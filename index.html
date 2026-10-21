@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Virtual Office</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#0f1218;--panel:#161b24;--panel2:#1c2330;--line:#2a3343;--txt:#e7ebf2;--mut:#8d97a8;--err:#ff6b6b;--gold:#e0a526}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:14px/1.45 ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace}
+body{display:grid;place-items:center;background:
+ linear-gradient(rgba(42,51,67,.35) 1px,transparent 1px) 0 0/32px 16px,
+ linear-gradient(90deg,rgba(42,51,67,.35) 1px,transparent 1px) 0 0/32px 16px,
+ radial-gradient(ellipse at 50% 40%,#18202d 0,#0f1218 70%)}
+.card{width:min(360px,92vw);background:var(--panel);padding:28px 26px 22px;image-rendering:pixelated;
+ box-shadow:0 -4px 0 0 var(--line),0 4px 0 0 var(--line),-4px 0 0 0 var(--line),4px 0 0 0 var(--line),
+ 0 0 0 4px var(--panel2),0 -8px 0 0 #0b0e13,0 8px 0 0 #0b0e13,-8px 0 0 0 #0b0e13,8px 0 0 0 #0b0e13,0 18px 40px rgba(0,0,0,.55)}
+h1{margin:0 0 4px;font-size:20px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);text-shadow:2px 2px 0 #000}
+p{margin:0 0 18px;color:var(--mut);font-size:12px}
+.ico{width:32px;height:32px;margin:0 auto 14px;display:block}
+label{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+input{width:100%;padding:10px 12px;background:#0b0e13;color:var(--txt);border:0;outline:0;font:inherit;font-size:15px;
+ box-shadow:inset 0 0 0 2px var(--line)}
+input:focus{box-shadow:inset 0 0 0 2px var(--gold)}
+button{margin-top:14px;width:100%;padding:11px;border:0;cursor:pointer;font:inherit;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+ background:var(--gold);color:#1b1405;box-shadow:inset -4px -4px 0 #a5740f,inset 4px 4px 0 #f3c75a}
+button:hover{filter:brightness(1.08)}button:active{box-shadow:inset 4px 4px 0 #a5740f,inset -4px -4px 0 #f3c75a}
+button:disabled{opacity:.6;cursor:wait}
+.err{min-height:18px;margin-top:12px;color:var(--err);font-size:12px}
+.foot{margin-top:6px;color:#5b6577;font-size:10px;text-align:center}
+</style>
+</head>
+<body>
+<form class="card" id="f" autocomplete="on">
+  <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#e0a526" d="M2 0h4v1H2zM1 1h1v2H1zM6 1h1v2H6zM0 3h8v5H0z"/><path fill="#0f1218" d="M3 4h2v2H3zM3.5 6h1v1h-1z"/></svg>
+  <h1>Virtual Office</h1>
+  <p>This office is private. Enter the password to come in.</p>
+  <label for="pw">Password</label>
+  <input id="pw" type="password" autocomplete="current-password" autofocus required>
+  <button id="go" type="submit">Unlock</button>
+  <div class="err" id="err" role="alert"></div>
+  <div class="foot">Decrypted locally in your browser.</div>
+</form>
+<script>
+(function(){
+'use strict';
+var SALT='fUkZNsgp7R1y+bammxfxWA==', ITER=600000, K='vo_key';
+var f=document.getElementById('f'), pw=document.getElementById('pw'), go=document.getElementById('go'), err=document.getElementById('err');
+var b64d=function(s){return Uint8Array.from(atob(s),function(c){return c.charCodeAt(0);});};
+var b64e=function(u){var s='';u=new Uint8Array(u);for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s);};
+function next(){var n=new URLSearchParams(location.search).get('next')||'office.html';
+  if(!/^[A-Za-z0-9._\-\/%?=&]+$/.test(n)||n.indexOf('//')>=0||n.charAt(0)==='/')n='office.html'; return n+location.hash;}
+var swReady=('serviceWorker' in navigator)?navigator.serviceWorker.register('sw.js',{scope:'./',updateViaCache:'none'}).then(function(){return navigator.serviceWorker.ready;}):Promise.reject(new Error('nosw'));
+swReady.catch(function(){});
+async function derive(p){var base=await crypto.subtle.importKey('raw',new TextEncoder().encode(p),'PBKDF2',false,['deriveBits']);
+  return crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:b64d(SALT),iterations:ITER},base,256);}
+async function check(raw){var key=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);
+  var r=await fetch('manifest.enc?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('net');
+  var u=new Uint8Array(await r.arrayBuffer()); await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},key,u.slice(12));}
+async function enter(k){var reg=await swReady; var sw=reg.active||navigator.serviceWorker.controller;
+  await new Promise(function(res,rej){var ch=new MessageChannel(),t=setTimeout(function(){rej(new Error('sw'));},5000);
+    ch.port1.onmessage=function(e){clearTimeout(t);e.data&&e.data.ok?res():rej(new Error('sw'));}; sw.postMessage({type:'key',key:k},[ch.port2]);});
+  location.replace(next());}
+function fail(m){err.textContent=m; go.disabled=false; go.textContent='Unlock'; pw.select();}
+function why(e){return e&&e.message==='nosw'?'This browser blocks service workers (private mode?). Try a normal window.':
+  e&&e.message==='net'?'Could not reach the office. Check your connection.':'Something went wrong. Please try again.';}
+f.addEventListener('submit',async function(ev){ev.preventDefault(); if(!pw.value) return;
+  err.textContent=''; go.disabled=true; go.textContent='Unlocking…';
+  var raw; try{ raw=await derive(pw.value); }catch(e){ return fail(why(e)); }
+  try{ await check(raw); }catch(e){ return fail(e&&e.message==='net'?why(e):'Wrong password. Try again.'); }
+  var k=b64e(raw); try{ sessionStorage.setItem(K,k); }catch(e){}
+  pw.value=''; try{ await enter(k); }catch(e){ fail(why(e)); }});
+(async function(){var k=sessionStorage.getItem(K); if(!k) return; go.disabled=true; go.textContent='Unlocking…';
+  try{ await check(b64d(k)); await enter(k); }catch(e){ sessionStorage.removeItem(K); go.disabled=false; go.textContent='Unlock'; }})();
+})();
+</script>
+</body>
+</html>
