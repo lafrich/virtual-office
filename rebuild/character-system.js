@@ -1,4 +1,4 @@
-/* Virtual Office / Character System 01
+/* Virtual Office / Character System 02 — Final Cove Flat
  * Canonical 4-screen-direction flat character sprites.
  * 4 facing directions x [idle, stride A, passing, stride B].
  * Five independent interaction poses. Keeps a fallback to legacy canvas art.
@@ -7,9 +7,9 @@
  'use strict';
  const DIRECTIONS=Object.freeze(['down','left','right','up']);
  const POSES=Object.freeze(['sit','sleep','bathe','toilet','work']);
- const FRAME={w:96,h:112,pivotX:48,pivotY:103,scale:.88};
- const sheetSrc='./assets/character_flat_sheet.svg';
- const posesSrc='./assets/character_flat_poses.svg';
+ const FRAME={w:128,h:160,pivotX:64,pivotY:146,scale:.68};
+ const sheetSrc='./assets/character_flat_sheet.svg?v=2';
+ const posesSrc='./assets/character_flat_poses.svg?v=2';
  const sheets={walk:null,poses:null};
  const loaded={walk:false,poses:false};
  function load(which,src){
@@ -44,7 +44,7 @@
  function frameIndex({moving=false,walk=0}={}){
   if(!moving)return 0;
   // Frame 0 is used exclusively for idle; walking cycles through 1/2/3.
-  return 1+(Math.floor(Math.max(0,walk)*8)%3);
+  return 1+(Math.floor(Math.max(0,walk)*2.25)%3);
  }
  function animationKey({direction='down',moving=false,walk=0,pose=null}={}){
   if(POSES.includes(pose))return pose;
@@ -59,8 +59,9 @@
   const sx=frame*FRAME.w,sy=row*FRAME.h,sc=zoom*FRAME.scale;
   if(!Number.isFinite(sc)||sc<=0)return false;
   ctx.save();
-  ctx.imageSmoothingEnabled=false;
-  const bob=(opts.moving&&!pose&&frame===2)?1:0;
+  // Cove reference is clean flat illustration, not deliberately blocky nearest-neighbor.
+  ctx.imageSmoothingEnabled=true;
+  const bob=0; // Bounce and contact shadow are authored consistently in each frame.
   const x=Math.round(point.x-FRAME.pivotX*sc);
   const y=Math.round(point.y-FRAME.pivotY*sc+bob*sc);
   ctx.drawImage(img,sx,sy,FRAME.w,FRAME.h,x,y,
