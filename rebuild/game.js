@@ -40,7 +40,7 @@ function shadow(x,y,w=13,h=5){
  const p=iso(x,y);g.fillStyle='rgba(30,40,54,.30)';g.beginPath();g.ellipse(p.x,p.y,w*zoom,h*zoom,0,0,TAU);g.fill();
 }
 function faceDir(d){return ['se','sw','down','left','right'].includes(d)?'front':'back'}
-function drawHuman(x,y,{sitting=false,lying=false,dir='down',
+function drawHuman(x,y,{sitting=false,lying=false,dir='sw',
  shirt=PAL.ink,hair='#171b24',skin=PAL.skin,label=null,npc=false,walk=0,
  moving=false,pose=null}={}){
  const p=iso(x,y),k=zoom;
@@ -444,7 +444,7 @@ window.addEventListener('resize',resize,{passive:true});resize();
 
 const STORAGE='vo-editable-rebuild-v1';
 const defaults={fullness:87,energy:86,hygiene:91,bladder:15};
-const player={x:7.25,y:9.25,zone:'office',dir:'down',moving:false,
+const player={x:7.25,y:9.25,zone:'office',dir:'sw',moving:false,
  seatId:null,sitX:null,moveTarget:null,walk:0,run:false};
 const coveWorld=new window.VOModular.ModularWorld();
 const sceneWorlds=window.VOBuildScenes.makeWorlds();
@@ -708,18 +708,18 @@ function update(dt){
  if(keys.has('d')||keys.has('arrowright'))v.x+=1;
  let dx=0,dy=0;
  if(Math.hypot(v.x,v.y)>.15){
-  // Keyboard arrows/WASD and joystick map to SCREEN directions.
-  player.dir=window.VOCharacterSystem.screenDirection(v.x,v.y,player.dir);
-  dx=v.x/(TX*zoom)+v.y/(TY*zoom);dy=v.y/(TY*zoom)-v.x/(TX*zoom);
-  let m=Math.hypot(dx,dy);dx/=m;dy/=m;player.moveTarget=null;
+  // Move only along the iso world-axis the displayed sprite faces.
+  const move=window.VOCharacterSystem.worldAxisFromInput(v.x,v.y,player.dir);
+  dx=move.x;dy=move.y;player.dir=move.direction;player.moveTarget=null;
  }else if(player.moveTarget){
-  dx=player.moveTarget.x-player.x;dy=player.moveTarget.y-player.y;
-  const m=Math.hypot(dx,dy);
-  if(m<.07){dx=dy=0;player.moveTarget=null}
+  const tx=player.moveTarget.x-player.x,ty=player.moveTarget.y-player.y;
+  if(Math.hypot(tx,ty)<.07){dx=dy=0;player.moveTarget=null}
   else{
-   // Touch-to-walk derives the same SCREEN-space facing from the world target.
+   // 4-way iso walk: route tap navigation across the two world axes.
+   if(Math.abs(tx)>.07&&Math.abs(tx)>=Math.abs(ty)){dx=Math.sign(tx);dy=0}
+   else if(Math.abs(ty)>.07){dx=0;dy=Math.sign(ty)}
+   else{dx=Math.sign(tx);dy=0}
    player.dir=window.VOCharacterSystem.directionFromWorld(dx,dy,player.dir);
-   dx/=m;dy/=m;
   }
  }
  player.moving=false;
@@ -728,12 +728,16 @@ function update(dt){
   const speed=keys.has('shift')?4.5:2.5;
   const limit=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:player.zone==='cove'?[16,11]:[16,13];
   const oldX=player.x,oldY=player.y;
-  const nx=clamp(player.x+dx*speed*dt,.35,limit[0]-.35);
-  const ny=clamp(player.y+dy*speed*dt,.35,limit[1]-.35);
+  // Stop on each waypoint to prevent oscillating across the target.
+  const stepX=player.moveTarget&&dx?Math.sign(dx)*Math.min(speed*dt,Math.abs(player.moveTarget.x-player.x)):dx*speed*dt;
+  const stepY=player.moveTarget&&dy?Math.sign(dy)*Math.min(speed*dt,Math.abs(player.moveTarget.y-player.y)):dy*speed*dt;
+  const nx=clamp(player.x+stepX,.35,limit[0]-.35);
+  const ny=clamp(player.y+stepY,.35,limit[1]-.35);
   if(player.zone!=='cove'||!coveWorld.blocked(nx,player.y))player.x=nx;
   if(player.zone!=='cove'||!coveWorld.blocked(player.x,ny))player.y=ny;
   player.moving=Math.hypot(player.x-oldX,player.y-oldY)>.00001;
   if(player.moving)player.walk+=dt*speed;
+  else if(player.moveTarget)player.moveTarget=null;
  }
  const gameMinutes=dt*0.6; timeMinutes+=gameMinutes;
  needs.fullness=clamp(needs.fullness-gameMinutes*(10/15),0,100);

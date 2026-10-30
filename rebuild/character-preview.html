@@ -24,9 +24,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 .meta{border-top:1px solid #B3C9D8;padding-top:9px;color:#526778}
 .frames{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 .frame-card{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#DDECFA;border:2px solid #A7BBCD;padding:9px 3px;min-width:0}
-.sprite{height:160px;width:128px;max-width:100%;background-image:url('./assets/character_flat_sheet.svg?v=2');background-repeat:no-repeat;image-rendering:auto}
-.sprite.down{background-position:0 0}.sprite.left{background-position:0 -160px}
-.sprite.right{background-position:0 -320px}.sprite.up{background-position:0 -480px}
+.sprite{height:160px;width:128px;max-width:100%;background-image:url('./assets/character_iso_sheet.svg?v=1');background-repeat:no-repeat;image-rendering:auto}
+.sprite.sw{background-position:0 0}.sprite.se{background-position:0 -160px}
+.sprite.nw{background-position:0 -320px}.sprite.ne{background-position:0 -480px}
 .frame-card strong{font-size:10px;margin-top:6px}
 .code{font-family:monospace;color:#3D5977;font-size:11px}
 @media(max-width:440px){.frames{grid-template-columns:repeat(2,1fr)}.actions button{flex:1 1 25%}}
@@ -34,15 +34,15 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 </head>
 <body>
 <header><div style="letter-spacing:2px;font-weight:bold;font-size:10px">LAFRICH / VIRTUAL OFFICE / CHARACTER SYSTEM</div>
-<h1>CHARACTER · FINAL 02</h1><small>4 arah · 4 frame per arah · 5 pose interaksi · berdasarkan gaya Cove Room</small></header>
+<h1>CHARACTER · ISO 16</h1><small>4 arah · 4 frame per arah · 5 pose interaksi · berdasarkan gaya Cove Room</small></header>
 <main>
-<nav><a href="./?v=12">▶ MAIN GAME</a><a href="./asset-atlas.html">✦ ART ATLAS</a>
+<nav><a href="./?v=16">▶ MAIN GAME</a><a href="./asset-atlas.html">✦ ART ATLAS</a>
 <a href="https://github.com/lafrich/virtual-office/blob/main/rebuild/CHARACTER_GUIDE.md">⚙ CHARACTER GUIDE</a></nav>
 <section><h2>01 — Animation Preview</h2>
 <canvas width="480" height="420" id="preview" aria-label="Preview animasi karakter"></canvas>
 <div class="actions dirs">
-<button data-dir="left">← KIRI</button><button data-dir="up">↑ ATAS</button>
-<button data-dir="down" class="active">↓ BAWAH</button><button data-dir="right">→ KANAN</button>
+<button data-dir="nw">↖ NW</button><button data-dir="ne">↗ NE</button>
+<button data-dir="sw" class="active">↙ SW</button><button data-dir="se">↘ SE</button>
 <button id="walk" class="active">▶ JALAN</button>
 </div>
 <div class="actions poses">
@@ -50,14 +50,14 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 <button data-pose="bathe">MANDI</button><button data-pose="toilet">TOILET</button>
 <button data-pose="work">KERJA</button><button id="clearPose" class="active">KEMBALI</button>
 </div>
-<p class="meta" id="state">walk_down · frame 1</p>
+<p class="meta" id="state">walk_sw · frame 1</p>
 </section>
 <section><h2>02 — Four-Direction Idle</h2>
 <div class="frames">
-<div class="frame-card"><div class="sprite down"></div><strong>BAWAH · DEPAN</strong></div>
-<div class="frame-card"><div class="sprite up"></div><strong>ATAS · BELAKANG</strong></div>
-<div class="frame-card"><div class="sprite left"></div><strong>KIRI · PROFIL</strong></div>
-<div class="frame-card"><div class="sprite right"></div><strong>KANAN · PROFIL</strong></div>
+<div class="frame-card"><div class="sprite sw"></div><strong>↙ SW · 3/4 DEPAN</strong></div>
+<div class="frame-card"><div class="sprite se"></div><strong>↘ SE · 3/4 DEPAN</strong></div>
+<div class="frame-card"><div class="sprite nw"></div><strong>↖ NW · 3/4 BELAKANG</strong></div>
+<div class="frame-card"><div class="sprite ne"></div><strong>↗ NE · 3/4 BELAKANG</strong></div>
 </div>
 </section>
 <section><h2>03 — NPC Consistency</h2>
@@ -66,16 +66,16 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 </section>
 <section><h2>04 — Locked Art Direction</h2>
 <p><b>Flat isometric, soft pastel, sedikit outline, maksimal 3 tone per material.</b> Rambut hitam bergumpal asimetris, kacamata kotak, kaos charcoal, celana gelap dan sepatu sederhana. Seluruh frame memakai pivot kaki yang sama. Pose interaksi berada dalam sheet terpisah.</p>
-<p class="code">Idle: frame 0 · Walk: frame 1/2/3 · Pivot: (64,146) / 128×160 · Front: down · Back: up · Side: left/right.</p>
+<p class="code">Idle: frame 0 · Walk: 1→2→3→2 · Pivot (64,146) / 128×160 · Four 3/4 iso directions SW / SE / NW / NE.</p>
 </section>
 </main>
 <script>
 (()=>{'use strict';
  const cv=document.getElementById('preview'),ctx=cv.getContext('2d');
  const sheet=new Image(),poses=new Image();
- sheet.src='./assets/character_flat_sheet.svg?v=2';poses.src='./assets/character_flat_poses.svg?v=3';
- let direction='down',pose=null,walking=true,t0=0;
- const rows={down:0,left:1,right:2,up:3},
+ sheet.src='./assets/character_iso_sheet.svg?v=1';poses.src='./assets/character_flat_poses.svg?v=3';
+ let direction='sw',pose=null,walking=true,t0=0;
+ const rows={sw:0,se:1,nw:2,ne:3},
        posesCol={sit:0,sleep:1,bathe:2,toilet:3,work:4};
  function updateSelection(){
   for(const b of document.querySelectorAll('[data-dir]'))b.classList.toggle('active',b.dataset.dir===direction&&!pose);
