@@ -80,12 +80,16 @@ function cleanData(src,base){
  return d;
 }
 class ModularWorld{
- constructor(){
-  this.width=16;this.height=11;this.tileSize={x:23,y:11.5};
+ constructor(options={}){
+  this.room=options.room||'cove';
+  this.key=this.room==='cove'?KEY:'vo-rebuild-modules-'+this.room+'-v1';
+  this.width=options.width||16;this.height=options.height||11;
+  this.tileSize={x:23,y:11.5};
   this.version=VERSION;
-  this.defaultAssets=COVE_ITEMS.map(x=>JSON.parse(JSON.stringify(x)));
+  const source=options.assets||COVE_ITEMS;
+  this.defaultAssets=source.map(x=>JSON.parse(JSON.stringify(x)));
   this.assets=this.defaultAssets.map(x=>JSON.parse(JSON.stringify(x)));
-  this.selectedId='cove-bed';
+  this.selectedId=this.assets[0]?.id||null;
   this.listeners=new Set();
   this.images=new Map();
   this.load();
@@ -121,13 +125,13 @@ class ModularWorld{
   }else this.assets=this.defaultAssets.map(a=>JSON.parse(JSON.stringify(a)));
   this.save();this.changed();
  }
- snapshot(){return {format:'virtual-office-modular-room',version:VERSION,room:'cove',
+ snapshot(){return {format:'virtual-office-modular-room',version:VERSION,room:this.room,
   grid:{width:this.width,height:this.height,tile:this.tileSize},
   assets:this.assets.map(a=>JSON.parse(JSON.stringify(a)))}}
  serialize(){return JSON.stringify(this.snapshot(),null,2)}
  applyJSON(text){
   let source=typeof text==='string'?JSON.parse(text):text;
-  if(!source||source.format!=='virtual-office-modular-room'||source.room!=='cove'||!Array.isArray(source.assets)){
+  if(!source||source.format!=='virtual-office-modular-room'||source.room!==this.room||!Array.isArray(source.assets)){
    throw new Error('Format harus virtual-office-modular-room / cove');
   }
   // Only known IDs, only whitelisted placement fields. Never mutate registry entries.
@@ -135,8 +139,8 @@ class ModularWorld{
   this.assets=this.defaultAssets.map(base=>cleanData(mapped.get(base.id),base));
   this.save();this.changed();return this.assets.length;
  }
- save(){try{localStorage.setItem(KEY,this.serialize())}catch(e){}}
- load(){try{const old=localStorage.getItem(KEY);if(old)this.applyJSON(old)}catch(e){console.warn('[modular] invalid saved layout, using defaults',e)}}
+ save(){try{localStorage.setItem(this.key,this.serialize())}catch(e){}}
+ load(){try{const old=localStorage.getItem(this.key);if(old)this.applyJSON(old)}catch(e){console.warn('[modular] invalid saved layout, using defaults',e)}}
  actionPoints(){
   return this.assets.filter(a=>a.visible&&a.action).map(a=>{
    const act=a.action,anchor=act.approach||{x:0,y:0},pose=act.pose||{x:0,y:0};
