@@ -3,7 +3,7 @@
 <head>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
- <title>Virtual Office — Art Atlas 01</title>
+ <title>Virtual Office — Art Atlas 02</title>
  <style>
   :root{--sky:#CFE4FF;--wall:#EADFC7;--cream:#FFF8E6;--ink:#28364A;--red:#E04848;--gold:#FFC857;--line:#91B2CD}
   *{box-sizing:border-box}
@@ -37,16 +37,16 @@
 <body>
 <header>
   <div class="eyebrow">LAFRICH / VIRTUAL OFFICE / ART SYSTEM</div>
-  <h1>VISUAL ASSET ATLAS <span style="color:#FFE5A6">01</span></h1>
-  <div class="subtitle">Rebuild 09 · konsistensi palet, skala, pivot dan layer karakter. Aset asli yang dipakai di game, bukan gambar referensi.</div>
+  <h1>VISUAL ASSET ATLAS <span style="color:#FFE5A6">02</span></h1>
+  <div class="subtitle">Rebuild 10 · konsistensi palet, skala, pivot dan layer karakter. Aset asli yang dipakai di game, bukan gambar referensi.</div>
 </header>
 <main>
  <p class="intro">Semua sprite di bawah adalah file SVG transparan yang digunakan langsung di Virtual Office. Objek dengan dua layer memperlihatkan <b>base + foreground</b> bersamaan. File sumber bisa diperiksa di repo dan diganti tanpa mengubah mekanik permainan.</p>
  <nav class="nav">
-  <a href="./?v=9">▶ MAIN GAME</a>
+  <a href="./?v=10">▶ MAIN GAME</a>
   <a href="https://github.com/lafrich/virtual-office/tree/main/rebuild/assets">⌁ SOURCE ASSETS</a>
  </nav>
- <h2 class="section">01 — MODULAR FURNITURE / 11 SETS</h2>
+ <h2 class="section">01 — MODULAR FURNITURE / 16 SETS</h2>
  <div class="grid" id="atlas"></div>
  <h2 class="section">02 — SHARED COLOR RAMPS</h2>
  <div class="swatches" id="palette"></div>
@@ -67,7 +67,12 @@
   {id:"dresser",name:"Wood Dresser",tag:"Cove · decor"},
   {id:"nightstand",name:"Nightstand",tag:"Cove · furniture"},
   {id:"coffee",name:"Coffee Table",tag:"Office · furniture"},
-  {id:"storage",name:"Blue Storage",tag:"Office · furniture"}
+  {id:"storage",name:"Blue Storage",tag:"Office · furniture"},
+  {id:"park_bench",name:"Wood Park Bench",tag:"Taman · sit",front:true},
+  {id:"park_lounger",name:"Garden Lounger",tag:"Taman · lie",front:true},
+  {id:"warteg_house",name:"Warteg Facade",tag:"Taman · entrance"},
+  {id:"warteg_table",name:"Dining Table Set",tag:"Warteg · dining"},
+  {id:"warteg_buffet",name:"Nasi Kuning Buffet",tag:"Warteg · food",front:true}
  ];
  const pal={Wall:"#EADFC7",Floor:"#CFE4FF","Bath tile":"#D87469",Wood:"#A26B3F","Wood light":"#C38C5A","Wood dark":"#754A2E","Accent blue":"#4E8DE6","Accent green":"#6BB77A",Cream:"#FFF8E6",Shadow:"#8A9DB7","UI red":"#E04848","UI gold":"#FFC857"};
  for(const a of assets){
