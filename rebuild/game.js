@@ -7,6 +7,7 @@
 const $=id=>document.getElementById(id), C=$('world'), g=C.getContext('2d',{alpha:false});
 const view=$('viewport'), action=$('actionBtn'), toastEl=$('toast');
 const DPR=.82, TX=23, TY=11.5, TAU=Math.PI*2;
+const V=window.VOVisualSystem, PAL=V.palette;
 let W=420,H=650,zoom=.77,ox=0,oy=0,now=performance.now(),toastTimer=0,manualZoom=false;
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
 const iso=(x,y,z=0)=>({x:ox+(x-y)*TX*zoom,y:oy+(x+y)*TY*zoom-z*zoom});
@@ -70,25 +71,13 @@ function drawCat(x,y,t=0){
  fill(-8,-13,5,5,'#252d39');fill(3,-13,5,5,'#252d39');fill(4,-7,2,2,'#a3d179');
  fill(8,-5,6,2,'#252d39');g.restore();
 }
-function drawPlant(x,y,size=1){
- shadow(x,y,9,4);box(x,y,.65,.65,7*size,'#e5d5bb','#b8a987','#b0a281');
- const p=iso(x,y,8*size);
- g.save();g.translate(p.x,p.y);g.scale(size*zoom,size*zoom);
- fill(-2,-18,3,19,'#2d715a');
- for(let i=0;i<7;i++){const a=i*TAU/7,ex=Math.cos(a)*19,ey=Math.sin(a)*12-12;
- line({x:0,y:-12},{x:ex,y:ey},'#286e55',3);fill(ex-4,ey-3,8,5,i%2?'#3cad7b':'#288958');}
- g.restore();
-}
-function drawWindow(x,y,orient='horizontal'){
- const a=iso(x,y,46),b=iso(x+(orient==='horizontal'?1.0:0),y+(orient==='horizontal'?0:1.0),46),
- c=iso(x+(orient==='horizontal'?1.0:0),y+(orient==='horizontal'?0:1.0),69),d=iso(x,y,69);
- poly([a,b,c,d],'#25283f','#ddd1ac',2);
- line({x:(a.x+b.x)/2,y:(a.y+b.y)/2},{x:(c.x+d.x)/2,y:(c.y+d.y)/2},'#8796b7',1);
- line({x:(a.x+d.x)/2,y:(a.y+d.y)/2},{x:(b.x+c.x)/2,y:(b.y+c.y)/2},'#899ab9',1);
-}
+// Consistent visual primitives shared across all scenes.
+function artProps(){return V.props({ctx:g,zoom,box,iso,poly,line,fill,shadow});}
+function drawPlant(x,y,size=1){artProps().plant(x,y,size);}
+function drawWindow(x,y,orient='horizontal'){artProps().window(x,y,orient,34,2.45);}
 function drawWalls(zone){
  let w=zone==='office'?18:zone==='warteg'?12:16,d=zone==='office'?13:zone==='warteg'?11:13;
- const wall=zone==='warteg'?'#f0f0df':zone==='office'?'#d7ccb0':'#c6d5ca',trim=zone==='warteg'?'#159544':'#c4ba9f';
+ const wall=zone==='warteg'?PAL.cream:PAL.wall,trim=zone==='warteg'?PAL.greenDark:PAL.wallLight;
  const bl=iso(0,0),br=iso(w,0),fl=iso(0,d);
  const h=zone==='warteg'?80:70;
  poly([{x:bl.x,y:bl.y-h*zoom},{x:br.x,y:br.y-h*zoom},br,bl],wall,'#7d817f',1);
@@ -96,71 +85,59 @@ function drawWalls(zone){
  line({x:bl.x,y:bl.y-h*zoom},{x:br.x,y:br.y-h*zoom},trim,7*zoom);
  line({x:bl.x,y:bl.y-h*zoom},{x:fl.x,y:fl.y-h*zoom},trim,7*zoom);
  if(zone==='warteg'){
-   line(iso(0,0,36),iso(w,0,36),'#1f9849',3);
-   line(iso(0,0,36),iso(0,d,36),'#1f9849',3);
+   line(iso(0,0,36),iso(w,0,36),PAL.greenDark,3);
+   line(iso(0,0,36),iso(0,d,36),PAL.greenDark,3);
    drawWindow(2,0,'horizontal');drawWindow(0,4,'vertical');
  }else if(zone==='office'){
    for(let j=3;j<16;j+=4)drawWindow(j,0,'horizontal');
    for(let j=3;j<12;j+=3)drawWindow(0,j,'vertical');
+   artProps().wallArt(5.1,0,40,1.30,0,'blue');
+   artProps().wallArt(7.7,0,38,1.10,0,'bath');
  }else{for(let j=3;j<13;j+=4)drawWindow(j,0,'horizontal');}
 }
 function drawFloor(zone){
  const dims=zone==='office'?[18,13]:zone==='street'?[16,13]:[12,11];
  for(let y=0;y<dims[1];y++)for(let x=0;x<dims[0];x++){
-  let color;
-  if(zone==='office'){
-   color=(x<8&&y>6)?((x+y)%2?'#f8d9c4':'#f2c9b1'):(x>10&&y>8)?((x+y)%2?'#8ed4cc':'#9de1dc'):((x+y)%2?'#b1c5f1':'#c3d3f5');
-  }else if(zone==='warteg')color=(x+y)%2?'#e3e8df':'#f0f1ea';
-  else color=(x+y)%2?'#c7d3c8':'#dbe2d5';
-  diamond(x,y,color,zone==='warteg'?'#c9d2c7':'#abc1c4');
+  const alternating=(x+y)%2===0;
+  let color,stroke;
+  if(zone==='office'){color=alternating?PAL.floor:PAL.floorAlt;stroke=PAL.floorEdge;}
+  else if(zone==='warteg'){color=alternating?PAL.cream:PAL.wallLight;stroke=PAL.wallSide;}
+  else{color=alternating?'#D5E7D4':'#C6DECC';stroke=PAL.greenLight;}
+  diamond(x,y,color,stroke);
  }
  if(zone==='office'){
-  const rug=box(7.1,6.5,5.0,3.8,0.12,'#5e84d5','#355cb1','#375caf');
-  box(7.1,6.5,4.55,3.25,.13,'#dad3a6','#9c935f','#a49c72',.13);
+  box(7.1,6.5,5.0,3.8,.12,PAL.blueDark,PAL.shadowDark,PAL.shadowDark);
+  artProps().rug(7.1,6.5,4.65,3.4);
  }
 }
-function drawDesk(x,y){
- box(x,y,2.7,1.55,12,'#bb8f57','#966d43','#8e613d');
- box(x-.35,y-.05,.12,.68,17,'#384359','#212d44','#242e43',12);
- const screen=box(x-.38,y-.2,.85,.22,15,'#82bbf1','#37638c','#243850',22);
- box(x+.6,y+.25,.45,.32,.4,'#d7e9db','#9caba1','#9ca99d',13);
- box(x-.2,y+.45,1.2,.35,.25,'#e3ded3','#a7aaa3','#aaa9a3',12.5);
-}
-function drawChair(x,y,mode='office'){
- const blue=mode==='warteg'?'#2f73a3':'#536bb6';
- shadow(x,y,8,4);box(x,y,.72,.72,7,blue,'#2b4b79','#294770');
- box(x,y-.30,.69,.15,18,blue,'#244a82','#244879');
- for(let s of [-.22,.22]){const q=iso(x+s,y+.23);fill(q.x-1,q.y,2,8*zoom,'#7d838c');}
-}
+function drawDesk(x,y){artProps().desk(x,y);}
+function drawChair(x,y,mode='office'){artProps().chair(x,y,mode==='warteg'?'blue':'wood');}
 function drawSofa(occupied,frame){
- // Fixed painter order: sofa base > seat cushion > sitter > arms/front trim.
- // This keeps sitting characters aligned without moving SVG / canvas layers.
+ // Fixed painter order: back + cushions -> sitters -> armrests/front trim.
  const x=7.4,y=6.1;
- shadow(x,y,20,7);
- // Low wooden legs visible below upholstered base.
- for(const xx of [5.5,9.1])box(xx,6.6,.19,.26,4,'#463c3e','#342e39','#40353c');
- box(x,y,4.25,1.76,7,'#536dd0','#344b9e','#30488e');
- // Backrest in a slightly muted blue with a low highlight seam.
- box(x,y-.63,4.22,.38,22,'#536cd2','#364da4','#304494');
- const b1=iso(5.42,5.47,22),b2=iso(9.38,5.47,22);
- line(b1,b2,'#8295ed',1.4);
- // Individually upholstered cushion tops and darker separation lines.
+ shadow(x,y,23,7);
+ for(const xx of [5.45,9.3])
+  box(xx,6.65,.19,.28,4,PAL.wood,PAL.woodDark,PAL.woodDark);
+ box(x,y,4.25,1.76,7,PAL.creamShade,PAL.wallSide,PAL.shadow);
+ box(x,y-.63,4.22,.38,22,PAL.cream,PAL.creamShade,PAL.wallSide);
+ line(iso(5.42,5.47,22),iso(9.38,5.47,22),PAL.white,1.4);
  for(let i=0;i<3;i++){
   const seatX=6.15+i*1.24;
-  box(seatX,6.37,1.16,1.00,8,'#788ee8','#4e67c8','#4761c1',7);
-  const seam1=iso(seatX-.45,6.70,15.1),seam2=iso(seatX+.39,6.70,15.1);
-  line(seam1,seam2,'#a0b2fa',.7);
+  box(seatX,6.37,1.16,1.00,8,PAL.cream,PAL.creamShade,PAL.shadow,7);
+  line(iso(seatX-.45,6.7,15.1),iso(seatX+.39,6.7,15.1),PAL.white,.7);
  }
- if(occupied)drawHuman(occupied.x,occupied.y,{sitting:true,dir:'sw',shirt:'#242a3a',hair:'#171b24'});
- drawHuman(6.05,6.34,{sitting:true,dir:'sw',hair:'#949ca7',skin:'#efd0b1',shirt:'#e2e6e9'});
- // Armrests: separate from cushions so character's lap stays behind them.
- box(5.20,6.10,.42,1.57,18,'#465fc6','#2d439c','#334ba6');
- box(9.57,6.10,.38,1.57,18,'#465fc6','#2d439c','#334ba6');
- box(x,6.93,4.30,.20,10,'#627cdf','#3c53b1','#394fa6');
+ box(8.55,5.92,.67,.50,5,PAL.blue,PAL.blueDark,PAL.blueDark,16);
+ if(occupied)drawHuman(occupied.x,occupied.y,{
+  sitting:true,dir:'sw',shirt:PAL.ink,hair:'#171b24'
+ });
+ drawHuman(6.05,6.34,{
+  sitting:true,dir:'sw',hair:'#949ca7',skin:'#efd0b1',shirt:PAL.grey
+ });
+ box(5.20,6.10,.42,1.57,18,PAL.cream,PAL.creamShade,PAL.wallSide);
+ box(9.57,6.10,.38,1.57,18,PAL.cream,PAL.creamShade,PAL.wallSide);
+ box(x,6.93,4.30,.20,10,PAL.cream,PAL.creamShade,PAL.shadow);
  drawCat(8.15,6.5,frame);
- // NPC label is attached visually to its seat rather than floating high
- // over the lounge, and only shows when the seat is on-screen.
- const n=iso(6.05,6.34,53);pixelText('BAYMAX',n.x,n.y,'#fff1d8',8);
+ const n=iso(6.05,6.34,53);pixelText('BAYMAX',n.x,n.y,PAL.cream,8);
 }
 function drawOffice(x,y,sceneActor,frame){
  drawWalls('office');drawFloor('office');
@@ -175,8 +152,7 @@ function drawOffice(x,y,sceneActor,frame){
   ['office-plant-b',15,()=>drawPlant(12.2,8.7)],
   ['office-sofa',15.5,(dx,dy)=>drawSofa(
     sceneActor?.seatId==='sofa'?{...sceneActor,x:sceneActor.x-dx,y:sceneActor.y-dy}:null,frame)],
-  ['office-coffee-a',18,()=>{box(10.25,7.9,1.9,.96,6,'#d4a674','#a4774d','#976e46');
-    box(10.25,7.9,1.70,.76,.2,'#f3e5c8','#bfbaaa','#c5b7a0',6);}],
+  ['office-coffee-a',18,()=>artProps().coffee(10.25,7.9)],
   ['office-coffee-b',19,()=>{box(11.2,10.1,1.05,.72,10,'#bd955f','#866744','#8e6c43');
     box(11.2,10.1,.84,.56,.15,'#e9dbb7','#ac986f','#aa916f',10);}],
   ['office-desk-c',22,()=>drawDesk(14.5,8.1)],
@@ -547,7 +523,7 @@ function update(dt){
 }
 const objects=[];
 function draw(frame){
- g.fillStyle='#293141';g.fillRect(0,0,W,H);
+ g.fillStyle='#B6DDF3';g.fillRect(0,0,W,H);
  // Composite camera: keep the character visible while showing more of the room.
  const limits=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:player.zone==='cove'?[16,11]:[16,13];
  const cameraX=player.x*.62+(limits[0]/2)*.38;
