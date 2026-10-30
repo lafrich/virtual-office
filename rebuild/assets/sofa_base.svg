@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="200" viewBox="0 0 256 200" shape-rendering="crispEdges">
+<polygon points="53,158 60,152 196,152 203,158 196,163 60,163" fill="#6E829944"/>
+<polygon points="98,123 102,125 102,130 98,128" fill="#754A2E"/><polygon points="105,123 102,125 102,130 105,128" fill="#28364A"/><polygon points="101,121 105,123 102,125 98,123" fill="#754A2E"/>
+<polygon points="65,139 69,141 69,146 65,144" fill="#754A2E"/><polygon points="72,140 69,141 69,146 72,145" fill="#28364A"/><polygon points="68,138 72,140 69,141 65,139" fill="#754A2E"/>
+<polygon points="184,166 188,168 188,173 184,171" fill="#754A2E"/><polygon points="192,166 188,168 188,173 192,171" fill="#28364A"/><polygon points="188,164 192,166 188,168 184,166" fill="#754A2E"/>
+<polygon points="151,183 155,185 155,190 151,188" fill="#754A2E"/><polygon points="158,183 155,185 155,190 158,188" fill="#28364A"/><polygon points="155,181 158,183 155,185 151,183" fill="#754A2E"/>
+<polygon points="59,136 157,184 157,192 59,144" fill="#8A9DB7"/><polygon points="197,164 157,184 157,192 197,172" fill="#6E8299"/><polygon points="99,116 197,164 157,184 59,136" fill="#D7CDBB"/>
+<polygon points="92,106 187,153 187,175 92,128" fill="#D7CDBB"/><polygon points="196,149 187,153 187,175 196,171" fill="#8A9DB7"/><polygon points="100,101 196,149 187,153 92,106" fill="#FFF8E6"/>
+<polygon points="70,130 98,144 98,151 70,137" fill="#D7CDBB"/><polygon points="124,131 98,144 98,151 124,138" fill="#8A9DB7"/><polygon points="96,117 124,131 98,144 70,130" fill="#FFF8E6"/>
+<polyline points="77,129 97,138" fill="none" stroke="#FEFCF5" stroke-width="1.1" stroke-linecap="square"/>
+<polygon points="98,144 126,158 126,165 98,151" fill="#D7CDBB"/><polygon points="152,145 126,158 126,165 152,152" fill="#8A9DB7"/><polygon points="124,131 152,145 126,158 98,144" fill="#FFF8E6"/>
+<polyline points="106,143 125,153" fill="none" stroke="#FEFCF5" stroke-width="1.1" stroke-linecap="square"/>
+<polygon points="127,158 155,172 155,179 127,165" fill="#D7CDBB"/><polygon points="181,159 155,172 155,179 181,166" fill="#8A9DB7"/><polygon points="153,145 181,159 155,172 127,158" fill="#FFF8E6"/>
+<polyline points="134,157 154,167" fill="none" stroke="#FEFCF5" stroke-width="1.1" stroke-linecap="square"/>
+<polygon points="148,151 165,160 165,163 148,154" fill="#385C9E"/><polygon points="178,153 165,160 165,163 178,156" fill="#385C9E"/><polygon points="162,144 178,153 165,160 148,151" fill="#4E8DE6"/>
+<polygon points="69,123 76,126 76,145 69,142" fill="#D7CDBB"/><polygon points="95,117 76,126 76,145 95,136" fill="#8A9DB7"/><polygon points="88,113 95,117 76,126 69,123" fill="#FFF8E6"/>
+<polygon points="152,164 159,167 159,186 152,183" fill="#D7CDBB"/><polygon points="178,158 159,167 159,186 178,177" fill="#8A9DB7"/><polygon points="171,155 178,158 159,167 152,164" fill="#FFF8E6"/>
+<polyline points="103,102 192,146" fill="none" stroke="#FEFCF5" stroke-width="1.2" stroke-linecap="square"/>
+<polyline points="68,130 152,172" fill="none" stroke="#EADFC7" stroke-width="1.2" stroke-linecap="square"/>
+</svg>
