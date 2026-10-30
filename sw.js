@@ -43,6 +43,7 @@ self.addEventListener('fetch', ev => {
   const req = ev.request, u = new URL(req.url);
   if (req.method !== 'GET' || u.origin !== location.origin || !u.pathname.startsWith(BASE)) return;
   let p; try { p = decodeURIComponent(u.pathname.slice(BASE.length)); } catch (e) { return; }
+  if (p.startsWith('staging/')) return; // staging's own service worker owns these paths
   if (PLAIN.has(p) || p.endsWith('.enc')) return;               // lock page + ciphertext straight from the network
   ev.respondWith(handle(ev, p, u));
 });
