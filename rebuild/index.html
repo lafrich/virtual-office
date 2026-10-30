@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#e60029">
   <title>Virtual Office — Editable Rebuild</title>
-  <link rel="stylesheet" href="./style.css?v=2">
-  <script src="./game.js?v=3" defer></script>
+  <link rel="stylesheet" href="./style.css?v=3">
+  <script src="./modular-engine.js?v=1" defer></script>
+  <script src="./modular-editor.js?v=1" defer></script>
+  <script src="./cove-scene.js?v=1" defer></script>
+  <script src="./game.js?v=4" defer></script>
 </head>
 <body>
   <div id="app">
-    <header class="topbar"><span class="building">▦</span> VIRTUAL OFFICE <span class="edition">/ REBUILD 02</span></header>
+    <header class="topbar"><span class="building">▦</span> VIRTUAL OFFICE <span class="edition">/ REBUILD 03</span></header>
     <main class="viewport" id="viewport" aria-label="Game Virtual Office">
       <canvas id="world" aria-label="Peta game isometrik"></canvas>
       <div class="left-tools" aria-label="Kontrol game">
@@ -19,6 +22,7 @@
         <button class="tool" id="btnFit" title="Pusatkan kamera" aria-label="Pusatkan kamera">⌗</button>
         <button class="tool gold" id="btnNotif" title="Notifikasi dan status" aria-label="Notifikasi dan status">🔔<span class="notice-dot"></span></button>
         <button class="tool" id="btnMap" title="Pindah lokasi" aria-label="Pindah lokasi">⌖</button>
+        <button class="tool" id="btnEditor" hidden title="Precision asset editor" aria-label="Buka editor modular">🛠</button>
       </div>
       <div class="location-chip" id="locationChip">🏢 OFFICE</div>
       <div class="toast" id="toast" aria-live="polite"></div>
@@ -28,6 +32,7 @@
         <button data-zone="office">🏢 OFFICE</button>
         <button data-zone="street">🌳 TAMAN</button>
         <button data-zone="warteg">🍛 WARTEG</button>
+        <button data-zone="cove">🛏️ COVE ROOM</button>
       </nav>
       <div class="help" id="help">WASD / joystick untuk jalan · dekati objek lalu ACTION</div>
       <section class="drawer" id="drawer" aria-label="Notifikasi dan status" hidden>
@@ -54,6 +59,7 @@
           <div class="status-foot">PROTOTYPE LOKAL · DATA DISIMPAN DI BROWSER · BELUM MULTIPLAYER</div>
         </div>
       </section>
+      <section class="module-editor" id="moduleEditor" hidden aria-label="Modular precision editor"></section>
     </main>
     <div class="bottom-note">REBUILD / SOURCE TERBUKA UNTUK DI-EDIT · TIDAK MENGUBAH GAME UTAMA</div>
   </div>
