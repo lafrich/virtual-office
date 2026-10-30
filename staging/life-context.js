@@ -108,6 +108,11 @@
   function contextualLife() {
     if (!gameUserReady()) return null;
     const seat = nearestSeat();
+    // Once positioned in a furniture slot, maintain the correct action even
+    // if the seat is occupied by this user (or the player shifts slightly).
+    if (me._lifeStandOrigin && me.forceAnim === 'lie') {
+      return {k:'vc-stand',l:'Bangun',hint:'Berdiri dari tempat rebahan',d:-1};
+    }
     if (seat) {
       if (me.forceAnim === 'lie') {
         return {k:'vc-stand',l:'Bangun',hint:'Bangun dari sofa',d:seat.distance / RANGE_SEAT - 1.0,seat};
@@ -115,6 +120,9 @@
       if (me.forceAnim === 'sit' || me.forceAnim === 'perch') {
         if (nearSofa(seat)) return {k:'vc-sleep',l:'Tidur',hint:'Tidur di sofa',d:seat.distance / RANGE_SEAT - 1.0,seat};
         return {k:'vc-stand',l:'Bangun',hint:'Berdiri dari kursi',d:seat.distance / RANGE_SEAT - 1.0,seat};
+      }
+      if (seat.pose === 'lie' || (seat.anims && seat.anims.length === 1 && seat.anims[0] === 'lie')) {
+        return {k:'vc-recline',l:'Rebah',hint:'Rebah di kursi pantai',d:seat.distance / RANGE_SEAT - 1.0,seat};
       }
       return {k:'vc-sit',l:'Duduk',hint:'Duduk di kursi',d:seat.distance / RANGE_SEAT - 1.0,seat};
     }
@@ -166,7 +174,7 @@
       return;
     }
     if (!fresh || fresh.k !== choice.k) return;
-    if (choice.k === 'vc-sit') {
+    if (choice.k === 'vc-sit' || choice.k === 'vc-recline') {
       if (!fresh.seat || occupied(fresh.seat)) return;
       // Snap only within interaction radius; avoids sitting mid-air.
       // Remember an actually walkable standing position: furniture seat tiles
@@ -182,7 +190,12 @@
         const lounge = LOUNGE.find(s => distance(s, fresh.seat) < 0.35);
         if (lounge && lounge.dir) me.dir = lounge.dir;
       }
-      if (activate('sit') && fresh.seat.pose === 'perch' &&
+      if (choice.k === 'vc-recline') {
+        // sun_lounger_* already defines its lie anchor and facing in the
+        // environment manifest; reuse the existing animation and seat point.
+        // 'sleep' chooses pose 'lie' and the existing Life energy recovery.
+        if (!activate('sleep')) window.__lifeBridge.exitPoseForMovement?.();
+      } else if (activate('sit') && fresh.seat.pose === 'perch' &&
           typeof SL !== 'undefined' && SL.anims && SL.anims.perch) {
         me.forceAnim = 'perch';
       }
