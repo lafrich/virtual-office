@@ -11,6 +11,8 @@ function drawFloor(api){
   const color=bath?(x+y)%2?PAL.bath:PAL.bathAlt:(x+y)%2?PAL.floorAlt:PAL.floor;
   diamond(x,y,color,bath?PAL.woodDark:PAL.floorEdge);
  }
+ // Architectural edges are shared with Office, Taman and Warteg.
+ global.VOEnvironment.worldDetail(api,'cove',16,11);
  // Rugs are independent editable modules; don't draw a duplicate under them.
  box(9.1,9.0,1.2,.7,.19,PAL.blue,PAL.blueDark,PAL.blueDark);
  const roomW=16,depth=11,h=62;
@@ -19,6 +21,7 @@ function drawFloor(api){
  poly([iso(0,0,h),iso(0,depth,h),c,a],PAL.wallLight,PAL.wallSide,1);
  line(iso(0,0,h),iso(roomW,0,h),'#fff4db',5*zoom);
  line(iso(0,0,h),iso(0,depth,h),'#fff4db',5*zoom);
+ global.VOEnvironment.wallBase(api,roomW,depth,'cove');
  // Two wall zones and a partition dividing bedroom from bathroom visually.
  const ps=[iso(9.05,0,0),iso(9.05,0,65),iso(9.05,3.4,65),iso(9.05,3.4,0)];
  poly(ps,PAL.wall,PAL.wallSide,1);
