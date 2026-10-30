@@ -117,3 +117,12 @@ button{font-family:inherit;cursor:pointer;user-select:none;-webkit-tap-highlight
  .me-short button{font-size:9px;padding:8px 1px}
  .me-fields{gap:6px}
 }
+
+/* Editor bottom sheet on narrow screens: the map remains tappable above it. */
+@media(max-width:520px){
+ .module-editor{top:auto;left:7px;right:7px;bottom:7px;width:auto;
+  height:auto;max-height:min(44dvh,430px);box-shadow:0 -4px 0 #0b1018}
+ .me-head{padding:8px}
+ .module-editor-inner{padding-bottom:21px}
+ .modular-editing .joystick{opacity:.25;pointer-events:none}
+}
