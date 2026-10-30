@@ -36,3 +36,40 @@ No build step, backend, dependency, password, decryption, npm, or API keys requi
 6. Reopen to verify saved needs (no decay while the game is closed).
 
 This project is not a pixel-perfect replica of the original artwork. It is a clean playable foundation, deliberately designed for iterative asset replacement and expansion without risking the existing deployment.
+
+
+## Modular Cove Room / Precision Editor (Rebuild 03)
+
+In the game, tap the map pin → **🛏️ COVE ROOM**, then tap **🛠** to edit assets precisely. The rest of Rebuild remains playable.
+
+The Cove demo has **16 independent modules**: bed, nightstand, lamp, desk, chair, bookshelf, plant, rug, bathtub, shower, glass partition, sink, mirror, toilet, dresser, and door.
+
+### Precision controls
+
+- **GRID X / GRID Y**: physical tile coordinates; drag on the map or nudge 0.1 tile.
+- **PIXEL X / PIXEL Y**: visual-only sprite offset, adjustable in 1px increments; never shifts collision.
+- **HEIGHT Z**: vertical elevation. **SORT BIAS**: drawing order relative to character.
+- **WIDTH / DEPTH / HEIGHT**: editable footprint and procedural dimensions.
+- **ACTION X / ACTION Y**: where the contextual action can be activated, relative to the furniture origin.
+- **POSE X / POSE Y**: exact target anchor for the seated, sleeping, bathing or toilet player.
+- **Facing, Collision**, plus optional Base PNG and Front PNG sprite paths.
+
+Grid position, sprite offset, action approach and pose offset are deliberately independent. The deterministic painter sorts on grid X + grid Y + depth bias, with base and foreground layers split so a duvet or tub rim can cover the player without moving the entire furniture group.
+
+### PNG replacement workflow
+
+The default visual is a *procedural geometric preview*, NOT the pixel-perfect furnished-room illustration. To change its style, add transparent PNG sprites inside rebuild/assets/, named for example bed_base.png and bed_front.png. Select the bed, open **PNG SPRITE**, and enter ./assets/bed_base.png as Base PNG and ./assets/bed_front.png as Front PNG. Use PIXEL X/Y to calibrate rendering, and POSE X/Y to calibrate the player separately.
+
+Missing PNGs fall back to procedural placeholders. Only local paths within ./assets/ with PNG extensions are accepted.
+
+### Export/import
+
+**EXPORT JSON** generates a complete, versioned layout; the editor attempts to copy it and also puts it in the text box. **IMPORT JSON** restores it, validating known module IDs and numeric bounds. **RESET ASSET** and **RESET ROOM** restore defaults. Changes persist locally under the key vo-rebuild-cove-modules-v1 and are NOT synced across devices or multiplayer.
+
+### Implementation files
+
+- modular-engine.js — data schema, registry, transforms, collision, interaction points, painter commands and serialization.
+- modular-editor.js — browser editor, draggable placement, per-axis numeric controls, and JSON export/import.
+- cove-scene.js — modular room base and fallback furniture.
+- game.js — integration with the game camera, contextual Action button, player poses, and life needs.
+
