@@ -229,6 +229,72 @@
   };
 
 
+
+  // Staging-only visual seat calibration. Hidden unless office.html?seatCal=1
+  // is opened deliberately; the usual contextual Action UI is unchanged.
+  const SEAT_CAL_KEY = 'vc-blue-sofa-user-pivot-v1';
+  const seatVisualTuning = { x: 8, y: -4 }; // atlas px; into sofa, not down in front
+  const seatCalibrationMode = new URLSearchParams(location.search).get('seatCal') === '1';
+  try {
+    const saved = JSON.parse(localStorage.getItem(SEAT_CAL_KEY) || 'null');
+    if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
+      seatVisualTuning.x = Math.max(-32, Math.min(32, Math.round(saved.x)));
+      seatVisualTuning.y = Math.max(-32, Math.min(32, Math.round(saved.y)));
+    }
+  } catch (e) {}
+
+  let calPanel = null;
+  if (seatCalibrationMode) {
+    const css = document.createElement('style');
+    css.textContent = [
+      '#vc-seat-cal{position:fixed;right:8px;top:51px;z-index:9997;background:#171c29;color:#fff;',
+      'padding:8px;border:2px solid #ffe08c;box-shadow:2px 3px 0 #000;display:none;',
+      'font:700 11px monospace;max-width:180px}',
+      '#vc-seat-cal button{font:700 13px monospace;padding:7px;min-width:35px;min-height:33px;',
+      'border:1px solid #8793a3;color:#fff;background:#2b3950;touch-action:manipulation}',
+      '#vc-seat-cal .value{color:#ffe08c;margin:5px 0 8px}',
+      '#vc-seat-cal .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}',
+      '#vc-seat-cal .bottom{display:flex;gap:4px;margin-top:7px}',
+      '#vc-seat-cal .bottom button{font-size:10px;flex:1}',
+      ''
+    ].join('');
+    document.head.appendChild(css);
+    calPanel = document.createElement('div');
+    calPanel.id = 'vc-seat-cal';
+    calPanel.innerHTML = '<div>SOFA PLAYER ONLY</div><div class="value"></div>' +
+      '<div class="grid"><span></span><button data-dy="-2">↑</button><span></span>' +
+      '<button data-dx="-2">←</button><button data-reset="1">↺</button>' +
+      '<button data-dx="2">→</button><span></span><button data-dy="2">↓</button><span></span></div>' +
+      '<div class="bottom"><button data-copy="1">COPY X/Y</button></div>';
+    document.body.appendChild(calPanel);
+    const update = () => {
+      calPanel.querySelector('.value').textContent =
+        'X: ' + seatVisualTuning.x + ' · Y: ' + seatVisualTuning.y + ' px';
+      try { localStorage.setItem(SEAT_CAL_KEY, JSON.stringify(seatVisualTuning)); } catch (e) {}
+    };
+    for (const eventName of ['pointerdown','pointerup','touchstart','touchend','click','keydown','keyup']) {
+      calPanel.addEventListener(eventName, e => e.stopPropagation());
+    }
+    calPanel.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
+      if (button.hasAttribute('data-dx')) {
+        seatVisualTuning.x = Math.max(-32, Math.min(32,
+          seatVisualTuning.x + Number(button.dataset.dx)));
+      } else if (button.hasAttribute('data-dy')) {
+        seatVisualTuning.y = Math.max(-32, Math.min(32,
+          seatVisualTuning.y + Number(button.dataset.dy)));
+      } else if (button.hasAttribute('data-reset')) {
+        seatVisualTuning.x = 8; seatVisualTuning.y = -4;
+      } else if (button.hasAttribute('data-copy')) {
+        const val = 'Blue sofa player seat offset: X=' + seatVisualTuning.x +
+          ', Y=' + seatVisualTuning.y + ' atlas px';
+        navigator.clipboard?.writeText(val).catch(() => {});
+      }
+      update();
+    }));
+    update();
+  }
+  window.__vcLifeSeatTuning = seatCalibrationMode ? seatVisualTuning : null;
+
   // Render the seated *player* in the same depth-sorted SVG world as Baymax.
   // The normal player avatar is HTML above all furniture, causing the player to
   // appear in front of armrests/partition walls even with correct seat coords.
@@ -249,6 +315,8 @@
     window.__vcLifeSeatRenderer = function renderSeatLayer() {
       const sitting = valid && !SPEC && !OUT_ON && !!me._lifeSeat &&
         !me.moving && ['sit','perch','lie'].includes(me.forceAnim);
+      if (calPanel) calPanel.style.display =
+        sitting && me._lifeSeat.objectId === 'sofa_3_sw' ? 'block' : 'none';
       if (!sitting) {
         if (displayed) {
           displayed = false;
@@ -258,16 +326,16 @@
         return;
       }
       const p = P(me.c, me.r);
-      // Player-only sit-frame correction. The reference_man seated sprite
-      // draws its lower body farther below its foot pivot than Baymax's frame.
-      // Leave the furniture anchors and all NPC rendering entirely unchanged.
-      // The correction is visual only and immediately disappears on standing.
-      const sofaPlayerCorrectionPx =
-        /^sofa_/.test(me._lifeSeat.objectId || '') && me.forceAnim === 'sit'
-          ? 10 : 0;
-      const y = p.y + sitOffset(me.c, me.r, me.forceAnim, null)
-        + sofaPlayerCorrectionPx / PPU;
-      const xSnap = Math.round(p.x * PPU) / PPU;
+      // The reference_man sit frame is NOT aligned like Baymax's Bima sheet.
+      // Calibrate only the rendered PLAYER on the BLUE sofa: a small
+      // screen-diagonal step into the cushion (right/back), never move the
+      // actual seat, collision, Baymax, Migi, or the furniture itself.
+      const isBlueSofa = me._lifeSeat.objectId === 'sofa_3_sw' &&
+        me.forceAnim === 'sit';
+      const dx = isBlueSofa ? seatVisualTuning.x / PPU : 0;
+      const dy = isBlueSofa ? seatVisualTuning.y / PPU : 0;
+      const y = p.y + sitOffset(me.c, me.r, me.forceAnim, null) + dy;
+      const xSnap = Math.round((p.x + dx) * PPU) / PPU;
       const ySnap = Math.round(y * PPU) / PPU;
       // Native world depth: keep the same sofa, Baymax and Migi sorting.
       const depth = me.c + me.r + 0.05;
