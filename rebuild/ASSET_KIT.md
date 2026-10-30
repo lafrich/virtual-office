@@ -92,3 +92,28 @@ New assets use **256 × 200 transparent SVG** with a registered pixel pivot **(1
 **Current limitation:** These are crisp-edge vector SVG pixel-art sprites and have not been visually inspected in a real mobile browser. They are not a final raster sprite sheet. Office and Cove are the first upgraded areas; Taman and Warteg still contain their earlier procedural furniture and environment art.
 
 Release smoke tests: JavaScript integration, Office/Cove sprite draw calls, correct seating actions and occlusion, legacy local saves, cross-zone rendering, and Edit Mode Save/Cancel passed (12/12). All 16 source SVG files passed structural checks. A real screenshot comparison is still necessary before claiming pixel-perfect parity with the visual reference.
+
+
+## Rebuild 10 — Taman & Warteg share the same authored asset quality
+
+Eight more original pixel-style SVG files add **five new asset sets**, growing the full in-game asset atlas from 11 to **16 sets / 24 SVG source files**.
+
+| Scene | Module | Sprite |
+|---|---|---|
+| Taman | Both park benches | `park_bench_base.svg` + `park_bench_front.svg` |
+| Taman | Lounger | `park_lounger_base.svg` + `park_lounger_front.svg` |
+| Taman | Exterior warteg entrance | `warteg_house_base.svg` |
+| Warteg | Both green dining tables + seats | `warteg_table_base.svg` |
+| Warteg | Buffet and eating bar | `warteg_buffet_base.svg` + `warteg_buffet_front.svg` |
+
+All are transparently authored with the canonical warm materials, top-left 3-tone directional shading and crisp pixel edges. Larger props use wider canvases **without changing grid physics**. Pivot presets are:
+
+- Bench, lounger, dining table: 256×200, origin (128,158), normalized (.5,.79)
+- Street warteg façade: 320×220, origin (160,173), normalized (.5,173/220)
+- Food buffet: 512×250, origin (256,180), normalized (.5,.72)
+
+A shared renderer in `game.js` now uses the existing `ModularWorld.drawSprite` for **every location** (not only Cove/Office); special seats put the avatar between each base and front layer and retain procedural fallback when sprite loading fails.
+
+The new assets are bound to **the same existing object IDs** as the original geometric furniture. Each Edit Mode position/offset and action anchor carries forward without reset. The user can still enter the warteg, sit at park benches, lie on loungers and order food. Sprite loading and layered occlusion were covered by a twelve-check in-memory integration smoke test; all eight asset sources were checked for valid SVG structure and matching front/base canvas sizes.
+
+**Art inspection:** open `rebuild/asset-atlas.html` for the actual source-file preview of all 16 sets. This does not establish real mobile/browser parity until visually tested on a device. This is flat-color vector pixel-style artwork, not a final individually painted PNG sprite sheet.
