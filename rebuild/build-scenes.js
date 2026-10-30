@@ -36,12 +36,12 @@
     asset('street-bench-0','Bangku taman A',5,6.4,3.4,.82,21,{action:place('sit','DUDUK',0,1.2),sprite:{base:'./assets/park_bench_base.svg',front:'./assets/park_bench_front.svg',pivot:{x:.5,y:.79}}}),
     asset('street-bench-1','Bangku taman B',10,6.4,3.4,.82,21,{action:place('sit','DUDUK',0,1.2),sprite:{base:'./assets/park_bench_base.svg',front:'./assets/park_bench_front.svg',pivot:{x:.5,y:.79}}}),
     asset('street-warteg','Bangunan warteg',11.4,3.9,3.5,2.6,39,{action:place('zone','MASUK',.4,1.6),sprite:{base:'./assets/warteg_house_base.svg',pivot:{x:.5,y:173/220}}}),
-    asset('street-props-a','Furnitur taman',8.15,9.4,1.5,.9,14),
+    asset('street-props-a','Furnitur taman',8.15,9.4,1.5,.9,14,{sprite:{base:'./assets/street_props_base.svg',pivot:{x:.5,y:.79}}}),
     asset('street-lounger','Kursi rebah',13.2,8.8,2.4,1,14,{action:place('lie','REBAH',0,.8),sprite:{base:'./assets/park_lounger_base.svg',front:'./assets/park_lounger_front.svg',pivot:{x:.5,y:.79}}})
   ]},
   warteg:{width:12,height:11,assets:[
     asset('warteg-plant','Tanaman warteg',1.4,2.4,.7,.7,24,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
-    asset('warteg-sign','Pajangan dinding',3,3,1.35,.7,29),
+    asset('warteg-sign','Pajangan dinding',3,3,1.35,.7,29,{sprite:{base:'./assets/warteg_sign_base.svg',pivot:{x:.5,y:.79}}}),
     asset('warteg-table-a','Meja dan bangku A',3.6,8.1,2.5,3,9,{sprite:{base:'./assets/warteg_table_base.svg',pivot:{x:.5,y:.79}}}),
     asset('warteg-table-b','Meja dan bangku B',8.5,8.1,2.5,3,9,{sprite:{base:'./assets/warteg_table_base.svg',pivot:{x:.5,y:.79}}}),
     asset('warteg-bar','Etalase dan bangku bar',6.3,4.1,7.7,3.8,55,{

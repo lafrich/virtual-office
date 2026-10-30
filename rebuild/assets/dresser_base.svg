@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="200" viewBox="0 0 256 200" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="200" viewBox="0 0 256 200" shape-rendering="geometricPrecision">
 <polygon points="100,158 107,152 149,152 156,158 149,163 107,163" fill="#6E829944"/>
 <polygon points="100,135 134,152 134,172 100,155" fill="#A26B3F"/><polygon points="156,141 134,152 134,172 156,161" fill="#754A2E"/><polygon points="122,124 156,141 134,152 100,135" fill="#C38C5A"/>
 <polygon points="100,134 134,151 134,152 100,135" fill="#A26B3F"/><polygon points="156,140 134,151 134,152 156,141" fill="#754A2E"/><polygon points="122,123 156,140 134,151 100,134" fill="#C38C5A"/>

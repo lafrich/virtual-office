@@ -10,8 +10,9 @@
  const FRAME={w:128,h:160,pivotX:64,pivotY:146,scale:.68};
  const sheetSrc='./assets/character_flat_sheet.svg?v=2';
  const posesSrc='./assets/character_flat_poses.svg?v=2';
- const sheets={walk:null,poses:null};
- const loaded={walk:false,poses:false};
+ const baymaxSrc='./assets/character_baymax_poses.svg?v=1';
+ const sheets={walk:null,poses:null,baymax:null};
+ const loaded={walk:false,poses:false,baymax:false};
  function load(which,src){
   if(typeof Image==='undefined')return;
   const pic=new Image();
@@ -20,7 +21,7 @@
   pic.src=src;
   sheets[which]=pic;
  }
- load('walk',sheetSrc);load('poses',posesSrc);
+ load('walk',sheetSrc);load('poses',posesSrc);load('baymax',baymaxSrc);
  function normalizeDirection(value){
   if(DIRECTIONS.includes(value))return value;
   return ({sw:'down',se:'right',nw:'up',ne:'left'})[value]||'down';
@@ -53,7 +54,7 @@
  }
  function draw(ctx,point,zoom,opts={}){
   const pose=POSES.includes(opts.pose)?opts.pose:null;
-  const kind=pose?'poses':'walk',img=sheets[kind];
+  const kind=pose?(opts.variant==='baymax'?'baymax':'poses'):'walk',img=sheets[kind];
   if(!loaded[kind]||!img||!ctx||!point)return false;
   const frame=pose?POSES.indexOf(pose):frameIndex(opts);
   const row=pose?0:DIRECTIONS.indexOf(normalizeDirection(opts.direction));
@@ -62,17 +63,16 @@
   ctx.save();
   // Cove reference is clean flat illustration, not deliberately blocky nearest-neighbor.
   ctx.imageSmoothingEnabled=true;
-  const bob=0; // Bounce and contact shadow are authored consistently in each frame.
-  const x=Math.round(point.x-FRAME.pivotX*sc);
-  const y=Math.round(point.y-FRAME.pivotY*sc+bob*sc);
-  ctx.drawImage(img,sx,sy,FRAME.w,FRAME.h,x,y,
-    Math.round(FRAME.w*sc),Math.round(FRAME.h*sc));
+  // Subpixel positions eliminate the avatar's one-pixel camera jitter.
+  const x=point.x-FRAME.pivotX*sc;
+  const y=point.y-FRAME.pivotY*sc;
+  ctx.drawImage(img,sx,sy,FRAME.w,FRAME.h,x,y,FRAME.w*sc,FRAME.h*sc);
   ctx.restore();
   return true;
  }
  global.VOCharacterSystem=Object.freeze({
   directions:DIRECTIONS,poses:POSES,frame:FRAME,
   normalizeDirection,screenDirection,directionFromWorld,frameIndex,animationKey,
-  draw,ready:()=>({...loaded}),sheetPaths:Object.freeze({walk:sheetSrc,poses:posesSrc})
+  draw,ready:()=>({...loaded}),sheetPaths:Object.freeze({walk:sheetSrc,poses:posesSrc,baymax:baymaxSrc})
  });
 })(window);

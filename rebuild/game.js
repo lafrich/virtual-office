@@ -45,11 +45,13 @@ function drawHuman(x,y,{sitting=false,lying=false,dir='down',
  moving=false,pose=null}={}){
  const p=iso(x,y),k=zoom;
  const protagonist=!npc&&(hair==='#171b24'||hair==='#161c25');
+ const baymax=!npc&&hair==='#949ca7'&&sitting;
  const state=pose||(lying?'sleep':sitting?'sit':null);
  // First choice: consistent flat Cove-reference sprite sheet.
  // Fallback keeps a visible actor if an SVG has not loaded yet.
- if(protagonist&&window.VOCharacterSystem?.draw(g,p,zoom,{
-   direction:dir,moving:!state&&moving,walk,pose:state
+ if((protagonist||baymax)&&window.VOCharacterSystem?.draw(g,p,zoom,{
+   direction:dir,moving:!state&&moving,walk,pose:state,
+   variant:baymax?'baymax':'player'
  })){
    if(label){const q=iso(x,y,64);pixelText(label,q.x,q.y,PAL.cream,9)}
    return;
@@ -563,11 +565,16 @@ function paintFurniture(zone,id,baseX,baseY,fn){
  const paired=(zone==='office'&&['office-sofa','office-chair'].includes(id))||
    (zone==='street'&&['street-bench-0','street-bench-1','street-lounger'].includes(id))||
    (zone==='warteg'&&id==='warteg-bar');
- if(!paired&&item.sprite?.base&&world.drawSprite({ctx:g,iso,zoom},item,'base',{
-      x:base?.at.x??baseX,y:base?.at.y??baseY
-    })){
-   // Sprite replaces only visual geometry, never the interaction/collision.
- }else fn(deltaX,deltaY);
+ if(!paired&&item.sprite?.base){
+   const didDraw=world.drawSprite({ctx:g,iso,zoom},item,'base',{
+     x:base?.at.x??baseX,y:base?.at.y??baseY
+   });
+   if(didDraw){g.restore();return;}
+   const state=world.images.get(item.sprite.base);
+   // Avoid flashing the old geometric placeholder during SVG load.
+   if(state&&!state.failed){g.restore();return;}
+ }
+ fn(deltaX,deltaY);
  g.restore();
 }
 function currentAction(){

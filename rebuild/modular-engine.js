@@ -3,6 +3,20 @@
 (function(global){
 'use strict';
 const VERSION=1,KEY='vo-rebuild-cove-modules-v1';
+// Authoring size and world footprint are independent. Scale existing visual
+// artwork without changing editor scale, physical collision or saved layout.
+const ART_SCALE=Object.freeze({
+ './assets/plant_base.svg':.52,
+ './assets/lamp_base.svg':.54,
+ './assets/rug_base.svg':.89,
+ './assets/shower_base.svg':.47,
+ './assets/partition_base.svg':.52,
+ './assets/sink_base.svg':.52,
+ './assets/mirror_base.svg':.40,
+ './assets/door_base.svg':.48,
+ './assets/street_props_base.svg':.57,
+ './assets/warteg_sign_base.svg':.43
+});
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const num=(v,d)=>Number.isFinite(Number(v))?Number(v):d;
 const round=(v,p=100)=>Math.round(v*p)/p;
@@ -227,15 +241,16 @@ class ModularWorld{
   const zoom=api.zoom,g=api.ctx;
   const at=position||a.at;
   const p=api.iso(at.x,at.y,a.elevation);
-  const scale=zoom*a.scale;
+  const scale=zoom*a.scale*(ART_SCALE[a.sprite[part]]||1);
   const pivot=a.sprite?.pivot;
   const px=Math.min(1,Math.max(0,Number.isFinite(pivot?.x)?pivot.x:.5));
   const py=Math.min(1,Math.max(0,Number.isFinite(pivot?.y)?pivot.y:1));
   // SVG artwork scales smoothly; custom PNG pixel sprites remain nearest-neighbour.
+  g.save();
   g.imageSmoothingEnabled=/\.svg(?:\?|$)/i.test(a.sprite[part]);
-  g.drawImage(img,Math.round(p.x-img.width*scale*px),
-    Math.round(p.y-img.height*scale*py),
-    Math.round(img.width*scale),Math.round(img.height*scale));
+  const width=img.width*scale,height=img.height*scale;
+  g.drawImage(img,p.x-width*px,p.y-height*py,width,height);
+  g.restore();
   return true;
  }
  render(api,player){
