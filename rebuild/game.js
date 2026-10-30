@@ -164,22 +164,36 @@ function drawSofa(occupied,frame){
 }
 function drawOffice(x,y,sceneActor,frame){
  drawWalls('office');drawFloor('office');
- const objs=[
- {d:4,fn:()=>drawPlant(2.1,2.7)},
- {d:5.5,fn:()=>box(4.2,2.2,1.3,1.4,9,'#475de0','#2f47aa','#304eac')},
- {d:9,fn:()=>box(8.6,3.8,2.5,1.15,10,'#dfb575','#a87f51','#a0794c')},
- {d:10,fn:()=>drawDesk(12.0,3.7)},
- {d:13,fn:()=>drawDesk(13.3,5.9)},
- {d:15,fn:()=>drawPlant(12.2,8.7)},
- {d:15.5,fn:()=>drawSofa(sceneActor?.seatId==='sofa'?sceneActor:null,frame)},
- {d:18,fn:()=>{box(10.25,7.9,1.9,.96,6,'#d4a674','#a4774d','#976e46');box(10.25,7.9,1.70,.76,.2,'#f3e5c8','#bfbaaa','#c5b7a0',6);}},
- {d:19,fn:()=>{box(11.2,10.1,1.05,.72,10,'#bd955f','#866744','#8e6c43');box(11.2,10.1,.84,.56,.15,'#e9dbb7','#ac986f','#aa916f',10);}},
- {d:22,fn:()=>drawDesk(14.5,8.1)},
- {d:23,fn:()=>drawChair(14.4,9.1)},
- {d:25,fn:()=>{box(16.1,10.8,.9,.9,6,'#f9fbf9','#c8e1e5','#bad5d7');box(16.1,10.8,.48,.58,2,'#b7e6f2','#71aabb','#73a6b5',6);}},
- {d:24.8,fn:()=>{box(16.2,8.8,1.0,.9,27,'#a9dcf1','#7099ba','#658eb6');box(16.2,8.8,.8,.8,1,'#e2f6f8','#bfd6d7','#b2d3d5',27);}}
+ // Each physical furnishing retains its original artwork but receives
+ // an independent editable world transform and depth.
+ const entries=[
+  ['office-plant-a',4,()=>drawPlant(2.1,2.7)],
+  ['office-storage',5.5,()=>box(4.2,2.2,1.3,1.4,9,'#475de0','#2f47aa','#304eac')],
+  ['office-lowtable',9,()=>box(8.6,3.8,2.5,1.15,10,'#dfb575','#a87f51','#a0794c')],
+  ['office-desk-a',10,()=>drawDesk(12.0,3.7)],
+  ['office-desk-b',13,()=>drawDesk(13.3,5.9)],
+  ['office-plant-b',15,()=>drawPlant(12.2,8.7)],
+  ['office-sofa',15.5,(dx,dy)=>drawSofa(
+    sceneActor?.seatId==='sofa'?{...sceneActor,x:sceneActor.x-dx,y:sceneActor.y-dy}:null,frame)],
+  ['office-coffee-a',18,()=>{box(10.25,7.9,1.9,.96,6,'#d4a674','#a4774d','#976e46');
+    box(10.25,7.9,1.70,.76,.2,'#f3e5c8','#bfbaaa','#c5b7a0',6);}],
+  ['office-coffee-b',19,()=>{box(11.2,10.1,1.05,.72,10,'#bd955f','#866744','#8e6c43');
+    box(11.2,10.1,.84,.56,.15,'#e9dbb7','#ac986f','#aa916f',10);}],
+  ['office-desk-c',22,()=>drawDesk(14.5,8.1)],
+  ['office-chair',23,()=>drawChair(14.4,9.1)],
+  ['office-toilet',25,()=>{box(16.1,10.8,.9,.9,6,'#f9fbf9','#c8e1e5','#bad5d7');
+    box(16.1,10.8,.48,.58,2,'#b7e6f2','#71aabb','#73a6b5',6);}],
+  ['office-shower',24.8,()=>{box(16.2,8.8,1.0,.9,27,'#a9dcf1','#7099ba','#658eb6');
+    box(16.2,8.8,.8,.8,1,'#e2f6f8','#bfd6d7','#b2d3d5',27);}]
  ];
- for(const o of objs)objects.push(o);
+ const w=sceneWorlds.office;
+ for(const [id,depth,fn] of entries){
+   const item=w.get(id),base=w.defaultAssets.find(a=>a.id===id);
+   if(!item?.visible||!base)continue;
+   const dx=item.at.x-base.at.x,dy=item.at.y-base.at.y;
+   objects.push({d:depth+dx+dy+item.depthBias,
+     fn:()=>paintFurniture('office',id,base.at.x,base.at.y,fn)});
+ }
 }
 function drawBar(occupied){
  const x=6.3,y=4.1;
@@ -351,7 +365,7 @@ function paintFurniture(zone,id,baseX,baseY,fn){
  g.save();
  g.translate(Math.round((deltaX-deltaY)*TX*zoom+item.offset.x*zoom),
    Math.round((deltaX+deltaY)*TY*zoom+item.offset.y*zoom));
- fn();g.restore();
+ fn(deltaX,deltaY);g.restore();
 }
 function currentAction(){
  if(player.seatId)return {type:'stand',label:'BANGUN'};
