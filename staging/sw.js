@@ -102,7 +102,7 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=8', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=9', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
