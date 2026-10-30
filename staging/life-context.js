@@ -13,9 +13,12 @@
   const distance = (a, b) => Math.hypot(a.c - b.c, a.r - b.r);
   const RANGE_SEAT = 1.35;
   const RANGE_WALL = 1.15;
-  const lifeHUD = document.getElementById('vclife');
+  // This script runs inside the game's closure, before the Life HUD creates its DOM.
+  // Always resolve the hidden HUD lazily at the moment an action is chosen.
   const style = document.createElement('style');
   style.textContent = `
+    /* No floating LIFE panel. Use the game's original bottom-right Action button. */
+    #vclife {display:none!important}
     #vclife .life-actions {display:none!important}
     #vclife .life-note:after {content:" · Action muncul saat dekat objek"}
     .me .life-pee-fx {position:absolute;left:8px;bottom:1px;width:3px;height:18px;
@@ -132,6 +135,7 @@
   };
 
   function activate(which) {
+    const lifeHUD = document.getElementById('vclife');
     const button = lifeHUD && lifeHUD.querySelector('[data-act="' + which + '"]');
     if (!button || button.disabled) return false;
     button.click(); // Uses the existing Life HUD's user-scoped logic and saving.
@@ -210,5 +214,6 @@
   if (typeof updAction === 'function') {
     try { updAction(); } catch (e) { console.warn('[life-context]',e); }
   }
-  console.info('[life-context] object proximity actions enabled');
+  window.__vcLifeContextReady = true;
+  console.info('[life-context] native Action integrated; floating Life panel hidden');
 })();
