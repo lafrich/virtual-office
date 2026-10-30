@@ -395,6 +395,7 @@ function currentAction(){
  let nearest=null,dmin=Infinity;
  for(const spot of spots[player.zone]){
   const dSpot=adjustedActionSpot(player.zone,spot);
+  if(dSpot.r<=0)continue;
   const d=Math.hypot(player.x-dSpot.x,player.y-dSpot.y);
   if(d<=spot.r&&d<dmin){nearest=dSpot;dmin=d}
  }
@@ -402,6 +403,7 @@ function currentAction(){
  return {type:'fart',label:'KENTUT'};
 }
 function pressAction(){
+ if(coveEditor?.active)return;
  const a=currentAction();
  if(a.type==='stand'){stand();notice('Berdiri');return}
  if(['sit','lie','sleep','bathe'].includes(a.type)){
@@ -477,7 +479,8 @@ joystick.addEventListener('pointerdown',e=>{e.preventDefault();joy.pointer=e.poi
 joystick.addEventListener('pointermove',e=>{if(joy.pointer===e.pointerId)adjustJoy(e)});
 for(const n of ['pointerup','pointercancel','lostpointercapture'])joystick.addEventListener(n,e=>{if(joy.pointer===e.pointerId)resetJoy()});
 window.addEventListener('keydown',e=>{
- const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d','shift',' ','enter'].includes(k)){e.preventDefault();keys.add(k)}
+ const k=e.key.toLowerCase();
+ if(coveEditor?.active){if(k==='escape'){e.preventDefault();coveEditor.close(false)}return;}if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d','shift',' ','enter'].includes(k)){e.preventDefault();keys.add(k)}
  if((k===' '||k==='enter')&&!e.repeat&&$('drawer').hidden&&$('zoneSwitch').hidden)pressAction();
  if(k==='escape'){$('drawer').hidden=true;$('zoneSwitch').hidden=true}
 });
