@@ -394,7 +394,24 @@ window.addEventListener('keydown',e=>{
  if(k==='escape'){$('drawer').hidden=true;$('zoneSwitch').hidden=true}
 });
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+const covePointer=e=>{
+ const r=C.getBoundingClientRect();
+ return {x:(e.clientX-r.left)*DPR,y:(e.clientY-r.top)*DPR};
+};
+C.addEventListener('pointerdown',e=>{
+ if(coveEditor?.active){
+   coveEditor.pointerDown(e,covePointer);
+   if(C.setPointerCapture)C.setPointerCapture(e.pointerId);
+ }
+});
+C.addEventListener('pointermove',e=>{
+ if(coveEditor?.active)coveEditor.pointerMove(e,covePointer);
+});
+C.addEventListener('pointercancel',e=>{
+ if(coveEditor?.active)coveEditor.pointerUp(e);
+});
 C.addEventListener('pointerup',e=>{
+ if(coveEditor?.active){coveEditor.pointerUp(e);e.preventDefault();return}
  if(e.pointerType==='mouse'&&e.button!==0)return;
  const rect=C.getBoundingClientRect(),cx=(e.clientX-rect.left)*DPR,cy=(e.clientY-rect.top)*DPR;
  const a=(cx-ox)/(TX*zoom),b=(cy-oy)/(TY*zoom);
@@ -486,6 +503,15 @@ function frame(t){
  const dt=clamp((t-now)/1000,0,.06);now=t;
  update(dt);draw(t*.001);requestAnimationFrame(frame);
 }
+// Initialize the editor once after all gameplay hooks are set up.
+coveEditor=window.VOModularEditor.createEditor(coveWorld,{
+ getZone:()=>player.zone,
+ getProject:()=>Object.assign((x,y,z=0)=>iso(x,y,z),{zoom}),
+ screenToWorld:(screenX,screenY)=>{
+  const a=(screenX-ox)/(TX*zoom),b=(screenY-oy)/(TY*zoom);
+  return {x:(a+b)/2,y:(b-a)/2}
+ }
+});
 renderFeed();renderNeeds();$('playerName').textContent='PLAYER';$('locationChip').textContent=player.zone==='office'?'🏢 OFFICE':player.zone==='street'?'🌳 TAMAN':zone==='warteg'?'🍛 WARTEG':'🛏️ COVE ROOM';
 $('playerPlace').textContent=player.zone==='office'?'Pegawai kantor · Local test':player.zone==='street'?'Taman kota · Local test':zone==='warteg'?'Warteg · Local test':'Cove Bedroom + Bathroom';
 addLog('✨ Editable Rebuild 01 siap dimainkan. Source mandiri, tanpa aset terenkripsi.');
