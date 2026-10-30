@@ -234,19 +234,47 @@ function drawOffice(x,y,sceneActor,frame){
 }
 function drawBar(occupied){
  const x=6.3,y=4.1;
- // Storage and buffet in front of the green warteg wall.
+ // WARM WARTEG: the same 3-tone material ramps as the bedroom and office.
+ // Cabinet feet, main counter and raised transparent food display.
+ shadow(x,y,26,8);
+ for(const cx of [x-3.2,x+3.2])
+  box(cx,y+.45,.25,.30,12,PAL.woodDark,PAL.woodDark,PAL.woodDark);
  box(x,y,7.7,1.45,21,PAL.cream,PAL.wallSide,PAL.grey);
- box(x,y-.08,7.9,1.5,23,PAL.greenLight,PAL.green,PAL.greenDark,21);
- const foods=['#d39a42','#f7c94b','#b86c3c','#94bd65','#dd6e52','#a77d4e'];
- for(let i=0;i<6;i++)box(3.2+i*1.2,4.0,.70,.48,.65,foods[i],'#c4aa89','#a3885e',44);
- for(let s of [-2.6,-.7,1.2,3.1]){const q=iso(x+s,y+.2,55);const r=iso(x+s,y+.2,31);line(q,r,'#c2eaf2',1.5)}
- const stools=[4.8,6.3,7.8];
- for(let i=0;i<stools.length;i++){
-  box(stools[i],6.3,.72,.8,6,PAL.green,PAL.greenDark,PAL.greenDark);
+ box(x,y-.08,7.9,1.5,1.6,PAL.greenLight,PAL.green,PAL.greenDark,21);
+ // Glass display frame and shelf - restrained, cool desaturated glass.
+ const frame='#BAD9D4',glass='rgba(193,237,226,.20)';
+ box(x,y-.17,7.55,.88,.55,PAL.cream,PAL.creamShade,PAL.grey,39);
+ for(const sx of [-3.4,-1.15,1.15,3.4]){
+  const q1=iso(x+sx,y-.6,23),q2=iso(x+sx,y-.6,43);
+  line(q1,q2,frame,1.5*zoom);
+ }
+ const trayColors=['#BB7542','#DDB753','#A05C3C',PAL.green,
+  PAL.bath,'#A77444','#CB884C','#E2B954'];
+ for(let i=0;i<8;i++){
+  const tx=x-3.20+i*.92,ty=y-.15;
+  box(tx,ty,.65,.46,1.15,PAL.grey,PAL.shadow,PAL.shadowDark,39.5);
+  box(tx,ty,.55,.36,.8,trayColors[i],PAL.wood,PAL.woodDark,40.7);
+  for(let j=0;j<3;j++){
+   const dx=(j-1)*.15,dy=(j%2?-.11:.08);
+   box(tx+dx,ty+dy,.14,.13,.85,
+     i%3===0?PAL.greenLight:i%3===1?PAL.uiGold:PAL.cream,
+     trayColors[i],PAL.wood,41.5);
+  }
+ }
+ // Glass upper lip and paper menus, distinct from the playable bar seats.
+ box(x,y-.65,7.70,.13,13,glass,glass,'rgba(169,217,235,.12)',23);
+ box(x+.95,y+.42,.45,.30,.30,PAL.cream,PAL.wallSide,PAL.grey,23.5);
+ box(x+1.45,y+.43,.30,.26,2.8,PAL.greenDark,PAL.green,PAL.woodDark,23);
+ box(x+1.85,y+.43,.25,.21,3.2,PAL.uiRed,PAL.wood,PAL.woodDark,23);
+ // Three fixed bar stools; keep the sitter inside the counter group.
+ for(const sx of [4.8,6.3,7.8]){
+  box(sx,6.3,.72,.75,6,PAL.greenLight,PAL.green,PAL.greenDark);
+  box(sx,6.3,.65,.67,.45,PAL.woodLight,PAL.wood,PAL.woodDark,6);
  }
  if(occupied)drawHuman(occupied.x,occupied.y,{sitting:true,dir:'nw'});
- // Foreground bar edge is ALWAYS rendered above the seated avatar.
- box(6.3,4.95,7.7,.20,30,PAL.green,PAL.greenDark,PAL.greenDark);
+ // Only the front lip covers a seated player; no duplicated furniture overlay.
+ box(x,4.95,7.7,.20,29,PAL.greenLight,PAL.green,PAL.greenDark);
+ line(iso(x-3.72,4.85,31),iso(x+3.72,4.85,31),PAL.cream,.9*zoom);
 }
 function queueFurniture(zone,id,draw){
  const item=sceneWorlds[zone]?.get(id);
