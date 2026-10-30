@@ -238,6 +238,8 @@ window.addEventListener('resize',resize,{passive:true});resize();
 const STORAGE='vo-editable-rebuild-v1';
 const defaults={fullness:87,energy:86,hygiene:91,bladder:15};
 const player={x:7.25,y:9.25,zone:'office',dir:'sw',seatId:null,sitX:null,moveTarget:null,walk:0,run:false};
+const coveWorld=new window.VOModular.ModularWorld();
+let coveEditor=null;
 let needs={...defaults},wallet=125000,events=[],timeMinutes=8*60+15;
 try{
  const o=JSON.parse(localStorage.getItem(STORAGE)||'null');
@@ -245,7 +247,7 @@ try{
   if(Number.isFinite(o.wallet))wallet=o.wallet;
   if(Number.isFinite(o.timeMinutes))timeMinutes=o.timeMinutes;
   if(Array.isArray(o.events))events=o.events.slice(0,25);
-  if(['office','street','warteg'].includes(o.zone))player.zone=o.zone;
+  if(['office','street','warteg','cove'].includes(o.zone))player.zone=o.zone;
  }
 }catch(e){}
 function save(){try{localStorage.setItem(STORAGE,JSON.stringify({version:1,needs,wallet,timeMinutes,zone:player.zone,events:events.slice(0,25)}))}catch(e){}}
@@ -263,12 +265,12 @@ function renderFeed(){
  '<div class="feed-entry">Selamat datang! Eksplor office, taman, dan warteg. Dekati objek lalu tekan ACTION.</div>';
 }
 function setZone(zone){
- if(!['office','street','warteg'].includes(zone))return;
+ if(!['office','street','warteg','cove'].includes(zone))return;
  stand();player.zone=zone;player.moveTarget=null;
- Object.assign(player,zone==='office'?{x:7.25,y:9.25}:zone==='street'?{x:8.2,y:8.5}:{x:7.1,y:8.8});
- $('locationChip').textContent=zone==='office'?'🏢 OFFICE':zone==='street'?'🌳 TAMAN':'🍛 WARTEG';
- $('playerPlace').textContent=zone==='office'?'Pegawai kantor · Local test':zone==='street'?'Taman kota · Local test':'Warteg · Local test';
- $('zoneSwitch').hidden=true;addLog('📍 Berpindah ke '+(zone==='office'?'Office':zone==='street'?'Taman':'Warteg'));
+ Object.assign(player,zone==='office'?{x:7.25,y:9.25}:zone==='street'?{x:8.2,y:8.5}:zone==='warteg'?{x:7.1,y:8.8}:{x:4.5,y:9.15});
+ $('locationChip').textContent=zone==='office'?'🏢 OFFICE':zone==='street'?'🌳 TAMAN':zone==='warteg'?'🍛 WARTEG':'🛏️ COVE ROOM';
+ $('playerPlace').textContent=zone==='office'?'Pegawai kantor · Local test':zone==='street'?'Taman kota · Local test':zone==='warteg'?'Warteg · Local test':'Cove Bedroom + Bathroom';
+ $('zoneSwitch').hidden=true;if(coveEditor)coveEditor.zoneChanged();addLog('📍 Berpindah ke '+(zone==='office'?'Office':zone==='street'?'Taman':zone==='warteg'?'Warteg':'Cove Room'));
  notice('AREA: '+zone.toUpperCase());
 }
 function stand(){player.seatId=null;player.sitX=null;}
@@ -302,6 +304,7 @@ const spots={
 };
 function currentAction(){
  if(player.seatId)return {type:'stand',label:'BANGUN'};
+ if(player.zone==='cove')return coveWorld.nearestAction(player)||{type:'fart',label:'KENTUT'};
  let nearest=null,dmin=Infinity;
  for(const spot of spots[player.zone]){
   const d=Math.hypot(player.x-spot.x,player.y-spot.y);
@@ -313,10 +316,24 @@ function currentAction(){
 function pressAction(){
  const a=currentAction();
  if(a.type==='stand'){stand();notice('Berdiri');return}
- if(a.type==='sit'||a.type==='lie'){player.seatId=a.id;player.sitX={x:a.seatX,y:a.seatY};player.x=a.seatX;player.y=a.seatY;player.moveTarget=null;player.dir=player.zone==='warteg'?'nw':'sw';addLog(a.type==='lie'?'💤 Rebahan di kursi taman.':'🪑 Duduk di '+(player.zone==='warteg'?'bangku depan etalase':player.zone==='office'?'sofa / kursi kantor':'bangku taman'));return}
+ if(['sit','lie','sleep','bathe'].includes(a.type)){
+    player.seatId=a.id;player.sitX={x:a.seatX,y:a.seatY};player.x=a.seatX;player.y=a.seatY;
+    player.moveTarget=null;player.dir=player.zone==='warteg'?'nw':'sw';
+    if(a.type==='bathe'){needs.hygiene=100;addLog('🛁 Mandi di bathtub · Kebersihan 100');notice('🛁 BERSIH')}
+    else if(a.type==='sleep'){addLog('🛏️ Tidur di kasur · energi pulih selama tidur');notice('💤 TIDUR')}
+    else addLog(a.type==='lie'?'💤 Rebahan di kursi taman.':'🪑 Duduk di '+(player.zone==='cove'?'Cove Room':player.zone==='warteg'?'bangku depan etalase':player.zone==='office'?'sofa / kursi kantor':'bangku taman'));
+    return
+ }
  if(a.type==='eat'){if(wallet<12000)return notice('Uang tidak cukup');wallet-=12000;needs.fullness=clamp(needs.fullness+40,0,100);needs.bladder=clamp(needs.bladder+4,0,100);addLog('🍛 Makan nasi kuning · -Rp12.000 · Kenyang +40');notice('🍛 MAKAN +40');return}
  if(a.type==='drink'){needs.bladder=clamp(needs.bladder+15,0,100);addLog('🥤 Minum es teh · Kebelet +15');notice('🥤 MINUM');return}
- if(a.type==='pee'){needs.bladder=0;needs.hygiene=clamp(needs.hygiene-3,0,100);addLog('🚽 Pipis di toilet · Kebelet kembali nol');notice('🚽 LEGA');return}
+ if(a.type==='pee'){
+    if(player.zone==='cove'){
+      player.seatId=a.id;player.sitX={x:a.seatX,y:a.seatY};
+      player.x=a.seatX;player.y=a.seatY;player.moveTarget=null
+    }
+    needs.bladder=0;needs.hygiene=clamp(needs.hygiene-3,0,100);
+    addLog('🚽 Pipis di toilet · Kebelet kembali nol');notice('🚽 LEGA');return
+ }
  if(a.type==='shower'){needs.hygiene=100;addLog('🚿 Mandi · Kebersihan pulih ke 100');notice('🚿 BERSIH');return}
  if(a.type==='pet'){addLog('🐈 Kamu mengelus Migi.');notice('MIGI: PURRR 🐈');return}
  if(a.type==='work'){wallet+=45000;needs.energy=clamp(needs.energy-4,0,100);needs.hygiene=clamp(needs.hygiene-2,0,100);addLog('💻 Selesai satu tugas kantor · +Rp45.000');notice('GAJI +45.000');return}
@@ -382,7 +399,7 @@ C.addEventListener('pointerup',e=>{
  const rect=C.getBoundingClientRect(),cx=(e.clientX-rect.left)*DPR,cy=(e.clientY-rect.top)*DPR;
  const a=(cx-ox)/(TX*zoom),b=(cy-oy)/(TY*zoom);
  const x=(a+b)/2,y=(b-a)/2;
- const limit=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:[16,13];
+ const limit=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:player.zone==='cove'?[16,11]:[16,13];
  if(x>=.3&&x<limit[0]-.3&&y>=.3&&y<limit[1]-.3){player.moveTarget={x,y};if(player.seatId)stand();}
 });
 function update(dt){
@@ -402,9 +419,11 @@ function update(dt){
  if(dx||dy){
   if(player.seatId)stand();
   let speed=(keys.has('shift')?4.5:2.5);
-  const limit=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:[16,13];
-  player.x=clamp(player.x+dx*speed*dt,.35,limit[0]-.35);
-  player.y=clamp(player.y+dy*speed*dt,.35,limit[1]-.35);
+  const limit=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:player.zone==='cove'?[16,11]:[16,13];
+  const nx=clamp(player.x+dx*speed*dt,.35,limit[0]-.35);
+  const ny=clamp(player.y+dy*speed*dt,.35,limit[1]-.35);
+  if(player.zone!=='cove'||!coveWorld.blocked(nx,player.y))player.x=nx;
+  if(player.zone!=='cove'||!coveWorld.blocked(player.x,ny))player.y=ny;
   player.dir=(dx-dy)>=0?'se':'sw';player.walk+=dt*speed;
  }
  const gameMinutes=dt*0.6; timeMinutes+=gameMinutes;
@@ -412,7 +431,7 @@ function update(dt){
  needs.hygiene=clamp(needs.hygiene-gameMinutes*(5/15)-(dx||dy?dt*.06:0),0,100);
  needs.bladder=clamp(needs.bladder+gameMinutes*(20/15),0,100);
  const seated=!!player.seatId;
- needs.energy=clamp(needs.energy+dt*(seated?(player.seatId==='lounger'?9:.8):-.26)-(dx||dy?dt*.14:0),0,100);
+ needs.energy=clamp(needs.energy+dt*(seated?(['lounger','cove-bed'].includes(player.seatId)?9:.8):-.26)-(dx||dy?dt*.14:0),0,100);
  if(needs.bladder>=100){needs.bladder=5;needs.hygiene=clamp(needs.hygiene-30,0,100);addLog('⚠️ Terlalu kebelet! Karakter ngompol. Kebersihan -30');notice('⚠️ NGOMPOL')}
  const a=currentAction();action.textContent=a.label;
  if(Math.floor(now/1000)!==Math.floor((now-dt*1000)/1000))renderNeeds();
@@ -421,13 +440,27 @@ const objects=[];
 function draw(frame){
  g.fillStyle='#293141';g.fillRect(0,0,W,H);
  // Composite camera: keep the character visible while showing more of the room.
- const limits=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:[16,13];
+ const limits=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:player.zone==='cove'?[16,11]:[16,13];
  const cameraX=player.x*.62+(limits[0]/2)*.38;
  const cameraY=player.y*.62+(limits[1]/2)*.38;
  ox=W*.51-(cameraX-cameraY)*TX*zoom;
  oy=H*.54-(cameraX+cameraY)*TY*zoom;
  objects.length=0;
  const seated=player.seatId?{x:player.x,y:player.y,seatId:player.seatId}:null;
+ if(player.zone==='cove'){
+   const api={ctx:g,iso,box,line,diamond,poly,drawPlant,shadow,drawHuman,pixelText,zoom,
+     drawPlaceholder:(a,part)=>window.VOCoveScene.drawAsset(api,a,part),
+     drawPlayer:()=>drawHuman(player.x,player.y,{
+       lying:player.seatId==='cove-bed',
+       sitting:!!player.seatId&&player.seatId!=='cove-bed',
+       shirt:player.seatId==='cove-bath'?'#dcb492':'#242a3a',
+       hair:'#171b24',dir:player.dir,walk:player.walk
+     })};
+   window.VOCoveScene.drawFloor(api);
+   coveWorld.render(api,player);
+   if(coveEditor)coveEditor.overlay(api);
+   return;
+ }
  if(player.zone==='office')drawOffice(player.x,player.y,seated,frame);
  else if(player.zone==='warteg')drawWarteg(seated);
  else drawPark(seated,frame);
@@ -453,8 +486,8 @@ function frame(t){
  const dt=clamp((t-now)/1000,0,.06);now=t;
  update(dt);draw(t*.001);requestAnimationFrame(frame);
 }
-renderFeed();renderNeeds();$('playerName').textContent='PLAYER';$('locationChip').textContent=player.zone==='office'?'🏢 OFFICE':player.zone==='street'?'🌳 TAMAN':'🍛 WARTEG';
-$('playerPlace').textContent=player.zone==='office'?'Pegawai kantor · Local test':player.zone==='street'?'Taman kota · Local test':'Warteg · Local test';
+renderFeed();renderNeeds();$('playerName').textContent='PLAYER';$('locationChip').textContent=player.zone==='office'?'🏢 OFFICE':player.zone==='street'?'🌳 TAMAN':zone==='warteg'?'🍛 WARTEG':'🛏️ COVE ROOM';
+$('playerPlace').textContent=player.zone==='office'?'Pegawai kantor · Local test':player.zone==='street'?'Taman kota · Local test':zone==='warteg'?'Warteg · Local test':'Cove Bedroom + Bathroom';
 addLog('✨ Editable Rebuild 01 siap dimainkan. Source mandiri, tanpa aset terenkripsi.');
 requestAnimationFrame(frame);
 })();
