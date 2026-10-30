@@ -1,5 +1,5 @@
-# VIRTUAL OFFICE — CHARACTER GUIDE V1
-Rebuild 11 | Flat isometric character system | Art benchmark: the user's Cove Room bedroom+bathroom concept (black-haired, glasses-wearing character).
+# VIRTUAL OFFICE — CHARACTER GUIDE V2 — FINAL FLAT
+Rebuild 12 | Final flat isometric character system | Art benchmark: the user's Cove Room bedroom+bathroom concept (black-haired, glasses-wearing character).
 
 ## Purpose
 Correct player-facing on every directional input, then replace the previous rigid rough pixel character with a coherent, editable, animated **flat, cozy isometric avatar**. The mechanics and existing Save/Cancel furniture editor remain independent.
@@ -31,13 +31,13 @@ Movement semantics:
 
 ## 02 — Source files
 - `character-system.js` — direction mapping, animation frame state and image-sheet renderer.
-- `assets/character_flat_sheet.svg` — **384×448 SVG**, 4 rows × 4 frames, each **96×112**; rows down/left/right/up, first column idle.
-- `assets/character_flat_poses.svg` — **480×112 SVG**, 5 columns: sit, sleep, bathe, toilet, work.
+- `assets/character_flat_sheet.svg` — **512×640 SVG**, 4 rows × 4 frames, each **128×160**; rows down/left/right/up, first column idle.
+- `assets/character_flat_poses.svg` — **640×160 SVG**, 5 columns: sit, sleep, bathe, toilet, work.
 - `character-preview.html` — interactive direction / motion / pose preview generated from the exact sources the game loads.
 - `game.js` — movement state updates, last-facing storage, and `drawHuman` integration.
 - `VISUAL_GUIDE.md` — shared world palette, lighting and material hierarchy.
 
-Every character frame uses **feet pivot (48,103)** within a 96×112 transparent cell; render scale **0.88 × cameraZoom**, using nearest-neighbor scaling. This pivot does not change furniture collision, seating anchors, or depth order. While an SVG image is loading, the previous canvas character serves as a fallback.
+Every character frame uses **feet pivot (64,146)** within a 128×160 transparent cell; render scale **0.68 × cameraZoom**, using smooth canvas downsampling. This pivot does not change furniture collision, seating anchors, or depth order. While an SVG image is loading, the previous canvas character serves as a fallback.
 
 ## 03 — Character visual benchmark
 
@@ -79,4 +79,20 @@ Work actions that directly pay a salary remain instant: they do not forcibly sea
 - [ ] Actual visual inspection on the user's Android screen after GitHub Pages deployment.
 - [ ] Full redraw / art-director review against uploaded Cove concept at target device zoom.
 
-**Important:** these are original crisp-edge SVG art sprites produced for the prototype, not a fully hand-painted raster/PNG character asset. Compare the real sprite preview and game before calling the visual final.
+**Important:** these are original flat-shaded SVG art sprites produced for the prototype, not a fully hand-painted raster/PNG character asset. Compare the real sprite preview and game before calling the visual final.
+
+
+## 06 — Final visual pass (Rebuild 12)
+
+**Art style is locked to the supplied Cove Room reference:** clean geometric/low-poly **flat**, soft cream/blue environment, no chunky pixel outline. The sprite file and mechanical 4-direction system remain separately editable.
+
+- Production sprite master: 128 × 160 transparent per frame, larger source resolution for cleaner features at mobile zoom.
+- Front/down: coherent dark tousled hair mass, two rectangular glasses lenses with pale blue reflection, warm human face, modest soft mouth, dark charcoal tee, tapered trousers and tiny black shoes.
+- Side/left and side/right: distinctly sideways, single-lens frame, hair layers, ear and nose silhouette; horizontal direction changes do not merely swap labels on a frontal sprite.
+- Back/up: consistent hair volume and scalp highlight, no floating front eyes or lenses.
+- All views: **same foot pivot (64,146)**, 2–3 flat-tone material ramps, shadow direction, relative head/body size and palette.
+- Walk cycles use actual alternating leg/arm motion at the slower gameplay tempo; idle freezes and keeps its last cardinal facing.
+- Sitting, sleeping, bathing, toilet and working use their own authored flat poses with the same pivot. Interaction silhouettes remain behind furniture foreground layers.
+- The final vector sources are **not** an AI-generated scene crop. They are separate SVG sheets directly loaded by the game and visually checked as a full sprite montage before release. Source has no embedded external image, font or remote link.
+
+**QA boundary:** CairoSVG offscreen sprite-sheet rendering has been inspected, and game simulation verifies animation source selection. Pixel-perfect game-browser screenshots on the user's actual Android device still require validation, and further stylistic changes remain possible if desired.
