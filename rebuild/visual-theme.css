@@ -1,0 +1,132 @@
+/* VIRTUAL OFFICE — Visual System 01 / game-wide UI tokens
+   Keep HUD interaction geometry, unify colors, border treatment and typography. */
+:root{
+ --vs-wall:#EADFC7;--vs-floor:#CFE4FF;--vs-bath:#D87469;
+ --vs-wood:#A26B3F;--vs-blue:#4E8DE6;--vs-green:#6BB77A;
+ --vs-cream:#FFF8E6;--vs-gray:#B7BDC7;--vs-shadow:#8A9DB7;
+ --vs-red:#E04848;--vs-gold:#FFC857;--vs-ink:#28364A;
+ --vs-sky:#B6DDF3;--vs-panel:#E8F3FC;--vs-paper:#F7FBFD;
+ --vs-border:#263B56;
+ --vs-edge:3px solid var(--vs-border);
+ --vs-hard-shadow:3px 3px 0 #617D9B;
+}
+#app{background:var(--vs-sky);color:var(--vs-ink)}
+.viewport{background:var(--vs-sky)}
+#world{image-rendering:pixelated}
+.topbar{
+ background:var(--vs-red);
+ border-bottom:var(--vs-edge);
+ color:var(--vs-cream);text-shadow:2px 2px 0 #923D3A;
+ letter-spacing:1.1px
+}
+.edition{
+ color:var(--vs-cream);background:#B63A3D;border:2px solid #803638;
+ text-shadow:none;box-shadow:2px 2px 0 #923D3A
+}
+.tool{
+ background:#F4F8F8;color:var(--vs-ink);
+ border:var(--vs-edge);border-radius:7px;
+ box-shadow:inset 0 0 0 2px #D2E8F9,var(--vs-hard-shadow);
+ font-weight:900
+}
+.tool.gold{
+ background:var(--vs-gold);color:var(--vs-ink);
+ border:var(--vs-edge);border-radius:7px;
+ box-shadow:inset 0 0 0 2px #FFE6A1,var(--vs-hard-shadow)
+}
+.tool:active{box-shadow:inset 0 0 0 2px #D2E8F9,1px 1px 0 #617D9B;transform:translate(2px,2px)}
+.location-chip{
+ background:var(--vs-cream);color:var(--vs-ink);
+ border:var(--vs-edge);border-radius:3px;
+ box-shadow:var(--vs-hard-shadow);
+ text-transform:uppercase;font-weight:900
+}
+.action{
+ color:#fff;background:var(--vs-red);text-shadow:1px 1px 0 #9C3F42;
+ border:4px solid var(--vs-border);border-radius:10px;
+ box-shadow:inset 0 0 0 3px #EA7470,4px 4px 0 #617D9B;
+ letter-spacing:.3px
+}
+.action:active{transform:translate(2px,2px);box-shadow:inset 0 0 0 3px #EA7470,1px 1px 0 #617D9B}
+.build-launch{
+ background:var(--vs-cream);color:var(--vs-ink);
+ border:var(--vs-edge);border-radius:3px;box-shadow:var(--vs-hard-shadow);
+ font-weight:900
+}
+.build-launch.editor-active,body.modular-editing .build-launch{
+ background:var(--vs-green);color:#213B2B
+}
+.joystick{
+ background:radial-gradient(circle,#ACD8ED77 0,#7DB2CF44 63%,#5C8EB444);
+ border:2px solid #7292AF88;
+ box-shadow:inset 0 0 0 2px #E9FAFF55
+}
+.joy-knob{
+ background:#B9D7E899;border:3px solid #658CA9;
+ box-shadow:inset 0 0 0 2px #D7F0FD,2px 2px 0 #55718C66
+}
+.drawer,.module-editor{
+ background:var(--vs-panel);color:var(--vs-ink);
+ border:var(--vs-edge);border-radius:3px;
+ box-shadow:4px 4px 0 #6E94B3;
+}
+.drawer-head,.build-head{
+ background:var(--vs-blue);color:#fff;
+ border-bottom:2px solid var(--vs-border)
+}
+.drawer-head button,.build-head button{
+ border:2px solid var(--vs-border);background:var(--vs-cream);color:var(--vs-ink)
+}
+.tab{
+ background:#C7E0F3;border:2px solid var(--vs-border);
+ color:var(--vs-ink);font-weight:900
+}
+.tab.active{background:var(--vs-gold);color:var(--vs-ink)}
+.micro,.build-selected,.build-line-label{color:#315B8B;font-weight:900}
+.feed-entry,.player-info{
+ background:var(--vs-paper);color:var(--vs-ink);
+ border:2px solid #9BBDD8;border-left:4px solid var(--vs-blue);
+ box-shadow:2px 2px 0 #9BBDD8
+}
+.feed-entry time,.player-info small,.need-hint{color:#526F88}
+.need-head,.need-head output{color:var(--vs-ink)}
+.need-track{background:#CDDBE6;border:2px solid var(--vs-border)}
+.need-fill{background:var(--vs-green)}
+.need-row[data-kind="bladder"] .need-fill{background:var(--vs-blue)}
+.need-row.warn .need-fill{background:var(--vs-gold)}
+.need-row.crit .need-fill{background:var(--vs-red)}
+.rules,#buildAdvanced{
+ background:var(--vs-paper);color:var(--vs-ink);
+ border:2px solid #A5C5DE
+}
+.rules summary,#buildAdvanced summary{color:#325E8B}
+.status-message,.status-foot{color:#446F8E}
+.avatar-pixel{background:var(--vs-gold);border:2px solid var(--vs-border);color:var(--vs-ink)}
+.build-content{color:var(--vs-ink)}
+.build-head{background:var(--vs-blue)}
+.build-tip{color:var(--vs-ink)}
+#buildSelect,#buildJSON,.build-field input{
+ background:var(--vs-paper);color:var(--vs-ink);border:2px solid #8EAEC8
+}
+.build-field{color:var(--vs-ink)}
+.build-controls button{
+ background:var(--vs-cream);color:var(--vs-ink);
+ border:2px solid var(--vs-border);border-radius:2px
+}
+.build-controls.build-fine button{background:#BBDCF3;color:var(--vs-ink)}
+.build-footer{background:#D4E9F9;border-top:2px solid var(--vs-border)}
+#buildCancel{background:#ADBFCF;color:var(--vs-ink)}
+#buildSave{background:var(--vs-green);color:#213D2A}
+.build-info{color:#346C52}
+.build-options,.build-field{color:var(--vs-ink)}
+.build-io button{background:#CBE4F5;color:var(--vs-ink);border:2px solid var(--vs-border)}
+.toast{background:var(--vs-cream);color:var(--vs-ink);border:var(--vs-edge)}
+.zone-switch{background:var(--vs-panel);border:var(--vs-edge)}
+.zone-switch button{background:var(--vs-cream);color:var(--vs-ink);border:2px solid var(--vs-border)}
+.help{background:#F3F8F0E0;color:var(--vs-ink);border:1px solid #9BB3CF}
+@media(max-width:520px){
+ .topbar{height:49px}
+ .tool{border-radius:5px}
+ .action{border-radius:9px}
+ .build-launch{top:60px}
+}
