@@ -5,7 +5,7 @@
 'use strict';
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
-const PLAIN = new Set(['', 'index.html', 'sw.js', '.nojekyll', '404.html']);
+const PLAIN = new Set(['', 'index.html', 'sw.js', 'life-context.js', '.nojekyll', '404.html']);
 let KEY = null, MAN = null, MANP = null, MANT = 0;
 
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -64,7 +64,17 @@ async function handle(ev, p, u) {
     const bucket = ent[0].startsWith('vclife_') ? SCOPE + 'b/' : new URL('../b/', SCOPE).href;
     const r = await fetch(bucket + ent[0]);
     if (!r.ok) return new Response('', { status: r.status });
-    return new Response(await decrypt(await r.arrayBuffer()), { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
+    const plaintext = await decrypt(await r.arrayBuffer());
+    if (p === 'office.html') {
+      const html = new TextDecoder().decode(plaintext);
+      if (!html.includes('virtual-city-life-prototype') || !html.includes('</body>')) {
+        return new Response('staging game version mismatch', { status: 500 });
+      }
+      // Inject only into staging's decrypted document. Production remains untouched.
+      const extended = html.replace('</body>', '<script src="life-context.js?v=2" defer></script>\\n</body>');
+      return new Response(extended, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
+    }
+    return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
   } catch (e) {
     if (e && e.name === 'OperationError') KEY = null;           // wrong/stale key: force re-unlock
     return nav ? Response.redirect(SCOPE + '?next=' + encodeURIComponent(p + u.search), 302) : new Response('decrypt failed', { status: 500 });
