@@ -37,10 +37,21 @@ function pixelText(text,x,y,color='#fff',size=9){
 function shadow(x,y,w=13,h=5){
  const p=iso(x,y);g.fillStyle='rgba(30,40,54,.30)';g.beginPath();g.ellipse(p.x,p.y,w*zoom,h*zoom,0,0,TAU);g.fill();
 }
-function faceDir(d){return d==='se'||d==='sw'?'front':'back'}
-function drawHuman(x,y,{sitting=false,lying=false,dir='sw',
- shirt=PAL.ink,hair='#171b24',skin=PAL.skin,label=null,npc=false,walk=0}={}){
+function faceDir(d){return ['se','sw','down','left','right'].includes(d)?'front':'back'}
+function drawHuman(x,y,{sitting=false,lying=false,dir='down',
+ shirt=PAL.ink,hair='#171b24',skin=PAL.skin,label=null,npc=false,walk=0,
+ moving=false,pose=null}={}){
  const p=iso(x,y),k=zoom;
+ const protagonist=!npc&&(hair==='#171b24'||hair==='#161c25');
+ const state=pose||(lying?'sleep':sitting?'sit':null);
+ // First choice: consistent flat Cove-reference sprite sheet.
+ // Fallback keeps a visible actor if an SVG has not loaded yet.
+ if(protagonist&&window.VOCharacterSystem?.draw(g,p,zoom,{
+   direction:dir,moving:!state&&moving,walk,pose:state
+ })){
+   if(label){const q=iso(x,y,64);pixelText(label,q.x,q.y,PAL.cream,9)}
+   return;
+ }
  shadow(x,y,8.5,3.4);
  g.save();g.translate(Math.round(p.x),Math.round(p.y));g.scale(k,k);
  // The avatar uses one consistent pixel scale and the same top-left lighting
@@ -429,7 +440,8 @@ window.addEventListener('resize',resize,{passive:true});resize();
 
 const STORAGE='vo-editable-rebuild-v1';
 const defaults={fullness:87,energy:86,hygiene:91,bladder:15};
-const player={x:7.25,y:9.25,zone:'office',dir:'sw',seatId:null,sitX:null,moveTarget:null,walk:0,run:false};
+const player={x:7.25,y:9.25,zone:'office',dir:'down',moving:false,
+ seatId:null,sitX:null,moveTarget:null,walk:0,run:false};
 const coveWorld=new window.VOModular.ModularWorld();
 const sceneWorlds=window.VOBuildScenes.makeWorlds();
 const getEditWorld=zone=>zone==='cove'?coveWorld:sceneWorlds[zone];
@@ -442,9 +454,10 @@ try{
   if(Number.isFinite(o.timeMinutes))timeMinutes=o.timeMinutes;
   if(Array.isArray(o.events))events=o.events.slice(0,25);
   if(['office','street','warteg','cove'].includes(o.zone))player.zone=o.zone;
+  if(typeof o.dir==='string')player.dir=window.VOCharacterSystem.normalizeDirection(o.dir);
  }
 }catch(e){}
-function save(){try{localStorage.setItem(STORAGE,JSON.stringify({version:1,needs,wallet,timeMinutes,zone:player.zone,events:events.slice(0,25)}))}catch(e){}}
+function save(){try{localStorage.setItem(STORAGE,JSON.stringify({version:1,needs,wallet,timeMinutes,zone:player.zone,dir:player.dir,events:events.slice(0,25)}))}catch(e){}}
 window.addEventListener('pagehide',save);window.setInterval(save,5000);
 function addLog(msg){
  events.unshift({t:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),text:msg});
@@ -460,7 +473,7 @@ function renderFeed(){
 }
 function setZone(zone){
  if(!['office','street','warteg','cove'].includes(zone))return;
- stand();player.zone=zone;player.moveTarget=null;
+ stand();player.zone=zone;player.moveTarget=null;player.moving=false;
  Object.assign(player,zone==='office'?{x:7.25,y:9.25}:zone==='street'?{x:8.2,y:8.5}:zone==='warteg'?{x:7.1,y:8.8}:{x:4.5,y:9.15});
  $('locationChip').textContent=zone==='office'?'🏢 OFFICE':zone==='street'?'🌳 TAMAN':zone==='warteg'?'🍛 WARTEG':'🛏️ COVE ROOM';
  $('playerPlace').textContent=zone==='office'?'Pegawai kantor · Local test':zone==='street'?'Taman kota · Local test':zone==='warteg'?'Warteg · Local test':'Cove Bedroom + Bathroom';
@@ -485,7 +498,7 @@ function stand(){
      }
    }
  }
- player.seatId=null;player.sitX=null;
+ player.seatId=null;player.sitX=null;player.moving=false;
 }
 function near(p,x,y,range=1.7){return Math.hypot(p.x-x,p.y-y)<=range;}
 const spots={
@@ -574,7 +587,8 @@ function pressAction(){
  if(a.type==='stand'){stand();notice('Berdiri');return}
  if(['sit','lie','sleep','bathe'].includes(a.type)){
     player.seatId=a.id;player.sitX={x:a.seatX,y:a.seatY};player.x=a.seatX;player.y=a.seatY;
-    player.moveTarget=null;player.dir=player.zone==='warteg'?'nw':'sw';
+    player.moveTarget=null;player.moving=false;
+    // Interaction pose is separate; do not overwrite last walk-facing.
     if(a.type==='bathe'){needs.hygiene=100;addLog('🛁 Mandi di bathtub · Kebersihan 100');notice('🛁 BERSIH')}
     else if(a.type==='sleep'){addLog('🛏️ Tidur di kasur · energi pulih selama tidur');notice('💤 TIDUR')}
     else addLog(a.type==='lie'?'💤 Rebahan di kursi taman.':'🪑 Duduk di '+(player.zone==='cove'?'Cove Room':player.zone==='warteg'?'bangku depan etalase':player.zone==='office'?'sofa / kursi kantor':'bangku taman'));
@@ -677,7 +691,7 @@ C.addEventListener('pointerup',e=>{
  if(x>=.3&&x<limit[0]-.3&&y>=.3&&y<limit[1]-.3){player.moveTarget={x,y};if(player.seatId)stand();}
 });
 function update(dt){
- if(coveEditor?.active){action.textContent='EDIT';return}
+ if(coveEditor?.active){player.moving=false;action.textContent='EDIT';return}
  const v={x:joy.x,y:joy.y};
  if(keys.has('w')||keys.has('arrowup'))v.y-=1;
  if(keys.has('s')||keys.has('arrowdown'))v.y+=1;
@@ -685,21 +699,32 @@ function update(dt){
  if(keys.has('d')||keys.has('arrowright'))v.x+=1;
  let dx=0,dy=0;
  if(Math.hypot(v.x,v.y)>.15){
+  // Keyboard arrows/WASD and joystick map to SCREEN directions.
+  player.dir=window.VOCharacterSystem.screenDirection(v.x,v.y,player.dir);
   dx=v.x/(TX*zoom)+v.y/(TY*zoom);dy=v.y/(TY*zoom)-v.x/(TX*zoom);
   let m=Math.hypot(dx,dy);dx/=m;dy/=m;player.moveTarget=null;
  }else if(player.moveTarget){
   dx=player.moveTarget.x-player.x;dy=player.moveTarget.y-player.y;
-  const m=Math.hypot(dx,dy);if(m<.07){dx=dy=0;player.moveTarget=null}else{dx/=m;dy/=m}
+  const m=Math.hypot(dx,dy);
+  if(m<.07){dx=dy=0;player.moveTarget=null}
+  else{
+   // Touch-to-walk derives the same SCREEN-space facing from the world target.
+   player.dir=window.VOCharacterSystem.directionFromWorld(dx,dy,player.dir);
+   dx/=m;dy/=m;
+  }
  }
+ player.moving=false;
  if(dx||dy){
   if(player.seatId)stand();
-  let speed=(keys.has('shift')?4.5:2.5);
+  const speed=keys.has('shift')?4.5:2.5;
   const limit=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:player.zone==='cove'?[16,11]:[16,13];
+  const oldX=player.x,oldY=player.y;
   const nx=clamp(player.x+dx*speed*dt,.35,limit[0]-.35);
   const ny=clamp(player.y+dy*speed*dt,.35,limit[1]-.35);
   if(player.zone!=='cove'||!coveWorld.blocked(nx,player.y))player.x=nx;
   if(player.zone!=='cove'||!coveWorld.blocked(player.x,ny))player.y=ny;
-  player.dir=(dx-dy)>=0?'se':'sw';player.walk+=dt*speed;
+  player.moving=Math.hypot(player.x-oldX,player.y-oldY)>.00001;
+  if(player.moving)player.walk+=dt*speed;
  }
  const gameMinutes=dt*0.6; timeMinutes+=gameMinutes;
  needs.fullness=clamp(needs.fullness-gameMinutes*(10/15),0,100);
@@ -728,8 +753,13 @@ function draw(frame){
      drawPlayer:()=>drawHuman(player.x,player.y,{
        lying:player.seatId==='cove-bed',
        sitting:!!player.seatId&&player.seatId!=='cove-bed',
-       shirt:player.seatId==='cove-bath'?'#dcb492':'#242a3a',
-       hair:'#171b24',dir:player.dir,walk:player.walk
+       pose:player.seatId==='cove-bed'?'sleep':
+         player.seatId==='cove-bath'?'bathe':
+         player.seatId==='cove-toilet'?'toilet':
+         player.seatId==='cove-desk-chair'?'work':
+         player.seatId?'sit':null,
+       shirt:'#303743',hair:'#171b24',
+       dir:player.dir,walk:player.walk,moving:player.moving
      })};
    window.VOCoveScene.drawFloor(api);
    coveWorld.render(api,player);
@@ -744,7 +774,8 @@ function draw(frame){
  let drewActor=false;
  const drawNormalActor=()=>{
   if(!player.seatId){
-   drawHuman(player.x,player.y,{dir:player.dir,walk:player.walk,shirt:'#242a3a',hair:'#171b24'});
+   drawHuman(player.x,player.y,{dir:player.dir,walk:player.walk,
+    moving:player.moving,shirt:'#303743',hair:'#171b24'});
    drewActor=true;
   }
  };
@@ -765,7 +796,7 @@ coveEditor=window.VOModularEditor.createEditor(getEditWorld(player.zone),{
  getZone:()=>player.zone,
  getProject:()=>Object.assign((x,y,z=0)=>iso(x,y,z),{zoom}),
  pointerPosition:covePointer,
- onState:on=>{player.moveTarget=null;keys.clear();resetJoy();
+ onState:on=>{player.moveTarget=null;player.moving=false;keys.clear();resetJoy();
    $('drawer').hidden=true;$('zoneSwitch').hidden=true;}
 });
 renderFeed();renderNeeds();$('playerName').textContent='PLAYER';$('locationChip').textContent=player.zone==='office'?'🏢 OFFICE':player.zone==='street'?'🌳 TAMAN':player.zone==='warteg'?'🍛 WARTEG':'🛏️ COVE ROOM';
