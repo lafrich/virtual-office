@@ -80,7 +80,12 @@ function drawCat(x,y,t=0){
 }
 // Consistent visual primitives shared across all scenes.
 function artProps(){return V.props({ctx:g,zoom,box,iso,poly,line,fill,shadow});}
-function drawPlant(x,y,size=1){artProps().plant(x,y,size);}
+// Shared detailed prop renderer used by all rooms, not just Cove.
+function pixelPiece(type,x,y,w,d,h,scale=1){
+ return window.VOPixelKit.drawAsset({ctx:g,box,iso,line,poly,shadow,zoom},
+   {id:'shared-'+type,type,at:{x,y},size:{w,d,h},scale,elevation:0},'base');
+}
+function drawPlant(x,y,size=1){pixelPiece('plant',x,y,.66,.66,27,size);}
 function drawWindow(x,y,orient='horizontal'){artProps().window(x,y,orient,34,2.45);}
 function drawWalls(zone){
  let w=zone==='office'?18:zone==='warteg'?12:16,d=zone==='office'?13:zone==='warteg'?11:13;
@@ -117,8 +122,8 @@ function drawFloor(zone){
   artProps().rug(7.1,6.5,4.65,3.4);
  }
 }
-function drawDesk(x,y){artProps().desk(x,y);}
-function drawChair(x,y,mode='office'){artProps().chair(x,y,mode==='warteg'?'blue':'wood');}
+function drawDesk(x,y){pixelPiece('desk',x,y,2.7,1.55,43);}
+function drawChair(x,y,mode='office'){pixelPiece('chair',x,y,.72,.72,25);}
 function drawSofa(occupied,frame){
  // Fixed painter order: back + cushions -> sitters -> armrests/front trim.
  const x=7.4,y=6.1;
