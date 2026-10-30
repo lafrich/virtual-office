@@ -213,33 +213,55 @@ function drawBar(occupied){
 }
 function drawWarteg(occupied){
  drawWalls('warteg');drawFloor('warteg');
- drawPlant(1.4,2.4,.8);
- box(3,3,1.35,.7,29,'#fff8d9','#d6e3dc','#d3e0d7');
- for(let i=0;i<2;i++)box(3.6+i*4.9,8.1,2.5,1.4,9,'#60b977','#3c8b54','#327e4d');
- // Old table sets are decorative only; no forced chair interactions.
- for(const x of [3.6,8.5])for(const s of [-1,1])box(x,8.1+s*.85,1.8,.43,5,'#44945c','#2b7543','#2d6d40');
- drawBar(occupied);
+ paintFurniture('warteg','warteg-plant',1.4,2.4,()=>drawPlant(1.4,2.4,.8));
+ paintFurniture('warteg','warteg-sign',3,3,()=>box(3,3,1.35,.7,29,'#fff8d9','#d6e3dc','#d3e0d7'));
+ for(let i=0;i<2;i++){
+   const cx=3.6+i*4.9;
+   paintFurniture('warteg','warteg-table-'+(i===0?'a':'b'),cx,8.1,()=>{
+     box(cx,8.1,2.5,1.4,9,'#60b977','#3c8b54','#327e4d');
+     // The attached small benches remain decorative and move with their table.
+     for(const sign of [-1,1])box(cx,8.1+sign*.85,1.8,.43,5,'#44945c','#2b7543','#2d6d40');
+   });
+ }
+ paintFurniture('warteg','warteg-bar',6.3,4.1,(dx,dy)=>{
+   const sitter=occupied&&/^bar[012]$/.test(occupied.seatId||'')
+    ?{...occupied,x:occupied.x-dx,y:occupied.y-dy}:null;
+   drawBar(sitter);
+ });
 }
 function drawPark(occupied,frame){
  drawWalls('street');drawFloor('street');
- for(let i=0;i<4;i++)drawPlant(2+i*3.4,1.7,i===1?1.1:.7);
- for(let i=0;i<2;i++){
-  let bx=5+i*5;
-  box(bx,6.4,3.4,.82,8,'#ad875f','#866448','#795a40');
-  box(bx,5.95,3.4,.20,21,'#b88d68','#855f42','#715b4a');
-  if(occupied&&occupied.seatId==='bench'+i)drawHuman(occupied.x,occupied.y,{sitting:true,dir:'sw'});
-  box(bx,6.78,3.4,.12,9,'#cfa677','#9c754b','#876140');
+ for(let i=0;i<4;i++){
+   const c=2+i*3.4;
+   paintFurniture('street','street-plant-'+i,c,1.7,()=>drawPlant(c,1.7,i===1?1.1:.7));
  }
- box(11.4,3.9,2.8,2.0,22,'#e7e0b9','#c7b88f','#b6a47a');
- box(11.4,3.9,3.5,2.6,1,'#168c53','#0d7741','#167e47',22);
- pixelText('WARTEG',iso(11.4,3.2,39).x,iso(11.4,3.2,39).y,'#ffe4a1',12);
- box(8,9.5,1.4,.8,7,'#c4d4d0','#608cba','#5796c6');
- box(8.3,9.4,.6,.8,12,'#4d6ea0','#42689b','#3b658f',7);
- // Lounger renders the reclining avatar in one stable world layer.
- box(13.2,8.8,2.4,1,7,'#f4e8d5','#b3a68b','#b8a689');
- box(13.2,8.35,2.4,.28,14,'#f3e7d1','#baa992','#a89d87');
- if(occupied&&occupied.seatId==='lounger')drawHuman(occupied.x,occupied.y,{lying:true,dir:'se'});
- box(13.2,9.28,2.4,.12,8,'#f6eddc','#c0b39b','#b9ac95');
+ for(let i=0;i<2;i++){
+   const bx=5+i*5;
+   paintFurniture('street','street-bench-'+i,bx,6.4,(dx,dy)=>{
+     box(bx,6.4,3.4,.82,8,'#ad875f','#866448','#795a40');
+     box(bx,5.95,3.4,.20,21,'#b88d68','#855f42','#715b4a');
+     if(occupied&&occupied.seatId==='bench'+i)
+       drawHuman(occupied.x-dx,occupied.y-dy,{sitting:true,dir:'sw'});
+     box(bx,6.78,3.4,.12,9,'#cfa677','#9c754b','#876140');
+   });
+ }
+ paintFurniture('street','street-warteg',11.4,3.9,()=>{
+   box(11.4,3.9,2.8,2.0,22,'#e7e0b9','#c7b88f','#b6a47a');
+   box(11.4,3.9,3.5,2.6,1,'#168c53','#0d7741','#167e47',22);
+   const p=iso(11.4,3.2,39);
+   pixelText('WARTEG',p.x,p.y,'#ffe4a1',12);
+ });
+ paintFurniture('street','street-props-a',8.15,9.4,()=>{
+   box(8,9.5,1.4,.8,7,'#c4d4d0','#608cba','#5796c6');
+   box(8.3,9.4,.6,.8,12,'#4d6ea0','#42689b','#3b658f',7);
+ });
+ paintFurniture('street','street-lounger',13.2,8.8,(dx,dy)=>{
+   box(13.2,8.8,2.4,1,7,'#f4e8d5','#b3a68b','#b8a689');
+   box(13.2,8.35,2.4,.28,14,'#f3e7d1','#baa992','#a89d87');
+   if(occupied&&occupied.seatId==='lounger')
+     drawHuman(occupied.x-dx,occupied.y-dy,{lying:true,dir:'se'});
+   box(13.2,9.28,2.4,.12,8,'#f6eddc','#c0b39b','#b9ac95');
+ });
 }
 function resize(){
  const box=view.getBoundingClientRect();
