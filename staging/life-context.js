@@ -56,10 +56,10 @@
   // The original Grok PNG has 64x112 px frames and a (32,100) feet pivot.
   // Place pixel smoke at the hip and send it away from the back of the player.
   const FART_HIPS = Object.freeze({
-    se: { x:24, y:78, vx:-1, vy:-0.32 },
-    sw: { x:40, y:78, vx: 1, vy:-0.32 },
-    ne: { x:28, y:78, vx:-1, vy: 0.28 },
-    nw: { x:36, y:78, vx: 1, vy: 0.28 }
+    se: { x:24, y:73, vx:-1, vy:-0.32 },
+    sw: { x:40, y:73, vx: 1, vy:-0.32 },
+    ne: { x:28, y:73, vx:-1, vy: 0.28 },
+    nw: { x:36, y:73, vx: 1, vy: 0.28 }
   });
   const oldFartPuff = window.__lifeBridge.puff;
   window.__lifeBridge.puff = function positionedFartPuff() {
@@ -141,36 +141,51 @@
   }
 
   function nearWall() {
+    // Pipis only while FACING an actual wall. Direction mapping follows
+    // Grok's native isometric grid: +c=SE, +r=SW, -c=NW, -r=NE.
+    // Checking this inside nearWall() also protects the actual Action click,
+    // not only the button hint shown in the previous render frame.
+    const facing=me.dir;
+    let nearest=Infinity;
+    const consider=(distance,requiredFacing)=>{
+      if (facing===requiredFacing && distance<=RANGE_WALL &&
+          distance<nearest) nearest=distance;
+    };
+
     if (OUT_ON) {
       if (WT.on) {
-        // Warteg: rear/side interior walls, away from the doorway.
-        const d = Math.min(Math.abs(me.r - 24.5), Math.abs(me.c - 28.6));
-        if (me.c >= 28.6 && me.c <= 35.05 && me.r >= 24.5 &&
-            me.r <= 27.92 && d <= RANGE_WALL) return d;
-        return null;
+        // Warteg interior: both walls are behind the upper/left boundaries.
+        if (me.c>=28.6 && me.c<=35.05 &&
+            me.r>=24.5 && me.r<=27.92) {
+          consider(Math.abs(me.r-24.5),'ne');
+          consider(Math.abs(me.c-28.6),'nw');
+        }
+      } else {
+        // Outdoor building facades: street-side player must look AT the wall.
+        // The entrance remains excluded from outdoor peeing.
+        const awayFromDoor=Math.abs(me.c-EXT.door.c)>1.5;
+        if (me.c>-18 && me.c<26.8 && awayFromDoor &&
+            me.r>=28.25 && me.r<29.15)
+          consider(Math.abs(me.r-28),'ne');
+        if (me.r>=28.25 && me.r<=31.7 &&
+            me.c>27 && me.c<28.15)
+          consider(Math.abs(me.c-27),'nw');
       }
-      // Building facade: visible exterior walls at r=28 and c=27.
-      // Doorway deliberately excluded.
-      const doorDistance = Math.abs(me.c - EXT.door.c);
-      const front = me.c > -18 && me.c < 26.8 && doorDistance > 1.5 &&
-          me.r >= 28.25 && me.r < 29.15 ? Math.abs(me.r - 28) : Infinity;
-      const side = me.r >= 28.25 && me.r <= 31.7 && me.c > 27 &&
-          me.c < 28.15 ? Math.abs(me.c - 27) : Infinity;
-      const d = Math.min(front, side);
-      return d <= RANGE_WALL ? d : null;
+    } else {
+      // Office walls: front/back and left/right use different facings.
+      consider(Math.abs(me.c-0.5),'nw');
+      consider(Math.abs(me.r-0.5),'ne');
+      consider(Math.abs(me.c-(C-0.5)),'se');
+      consider(Math.abs(me.r-(R-0.5)),'sw');
+
+      // Gallery divider has two sides. Which side the character stands on
+      // determines the required facing; no pipis while facing away.
+      if (me.r>=0 && me.r<=8 && Math.abs(me.r-4.5)>1.25) {
+        if (me.c<22) consider(Math.abs(me.c-22),'se');
+        else if (me.c>22) consider(Math.abs(me.c-22),'nw');
+      }
     }
-    // Indoor: only mapped perimeter/gallery partitions, never desks or furniture.
-    const walls = [
-      Math.abs(me.c - 0.5),
-      Math.abs(me.r - 0.5),
-      Math.abs(me.c - (C - 0.5)),
-      Math.abs(me.r - (R - 0.5))
-    ];
-    if (me.r >= 0 && me.r <= 8 && Math.abs(me.r - 4.5) > 1.25) {
-      walls.push(Math.abs(me.c - 22));
-    }
-    const d = Math.min(...walls);
-    return d <= RANGE_WALL ? d : null;
+    return Number.isFinite(nearest)?nearest:null;
   }
 
   function contextualLife() {
