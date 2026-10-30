@@ -45,19 +45,24 @@
   }
 
   function nearestSeat() {
-    if (OUT_ON || typeof SEATDY === 'undefined') return null;
+    if (OUT_ON) return null;
+    // All registered furniture seats, including zero-offset desk chairs.
+    // These are captured from the original put() / res.seats template data.
+    const seats = window.__vcLifeSeats || [];
     let best = null;
-    for (const s of SEATDY) {
+    for (const s of seats) {
       const d = distance(me, s);
-      if (d > RANGE_SEAT || (occupied(s) && d > 0.2)) continue;
-      if (!best || d < best.distance) best = { c:s.c, r:s.r, distance:d };
+      if (d > RANGE_SEAT || occupied(s)) continue;
+      if (!best || d < best.distance) best = { ...s, distance:d };
     }
     return best;
   }
 
   function nearSofa(seat) {
-    if (!seat || typeof LOUNGE === 'undefined') return false;
-    return LOUNGE.some(s => s.id.indexOf('sofa') === 0 && distance(seat, s) < 0.48);
+    if (!seat) return false;
+    if (typeof seat.objectId === 'string' && /^sofa_/i.test(seat.objectId)) return true;
+    return typeof LOUNGE !== 'undefined' &&
+      LOUNGE.some(s => s.id.indexOf('sofa') === 0 && distance(seat, s) < 0.48);
   }
 
   function nearWall() {
@@ -100,14 +105,14 @@
       if (me.forceAnim === 'lie') {
         return {k:'vc-stand',l:'Bangun',hint:'Bangun dari sofa',d:seat.distance / RANGE_SEAT - 1.0,seat};
       }
-      if (me.forceAnim === 'sit') {
+      if (me.forceAnim === 'sit' || me.forceAnim === 'perch') {
         if (nearSofa(seat)) return {k:'vc-sleep',l:'Tidur',hint:'Tidur di sofa',d:seat.distance / RANGE_SEAT - 1.0,seat};
         return {k:'vc-stand',l:'Bangun',hint:'Berdiri dari kursi',d:seat.distance / RANGE_SEAT - 1.0,seat};
       }
       return {k:'vc-sit',l:'Duduk',hint:'Duduk di kursi',d:seat.distance / RANGE_SEAT - 1.0,seat};
     }
     // Standing up remains available even if the seat position is slightly offset.
-    if (me.forceAnim === 'sit' || me.forceAnim === 'lie') {
+    if (me.forceAnim === 'sit' || me.forceAnim === 'lie' || me.forceAnim === 'perch') {
       return {k:'vc-stand',l:'Bangun',hint:'Berdiri',d:-0.7};
     }
     const w = nearWall();
@@ -156,23 +161,52 @@
     if (choice.k === 'vc-sit') {
       if (!fresh.seat || occupied(fresh.seat)) return;
       // Snap only within interaction radius; avoids sitting mid-air.
+      // Remember an actually walkable standing position: furniture seat tiles
+      // can be blocked, so movement must start from the approach tile.
+      if (typeof okG === 'function' && !okG(me.c, me.r)) return;
+      me._lifeStandOrigin = { c:me.c, r:me.r };
+      me._lifeSeat = { c:fresh.seat.c, r:fresh.seat.r };
       me.c = fresh.seat.c;
       me.r = fresh.seat.r;
       me.path = [];
-      if (typeof LOUNGE !== 'undefined') {
+      if (fresh.seat.dir) me.dir = fresh.seat.dir;
+      if (!fresh.seat.dir && typeof LOUNGE !== 'undefined') {
         const lounge = LOUNGE.find(s => distance(s, fresh.seat) < 0.35);
         if (lounge && lounge.dir) me.dir = lounge.dir;
       }
-      activate('sit');
+      if (activate('sit') && fresh.seat.pose === 'perch' &&
+          typeof SL !== 'undefined' && SL.anims && SL.anims.perch) {
+        me.forceAnim = 'perch';
+      }
     } else if (choice.k === 'vc-sleep') {
       activate('sleep');
     } else if (choice.k === 'vc-stand') {
       activate('stand');
+      if (window.__lifeBridge.exitPoseForMovement)
+        window.__lifeBridge.exitPoseForMovement();
     } else if (choice.k === 'vc-pee') {
       if (nearWall() == null) return;
       if (activate('pee')) peeEffect();
     }
   };
+  // Called synchronously at the beginning of the original movement tick,
+  // and before pathfinding when the player taps another location.
+  window.__lifeBridge.exitPoseForMovement = function () {
+    const hadPose = !!me.forceAnim || !!me._lifeStandOrigin;
+    if (!hadPose) return false;
+    me.forceAnim = null;
+    const origin = me._lifeStandOrigin;
+    if (origin && typeof okG === 'function' && okG(origin.c,origin.r) &&
+        Math.hypot(me.c-origin.c,me.r-origin.r) <= RANGE_SEAT+0.2) {
+      me.c = origin.c;
+      me.r = origin.r;
+    }
+    me._lifeSeat = null;
+    me._lifeStandOrigin = null;
+    window.dispatchEvent(new Event('vc-life-stand'));
+    return true;
+  };
+
   if (typeof updAction === 'function') {
     try { updAction(); } catch (e) { console.warn('[life-context]',e); }
   }
