@@ -73,3 +73,20 @@ Missing PNGs fall back to procedural placeholders. Only local paths within ./ass
 - cove-scene.js — modular room base and fallback furniture.
 - game.js — integration with the game camera, contextual Action button, player poses, and life needs.
 
+
+
+## Edit Mode (Rebuild 04) — all locations
+
+The player-facing editor is now a Sims-like **EDIT** button in the upper-right corner of **all four maps**: Office, Taman, Warteg, and Cove Room.
+
+1. Tap **🛠 EDIT** from any map.
+2. Tap a visible furniture item on the canvas, or use the furniture dropdown.
+3. Drag furniture with a finger. If needed, use the four direction buttons for **0.1 tile** steps or the **1px** buttons for screen-pixel alignment.
+4. Tap **✓ SIMPAN** to keep the new layout or **BATAL** to revert all changes made in this edit session.
+5. Expand **⚙ Pengaturan detail** only if you need coordinates, depth sorting, scale, interaction pose anchors, visibility, collision or JSON import/export.
+
+Edit Mode temporarily pauses player movement and need decay. Game interactions are disabled while editing.
+
+Movable furniture now includes **13 Office elements, 9 Taman elements, 5 Warteg elements**, plus **16 Cove Room elements**, with distinct local layouts per area. The old furniture artwork is drawn using editable transforms rather than rewritten. Connected actions such as Duduk, Kerja and Pesan shift along with their furniture, including the seated player.
+
+**Limitations:** Changes currently persist in the same browser using localStorage, not to other devices or multiplayer. Furniture orientation cannot yet be visually rotated in all procedural scenes. Moving objects can overlap existing furniture; collision constraints are not yet a full build-mode placement validator. Furniture artwork outside Cove remains the same procedural prototype rather than the target pixel-art sprites. Build Mode does not affect the encrypted production game.
