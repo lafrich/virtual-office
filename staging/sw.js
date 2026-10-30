@@ -81,7 +81,7 @@ async function handle(ev, p, u) {
         return new Response('staging life controller version mismatch', { status: 500 });
       }
       let patched = html.replace(seatAnchor,
-        "  (window.__vcLifeSeats || (window.__vcLifeSeats=[])).push(...res.seats.map(s=>({...s,objectId:id,renderDepth:/^sofa_/.test(id)&&res.seats.length?Math.min(...res.seats.map(z=>z.c+z.r+0.05)):null})));\n" + seatAnchor);
+        "  (window.__vcLifeSeats || (window.__vcLifeSeats=[])).push(...res.seats.map(s=>({...s,objectId:id})));\n" + seatAnchor);
       patched = patched.replace(tickAnchor,
         "  let moving=false;\n  if ((m>0.05 || me.path.length>0) && me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement();\n  if(m>0.05){");
       patched = patched.replace(routeAnchor,
@@ -102,7 +102,7 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=7', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=8', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
