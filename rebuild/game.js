@@ -173,7 +173,29 @@ function drawFloor(zone){
 }
 function drawDesk(x,y){pixelPiece('desk',x,y,2.7,1.55,43);}
 function drawChair(x,y,mode='office'){pixelPiece('chair',x,y,.72,.72,25);}
+function officeSprite(id,part,at){
+ const world=sceneWorlds.office,item=world?.get(id);
+ if(!item?.sprite?.[part])return false;
+ return world.drawSprite({ctx:g,iso,zoom},item,part,at);
+}
 function drawSofa(occupied,frame){
+ // Draw authored multi-layer furniture without changing gameplay anchors.
+ // While either image is still loading, use the prior procedural sofa.
+ const w=sceneWorlds.office,asset=w.get('office-sofa');
+ const origin={x:7.4,y:6.1};
+ if(asset?.sprite?.base&&asset?.sprite?.front&&
+    w.image(asset.sprite.base)&&w.image(asset.sprite.front)){
+   officeSprite('office-sofa','base',origin);
+   drawHuman(6.05,6.34,{sitting:true,dir:'sw',
+    hair:'#949ca7',skin:'#efd0b1',shirt:PAL.grey});
+   if(occupied)drawHuman(occupied.x,occupied.y,{
+    sitting:true,dir:'sw',shirt:PAL.ink,hair:'#171b24'});
+   drawCat(8.15,6.5,frame);
+   officeSprite('office-sofa','front',origin);
+   const label=iso(6.05,6.34,53);
+   pixelText('BAYMAX',label.x,label.y,PAL.cream,8);
+   return;
+ }
  // Fixed painter order: back + cushions -> sitters -> armrests/front trim.
  const x=7.4,y=6.1;
  shadow(x,y,23,7);
@@ -218,11 +240,20 @@ function drawOffice(x,y,sceneActor,frame){
     box(11.2,10.1,.84,.56,.15,'#e9dbb7','#ac986f','#aa916f',10);}],
   ['office-desk-c',22,()=>drawDesk(14.5,8.1)],
   ['office-chair',23,(dx,dy)=>{
-    drawChair(14.4,9.1);
-    if(sceneActor?.seatId==='officechair'){
+    // A physical chair is one independently edited object; sitter goes
+    // between its base art and foreground, just like the Cove chair.
+    const item=sceneWorlds.office.get('office-chair');
+    const origin={x:14.4,y:9.1};
+    const ready=item?.sprite?.base&&item?.sprite?.front&&
+      sceneWorlds.office.image(item.sprite.base)&&
+      sceneWorlds.office.image(item.sprite.front);
+    if(ready)officeSprite('office-chair','base',origin);
+    else drawChair(14.4,9.1);
+    if(sceneActor?.seatId==='officechair')
       drawHuman(sceneActor.x-dx,sceneActor.y-dy,{sitting:true,dir:'sw'});
+    if(ready)officeSprite('office-chair','front',origin);
+    else if(sceneActor?.seatId==='officechair')
       pixelPiece('chair',14.4,9.1,.72,.72,25,1,'front');
-    }
   }],
   ['office-toilet',25,()=>{box(16.1,10.8,.9,.9,6,'#f9fbf9','#c8e1e5','#bad5d7');
     box(16.1,10.8,.48,.58,2,'#b7e6f2','#71aabb','#73a6b5',6);}],
@@ -482,7 +513,15 @@ function paintFurniture(zone,id,baseX,baseY,fn){
  g.save();
  g.translate(Math.round((deltaX-deltaY)*TX*zoom+item.offset.x*zoom),
    Math.round((deltaX+deltaY)*TY*zoom+item.offset.y*zoom));
- fn(deltaX,deltaY);g.restore();
+ // Office modules have real image sprites: painter-order and transform
+ // remain under Edit Mode control, even for saved/custom art.
+ if(zone==='office'&&id!=='office-sofa'&&id!=='office-chair'&&
+    item.sprite?.base&&world.drawSprite({ctx:g,iso,zoom},item,'base',{
+      x:base?.at.x??baseX,y:base?.at.y??baseY
+    })){
+   // Sprite replaces only visual geometry, never the interaction/collision.
+ }else fn(deltaX,deltaY);
+ g.restore();
 }
 function currentAction(){
  if(player.seatId)return {type:'stand',label:'BANGUN'};
