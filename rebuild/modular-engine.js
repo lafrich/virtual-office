@@ -49,17 +49,19 @@ const SAFE_FIELDS={
  'at.x':[-1,18],'at.y':[-1,13],
  'offset.x':[-48,48],'offset.y':[-48,48],
  'size.w':[.10,7],'size.d':[.10,7],'size.h':[.1,80],
- 'elevation':[-20,60],'depthBias':[-4,4],'scale':[.40,2.5]
+ 'elevation':[-20,60],'depthBias':[-4,4],'scale':[.40,2.5],
+ 'action.approach.x':[-4,4],'action.approach.y':[-4,4],
+ 'action.pose.x':[-4,4],'action.pose.y':[-4,4]
 };
 const directions=['SW','SE','NW','NE'];
 function cleanData(src,base){
- const d=structuredClone?structuredClone(base):JSON.parse(JSON.stringify(base));
+ const d=typeof structuredClone==='function'?structuredClone(base):JSON.parse(JSON.stringify(base));
  if(!src||typeof src!=='object')return d;
  for(const [path,bounds] of Object.entries(SAFE_FIELDS)){
   const segments=path.split('.');let source=src,target=d;
   for(let i=0;i<segments.length-1;i++){source=source&&source[segments[i]];target=target[segments[i]]}
   const k=segments.at(-1);
-  if(source&&Object.prototype.hasOwnProperty.call(source,k)){
+  if(source&&target&&Object.prototype.hasOwnProperty.call(source,k)){
    const v=Number(source[k]);
    if(Number.isFinite(v))target[k]=round(clamp(v,...bounds),1000);
   }
@@ -104,6 +106,13 @@ class ModularWorld{
   return true;
  }
  toggle(id){const a=this.get(id);if(!a)return;a.visible=!a.visible;this.save();this.changed()}
+ setCollision(id,value){const a=this.get(id);if(!a)return;a.collision=!!value;this.save();this.changed()}
+ setSprite(id,part,path){
+  const a=this.get(id);if(!a||!['base','front'].includes(part))return false;
+  if(path&&!/^\.\/assets\/[\w./-]+\.png$/.test(path)||path&&path.includes('..'))return false;
+  if(!a.sprite)a.sprite={};if(path)a.sprite[part]=path;else delete a.sprite[part];
+  this.save();this.changed();return true;
+ }
  setFacing(id,value){const a=this.get(id);if(a&&directions.includes(value)){a.facing=value;this.save();this.changed()}}
  reset(id){
   if(id){
