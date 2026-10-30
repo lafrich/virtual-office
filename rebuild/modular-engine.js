@@ -9,6 +9,7 @@ const round=(v,p=100)=>Math.round(v*p)/p;
 const def=(id,type,name,x,y,w,d,h,extra={})=>({
  id,type,name,at:{x,y},size:{w,d,h},offset:{x:0,y:0},elevation:0,depthBias:0,
  facing:'SW',scale:1,visible:true,sprite:null,
+ visual:global.VOVisualSystem.describeAsset(id,type,w,d),
  action:null,collision:true,...extra
 });
 const COVE_ITEMS=[
