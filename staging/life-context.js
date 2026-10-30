@@ -56,7 +56,11 @@
     for (const s of seats) {
       const d = distance(me, s);
       if (d > RANGE_SEAT || occupied(s)) continue;
-      if (!best || d < best.distance) best = { ...s, distance:d };
+      const chair = /(?:^|_)chair_/i.test(s.objectId || '') ? 1 : 0;
+      const oldChair = best && /(?:^|_)chair_/i.test(best.objectId || '') ? 1 : 0;
+      if (!best || d < best.distance - 0.001 ||
+          (Math.abs(d - best.distance) < 0.001 && chair > oldChair))
+        best = { ...s, distance:d };
     }
     return best;
   }
@@ -210,6 +214,62 @@
     window.dispatchEvent(new Event('vc-life-stand'));
     return true;
   };
+
+
+  // Render the seated *player* in the same depth-sorted SVG world as Baymax.
+  // The normal player avatar is HTML above all furniture, causing the player to
+  // appear in front of armrests/partition walls even with correct seat coords.
+  // sheetSprite + sprite + sortWorld use the very same pivot and draw order as
+  // AI actors; no hand-tuned pixel offsets are used.
+  (function prepareSeatLayer() {
+    const entry = typeof charEntry === 'function' ? charEntry('_user') : null;
+    if (!entry || !entry.sheet || typeof sprite !== 'function' ||
+        typeof sheetSprite !== 'function') return;
+    const group = sprite(0, 'bot vc-life-sitter');
+    group.setAttribute('display', 'none');
+    const seatedSprite = sheetSprite(group, entry.sheet);
+    let valid = false;
+    let displayed = false;
+    let lastDepth = null;
+    let lastFrame = '';
+    loadImg(entry.sheet).then(img => { valid = !!img; });
+    window.__vcLifeSeatRenderer = function renderSeatLayer() {
+      const sitting = valid && !SPEC && !OUT_ON && !!me._lifeSeat &&
+        !me.moving && ['sit','perch','lie'].includes(me.forceAnim);
+      if (!sitting) {
+        if (displayed) {
+          displayed = false;
+          group.setAttribute('display', 'none');
+          meEl.style.visibility = '';
+        }
+        return;
+      }
+      const p = P(me.c, me.r);
+      // Match Baymax's world-space, art-pixel-aligned anchor and seat sinking.
+      const y = p.y + sitOffset(me.c, me.r, me.forceAnim, null);
+      const xSnap = Math.round(p.x * PPU) / PPU;
+      const ySnap = Math.round(y * PPU) / PPU;
+      const depth = me.c + me.r + 0.05;
+      group.setAttribute('transform', 'translate(' + xSnap + ',' + ySnap + ')');
+      if (!displayed) {
+        displayed = true;
+        group.setAttribute('display', 'inline');
+        meEl.style.visibility = 'hidden';
+      }
+      if (depth !== lastDepth) {
+        group._d = depth;
+        if (typeof sortWorld === 'function') sortWorld();
+        lastDepth = depth;
+      }
+      const {col,row} = sheetCell(me.forceAnim, me.dir, me.at);
+      const frame = col + ':' + row;
+      if (frame !== lastFrame) {
+        seatedSprite.im.setAttribute('x', -col * SL.frame[0]);
+        seatedSprite.im.setAttribute('y', -row * SL.frame[1]);
+        lastFrame = frame;
+      }
+    };
+  })();
 
   if (typeof updAction === 'function') {
     try { updAction(); } catch (e) { console.warn('[life-context]',e); }
