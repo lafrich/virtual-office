@@ -12,15 +12,15 @@ function createEditor(world,opt={}){
  const fieldNames={
   'at.x':'GRID X','at.y':'GRID Y',
   'offset.x':'PIXEL X','offset.y':'PIXEL Y',
-  'elevation':'HEIGHT Z','depthBias':'SORT BIAS',
+  'elevation':'HEIGHT Z','depthBias':'SORT BIAS','scale':'SCALE',
   'size.w':'WIDTH','size.d':'DEPTH','size.h':'HEIGHT',
   'action.approach.x':'ACTION X','action.approach.y':'ACTION Y',
   'action.pose.x':'POSE X','action.pose.y':'POSE Y'
  };
- const fields=['at.x','at.y','offset.x','offset.y','elevation','depthBias',
+ const fields=['at.x','at.y','offset.x','offset.y','elevation','depthBias','scale',
  'size.w','size.d','size.h','action.approach.x','action.approach.y','action.pose.x','action.pose.y'];
  const steps={'at.x':.1,'at.y':.1,'offset.x':1,'offset.y':1,
-  'elevation':1,'depthBias':.05,'size.w':.1,'size.d':.1,'size.h':1,
+  'elevation':1,'depthBias':.05,'scale':.05,'size.w':.1,'size.d':.1,'size.h':1,
   'action.approach.x':.1,'action.approach.y':.1,
   'action.pose.x':.1,'action.pose.y':.1};
  const div=document.createElement('div');
@@ -45,7 +45,7 @@ function createEditor(world,opt={}){
   </div>
   <div class="me-fields" id="meFields"></div>
   <div class="me-options"><label><input id="meSnap" type="checkbox" checked> Grid snap 0.1</label>
-    <label><input id="meCollision" type="checkbox"> Collision</label></div>
+    <label><input id="meCollision" type="checkbox"> Collision</label><label><input id="meVisible" type="checkbox"> Visible</label></div>
   <label class="me-label" for="meFacing">DIRECTION / SPRITE</label>
   <select class="me-select" id="meFacing">
    <option>SW</option><option>SE</option><option>NW</option><option>NE</option>
@@ -101,6 +101,7 @@ function createEditor(world,opt={}){
    if(document.activeElement!==inp)inp.value=enabled&&Number.isFinite(obj)?String(obj):'';
   }
   el('meCollision').checked=!!selected.collision;
+  el('meVisible').checked=!!selected.visible;
   el('meFacing').value=selected.facing;
   el('meSpriteBase').value=selected.sprite?.base||'';
   el('meSpriteFront').value=selected.sprite?.front||'';
@@ -109,6 +110,7 @@ function createEditor(world,opt={}){
  sel.addEventListener('change',()=>{world.select(sel.value);status('Editing '+world.selected.name)});
  el('meFacing').addEventListener('change',()=>world.setFacing(world.selectedId,el('meFacing').value));
  el('meCollision').addEventListener('change',()=>world.setCollision(world.selectedId,el('meCollision').checked));
+ el('meVisible').addEventListener('change',()=>world.toggle(world.selectedId));
  el('meApplySprite').addEventListener('click',()=>{
   const id=world.selectedId;
   // Capture both values before the first update re-renders the form.
