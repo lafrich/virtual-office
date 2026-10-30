@@ -9,8 +9,8 @@
  const POSES=Object.freeze(['sit','sleep','bathe','toilet','work']);
  const FRAME={w:128,h:160,pivotX:64,pivotY:146,scale:.68};
  const sheetSrc='./assets/character_flat_sheet.svg?v=2';
- const posesSrc='./assets/character_flat_poses.svg?v=2';
- const baymaxSrc='./assets/character_baymax_poses.svg?v=1';
+ const posesSrc='./assets/character_flat_poses.svg?v=3';
+ const baymaxSrc='./assets/character_baymax_poses.svg?v=2';
  const sheets={walk:null,poses:null,baymax:null};
  const loaded={walk:false,poses:false,baymax:false};
  function load(which,src){

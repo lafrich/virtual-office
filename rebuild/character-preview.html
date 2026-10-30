@@ -62,7 +62,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 </section>
 <section><h2>03 — NPC Consistency</h2>
 <p>Baymax now uses the same flat character proportions and sprite pivot as the main player.</p>
-<img src="./assets/character_baymax_poses.svg?v=1" alt="Baymax character poses" style="display:block;width:min(100%,640px);height:auto;margin:auto" />
+<img src="./assets/character_baymax_poses.svg?v=2" alt="Baymax character poses" style="display:block;width:min(100%,640px);height:auto;margin:auto" />
 </section>
 <section><h2>04 — Locked Art Direction</h2>
 <p><b>Flat isometric, soft pastel, sedikit outline, maksimal 3 tone per material.</b> Rambut hitam bergumpal asimetris, kacamata kotak, kaos charcoal, celana gelap dan sepatu sederhana. Seluruh frame memakai pivot kaki yang sama. Pose interaksi berada dalam sheet terpisah.</p>
@@ -73,7 +73,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 (()=>{'use strict';
  const cv=document.getElementById('preview'),ctx=cv.getContext('2d');
  const sheet=new Image(),poses=new Image();
- sheet.src='./assets/character_flat_sheet.svg?v=2';poses.src='./assets/character_flat_poses.svg?v=2';
+ sheet.src='./assets/character_flat_sheet.svg?v=2';poses.src='./assets/character_flat_poses.svg?v=3';
  let direction='down',pose=null,walking=true,t0=0;
  const rows={down:0,left:1,right:2,up:3},
        posesCol={sit:0,sleep:1,bathe:2,toilet:3,work:4};
