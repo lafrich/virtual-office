@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#e60029">
+  <title>Virtual Office — Editable Rebuild</title>
+  <link rel="stylesheet" href="./style.css?v=1">
+  <script src="./game.js?v=1" defer></script>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar"><span class="building">▦</span> VIRTUAL OFFICE <span class="edition">/ REBUILD 01</span></header>
+    <main class="viewport" id="viewport" aria-label="Game Virtual Office">
+      <canvas id="world" aria-label="Peta game isometrik"></canvas>
+      <div class="left-tools" aria-label="Kontrol game">
+        <button class="tool" id="btnZoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+        <button class="tool" id="btnZoomOut" title="Zoom out" aria-label="Zoom out">−</button>
+        <button class="tool" id="btnFit" title="Pusatkan kamera" aria-label="Pusatkan kamera">⌗</button>
+        <button class="tool gold" id="btnNotif" title="Notifikasi dan status" aria-label="Notifikasi dan status">♟<span class="notice-dot"></span></button>
+        <button class="tool" id="btnMap" title="Pindah lokasi" aria-label="Pindah lokasi">⌖</button>
+      </div>
+      <div class="location-chip" id="locationChip">🏢 OFFICE</div>
+      <div class="toast" id="toast" aria-live="polite"></div>
+      <div class="joystick" id="joystick" aria-label="Joystick bergerak" role="application"><span class="joy-arrows">+ </span><div class="joy-knob" id="joyKnob"></div></div>
+      <button class="action" id="actionBtn" aria-label="Aksi karakter">AKSI</button>
+      <nav class="zone-switch" id="zoneSwitch" aria-label="Pilihan lokasi" hidden>
+        <button data-zone="office">🏢 OFFICE</button>
+        <button data-zone="street">🌳 TAMAN</button>
+        <button data-zone="warteg">🍛 WARTEG</button>
+      </nav>
+      <div class="help" id="help">WASD / joystick untuk jalan · dekati objek lalu ACTION</div>
+      <section class="drawer" id="drawer" aria-label="Notifikasi dan status" hidden>
+        <div class="drawer-head"><strong>MENU PLAYER</strong><button id="closeDrawer" aria-label="Tutup panel">✕</button></div>
+        <div class="drawer-tabs" role="tablist">
+          <button class="tab active" id="tabNotifications" role="tab" aria-selected="true">🔔 NOTIFIKASI</button>
+          <button class="tab" id="tabStatus" role="tab" aria-selected="false">👤 STATUS PLAYER</button>
+        </div>
+        <div class="drawer-content" id="notifContent">
+          <p class="micro">AKTIVITAS · SESI LOKAL</p>
+          <div class="feed" id="feed"></div>
+        </div>
+        <div class="drawer-content" id="statusContent" hidden>
+          <p class="micro">KONDISI KARAKTER · LIVE</p>
+          <div class="player-info"><span class="avatar-pixel">◧</span><div><strong id="playerName">PLAYER</strong><small id="playerPlace">Office worker · Local test</small></div></div>
+          <div class="needs" id="needs"></div>
+          <p class="status-message" id="statusMessage"></p>
+          <details class="rules"><summary>📋 RULES MAKAN / TIDUR / DLL.</summary><div id="rulesBody">
+            <p>🍚 <b>Makan:</b> menambah kenyang. 🍹 <b>Minum:</b> menambah kebelet.</p>
+            <p>💤 <b>Tidur:</b> energi pulih. 🪑 <b>Duduk:</b> energi pulih lebih pelan.</p>
+            <p>🚿 <b>Mandi:</b> kebersihan kembali penuh. 🚽 <b>Pipis:</b> kebelet kembali nol.</p>
+            <p>🏃 <b>Aktif bergerak:</b> kebutuhan turun perlahan. Tidak ada pengurangan saat offline.</p>
+          </div></details>
+          <div class="status-foot">PROTOTYPE LOKAL · DATA DISIMPAN DI BROWSER · BELUM MULTIPLAYER</div>
+        </div>
+      </section>
+    </main>
+    <div class="bottom-note">REBUILD / SOURCE TERBUKA UNTUK DI-EDIT · TIDAK MENGUBAH GAME UTAMA</div>
+  </div>
+</body>
+</html>
