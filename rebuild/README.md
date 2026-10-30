@@ -48,7 +48,7 @@ The Cove demo has **16 independent modules**: bed, nightstand, lamp, desk, chair
 
 - **GRID X / GRID Y**: physical tile coordinates; drag on the map or nudge 0.1 tile.
 - **PIXEL X / PIXEL Y**: visual-only sprite offset, adjustable in 1px increments; never shifts collision.
-- **HEIGHT Z**: vertical elevation. **SORT BIAS**: drawing order relative to character.
+- **HEIGHT Z**: vertical elevation. **SORT BIAS**: drawing order relative to character. **SCALE**: adjust visual sprite size in 5% steps.
 - **WIDTH / DEPTH / HEIGHT**: editable footprint and procedural dimensions.
 - **ACTION X / ACTION Y**: where the contextual action can be activated, relative to the furniture origin.
 - **POSE X / POSE Y**: exact target anchor for the seated, sleeping, bathing or toilet player.
