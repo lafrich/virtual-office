@@ -133,16 +133,34 @@ function drawChair(x,y,mode='office'){
  for(let s of [-.22,.22]){const q=iso(x+s,y+.23);fill(q.x-1,q.y,2,8*zoom,'#7d838c');}
 }
 function drawSofa(occupied,frame){
+ // Fixed painter order: sofa base > seat cushion > sitter > arms/front trim.
+ // This keeps sitting characters aligned without moving SVG / canvas layers.
  const x=7.4,y=6.1;
- box(x,y,4.2,1.65,8,'#597be5','#314ca4','#2d4fa9');
- box(x,y-.6,4.2,.36,22,'#425bbb','#283e91','#30438d');
- for(let i=0;i<3;i++)box(6.15+i*1.25,6.45,1.1,1.0,8,'#7690ef','#4266cf','#4563ba',8);
- if(occupied)drawHuman(occupied.x,occupied.y,{sitting:true,dir:'sw',walk:frame*0.01});
- drawHuman(6.15,6.3,{sitting:true,dir:'sw',hair:'#999da5',skin:'#efd0b1',shirt:'#e2e6e9',label:'BAYMAX'});
- box(5.25,6.15,.36,1.6,18,'#3955bb','#273d8d','#2f448c');
- box(9.55,6.15,.30,1.6,18,'#3955bb','#273d8d','#2f448c');
- box(x,y+.80,4.2,.20,11,'#5b76df','#344aaf','#304aaf');
- drawCat(8.15,6.4,frame);
+ shadow(x,y,20,7);
+ // Low wooden legs visible below upholstered base.
+ for(const xx of [5.5,9.1])box(xx,6.6,.19,.26,4,'#463c3e','#342e39','#40353c');
+ box(x,y,4.25,1.76,7,'#536dd0','#344b9e','#30488e');
+ // Backrest in a slightly muted blue with a low highlight seam.
+ box(x,y-.63,4.22,.38,22,'#536cd2','#364da4','#304494');
+ const b1=iso(5.42,5.47,22),b2=iso(9.38,5.47,22);
+ line(b1,b2,'#8295ed',1.4);
+ // Individually upholstered cushion tops and darker separation lines.
+ for(let i=0;i<3;i++){
+  const seatX=6.15+i*1.24;
+  box(seatX,6.37,1.16,1.00,8,'#788ee8','#4e67c8','#4761c1',7);
+  const seam1=iso(seatX-.45,6.70,15.1),seam2=iso(seatX+.39,6.70,15.1);
+  line(seam1,seam2,'#a0b2fa',.7);
+ }
+ if(occupied)drawHuman(occupied.x,occupied.y,{sitting:true,dir:'sw',shirt:'#242a3a',hair:'#171b24'});
+ drawHuman(6.05,6.34,{sitting:true,dir:'sw',hair:'#949ca7',skin:'#efd0b1',shirt:'#e2e6e9'});
+ // Armrests: separate from cushions so character's lap stays behind them.
+ box(5.20,6.10,.42,1.57,18,'#465fc6','#2d439c','#334ba6');
+ box(9.57,6.10,.38,1.57,18,'#465fc6','#2d439c','#334ba6');
+ box(x,6.93,4.30,.20,10,'#627cdf','#3c53b1','#394fa6');
+ drawCat(8.15,6.5,frame);
+ // NPC label is attached visually to its seat rather than floating high
+ // over the lounge, and only shows when the seat is on-screen.
+ const n=iso(6.05,6.34,53);pixelText('BAYMAX',n.x,n.y,'#fff1d8',8);
 }
 function drawOffice(x,y,sceneActor,frame){
  drawWalls('office');drawFloor('office');
@@ -154,8 +172,8 @@ function drawOffice(x,y,sceneActor,frame){
  {d:13,fn:()=>drawDesk(13.3,5.9)},
  {d:15,fn:()=>drawPlant(12.2,8.7)},
  {d:15.5,fn:()=>drawSofa(sceneActor?.seatId==='sofa'?sceneActor:null,frame)},
- {d:18,fn:()=>box(9.1,9.3,1.4,1.1,9,'#b99460','#8f6c45','#8a623e')},
- {d:19,fn:()=>box(10.9,9.1,1.4,1.1,9,'#b99460','#8f6c45','#8a623e')},
+ {d:18,fn:()=>{box(10.25,7.9,1.9,.96,6,'#d4a674','#a4774d','#976e46');box(10.25,7.9,1.70,.76,.2,'#f3e5c8','#bfbaaa','#c5b7a0',6);}},
+ {d:19,fn:()=>{box(11.2,10.1,1.05,.72,10,'#bd955f','#866744','#8e6c43');box(11.2,10.1,.84,.56,.15,'#e9dbb7','#ac986f','#aa916f',10);}},
  {d:22,fn:()=>drawDesk(14.5,8.1)},
  {d:23,fn:()=>drawChair(14.4,9.1)},
  {d:25,fn:()=>{box(16.1,10.8,.9,.9,6,'#f9fbf9','#c8e1e5','#bad5d7');box(16.1,10.8,.48,.58,2,'#b7e6f2','#71aabb','#73a6b5',6);}},
