@@ -7,7 +7,7 @@
 const $=id=>document.getElementById(id), C=$('world'), g=C.getContext('2d',{alpha:false});
 const view=$('viewport'), action=$('actionBtn'), toastEl=$('toast');
 const DPR=.82, TX=23, TY=11.5, TAU=Math.PI*2;
-let W=420,H=650,scale=1,zoom=1,ox=0,oy=0,now=performance.now(),toastTimer=0;
+let W=420,H=650,zoom=.77,ox=0,oy=0,now=performance.now(),toastTimer=0,manualZoom=false;
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
 const iso=(x,y,z=0)=>({x:ox+(x-y)*TX*zoom,y:oy+(x+y)*TY*zoom-z*zoom});
 const point=(x,y)=>({x:Math.round(x),y:Math.round(y)});
@@ -213,12 +213,13 @@ function resize(){
  const box=view.getBoundingClientRect();
  W=Math.max(180,Math.floor(box.width*DPR));H=Math.max(180,Math.floor(box.height*DPR));
  C.width=W;C.height=H;g.imageSmoothingEnabled=false;
+ if(!manualZoom)zoom=clamp(box.width/480,.70,.94);
 }
 window.addEventListener('resize',resize,{passive:true});resize();
 
 const STORAGE='vo-editable-rebuild-v1';
 const defaults={fullness:87,energy:86,hygiene:91,bladder:15};
-const player={x:9.3,y:9.5,zone:'office',dir:'sw',seatId:null,sitX:null,moveTarget:null,walk:0,run:false};
+const player={x:7.25,y:9.25,zone:'office',dir:'sw',seatId:null,sitX:null,moveTarget:null,walk:0,run:false};
 let needs={...defaults},wallet=125000,events=[],timeMinutes=8*60+15;
 try{
  const o=JSON.parse(localStorage.getItem(STORAGE)||'null');
@@ -246,7 +247,7 @@ function renderFeed(){
 function setZone(zone){
  if(!['office','street','warteg'].includes(zone))return;
  stand();player.zone=zone;player.moveTarget=null;
- Object.assign(player,zone==='office'?{x:9.3,y:9.5}:zone==='street'?{x:8.2,y:8.5}:{x:7.1,y:8.8});
+ Object.assign(player,zone==='office'?{x:7.25,y:9.25}:zone==='street'?{x:8.2,y:8.5}:{x:7.1,y:8.8});
  $('locationChip').textContent=zone==='office'?'🏢 OFFICE':zone==='street'?'🌳 TAMAN':'🍛 WARTEG';
  $('playerPlace').textContent=zone==='office'?'Pegawai kantor · Local test':zone==='street'?'Taman kota · Local test':'Warteg · Local test';
  $('zoneSwitch').hidden=true;addLog('📍 Berpindah ke '+(zone==='office'?'Office':zone==='street'?'Taman':'Warteg'));
@@ -256,8 +257,8 @@ function stand(){player.seatId=null;player.sitX=null;}
 function near(p,x,y,range=1.7){return Math.hypot(p.x-x,p.y-y)<=range;}
 const spots={
  office:[
-  {x:6.65,y:7.6,r:2.3,id:'sofa',label:'DUDUK',type:'sit',seatX:6.75,seatY:6.25},
-  {x:8.3,y:7.6,r:2.3,id:'sofa',label:'DUDUK',type:'sit',seatX:8.2,seatY:6.25},
+  {x:7.5,y:7.5,r:1.9,id:'sofa',label:'DUDUK',type:'sit',seatX:7.45,seatY:6.35},
+  {x:8.8,y:7.55,r:1.9,id:'sofa',label:'DUDUK',type:'sit',seatX:8.68,seatY:6.35},
   {x:12,y:5.5,r:2.0,id:'desk',label:'KERJA',type:'work'},
   {x:14.5,y:8.8,r:1.8,id:'officechair',label:'DUDUK',type:'sit',seatX:14.4,seatY:9.1},
   {x:8.1,y:6.4,r:1.5,id:'migi',label:'PET',type:'pet'},
@@ -339,9 +340,9 @@ $('tabNotifications').addEventListener('click',()=>switchTab('notif'));
 $('tabStatus').addEventListener('click',()=>switchTab('status'));
 $('btnMap').addEventListener('click',()=>{$('zoneSwitch').hidden=!$('zoneSwitch').hidden;$('drawer').hidden=true});
 document.querySelectorAll('[data-zone]').forEach(b=>b.addEventListener('click',()=>setZone(b.dataset.zone)));
-$('btnZoomIn').addEventListener('click',()=>zoom=clamp(zoom+.15,.65,1.65));
-$('btnZoomOut').addEventListener('click',()=>zoom=clamp(zoom-.15,.65,1.65));
-$('btnFit').addEventListener('click',()=>{zoom=1;notice('Kamera dipusatkan')});
+$('btnZoomIn').addEventListener('click',()=>{manualZoom=true;zoom=clamp(zoom+.12,.55,1.50)});
+$('btnZoomOut').addEventListener('click',()=>{manualZoom=true;zoom=clamp(zoom-.12,.55,1.50)});
+$('btnFit').addEventListener('click',()=>{manualZoom=false;zoom=clamp(view.getBoundingClientRect().width/480,.70,.94);notice('Kamera dipusatkan')});
 const keys=new Set();let joy={x:0,y:0,pointer:null};const joystick=$('joystick'),knob=$('joyKnob');
 const resetJoy=()=>{joy.x=0;joy.y=0;joy.pointer=null;knob.style.left='50%';knob.style.top='50%'};
 function adjustJoy(e){
@@ -401,8 +402,12 @@ function update(dt){
 const objects=[];
 function draw(frame){
  g.fillStyle='#293141';g.fillRect(0,0,W,H);
- ox=W*.52-(player.x-player.y)*TX*zoom;
- oy=H*.52-(player.x+player.y)*TY*zoom;
+ // Composite camera: keep the character visible while showing more of the room.
+ const limits=player.zone==='office'?[18,13]:player.zone==='warteg'?[12,11]:[16,13];
+ const cameraX=player.x*.62+(limits[0]/2)*.38;
+ const cameraY=player.y*.62+(limits[1]/2)*.38;
+ ox=W*.51-(cameraX-cameraY)*TX*zoom;
+ oy=H*.54-(cameraX+cameraY)*TY*zoom;
  objects.length=0;
  const seated=player.seatId?{x:player.x,y:player.y,seatId:player.seatId}:null;
  if(player.zone==='office')drawOffice(player.x,player.y,seated,frame);
@@ -413,21 +418,18 @@ function draw(frame){
  let drewActor=false;
  const drawNormalActor=()=>{
   if(!player.seatId){
-   drawHuman(player.x,player.y,{dir:player.dir,walk:player.walk,shirt:'#242a3a',hair:'#171b24',label:'YOU'});
+   drawHuman(player.x,player.y,{dir:player.dir,walk:player.walk,shirt:'#242a3a',hair:'#171b24'});
    drewActor=true;
   } else if(player.seatId==='officechair'){
-   drawHuman(player.x,player.y,{sitting:true,dir:'sw',shirt:'#242a3a',hair:'#171b24',label:'YOU'});drewActor=true;
+   drawHuman(player.x,player.y,{sitting:true,dir:'sw',shirt:'#242a3a',hair:'#171b24'});drewActor=true;
   }
  };
  for(const o of objects){if(!drewActor&&!player.seatId&&actorDepth<o.d)drawNormalActor();o.fn();}
  if(!drewActor)drawNormalActor();
- if(player.seatId&&!['officechair'].includes(player.seatId)){
-  const p=iso(player.x,player.y,57);pixelText('YOU',p.x,p.y,'#f5f6f9',9);
- }
+ // Avoid floating name labels overlapping furniture in tight mobile framing.
  // draw zone indicator as world label
  if(player.zone==='warteg'){const p=iso(5,0,75);pixelText('BU WARTEG',p.x,p.y,'#ffe4a4',12)}
- const t=((timeMinutes%(24*60))/60),hour=Math.floor(t),min=Math.floor((t-hour)*60);
- pixelText(String(hour).padStart(2,'0')+':'+String(min).padStart(2,'0')+' WIB',W*.82,Math.min(H-8,42),'#ffdf9b',10);
+ // Clock moved out of the canvas to prevent overlap with the location label.
 }
 function frame(t){
  const dt=clamp((t-now)/1000,0,.06);now=t;
