@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="200" viewBox="0 0 256 200" shape-rendering="crispEdges">
+<polygon points="103,158 110,152 146,152 153,158 146,163 110,163" fill="#6E829944"/>
+<polygon points="103,122 134,137 134,170 103,155" fill="#A26B3F"/><polygon points="153,128 134,137 134,170 153,161" fill="#754A2E"/><polygon points="122,113 153,128 134,137 103,122" fill="#C38C5A"/>
+<polygon points="106,150 132,163 132,164 106,151" fill="#A26B3F"/><polygon points="135,161 132,163 132,164 135,162" fill="#754A2E"/><polygon points="110,148 135,161 132,163 106,150" fill="#C38C5A"/>
+<polygon points="113,143 118,146 118,149 113,147" fill="#754A2E"/><polygon points="123,143 118,146 118,149 123,146" fill="#754A2E"/><polygon points="119,141 123,143 118,146 113,143" fill="#385C9E"/>
+<polygon points="120,144 124,146 124,153 120,150" fill="#754A2E"/><polygon points="130,143 124,146 124,153 130,150" fill="#754A2E"/><polygon points="126,141 130,143 124,146 120,144" fill="#FFF8E6"/>
+<polygon points="127,150 131,152 131,156 127,154" fill="#754A2E"/><polygon points="137,149 131,152 131,156 137,153" fill="#754A2E"/><polygon points="132,147 137,149 131,152 127,150" fill="#6BB77A"/>
+<polygon points="133,150 138,153 138,159 133,157" fill="#754A2E"/><polygon points="143,150 138,153 138,159 143,156" fill="#754A2E"/><polygon points="139,148 143,150 138,153 133,150" fill="#FFC857"/>
+<polygon points="106,141 132,154 132,155 106,142" fill="#A26B3F"/><polygon points="135,152 132,154 132,155 135,153" fill="#754A2E"/><polygon points="110,139 135,152 132,154 106,141" fill="#C38C5A"/>
+<polygon points="113,134 118,137 118,140 113,138" fill="#754A2E"/><polygon points="123,134 118,137 118,140 123,137" fill="#754A2E"/><polygon points="119,132 123,134 118,137 113,134" fill="#FFF8E6"/>
+<polygon points="120,135 124,137 124,144 120,141" fill="#754A2E"/><polygon points="130,134 124,137 124,144 130,141" fill="#754A2E"/><polygon points="126,132 130,134 124,137 120,135" fill="#6BB77A"/>
+<polygon points="127,141 131,143 131,147 127,145" fill="#754A2E"/><polygon points="137,140 131,143 131,147 137,144" fill="#754A2E"/><polygon points="132,138 137,140 131,143 127,141" fill="#FFC857"/>
+<polygon points="133,141 138,144 138,150 133,148" fill="#754A2E"/><polygon points="143,141 138,144 138,150 143,147" fill="#754A2E"/><polygon points="139,139 143,141 138,144 133,141" fill="#385C9E"/>
+<polygon points="106,132 132,145 132,146 106,133" fill="#A26B3F"/><polygon points="135,143 132,145 132,146 135,144" fill="#754A2E"/><polygon points="110,130 135,143 132,145 106,132" fill="#C38C5A"/>
+<polygon points="113,125 118,128 118,131 113,129" fill="#754A2E"/><polygon points="123,125 118,128 118,131 123,128" fill="#754A2E"/><polygon points="119,123 123,125 118,128 113,125" fill="#6BB77A"/>
+<polygon points="120,126 124,128 124,135 120,132" fill="#754A2E"/><polygon points="130,125 124,128 124,135 130,132" fill="#754A2E"/><polygon points="126,123 130,125 124,128 120,126" fill="#FFC857"/>
+<polygon points="127,132 131,134 131,138 127,136" fill="#754A2E"/><polygon points="137,131 131,134 131,138 137,135" fill="#754A2E"/><polygon points="132,129 137,131 131,134 127,132" fill="#385C9E"/>
+<polygon points="133,132 138,135 138,141 133,139" fill="#754A2E"/><polygon points="143,132 138,135 138,141 143,138" fill="#754A2E"/><polygon points="139,130 143,132 138,135 133,132" fill="#FFF8E6"/>
+<polygon points="130,137 132,138 132,158 130,157" fill="#754A2E"/><polygon points="134,137 132,138 132,158 134,157" fill="#754A2E"/><polygon points="133,136 134,137 132,138 130,137" fill="#A26B3F"/>
+<polyline points="105,123 132,136" fill="none" stroke="#FFF8E6" stroke-width="0.8" stroke-linecap="square"/>
+</svg>
