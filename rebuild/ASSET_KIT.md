@@ -66,3 +66,29 @@ Legacy browser layouts with `sprite:null` are upgraded non-destructively to buil
 **Tested:** six XML/SVG asset files, whitelisted paths, legacy layout migration, JSON persistence, foreground painter order, and pixel-precise image pivot. Detailed sprite drawing still needs visual QA in a real browser/device after deployment.
 
 **Next pass:** replace the remaining Cove and Office procedural props with their own authored sprite assets, retaining the same projection, palette and per-object calibrations.
+
+
+## Rebuild 09 — Reusable furniture art, Cove + Office
+
+Ten new original SVG layer files expand the art library into **11 complete furniture sets / 16 SVGs**. The new sets are:
+
+| Furniture | Files | Room reuse |
+|---|---|---|
+| Cream sofa | `sofa_base.svg`, `sofa_front.svg` | Office lounge, player + Baymax + Migi remain integrated |
+| Work desk | `desk_base.svg` | Cove bedroom desk + all three Office desks |
+| Wooden chair | `chair_base.svg`, `chair_front.svg` | Cove work chair + Office work chair |
+| Bookshelf | `bookshelf_base.svg` | Cove |
+| Dresser | `dresser_base.svg` | Cove |
+| Nightstand | `nightstand_base.svg` | Cove |
+| Coffee table | `coffee_base.svg` | Two Office tables + side table |
+| Blue cabinet | `storage_base.svg` | Office |
+
+New assets use **256 × 200 transparent SVG** with a registered pixel pivot **(128,158)**, normalized as `{x:.5,y:.79}`; older Cove bed, bath and toilet retain their original 160 × 160 art/pivot. Corresponding base/front layers share identical canvas dimensions and pivot.
+
+`ModularWorld.drawSprite(api, asset, part, position?)` is the shared art renderer, used by the original Cove painter and the Office scene. Office still uses its independently editable world-space transforms, while the sofa and chair insert character sprites **between** base and foreground layers. PNG/SVG custom sprites remain supported, with prior user-calibrated positions loaded from localStorage.
+
+**New visual inspection page:** [Asset Atlas](./asset-atlas.html) renders all 11 sets from the source files, shows their front overlays and the shared material palette. Use it to verify future additions and prevent style drift.
+
+**Current limitation:** These are crisp-edge vector SVG pixel-art sprites and have not been visually inspected in a real mobile browser. They are not a final raster sprite sheet. Office and Cove are the first upgraded areas; Taman and Warteg still contain their earlier procedural furniture and environment art.
+
+Release smoke tests: JavaScript integration, Office/Cove sprite draw calls, correct seating actions and occlusion, legacy local saves, cross-zone rendering, and Edit Mode Save/Cancel passed (12/12). All 16 source SVG files passed structural checks. A real screenshot comparison is still necessary before claiming pixel-perfect parity with the visual reference.
