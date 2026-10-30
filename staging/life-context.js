@@ -181,7 +181,7 @@
       // can be blocked, so movement must start from the approach tile.
       if (typeof okG === 'function' && !okG(me.c, me.r)) return;
       me._lifeStandOrigin = { c:me.c, r:me.r };
-      me._lifeSeat = { c:fresh.seat.c, r:fresh.seat.r };
+      me._lifeSeat = { ...fresh.seat }; // retain furniture-specific render depth
       me.c = fresh.seat.c;
       me.r = fresh.seat.r;
       me.path = [];
@@ -262,7 +262,13 @@
       const y = p.y + sitOffset(me.c, me.r, me.forceAnim, null);
       const xSnap = Math.round(p.x * PPU) / PPU;
       const ySnap = Math.round(y * PPU) / PPU;
-      const depth = me.c + me.r + 0.05;
+      // Baymax sits correctly in the left slot of the blue sofa.
+      // For all slots of that sofa use the same depth ordering as its
+      // leftmost slot. The world position and sit animation stay unchanged.
+      // Otherwise, the middle/right player appears in front of the divider.
+      const nativeDepth = me.c + me.r + 0.05;
+      const depth = Number.isFinite(me._lifeSeat.renderDepth)
+        ? me._lifeSeat.renderDepth : nativeDepth;
       group.setAttribute('transform', 'translate(' + xSnap + ',' + ySnap + ')');
       if (!displayed) {
         displayed = true;
