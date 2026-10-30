@@ -271,6 +271,16 @@ function drawOffice(x,y,sceneActor,frame){
 }
 function drawBar(occupied){
  const x=6.3,y=4.1;
+ const item=sceneWorlds.warteg.get('warteg-bar');
+ const w=sceneWorlds.warteg;
+ // Single independently editable buffet with avatar between base/front art.
+ if(item?.sprite?.base&&item?.sprite?.front&&
+    w.image(item.sprite.base)&&w.image(item.sprite.front)){
+   w.drawSprite({ctx:g,iso,zoom},item,'base',{x,y});
+   if(occupied)drawHuman(occupied.x,occupied.y,{sitting:true,dir:'nw'});
+   w.drawSprite({ctx:g,iso,zoom},item,'front',{x,y});
+   return;
+ }
  // WARM WARTEG: the same 3-tone material ramps as the bedroom and office.
  // Cabinet feet, main counter and raised transparent food display.
  shadow(x,y,26,8);
@@ -350,6 +360,16 @@ function drawPark(occupied,frame){
    const bx=5+i*5;
    const id='street-bench-'+i;
    queueFurniture('street',id,()=>paintFurniture('street',id,bx,6.4,(dx,dy)=>{
+     const item=sceneWorlds.street.get(id),w=sceneWorlds.street;
+     const ready=item?.sprite?.base&&item?.sprite?.front&&
+       w.image(item.sprite.base)&&w.image(item.sprite.front);
+     if(ready){
+       w.drawSprite({ctx:g,iso,zoom},item,'base',{x:bx,y:6.4});
+       if(occupied?.seatId==='bench'+i)
+         drawHuman(occupied.x-dx,occupied.y-dy,{sitting:true,dir:'sw'});
+       w.drawSprite({ctx:g,iso,zoom},item,'front',{x:bx,y:6.4});
+       return;
+     }
      // Repeated slats communicate scale without noisy pixels.
      for(const cx of [bx-1.20,bx+1.20])
        box(cx,6.4,.15,.18,11,PAL.woodDark,PAL.woodDark,PAL.woodDark);
@@ -382,6 +402,16 @@ function drawPark(occupied,frame){
    box(8.3,9.4,.6,.8,12,PAL.blueDark,PAL.blueDark,PAL.shadowDark,7);
  }));
  queueFurniture('street','street-lounger',()=>paintFurniture('street','street-lounger',13.2,8.8,(dx,dy)=>{
+   const w=sceneWorlds.street,item=w.get('street-lounger');
+   const ready=item?.sprite?.base&&item?.sprite?.front&&
+     w.image(item.sprite.base)&&w.image(item.sprite.front);
+   if(ready){
+     w.drawSprite({ctx:g,iso,zoom},item,'base',{x:13.2,y:8.8});
+     if(occupied?.seatId==='lounger')
+       drawHuman(occupied.x-dx,occupied.y-dy,{lying:true,dir:'se'});
+     w.drawSprite({ctx:g,iso,zoom},item,'front',{x:13.2,y:8.8});
+     return;
+   }
    box(13.2,8.8,2.4,1,7,'#f4e8d5','#b3a68b','#b8a689');
    box(13.2,8.35,2.4,.28,14,'#f3e7d1','#baa992','#a89d87');
    if(occupied&&occupied.seatId==='lounger')
@@ -515,8 +545,10 @@ function paintFurniture(zone,id,baseX,baseY,fn){
    Math.round((deltaX+deltaY)*TY*zoom+item.offset.y*zoom));
  // Office modules have real image sprites: painter-order and transform
  // remain under Edit Mode control, even for saved/custom art.
- if(zone==='office'&&id!=='office-sofa'&&id!=='office-chair'&&
-    item.sprite?.base&&world.drawSprite({ctx:g,iso,zoom},item,'base',{
+ const paired=(zone==='office'&&['office-sofa','office-chair'].includes(id))||
+   (zone==='street'&&['street-bench-0','street-bench-1','street-lounger'].includes(id))||
+   (zone==='warteg'&&id==='warteg-bar');
+ if(!paired&&item.sprite?.base&&world.drawSprite({ctx:g,iso,zoom},item,'base',{
       x:base?.at.x??baseX,y:base?.at.y??baseY
     })){
    // Sprite replaces only visual geometry, never the interaction/collision.
