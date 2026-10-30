@@ -59,7 +59,7 @@ function cleanData(src,base){
  if(!src||typeof src!=='object')return d;
  for(const [path,bounds] of Object.entries(SAFE_FIELDS)){
   const segments=path.split('.');let source=src,target=d;
-  for(let i=0;i<segments.length-1;i++){source=source&&source[segments[i]];target=target[segments[i]]}
+  for(let i=0;i<segments.length-1;i++){source=source?.[segments[i]];target=target?.[segments[i]]}
   const k=segments.at(-1);
   if(source&&target&&Object.prototype.hasOwnProperty.call(source,k)){
    const v=Number(source[k]);
