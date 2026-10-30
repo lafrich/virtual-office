@@ -142,6 +142,7 @@ function drawWalls(zone){
  poly([{x:bl.x,y:bl.y-h*zoom},{x:fl.x,y:fl.y-h*zoom},fl,bl],wall,'#7b837a',1);
  line({x:bl.x,y:bl.y-h*zoom},{x:br.x,y:br.y-h*zoom},trim,7*zoom);
  line({x:bl.x,y:bl.y-h*zoom},{x:fl.x,y:fl.y-h*zoom},trim,7*zoom);
+ window.VOEnvironment.wallBase({iso,line,zoom},w,d,zone);
  if(zone==='warteg'){
    line(iso(0,0,36),iso(w,0,36),PAL.greenDark,3);
    line(iso(0,0,36),iso(0,d,36),PAL.greenDark,3);
@@ -163,6 +164,8 @@ function drawFloor(zone){
   else{color=alternating?'#D5E7D4':'#C6DECC';stroke=PAL.greenLight;}
   diamond(x,y,color,stroke);
  }
+ const [roomW,roomD]=dims;
+ window.VOEnvironment.worldDetail({iso,poly,line,zoom},zone,roomW,roomD);
  if(zone==='office'){
   box(7.1,6.5,5.0,3.8,.12,PAL.blueDark,PAL.shadowDark,PAL.shadowDark);
   artProps().rug(7.1,6.5,4.65,3.4);
