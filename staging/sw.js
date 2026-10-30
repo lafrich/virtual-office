@@ -116,6 +116,14 @@ async function handle(ev, p, u) {
         }
         patched = patched.replace(oldValue,newValue);
       }
+      // pxBake uses getBBox and skips nodes with display:none or no _a.
+      // Bake the overlay while visible, then hide before its first frame.
+      const overlayEndAnchor = "WT.parts.forEach(n=>pxBake(n)); }";
+      const overlayEndPatched = "WT.parts.forEach(n=>pxBake(n)); " +
+        "WT.tableOverlays.forEach(n=>{n._show=false;n.setAttribute('display','none');}); }";
+      if (patched.split(overlayEndAnchor).length !== 2)
+        return new Response('warteg overlay bake anchor mismatch',{status:500});
+      patched=patched.replace(overlayEndAnchor,overlayEndPatched);
       // Warteg chair layering: the chair and table currently share one SVG
       // depth group. When the player sits in that table's chair or bench,
       // keep ONLY that group's rendering behind the seated HTML avatar.
@@ -140,7 +148,7 @@ async function handle(ev, p, u) {
       const overlayBuildPatch = "function wtBuild(){ if(WT.built) return; WT.built=true; WT.parts=[]; WT.tableOverlays=[];";
       const tabletopAnchor = "g._b=c+r-0.2; g._d=c+r; WT.dyn.push(g); WT.blk.push(";
       const tabletopPatch = "g._b=c+r-0.2; g._d=c+r; WT.dyn.push(g); " +
-        "const top=el('g',{display:'none'},wtF); top._wtTable=id; " +
+        "const top=el('g',{},wtF); top._wtTable=id; top._a=P(30,25); top._k='wt_overlay_'+id; top._raw=true; " +
         "const a=c-0.5,b=c+0.5,d=r-0.33,e=r+0.33; " +
         "bx(top,a,d,b,e,10,10.8,'rgba(127,217,154,.85)','#1F8F3A','#16702D'); " +
         "faceSW(top,e,a,b,10.6,10.8,'#B8F0C8'); " +
