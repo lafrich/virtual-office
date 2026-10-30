@@ -13,26 +13,26 @@
  });
  const SCENES={
   office:{width:18,height:13,assets:[
-    asset('office-plant-a','Tanaman sudut',2.1,2.7,.8,.8,20),
+    asset('office-plant-a','Tanaman sudut',2.1,2.7,.8,.8,20,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
     asset('office-storage','Lemari biru',4.2,2.2,1.3,1.4,9,{sprite:{base:'./assets/storage_base.svg',pivot:{x:.5,y:.79}}}),
     asset('office-lowtable','Meja samping',8.6,3.8,2.5,1.15,10,{sprite:{base:'./assets/coffee_base.svg',pivot:{x:.5,y:.79}}}),
     asset('office-desk-a','Meja kerja A',12,3.7,2.7,1.55,22,{action:place('work','KERJA',0,1.8),sprite:{base:'./assets/desk_base.svg',pivot:{x:.5,y:.79}}}),
     asset('office-desk-b','Meja kerja B',13.3,5.9,2.7,1.55,22,{sprite:{base:'./assets/desk_base.svg',pivot:{x:.5,y:.79}}}),
-    asset('office-plant-b','Tanaman tengah',12.2,8.7,.8,.8,20),
+    asset('office-plant-b','Tanaman tengah',12.2,8.7,.8,.8,20,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
     asset('office-sofa','Sofa biru',7.4,6.1,4.25,1.76,25,{
       action:place('sit','DUDUK',.2,1.4),sprite:{base:'./assets/sofa_base.svg',front:'./assets/sofa_front.svg',pivot:{x:.5,y:.79}}}),
     asset('office-coffee-a','Meja kopi A',10.25,7.9,1.9,.96,6,{sprite:{base:'./assets/coffee_base.svg',pivot:{x:.5,y:.79}}}),
     asset('office-coffee-b','Meja kopi B',11.2,10.1,1.05,.72,10,{sprite:{base:'./assets/coffee_base.svg',pivot:{x:.5,y:.79}},scale:.75}),
     asset('office-desk-c','Meja kerja C',14.5,8.1,2.7,1.55,22,{sprite:{base:'./assets/desk_base.svg',pivot:{x:.5,y:.79}}}),
     asset('office-chair','Kursi kerja',14.4,9.1,.72,.72,18,{action:place('sit','DUDUK',0,-.3),sprite:{base:'./assets/chair_base.svg',front:'./assets/chair_front.svg',pivot:{x:.5,y:.79}}}),
-    asset('office-toilet','Toilet',16.1,10.8,.9,.9,8,{action:place('pee','PIPIS',0,0)}),
-    asset('office-shower','Kamar mandi',16.2,8.8,1,.9,28,{action:place('shower','MANDI',0,0)})
+    asset('office-toilet','Toilet',16.1,10.8,.9,.9,8,{action:place('pee','PIPIS',0,0),sprite:{base:'./assets/toilet_base.svg',pivot:{x:.5,y:.7375}}}),
+    asset('office-shower','Kamar mandi',16.2,8.8,1,.9,28,{action:place('shower','MANDI',0,0),sprite:{base:'./assets/shower_base.svg',pivot:{x:.5,y:.79}}})
   ]},
   street:{width:16,height:13,assets:[
-    asset('street-plant-0','Tanaman taman A',2,1.7,.8,.8,26),
-    asset('street-plant-1','Tanaman taman B',5.4,1.7,.9,.9,29),
-    asset('street-plant-2','Tanaman taman C',8.8,1.7,.8,.8,26),
-    asset('street-plant-3','Tanaman taman D',12.2,1.7,.8,.8,26),
+    asset('street-plant-0','Tanaman taman A',2,1.7,.8,.8,26,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
+    asset('street-plant-1','Tanaman taman B',5.4,1.7,.9,.9,29,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
+    asset('street-plant-2','Tanaman taman C',8.8,1.7,.8,.8,26,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
+    asset('street-plant-3','Tanaman taman D',12.2,1.7,.8,.8,26,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
     asset('street-bench-0','Bangku taman A',5,6.4,3.4,.82,21,{action:place('sit','DUDUK',0,1.2),sprite:{base:'./assets/park_bench_base.svg',front:'./assets/park_bench_front.svg',pivot:{x:.5,y:.79}}}),
     asset('street-bench-1','Bangku taman B',10,6.4,3.4,.82,21,{action:place('sit','DUDUK',0,1.2),sprite:{base:'./assets/park_bench_base.svg',front:'./assets/park_bench_front.svg',pivot:{x:.5,y:.79}}}),
     asset('street-warteg','Bangunan warteg',11.4,3.9,3.5,2.6,39,{action:place('zone','MASUK',.4,1.6),sprite:{base:'./assets/warteg_house_base.svg',pivot:{x:.5,y:173/220}}}),
@@ -40,7 +40,7 @@
     asset('street-lounger','Kursi rebah',13.2,8.8,2.4,1,14,{action:place('lie','REBAH',0,.8),sprite:{base:'./assets/park_lounger_base.svg',front:'./assets/park_lounger_front.svg',pivot:{x:.5,y:.79}}})
   ]},
   warteg:{width:12,height:11,assets:[
-    asset('warteg-plant','Tanaman warteg',1.4,2.4,.7,.7,24),
+    asset('warteg-plant','Tanaman warteg',1.4,2.4,.7,.7,24,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
     asset('warteg-sign','Pajangan dinding',3,3,1.35,.7,29),
     asset('warteg-table-a','Meja dan bangku A',3.6,8.1,2.5,3,9,{sprite:{base:'./assets/warteg_table_base.svg',pivot:{x:.5,y:.79}}}),
     asset('warteg-table-b','Meja dan bangku B',8.5,8.1,2.5,3,9,{sprite:{base:'./assets/warteg_table_base.svg',pivot:{x:.5,y:.79}}}),

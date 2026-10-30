@@ -19,7 +19,7 @@ const COVE_ITEMS=[
   sprite:{base:'./assets/bed_base.svg',front:'./assets/bed_front.svg',pivot:{x:.5,y:.7375}}
  }),
  def('cove-nightstand','nightstand','Nightstand',2.35,5.0,.85,.80,9,{sprite:{base:'./assets/nightstand_base.svg',pivot:{x:.5,y:.79}}}),
- def('cove-lamp','lamp','Bedside Lamp',2.35,5.0,.45,.45,16,{collision:false}),
+ def('cove-lamp','lamp','Bedside Lamp',2.35,5.0,.45,.45,16,{collision:false,elevation:12,sprite:{base:'./assets/lamp_base.svg',pivot:{x:.5,y:.79}}}),
  def('cove-desk','desk','Work Desk',5.45,2.2,2.9,1.15,13,{
   action:{type:'work',label:'KERJA',range:2.0,approach:{x:0,y:1.5}},
   sprite:{base:'./assets/desk_base.svg',pivot:{x:.5,y:.79}}
@@ -30,17 +30,17 @@ const COVE_ITEMS=[
   sprite:{base:'./assets/chair_base.svg',front:'./assets/chair_front.svg',pivot:{x:.5,y:.79}}
  }),
  def('cove-bookshelf','bookshelf','Book Cabinet',7.60,2.25,1.25,.80,33,{sprite:{base:'./assets/bookshelf_base.svg',pivot:{x:.5,y:.79}}}),
- def('cove-plant','plant','Ficus Plant',8.25,4.10,.75,.72,27),
- def('cove-rug','rug','Cream Rug',4.8,7.20,4.8,3.15,.3,{collision:false,depthBias:-4}),
+ def('cove-plant','plant','Ficus Plant',8.25,4.10,.75,.72,27,{sprite:{base:'./assets/plant_base.svg',pivot:{x:.5,y:.79}}}),
+ def('cove-rug','rug','Cream Rug',4.8,7.20,4.8,3.15,.3,{collision:false,depthBias:-4,sprite:{base:'./assets/rug_base.svg',pivot:{x:.5,y:.79}}}),
  def('cove-bath','bathtub','Green Bathtub',11.85,4.50,3.1,1.55,19,{
   action:{type:'bathe',label:'MANDI',range:2.0,approach:{x:0,y:1.5},pose:{x:0,y:0}},
   layers:{base:-.35,front:1.75},
   sprite:{base:'./assets/bathtub_base.svg',front:'./assets/bathtub_front.svg',pivot:{x:.5,y:.7375}}
  }),
- def('cove-shower','shower','Rain Shower',11.25,1.5,.25,.30,48,{collision:false}),
- def('cove-partition','partition','Glass Partition',13.6,2.45,.22,2.9,43,{collision:true,depthBias:-2}),
- def('cove-sink','sink','Bathroom Sink',14.35,4.5,.9,.75,24),
- def('cove-mirror','mirror','Wall Mirror',14.45,2.2,.8,.20,42,{collision:false}),
+ def('cove-shower','shower','Rain Shower',11.25,1.5,.25,.30,48,{collision:false,sprite:{base:'./assets/shower_base.svg',pivot:{x:.5,y:.79}}}),
+ def('cove-partition','partition','Glass Partition',13.6,2.45,.22,2.9,43,{collision:true,depthBias:-2,sprite:{base:'./assets/partition_base.svg',pivot:{x:.5,y:.79}}}),
+ def('cove-sink','sink','Bathroom Sink',14.35,4.5,.9,.75,24,{sprite:{base:'./assets/sink_base.svg',pivot:{x:.5,y:.79}}}),
+ def('cove-mirror','mirror','Wall Mirror',14.45,2.2,.8,.20,42,{collision:false,elevation:12,sprite:{base:'./assets/mirror_base.svg',pivot:{x:.5,y:.79}}}),
  def('cove-toilet','toilet','Toilet',14.1,7.60,1.30,1.5,15,{
   action:{type:'pee',label:'PIPIS',range:1.7,approach:{x:-.7,y:.1},pose:{x:0,y:.25}},
   layers:{base:-.30,front:1.15},
@@ -48,7 +48,7 @@ const COVE_ITEMS=[
  }),
  def('cove-dresser','dresser','Wood Dresser',7.2,5.40,1.45,.9,20,{sprite:{base:'./assets/dresser_base.svg',pivot:{x:.5,y:.79}}}),
  def('cove-door','door','Bedroom Door',9.0,7.20,.33,1.38,41,{
-  collision:false,action:{type:'zone',label:'OFFICE',to:'office',range:2,approach:{x:-1.2,y:.1}}
+  sprite:{base:'./assets/door_base.svg',pivot:{x:.5,y:.79}},collision:false,action:{type:'zone',label:'OFFICE',to:'office',range:2,approach:{x:-1.2,y:.1}}
  })
 ];
 const SAFE_FIELDS={
@@ -105,6 +105,8 @@ class ModularWorld{
   this.listeners=new Set();
   this.images=new Map();
   this.load();
+  // Preload authored sprites before the first frame.
+  for(const a of this.assets)for(const part of ['base','front'])if(a.sprite?.[part])this.image(a.sprite[part]);
  }
  onChange(fn){this.listeners.add(fn);return()=>this.listeners.delete(fn)}
  changed(){for(const fn of this.listeners)try{fn(this)}catch(e){console.warn(e)}}
@@ -229,7 +231,8 @@ class ModularWorld{
   const pivot=a.sprite?.pivot;
   const px=Math.min(1,Math.max(0,Number.isFinite(pivot?.x)?pivot.x:.5));
   const py=Math.min(1,Math.max(0,Number.isFinite(pivot?.y)?pivot.y:1));
-  g.imageSmoothingEnabled=false;
+  // SVG artwork scales smoothly; custom PNG pixel sprites remain nearest-neighbour.
+  g.imageSmoothingEnabled=/\.svg(?:\?|$)/i.test(a.sprite[part]);
   g.drawImage(img,Math.round(p.x-img.width*scale*px),
     Math.round(p.y-img.height*scale*py),
     Math.round(img.width*scale),Math.round(img.height*scale));
@@ -241,7 +244,9 @@ class ModularWorld{
    if(job.kind==='player'){api.drawPlayer();continue}
    const a=job.asset;g.save();
    g.translate(Math.round(a.offset.x*zoom),Math.round(a.offset.y*zoom));
-   if(!this.drawSprite(api,a,job.part)&&api.drawPlaceholder)
+   const src=a.sprite?.[job.part],state=src&&this.images.get(src);
+   // Never flash old geometric art while the authored SVG is loading.
+   if(!this.drawSprite(api,a,job.part)&&api.drawPlaceholder&&(!src||state?.failed))
     api.drawPlaceholder(a,job.part);
    g.restore()
   }

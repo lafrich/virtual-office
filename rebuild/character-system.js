@@ -44,7 +44,8 @@
  function frameIndex({moving=false,walk=0}={}){
   if(!moving)return 0;
   // Frame 0 is used exclusively for idle; walking cycles through 1/2/3.
-  return 1+(Math.floor(Math.max(0,walk)*2.25)%3);
+  // Four-beat ping-pong gait avoids abrupt stride resets.
+  return [1,2,3,2][Math.floor(Math.max(0,walk)*2.25)%4];
  }
  function animationKey({direction='down',moving=false,walk=0,pose=null}={}){
   if(POSES.includes(pose))return pose;

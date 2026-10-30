@@ -5,7 +5,7 @@ button{font-family:inherit;cursor:pointer;user-select:none;-webkit-tap-highlight
 .topbar{height:69px;flex:none;background:var(--red);border-bottom:4px solid #050708;display:flex;align-items:center;padding:0 clamp(12px,3vw,24px);font-weight:900;letter-spacing:2px;font-size:clamp(17px,3.5vw,24px);text-shadow:2px 3px #06040b;white-space:nowrap;overflow:hidden}
 .building{font-size:28px;margin-right:12px;line-height:1}.edition{font-size:10px;letter-spacing:0;margin-left:auto;background:#1a1c29;border:2px solid #0a0c12;padding:6px 7px;color:#ffe4a0;text-shadow:none}
 .viewport{position:relative;min-height:0;flex:1;overflow:hidden;background:#2a3243}
-#world{display:block;width:100%;height:100%;touch-action:none;image-rendering:pixelated}
+#world{display:block;width:100%;height:100%;touch-action:none;image-rendering:auto}
 .left-tools{position:absolute;top:13px;left:12px;z-index:6;display:flex;flex-direction:column;gap:9px}
 .tool{position:relative;width:58px;height:58px;border-radius:50%;background:linear-gradient(#405571,#263247);border:4px solid #090c14;box-shadow:inset 0 0 0 3px #61728b,0 3px 0 rgba(0,0,0,.55);color:#e9eff9;font:bold 30px/1 monospace;display:flex;align-items:center;justify-content:center}
 .tool:active{transform:translateY(2px)}.tool.gold{background:linear-gradient(#ffdf7d,#eab840);color:#1a1f28;box-shadow:inset 0 0 0 3px #fff0a9,0 3px 0 rgba(0,0,0,.55)}

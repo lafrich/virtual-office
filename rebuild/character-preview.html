@@ -96,7 +96,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
   for(let i=-2;i<=2;i++){
    const dx=i*33;ctx.beginPath();ctx.moveTo(240+dx-71,320-36);ctx.lineTo(240+dx+71,320+36);ctx.stroke();
   }
-  const frame=walking&&!pose?1+(Math.floor(t/200)%3):0;
+  const frame=walking&&!pose?[1,2,3,2][Math.floor(t/200)%4]:0;
   const row=rows[direction],image=pose?poses:sheet;
   if(image.complete&&image.naturalWidth){
    ctx.imageSmoothingEnabled=true;

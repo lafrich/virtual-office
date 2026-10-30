@@ -6,9 +6,11 @@
 'use strict';
 const $=id=>document.getElementById(id), C=$('world'), g=C.getContext('2d',{alpha:false});
 const view=$('viewport'), action=$('actionBtn'), toastEl=$('toast');
-const DPR=.82, TX=23, TY=11.5, TAU=Math.PI*2;
+// High-density canvas: render at physical display resolution.
+const DPR=Math.min(2,Math.max(1,window.devicePixelRatio||1)), TX=23, TY=11.5, TAU=Math.PI*2;
 const V=window.VOVisualSystem, PAL=V.palette;
-let W=420,H=650,zoom=.77,ox=0,oy=0,now=performance.now(),toastTimer=0,manualZoom=false;
+let W=420,H=650,zoom=.77*DPR,ox=0,oy=0,now=performance.now(),toastTimer=0,manualZoom=false;
+const fitZoom=()=>clamp(view.getBoundingClientRect().width/480,.70,.94)*DPR;
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
 const iso=(x,y,z=0)=>({x:ox+(x-y)*TX*zoom,y:oy+(x+y)*TY*zoom-z*zoom});
 const point=(x,y)=>({x:Math.round(x),y:Math.round(y)});
@@ -433,8 +435,8 @@ function drawPark(occupied,frame){
 function resize(){
  const box=view.getBoundingClientRect();
  W=Math.max(180,Math.floor(box.width*DPR));H=Math.max(180,Math.floor(box.height*DPR));
- C.width=W;C.height=H;g.imageSmoothingEnabled=false;
- if(!manualZoom)zoom=clamp(box.width/480,.70,.94);
+ C.width=W;C.height=H;g.imageSmoothingEnabled=true;
+ if(!manualZoom)zoom=fitZoom();
 }
 window.addEventListener('resize',resize,{passive:true});resize();
 
@@ -645,9 +647,9 @@ $('tabNotifications').addEventListener('click',()=>switchTab('notif'));
 $('tabStatus').addEventListener('click',()=>switchTab('status'));
 $('btnMap').addEventListener('click',()=>{if(coveEditor?.active)return;$('zoneSwitch').hidden=!$('zoneSwitch').hidden;$('drawer').hidden=true});
 document.querySelectorAll('[data-zone]').forEach(b=>b.addEventListener('click',()=>setZone(b.dataset.zone)));
-$('btnZoomIn').addEventListener('click',()=>{manualZoom=true;zoom=clamp(zoom+.12,.55,1.50)});
-$('btnZoomOut').addEventListener('click',()=>{manualZoom=true;zoom=clamp(zoom-.12,.55,1.50)});
-$('btnFit').addEventListener('click',()=>{manualZoom=false;zoom=clamp(view.getBoundingClientRect().width/480,.70,.94);notice('Kamera dipusatkan')});
+$('btnZoomIn').addEventListener('click',()=>{manualZoom=true;zoom=clamp(zoom+.12*DPR,.55*DPR,1.50*DPR)});
+$('btnZoomOut').addEventListener('click',()=>{manualZoom=true;zoom=clamp(zoom-.12*DPR,.55*DPR,1.50*DPR)});
+$('btnFit').addEventListener('click',()=>{manualZoom=false;zoom=fitZoom();notice('Kamera dipusatkan')});
 const keys=new Set();let joy={x:0,y:0,pointer:null};const joystick=$('joystick'),knob=$('joyKnob');
 const resetJoy=()=>{joy.x=0;joy.y=0;joy.pointer=null;knob.style.left='50%';knob.style.top='50%'};
 function adjustJoy(e){
