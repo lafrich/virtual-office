@@ -88,7 +88,21 @@ async function handle(ev, p, u) {
         "function goTo(t){ if(me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement(); if(OUT_ON){");
       patched = patched.replace(hudAnchor,
         "window.addEventListener('vc-life-stand',()=>{ if(mode==='sit'||mode==='sleep') mode='idle'; });\n" + hudAnchor);
-      const extended = patched.replace('</body>', '<script src="life-context.js?v=4" defer></script></body>');
+      // actionCtx, doAction and me are private to the original game IIFE.
+      // Put the contextual controller inside that IIFE, not in an external script.
+      const scopeEnd = '  MP.me=null; MP.tok=null; showLogin(true);\n})();\n})();\n</script>';
+      if (patched.split(scopeEnd).length !== 2) {
+        console.warn('[staging] game IIFE closure changed');
+        return new Response('staging game scope mismatch', {status:500});
+      }
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=5', {cache:'no-store'});
+      if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
+      const ctx = await ctxResponse.text();
+      if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
+        return new Response('invalid life-context controller', {status:500});
+      }
+      const extended = patched.replace(scopeEnd,
+        '  MP.me=null; MP.tok=null; showLogin(true);\n})();\n' + ctx + '\n})();\n</script>');
       return new Response(extended, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
     }
     return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
