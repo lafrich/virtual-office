@@ -192,7 +192,7 @@
   // Called synchronously at the beginning of the original movement tick,
   // and before pathfinding when the player taps another location.
   window.__lifeBridge.exitPoseForMovement = function () {
-    const hadPose = !!me.forceAnim || !!me._lifeStandOrigin;
+    const hadPose = !!me._lifeStandOrigin; // never interrupt unrelated game poses
     if (!hadPose) return false;
     me.forceAnim = null;
     const origin = me._lifeStandOrigin;
