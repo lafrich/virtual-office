@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Virtual Office — Character Flat Animation Preview</title>
+<title>Virtual Office — Character Flat — Final Animation Preview</title>
 <style>
 :root{--sky:#B9DCF4;--cream:#FFF8E6;--ink:#28364A;--red:#C94148;--line:#879FB2;--blue:#4E8DE6;--yellow:#FFC857}
 *{box-sizing:border-box}
@@ -15,7 +15,7 @@ nav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 a{color:var(--ink);background:var(--yellow);font-size:12px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--line);padding:9px 12px;text-decoration:none;font-weight:bold}
 section{background:#F8FBFF;border:2px solid var(--ink);box-shadow:4px 4px 0 #86A8C2;margin-bottom:18px;padding:15px}
 h2{font-size:15px;margin:0 0 14px}p{font-size:12px;line-height:1.6}
-canvas{display:block;max-width:100%;width:100%;height:auto;background:linear-gradient(#C4E4FB,#ECF6FF);border:2px solid #A6C7E0;image-rendering:pixelated}
+canvas{display:block;max-width:100%;width:100%;height:auto;background:linear-gradient(#C4E4FB,#ECF6FF);border:2px solid #A6C7E0}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 button{padding:9px 10px;min-height:38px;background:var(--cream);border:2px solid var(--ink);font-weight:bold;font:12px "Courier New",monospace;color:var(--ink);cursor:pointer}
 button.active{background:var(--yellow)}
@@ -24,9 +24,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 .meta{border-top:1px solid #B3C9D8;padding-top:9px;color:#526778}
 .frames{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 .frame-card{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#DDECFA;border:2px solid #A7BBCD;padding:9px 3px;min-width:0}
-.sprite{height:112px;width:96px;max-width:100%;background-image:url('./assets/character_flat_sheet.svg');background-repeat:no-repeat;image-rendering:pixelated}
-.sprite.down{background-position:0 0}.sprite.left{background-position:0 -112px}
-.sprite.right{background-position:0 -224px}.sprite.up{background-position:0 -336px}
+.sprite{height:160px;width:128px;max-width:100%;background-image:url('./assets/character_flat_sheet.svg?v=2');background-repeat:no-repeat;image-rendering:auto}
+.sprite.down{background-position:0 0}.sprite.left{background-position:0 -160px}
+.sprite.right{background-position:0 -320px}.sprite.up{background-position:0 -480px}
 .frame-card strong{font-size:10px;margin-top:6px}
 .code{font-family:monospace;color:#3D5977;font-size:11px}
 @media(max-width:440px){.frames{grid-template-columns:repeat(2,1fr)}.actions button{flex:1 1 25%}}
@@ -34,12 +34,12 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 </head>
 <body>
 <header><div style="letter-spacing:2px;font-weight:bold;font-size:10px">LAFRICH / VIRTUAL OFFICE / CHARACTER SYSTEM</div>
-<h1>CHARACTER · FLAT 01</h1><small>4 arah · 4 frame per arah · 5 pose interaksi · berdasarkan gaya Cove Room</small></header>
+<h1>CHARACTER · FINAL 02</h1><small>4 arah · 4 frame per arah · 5 pose interaksi · berdasarkan gaya Cove Room</small></header>
 <main>
-<nav><a href="./?v=11">▶ MAIN GAME</a><a href="./asset-atlas.html">✦ ART ATLAS</a>
+<nav><a href="./?v=12">▶ MAIN GAME</a><a href="./asset-atlas.html">✦ ART ATLAS</a>
 <a href="https://github.com/lafrich/virtual-office/blob/main/rebuild/CHARACTER_GUIDE.md">⚙ CHARACTER GUIDE</a></nav>
 <section><h2>01 — Animation Preview</h2>
-<canvas width="480" height="340" id="preview" aria-label="Preview animasi karakter"></canvas>
+<canvas width="480" height="420" id="preview" aria-label="Preview animasi karakter"></canvas>
 <div class="actions dirs">
 <button data-dir="left">← KIRI</button><button data-dir="up">↑ ATAS</button>
 <button data-dir="down" class="active">↓ BAWAH</button><button data-dir="right">→ KANAN</button>
@@ -62,14 +62,14 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
 </section>
 <section><h2>03 — Locked Art Direction</h2>
 <p><b>Flat isometric, soft pastel, sedikit outline, maksimal 3 tone per material.</b> Rambut hitam bergumpal asimetris, kacamata kotak, kaos charcoal, celana gelap dan sepatu sederhana. Seluruh frame memakai pivot kaki yang sama. Pose interaksi berada dalam sheet terpisah.</p>
-<p class="code">Idle: frame 0 · Walk: frame 1/2/3 · Pivot: (48,103) / 96×112 · Front: down · Back: up · Side: left/right.</p>
+<p class="code">Idle: frame 0 · Walk: frame 1/2/3 · Pivot: (64,146) / 128×160 · Front: down · Back: up · Side: left/right.</p>
 </section>
 </main>
 <script>
 (()=>{'use strict';
  const cv=document.getElementById('preview'),ctx=cv.getContext('2d');
  const sheet=new Image(),poses=new Image();
- sheet.src='./assets/character_flat_sheet.svg';poses.src='./assets/character_flat_poses.svg';
+ sheet.src='./assets/character_flat_sheet.svg?v=2';poses.src='./assets/character_flat_poses.svg?v=2';
  let direction='down',pose=null,walking=true,t0=0;
  const rows={down:0,left:1,right:2,up:3},
        posesCol={sit:0,sleep:1,bathe:2,toilet:3,work:4};
@@ -88,20 +88,20 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--blue)}
   ctx.lineTo(x,y+hh);ctx.lineTo(x-ww,y);ctx.closePath();ctx.fill();
  }
  function render(t){
-  ctx.clearRect(0,0,480,340);
-  ctx.fillStyle='#CAE6F8';ctx.fillRect(0,0,480,340);
-  diamond(240,260,179,92,'#CEE5FF');
-  diamond(240,250,170,84,'#E7F2FC');
+  ctx.clearRect(0,0,480,420);
+  ctx.fillStyle='#CAE6F8';ctx.fillRect(0,0,480,420);
+  diamond(240,350,179,92,'#CEE5FF');
+  diamond(240,340,170,84,'#E7F2FC');
   ctx.strokeStyle='#C4D9E9';ctx.lineWidth=1;
   for(let i=-2;i<=2;i++){
-   const dx=i*33;ctx.beginPath();ctx.moveTo(240+dx-71,228-36);ctx.lineTo(240+dx+71,228+36);ctx.stroke();
+   const dx=i*33;ctx.beginPath();ctx.moveTo(240+dx-71,320-36);ctx.lineTo(240+dx+71,320+36);ctx.stroke();
   }
-  const frame=walking&&!pose?1+(Math.floor(t/160)%3):0;
+  const frame=walking&&!pose?1+(Math.floor(t/200)%3):0;
   const row=rows[direction],image=pose?poses:sheet;
   if(image.complete&&image.naturalWidth){
-   ctx.imageSmoothingEnabled=false;
-   ctx.drawImage(image,pose?posesCol[pose]*96:frame*96,pose?0:row*112,96,112,
-     240-48*2.4,258-103*2.4,96*2.4,112*2.4);
+   ctx.imageSmoothingEnabled=true;
+   ctx.drawImage(image,pose?posesCol[pose]*128:frame*128,pose?0:row*160,128,160,
+     240-64*2,350-146*2,128*2,160*2);
   }
   const status=(pose||((walking?'walk_':'idle_')+direction))+' · frame '+frame;
   document.getElementById('state').textContent=status;
