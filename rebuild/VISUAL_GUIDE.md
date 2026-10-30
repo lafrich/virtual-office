@@ -67,3 +67,15 @@ All new modules specify: stable ID, name, visual type/category, physical footpri
 
 ## Current limitations
 The current Rebuild 05 visual pass **does not yet replace all procedural geometry with individually illustrated pixel-art PNGs**. The concept sheet is an **art direction reference**; it is not a complete exported sprite sheet. To reach its exact fidelity, illustrated sprite assets must be produced individually and plugged into the shared manifest/pivot system.
+
+
+## Rebuild 07 — Depth and Environment Pass
+
+- **Unified world depth:** Office, Warteg, and Taman now enqueue furniture in painter order using `asset.at.x + asset.at.y + depthBias`. This matches the character depth and Cove's modular rendering. Moving furniture through Edit Mode updates draw order automatically instead of retaining an outdated hardcoded order.
+- **Seated avatars:** Office work chair, sofa, park bench, and warteg counter render their sitter within that furniture's draw group. The office work chair specifically uses `chair base -> avatar -> chair foreground`; standing player is not drawn again above everything.
+- **Shared architecture:** `visual-environment.js` draws the same restrained tile-floor thickness, warm wall skirting and pale hard-edged window light in every location. All coordinate values use the existing 2:1 projection.
+- **Warteg detail:** Green buffet counter now has clearly grouped food trays, condensed glass framing, condiments and wooden stool tops; the roadside warteg adds a striped canopy.
+- **Taman detail:** Park benches get consistent wooden slats and metal fasteners, with a separate front lip rendered after the seated sprite.
+- **Regression coverage:** Exercise 4 map renders, Action interactions, editing and local persistence on every release. Rebuild 07 has 10/10 simulated gameplay/integration checks passing. Browser screenshots and mobile visual QA are still required; simulation tests do not establish pixel-perfect rendering.
+
+No game data or existing per-browser furniture positions are reset by this visual update.
