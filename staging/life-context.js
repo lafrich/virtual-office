@@ -232,16 +232,38 @@
 
   // Staging-only visual seat calibration. Hidden unless office.html?seatCal=1
   // is opened deliberately; the usual contextual Action UI is unchanged.
-  const SEAT_CAL_KEY = 'vc-blue-sofa-user-pivot-v1';
-  const seatVisualTuning = { x: 8, y: -4 }; // atlas px; into sofa, not down in front
+  // Exact player-only calibration: user verified the MIDDLE BLUE SOFA seat.
+  // The other two slots have separate, as-yet uncalibrated offsets (0,0).
+  // Old localStorage v1 was for ALL sofa seats and must not override this value.
+  const BLUE_SOFA_DEFAULT_OFFSETS = [
+    { x: 0, y: 0 },      // left; awaiting visual calibration
+    { x: -2, y: -4 },    // MIDDLE; user-confirmed 2026-10-31
+    { x: 0, y: 0 }       // right; awaiting visual calibration
+  ];
+  const SEAT_CAL_KEY = 'vc-blue-sofa-player-offsets-v2';
+  const seatVisualTunings = BLUE_SOFA_DEFAULT_OFFSETS.map(v => ({ ...v }));
   const seatCalibrationMode = new URLSearchParams(location.search).get('seatCal') === '1';
-  try {
-    const saved = JSON.parse(localStorage.getItem(SEAT_CAL_KEY) || 'null');
-    if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
-      seatVisualTuning.x = Math.max(-32, Math.min(32, Math.round(saved.x)));
-      seatVisualTuning.y = Math.max(-32, Math.min(32, Math.round(saved.y)));
-    }
-  } catch (e) {}
+
+  // These temporary overrides are only honored in explicit calibration mode.
+  // Standard staging is deterministic and always uses the confirmed defaults.
+  if (seatCalibrationMode) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(SEAT_CAL_KEY) || 'null');
+      if (Array.isArray(saved)) {
+        saved.slice(0, 3).forEach((v, i) => {
+          if (v && Number.isFinite(v.x) && Number.isFinite(v.y)) {
+            seatVisualTunings[i].x = Math.max(-32, Math.min(32, Math.round(v.x)));
+            seatVisualTunings[i].y = Math.max(-32, Math.min(32, Math.round(v.y)));
+          }
+        });
+      }
+    } catch (e) {}
+  }
+  function selectedSofaSlot() {
+    if (!me._lifeSeat || me._lifeSeat.objectId !== 'sofa_3_sw') return -1;
+    const index = me._lifeSeat.seatIndex;
+    return Number.isInteger(index) && index >= 0 && index <= 2 ? index : -1;
+  }
 
   let calPanel = null;
   if (seatCalibrationMode) {
@@ -255,8 +277,7 @@
       '#vc-seat-cal .value{color:#ffe08c;margin:5px 0 8px}',
       '#vc-seat-cal .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}',
       '#vc-seat-cal .bottom{display:flex;gap:4px;margin-top:7px}',
-      '#vc-seat-cal .bottom button{font-size:10px;flex:1}',
-      ''
+      '#vc-seat-cal .bottom button{font-size:10px;flex:1}'
     ].join('');
     document.head.appendChild(css);
     calPanel = document.createElement('div');
@@ -268,32 +289,35 @@
       '<div class="bottom"><button data-copy="1">COPY X/Y</button></div>';
     document.body.appendChild(calPanel);
     const update = () => {
+      const slot = selectedSofaSlot();
+      if (slot < 0) return;
+      const offset = seatVisualTunings[slot];
       calPanel.querySelector('.value').textContent =
-        'X: ' + seatVisualTuning.x + ' · Y: ' + seatVisualTuning.y + ' px';
-      try { localStorage.setItem(SEAT_CAL_KEY, JSON.stringify(seatVisualTuning)); } catch (e) {}
+        'SLOT ' + (slot + 1) + '/3 · X: ' + offset.x + ' · Y: ' + offset.y + ' px';
+      try { localStorage.setItem(SEAT_CAL_KEY, JSON.stringify(seatVisualTunings)); } catch (e) {}
     };
     for (const eventName of ['pointerdown','pointerup','touchstart','touchend','click','keydown','keyup']) {
       calPanel.addEventListener(eventName, e => e.stopPropagation());
     }
     calPanel.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
+      const slot = selectedSofaSlot();
+      if (slot < 0) return;
+      const offset = seatVisualTunings[slot];
       if (button.hasAttribute('data-dx')) {
-        seatVisualTuning.x = Math.max(-32, Math.min(32,
-          seatVisualTuning.x + Number(button.dataset.dx)));
+        offset.x = Math.max(-32, Math.min(32, offset.x + Number(button.dataset.dx)));
       } else if (button.hasAttribute('data-dy')) {
-        seatVisualTuning.y = Math.max(-32, Math.min(32,
-          seatVisualTuning.y + Number(button.dataset.dy)));
+        offset.y = Math.max(-32, Math.min(32, offset.y + Number(button.dataset.dy)));
       } else if (button.hasAttribute('data-reset')) {
-        seatVisualTuning.x = 8; seatVisualTuning.y = -4;
+        Object.assign(offset, BLUE_SOFA_DEFAULT_OFFSETS[slot]);
       } else if (button.hasAttribute('data-copy')) {
-        const val = 'Blue sofa player seat offset: X=' + seatVisualTuning.x +
-          ', Y=' + seatVisualTuning.y + ' atlas px';
+        const val = 'Blue sofa player seat SLOT ' + (slot + 1) +
+          ' offset: X=' + offset.x + ', Y=' + offset.y + ' atlas px';
         navigator.clipboard?.writeText(val).catch(() => {});
       }
       update();
     }));
-    update();
   }
-  window.__vcLifeSeatTuning = seatCalibrationMode ? seatVisualTuning : null;
+  window.__vcLifeSeatTuning = seatCalibrationMode ? seatVisualTunings : null;
 
   // Render the seated *player* in the same depth-sorted SVG world as Baymax.
   // The normal player avatar is HTML above all furniture, causing the player to
@@ -315,8 +339,16 @@
     window.__vcLifeSeatRenderer = function renderSeatLayer() {
       const sitting = valid && !SPEC && !OUT_ON && !!me._lifeSeat &&
         !me.moving && ['sit','perch','lie'].includes(me.forceAnim);
-      if (calPanel) calPanel.style.display =
-        sitting && me._lifeSeat.objectId === 'sofa_3_sw' ? 'block' : 'none';
+      if (calPanel) {
+        const onSofa = sitting && selectedSofaSlot() >= 0;
+        calPanel.style.display = onSofa ? 'block' : 'none';
+        if (onSofa) {
+          const current = seatVisualTunings[selectedSofaSlot()];
+          calPanel.querySelector('.value').textContent =
+            'SLOT ' + (selectedSofaSlot() + 1) + '/3 · X: ' + current.x +
+            ' · Y: ' + current.y + ' px';
+        }
+      }
       if (!sitting) {
         if (displayed) {
           displayed = false;
@@ -330,10 +362,10 @@
       // Calibrate only the rendered PLAYER on the BLUE sofa: a small
       // screen-diagonal step into the cushion (right/back), never move the
       // actual seat, collision, Baymax, Migi, or the furniture itself.
-      const isBlueSofa = me._lifeSeat.objectId === 'sofa_3_sw' &&
-        me.forceAnim === 'sit';
-      const dx = isBlueSofa ? seatVisualTuning.x / PPU : 0;
-      const dy = isBlueSofa ? seatVisualTuning.y / PPU : 0;
+      const slot = me.forceAnim === 'sit' ? selectedSofaSlot() : -1;
+      const offset = slot < 0 ? null : seatVisualTunings[slot];
+      const dx = offset ? offset.x / PPU : 0;
+      const dy = offset ? offset.y / PPU : 0;
       const y = p.y + sitOffset(me.c, me.r, me.forceAnim, null) + dy;
       const xSnap = Math.round((p.x + dx) * PPU) / PPU;
       const ySnap = Math.round(y * PPU) / PPU;
