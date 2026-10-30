@@ -43,3 +43,26 @@ Colors and material ramps are always sourced from `visual-system.js`.
 - `VISUAL_GUIDE.md`: complete art-direction reference.
 
 **Status:** This is still a consistent, detailed **procedural pixel-art pass**, not the illustration reference recreated at exact fidelity or raster PNG sprites. The next art pass can replace objects one at a time while keeping the physics, snapping and interaction system.
+
+
+## Rebuild 08 — Real layered pixel-style sprite files
+
+Three flagship Cove interactions now use **original transparent SVG assets**, not per-frame procedural geometry:
+
+| Asset | Base art | Foreground/occlusion art |
+|---|---|---|
+| Bed | `assets/bed_base.svg` | `assets/bed_front.svg` |
+| Bathtub | `assets/bathtub_base.svg` | `assets/bathtub_front.svg` |
+| Toilet | `assets/toilet_base.svg` | `assets/toilet_front.svg` |
+
+Each file is a `160 × 160` transparent, shape-rendering="crispEdges" SVG in the same 2:1 isometric projection, with a shared artwork origin at **(80,118)**.
+
+**Runtime pivot contract:** for these *built-in files only*, the sprite origin is `{x:.5,y:.7375}` in normalized image coordinates. The renderer subtracts that origin so the sprite's physical center matches the object's existing world coordinate. This is independent of the Edit Mode `offset` or action `pose` anchor. The foreground asset uses the same canvas size and origin, so the blanket/tub rim covers a seated avatar without shifting.
+
+The PNG loader now also accepts same-origin `./assets/*.svg` file paths. Unrecognized/remote/parent-traversal paths remain rejected; custom PNG or SVG objects retain the previous bottom-center pivot convention unless a built-in matching sprite is chosen.
+
+Legacy browser layouts with `sprite:null` are upgraded non-destructively to built-in art without resetting the user's edited `at`, `offset`, `size`, `action` positions, or save data. A custom user-specified sprite path is not overwritten.
+
+**Tested:** six XML/SVG asset files, whitelisted paths, legacy layout migration, JSON persistence, foreground painter order, and pixel-precise image pivot. Detailed sprite drawing still needs visual QA in a real browser/device after deployment.
+
+**Next pass:** replace the remaining Cove and Office procedural props with their own authored sprite assets, retaining the same projection, palette and per-object calibrations.
