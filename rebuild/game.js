@@ -38,39 +38,85 @@ function shadow(x,y,w=13,h=5){
  const p=iso(x,y);g.fillStyle='rgba(30,40,54,.30)';g.beginPath();g.ellipse(p.x,p.y,w*zoom,h*zoom,0,0,TAU);g.fill();
 }
 function faceDir(d){return d==='se'||d==='sw'?'front':'back'}
-function drawHuman(x,y,{sitting=false,lying=false,dir='sw',shirt='#22293a',hair='#161c25',skin='#f1be92',label=null,npc=false,walk=0}={}){
+function drawHuman(x,y,{sitting=false,lying=false,dir='sw',
+ shirt=PAL.ink,hair='#171b24',skin=PAL.skin,label=null,npc=false,walk=0}={}){
  const p=iso(x,y),k=zoom;
- shadow(x,y,9,4);
+ shadow(x,y,8.5,3.4);
  g.save();g.translate(Math.round(p.x),Math.round(p.y));g.scale(k,k);
- if(lying){fill(-13,-11,27,7,shirt);fill(-17,-16,12,11,hair);fill(-13,-13,8,8,skin);fill(9,-8,8,3,'#3c3946');}
- else {
-  const bob=sitting?0:Math.round(Math.sin(walk*11)*2);
+ // The avatar uses one consistent pixel scale and the same top-left lighting
+ // in idle, walk, sit, sleep and bath. Nothing is a new floating canvas object.
+ const P=(xx,yy,ww,hh,c)=>fill(xx,yy,ww,hh,c);
+ const trousers='#303747',trousersLight='#526078',boots='#2B3038',
+       shirtLight=shirt===PAL.ink?'#44536B':PAL.grey;
+ const rear=faceDir(dir)!=='front';
+ const glasses=hair==='#171b24'||hair==='#161c25';
+ if(lying){
+  // Lateral 2:1 sleeping silhouette, with glasses & hair at left.
+  P(-18,-14,11,11,hair);P(-17,-10,9,8,skin);
+  P(-13,-15,11,4,hair);P(-15,-8,8,2,hair);
+  P(-6,-13,23,12,shirt);P(-5,-12,9,3,shirtLight);
+  P(14,-12,15,5,trousers);P(15,-6,15,4,trousers);
+  P(25,-12,8,3,boots);P(27,-3,8,3,boots);
+  if(glasses){P(-14,-9,6,3,PAL.ink);P(-12,-8,3,1,PAL.glass)}
+ }else{
+  const stride=sitting?0:Math.sin(walk*9),swing=Math.round(stride*2);
+  const torso=sitting?-23:-34,head=sitting?-43:-54;
   if(sitting){
-   fill(-8,-9,6,11,'#2a2b36');fill(1,-9,6,11,'#2a2b36');
-   fill(-10,-1,8,3,'#423727');fill(2,-1,8,3,'#423727');
-   fill(-9,-22,19,17,shirt);fill(-13,-16,5,12,shirt);fill(8,-15,5,12,shirt);
+   // Bent thighs and short dangling lower legs sit behind front occlusion.
+   P(-9,-9,8,10,trousers);
+   P(2,-9,8,10,trousersLight);
+   P(-10,-1,8,3,boots);P(3,-1,8,3,boots);
+   P(-9,-12,18,5,trousers);
   }else{
-   fill(-7,-12+bob,6,12,'#252939');fill(2,-12-bob,6,12,'#222736');
-   fill(-8,-2+bob,8,3,'#473c32');fill(1,-2-bob,8,3,'#473c32');
-   fill(-9,-33,18,21,shirt);fill(-13,-29,5,16,shirt);fill(9,-29,5,16,shirt);
+   P(-9,-15+swing,7,15,trousers);
+   P(2,-15-swing,7,15,trousersLight);
+   P(-10,-2+swing,8,3,boots);P(2,-2-swing,9,3,boots);
+   P(-8,-17,16,4,trousers);
   }
-  const headY=sitting?-40:-51;
-  fill(-11,headY,22,19,hair);fill(-9,headY+8,18,12,skin);fill(-10,headY,20,7,hair);
-  if(faceDir(dir)==='front'){
-   // Signature black pixel glasses: reusable character identity.
-   fill(-10,headY+10,10,7,PAL.ink);
-   fill(1,headY+10,10,7,PAL.ink);
-   fill(-1,headY+12,3,2,PAL.ink);
-   fill(-8,headY+12,6,3,'#D9EAF1');
-   fill(3,headY+12,6,3,'#D9EAF1');
-   fill(-7,headY+13,2,2,PAL.ink);
-   fill(4,headY+13,2,2,PAL.ink);
-   fill(-6,headY+18,12,1,'#975E4E');
-  }else{fill(-10,headY+2,18,17,hair);fill(-3,headY+2,9,9,'#333845')}
-  if(hair==='#171b24'){fill(-12,headY+6,3,11,hair)}
+  // Shirt silhouette: separate shoulders, seam, sleeves and tiny collar.
+  P(-11,torso,22,19,shirt);P(-9,torso+2,6,3,shirtLight);
+  P(-13,torso+2,5,12,shirt);
+  P(8,torso+2,6,12,shirt);
+  P(-13,torso+13,4,5,skin);
+  P(10,torso+13,4,5,skin);
+  P(-7,torso+18,14,2,PAL.ink);
+  P(-3,torso+1,6,3,skin);
+  // Rounded pixel-cut jaw and ears, framed by two-tone hair.
+  P(-12,head+5,24,16,skin);
+  P(-10,head+19,20,4,PAL.skinShadow);
+  P(-12,head+15,4,6,PAL.skinShadow);
+  P(8,head+15,4,6,PAL.skinShadow);
+  P(-12,head-1,24,12,hair);
+  P(-10,head-4,8,7,hair);
+  P(0,head-5,10,7,hair);
+  P(10,head+5,3,14,hair);
+  P(-13,head+4,4,14,hair);
+  // Asymmetric pixel bangs and small side tuft; no smooth gradients.
+  P(-8,head+8,5,5,hair);
+  P(-1,head+7,6,4,hair);
+  P(6,head+9,4,4,hair);
+  P(-8,head+1,7,3,'#303746');
+  if(!rear){
+   if(glasses){
+    // Glasses as two open lenses, exact same size for every pose.
+    P(-10,head+12,9,7,PAL.ink);P(1,head+12,9,7,PAL.ink);
+    P(-8,head+14,5,3,PAL.glass);P(3,head+14,5,3,PAL.glass);
+    P(-2,head+14,5,2,PAL.ink);
+    P(-8,head+15,2,2,PAL.ink);P(3,head+15,2,2,PAL.ink);
+    P(-12,head+13,3,2,PAL.ink);P(9,head+13,3,2,PAL.ink);
+   }else{
+    P(-7,head+15,2,2,PAL.ink);
+    P(5,head+15,2,2,PAL.ink);
+   }
+   P(-3,head+21,6,1,'#935A4F');
+  }else{
+   // Back-facing hair covers facial features with a simple side highlight.
+   P(-9,head+10,18,11,hair);
+   P(-6,head+3,7,14,'#2A303A');
+  }
  }
  g.restore();
- if(label){const q=iso(x,y,(lying?20:sitting?51:63));pixelText(label,q.x,q.y,'#fff',9)}
+ if(label){const q=iso(x,y,(lying?20:sitting?51:63));pixelText(label,q.x,q.y,PAL.cream,9)}
 }
 function drawCat(x,y,t=0){
  const p=iso(x,y,4);g.save();g.translate(Math.round(p.x),Math.round(p.y+Math.sin(t*2)*1.1));g.scale(zoom,zoom);
