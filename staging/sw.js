@@ -5,7 +5,7 @@
 'use strict';
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
-const PLAIN = new Set(['', 'index.html', 'sw.js', 'life-context.js', '.nojekyll', '404.html']);
+const PLAIN = new Set(['', 'index.html', 'sw.js', 'life-context.js', 'player-status.js', '.nojekyll', '404.html']);
 let KEY = null, MAN = null, MANP = null, MANT = 0;
 
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -143,7 +143,8 @@ async function handle(ev, p, u) {
         return new Response('invalid life-context controller', {status:500});
       }
       const extended = patched.replace(scopeEnd,
-        '  MP.me=null; MP.tok=null; showLogin(true);\n})();\n' + ctx + '\n})();\n</script>');
+        '  MP.me=null; MP.tok=null; showLogin(true);\n})();\n' + ctx + '\n})();\n</script>')
+        .replace('</body>', '<script src="player-status.js?v=1" defer></script></body>');
       return new Response(extended, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
     }
     return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
