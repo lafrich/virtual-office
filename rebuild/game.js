@@ -225,7 +225,7 @@ function drawOffice(x,y,sceneActor,frame){
    const item=w.get(id),base=w.defaultAssets.find(a=>a.id===id);
    if(!item?.visible||!base)continue;
    const dx=item.at.x-base.at.x,dy=item.at.y-base.at.y;
-   objects.push({d:depth+dx+dy+item.depthBias,
+   objects.push({d:item.at.x+item.at.y+item.depthBias,
      fn:()=>paintFurniture('office',id,base.at.x,base.at.y,fn)});
  }
 }
@@ -245,57 +245,67 @@ function drawBar(occupied){
  // Foreground bar edge is ALWAYS rendered above the seated avatar.
  box(6.3,4.95,7.7,.20,30,PAL.green,PAL.greenDark,PAL.greenDark);
 }
+function queueFurniture(zone,id,draw){
+ const item=sceneWorlds[zone]?.get(id);
+ if(!item?.visible)return;
+ // Exact same grid-based depth as the player and the Cove modular engine.
+ // No DOM reparenting: every frame simply repaints in world order.
+ objects.push({d:item.at.x+item.at.y+item.depthBias,fn:draw});
+}
 function drawWarteg(occupied){
  drawWalls('warteg');drawFloor('warteg');
- paintFurniture('warteg','warteg-plant',1.4,2.4,()=>drawPlant(1.4,2.4,.8));
- paintFurniture('warteg','warteg-sign',3,3,()=>box(3,3,1.35,.7,29,PAL.cream,PAL.wallSide,PAL.grey));
+ queueFurniture('warteg','warteg-plant',()=>paintFurniture('warteg','warteg-plant',1.4,2.4,()=>drawPlant(1.4,2.4,.8)));
+ queueFurniture('warteg','warteg-sign',()=>paintFurniture('warteg','warteg-sign',3,3,()=>box(3,3,1.35,.7,29,PAL.cream,PAL.wallSide,PAL.grey)));
  for(let i=0;i<2;i++){
    const cx=3.6+i*4.9;
-   paintFurniture('warteg','warteg-table-'+(i===0?'a':'b'),cx,8.1,()=>{
+   const id='warteg-table-'+(i===0?'a':'b');
+   queueFurniture('warteg',id,()=>paintFurniture('warteg',id,cx,8.1,()=>{
      box(cx,8.1,2.5,1.4,9,PAL.green,PAL.greenDark,PAL.greenDark);
      // The attached small benches remain decorative and move with their table.
      for(const sign of [-1,1])box(cx,8.1+sign*.85,1.8,.43,5,PAL.green,PAL.greenDark,PAL.greenDark);
-   });
+   }));
  }
- paintFurniture('warteg','warteg-bar',6.3,4.1,(dx,dy)=>{
+ queueFurniture('warteg','warteg-bar',()=>paintFurniture('warteg','warteg-bar',6.3,4.1,(dx,dy)=>{
    const sitter=occupied&&/^bar[012]$/.test(occupied.seatId||'')
     ?{...occupied,x:occupied.x-dx,y:occupied.y-dy}:null;
    drawBar(sitter);
- });
+ }));
 }
 function drawPark(occupied,frame){
  drawWalls('street');drawFloor('street');
  for(let i=0;i<4;i++){
    const c=2+i*3.4;
-   paintFurniture('street','street-plant-'+i,c,1.7,()=>drawPlant(c,1.7,i===1?1.1:.7));
+   const id='street-plant-'+i;
+   queueFurniture('street',id,()=>paintFurniture('street',id,c,1.7,()=>drawPlant(c,1.7,i===1?1.1:.7)));
  }
  for(let i=0;i<2;i++){
    const bx=5+i*5;
-   paintFurniture('street','street-bench-'+i,bx,6.4,(dx,dy)=>{
+   const id='street-bench-'+i;
+   queueFurniture('street',id,()=>paintFurniture('street',id,bx,6.4,(dx,dy)=>{
      box(bx,6.4,3.4,.82,8,PAL.woodLight,PAL.wood,PAL.woodDark);
      box(bx,5.95,3.4,.20,21,PAL.woodLight,PAL.wood,PAL.woodDark);
      if(occupied&&occupied.seatId==='bench'+i)
        drawHuman(occupied.x-dx,occupied.y-dy,{sitting:true,dir:'sw'});
      box(bx,6.78,3.4,.12,9,PAL.woodLight,PAL.wood,PAL.woodDark);
-   });
+   }));
  }
- paintFurniture('street','street-warteg',11.4,3.9,()=>{
+ queueFurniture('street','street-warteg',()=>paintFurniture('street','street-warteg',11.4,3.9,()=>{
    box(11.4,3.9,2.8,2.0,22,PAL.wallLight,PAL.wall,PAL.wallSide);
    box(11.4,3.9,3.5,2.6,1,PAL.green,PAL.greenDark,PAL.greenDark,22);
    const p=iso(11.4,3.2,39);
-   pixelText('WARTEG',p.x,p.y,'#ffe4a1',12);
- });
- paintFurniture('street','street-props-a',8.15,9.4,()=>{
+   pixelText('WARTEG',p.x,p.y,PAL.cream,12);
+ }));
+ queueFurniture('street','street-props-a',()=>paintFurniture('street','street-props-a',8.15,9.4,()=>{
    box(8,9.5,1.4,.8,7,'#c4d4d0','#608cba','#5796c6');
-   box(8.3,9.4,.6,.8,12,'#4d6ea0','#42689b','#3b658f',7);
- });
- paintFurniture('street','street-lounger',13.2,8.8,(dx,dy)=>{
+   box(8.3,9.4,.6,.8,12,PAL.blueDark,PAL.blueDark,PAL.shadowDark,7);
+ }));
+ queueFurniture('street','street-lounger',()=>paintFurniture('street','street-lounger',13.2,8.8,(dx,dy)=>{
    box(13.2,8.8,2.4,1,7,'#f4e8d5','#b3a68b','#b8a689');
    box(13.2,8.35,2.4,.28,14,'#f3e7d1','#baa992','#a89d87');
    if(occupied&&occupied.seatId==='lounger')
      drawHuman(occupied.x-dx,occupied.y-dy,{lying:true,dir:'se'});
-   box(13.2,9.28,2.4,.12,8,'#f6eddc','#c0b39b','#b9ac95');
- });
+   box(13.2,9.28,2.4,.12,8,PAL.cream,PAL.creamShade,PAL.wallSide);
+ }));
 }
 function resize(){
  const box=view.getBoundingClientRect();
