@@ -57,8 +57,15 @@ function drawHuman(x,y,{sitting=false,lying=false,dir='sw',shirt='#22293a',hair=
   const headY=sitting?-40:-51;
   fill(-11,headY,22,19,hair);fill(-9,headY+8,18,12,skin);fill(-10,headY,20,7,hair);
   if(faceDir(dir)==='front'){
-   fill(-7,headY+12,4,2,'#293242');fill(4,headY+12,4,2,'#293242');
-   fill(-6,headY+17,12,1,'#6e4a43');
+   // Signature black pixel glasses: reusable character identity.
+   fill(-10,headY+10,10,7,PAL.ink);
+   fill(1,headY+10,10,7,PAL.ink);
+   fill(-1,headY+12,3,2,PAL.ink);
+   fill(-8,headY+12,6,3,'#D9EAF1');
+   fill(3,headY+12,6,3,'#D9EAF1');
+   fill(-7,headY+13,2,2,PAL.ink);
+   fill(4,headY+13,2,2,PAL.ink);
+   fill(-6,headY+18,12,1,'#975E4E');
   }else{fill(-10,headY+2,18,17,hair);fill(-3,headY+2,9,9,'#333845')}
   if(hair==='#171b24'){fill(-12,headY+6,3,11,hair)}
  }
@@ -174,29 +181,29 @@ function drawOffice(x,y,sceneActor,frame){
 function drawBar(occupied){
  const x=6.3,y=4.1;
  // Storage and buffet in front of the green warteg wall.
- box(x,y,7.7,1.45,21,'#f2f3ea','#d2d9d3','#b4bfbc');
- box(x,y-.08,7.9,1.5,23,'#b4e7c4','#72b895','#64a980',21);
+ box(x,y,7.7,1.45,21,PAL.cream,PAL.wallSide,PAL.grey);
+ box(x,y-.08,7.9,1.5,23,PAL.greenLight,PAL.green,PAL.greenDark,21);
  const foods=['#d39a42','#f7c94b','#b86c3c','#94bd65','#dd6e52','#a77d4e'];
  for(let i=0;i<6;i++)box(3.2+i*1.2,4.0,.70,.48,.65,foods[i],'#c4aa89','#a3885e',44);
  for(let s of [-2.6,-.7,1.2,3.1]){const q=iso(x+s,y+.2,55);const r=iso(x+s,y+.2,31);line(q,r,'#c2eaf2',1.5)}
  const stools=[4.8,6.3,7.8];
  for(let i=0;i<stools.length;i++){
-  box(stools[i],6.3,.72,.8,6,'#469d60','#347b4b','#2b7546');
+  box(stools[i],6.3,.72,.8,6,PAL.green,PAL.greenDark,PAL.greenDark);
  }
  if(occupied)drawHuman(occupied.x,occupied.y,{sitting:true,dir:'nw'});
  // Foreground bar edge is ALWAYS rendered above the seated avatar.
- box(6.3,4.95,7.7,.20,30,'#39ab60','#277a49','#216d3f');
+ box(6.3,4.95,7.7,.20,30,PAL.green,PAL.greenDark,PAL.greenDark);
 }
 function drawWarteg(occupied){
  drawWalls('warteg');drawFloor('warteg');
  paintFurniture('warteg','warteg-plant',1.4,2.4,()=>drawPlant(1.4,2.4,.8));
- paintFurniture('warteg','warteg-sign',3,3,()=>box(3,3,1.35,.7,29,'#fff8d9','#d6e3dc','#d3e0d7'));
+ paintFurniture('warteg','warteg-sign',3,3,()=>box(3,3,1.35,.7,29,PAL.cream,PAL.wallSide,PAL.grey));
  for(let i=0;i<2;i++){
    const cx=3.6+i*4.9;
    paintFurniture('warteg','warteg-table-'+(i===0?'a':'b'),cx,8.1,()=>{
-     box(cx,8.1,2.5,1.4,9,'#60b977','#3c8b54','#327e4d');
+     box(cx,8.1,2.5,1.4,9,PAL.green,PAL.greenDark,PAL.greenDark);
      // The attached small benches remain decorative and move with their table.
-     for(const sign of [-1,1])box(cx,8.1+sign*.85,1.8,.43,5,'#44945c','#2b7543','#2d6d40');
+     for(const sign of [-1,1])box(cx,8.1+sign*.85,1.8,.43,5,PAL.green,PAL.greenDark,PAL.greenDark);
    });
  }
  paintFurniture('warteg','warteg-bar',6.3,4.1,(dx,dy)=>{
@@ -214,16 +221,16 @@ function drawPark(occupied,frame){
  for(let i=0;i<2;i++){
    const bx=5+i*5;
    paintFurniture('street','street-bench-'+i,bx,6.4,(dx,dy)=>{
-     box(bx,6.4,3.4,.82,8,'#ad875f','#866448','#795a40');
-     box(bx,5.95,3.4,.20,21,'#b88d68','#855f42','#715b4a');
+     box(bx,6.4,3.4,.82,8,PAL.woodLight,PAL.wood,PAL.woodDark);
+     box(bx,5.95,3.4,.20,21,PAL.woodLight,PAL.wood,PAL.woodDark);
      if(occupied&&occupied.seatId==='bench'+i)
        drawHuman(occupied.x-dx,occupied.y-dy,{sitting:true,dir:'sw'});
-     box(bx,6.78,3.4,.12,9,'#cfa677','#9c754b','#876140');
+     box(bx,6.78,3.4,.12,9,PAL.woodLight,PAL.wood,PAL.woodDark);
    });
  }
  paintFurniture('street','street-warteg',11.4,3.9,()=>{
-   box(11.4,3.9,2.8,2.0,22,'#e7e0b9','#c7b88f','#b6a47a');
-   box(11.4,3.9,3.5,2.6,1,'#168c53','#0d7741','#167e47',22);
+   box(11.4,3.9,2.8,2.0,22,PAL.wallLight,PAL.wall,PAL.wallSide);
+   box(11.4,3.9,3.5,2.6,1,PAL.green,PAL.greenDark,PAL.greenDark,22);
    const p=iso(11.4,3.2,39);
    pixelText('WARTEG',p.x,p.y,'#ffe4a1',12);
  });
