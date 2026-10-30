@@ -48,12 +48,13 @@
   }
 
   function nearestSeat() {
-    if (OUT_ON) return null;
-    // All registered furniture seats, including zero-offset desk chairs.
-    // These are captured from the original put() / res.seats template data.
+    // Indoor seats come from asset metadata; outdoor benches and warteg chairs
+    // are registered at construction time by the original exterior builders.
+    const zone = OUT_ON ? (WT.on ? 'warteg' : 'street') : 'office';
     const seats = window.__vcLifeSeats || [];
     let best = null;
     for (const s of seats) {
+      if ((s.zone || 'office') !== zone) continue;
       const d = distance(me, s);
       if (d > RANGE_SEAT || occupied(s)) continue;
       const chair = /(?:^|_)chair_/i.test(s.objectId || '') ? 1 : 0;
@@ -68,6 +69,7 @@
   function nearSofa(seat) {
     if (!seat) return false;
     if (typeof seat.objectId === 'string' && /^sofa_/i.test(seat.objectId)) return true;
+    if (OUT_ON) return false;
     return typeof LOUNGE !== 'undefined' &&
       LOUNGE.some(s => s.id.indexOf('sofa') === 0 && distance(seat, s) < 0.48);
   }
@@ -179,7 +181,8 @@
       // Snap only within interaction radius; avoids sitting mid-air.
       // Remember an actually walkable standing position: furniture seat tiles
       // can be blocked, so movement must start from the approach tile.
-      if (typeof okG === 'function' && !okG(me.c, me.r)) return;
+      // Outdoor geometry has separate collision rules from office pathfinding.
+      if (OUT_ON ? !extOK(me.c, me.r) : (typeof okG === 'function' && !okG(me.c, me.r))) return;
       me._lifeStandOrigin = { c:me.c, r:me.r };
       me._lifeSeat = { ...fresh.seat }; // retain furniture-specific render depth
       me.c = fresh.seat.c;
@@ -217,7 +220,8 @@
     if (!hadPose) return false;
     me.forceAnim = null;
     const origin = me._lifeStandOrigin;
-    if (origin && typeof okG === 'function' && okG(origin.c,origin.r) &&
+    if (origin && (OUT_ON ? extOK(origin.c,origin.r) :
+        (typeof okG !== 'function' || okG(origin.c,origin.r))) &&
         Math.hypot(me.c-origin.c,me.r-origin.r) <= RANGE_SEAT+0.2) {
       me.c = origin.c;
       me.r = origin.r;
