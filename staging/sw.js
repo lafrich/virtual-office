@@ -73,7 +73,7 @@ async function handle(ev, p, u) {
       // Patch the decoded document in memory; all original encrypted files
       // remain intact. Every anchor is checked to avoid a silent partial patch.
       const seatAnchor = '  res.use=(a.use_points||[]).map(u=>';
-      const tickAnchor = '  let moving=false;\\n  if(m>0.05){';
+      const tickAnchor = '  let moving=false;\n  if(m>0.05){';
       const routeAnchor = 'function goTo(t){ if(OUT_ON){';
       const hudAnchor = "window.addEventListener('pagehide',store);";
       if (![seatAnchor,tickAnchor,routeAnchor,hudAnchor].every(s=>html.includes(s))) {
@@ -81,13 +81,13 @@ async function handle(ev, p, u) {
         return new Response('staging life controller version mismatch', { status: 500 });
       }
       let patched = html.replace(seatAnchor,
-        "  (window.__vcLifeSeats || (window.__vcLifeSeats=[])).push(...res.seats.map(s=>({...s,objectId:id})));\\n" + seatAnchor);
+        "  (window.__vcLifeSeats || (window.__vcLifeSeats=[])).push(...res.seats.map(s=>({...s,objectId:id})));\n" + seatAnchor);
       patched = patched.replace(tickAnchor,
-        "  let moving=false;\\n  if ((m>0.05 || me.path.length>0) && me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement();\\n  if(m>0.05){");
+        "  let moving=false;\n  if ((m>0.05 || me.path.length>0) && me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement();\n  if(m>0.05){");
       patched = patched.replace(routeAnchor,
         "function goTo(t){ if(me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement(); if(OUT_ON){");
       patched = patched.replace(hudAnchor,
-        "window.addEventListener('vc-life-stand',()=>{ if(mode==='sit'||mode==='sleep') mode='idle'; });\\n" + hudAnchor);
+        "window.addEventListener('vc-life-stand',()=>{ if(mode==='sit'||mode==='sleep') mode='idle'; });\n" + hudAnchor);
       const extended = patched.replace('</body>', '<script src="life-context.js?v=4" defer></script></body>');
       return new Response(extended, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
     }
