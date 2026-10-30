@@ -82,6 +82,40 @@ async function handle(ev, p, u) {
       }
       let patched = html.replace(seatAnchor,
         "  (window.__vcLifeSeats || (window.__vcLifeSeats=[])).push(...res.seats.map((s,seatIndex)=>({...s,objectId:id,seatIndex})));\n" + seatAnchor);
+      // Outdoor furniture is procedural, unlike indoor asset-manifest seats.
+      // Register seat anchors at construction time, without modifying
+      // the bench/chair meshes, collision data, Baymax, or Migi.
+      const parkAnchor = 'function bench(c,r){ return prop(c+0.8,r+0.25,0.8,g=>';
+      const parkSeats = "function bench(c,r){ (window.__vcLifeSeats||(window.__vcLifeSeats=[])).push(" +
+        "{c:c+0.42,r:r+0.29,zone:'street',objectId:'park_bench',seatIndex:0,dir:'sw',pose:'sit'}," +
+        "{c:c+1.18,r:r+0.29,zone:'street',objectId:'park_bench',seatIndex:1,dir:'sw',pose:'sit'}); " +
+        "return prop(c+0.8,r+0.25,0.8,g=>";
+      const cafeAnchor = "function chairP(c,r,back,col){ col=col||";
+      const cafeSeats = "function chairP(c,r,back,col){ " +
+        "(window.__vcLifeSeats||(window.__vcLifeSeats=[])).push(" +
+        "{c,r,zone:'street',objectId:'warteg_terrace_chair',seatIndex:back<0?0:1," +
+        "dir:back<0?'se':'nw',pose:'sit'}); col=col||";
+      const wtTableAnchor = 'const table=(id,c,r,chairs)=>{ const g=wtB';
+      const wtTableSeats = "const table=(id,c,r,chairs)=>{ " +
+        "const t=(window.__vcLifeSeats||(window.__vcLifeSeats=[])); " +
+        "const rowBack=r-0.65,rowFront=r+0.65; " +
+        "const spots=chairs?" +
+        "[{c,r:rowBack,dir:'sw'},{c,r:rowFront,dir:'ne'}]:" +
+        "[{c:c-0.23,r:rowBack,dir:'sw'},{c:c+0.23,r:rowBack,dir:'sw'}," +
+        "{c:c-0.23,r:rowFront,dir:'ne'},{c:c+0.23,r:rowFront,dir:'ne'}]; " +
+        "t.push(...spots.map((s,i)=>({...s,zone:'warteg'," +
+        "objectId:'warteg_'+id+(chairs?'_chair':'_bench'),seatIndex:i,pose:'sit'}))); " +
+        "const g=wtB";
+      for (const [oldValue,newValue] of [
+        [parkAnchor,parkSeats], [cafeAnchor,cafeSeats],
+        [wtTableAnchor,wtTableSeats]
+      ]) {
+        if (patched.split(oldValue).length !== 2) {
+          console.warn('[staging] outdoor seat anchor changed:',oldValue);
+          return new Response('staging exterior seat version mismatch', {status:500});
+        }
+        patched = patched.replace(oldValue,newValue);
+      }
       patched = patched.replace(tickAnchor,
         "  let moving=false;\n  if ((m>0.05 || me.path.length>0) && me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement();\n  if(m>0.05){");
       patched = patched.replace(routeAnchor,
@@ -102,7 +136,7 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=10', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=11', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
