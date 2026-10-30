@@ -116,55 +116,6 @@ async function handle(ev, p, u) {
         }
         patched = patched.replace(oldValue,newValue);
       }
-      // pxBake uses getBBox and skips nodes with display:none or no _a.
-      // Bake the overlay while visible, then hide before its first frame.
-      const overlayEndAnchor = "WT.parts.forEach(n=>pxBake(n)); }";
-      const overlayEndPatched = "WT.parts.forEach(n=>pxBake(n)); " +
-        "WT.tableOverlays.forEach(n=>{n._show=false;n.setAttribute('display','none');}); }";
-      if (patched.split(overlayEndAnchor).length !== 2)
-        return new Response('warteg overlay bake anchor mismatch',{status:500});
-      patched=patched.replace(overlayEndAnchor,overlayEndPatched);
-      // Warteg chair layering: the chair and table currently share one SVG
-      // depth group. When the player sits in that table's chair or bench,
-      // keep ONLY that group's rendering behind the seated HTML avatar.
-      // No sprite coordinates, table geometry or other tables are changed.
-      const wtDepthAnchor = "function wtDepth(){ if(!WT.on) return; const pd=me.c+me.r; WT.dyn.forEach(n=>{ const f=n._b>pd+0.02; if(f!==n._f){ n._f=f; (f?wtF:WT.gD).appendChild(n); } }); }";
-      const wtDepthPatched = "function wtDepth(){ if(!WT.on) return; " +
-        "const occupied=me._lifeSeat&&me.forceAnim==='sit'&&" +
-        "/^warteg_t[123]_(chair|bench)$/.test(me._lifeSeat.objectId||'')?" +
-        "me._lifeSeat.objectId.match(/^warteg_(t[123])_/)[1]:null; " +
-        "const pd=me.c+me.r; WT.dyn.forEach(n=>{ " +
-        "const f=n._k==='wt_'+occupied?false:n._b>pd+0.02; " +
-        "if(f!==n._f || n.parentNode!==(f?wtF:WT.gD)){ n._f=f; " +
-        "(f?wtF:WT.gD).appendChild(n); } }); " +
-        "(WT.tableOverlays||[]).forEach(n=>{ const show=n._wtTable===occupied; " +
-        "if(show!==n._show){n._show=show;n.setAttribute('display',show?'inline':'none');} }); }";
-      if (patched.split(wtDepthAnchor).length !== 2)
-        return new Response('staging warteg depth source mismatch', {status:500});
-      patched = patched.replace(wtDepthAnchor, wtDepthPatched);
-      // Retain original chairs and table as a SINGLE stable SVG group.
-      // Only duplicate its tabletop geometry into the foreground while seated.
-      const overlayBuildAnchor = "function wtBuild(){ if(WT.built) return; WT.built=true; WT.parts=[];";
-      const overlayBuildPatch = "function wtBuild(){ if(WT.built) return; WT.built=true; WT.parts=[]; WT.tableOverlays=[];";
-      const tabletopAnchor = "g._b=c+r-0.2; g._d=c+r; WT.dyn.push(g); WT.blk.push(";
-      const tabletopPatch = "g._b=c+r-0.2; g._d=c+r; WT.dyn.push(g); " +
-        "const top=el('g',{},wtF); top._wtTable=id; top._a=P(30,25); top._k='wt_overlay_'+id; top._raw=true; " +
-        "const a=c-0.5,b=c+0.5,d=r-0.33,e=r+0.33; " +
-        "bx(top,a,d,b,e,10,10.8,'rgba(127,217,154,.85)','#1F8F3A','#16702D'); " +
-        "faceSW(top,e,a,b,10.6,10.8,'#B8F0C8'); " +
-        "const p=uS(P(c,r),10.8); " +
-        "el('ellipse',{cx:p.x+2,cy:p.y,rx:1.6,ry:0.8,fill:'#D7262E'},top); " +
-        "el('rect',{x:p.x-3.4,y:p.y-2.6,width:1.4,height:2.6," +
-        "fill:'#FFFFFF',stroke:'#9AA3AE','stroke-width':0.3},top); " +
-        "WT.tableOverlays.push(top); WT.parts.push(top); WT.blk.push(";
-      for (const [source,patchedSource] of [
-        [overlayBuildAnchor,overlayBuildPatch],
-        [tabletopAnchor,tabletopPatch]
-      ]) {
-        if (patched.split(source).length !== 2)
-          return new Response('staging tabletop anchor mismatch',{status:500});
-        patched=patched.replace(source,patchedSource);
-      }
       patched = patched.replace(tickAnchor,
         "  let moving=false;\n  if ((m>0.05 || me.path.length>0) && me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement();\n  if(m>0.05){");
       patched = patched.replace(routeAnchor,
@@ -185,7 +136,7 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=15', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=16', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
