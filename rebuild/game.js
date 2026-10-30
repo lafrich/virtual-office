@@ -127,9 +127,9 @@ function drawCat(x,y,t=0){
 // Consistent visual primitives shared across all scenes.
 function artProps(){return V.props({ctx:g,zoom,box,iso,poly,line,fill,shadow});}
 // Shared detailed prop renderer used by all rooms, not just Cove.
-function pixelPiece(type,x,y,w,d,h,scale=1){
+function pixelPiece(type,x,y,w,d,h,scale=1,part='base'){
  return window.VOPixelKit.drawAsset({ctx:g,box,iso,line,poly,shadow,zoom},
-   {id:'shared-'+type,type,at:{x,y},size:{w,d,h},scale,elevation:0},'base');
+   {id:'shared-'+type,type,at:{x,y},size:{w,d,h},scale,elevation:0},part);
 }
 function drawPlant(x,y,size=1){pixelPiece('plant',x,y,.66,.66,27,size);}
 function drawWindow(x,y,orient='horizontal'){artProps().window(x,y,orient,34,2.45);}
@@ -217,7 +217,13 @@ function drawOffice(x,y,sceneActor,frame){
   ['office-coffee-b',19,()=>{box(11.2,10.1,1.05,.72,10,'#bd955f','#866744','#8e6c43');
     box(11.2,10.1,.84,.56,.15,'#e9dbb7','#ac986f','#aa916f',10);}],
   ['office-desk-c',22,()=>drawDesk(14.5,8.1)],
-  ['office-chair',23,()=>drawChair(14.4,9.1)],
+  ['office-chair',23,(dx,dy)=>{
+    drawChair(14.4,9.1);
+    if(sceneActor?.seatId==='officechair'){
+      drawHuman(sceneActor.x-dx,sceneActor.y-dy,{sitting:true,dir:'sw'});
+      pixelPiece('chair',14.4,9.1,.72,.72,25,1,'front');
+    }
+  }],
   ['office-toilet',25,()=>{box(16.1,10.8,.9,.9,6,'#f9fbf9','#c8e1e5','#bad5d7');
     box(16.1,10.8,.48,.58,2,'#b7e6f2','#71aabb','#73a6b5',6);}],
   ['office-shower',24.8,()=>{box(16.2,8.8,1.0,.9,27,'#a9dcf1','#7099ba','#658eb6');
@@ -669,8 +675,6 @@ function draw(frame){
   if(!player.seatId){
    drawHuman(player.x,player.y,{dir:player.dir,walk:player.walk,shirt:'#242a3a',hair:'#171b24'});
    drewActor=true;
-  } else if(player.seatId==='officechair'){
-   drawHuman(player.x,player.y,{sitting:true,dir:'sw',shirt:'#242a3a',hair:'#171b24'});drewActor=true;
   }
  };
  for(const o of objects){if(!drewActor&&!player.seatId&&actorDepth<o.d)drawNormalActor();o.fn();}
