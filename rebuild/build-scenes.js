@@ -5,7 +5,8 @@
  const asset=(id,name,x,y,w=1,d=1,h=12,extra={})=>({
   id,name,type:'furniture',at:{x,y},size:{w,d,h},
   offset:{x:0,y:0},elevation:0,depthBias:0,
-  scale:1,facing:'SW',collision:false,visible:true,sprite:null,action:null,...extra
+  scale:1,facing:'SW',collision:false,visible:true,sprite:null,action:null,
+  visual:global.VOVisualSystem.describeAsset(id,'furniture',w,d),...extra
  });
  const place=(type,label,dx=0,dy=0)=>({
   type,label,range:1.9,approach:{x:dx,y:dy},pose:{x:0,y:0}
