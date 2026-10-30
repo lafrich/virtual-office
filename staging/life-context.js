@@ -27,8 +27,74 @@
       animation:vcPee 1s ease-in-out 2;pointer-events:none;z-index:9}
     @keyframes vcPee {0%{opacity:0;height:4px}20%{opacity:.95;height:19px}
       75%{opacity:.9;height:24px}100%{opacity:0;height:15px}}
+    .me .vc-fart-cloud {
+      position:absolute;display:block;width:0;height:0;z-index:5;
+      pointer-events:none;overflow:visible;image-rendering:pixelated
+    }
+    .me .vc-fart-cloud i {
+      position:absolute;display:block;left:0;top:0;
+      width:var(--vc-fart-dot);height:var(--vc-fart-dot);
+      background:#e1e8dc;
+      box-shadow:
+        var(--vc-fart-dot) 0 #bdcbc2,
+        0 var(--vc-fart-dot-neg) #eff0e4,
+        var(--vc-fart-half-neg) var(--vc-fart-half) #96ada9;
+      animation:vc-fart-trail 860ms steps(8,end) both;
+      transform-origin:center;pointer-events:none
+    }
+    @keyframes vc-fart-trail {
+      0% {opacity:0;transform:translate(0,0) scale(.6)}
+      12% {opacity:.95;transform:translate(0,0) scale(.75)}
+      62% {opacity:.7}
+      100% {opacity:0;transform:
+        translate(var(--vc-fart-x),var(--vc-fart-y)) scale(1.25)}
+    }
   `;
   document.head.appendChild(style);
+
+  // The old fart effect was an 18px emoji at a fixed 2D offset.
+  // The original Grok PNG has 64x112 px frames and a (32,100) feet pivot.
+  // Place pixel smoke at the hip and send it away from the back of the player.
+  const FART_HIPS = Object.freeze({
+    se: { x:24, y:78, vx:-1, vy:-0.32 },
+    sw: { x:40, y:78, vx: 1, vy:-0.32 },
+    ne: { x:28, y:78, vx:-1, vy: 0.28 },
+    nw: { x:36, y:78, vx: 1, vy: 0.28 }
+  });
+  const oldFartPuff = window.__lifeBridge.puff;
+  window.__lifeBridge.puff = function positionedFartPuff() {
+    if (!gameUserReady() || !meEl || !meEl.isConnected) return;
+    if (!meEl.classList.contains('spr') ||
+        typeof cam === 'undefined' || !cam.sc ||
+        typeof SL === 'undefined' || !SL.pivot) {
+      if (typeof oldFartPuff === 'function') oldFartPuff();
+      return;
+    }
+    const dir=FART_HIPS[me.dir] || FART_HIPS.se;
+    const scale=cam.sc / PPU;
+    if (!(scale>0)) return;
+    const fx=Math.round((dir.x-SL.pivot[0])*scale);
+    const fy=Math.round((dir.y-SL.pivot[1])*scale);
+    const cloud=document.createElement('span');
+    cloud.className='vc-fart-cloud';
+    cloud.setAttribute('aria-hidden','true');
+    cloud.style.left=fx+'px';
+    cloud.style.top=fy+'px';
+    const pixels=val=>Math.max(1,Math.round(val*scale))+'px';
+    cloud.style.setProperty('--vc-fart-dot',pixels(3));
+    cloud.style.setProperty('--vc-fart-dot-neg','-'+pixels(3));
+    cloud.style.setProperty('--vc-fart-half',pixels(2));
+    cloud.style.setProperty('--vc-fart-half-neg','-'+pixels(2));
+    for(let i=0;i<3;i++){
+      const bit=document.createElement('i');
+      bit.style.setProperty('--vc-fart-x',(dir.vx*(8+6*i)*scale).toFixed(2)+'px');
+      bit.style.setProperty('--vc-fart-y',((dir.vy*(8+6*i)-5-2*i)*scale).toFixed(2)+'px');
+      bit.style.animationDelay=(i*100)+'ms';
+      cloud.appendChild(bit);
+    }
+    meEl.appendChild(cloud);
+    setTimeout(()=>cloud.remove(),1200);
+  };
 
   function gameUserReady() {
     const p = window.__mp;
