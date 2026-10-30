@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="id">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <title>Virtual Office — Art Atlas 01</title>
+ <style>
+  :root{--sky:#CFE4FF;--wall:#EADFC7;--cream:#FFF8E6;--ink:#28364A;--red:#E04848;--gold:#FFC857;--line:#91B2CD}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--sky);font-family:ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace;color:var(--ink)}
+  header{background:var(--red);color:white;border-bottom:4px solid var(--ink);padding:20px max(18px,calc((100vw - 1160px)/2))}
+  .eyebrow{font-size:11px;letter-spacing:2px;font-weight:bold}
+  h1{font-size:clamp(22px,4vw,38px);margin:8px 0;letter-spacing:-1px}
+  .subtitle{font-size:12px;max-width:650px;line-height:1.5;color:#FFF6E5}
+  main{max-width:1160px;margin:auto;padding:23px 15px 60px}
+  .intro{font-size:13px;line-height:1.6;max-width:760px;margin:0 0 20px}
+  .nav{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 25px}
+  .nav a{font-size:12px;font-weight:bold;color:var(--ink);background:var(--gold);border:2px solid var(--ink);padding:10px 14px;text-decoration:none;box-shadow:3px 3px 0 #86A8C2}
+  .section{font-size:14px;margin:27px 0 13px;letter-spacing:.7px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+  article{border:2px solid var(--ink);background:#FBFBF2;box-shadow:4px 4px 0 #8CA9BF;overflow:hidden}
+  .stage{position:relative;aspect-ratio:1.28;display:flex;align-items:center;justify-content:center;
+   background:repeating-linear-gradient(45deg,#E5F3FC 0 13px,#D9EDF8 13px 26px)}
+  .stage:before{content:"";position:absolute;left:50%;top:78%;width:4px;height:4px;background:#DA6E60;z-index:5}
+  .composite{position:relative;width:min(100%,246px);height:100%;display:flex;align-items:center;justify-content:center}
+  .composite img{position:absolute;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;image-rendering:pixelated}
+  .info{border-top:2px solid var(--ink);padding:11px 12px}
+  .name{font-size:14px;font-weight:900;margin:0 0 5px}
+  .meta{font-size:10px;color:#556B81;line-height:1.5}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:8px}
+  .swatch{background:#fff;border:2px solid var(--ink);padding:7px;font-size:11px}
+  .swatch span{display:block;height:42px;border:1px solid #889;padding:2px;margin-bottom:5px}
+  .legend{margin-top:24px;padding:14px;background:var(--cream);border:2px solid var(--ink);font-size:11px;line-height:1.7}
+  footer{margin-top:30px;font-size:11px;color:#465B76;line-height:1.6}
+ </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">LAFRICH / VIRTUAL OFFICE / ART SYSTEM</div>
+  <h1>VISUAL ASSET ATLAS <span style="color:#FFE5A6">01</span></h1>
+  <div class="subtitle">Rebuild 09 · konsistensi palet, skala, pivot dan layer karakter. Aset asli yang dipakai di game, bukan gambar referensi.</div>
+</header>
+<main>
+ <p class="intro">Semua sprite di bawah adalah file SVG transparan yang digunakan langsung di Virtual Office. Objek dengan dua layer memperlihatkan <b>base + foreground</b> bersamaan. File sumber bisa diperiksa di repo dan diganti tanpa mengubah mekanik permainan.</p>
+ <nav class="nav">
+  <a href="./?v=9">▶ MAIN GAME</a>
+  <a href="https://github.com/lafrich/virtual-office/tree/main/rebuild/assets">⌁ SOURCE ASSETS</a>
+ </nav>
+ <h2 class="section">01 — MODULAR FURNITURE / 11 SETS</h2>
+ <div class="grid" id="atlas"></div>
+ <h2 class="section">02 — SHARED COLOR RAMPS</h2>
+ <div class="swatches" id="palette"></div>
+ <div class="legend"><b>ASSET RULES</b><br>
+  Perspektif isometrik 2:1 · arah cahaya kiri atas · top/left/right material ramps · hard pixel edges · pivot tetap pada setiap pasangan base/front · avatar digambar di antaranya · Edit Mode menggeser world origin terpisah dari offset gambar. SVG ini adalah aset authored vector bergaya pixel, belum PNG sprite sheet final.
+ </div>
+ <footer>Virtual Office Rebuild — internal visual library. Tidak mengubah game original. © 2026 Lafrich Studio.</footer>
+</main>
+<script>
+ const assets=[
+  {id:"bed",name:"Blue Bed",tag:"Cove · sleep",front:true},
+  {id:"bathtub",name:"Sage Bathtub",tag:"Cove · bathe",front:true},
+  {id:"toilet",name:"Ceramic Toilet",tag:"Cove · toilet",front:true},
+  {id:"sofa",name:"Cream Sofa",tag:"Office · sit",front:true},
+  {id:"desk",name:"Work Desk",tag:"Cove / Office · work"},
+  {id:"chair",name:"Desk Chair",tag:"Cove / Office · sit",front:true},
+  {id:"bookshelf",name:"Wood Bookcase",tag:"Cove · storage"},
+  {id:"dresser",name:"Wood Dresser",tag:"Cove · decor"},
+  {id:"nightstand",name:"Nightstand",tag:"Cove · furniture"},
+  {id:"coffee",name:"Coffee Table",tag:"Office · furniture"},
+  {id:"storage",name:"Blue Storage",tag:"Office · furniture"}
+ ];
+ const pal={Wall:"#EADFC7",Floor:"#CFE4FF","Bath tile":"#D87469",Wood:"#A26B3F","Wood light":"#C38C5A","Wood dark":"#754A2E","Accent blue":"#4E8DE6","Accent green":"#6BB77A",Cream:"#FFF8E6",Shadow:"#8A9DB7","UI red":"#E04848","UI gold":"#FFC857"};
+ for(const a of assets){
+   const card=document.createElement("article");
+   const stage=document.createElement("div");stage.className="stage";
+   const comp=document.createElement("div");comp.className="composite";
+   for(const part of a.front?["base","front"]:["base"]){
+     const img=document.createElement("img");img.src="./assets/"+a.id+"_"+part+".svg";
+     img.alt=a.name+" "+part;img.loading="lazy";
+     comp.appendChild(img);
+   }
+   stage.appendChild(comp);card.appendChild(stage);
+   const info=document.createElement("div");info.className="info";
+   const title=document.createElement("p");title.className="name";title.textContent=a.name;
+   const meta=document.createElement("div");meta.className="meta";
+   meta.textContent=a.tag+" · "+(a.front?"BASE + FRONT":"BASE");
+   info.append(title,meta);card.appendChild(info);
+   document.getElementById("atlas").appendChild(card);
+ }
+ for(const [label,color]of Object.entries(pal)){
+   const row=document.createElement("div");row.className="swatch";
+   const square=document.createElement("span");square.style.backgroundColor=color;
+   const desc=document.createTextNode(label+" · "+color);
+   row.append(square,desc);document.getElementById("palette").appendChild(row);
+ }
+</script>
+</body>
+</html>
