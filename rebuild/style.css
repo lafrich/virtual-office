@@ -188,3 +188,11 @@ body.modular-editing .build-launch{background:#76d5ab;color:#0d2621}
  .build-controls button{min-height:36px}
  .build-tip{font-size:10px}
 }
+
+/* Keep Save/Cancel pinned while scrolling the build settings on phones. */
+@media(max-width:520px){
+ .module-editor{height:min(47dvh,452px);max-height:min(47dvh,452px);overflow:hidden}
+ .build-ui{height:100%;max-height:100%;overflow:hidden}
+ .build-content{min-height:0;overflow-y:auto;flex:1}
+ .build-footer{position:sticky;bottom:0;z-index:2}
+}
