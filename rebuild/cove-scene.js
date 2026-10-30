@@ -104,7 +104,7 @@ function drawAsset(api,a,part){
    b(.35,.23,.82,.28,3,'#f1d4a1','#caa66e','#cba669',45);
    break;
   case 'partition':
-   b(0,0,a.size.w,a.size.d,38,rgba(169,217,235,.35),rgba(138,157,183,.45),rgba(138,157,183,.5));
+   b(0,0,a.size.w,a.size.d,38,'rgba(169,217,235,.35)','rgba(138,157,183,.45)','rgba(138,157,183,.5)');
    for(let z2=8;z2<37;z2+=9)b(.03,0,.16,a.size.d,.42,'#e8f5ef','#adc9c9','#b7cbcb',z2);
    break;
   case 'sink':
