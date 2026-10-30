@@ -258,17 +258,19 @@
         return;
       }
       const p = P(me.c, me.r);
-      // Match Baymax's world-space, art-pixel-aligned anchor and seat sinking.
-      const y = p.y + sitOffset(me.c, me.r, me.forceAnim, null);
+      // Player-only sit-frame correction. The reference_man seated sprite
+      // draws its lower body farther below its foot pivot than Baymax's frame.
+      // Leave the furniture anchors and all NPC rendering entirely unchanged.
+      // The correction is visual only and immediately disappears on standing.
+      const sofaPlayerCorrectionPx =
+        /^sofa_/.test(me._lifeSeat.objectId || '') && me.forceAnim === 'sit'
+          ? -10 : 0;
+      const y = p.y + sitOffset(me.c, me.r, me.forceAnim, null)
+        + sofaPlayerCorrectionPx / PPU;
       const xSnap = Math.round(p.x * PPU) / PPU;
       const ySnap = Math.round(y * PPU) / PPU;
-      // Baymax sits correctly in the left slot of the blue sofa.
-      // For all slots of that sofa use the same depth ordering as its
-      // leftmost slot. The world position and sit animation stay unchanged.
-      // Otherwise, the middle/right player appears in front of the divider.
-      const nativeDepth = me.c + me.r + 0.05;
-      const depth = Number.isFinite(me._lifeSeat.renderDepth)
-        ? me._lifeSeat.renderDepth : nativeDepth;
+      // Native world depth: keep the same sofa, Baymax and Migi sorting.
+      const depth = me.c + me.r + 0.05;
       group.setAttribute('transform', 'translate(' + xSnap + ',' + ySnap + ')');
       if (!displayed) {
         displayed = true;
