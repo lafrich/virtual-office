@@ -410,8 +410,12 @@
   // sheetSprite + sprite + sortWorld use the very same pivot and draw order as
   // AI actors; no hand-tuned pixel offsets are used.
   (function prepareSeatLayer() {
-    const entry = typeof charEntry === 'function' ? charEntry('_user') : null;
-    if (!entry || !entry.sheet || typeof sprite !== 'function' ||
+    // The seated copy must use the sheet of whoever is playing: noorz wears
+    // the Noor sheet (same SL layout), ichsan the default user sheet.
+    const sheetKey = () => (window.__mp && window.__mp.me === 'noorz') ? '_npc_noor' : '_user';
+    const sheetFor = k => { const e = typeof charEntry === 'function' ? charEntry(k) : null; return e && e.sheet; };
+    const entry = { sheet: sheetFor('_user') };
+    if (!entry.sheet || typeof sprite !== 'function' ||
         typeof sheetSprite !== 'function') return;
     const group = sprite(0, 'bot vc-life-sitter');
     group.setAttribute('display', 'none');
@@ -421,9 +425,17 @@
     let lastDepth = null;
     let lastFrame = '';
     loadImg(entry.sheet).then(img => { valid = !!img; });
+    let usedSheet = entry.sheet;
+    const ready = { [entry.sheet]: true };
+    function syncSheet() {
+      const want = sheetFor(sheetKey()) || entry.sheet;
+      if (want === usedSheet) return true;
+      if (!ready[want]) { if (ready[want] === undefined) { ready[want] = false; loadImg(want).then(img => { ready[want] = !!img; }); } return false; }
+      seatedSprite.im.setAttribute('href', want); usedSheet = want; lastFrame = ''; return true;
+    }
     window.__vcLifeSeatRenderer = function renderSeatLayer() {
       const sitting = valid && !SPEC && !OUT_ON && !!me._lifeSeat &&
-        !me.moving && ['sit','perch','lie'].includes(me.forceAnim);
+        !me.moving && ['sit','perch','lie'].includes(me.forceAnim) && syncSheet();
       if (calPanel) {
         const onSofa = sitting && selectedSofaSlot() >= 0;
         calPanel.style.display = onSofa ? 'block' : 'none';
@@ -476,6 +488,19 @@
       }
     };
   })();
+
+  // Extra occlusion targets for the native occTick (patched in staging/sw.js):
+  // the other player (Noor = NOOR when it is a remote peer, Ichsan = network ghost)
+  // gets the same see-through treatment as the local player.
+  window.__vcOccExtra = function () {
+    const out = [];
+    if (typeof NOOR !== 'undefined' && NOOR && NOOR.net === 'peer' && NOOR._fv !== false &&
+        Number.isFinite(NOOR.c) && Number.isFinite(NOOR.r)) out.push({ c:NOOR.c, r:NOOR.r });
+    const npcs = window.__npcs || [];
+    const gh = npcs.find && npcs.find(n => n && n.id === '_net_ichsan');
+    if (gh && gh._fv && Number.isFinite(gh.c) && Number.isFinite(gh.r)) out.push({ c:gh.c, r:gh.r });
+    return out;
+  };
 
   if (typeof updAction === 'function') {
     try { updAction(); } catch (e) { console.warn('[life-context]',e); }

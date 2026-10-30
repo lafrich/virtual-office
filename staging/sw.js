@@ -1,4 +1,4 @@
-/* STAGING sw v1 2026-10-30: isolated test build; production assets read-only. */
+/* STAGING sw v1.1 2026-10-31 (Noor parity + remote occlusion): isolated test build; production assets read-only. */
 /* sw v2 2026-10-29 game-only: no caching of office files (always network + decrypt) */
 /* Virtual Office decrypting service worker. Holds the AES key in memory only;
    when restarted it asks an unlocked tab (which keeps it in sessionStorage). */
@@ -136,7 +136,13 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=19', {cache:'no-store'});
+      // Occlusion fade for the other (remote) player too, same box as the local one.
+      const occAnchor = 'T.push({x0:pm.x-9,x1:pm.x+9,y0:pm.y-46,y1:pm.y+2,d:me.c+me.r});';
+      if (patched.split(occAnchor).length !== 2)
+        return new Response('staging occlusion anchor mismatch', {status:500});
+      patched = patched.replace(occAnchor, occAnchor +
+        " if(window.__vcOccExtra){ try{ for(const t of window.__vcOccExtra()){ const q=P(t.c,t.r); T.push({x0:q.x-9,x1:q.x+9,y0:q.y-46,y1:q.y+2,d:t.c+t.r}); } }catch(e){} }");
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=20', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
