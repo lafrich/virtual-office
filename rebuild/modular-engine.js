@@ -18,16 +18,18 @@ const COVE_ITEMS=[
   layers:{base:-.34,front:2.1},
   sprite:{base:'./assets/bed_base.svg',front:'./assets/bed_front.svg',pivot:{x:.5,y:.7375}}
  }),
- def('cove-nightstand','nightstand','Nightstand',2.35,5.0,.85,.80,9),
+ def('cove-nightstand','nightstand','Nightstand',2.35,5.0,.85,.80,9,{sprite:{base:'./assets/nightstand_base.svg',pivot:{x:.5,y:.79}}}),
  def('cove-lamp','lamp','Bedside Lamp',2.35,5.0,.45,.45,16,{collision:false}),
  def('cove-desk','desk','Work Desk',5.45,2.2,2.9,1.15,13,{
-  action:{type:'work',label:'KERJA',range:2.0,approach:{x:0,y:1.5}}
+  action:{type:'work',label:'KERJA',range:2.0,approach:{x:0,y:1.5}},
+  sprite:{base:'./assets/desk_base.svg',pivot:{x:.5,y:.79}}
  }),
  def('cove-desk-chair','chair','Desk Chair',6.55,3.75,.85,.78,10,{
   action:{type:'sit',label:'DUDUK',range:1.4,approach:{x:0,y:.6},pose:{x:0,y:0}},
-  layers:{base:-.2,front:1.2}
+  layers:{base:-.2,front:1.2},
+  sprite:{base:'./assets/chair_base.svg',front:'./assets/chair_front.svg',pivot:{x:.5,y:.79}}
  }),
- def('cove-bookshelf','bookshelf','Book Cabinet',7.60,2.25,1.25,.80,33),
+ def('cove-bookshelf','bookshelf','Book Cabinet',7.60,2.25,1.25,.80,33,{sprite:{base:'./assets/bookshelf_base.svg',pivot:{x:.5,y:.79}}}),
  def('cove-plant','plant','Ficus Plant',8.25,4.10,.75,.72,27),
  def('cove-rug','rug','Cream Rug',4.8,7.20,4.8,3.15,.3,{collision:false,depthBias:-4}),
  def('cove-bath','bathtub','Green Bathtub',11.85,4.50,3.1,1.55,19,{
@@ -44,7 +46,7 @@ const COVE_ITEMS=[
   layers:{base:-.30,front:1.15},
   sprite:{base:'./assets/toilet_base.svg',front:'./assets/toilet_front.svg',pivot:{x:.5,y:.7375}}
  }),
- def('cove-dresser','dresser','Wood Dresser',7.2,5.40,1.45,.9,20),
+ def('cove-dresser','dresser','Wood Dresser',7.2,5.40,1.45,.9,20,{sprite:{base:'./assets/dresser_base.svg',pivot:{x:.5,y:.79}}}),
  def('cove-door','door','Bedroom Door',9.0,7.20,.33,1.38,41,{
   collision:false,action:{type:'zone',label:'OFFICE',to:'office',range:2,approach:{x:-1.2,y:.1}}
  })
@@ -217,24 +219,30 @@ class ModularWorld{
   }
   const o=this.images.get(src);return o.ready?o.img:null
  }
+ drawSprite(api,a,part,position=null){
+  const img=a.sprite?.[part]&&this.image(a.sprite[part]);
+  if(!img)return false;
+  const zoom=api.zoom,g=api.ctx;
+  const at=position||a.at;
+  const p=api.iso(at.x,at.y,a.elevation);
+  const scale=zoom*a.scale;
+  const pivot=a.sprite?.pivot;
+  const px=Math.min(1,Math.max(0,Number.isFinite(pivot?.x)?pivot.x:.5));
+  const py=Math.min(1,Math.max(0,Number.isFinite(pivot?.y)?pivot.y:1));
+  g.imageSmoothingEnabled=false;
+  g.drawImage(img,Math.round(p.x-img.width*scale*px),
+    Math.round(p.y-img.height*scale*py),
+    Math.round(img.width*scale),Math.round(img.height*scale));
+  return true;
+ }
  render(api,player){
   const g=api.ctx,zoom=api.zoom;
   for(const job of this.commands(player)){
    if(job.kind==='player'){api.drawPlayer();continue}
    const a=job.asset;g.save();
    g.translate(Math.round(a.offset.x*zoom),Math.round(a.offset.y*zoom));
-   const path=a.sprite&&a.sprite[job.part];
-   const img=path&&this.image(path);
-   if(img){
-    const p=api.iso(a.at.x,a.at.y,a.elevation);
-    const s=zoom*a.scale;
-    const pivot=a.sprite?.pivot;
-    const px=Math.min(1,Math.max(0,Number.isFinite(pivot?.x)?pivot.x:.5));
-    const py=Math.min(1,Math.max(0,Number.isFinite(pivot?.y)?pivot.y:1));
-    const gx=Math.round(p.x-img.width*s*px);
-    const gy=Math.round(p.y-img.height*s*py);
-    g.imageSmoothingEnabled=false;g.drawImage(img,gx,gy,Math.round(img.width*s),Math.round(img.height*s))
-   }else if(api.drawPlaceholder)api.drawPlaceholder(a,job.part);
+   if(!this.drawSprite(api,a,job.part)&&api.drawPlaceholder)
+    api.drawPlaceholder(a,job.part);
    g.restore()
   }
  }
