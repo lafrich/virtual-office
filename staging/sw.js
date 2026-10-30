@@ -88,6 +88,13 @@ async function handle(ev, p, u) {
         "function goTo(t){ if(me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement(); if(OUT_ON){");
       patched = patched.replace(hudAnchor,
         "window.addEventListener('vc-life-stand',()=>{ if(mode==='sit'||mode==='sleep') mode='idle'; });\n" + hudAnchor);
+      // Baymax and the player need the same render layer while seated.
+      // Call the world-space sprite renderer from the game's native frame loop.
+      const placeAnchor = "meEl.classList.toggle('flip',me.dir==='sw'||me.dir==='nw'); }";
+      if (patched.split(placeAnchor).length !== 2)
+        return new Response('staging render anchor mismatch', {status:500});
+      patched = patched.replace(placeAnchor,
+        "meEl.classList.toggle('flip',me.dir==='sw'||me.dir==='nw'); if(window.__vcLifeSeatRenderer) window.__vcLifeSeatRenderer(); }");
       // actionCtx, doAction and me are private to the original game IIFE.
       // Put the contextual controller inside that IIFE, not in an external script.
       const scopeEnd = '  MP.me=null; MP.tok=null; showLogin(true);\n})();\n})();\n</script>';
@@ -95,7 +102,7 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=5', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=6', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
