@@ -116,6 +116,22 @@ async function handle(ev, p, u) {
         }
         patched = patched.replace(oldValue,newValue);
       }
+      // Warteg chair layering: the chair and table currently share one SVG
+      // depth group. When the player sits in that table's chair or bench,
+      // keep ONLY that group's rendering behind the seated HTML avatar.
+      // No sprite coordinates, table geometry or other tables are changed.
+      const wtDepthAnchor = "function wtDepth(){ if(!WT.on) return; const pd=me.c+me.r; WT.dyn.forEach(n=>{ const f=n._b>pd+0.02; if(f!==n._f){ n._f=f; (f?wtF:WT.gD).appendChild(n); } }); }";
+      const wtDepthPatched = "function wtDepth(){ if(!WT.on) return; " +
+        "const occupied=me._lifeSeat&&me.forceAnim==='sit'&&" +
+        "/^warteg_t[123]_(chair|bench)$/.test(me._lifeSeat.objectId||'')?" +
+        "me._lifeSeat.objectId.match(/^warteg_(t[123])_/)[1]:null; " +
+        "const pd=me.c+me.r; WT.dyn.forEach(n=>{ " +
+        "const f=n._k==='wt_'+occupied?false:n._b>pd+0.02; " +
+        "if(f!==n._f || n.parentNode!==(f?wtF:WT.gD)){ n._f=f; " +
+        "(f?wtF:WT.gD).appendChild(n); } }); }";
+      if (patched.split(wtDepthAnchor).length !== 2)
+        return new Response('staging warteg depth source mismatch', {status:500});
+      patched = patched.replace(wtDepthAnchor, wtDepthPatched);
       patched = patched.replace(tickAnchor,
         "  let moving=false;\n  if ((m>0.05 || me.path.length>0) && me._lifeStandOrigin && window.__lifeBridge && window.__lifeBridge.exitPoseForMovement) window.__lifeBridge.exitPoseForMovement();\n  if(m>0.05){");
       patched = patched.replace(routeAnchor,
@@ -136,7 +152,7 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=11', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=12', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
