@@ -15,7 +15,8 @@ const def=(id,type,name,x,y,w,d,h,extra={})=>({
 const COVE_ITEMS=[
  def('cove-bed','bed','Blue Bed',4.7,6.0,3.30,2.30,13,{
   action:{type:'sleep',label:'TIDUR',range:2.2,approach:{x:.3,y:1.7},pose:{x:0,y:.15}},
-  layers:{base:-.34,front:2.1}
+  layers:{base:-.34,front:2.1},
+  sprite:{base:'./assets/bed_base.svg',front:'./assets/bed_front.svg',pivot:{x:.5,y:.7375}}
  }),
  def('cove-nightstand','nightstand','Nightstand',2.35,5.0,.85,.80,9),
  def('cove-lamp','lamp','Bedside Lamp',2.35,5.0,.45,.45,16,{collision:false}),
@@ -31,7 +32,8 @@ const COVE_ITEMS=[
  def('cove-rug','rug','Cream Rug',4.8,7.20,4.8,3.15,.3,{collision:false,depthBias:-4}),
  def('cove-bath','bathtub','Green Bathtub',11.85,4.50,3.1,1.55,19,{
   action:{type:'bathe',label:'MANDI',range:2.0,approach:{x:0,y:1.5},pose:{x:0,y:0}},
-  layers:{base:-.35,front:1.75}
+  layers:{base:-.35,front:1.75},
+  sprite:{base:'./assets/bathtub_base.svg',front:'./assets/bathtub_front.svg',pivot:{x:.5,y:.7375}}
  }),
  def('cove-shower','shower','Rain Shower',11.25,1.5,.25,.30,48,{collision:false}),
  def('cove-partition','partition','Glass Partition',13.6,2.45,.22,2.9,43,{collision:true,depthBias:-2}),
@@ -39,7 +41,8 @@ const COVE_ITEMS=[
  def('cove-mirror','mirror','Wall Mirror',14.45,2.2,.8,.20,42,{collision:false}),
  def('cove-toilet','toilet','Toilet',14.1,7.60,1.30,1.5,15,{
   action:{type:'pee',label:'PIPIS',range:1.7,approach:{x:-.7,y:.1},pose:{x:0,y:.25}},
-  layers:{base:-.30,front:1.15}
+  layers:{base:-.30,front:1.15},
+  sprite:{base:'./assets/toilet_base.svg',front:'./assets/toilet_front.svg',pivot:{x:.5,y:.7375}}
  }),
  def('cove-dresser','dresser','Wood Dresser',7.2,5.40,1.45,.9,20),
  def('cove-door','door','Bedroom Door',9.0,7.20,.33,1.38,41,{
@@ -74,9 +77,15 @@ function cleanData(src,base){
   const sprite={};
   for(const part of ['base','front']){
    const path=src.sprite[part];
-   if(typeof path==='string'&&/^\.\/assets\/[\w./-]+\.png$/.test(path)&&!path.includes('..'))sprite[part]=path;
+   if(typeof path==='string'&&/^\.\/assets\/[\w./-]+\.(?:png|svg)$/.test(path)&&!path.includes('..'))sprite[part]=path;
   }
-  if(Object.keys(sprite).length)d.sprite=sprite;
+  if(Object.keys(sprite).length){
+   // Only built-in matching sprites inherit the calibrated non-bottom pivot.
+   // Uploaded user sprites keep the original bottom-center convention.
+   if(base.sprite?.pivot && sprite.base===base.sprite.base &&
+      sprite.front===base.sprite.front) sprite.pivot={...base.sprite.pivot};
+   d.sprite=sprite;
+  }
  }
  return d;
 }
@@ -114,8 +123,14 @@ class ModularWorld{
  setCollision(id,value){const a=this.get(id);if(!a)return;a.collision=!!value;this.save();this.changed()}
  setSprite(id,part,path){
   const a=this.get(id);if(!a||!['base','front'].includes(part))return false;
-  if(path&&!/^\.\/assets\/[\w./-]+\.png$/.test(path)||path&&path.includes('..'))return false;
+  if(path&&!/^\.\/assets\/[\w./-]+\.(?:png|svg)$/.test(path)||path&&path.includes('..'))return false;
   if(!a.sprite)a.sprite={};if(path)a.sprite[part]=path;else delete a.sprite[part];
+  // Custom sprites use the existing bottom-center convention by default.
+  const base=this.defaultAssets.find(d=>d.id===id);
+  if(a.sprite.pivot && (a.sprite.base!==base?.sprite?.base||
+      a.sprite.front!==base?.sprite?.front))delete a.sprite.pivot;
+  else if(base?.sprite?.pivot && a.sprite.base===base.sprite.base &&
+      a.sprite.front===base.sprite.front)a.sprite.pivot={...base.sprite.pivot};
   this.save();this.changed();return true;
  }
  setFacing(id,value){const a=this.get(id);if(a&&directions.includes(value)){a.facing=value;this.save();this.changed()}}
@@ -212,7 +227,12 @@ class ModularWorld{
    const img=path&&this.image(path);
    if(img){
     const p=api.iso(a.at.x,a.at.y,a.elevation);
-    const s=zoom*a.scale,gx=Math.round(p.x-img.width*s*.5),gy=Math.round(p.y-img.height*s);
+    const s=zoom*a.scale;
+    const pivot=a.sprite?.pivot;
+    const px=Math.min(1,Math.max(0,Number.isFinite(pivot?.x)?pivot.x:.5));
+    const py=Math.min(1,Math.max(0,Number.isFinite(pivot?.y)?pivot.y:1));
+    const gx=Math.round(p.x-img.width*s*px);
+    const gy=Math.round(p.y-img.height*s*py);
     g.imageSmoothingEnabled=false;g.drawImage(img,gx,gy,Math.round(img.width*s),Math.round(img.height*s))
    }else if(api.drawPlaceholder)api.drawPlaceholder(a,job.part);
    g.restore()
