@@ -111,8 +111,11 @@ function createEditor(world,opt={}){
  el('meCollision').addEventListener('change',()=>world.setCollision(world.selectedId,el('meCollision').checked));
  el('meApplySprite').addEventListener('click',()=>{
   const id=world.selectedId;
-  const goodBase=world.setSprite(id,'base',el('meSpriteBase').value.trim());
-  const goodFront=world.setSprite(id,'front',el('meSpriteFront').value.trim());
+  // Capture both values before the first update re-renders the form.
+  const basePath=el('meSpriteBase').value.trim();
+  const frontPath=el('meSpriteFront').value.trim();
+  const goodBase=world.setSprite(id,'base',basePath);
+  const goodFront=world.setSprite(id,'front',frontPath);
   status(goodBase&&goodFront?'Sprite paths updated.':'Gunakan ./assets/nama.png saja.',!(goodBase&&goodFront))
  });
  panel.querySelectorAll('[data-jog]').forEach(btn=>btn.addEventListener('click',()=>{
