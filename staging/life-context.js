@@ -264,7 +264,7 @@
       // The correction is visual only and immediately disappears on standing.
       const sofaPlayerCorrectionPx =
         /^sofa_/.test(me._lifeSeat.objectId || '') && me.forceAnim === 'sit'
-          ? -10 : 0;
+          ? 10 : 0;
       const y = p.y + sitOffset(me.c, me.r, me.forceAnim, null)
         + sofaPlayerCorrectionPx / PPU;
       const xSnap = Math.round(p.x * PPU) / PPU;
