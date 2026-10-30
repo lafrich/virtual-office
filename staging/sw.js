@@ -116,17 +116,46 @@ async function handle(ev, p, u) {
         }
         patched = patched.replace(oldValue,newValue);
       }
-      // Warteg chair layering: the chair and table currently share one SVG
-      // depth group. When the player sits in that table's chair or bench,
-      // keep ONLY that group's rendering behind the seated HTML avatar.
-      // No sprite coordinates, table geometry or other tables are changed.
+      // Warteg tables contain both chairs and tabletop in one procedural SVG
+      // group. Split these submeshes into three groups (back seat / table /
+      // front seat) while preserving every original drawing command.
+      // For occupied seats: chair backs stay BEHIND the player, the TABLE stays
+      // in FRONT. Else use the original world-depth sorting for all three.
+      const wtSplit = [
+        [
+          "const g=wtB(id,false,g_=>{ const tc0=c-0.5,tc1=c+0.5,tr0=r-0.33,tr1=r+0.33;",
+          "let gBack,gFront; const g=wtB(id,false,g_=>{ const tc0=c-0.5,tc1=c+0.5,tr0=r-0.33,tr1=r+0.33; " +
+            "gBack=el('g',{},WT.gD); gFront=el('g',{},WT.gD); WT.parts.push(gBack,gFront);"
+        ],
+        [
+          "if(chairs) chair(g_,c,tr0-0.32,-1); else bench(g_,tc0+0.02,tc1-0.02,tr0-0.5,tr0-0.2);",
+          "if(chairs) chair(gBack,c,tr0-0.32,-1); else bench(gBack,tc0+0.02,tc1-0.02,tr0-0.5,tr0-0.2);"
+        ],
+        [
+          "if(chairs) chair(g_,c,tr1+0.32,1); else bench(g_,tc0+0.02,tc1-0.02,tr1+0.2,tr1+0.5); },true);",
+          "if(chairs) chair(gFront,c,tr1+0.32,1); else bench(gFront,tc0+0.02,tc1-0.02,tr1+0.2,tr1+0.5); },true);"
+        ],
+        [
+          "g._b=c+r-0.2; g._d=c+r; WT.dyn.push(g); WT.blk.push(",
+          "const layers=[gBack,g,gFront]; layers.forEach((node,i)=>{ " +
+            "node._wtTable=id; node._wtRole=i===1?'table':'chair'; " +
+            "node._b=c+r-0.2; node._d=c+r; }); " +
+            "WT.dyn.push(...layers); WT.blk.push("
+        ]
+      ];
+      for (const [before,after] of wtSplit) {
+        if (patched.split(before).length !== 2)
+          return new Response('staging warteg table-layer source mismatch', {status:500});
+        patched = patched.replace(before,after);
+      }
       const wtDepthAnchor = "function wtDepth(){ if(!WT.on) return; const pd=me.c+me.r; WT.dyn.forEach(n=>{ const f=n._b>pd+0.02; if(f!==n._f){ n._f=f; (f?wtF:WT.gD).appendChild(n); } }); }";
       const wtDepthPatched = "function wtDepth(){ if(!WT.on) return; " +
         "const occupied=me._lifeSeat&&me.forceAnim==='sit'&&" +
         "/^warteg_t[123]_(chair|bench)$/.test(me._lifeSeat.objectId||'')?" +
         "me._lifeSeat.objectId.match(/^warteg_(t[123])_/)[1]:null; " +
         "const pd=me.c+me.r; WT.dyn.forEach(n=>{ " +
-        "const f=n._k==='wt_'+occupied?false:n._b>pd+0.02; " +
+        "const f=n._wtTable===occupied?" +
+        "n._wtRole==='table':n._b>pd+0.02; " +
         "if(f!==n._f || n.parentNode!==(f?wtF:WT.gD)){ n._f=f; " +
         "(f?wtF:WT.gD).appendChild(n); } }); }";
       if (patched.split(wtDepthAnchor).length !== 2)
@@ -152,7 +181,7 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=12', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=13', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
