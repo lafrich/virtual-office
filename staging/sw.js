@@ -5,7 +5,7 @@
 'use strict';
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
-const PLAIN = new Set(['', 'index.html', 'sw.js', 'life-context.js', 'player-status.js', '.nojekyll', '404.html']);
+const PLAIN = new Set(['', 'index.html', 'sw.js', 'life-context.js', 'player-status.js', 'assets/office_wc.svg', '.nojekyll', '404.html']);
 let KEY = null, MAN = null, MANP = null, MANT = 0;
 
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -136,15 +136,32 @@ async function handle(ev, p, u) {
         console.warn('[staging] game IIFE closure changed');
         return new Response('staging game scope mismatch', {status:500});
       }
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=16', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=17', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
         return new Response('invalid life-context controller', {status:500});
       }
-      const extended = patched.replace(scopeEnd,
+      let extended = patched.replace(scopeEnd,
         '  MP.me=null; MP.tok=null; showLogin(true);\n})();\n' + ctx + '\n})();\n</script>')
-        .replace('</body>', '<script src="player-status.js?v=1" defer></script></body>');
+        .replace('</body>', '<script src="player-status.js?v=2" defer></script></body>');
+      // The life prototype is a separate IIFE. Add a proper-toilet action to
+      // its own state machine instead of firing the outdoor 'pee' penalty.
+      const lifeActionAnchor = " if(which==='fart'){";
+      const lifeControllerAnchor =
+        "ui.querySelectorAll('[data-act]').forEach(btn=>btn.addEventListener('click',()=>act(btn.dataset.act)));";
+      if (extended.split(lifeActionAnchor).length !== 2 ||
+          extended.split(lifeControllerAnchor).length !== 2) {
+        console.warn('[staging] WC life controller anchors changed');
+        return new Response('staging WC life hook mismatch',{status:500});
+      }
+      extended=extended.replace(lifeActionAnchor,
+        " if(which==='toilet'){\n"+
+        "   state.bladder=0;message('WC kantor: lega, kebersihan tetap.');\n"+
+        " }else if(which==='fart'){");
+      extended=extended.replace(lifeControllerAnchor,
+        lifeControllerAnchor+"\n"+
+        "bridge.useToilet=()=>{if(!liveUser()||mode==='sleep')return false;act('toilet');return true;};");
       return new Response(extended, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
     }
     return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });

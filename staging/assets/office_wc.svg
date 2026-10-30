@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="112" height="144" viewBox="0 0 112 144" shape-rendering="crispEdges">
+<desc>Isometric WC cubicle for Virtual Office; palette-matched authored pixel art, grounded foot pivot (56,130).</desc>
+<!-- ground shadow -->
+<path d="M9 109L56 133L104 109L57 85Z" fill="#1b2734" opacity=".17"/>
+<!-- tiled floor and fascia -->
+<path d="M14 104L56 83L99 104L56 126Z" fill="#c9cfd3"/>
+<path d="M14 104L56 126V135L14 112Z" fill="#8c9da7"/>
+<path d="M56 126L99 104V112L56 135Z" fill="#738995"/>
+<path d="M20 104L56 87L93 104L56 121Z" fill="#bfd1cf"/>
+<path d="M20 104L56 121L56 124L20 107Z" fill="#9badaf"/>
+<path d="M56 121L93 104V107L56 124Z" fill="#8da8ab"/>
+<!-- rear right masonry wall -->
+<path d="M56 24L98 45V104L56 83Z" fill="#c8c2af"/>
+<path d="M59 30L93 47V98L59 82Z" fill="#e3ddc9"/>
+<path d="M59 73L93 91V98L59 82Z" fill="#99b2b0"/>
+<path d="M59 83L93 101" stroke="#718f8f" stroke-width="2"/>
+<!-- translucent frosted upper wall -->
+<path d="M56 24L98 45V70L56 49Z" fill="#a7c4ca"/>
+<path d="M62 32L92 47V63L62 48Z" fill="#d5e6e7"/>
+<path d="M66 35L66 51M75 39L75 56M85 44L85 62" stroke="#a1bdc2" stroke-width="2"/>
+<path d="M59 28L98 48" stroke="#fff7e0" stroke-width="3"/>
+<!-- rear left wall, half-height to keep toilet visible -->
+<path d="M14 44L56 24V77L14 98Z" fill="#d5d0bb"/>
+<path d="M19 48L52 31V74L19 91Z" fill="#eee5d0"/>
+<path d="M19 79L52 63V74L19 91Z" fill="#9bb6af"/>
+<path d="M20 55L49 41M20 64L49 50" stroke="#f7efdf" stroke-width="2"/>
+<path d="M14 44L56 24L98 45" stroke="#fff8e3" stroke-width="4" fill="none"/>
+<path d="M14 44V99L56 77" stroke="#b8b3a2" stroke-width="3" fill="none"/>
+<!-- WC signage pixel letters on right wall -->
+<path d="M74 64L76 65L77 70L79 67L81 71L83 68L84 66L86 67L84 75L82 74L80 72L78 74L76 73Z" fill="#425a66"/>
+<path d="M88 68L92 70V72L89 71L89 77L92 78V80L87 78L86 73Z" fill="#425a66"/>
+<!-- small cistern and flush -->
+<path d="M49 74L63 81L63 96L49 89Z" fill="#d3d9d8"/>
+<path d="M63 81L73 76V91L63 96Z" fill="#a9b8b8"/>
+<path d="M49 74L60 68L73 76L63 81Z" fill="#f7f9f4"/>
+<path d="M57 73L63 76L67 74L61 71Z" fill="#a7babc"/>
+<!-- porcelain bowl -->
+<path d="M42 89L60 79L78 88L61 99Z" fill="#f7faf7"/>
+<path d="M42 89L61 99L61 109L47 105L42 96Z" fill="#d5dddd"/>
+<path d="M61 99L78 88V99L61 109Z" fill="#a8bbbc"/>
+<path d="M46 89L60 82L73 88L60 95Z" fill="#86acb5"/>
+<path d="M51 89L60 85L68 89L60 92Z" fill="#c5e2df"/>
+<path d="M43 87L60 78L78 87L78 90L61 100L43 90Z" fill="#ffffff"/>
+<path d="M47 88L60 81L73 88L60 95Z" fill="#b6d0d1"/>
+<path d="M51 87L61 83L69 87L60 92Z" fill="#e4f0ea"/>
+<!-- soap / roll holder on rear wall -->
+<path d="M82 83L89 86V90L82 87Z" fill="#9b886e"/>
+<path d="M82 80L87 82V87L82 85Z" fill="#f5f1df"/>
+<path d="M85 85L91 88V94L85 91Z" fill="#faf6e6"/>
+<!-- WC label on approach side -->
+<path d="M18 103L28 108L28 111L18 106Z" fill="#f1f7f4"/>
+</svg>
