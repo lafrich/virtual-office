@@ -4,7 +4,7 @@
 'use strict';
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
-const PLAIN = new Set(['', 'index.html', 'sw.js', '.nojekyll', '404.html']);
+const PLAIN = new Set(['', 'index.html', 'sw.js', 'cove-reskin.js', '.nojekyll', '404.html']);
 let KEY = null, MAN = null, MANP = null, MANT = 0;
 
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -63,7 +63,18 @@ async function handle(ev, p, u) {
     if (!ent) return new Response('Not found', { status: 404 });
     const r = await fetch(SCOPE + 'b/' + ent[0]);
     if (!r.ok) return new Response('', { status: r.status });
-    return new Response(await decrypt(await r.arrayBuffer()), { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
+    const plaintext = await decrypt(await r.arrayBuffer());
+    // Authenticated feature preview: preserve the original Grok engine and ciphertext.
+    // Only the opt-in Cove URL gets an isolated visual/playable room module.
+    if (p === 'office.html' && u.searchParams.get('cove') === '1' && ent[1].includes('text/html')) {
+      const html = new TextDecoder().decode(plaintext);
+      const anchor = '</body>';
+      if (html.includes(anchor) && !html.includes('cove-reskin.js')) {
+        const patched = html.replace(anchor, '<script src="./cove-reskin.js?v=1" defer></script>' + anchor);
+        return new Response(patched, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
+      }
+    }
+    return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
   } catch (e) {
     if (e && e.name === 'OperationError') KEY = null;           // wrong/stale key: force re-unlock
     return nav ? Response.redirect(SCOPE + '?next=' + encodeURIComponent(p + u.search), 302) : new Response('decrypt failed', { status: 500 });
