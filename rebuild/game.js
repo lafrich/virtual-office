@@ -239,6 +239,8 @@ const STORAGE='vo-editable-rebuild-v1';
 const defaults={fullness:87,energy:86,hygiene:91,bladder:15};
 const player={x:7.25,y:9.25,zone:'office',dir:'sw',seatId:null,sitX:null,moveTarget:null,walk:0,run:false};
 const coveWorld=new window.VOModular.ModularWorld();
+const sceneWorlds=window.VOBuildScenes.makeWorlds();
+const getEditWorld=zone=>zone==='cove'?coveWorld:sceneWorlds[zone];
 let coveEditor=null;
 let needs={...defaults},wallet=125000,events=[],timeMinutes=8*60+15;
 try{
@@ -270,7 +272,7 @@ function setZone(zone){
  Object.assign(player,zone==='office'?{x:7.25,y:9.25}:zone==='street'?{x:8.2,y:8.5}:zone==='warteg'?{x:7.1,y:8.8}:{x:4.5,y:9.15});
  $('locationChip').textContent=zone==='office'?'🏢 OFFICE':zone==='street'?'🌳 TAMAN':zone==='warteg'?'🍛 WARTEG':'🛏️ COVE ROOM';
  $('playerPlace').textContent=zone==='office'?'Pegawai kantor · Local test':zone==='street'?'Taman kota · Local test':zone==='warteg'?'Warteg · Local test':'Cove Bedroom + Bathroom';
- $('zoneSwitch').hidden=true;if(coveEditor)coveEditor.zoneChanged();addLog('📍 Berpindah ke '+(zone==='office'?'Office':zone==='street'?'Taman':zone==='warteg'?'Warteg':'Cove Room'));
+ $('zoneSwitch').hidden=true;if(coveEditor)coveEditor.changeZone(getEditWorld(zone));addLog('📍 Berpindah ke '+(zone==='office'?'Office':zone==='street'?'Taman':zone==='warteg'?'Warteg':'Cove Room'));
  notice('AREA: '+zone.toUpperCase());
 }
 function stand(){
@@ -321,13 +323,44 @@ const spots={
   {x:10,y:9.8,r:1.9,id:'exit',label:'KELUAR',type:'zone',to:'street'}
  ]
 };
+// Reuse the existing Action spots while furniture moves in Build Mode.
+// The action point and occupied seat are shifted with the corresponding object.
+const actionOwner={
+ office:{sofa:'office-sofa',desk:'office-desk-a',officechair:'office-chair',
+   migi:'office-sofa',toilet:'office-toilet',shower:'office-shower'},
+ street:{bench0:'street-bench-0',bench1:'street-bench-1',lounger:'street-lounger',
+   'warteg-door':'street-warteg'},
+ warteg:{bar0:'warteg-bar',bar1:'warteg-bar',bar2:'warteg-bar',
+   food:'warteg-bar',drink:'warteg-bar'}
+};
+function adjustedActionSpot(zone,spot){
+ const id=actionOwner[zone]?.[spot.id];
+ if(!id)return spot;
+ const world=sceneWorlds[zone],asset=world.get(id);
+ const base=world.defaultAssets.find(a=>a.id===id);
+ if(!asset||!asset.visible||!base)return {...spot,r:0};
+ const dx=asset.at.x-base.at.x,dy=asset.at.y-base.at.y;
+ return {...spot,x:spot.x+dx,y:spot.y+dy,
+   seatX:Number.isFinite(spot.seatX)?spot.seatX+dx:undefined,
+   seatY:Number.isFinite(spot.seatY)?spot.seatY+dy:undefined};
+}
+function paintFurniture(zone,id,baseX,baseY,fn){
+ const world=sceneWorlds[zone],item=world?.get(id),base=world?.defaultAssets.find(a=>a.id===id);
+ if(!item||!item.visible)return;
+ const deltaX=item.at.x-(base?.at.x??baseX),deltaY=item.at.y-(base?.at.y??baseY);
+ g.save();
+ g.translate(Math.round((deltaX-deltaY)*TX*zoom+item.offset.x*zoom),
+   Math.round((deltaX+deltaY)*TY*zoom+item.offset.y*zoom));
+ fn();g.restore();
+}
 function currentAction(){
  if(player.seatId)return {type:'stand',label:'BANGUN'};
  if(player.zone==='cove')return coveWorld.nearestAction(player)||{type:'fart',label:'KENTUT'};
  let nearest=null,dmin=Infinity;
  for(const spot of spots[player.zone]){
-  const d=Math.hypot(player.x-spot.x,player.y-spot.y);
-  if(d<=spot.r&&d<dmin){nearest=spot;dmin=d}
+  const dSpot=adjustedActionSpot(player.zone,spot);
+  const d=Math.hypot(player.x-dSpot.x,player.y-dSpot.y);
+  if(d<=spot.r&&d<dmin){nearest=dSpot;dmin=d}
  }
  if(nearest)return nearest;
  return {type:'fart',label:'KENTUT'};
@@ -392,7 +425,7 @@ $('btnNotif').addEventListener('click',()=>{$('drawer').hidden=!$('drawer').hidd
 $('closeDrawer').addEventListener('click',()=>{$('drawer').hidden=true});
 $('tabNotifications').addEventListener('click',()=>switchTab('notif'));
 $('tabStatus').addEventListener('click',()=>switchTab('status'));
-$('btnMap').addEventListener('click',()=>{$('zoneSwitch').hidden=!$('zoneSwitch').hidden;$('drawer').hidden=true});
+$('btnMap').addEventListener('click',()=>{if(coveEditor?.active)return;$('zoneSwitch').hidden=!$('zoneSwitch').hidden;$('drawer').hidden=true});
 document.querySelectorAll('[data-zone]').forEach(b=>b.addEventListener('click',()=>setZone(b.dataset.zone)));
 $('btnZoomIn').addEventListener('click',()=>{manualZoom=true;zoom=clamp(zoom+.12,.55,1.50)});
 $('btnZoomOut').addEventListener('click',()=>{manualZoom=true;zoom=clamp(zoom-.12,.55,1.50)});
@@ -419,12 +452,12 @@ const covePointer=e=>{
 };
 C.addEventListener('pointerdown',e=>{
  if(coveEditor?.active){
-   coveEditor.pointerDown(e,covePointer);
+   coveEditor.pointerDown(e);
    if(C.setPointerCapture)C.setPointerCapture(e.pointerId);
  }
 });
 C.addEventListener('pointermove',e=>{
- if(coveEditor?.active)coveEditor.pointerMove(e,covePointer);
+ if(coveEditor?.active)coveEditor.pointerMove(e);
 });
 C.addEventListener('pointercancel',e=>{
  if(coveEditor?.active)coveEditor.pointerUp(e);
@@ -439,6 +472,7 @@ C.addEventListener('pointerup',e=>{
  if(x>=.3&&x<limit[0]-.3&&y>=.3&&y<limit[1]-.3){player.moveTarget={x,y};if(player.seatId)stand();}
 });
 function update(dt){
+ if(coveEditor?.active){action.textContent='EDIT';return}
  const v={x:joy.x,y:joy.y};
  if(keys.has('w')||keys.has('arrowup'))v.y-=1;
  if(keys.has('s')||keys.has('arrowdown'))v.y+=1;
@@ -517,22 +551,22 @@ function draw(frame){
  // draw zone indicator as world label
  if(player.zone==='warteg'){const p=iso(5,0,75);pixelText('BU WARTEG',p.x,p.y,'#ffe4a4',12)}
  // Clock moved out of the canvas to prevent overlap with the location label.
+ if(coveEditor?.active)coveEditor.overlay({ctx:g,iso,zoom});
 }
 function frame(t){
  const dt=clamp((t-now)/1000,0,.06);now=t;
  update(dt);draw(t*.001);requestAnimationFrame(frame);
 }
 // Initialize the editor once after all gameplay hooks are set up.
-coveEditor=window.VOModularEditor.createEditor(coveWorld,{
+coveEditor=window.VOModularEditor.createEditor(getEditWorld(player.zone),{
  getZone:()=>player.zone,
  getProject:()=>Object.assign((x,y,z=0)=>iso(x,y,z),{zoom}),
- screenToWorld:(screenX,screenY)=>{
-  const a=(screenX-ox)/(TX*zoom),b=(screenY-oy)/(TY*zoom);
-  return {x:(a+b)/2,y:(b-a)/2}
- }
+ pointerPosition:covePointer,
+ onState:on=>{player.moveTarget=null;keys.clear();resetJoy();
+   $('drawer').hidden=true;$('zoneSwitch').hidden=true;}
 });
-renderFeed();renderNeeds();$('playerName').textContent='PLAYER';$('locationChip').textContent=player.zone==='office'?'🏢 OFFICE':player.zone==='street'?'🌳 TAMAN':zone==='warteg'?'🍛 WARTEG':'🛏️ COVE ROOM';
-$('playerPlace').textContent=player.zone==='office'?'Pegawai kantor · Local test':player.zone==='street'?'Taman kota · Local test':zone==='warteg'?'Warteg · Local test':'Cove Bedroom + Bathroom';
+renderFeed();renderNeeds();$('playerName').textContent='PLAYER';$('locationChip').textContent=player.zone==='office'?'🏢 OFFICE':player.zone==='street'?'🌳 TAMAN':player.zone==='warteg'?'🍛 WARTEG':'🛏️ COVE ROOM';
+$('playerPlace').textContent=player.zone==='office'?'Pegawai kantor · Local test':player.zone==='street'?'Taman kota · Local test':player.zone==='warteg'?'Warteg · Local test':'Cove Bedroom + Bathroom';
 addLog('✨ Editable Rebuild 01 siap dimainkan. Source mandiri, tanpa aset terenkripsi.');
 requestAnimationFrame(frame);
 })();
