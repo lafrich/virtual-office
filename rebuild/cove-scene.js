@@ -32,6 +32,9 @@ function drawFloor(api){
  poly([iso(15.15,0,21),iso(15.8,0,21),iso(15.8,0,46),iso(15.15,0,46)],PAL.glass,PAL.wood,2);
 }
 function drawAsset(api,a,part){
+ // Detailed pixel art first.  Old geometric renderer is kept as fallback
+ // for user-created modules that aren't yet in the asset kit.
+ if(global.VOPixelKit?.drawAsset(api,a,part))return;
  const {box,line,iso,ctx,shadow,drawPlant}=api;
  const p=a.at,x=p.x,y=p.y,sc=a.scale,z=a.elevation;
  const dims=(w,d,h)=>[w*sc,d*sc,h*sc];
