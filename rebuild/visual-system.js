@@ -155,9 +155,46 @@
   rug:{category:'floorDecor',sizeClass:'large',material:'upholstery'},
   bookshelf:{category:'furniture',sizeClass:'medium',material:'wood'}
  });
+ // Gives each newly registered asset the same art-direction contract, even
+ // when its current art is procedural or comes from an external sprite.
+ function describeAsset(id,type,w,d){
+  const search=(String(type||'')+' '+String(id||'')).toLowerCase();
+  const preferred=Object.keys(manifest).find(k=>search.includes(k));
+  const ref=preferred?manifest[preferred]:null;
+  const category=ref?.category||
+   (/plant|lamp|shelf-art|picture|rug/.test(search)?'decor':
+    /toilet|sink|shower|bath/.test(search)?'bathroom':'furniture');
+  const sizeClass=ref?.sizeClass||
+   (Math.max(w||1,d||1)>=3?'extraLarge':
+    Math.max(w||1,d||1)>=1.8?'large':
+    Math.max(w||1,d||1)>=1.05?'medium':'small');
+  const material=ref?.material||
+   (/plant|leaf|tree|grass/.test(search)?'leaf':
+    /tile|rug/.test(search)?'upholstery':
+    /metal|toilet|sink/.test(search)?'ceramic':
+    /sofa|seat|couch/.test(search)?'upholstery':'wood');
+  return {visualVersion:'1.0',category,sizeClass,material,
+   pivot:'bottom-center',projection:'2:1',light:'top-left',
+   occlusion:ref?.split?ref.split.slice():['base']};
+ }
+ function validateAsset(asset){
+  const warnings=[];
+  if(!asset||!asset.id||!asset.at||!asset.size)return ['missing-id-position-or-size'];
+  if(!Number.isFinite(asset.at.x)||!Number.isFinite(asset.at.y))
+    warnings.push('invalid-grid-coordinate');
+  if(!Number.isFinite(asset.size.w)||!Number.isFinite(asset.size.d))
+    warnings.push('invalid-footprint');
+  const visual=asset.visual||describeAsset(asset.id,asset.type,asset.size.w,asset.size.d);
+  if(!sizes[visual.sizeClass])warnings.push('unknown-size-class');
+  if(!materials[visual.material])warnings.push('unknown-material');
+  if(visual.pivot!=='bottom-center')warnings.push('invalid-pivot');
+  if(asset.action?.type==='sleep'&&!asset.action.pose)
+    warnings.push('sleep-requires-pose-anchor');
+  return warnings;
+ }
  global.VOVisualSystem=Object.freeze({
   version:'1.0',palette,materials,sizes,hierarchy,poses,manifest,
   isometric:{footprintTile:{width:46,height:23},logicalSpriteTile:32,lightDirection:'top-left'},
-  color:p,material:mat,props
+  color:p,material:mat,props,describeAsset,validateAsset
  });
 })(window);
