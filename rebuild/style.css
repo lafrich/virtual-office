@@ -69,3 +69,51 @@ button{font-family:inherit;cursor:pointer;user-select:none;-webkit-tap-highlight
  .joystick{height:80px;width:80px}.joy-knob{height:36px;width:36px}
  .action{height:78px;width:78px}
 }
+
+/* REBUILD 03: asset precision editor, usable on a phone */
+.tool[hidden],.module-editor[hidden]{display:none!important}
+.tool.editor-active{background:#4d896e!important;color:#f9f6d3!important}
+.modular-editing .action{pointer-events:none;opacity:.35}
+.module-editor{position:absolute;z-index:18;right:8px;top:59px;bottom:108px;
+ width:min(336px,calc(100% - 73px));overflow-y:auto;overscroll-behavior:contain;
+ background:#232e40;border:3px solid #0c1019;color:#f2f1e8;box-shadow:4px 5px 0 #0b1018;
+ font:11px/1.35 "Courier New",monospace;touch-action:pan-y}
+.module-editor-inner{padding:0 9px 13px}
+.me-head{position:sticky;top:0;z-index:1;background:#f6d58b;color:#131a24;
+ display:flex;align-items:center;justify-content:space-between;margin:0 -9px 9px;
+ border-bottom:3px solid #101825;padding:6px 8px;min-height:36px}
+.me-head strong{font-size:12px}
+.me-head button{height:27px;width:30px;border:2px solid #111822;background:#e15f72;color:#151923;font-weight:bold}
+.me-help{margin:8px 0 12px;color:#c9d2de;font-size:10px;line-height:1.45}
+.me-label{display:block;font:bold 10px/1.5 monospace;color:#f6d991;margin:8px 0 4px}
+.me-select{appearance:auto;width:100%;padding:8px 6px;min-height:35px;background:#334258;border:2px solid #96a5b8;color:#fff;font:11px monospace}
+.me-short{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:8px 0}
+.me-short button,.me-advanced button{border:2px solid #9ba7ba;background:#34425b;color:#f5e5b8;
+ font:bold 10px/1.25 monospace;padding:8px 3px;min-height:38px;touch-action:manipulation}
+.me-short button:active,.me-advanced button:active{background:#e0c788;color:#151b29}
+.me-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 9px;margin:12px 0}
+.me-field{display:flex;flex-direction:column;gap:4px;font:bold 10px/1 monospace;color:#c3ccd8}
+.me-field input,.me-advanced input{background:#172235;color:#fff;border:2px solid #77899f;
+ border-radius:0;padding:6px;width:100%;min-height:34px;font:12px monospace}
+.me-field input:disabled{opacity:.35}
+.me-field input:focus,.me-select:focus,.me-advanced input:focus{outline:2px solid #f7cf79}
+.me-options{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+.me-options label{display:flex;align-items:center;gap:4px;white-space:nowrap;font:10px monospace;color:#dce5ec}
+.me-options input{accent-color:#f7d582}
+.me-advanced{border:1px solid #52627a;margin:10px 0;padding:9px;font:10px/1.5 monospace}
+.me-advanced summary{color:#ffdc96;font-weight:bold;cursor:pointer}
+.me-advanced label{display:block;margin:8px 0 3px}
+.me-advanced p{color:#b9c7d7;font-size:9px;margin:5px 0}
+.me-advanced button{padding:8px 12px}
+.me-operations{grid-template-columns:1fr 1fr}
+.me-operations button{font-size:10px;min-height:38px}
+#meJson{width:100%;min-height:90px;max-height:200px;resize:vertical;
+ border:2px solid #6d7b8e;background:#111c2b;color:#bce9d4;padding:8px;
+ font:10px/1.4 monospace}
+.me-status{font-size:10px;line-height:1.5;color:#c8e9b0;min-height:16px;margin:8px 0}
+.me-status.error{color:#ff9797}
+@media(max-width:520px){
+ .module-editor{top:10px;bottom:119px;right:6px;width:calc(100% - 64px);max-height:none}
+ .me-short button{font-size:9px;padding:8px 1px}
+ .me-fields{gap:6px}
+}
