@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" shape-rendering="crispEdges">
+<polygon points="28,90 97,125 97,144 28,109" fill="#6BB77A"/><polygon points="102,122 97,125 97,144 102,141" fill="#477C55"/><polygon points="33,87 102,122 97,125 28,90" fill="#91C795"/>
+<polygon points="29,91 92,123 92,143 29,111" fill="#6BB77A"/><polygon points="95,121 92,123 92,143 95,141" fill="#477C55"/><polygon points="32,90 95,121 92,123 29,91" fill="#A6C9A5"/>
+<polyline points="31,91 93,122" fill="none" stroke="#FFF8E6" stroke-width="1.4" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>
