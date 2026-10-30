@@ -43,3 +43,29 @@ button{font-family:inherit;cursor:pointer;user-select:none;-webkit-tap-highlight
 @media(max-width:520px){.topbar{height:56px;letter-spacing:1px;font-size:18px}.edition{font-size:9px;padding:5px}.building{font-size:22px;margin-right:8px}.left-tools{left:9px;top:12px;gap:7px}.tool{width:49px;height:49px;font-size:26px}.joystick{width:116px;height:116px;left:15px;bottom:34px}.action{height:92px;width:92px;right:14px;bottom:42px;font-size:12px}.drawer{left:65px;top:64px;width:calc(100% - 76px);max-height:calc(100% - 166px)}.location-chip{right:8px;top:10px;font-size:10px}.bottom-note{font-size:8px}}
 @media(max-height:650px){.left-tools{gap:4px}.tool{width:43px;height:43px;font-size:24px}.drawer{max-height:calc(100% - 100px);top:8px}.joystick{width:94px;height:94px}.action{width:88px;height:88px}}
 @media(prefers-reduced-motion:reduce){.need-fill,.toast{transition:none}}
+
+/* REBUILD-02: compact controls and cleaner mobile composition */
+.topbar{letter-spacing:1px;text-shadow:1px 2px #550717}
+.bottom-note{display:none}
+.help{font-size:9px;opacity:.76}
+.edition{font-size:9px;border-width:1px;color:#f1e2ba}
+.location-chip{font-size:10px;border-width:2px;padding:7px 9px;box-shadow:2px 2px #111923}
+@media(max-width:520px){
+ .topbar{height:49px;font-size:16px;letter-spacing:.7px;padding:0 9px}
+ .building{font-size:20px;margin-right:7px}
+ .edition{font-size:8px;padding:5px 4px;margin-left:auto;letter-spacing:0}
+ .left-tools{left:9px;top:11px;gap:8px}
+ .tool{width:44px;height:44px;font-size:21px;border-width:3px;box-shadow:inset 0 0 0 2px #61728b,0 2px 0 #080b12}
+ .joystick{width:92px;height:92px;left:14px;bottom:25px;border-width:2px}
+ .joy-knob{width:41px;height:41px;border-width:2px}
+ .action{width:84px;height:84px;right:13px;bottom:30px;font-size:11px;border-width:4px}
+ .location-chip{top:10px;right:8px;padding:6px 7px;font-size:10px}
+ .help{display:none}
+ .zone-switch{top:11px;left:61px}
+ .drawer{top:60px;left:60px;width:calc(100% - 70px);max-height:calc(100% - 123px)}
+}
+@media (max-height:720px) and (max-width:520px) {
+ .left-tools{gap:5px}.tool{height:40px;width:40px;font-size:20px}
+ .joystick{height:80px;width:80px}.joy-knob{height:36px;width:36px}
+ .action{height:78px;width:78px}
+}
