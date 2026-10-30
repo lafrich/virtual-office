@@ -47,60 +47,6 @@
     return false;
   }
 
-
-  // Native world-space WC. The original Grok grid, depth sort, sprite sheet,
-  // collision and Action button remain in charge (no overlay/canvas/game fork).
-  const WC = (function installOfficeWC() {
-    if (typeof walkable !== 'function' || typeof block !== 'function' ||
-        typeof sprite !== 'function' || typeof P !== 'function' ||
-        typeof el !== 'function') return null;
-    // Prefer the quiet gallery-side wall, away from workstations/sofas.
-    // Probe actual occupancy instead of hard-coding a tile over existing art.
-    const candidates = [[24,3],[25,3],[24,4],[25,4],[24,7],
-      [23,3],[23,4],[25,7],[24,2],[23,7],[25,20],[24,21]];
-    const selected = candidates.find(([c,r]) => walkable(c,r) &&
-      [[1,0],[-1,0],[0,1],[0,-1]].filter(([dc,dr]) =>
-        walkable(c+dc,r+dr)).length >= 2);
-    if (!selected) {
-      console.warn('[office-wc] No free, accessible office tile found');
-      return null;
-    }
-    const [c,r] = selected,foot = P(c+0.5,r+0.5);
-    // Register physical collision before new pathfinding/keyboard movement.
-    block(c,r);
-    const depth=c+r+1.0,makeImage=(group,clip)=>{
-      const wrap=el('svg',{x:foot.x-28,y:foot.y-65,width:56,height:72,
-        viewBox:'0 0 112 144',overflow:'hidden',
-        'shape-rendering':'crispEdges','pointer-events':'none'},group);
-      const img=el('image',{href:'assets/office_wc.svg?v=1',
-        x:0,y:0,width:112,height:144,
-        style:'image-rendering:pixelated'},wrap);
-      if (clip) {
-        const id='vc-wc-foreground-clip';
-        const defs=el('defs',{},wrap);
-        const cl=el('clipPath',{id},defs);
-        el('rect',{x:0,y:84,width:112,height:60},cl);
-        img.setAttribute('clip-path','url(#'+id+')');
-      }
-      return img;
-    };
-    const bg=sprite(depth-0.23,'vc-office-wc-back');
-    makeImage(bg,false);
-    // Bowl/threshold sit in front of seated sprite; back walls behind it.
-    const fg=sprite(depth+0.23,'vc-office-wc-front');
-    makeImage(fg,true);
-    if (typeof sortWorld === 'function') sortWorld();
-    window.__vcOfficeWC={c,r,approach:{c:c+0.5,r:r+1.5}};
-    console.info('[office-wc] Installed native toilet at',c,r);
-    return {c,r,at:{c:c+0.5,r:r+0.5},range:1.75};
-  })();
-
-  function nearOfficeWC() {
-    if (!WC || OUT_ON || !gameUserReady()) return null;
-    const d=distance(me,WC.at);
-    return d < WC.range ? {d} : null;
-  }
-
   function nearestSeat() {
     // Indoor seats come from asset metadata; outdoor benches and warteg chairs
     // are registered at construction time by the original exterior builders.
@@ -163,12 +109,6 @@
 
   function contextualLife() {
     if (!gameUserReady()) return null;
-    // WC has its own seat marker and should outrank nearby ordinary chairs.
-    if (me._vcOfficeWC) return {k:'vc-wc-stand',l:'Bangun',
-      hint:'Selesai menggunakan WC',d:-3};
-    const wc=nearOfficeWC();
-    if (wc && !me._lifeStandOrigin) return {k:'vc-wc',l:'Gunakan WC',
-      hint:'Pipis di toilet kantor',d:wc.d/WC.range-2};
     const seat = nearestSeat();
     // Once positioned in a furniture slot, maintain the correct action even
     // if the seat is occupied by this user (or the player shifts slightly).
@@ -236,22 +176,7 @@
       return;
     }
     if (!fresh || fresh.k !== choice.k) return;
-    if (choice.k === 'vc-wc') {
-      if (!WC || !nearOfficeWC() || me._lifeStandOrigin) return;
-      if (typeof okG === 'function' && !okG(me.c,me.r)) return;
-      if (!window.__lifeBridge.useToilet || !activate('sit')) return;
-      me._lifeStandOrigin = {c:me.c,r:me.r};
-      me._lifeSeat = {c:WC.at.c,r:WC.at.r,dir:'sw',
-        objectId:'office_wc',seatIndex:0,pose:'sit'};
-      me._vcOfficeWC = true;
-      me.c = WC.at.c; me.r = WC.at.r; me.dir = 'sw'; me.path = [];
-      // The proper toilet clears bladder without the outdoor hygiene penalty.
-      window.__lifeBridge.useToilet();
-      if (typeof updAction === 'function') updAction();
-    } else if (choice.k === 'vc-wc-stand') {
-      activate('stand');
-      window.__lifeBridge.exitPoseForMovement?.();
-    } else if (choice.k === 'vc-sit' || choice.k === 'vc-recline') {
+    if (choice.k === 'vc-sit' || choice.k === 'vc-recline') {
       if (!fresh.seat || occupied(fresh.seat)) return;
       // Snap only within interaction radius; avoids sitting mid-air.
       // Remember an actually walkable standing position: furniture seat tiles
@@ -302,7 +227,6 @@
       me.r = origin.r;
     }
     me._lifeSeat = null;
-    me._vcOfficeWC = false;
     me._lifeStandOrigin = null;
     window.dispatchEvent(new Event('vc-life-stand'));
     return true;

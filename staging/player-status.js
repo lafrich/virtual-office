@@ -101,7 +101,7 @@
         <p><strong>💤 Tidur:</strong> +25 Energi per menit. Duduk: +2 Energi per menit.</p>
         <p><strong>🥤 Minum:</strong> +15 Kebelet (aksi minum masih tes).</p>
         <p><strong>🚿 Mandi:</strong> Kebersihan kembali ke 100 (aksi mandi masih tes).</p>
-        <p><strong>🚽 WC kantor:</strong> Gunakan Action di depan toilet untuk mengosongkan Kebelet tanpa penalti Kebersihan.</p>\n        <p><strong>🚽 Pipis sembarangan:</strong> Kebelet kembali ke 0, Kebersihan -20. Muncul lewat Action dekat tembok.</p>
+        <p><strong>🚽 Pipis sembarangan:</strong> Kebelet kembali ke 0, Kebersihan -20. Muncul lewat Action dekat tembok.</p>
         <p><strong>⏱️ Saat bermain:</strong> Kenyang -10, Energi -8, Kebersihan -5, Kebelet +20 tiap 15 menit (kecuali pemulihan saat istirahat).</p>
         <p><strong>⚠️ Kebelet mencapai 100:</strong> otomatis ngompol, Kebersihan -30.</p>
       </div>
