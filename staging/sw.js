@@ -71,7 +71,7 @@ async function handle(ev, p, u) {
         return new Response('staging game version mismatch', { status: 500 });
       }
       // Inject only into staging's decrypted document. Production remains untouched.
-      const extended = html.replace('</body>', '<script src="life-context.js?v=2" defer></script>\\n</body>');
+      const extended = html.replace('</body>', '<script src="life-context.js?v=3" defer></script></body>');
       return new Response(extended, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
     }
     return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
