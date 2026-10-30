@@ -273,7 +273,26 @@ function setZone(zone){
  $('zoneSwitch').hidden=true;if(coveEditor)coveEditor.zoneChanged();addLog('📍 Berpindah ke '+(zone==='office'?'Office':zone==='street'?'Taman':zone==='warteg'?'Warteg':'Cove Room'));
  notice('AREA: '+zone.toUpperCase());
 }
-function stand(){player.seatId=null;player.sitX=null;}
+function stand(){
+ // Exit the occupied module at its walkable approach anchor.
+ // Without this, the character would stand inside a bed/bathtub collider.
+ const id=player.seatId;
+ if(id&&player.zone==='cove'){
+   const a=coveWorld.get(id),approach=a?.action?.approach;
+   if(a&&approach){
+     const x=a.at.x+approach.x,y=a.at.y+approach.y;
+     if(!coveWorld.blocked(x,y)){
+       player.x=x;player.y=y;
+     }else{
+       // Prefer an open adjacent tile if another moved object blocks approach.
+       const offsets=[[0,.6],[.6,0],[-.6,0],[0,-.6],[1,1],[-1,1],[1,-1],[-1,-1]];
+       const free=offsets.map(([dx,dy])=>({x:x+dx,y:y+dy})).find(v=>!coveWorld.blocked(v.x,v.y));
+       if(free){player.x=free.x;player.y=free.y}
+     }
+   }
+ }
+ player.seatId=null;player.sitX=null;
+}
 function near(p,x,y,range=1.7){return Math.hypot(p.x-x,p.y-y)<=range;}
 const spots={
  office:[
