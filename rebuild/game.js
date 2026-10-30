@@ -157,7 +157,9 @@ function drawOffice(x,y,sceneActor,frame){
  {d:18,fn:()=>box(9.1,9.3,1.4,1.1,9,'#b99460','#8f6c45','#8a623e')},
  {d:19,fn:()=>box(10.9,9.1,1.4,1.1,9,'#b99460','#8f6c45','#8a623e')},
  {d:22,fn:()=>drawDesk(14.5,8.1)},
- {d:23,fn:()=>drawChair(14.4,9.1)}
+ {d:23,fn:()=>drawChair(14.4,9.1)},
+ {d:25,fn:()=>{box(16.1,10.8,.9,.9,6,'#f9fbf9','#c8e1e5','#bad5d7');box(16.1,10.8,.48,.58,2,'#b7e6f2','#71aabb','#73a6b5',6);}},
+ {d:24.8,fn:()=>{box(16.2,8.8,1.0,.9,27,'#a9dcf1','#7099ba','#658eb6');box(16.2,8.8,.8,.8,1,'#e2f6f8','#bfd6d7','#b2d3d5',27);}}
  ];
  for(const o of objs)objects.push(o);
 }
@@ -201,6 +203,11 @@ function drawPark(occupied,frame){
  pixelText('WARTEG',iso(11.4,3.2,39).x,iso(11.4,3.2,39).y,'#ffe4a1',12);
  box(8,9.5,1.4,.8,7,'#c4d4d0','#608cba','#5796c6');
  box(8.3,9.4,.6,.8,12,'#4d6ea0','#42689b','#3b658f',7);
+ // Lounger renders the reclining avatar in one stable world layer.
+ box(13.2,8.8,2.4,1,7,'#f4e8d5','#b3a68b','#b8a689');
+ box(13.2,8.35,2.4,.28,14,'#f3e7d1','#baa992','#a89d87');
+ if(occupied&&occupied.seatId==='lounger')drawHuman(occupied.x,occupied.y,{lying:true,dir:'se'});
+ box(13.2,9.28,2.4,.12,8,'#f6eddc','#c0b39b','#b9ac95');
 }
 function resize(){
  const box=view.getBoundingClientRect();
@@ -254,11 +261,14 @@ const spots={
   {x:12,y:5.5,r:2.0,id:'desk',label:'KERJA',type:'work'},
   {x:14.5,y:8.8,r:1.8,id:'officechair',label:'DUDUK',type:'sit',seatX:14.4,seatY:9.1},
   {x:8.1,y:6.4,r:1.5,id:'migi',label:'PET',type:'pet'},
-  {x:16.4,y:10,r:2.1,id:'door',label:'KELUAR',type:'zone',to:'street'}
+  {x:16.1,y:10.8,r:1.5,id:'toilet',label:'PIPIS',type:'pee'},
+  {x:16.2,y:8.8,r:1.4,id:'shower',label:'MANDI',type:'shower'},
+  {x:16.7,y:12.0,r:1.6,id:'door',label:'KELUAR',type:'zone',to:'street'}
  ],
  street:[
   {x:5.1,y:7.6,r:2.0,id:'bench0',label:'DUDUK',type:'sit',seatX:5.0,seatY:6.4},
   {x:10.2,y:7.6,r:2.0,id:'bench1',label:'DUDUK',type:'sit',seatX:10,seatY:6.4},
+  {x:13.2,y:9.6,r:1.5,id:'lounger',label:'REBAH',type:'lie',seatX:13.2,seatY:8.8},
   {x:11.8,y:5.5,r:2.7,id:'warteg-door',label:'MASUK',type:'zone',to:'warteg'},
   {x:3.2,y:10,r:2.0,id:'office-door',label:'OFFICE',type:'zone',to:'office'}
  ],
@@ -267,6 +277,7 @@ const spots={
   {x:6.3,y:6.9,r:1.9,id:'bar1',label:'DUDUK',type:'sit',seatX:6.3,seatY:6.25},
   {x:7.8,y:6.9,r:1.9,id:'bar2',label:'DUDUK',type:'sit',seatX:7.8,seatY:6.25},
   {x:6.7,y:5.15,r:2.3,id:'food',label:'PESAN',type:'eat'},
+  {x:9.25,y:5.8,r:1.5,id:'drink',label:'MINUM',type:'drink'},
   {x:10,y:9.8,r:1.9,id:'exit',label:'KELUAR',type:'zone',to:'street'}
  ]
 };
@@ -283,8 +294,11 @@ function currentAction(){
 function pressAction(){
  const a=currentAction();
  if(a.type==='stand'){stand();notice('Berdiri');return}
- if(a.type==='sit'){player.seatId=a.id;player.sitX={x:a.seatX,y:a.seatY};player.x=a.seatX;player.y=a.seatY;player.moveTarget=null;player.dir=player.zone==='warteg'?'nw':'sw';addLog('🪑 Duduk di '+(player.zone==='warteg'?'bangku depan etalase':player.zone==='office'?'sofa / kursi kantor':'bangku taman'));return}
+ if(a.type==='sit'||a.type==='lie'){player.seatId=a.id;player.sitX={x:a.seatX,y:a.seatY};player.x=a.seatX;player.y=a.seatY;player.moveTarget=null;player.dir=player.zone==='warteg'?'nw':'sw';addLog(a.type==='lie'?'💤 Rebahan di kursi taman.':'🪑 Duduk di '+(player.zone==='warteg'?'bangku depan etalase':player.zone==='office'?'sofa / kursi kantor':'bangku taman'));return}
  if(a.type==='eat'){if(wallet<12000)return notice('Uang tidak cukup');wallet-=12000;needs.fullness=clamp(needs.fullness+40,0,100);needs.bladder=clamp(needs.bladder+4,0,100);addLog('🍛 Makan nasi kuning · -Rp12.000 · Kenyang +40');notice('🍛 MAKAN +40');return}
+ if(a.type==='drink'){needs.bladder=clamp(needs.bladder+15,0,100);addLog('🥤 Minum es teh · Kebelet +15');notice('🥤 MINUM');return}
+ if(a.type==='pee'){needs.bladder=0;needs.hygiene=clamp(needs.hygiene-3,0,100);addLog('🚽 Pipis di toilet · Kebelet kembali nol');notice('🚽 LEGA');return}
+ if(a.type==='shower'){needs.hygiene=100;addLog('🚿 Mandi · Kebersihan pulih ke 100');notice('🚿 BERSIH');return}
  if(a.type==='pet'){addLog('🐈 Kamu mengelus Migi.');notice('MIGI: PURRR 🐈');return}
  if(a.type==='work'){wallet+=45000;needs.energy=clamp(needs.energy-4,0,100);needs.hygiene=clamp(needs.hygiene-2,0,100);addLog('💻 Selesai satu tugas kantor · +Rp45.000');notice('GAJI +45.000');return}
  if(a.type==='zone')return setZone(a.to);
@@ -293,9 +307,9 @@ function pressAction(){
 action.addEventListener('click',pressAction);
 const NEEDS=[
  {kind:'fullness',label:'🍚 Kenyang',hint:'Makan nasi kuning di warteg.'},
- {kind:'energy',label:'💤 Energi',hint:'Duduk untuk istirahat; tidur belum aktif di versi ini.'},
- {kind:'hygiene',label:'🧼 Kebersihan',hint:'Mandi belum aktif di versi ini.'},
- {kind:'bladder',label:'🚽 Kebelet',hint:'Semakin tinggi artinya ingin pipis.'}
+ {kind:'energy',label:'💤 Energi',hint:'Duduk atau rebahan di kursi taman untuk istirahat.'},
+ {kind:'hygiene',label:'🧼 Kebersihan',hint:'Mandi di sudut kamar mandi office.'},
+ {kind:'bladder',label:'🚽 Kebelet',hint:'Semakin tinggi berarti ingin pipis. Cari toilet office.'}
 ];
 $('needs').innerHTML=NEEDS.map(n=>'<div class="need-row" data-kind="'+n.kind+'"><div class="need-head"><span>'+n.label+'</span><output>—</output></div><div class="need-track"><div class="need-fill"></div></div><div class="need-hint">'+n.hint+'</div></div>').join('');
 function renderNeeds(){
@@ -306,7 +320,7 @@ function renderNeeds(){
   row.classList.toggle('warn',item.kind==='bladder'?val>=70&&val<90:val<=30&&val>10);
  }
  let status='Status stabil. Eksplor map untuk mencoba interaksi.';
- if(needs.bladder>=90)status='⚠️ Kebelet sekali! Toilet akan ditambahkan berikutnya.';
+ if(needs.bladder>=90)status='⚠️ Kebelet sekali! Cari toilet di Office.';
  else if(needs.energy<20)status='⚠️ Energi rendah. Coba duduk sebentar.';
  else if(needs.fullness<25)status='⚠️ Lapar! Pesan makanan di warteg.';
  $('statusMessage').textContent=status;
@@ -379,7 +393,7 @@ function update(dt){
  needs.hygiene=clamp(needs.hygiene-gameMinutes*(5/15)-(dx||dy?dt*.06:0),0,100);
  needs.bladder=clamp(needs.bladder+gameMinutes*(20/15),0,100);
  const seated=!!player.seatId;
- needs.energy=clamp(needs.energy+dt*(seated?.8:-.26)-(dx||dy?dt*.14:0),0,100);
+ needs.energy=clamp(needs.energy+dt*(seated?(player.seatId==='lounger'?9:.8):-.26)-(dx||dy?dt*.14:0),0,100);
  if(needs.bladder>=100){needs.bladder=5;needs.hygiene=clamp(needs.hygiene-30,0,100);addLog('⚠️ Terlalu kebelet! Karakter ngompol. Kebersihan -30');notice('⚠️ NGOMPOL')}
  const a=currentAction();action.textContent=a.label;
  if(Math.floor(now/1000)!==Math.floor((now-dt*1000)/1000))renderNeeds();
