@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" shape-rendering="crispEdges">
+<polygon points="47,122 54,118 65,114 95,114 106,118 113,122 105,130 91,133 69,133 55,130" fill="#617B9055"/>
+<polygon points="72,83 96,95 96,122 72,110" fill="#B7BDC7"/><polygon points="110,88 96,95 96,122 110,115" fill="#8A9DB7"/><polygon points="86,76 110,88 96,95 72,83" fill="#FEFCF5"/>
+<polygon points="71,81 97,94 97,95 71,83" fill="#B7BDC7"/><polygon points="112,86 97,94 97,95 112,88" fill="#8A9DB7"/><polygon points="86,74 112,86 97,94 71,81" fill="#FFF8E6"/>
+<polygon points="94,84 98,86 98,87 94,84" fill="#8A9DB7"/><polygon points="100,85 98,86 98,87 100,85" fill="#415A68"/><polygon points="96,82 100,85 98,86 94,84" fill="#B7BDC7"/>
+<polygon points="49,108 77,122 77,131 49,117" fill="#B7BDC7"/><polygon points="100,110 77,122 77,131 100,119" fill="#8A9DB7"/><polygon points="72,96 100,110 77,122 49,108" fill="#FEFCF5"/>
+<polygon points="50,106 76,119 76,122 50,109" fill="#B7BDC7"/><polygon points="99,108 76,119 76,122 99,111" fill="#8A9DB7"/><polygon points="73,95 99,108 76,119 50,106" fill="#FFF8E6"/>
+<polygon points="59,105 76,113 76,114 59,106" fill="#8A9DB7"/><polygon points="90,107 76,113 76,114 90,108" fill="#B7BDC7"/><polygon points="73,98 90,107 76,113 59,105" fill="#A9D9EB"/>
+<polygon points="63,104 76,111 76,111 63,105" fill="#B7BDC7"/><polygon points="86,106 76,111 76,111 86,106" fill="#8A9DB7"/><polygon points="73,100 86,106 76,111 63,104" fill="#FEFCF5"/>
+<polyline points="58,104 75,113" fill="none" stroke="#FFF8E6" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>
