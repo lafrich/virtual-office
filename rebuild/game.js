@@ -313,18 +313,32 @@ function drawPark(occupied,frame){
    const bx=5+i*5;
    const id='street-bench-'+i;
    queueFurniture('street',id,()=>paintFurniture('street',id,bx,6.4,(dx,dy)=>{
+     // Repeated slats communicate scale without noisy pixels.
+     for(const cx of [bx-1.20,bx+1.20])
+       box(cx,6.4,.15,.18,11,PAL.woodDark,PAL.woodDark,PAL.woodDark);
      box(bx,6.4,3.4,.82,8,PAL.woodLight,PAL.wood,PAL.woodDark);
-     box(bx,5.95,3.4,.20,21,PAL.woodLight,PAL.wood,PAL.woodDark);
+     for(const ly of [5.89,6.04,6.19]){
+       box(bx,ly,3.37,.10,4,PAL.woodLight,PAL.wood,PAL.woodDark,14);
+     }
+     box(bx,5.95,3.4,.16,20,PAL.woodLight,PAL.wood,PAL.woodDark);
      if(occupied&&occupied.seatId==='bench'+i)
        drawHuman(occupied.x-dx,occupied.y-dy,{sitting:true,dir:'sw'});
-     box(bx,6.78,3.4,.12,9,PAL.woodLight,PAL.wood,PAL.woodDark);
+     box(bx,6.78,3.4,.14,9,PAL.woodLight,PAL.wood,PAL.woodDark);
+     for(const cx of [bx-1.05,bx+1.05])
+       box(cx,6.77,.11,.07,.35,PAL.grey,PAL.shadow,PAL.shadowDark,9.3);
    }));
  }
  queueFurniture('street','street-warteg',()=>paintFurniture('street','street-warteg',11.4,3.9,()=>{
    box(11.4,3.9,2.8,2.0,22,PAL.wallLight,PAL.wall,PAL.wallSide);
    box(11.4,3.9,3.5,2.6,1,PAL.green,PAL.greenDark,PAL.greenDark,22);
-   const p=iso(11.4,3.2,39);
-   pixelText('WARTEG',p.x,p.y,PAL.cream,12);
+   // Little green/cream striped canopy establishes the warteg landmark.
+   box(11.4,3.7,3.5,2.35,1.0,PAL.greenDark,PAL.greenDark,PAL.woodDark,27);
+   for(let i=0;i<6;i++)
+     box(9.98+i*.57,4.65,.55,.32,.55,
+       i%2?PAL.cream:PAL.greenLight,PAL.creamShade,PAL.greenDark,28.2);
+   box(11.4,3.45,2.16,.14,14,PAL.woodLight,PAL.wood,PAL.woodDark,22);
+   const p=iso(11.4,3.2,40);
+   pixelText('WARTEG',p.x,p.y,PAL.cream,11);
  }));
  queueFurniture('street','street-props-a',()=>paintFurniture('street','street-props-a',8.15,9.4,()=>{
    box(8,9.5,1.4,.8,7,'#c4d4d0','#608cba','#5796c6');
