@@ -116,7 +116,9 @@
   function nearestSeat() {
     // Indoor seats come from asset metadata; outdoor benches and warteg chairs
     // are registered at construction time by the original exterior builders.
-    const zone = OUT_ON ? (WT.on ? 'warteg' : 'street') : 'office';
+    const zone = OUT_ON ? ((typeof FMI !== 'undefined' && FMI.on) ? 'famima' :
+      (typeof CV !== 'undefined' && CV.on) ? (CV.room ? 'cove_' + CV.room : 'cove') :
+      WT.on ? 'warteg' : 'street') : 'office';
     const seats = window.__vcLifeSeats || [];
     let best = null;
     for (const s of seats) {
@@ -205,7 +207,7 @@
         return {k:'vc-stand',l:'Bangun',hint:'Berdiri dari kursi',d:seat.distance / RANGE_SEAT - 1.0,seat};
       }
       if (seat.pose === 'lie' || (seat.anims && seat.anims.length === 1 && seat.anims[0] === 'lie')) {
-        return {k:'vc-recline',l:'Rebah',hint:'Rebah di kursi pantai',d:seat.distance / RANGE_SEAT - 1.0,seat};
+        return {k:'vc-recline',l:/bed/.test(seat.objectId||'')?'Tidur':'Rebah',hint:/bed/.test(seat.objectId||'')?'Tidur di kasur':'Rebah di kursi pantai',d:seat.distance / RANGE_SEAT - 1.0,seat};
       }
       return {k:'vc-sit',l:'Duduk',hint:'Duduk di kursi',d:seat.distance / RANGE_SEAT - 1.0,seat};
     }
@@ -237,6 +239,16 @@
     return true;
   }
 
+  // Multiplayer: the Worker relays whitelisted 'fart' / 'pee' events; the game shows a small emote over the other player.
+  function sendEv(e) { try { window.__mp && window.__mp.sendEv && window.__mp.sendEv(e); } catch (err) {} }
+  // WC / bathtub / Cove toilet (native game actions) feed the Life needs: toilet empties the bladder without
+  // the hygiene penalty, shower / tub restores hygiene.
+  window.__vcLifeUse = function (kind) {
+    if (!gameUserReady()) return false;
+    if (kind === 'toilet') return activate('toilet');
+    if (kind === 'shower' || kind === 'tub') return activate('shower');
+    return false;
+  };
   function peeEffect() {
     const el = document.createElement('span');
     el.className = 'life-pee-fx';
@@ -253,7 +265,7 @@
     if (!gameUserReady()) return;
     const fresh = contextualLife();
     if (choice.k === 'vc-fart') {
-      if (!fresh && !originalCtx()) activate('fart');
+      if (!fresh && !originalCtx() && activate('fart')) sendEv('fart');
       return;
     }
     if (!fresh || fresh.k !== choice.k) return;
@@ -291,7 +303,7 @@
         window.__lifeBridge.exitPoseForMovement();
     } else if (choice.k === 'vc-pee') {
       if (nearWall() == null) return;
-      if (activate('pee')) peeEffect();
+      if (activate('pee')) { peeEffect(); sendEv('pee'); }
     }
   };
   // Called synchronously at the beginning of the original movement tick,

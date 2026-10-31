@@ -1,4 +1,4 @@
-/* STAGING sw v1.1 2026-10-31 (Noor parity + remote occlusion): isolated test build; production assets read-only. */
+/* STAGING sw v1.2 2026-10-31 (industrial office + WC, Cove rooms, FamilyMart, warteg bench; warteg seats now native): isolated test build; production assets read-only. */
 /* sw v2 2026-10-29 game-only: no caching of office files (always network + decrypt) */
 /* Virtual Office decrypting service worker. Holds the AES key in memory only;
    when restarted it asks an unlocked tab (which keeps it in sessionStorage). */
@@ -95,20 +95,9 @@ async function handle(ev, p, u) {
         "(window.__vcLifeSeats||(window.__vcLifeSeats=[])).push(" +
         "{c,r,zone:'street',objectId:'warteg_terrace_chair',seatIndex:back<0?0:1," +
         "dir:back<0?'se':'nw',pose:'sit'}); col=col||";
-      const wtTableAnchor = 'const table=(id,c,r,chairs)=>{ const g=wtB';
-      const wtTableSeats = "const table=(id,c,r,chairs)=>{ " +
-        "const t=(window.__vcLifeSeats||(window.__vcLifeSeats=[])); " +
-        "const rowBack=r-0.65,rowFront=r+0.65; " +
-        "const spots=chairs?" +
-        "[{c,r:rowBack,dir:'sw'},{c,r:rowFront,dir:'ne'}]:" +
-        "[{c:c-0.23,r:rowBack,dir:'sw'},{c:c+0.23,r:rowBack,dir:'sw'}," +
-        "{c:c-0.23,r:rowFront,dir:'ne'},{c:c+0.23,r:rowFront,dir:'ne'}]; " +
-        "t.push(...spots.map((s,i)=>({...s,zone:'warteg'," +
-        "objectId:'warteg_'+id+(chairs?'_chair':'_bench'),seatIndex:i,pose:'sit'}))); " +
-        "const g=wtB";
+      // Warteg bench, Cove and FamilyMart seats are registered natively by the game (window.__vcLifeSeats).
       for (const [oldValue,newValue] of [
-        [parkAnchor,parkSeats], [cafeAnchor,cafeSeats],
-        [wtTableAnchor,wtTableSeats]
+        [parkAnchor,parkSeats], [cafeAnchor,cafeSeats]
       ]) {
         if (patched.split(oldValue).length !== 2) {
           console.warn('[staging] outdoor seat anchor changed:',oldValue);
@@ -142,7 +131,7 @@ async function handle(ev, p, u) {
         return new Response('staging occlusion anchor mismatch', {status:500});
       patched = patched.replace(occAnchor, occAnchor +
         " if(window.__vcOccExtra){ try{ for(const t of window.__vcOccExtra()){ const q=P(t.c,t.r); T.push({x0:q.x-9,x1:q.x+9,y0:q.y-46,y1:q.y+2,d:t.c+t.r}); } }catch(e){} }");
-      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=20', {cache:'no-store'});
+      const ctxResponse = await fetch(SCOPE + 'life-context.js?v=21', {cache:'no-store'});
       if (!ctxResponse.ok) return new Response('life-context unavailable', {status:503});
       const ctx = await ctxResponse.text();
       if (ctx.includes('</script') || !ctx.includes('window.__vcLifeContextReady = true')) {
