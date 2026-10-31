@@ -1,4 +1,4 @@
-/* STAGING sw v1.3 2026-10-31 (industrial office + WC, Cove rooms, FamilyMart, warteg bench; warteg seats now native): isolated test build; production assets read-only. */
+/* STAGING sw v1.4 2026-10-31 (Life integrated in main build: pass-through) (industrial office + WC, Cove rooms, FamilyMart, warteg bench; warteg seats now native): isolated test build; production assets read-only. */
 /* sw v2 2026-10-29 game-only: no caching of office files (always network + decrypt) */
 /* Virtual Office decrypting service worker. Holds the AES key in memory only;
    when restarted it asks an unlocked tab (which keeps it in sessionStorage). */
@@ -70,6 +70,8 @@ async function handle(ev, p, u) {
       if (!html.includes('virtual-city-life-prototype') || !html.includes('</body>')) {
         return new Response('staging game version mismatch', { status: 500 });
       }
+      // Main build already carries the Life layer (2026-10-31): serve it unchanged, never patch twice.
+      if (html.includes('window.__vcLifeContextReady = true')) return new Response(html, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
       // Patch the decoded document in memory; all original encrypted files
       // remain intact. Every anchor is checked to avoid a silent partial patch.
       const seatAnchor = '  res.use=(a.use_points||[]).map(u=>';
