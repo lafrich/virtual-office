@@ -1,4 +1,4 @@
-/* STAGING sw v1.2 2026-10-31 (industrial office + WC, Cove rooms, FamilyMart, warteg bench; warteg seats now native): isolated test build; production assets read-only. */
+/* STAGING sw v1.3 2026-10-31 (industrial office + WC, Cove rooms, FamilyMart, warteg bench; warteg seats now native): isolated test build; production assets read-only. */
 /* sw v2 2026-10-29 game-only: no caching of office files (always network + decrypt) */
 /* Virtual Office decrypting service worker. Holds the AES key in memory only;
    when restarted it asks an unlocked tab (which keeps it in sessionStorage). */
@@ -139,7 +139,7 @@ async function handle(ev, p, u) {
       }
       const extended = patched.replace(scopeEnd,
         '  MP.me=null; MP.tok=null; showLogin(true);\n})();\n' + ctx + '\n})();\n</script>')
-        .replace('</body>', '<script src="player-status.js?v=1" defer></script></body>');
+        .replace('</body>', '<script src="player-status.js?v=2" defer></script></body>');
       return new Response(extended, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
     }
     return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });

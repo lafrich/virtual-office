@@ -121,7 +121,7 @@
       !(window.__lifeBridge && window.__lifeBridge.isSpectator &&
       window.__lifeBridge.isSpectator()));
     panel.querySelector('#vc-ps-user').textContent = live
-      ? '👤 ' + String(mp.me).slice(0, 36)
+      ? '👤 ' + String(mp.nick || mp.me).slice(0, 36)
       : '🔒 Login sebagai player untuk melihat kebutuhan';
     const source = document.getElementById('vclife');
     const categories = ['fullness','energy','hygiene','bladder'];

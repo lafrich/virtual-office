@@ -424,8 +424,9 @@
   (function prepareSeatLayer() {
     // The seated copy must use the sheet of whoever is playing: noorz wears
     // the Noor sheet (same SL layout), ichsan the default user sheet.
-    const sheetKey = () => (window.__mp && window.__mp.me === 'noorz') ? '_npc_noor' : '_user';
-    const sheetFor = k => { const e = typeof charEntry === 'function' ? charEntry(k) : null; return e && e.sheet; };
+    const sheetKey = () => (window.__mp && window.__mp.mySheet) ? '_mine' : (window.__mp && window.__mp.me === 'noorz') ? '_npc_noor' : '_user';
+    // custom accounts wear their own composed sheet (window.__mp.mySheet, same 384x4928 layout)
+    const sheetFor = k => { if (k === '_mine') return window.__mp && window.__mp.mySheet; const e = typeof charEntry === 'function' ? charEntry(k) : null; return e && e.sheet; };
     const entry = { sheet: sheetFor('_user') };
     if (!entry.sheet || typeof sprite !== 'function' ||
         typeof sheetSprite !== 'function') return;
@@ -509,8 +510,8 @@
     if (typeof NOOR !== 'undefined' && NOOR && NOOR.net === 'peer' && NOOR._fv !== false &&
         Number.isFinite(NOOR.c) && Number.isFinite(NOOR.r)) out.push({ c:NOOR.c, r:NOOR.r });
     const npcs = window.__npcs || [];
-    const gh = npcs.find && npcs.find(n => n && n.id === '_net_ichsan');
-    if (gh && gh._fv && Number.isFinite(gh.c) && Number.isFinite(gh.r)) out.push({ c:gh.c, r:gh.r });
+    for (const gh of (npcs.filter ? npcs.filter(n => n && typeof n.id === 'string' && n.id.startsWith('_net_')) : []))
+      if (gh._fv && Number.isFinite(gh.c) && Number.isFinite(gh.r)) out.push({ c:gh.c, r:gh.r });
     return out;
   };
 
