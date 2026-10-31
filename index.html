@@ -41,50 +41,115 @@ input{border-radius:0!important;border:3px solid #fff!important;background:#fff!
 button{border-radius:0!important;border:3px solid #141420!important;background:#e4002b!important;color:#fff!important;font-family:inherit!important;font-weight:900!important;text-transform:uppercase;box-shadow:inset -3px -3px 0 #9a001d,inset 3px 3px 0 #ff5a73,3px 3px 0 #fff!important}
 button:active{transform:translate(2px,2px);box-shadow:inset 3px 3px 0 #9a001d!important}
 .err{color:#ff8aa2!important}.foot{color:#c8c8d8!important}
+.tabs{display:flex;gap:0;margin:0 0 16px}
+.tabs button{margin:0;flex:1;padding:8px 6px;font-size:12px;letter-spacing:1px;background:#141420!important;color:#c8c8d8!important;border:3px solid #fff!important;box-shadow:none!important}
+.tabs button[aria-selected="true"]{background:#fff!important;color:#141420!important}
+.tabs button+button{border-left:0!important}
+.fld{margin-bottom:12px}.fld:last-of-type{margin-bottom:0}
+.hint{margin:4px 0 0;font-size:10px;color:#c8c8d8}
+.ok{min-height:0;margin-top:10px;color:#9fe3a8;font-size:12px}
+[hidden]{display:none!important}
+.card.busy input{opacity:.7}
 </style>
 </head>
 <body>
-<form class="card" id="f" autocomplete="on">
+<div class="card" id="card">
   <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#e0a526" d="M2 0h4v1H2zM1 1h1v2H1zM6 1h1v2H6zM0 3h8v5H0z"/><path fill="#0f1218" d="M3 4h2v2H3zM3.5 6h1v1h-1z"/></svg>
   <h1>Virtual Office</h1>
-  <p>This office is private. Enter the password to come in.</p>
-  <label for="pw">Password</label>
-  <input id="pw" type="password" autocomplete="current-password" autofocus required>
-  <button id="go" type="submit">Unlock</button>
+  <p id="sub">Log in to come in.</p>
+  <div class="tabs" role="tablist"><button type="button" role="tab" id="tl" aria-selected="true">Log in</button><button type="button" role="tab" id="tr" aria-selected="false">Create account</button></div>
+  <form id="fl" autocomplete="on">
+    <div class="fld"><label for="u">Email or username</label><input id="u" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+    <div class="fld"><label for="pw">Password</label><input id="pw" name="password" type="password" autocomplete="current-password" required></div>
+    <button id="go" type="submit">Log in</button>
+  </form>
+  <form id="fr" autocomplete="on" hidden>
+    <div class="fld"><label for="re">Email</label><input id="re" type="email" autocomplete="email" autocapitalize="none" spellcheck="false" required></div>
+    <div class="fld"><label for="rp">Password</label><input id="rp" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><div class="hint">At least 8 characters.</div></div>
+    <div class="fld"><label for="rp2">Confirm password</label><input id="rp2" type="password" autocomplete="new-password" required></div>
+    <div class="fld"><label for="ri">Office password</label><input id="ri" type="password" autocomplete="off" required><div class="hint">The invite password you got from the office.</div></div>
+    <button id="rgo" type="submit">Create account</button>
+  </form>
+  <div class="ok" id="ok" role="status"></div>
   <div class="err" id="err" role="alert"></div>
-  <div class="foot">Decrypted locally in your browser.</div>
-</form>
+  <div class="foot">The office is decrypted locally in your browser after you log in.</div>
+</div>
 <script>
 (function(){
 'use strict';
-var SALT='v0gxcoUSEnII/SXnXArV9Q==', ITER=600000, K='vo_key';
-var f=document.getElementById('f'), pw=document.getElementById('pw'), go=document.getElementById('go'), err=document.getElementById('err');
+var SALT='v0gxcoUSEnII/SXnXArV9Q==', ITER=600000, K='vo_key', LS='vo-mp-token', LSU='vo-mp-user', USERS=['ichsan','noorz'];
+var WK=(function(){try{var d=localStorage.getItem('vo-mp-dev');if(d&&/^http:\/\/localhost:\d{2,5}$/.test(d))return d;}catch(e){}return 'https://vo-multiplayer.lafrich.workers.dev';})();
+var $=function(i){return document.getElementById(i);};
+var card=$('card'), fl=$('fl'), fr=$('fr'), go=$('go'), rgo=$('rgo'), err=$('err'), ok=$('ok');
 var b64d=function(s){return Uint8Array.from(atob(s),function(c){return c.charCodeAt(0);});};
 var b64e=function(u){var s='';u=new Uint8Array(u);for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s);};
+var ERR={login:'Wrong email/username or password.',rate:'Too many attempts. Please wait a few minutes and try again.',
+  email:'Please enter a valid email address.',pw_len:'Password must be 8\u2013128 characters.',pw_match:'Passwords do not match.',
+  dup:'This email is already registered. Please log in.',gate:'Wrong office password.',net:'Cannot reach the server. Check your connection and try again.',
+  nosw:'This browser blocks service workers (private mode?). Try a normal window.',nokey:'The office is being updated. Please try again in a minute.',
+  bad:'Something went wrong. Please try again.'};
+var em=function(e){return ERR[e]||(/^(email|bad_email)/.test(e||'')?ERR.email:ERR.bad);};
 function next(){var n=new URLSearchParams(location.search).get('next')||'office.html';
   if(!/^[A-Za-z0-9._\-\/%?=&]+$/.test(n)||n.indexOf('//')>=0||n.charAt(0)==='/')n='office.html'; return n+location.hash;}
 var swReady=('serviceWorker' in navigator)?navigator.serviceWorker.register('sw.js',{scope:'./',updateViaCache:'none'}).then(function(){return navigator.serviceWorker.ready;}):Promise.reject(new Error('nosw'));
 swReady.catch(function(){});
+async function api(path,body){var r;try{r=await fetch(WK+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}catch(e){return {s:0,j:{error:'net'}};}
+  var j={};try{j=await r.json();}catch(e){} return {s:r.status,j:j||{}};}
 async function derive(p){var base=await crypto.subtle.importKey('raw',new TextEncoder().encode(p),'PBKDF2',false,['deriveBits']);
   return crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:b64d(SALT),iterations:ITER},base,256);}
 async function check(raw){var key=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);
   var r=await fetch('manifest.enc?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('net');
   var u=new Uint8Array(await r.arrayBuffer()); await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},key,u.slice(12));}
+// the key comes from the Worker (only for an authenticated session); the two member accounts can also derive it from their password
+async function keyFor(j,user,pw){
+  if(j&&j.k){try{await check(b64d(j.k));return j.k;}catch(e){if(e&&e.message==='net')throw e;}}
+  if(pw&&USERS.indexOf(user)>=0){try{var raw=await derive(pw);await check(raw);return b64e(raw);}catch(e){if(e&&e.message==='net')throw e;}}
+  throw new Error('nokey');}
 async function enter(k){var reg=await swReady; var sw=reg.active||navigator.serviceWorker.controller;
   await new Promise(function(res,rej){var ch=new MessageChannel(),t=setTimeout(function(){rej(new Error('sw'));},5000);
     ch.port1.onmessage=function(e){clearTimeout(t);e.data&&e.data.ok?res():rej(new Error('sw'));}; sw.postMessage({type:'key',key:k},[ch.port2]);});
   location.replace(next());}
-function fail(m){err.textContent=m; go.disabled=false; go.textContent='Unlock'; pw.select();}
-function why(e){return e&&e.message==='nosw'?'This browser blocks service workers (private mode?). Try a normal window.':
-  e&&e.message==='net'?'Could not reach the office. Check your connection.':'Something went wrong. Please try again.';}
-f.addEventListener('submit',async function(ev){ev.preventDefault(); if(!pw.value) return;
-  err.textContent=''; go.disabled=true; go.textContent='Unlocking…';
-  var raw; try{ raw=await derive(pw.value); }catch(e){ return fail(why(e)); }
-  try{ await check(raw); }catch(e){ return fail(e&&e.message==='net'?why(e):'Wrong password. Try again.'); }
-  var k=b64e(raw); try{ sessionStorage.setItem(K,k); }catch(e){}
-  pw.value=''; try{ await enter(k); }catch(e){ fail(why(e)); }});
-(async function(){var k=sessionStorage.getItem(K); if(!k) return; go.disabled=true; go.textContent='Unlocking…';
-  try{ await check(b64d(k)); await enter(k); }catch(e){ sessionStorage.removeItem(K); go.disabled=false; go.textContent='Unlock'; }})();
+function saveSession(j,user,k){try{localStorage.setItem(LS,j.token);localStorage.setItem(LSU,user||j.u);}catch(e){}
+  try{sessionStorage.setItem(K,k);sessionStorage.setItem('vo_auto','1');}catch(e){}}
+function busy(b,btn,label){card.classList.toggle('busy',!!b);go.disabled=rgo.disabled=!!b;btn.textContent=label;}
+function why(e){var m=e&&e.message;return em(m==='nosw'||m==='net'||m==='nokey'?m:'bad');}
+function tab(reg){fl.hidden=reg;fr.hidden=!reg;$('tl').setAttribute('aria-selected',String(!reg));$('tr').setAttribute('aria-selected',String(reg));
+  err.textContent='';$('sub').textContent=reg?'New here? Create your account.':'Log in to come in.';
+  if(matchMedia('(pointer:fine)').matches)setTimeout(function(){try{(reg?$('re'):($('u').value?$('pw'):$('u'))).focus();}catch(e){}},30);}
+$('tl').onclick=function(){tab(false);}; $('tr').onclick=function(){tab(true);};
+fl.addEventListener('submit',async function(ev){ev.preventDefault(); if(go.disabled) return;
+  var user=$('u').value.trim().toLowerCase(), pw=$('pw').value; err.textContent=''; ok.textContent='';
+  if(!user||!pw){err.textContent='Please enter your email (or username) and password.';return;}
+  busy(true,go,'Logging in\u2026');
+  var r=await api('/login',{u:user,p:pw});
+  if(!(r.s===200&&r.j.token)){busy(false,go,'Log in');err.textContent=em(r.j.error||(r.s===429?'rate':'login'));$('pw').select();return;}
+  var k; try{k=await keyFor(r.j,user,pw);}catch(e){busy(false,go,'Log in');err.textContent=why(e);return;}
+  saveSession(r.j,user,k); $('pw').value='';
+  try{await enter(k);}catch(e){busy(false,go,'Log in');err.textContent=why(e);}});
+fr.addEventListener('submit',async function(ev){ev.preventDefault(); if(rgo.disabled) return;
+  var email=$('re').value.trim(), p=$('rp').value, p2=$('rp2').value, inv=$('ri').value; err.textContent=''; ok.textContent='';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)||email.length>254){err.textContent=em('email');$('re').focus();return;}
+  if(p.length<8||p.length>128){err.textContent=em('pw_len');$('rp').focus();return;}
+  if(p!==p2){err.textContent=em('pw_match');$('rp2').focus();return;}
+  if(!inv){err.textContent='Please enter the office password.';$('ri').focus();return;}
+  busy(true,rgo,'Creating\u2026');
+  var r=await api('/register',{email:email,p:p,p2:p2,inv:inv});
+  if(!(r.s===200&&r.j.token)){busy(false,rgo,'Create account');err.textContent=em(r.j.error||(r.s===429?'rate':'bad'));if(r.j.error==='gate')$('ri').select();return;}
+  var k; try{k=await keyFor(r.j,'',null);}catch(e){busy(false,rgo,'Create account');err.textContent=why(e);return;}
+  saveSession(r.j,email.toLowerCase(),k); $('rp').value=$('rp2').value=$('ri').value='';
+  try{await enter(k);}catch(e){busy(false,rgo,'Create account');err.textContent=why(e);}});
+// returning visitor: a saved session token (also from before this page existed) logs straight in
+(async function(){var q=new URLSearchParams(location.search).get('m');
+  if(q==='out')ok.textContent='You are logged out.'; else if(q==='token')err.textContent='Your session expired. Please log in again.';
+  try{var lu=localStorage.getItem(LSU);if(lu)$('u').value=lu;}catch(e){}
+  var t=null; try{t=localStorage.getItem(LS);}catch(e){}
+  if(!t||q==='out'){tab(false);return;}
+  busy(true,go,'Signing in\u2026');
+  var r=await api('/refresh',{token:t});
+  if(r.s===200&&r.j.token){try{var k=await keyFor(r.j,'',null);saveSession(r.j,localStorage.getItem(LSU)||r.j.u,k);await enter(k);return;}catch(e){err.textContent=why(e);}}
+  else if(r.s===401){try{localStorage.removeItem(LS);}catch(e){} err.textContent='Your session expired. Please log in again.';}
+  else if(r.s===0) err.textContent=em('net');
+  busy(false,go,'Log in'); tab(false);})();
 })();
 </script>
 </body>
