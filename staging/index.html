@@ -9,71 +9,87 @@
 <meta name="referrer" content="no-referrer">
 <title>Virtual Office — Life Test</title>
 <link rel="icon" href="data:,">
-<style>
-:root{--bg:#0f1218;--panel:#161b24;--panel2:#1c2330;--line:#2a3343;--txt:#e7ebf2;--mut:#8d97a8;--err:#ff6b6b;--gold:#e0a526}
+<style>:root{--xpf:Tahoma,"Segoe UI",Verdana,"DejaVu Sans",sans-serif;--cr:#ECE9D8;--bd:#0831d9}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:14px/1.45 ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace}
-body{display:grid;place-items:center;background:
- linear-gradient(rgba(42,51,67,.35) 1px,transparent 1px) 0 0/32px 16px,
- linear-gradient(90deg,rgba(42,51,67,.35) 1px,transparent 1px) 0 0/32px 16px,
- radial-gradient(ellipse at 50% 40%,#18202d 0,#0f1218 70%)}
-.card{width:min(360px,92vw);background:var(--panel);padding:28px 26px 22px;image-rendering:pixelated;
- box-shadow:0 -4px 0 0 var(--line),0 4px 0 0 var(--line),-4px 0 0 0 var(--line),4px 0 0 0 var(--line),
- 0 0 0 4px var(--panel2),0 -8px 0 0 #0b0e13,0 8px 0 0 #0b0e13,-8px 0 0 0 #0b0e13,8px 0 0 0 #0b0e13,0 18px 40px rgba(0,0,0,.55)}
-h1{margin:0 0 4px;font-size:20px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);text-shadow:2px 2px 0 #000}
-p{margin:0 0 18px;color:var(--mut);font-size:12px}
-.ico{width:32px;height:32px;margin:0 auto 14px;display:block}
-label{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-input{width:100%;padding:10px 12px;background:#0b0e13;color:var(--txt);border:0;outline:0;font:inherit;font-size:15px;
- box-shadow:inset 0 0 0 2px var(--line)}
-input:focus{box-shadow:inset 0 0 0 2px var(--gold)}
-button{margin-top:14px;width:100%;padding:11px;border:0;cursor:pointer;font:inherit;font-weight:700;letter-spacing:2px;text-transform:uppercase;
- background:var(--gold);color:#1b1405;box-shadow:inset -4px -4px 0 #a5740f,inset 4px 4px 0 #f3c75a}
-button:hover{filter:brightness(1.08)}button:active{box-shadow:inset 4px 4px 0 #a5740f,inset -4px -4px 0 #f3c75a}
-button:disabled{opacity:.6;cursor:wait}
-.err{min-height:18px;margin-top:12px;color:var(--err);font-size:12px}
-.foot{margin-top:6px;color:#5b6577;font-size:10px;text-align:center}
-/* retro Nintendo-style restyle (Oct 28 2026): visual only */
-body{background:#8fd3f5!important;font-family:"Lucida Console","Courier New",monospace!important}
-.card{background:#141420!important;border:3px solid #fff!important;outline:3px solid #141420;border-radius:0!important;box-shadow:6px 6px 0 rgba(20,20,32,.35)!important;color:#fff}
-h1{color:#fff!important;text-transform:uppercase;letter-spacing:1px;text-shadow:2px 2px 0 #e4002b}
-input{border-radius:0!important;border:3px solid #fff!important;background:#fff!important;color:#141420!important;font-family:inherit!important}
-button{border-radius:0!important;border:3px solid #141420!important;background:#e4002b!important;color:#fff!important;font-family:inherit!important;font-weight:900!important;text-transform:uppercase;box-shadow:inset -3px -3px 0 #9a001d,inset 3px 3px 0 #ff5a73,3px 3px 0 #fff!important}
-button:active{transform:translate(2px,2px);box-shadow:inset 3px 3px 0 #9a001d!important}
-.err{color:#ff8aa2!important}.foot{color:#c8c8d8!important}
-.tabs{display:flex;gap:0;margin:0 0 16px}
-.tabs button{margin:0;flex:1;padding:8px 6px;font-size:12px;letter-spacing:1px;background:#141420!important;color:#c8c8d8!important;border:3px solid #fff!important;box-shadow:none!important}
-.tabs button[aria-selected="true"]{background:#fff!important;color:#141420!important}
-.tabs button+button{border-left:0!important}
-.fld{margin-bottom:12px}.fld:last-of-type{margin-bottom:0}
-.hint{margin:4px 0 0;font-size:10px;color:#c8c8d8}
-.ok{min-height:0;margin-top:10px;color:#9fe3a8;font-size:12px}
+html,body{margin:0;min-height:100%;font:12px/1.4 var(--xpf);color:#000}
+body{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:18px 12px 48px;
+ background:
+  radial-gradient(ellipse 70% 32% at 22% 88%,#7cc444 0,#5aa82c 55%,transparent 56%),
+  radial-gradient(ellipse 95% 40% at 80% 100%,#69b83a 0,#3f8f1f 60%,transparent 61%),
+  radial-gradient(ellipse 140% 46% at 50% 108%,#4f9e27 0,#2f7a14 70%,transparent 71%),
+  radial-gradient(ellipse 18% 6% at 25% 22%,rgba(255,255,255,.9),transparent 70%),
+  radial-gradient(ellipse 24% 7% at 70% 14%,rgba(255,255,255,.85),transparent 70%),
+  radial-gradient(ellipse 14% 5% at 85% 34%,rgba(255,255,255,.7),transparent 70%),
+  linear-gradient(#2a6fd6 0,#4b95ea 35%,#8cc3f5 62%,#cfe7fb 72%,#cfe7fb 100%);background-attachment:fixed}
+.win{width:min(380px,100%);background:var(--cr);border:3px solid var(--bd);border-top:0;border-radius:8px 8px 0 0;box-shadow:2px 4px 14px rgba(0,0,0,.45)}
+.tb{display:flex;align-items:center;gap:6px;height:30px;padding:0 5px 0 7px;margin:0 -3px;border-radius:7px 7px 0 0;color:#fff;font:700 13px var(--xpf);text-shadow:1px 1px #0a1f6b;
+ background:linear-gradient(#0997ff 0,#0053ee 8%,#0050ee 40%,#06f 88%,#06f 93%,#005bff 95%,#003dd7 96%,#003dd7 100%);border:1px solid #0831d9;border-bottom:0}
+.tb .ti{width:16px;height:16px;flex:none}
+.tb .tt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbb{display:flex;gap:2px;flex:none}
+.tbb i{width:21px;height:21px;display:block;position:relative;border:1px solid #f4f4f4;border-radius:3px;background:linear-gradient(135deg,#e6e6e6,#c4c4c4 60%,#adadad);box-shadow:inset -1px -1px 1px rgba(0,0,0,.18);pointer-events:none}
+.tbb i::before,.tbb i::after{content:'';position:absolute;background:#7d7d7d}
+.tbb .mn::before{left:5px;bottom:5px;width:7px;height:3px}
+.tbb .mx::before{left:4px;top:4px;width:11px;height:11px;background:none;border:1px solid #7d7d7d;border-top-width:3px;box-sizing:border-box}
+.tbb .cl::before,.tbb .cl::after{left:9px;top:3px;width:2px;height:13px;transform:rotate(45deg)}.tbb .cl::after{transform:rotate(-45deg)}
+.card{padding:16px 16px 12px}
+.head{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:0 0 12px;border-bottom:1px solid #c5c2b2;box-shadow:0 1px #fff}
+.head .ico{width:40px;height:40px;flex:none;image-rendering:pixelated}
+h1{margin:0;font:700 16px var(--xpf);color:#0a246a}
+p{margin:2px 0 0;color:#444;font-size:11px}
+.tabs{display:flex;align-items:flex-end;gap:2px;margin:0;padding-left:4px;position:relative;z-index:1}
+.tabs button{margin:0 0 -1px;padding:4px 12px;font:11px var(--xpf);color:#000;cursor:pointer;background:linear-gradient(#fff,#ecebe5 60%,#d8d4c8);border:1px solid #919b9c;border-bottom-color:#919b9c;border-radius:3px 3px 0 0}
+.tabs button[aria-selected="true"]{padding:5px 14px 6px;background:#fcfcfe;border-top:2px solid #ffc83c;border-bottom-color:#fcfcfe;font-weight:700}
+.pane{background:#fcfcfe;border:1px solid #919b9c;padding:14px 12px 12px;box-shadow:1px 1px 0 #d0cdc0}
+.fld{margin-bottom:10px}
+label{display:block;font-size:11px;margin-bottom:3px}
+input{width:100%;padding:4px 5px;height:24px;font:12px var(--xpf);color:#000;background:#fff;border:1px solid #7f9db9;border-radius:0;outline:0}
+input:focus{border-color:#3c7fb1;box-shadow:0 0 0 1px #c2d9f0}
+.hint{margin:3px 0 0;font-size:10px;color:#555}
+.row{display:flex;justify-content:flex-end;margin-top:12px}
+button.xb{min-width:86px;height:24px;padding:0 12px;font:11px var(--xpf);color:#000;cursor:pointer;border:1px solid #003c74;border-radius:3px;background:linear-gradient(#fff,#f3f2ec 45%,#e2dfd2 90%,#d6d0c0);box-shadow:inset 0 0 0 1px #fff}
+button.xb.def{box-shadow:inset 0 0 0 1px #c7d9f5,inset 0 -1px 0 1px #98b8ea}
+button.xb:hover{box-shadow:inset 0 0 0 1px #fdd889,inset 0 -1px 0 1px #f8b330}
+button.xb:active{background:linear-gradient(#e5e3d9,#eceae1 60%,#f4f3ee)}
+button.xb:disabled{color:#aca899;border-color:#c9c7ba;cursor:wait;box-shadow:none}
+.err{min-height:16px;margin-top:8px;color:#c00;font-size:11px}
+.ok{margin-top:8px;color:#1e6b1e;font-size:11px}.ok:empty{display:none}
+.foot{margin-top:2px;color:#555;font-size:10px;text-align:center}
+.card.busy input{background:#f4f3ee}
+.task{position:fixed;left:0;right:0;bottom:0;height:30px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(#1f5fdc 0,#3a81f3 9%,#2a6be6 18%,#245edb 60%,#1941a5 100%);border-top:1px solid #0b3ab0;z-index:0}
+.start{height:30px;display:flex;align-items:center;gap:5px;padding:0 18px 0 9px;color:#fff;font:italic 700 15px var(--xpf);text-shadow:1px 1px 1px #1a3d12;border-radius:0 12px 12px 0;background:linear-gradient(#3c9b3c 0,#48b848 15%,#3aa63a 50%,#2f8f2f 100%);box-shadow:inset -2px 0 3px rgba(0,0,0,.3);pointer-events:none;user-select:none}
+.start b{width:16px;height:16px;display:inline-block;background:conic-gradient(#f35325 0 25%,#81bc06 0 50%,#ffba08 0 75%,#05a6f0 0);border-radius:2px;transform:skew(-6deg)}
+.tray{height:30px;display:flex;align-items:center;padding:0 12px;color:#fff;font:11px var(--xpf);background:linear-gradient(#0c8aeb,#1a9cf0 15%,#0f7fd6);border-left:1px solid #092e8a}
 [hidden]{display:none!important}
-.card.busy input{opacity:.7}
+@media (max-width:420px){body{padding:10px 8px 40px;align-items:flex-start}.win{margin-top:8px}}
 </style>
 </head>
 <body>
-<div class="card" id="card">
-  <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#e0a526" d="M2 0h4v1H2zM1 1h1v2H1zM6 1h1v2H6zM0 3h8v5H0z"/><path fill="#0f1218" d="M3 4h2v2H3zM3.5 6h1v1h-1z"/></svg>
-  <h1>Life System Test</h1>
-  <p id="sub">Log in to come in.</p>
-  <div class="tabs" role="tablist"><button type="button" role="tab" id="tl" aria-selected="true">Log in</button><button type="button" role="tab" id="tr" aria-selected="false">Create account</button></div>
-  <form id="fl" autocomplete="on">
-    <div class="fld"><label for="u">Email or username</label><input id="u" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
-    <div class="fld"><label for="pw">Password</label><input id="pw" name="password" type="password" autocomplete="current-password" required></div>
-    <button id="go" type="submit">Log in</button>
-  </form>
-  <form id="fr" autocomplete="on" hidden>
-    <div class="fld"><label for="re">Email</label><input id="re" type="email" autocomplete="email" autocapitalize="none" spellcheck="false" required></div>
-    <div class="fld"><label for="rp">Password</label><input id="rp" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><div class="hint">At least 8 characters.</div></div>
-    <div class="fld"><label for="rp2">Confirm password</label><input id="rp2" type="password" autocomplete="new-password" required></div>
-    <div class="fld"><label for="ri">Office password</label><input id="ri" type="password" autocomplete="off" required><div class="hint">The invite password you got from the office.</div></div>
-    <button id="rgo" type="submit">Create account</button>
-  </form>
-  <div class="ok" id="ok" role="status"></div>
-  <div class="err" id="err" role="alert"></div>
-  <div class="foot">The office is decrypted locally in your browser after you log in.</div>
+<div class="win" role="dialog" aria-labelledby="h1">
+  <div class="tb"><svg class="ti" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#e0a526" d="M2 0h4v1H2zM1 1h1v2H1zM6 1h1v2H6zM0 3h8v5H0z"/><path fill="#0f1218" d="M3 4h2v2H3zM3.5 6h1v1h-1z"/></svg><span class="tt">Virtual Office — Log On</span><span class="tbb" aria-hidden="true"><i class="mn"></i><i class="mx"></i><i class="cl"></i></span></div>
+  <div class="card" id="card">
+    <div class="head"><svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="#e0a526" d="M2 0h4v1H2zM1 1h1v2H1zM6 1h1v2H6zM0 3h8v5H0z"/><path fill="#0f1218" d="M3 4h2v2H3zM3.5 6h1v1h-1z"/></svg><div><h1 id="h1">Life System Test</h1><p id="sub">Log in to come in.</p></div></div>
+    <div class="tabs" role="tablist"><button type="button" role="tab" id="tl" aria-selected="true">Log in</button><button type="button" role="tab" id="tr" aria-selected="false">Create account</button></div>
+    <div class="pane">
+    <form id="fl" autocomplete="on">
+      <div class="fld"><label for="u">Email or username:</label><input id="u" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+      <div class="fld"><label for="pw">Password:</label><input id="pw" name="password" type="password" autocomplete="current-password" required></div>
+      <div class="row"><button class="xb def" id="go" type="submit">Log in</button></div>
+    </form>
+    <form id="fr" autocomplete="on" hidden>
+      <div class="fld"><label for="re">Email:</label><input id="re" type="email" autocomplete="email" autocapitalize="none" spellcheck="false" required></div>
+      <div class="fld"><label for="rp">Password:</label><input id="rp" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><div class="hint">At least 8 characters.</div></div>
+      <div class="fld"><label for="rp2">Confirm password:</label><input id="rp2" type="password" autocomplete="new-password" required></div>
+      <div class="fld"><label for="ri">Office password:</label><input id="ri" type="password" autocomplete="off" required><div class="hint">The invite password you got from the office.</div></div>
+      <div class="row"><button class="xb def" id="rgo" type="submit">Create account</button></div>
+    </form>
+    <div class="ok" id="ok" role="status"></div>
+    <div class="err" id="err" role="alert"></div>
+    </div>
+    <div class="foot">The office is decrypted locally in your browser after you log in.</div>
+  </div>
 </div>
+<div class="task" aria-hidden="true"><span class="start"><b></b>start</span><span class="tray" id="clk"></span></div>
 <script>
 (function(){
 'use strict';
@@ -116,6 +132,7 @@ function why(e){var m=e&&e.message;return em(m==='nosw'||m==='net'||m==='nokey'?
 function tab(reg){fl.hidden=reg;fr.hidden=!reg;$('tl').setAttribute('aria-selected',String(!reg));$('tr').setAttribute('aria-selected',String(reg));
   err.textContent='';$('sub').textContent=reg?'New here? Create your account.':'Log in to come in.';
   if(matchMedia('(pointer:fine)').matches)setTimeout(function(){try{(reg?$('re'):($('u').value?$('pw'):$('u'))).focus();}catch(e){}},30);}
+(function(){var c=$('clk');function t(){var d=new Date();c.textContent=d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});}t();setInterval(t,30000);})();
 $('tl').onclick=function(){tab(false);}; $('tr').onclick=function(){tab(true);};
 fl.addEventListener('submit',async function(ev){ev.preventDefault(); if(go.disabled) return;
   var user=$('u').value.trim().toLowerCase(), pw=$('pw').value; err.textContent=''; ok.textContent='';
