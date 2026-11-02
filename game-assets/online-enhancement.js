@@ -81,7 +81,11 @@ function onlineEnhanceHtml(html){
   const currentAssetBlock=out.slice(imgStart,imgStop);
   if(!currentAssetBlock.includes("i._gptFloorDone")||!currentAssetBlock.includes("return clean&&clean.complete"))
     throw Error('ONLINE_LEVEL_ASSET_INCOMPATIBLE');
-  out=out.slice(0,imgStart)+originalXcImg+"\\n"+out.slice(imgStop);
+  const tail="return clean&&clean.complete&&clean.naturalWidth?clean:null; }";
+  const tailAt=currentAssetBlock.indexOf(tail);
+  if(tailAt<0||currentAssetBlock.indexOf(tail,tailAt+1)>=0)
+    throw Error('ONLINE_LEVEL_ASSET_END');
+  out=out.slice(0,imgStart)+originalXcImg+out.slice(imgStart+tailAt+tail.length);
 
   // Reuse the established XP loading screen. It reads local game-renderer
   // readiness only, never auth state or multiplayer tokens.
