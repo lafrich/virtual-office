@@ -1,0 +1,44 @@
+/* node tests/world-builder-v2.test.cjs */
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const root=path.resolve(__dirname,'..');
+const w={};
+const ctx=vm.createContext({window:w});
+for(const file of ['asset-catalog.js','pipeline-catalog.js','vegetation-catalog.js','style-rules.js','map-schema.js']){
+  vm.runInContext(fs.readFileSync(path.join(root,'world-builder',file),'utf8'),ctx,{filename:file});
+}
+const catalog=new Map(w.VLAssetCatalog.map(x=>[x.file,x]));
+const style=w.VLWorldStyle,schema=w.VLMapSchema;
+const data=JSON.parse(fs.readFileSync(path.join(root,'world-builder/world.json'),'utf8'));
+assert.equal(new Set(data.objects.map(x=>x.id)).size,data.objects.length);
+assert.equal(data.objects.length,32);
+assert.ok(catalog.size>=80);
+assert.ok(catalog.has('street2/loak/props/tong_sampah_besi_se.png'));
+assert.ok(catalog.has('vegetation:pohon_asam_M'));
+assert.ok(!catalog.has('vegetation:semak_bugenvil'),'on hold shrubs must stay excluded');
+const marker={id:'one',type:'marker',markerKind:'trigger',name:'Trigger',x:12,z:34,y:0,rotation:0,scale:1};
+schema.normalize(marker,catalog,style);
+assert.equal(style.reason(marker,[],data.map,catalog),'','logical marker may be on road');
+assert.equal(marker.collision,false);
+const original={id:'t',type:'sprite',asset:'pipeline:bangku_taman',x:0,z:34,rotation:27,scale:4};
+style.normalize(original,catalog);
+assert.equal(original.scale,1.15);assert.equal(original.rotation,0);
+assert.notEqual(style.reason(original,[],data.map,catalog),'');
+assert.equal(style.nearest(original,[],data.map,catalog),true);
+assert.equal(style.reason(original,[],data.map,catalog),'');
+const out=schema.enrich(data,catalog,style);
+assert.deepEqual(schema.validate(out,catalog,style),[]);
+assert.equal(out.schema,'virtual-life-ai-map-v2');
+assert.ok(out.objects.some(o=>o.markerKind==='spawn'));
+assert.ok(out.objects.every(o=>o.interactionHooks.every(h=>h.enabled===false)));
+assert.ok(out.objects.find(o=>o.asset==='pipeline:kantor_a').footprint.w>0);
+const html=fs.readFileSync(path.join(root,'world-builder/index.html'),'utf8');
+assert.ok(html.includes('xp.css'));assert.ok(html.includes('logicPane'));
+assert.ok(!html.includes('id="zoomIn"'));assert.ok(!html.includes('id="zoomOut"'));
+assert.ok(!fs.existsSync(path.join(root,'world-builder/gpt/index.html')),'retired secondary builder must be removed');
+const rig=fs.readFileSync(path.join(root,'world-builder/pipeline-character-rig.js'),'utf8');
+assert.ok(rig.includes('Math.SQRT2/64'),'character must use native tile px to world conversion');
+console.log('World Builder v2: PASS ('+out.objects.length+' map objects, '+catalog.size+' assets)');
