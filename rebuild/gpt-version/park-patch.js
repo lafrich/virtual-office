@@ -59,7 +59,15 @@ function gptParkPatch(html) {
   // floating sitter or a chair obscuring the entire seated character.
   change('XC.skip=back.length?back:null;',
     "if(me.forceAnim==='sit'&&me._lifeSeat&&EXT.props){var sitP=P(me._lifeSeat.c,me._lifeSeat.r),sitBench=null,sitDist=1e9;EXT.props.forEach(function(g){if(g._k!=='bench'||!g._a)return;var d=Math.hypot(g._a.x-sitP.x,g._a.y-sitP.y);if(d<sitDist){sitBench=g;sitDist=d;}});if(sitBench&&sitDist<35&&back.indexOf(sitBench)<0)back.push(sitBench);} XC.skip=back.length?back:null;");
-  change('GPT VERSION · v16a.17','GPT VERSION · v16a.20');
+  // The visible lower park benches/poles are painted into Street2's
+  // composite atlas, not EXT.props. Draw its prebuilt depth-filtered layer
+  // over the avatar as well; a bench added through bench() is insufficient.
+  // The level PNGs have already had flat gate pavement stripped by Package A.
+  change('if(!hits.length)return;',
+    "var parkLevel=(S2X.far&&S2X.lv&&S2X.lv.g&&S2X.lv.g.getAttribute('display')!=='none'&&me.r>=36.35&&me.r<=51)?S2X.lv.g:null; if(!hits.length&&!parkLevel)return;");
+  change('ctx.save();ctx.beginPath();ctx.rect(clipX,clipY,clipW,clipH);ctx.clip();',
+    'ctx.save();ctx.beginPath();ctx.rect(clipX,clipY,clipW,clipH);ctx.clip();if(parkLevel)xcDraw(cv,parkLevel,true);');
+  change('GPT VERSION · v16a.17','GPT VERSION · v16a.21');
   return html;
 }
 self.gptParkPatch=gptParkPatch;
