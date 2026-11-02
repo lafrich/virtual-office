@@ -40,7 +40,21 @@ function gptParkPatch(html) {
     lights.forEach(function(q){var g=lamp(q[0],q[1]);g._gptPark=true;V16.parkLamps.push(g);});
   }
   // Precise foreground safety pass.`);
-  change('GPT VERSION · v16a.17','GPT VERSION · v16a.18');
+
+  // Important: the lower-park furniture lives in EXT.gF, not EXT.gY.
+  // The previous overlay read EXT.dyn (EXT.gY only), silently excluding it.
+  // Draw ONLY bench/lamp pixels; trees/buildings keep their native painter.
+  change('if(!OUT_ON||!EXT.dyn||!EXT.dyn.length||!XC.b){',
+    'if(!OUT_ON||!EXT.props||!EXT.props.length||!XC.b){');
+  change('for(var i=0;i<EXT.dyn.length;i++){\\n      var n=EXT.dyn[i];',
+    'for(var i=0;i<EXT.props.length;i++){\\n      var n=EXT.props[i];');
+  change('if(!n||!n.isConnected||n._b==null||n._b<pd-.08)continue;',
+    "if(!n||!n.isConnected||n._b==null)continue; if(n._k!=='bench'&&n._k!=='lamp'&&!n._gptPark)continue; if(n._b<pd-.30)continue;");
+  // Seated players stay above the seat cushions; only the near/front lower
+  // portions of that bench are restored over the avatar.
+  change('try{for(var j=0;j<hits.length;j++)xcDraw(cv,hits[j],true);}',
+    "try{for(var j=0;j<hits.length;j++){var obj=hits[j];if(obj._k==='bench'&&me.forceAnim==='sit'){ctx.save();var rr=obj.getBoundingClientRect();var yy=(rr.top-fr.top+rr.height*.65)*d;ctx.beginPath();ctx.rect(clipX,Math.max(clipY,yy),clipW,Math.max(0,clipY+clipH-yy));ctx.clip();xcDraw(cv,obj,true);ctx.restore();}else xcDraw(cv,obj,true);}}");
+  change('GPT VERSION · v16a.17','GPT VERSION · v16a.19');
   return html;
 }
 self.gptParkPatch=gptParkPatch;
