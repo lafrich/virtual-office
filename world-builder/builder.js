@@ -948,6 +948,21 @@ function updateLogicUI(){
 function renderAssetList(){
  const q=$('searchAsset').value.trim().toLowerCase(),cat=$('assetCategory').value;
  const assets=[
+  ...[
+    {title:'Road · paint',tag:'terrain:road',category:'terrain',label:'TERRAIN / DRIVABLE'},
+    {title:'Sidewalk · paint',tag:'terrain:sidewalk',category:'terrain',label:'TERRAIN / WALKABLE'},
+    {title:'Grass · paint',tag:'terrain:grass',category:'terrain',label:'TERRAIN / GROUND'},
+    {title:'Water · paint',tag:'terrain:water',category:'terrain',label:'TERRAIN / NOT WALKABLE'},
+    {title:'Plaza / Paving · paint',tag:'terrain:plaza',category:'terrain',label:'TERRAIN / PLAZA'},
+    {title:'Soil · paint',tag:'terrain:soil',category:'terrain',label:'TERRAIN / DIRT'},
+    {title:'Small Building · 3×3',tag:'building:small',category:'custom',label:'PLACEHOLDER / REPLACEABLE'},
+    {title:'Medium Building · 5×4',tag:'building:medium',category:'custom',label:'PLACEHOLDER / REPLACEABLE'},
+    {title:'Large Building · 8×6',tag:'building:large',category:'custom',label:'PLACEHOLDER / REPLACEABLE'},
+    {title:'Park Tree · preview',tag:'tree',category:'vegetation',label:'PIXEL PLANE / PREVIEW'},
+    {title:'Street Light · preview',tag:'lamp',category:'street',label:'PIXEL PLANE / PREVIEW'},
+    {title:'Park Bench · preview',tag:'bench',category:'street',label:'PIXEL PLANE / PREVIEW'},
+    {title:'Trash Bin · original',tag:'sprite:street2/loak/props/tong_sampah_besi_se.png',category:'street',label:'GPT / ORIGINAL · login'}
+   ],
   ...[{title:'Player Spawn',tag:'marker:spawn',category:'logic',label:'LOGIC / SPAWN'},
       {title:'Entrance Point',tag:'marker:entrance',category:'logic',label:'LOGIC / DOOR'},
       {title:'Interaction Point',tag:'marker:interaction',category:'logic',label:'LOGIC / ACTION'},
@@ -972,9 +987,29 @@ function renderAssetList(){
   const origin=document.createElement('span');origin.className='asset-origin '+(a.origin||'');origin.textContent=a.label;
   btn.append(name,origin);
   btn.onclick=()=>{
-   add(a.tag);setMode('move');
+   if(a.tag.startsWith('terrain:')){
+    activeTerrain=a.tag.slice(8);
+    $('terrainLabel').textContent=activeTerrain.toUpperCase();
+    setMode('paint');tell('Paint '+activeTerrain+' · drag on canvas');
+   }else if(replaceTarget&&a.tag.startsWith('sprite:')){
+    const idToReplace=replaceTarget,old=documentMap.objects.find(o=>o.id===idToReplace);
+    const file=a.tag.slice(7),spec=assetByName.get(file);
+    if(old&&spec){
+     const previous=clone(old);
+     Object.assign(old,{type:'sprite',asset:file,name:spec.label,collision:spec.collision!==false,replaceable:true,
+      w:undefined,d:undefined,h:undefined,sizeClass:undefined,width:spec.width,height:spec.height});
+     style.normalize(old,assetByName);schema.normalize(old,assetByName,style);
+     const collision=style.reason(old,documentMap.objects,documentMap.map,assetByName);
+     if(collision){Object.assign(old,previous);tell('Replace gagal: '+collision);}
+     else {undoStack.push(JSON.stringify({...documentMap,objects:documentMap.objects.map(o=>o.id===idToReplace?previous:o)}));rebuild();saved();tell('Asset replaced');}
+    }
+    replaceTarget=null;setMode('select');
+   }else{
+    placementType=a.tag;setMode('place');placementType=a.tag;
+    tell('Tap map to place '+a.title+' · green footprint = valid');
+   }
    $('assetsPanel').classList.remove('mobile-open');
-   $('inspector').classList.add('mobile-open');
+   if(!a.tag.startsWith('terrain:'))$('inspector').classList.add('mobile-open');
   };
   holder.appendChild(btn);
  }
