@@ -1,32 +1,35 @@
-# Virtual Life — 3D World Builder (official assets)
+# Virtual Life — World Map Builder (XP / AI-ready v2)
 
-The editable map prototype now uses two independent, authoritative sources:
-- **Characters:** official v6b sprite sheets in [virtual-life-asset-pipeline](https://github.com/lafrich/virtual-life-asset-pipeline), `game/assets/chars/*_v6b_sheet.png`. The pipeline's `64×112` frames, pivot `(32,100)`, six columns, 44 rows, directions `SE/SW/NE/NW`, and action row map are reproduced in `pipeline-character-rig.js`. Characters stay as camera-facing 3D alpha-cutout sprites with free world movement, never arbitrarily rotate/squash. The current map includes Ichsan, Noor and Theodore.
-- **Buildings and outside props:** prefab names, footprint, pivot and image metadata from the official `assets/street_buildings/manifest.json` in the same pipeline repo, via `pipeline-catalog.js`. Original encrypted GPT Version props remain in `asset-catalog.js` and may be available when the production game asset Service Worker is authenticated.
+**Single supported editor**: https://lafrich.github.io/virtual-office/world-builder/
 
-## Important upstream image availability
+This is an authoring companion for [Virtual Life Asset Pipeline](https://lafrich.github.io/virtual-life-asset-pipeline/), built with the same Windows XP / Paint design language. Use it to lay out streets, buildings, trees, furniture, map triggers, and tentative entrances, then export a structured JSON map that future developers or AI agents can connect to gameplay.
 
-The pipeline is primarily a **source-code image generator**. Its manifest describes hundreds of intended PNG outputs, but most generated building PNG files are **not committed** to its main branch. A verified sample (`examples/street_buildings/hotel_sw.png`) is currently used as actual artwork. All other upstream-prefab placements display clearly sourced, editable **3D proxy geometry** until generated artwork becomes available, rather than showing broken or blank sprite planes.
+**This editor DOES NOT change the online Virtual Life map, accounts, saved game, NPC behavior or multiplayer.** The retired GPT Original Builder route `/world-builder/gpt/` was removed, and original GPT assets were merged into the single catalog.
 
-The template `world.json` places 20 independent objects including 3 canonical v6b actors and building/prop references. It is an approximate mapping study, **not a pixel-exact conversion of the production map**. All placements use world X/Y/Z, distinct entity ID and reversible JSON edits. Multiplayer accounts, production saves and NPC AI remain untouched.
+## Source/art hierarchy
 
-### How to use
+1. **Original GPT art**: individual asset paths already known from the protected game's `assets/env/` and `assets/street2/loak/` catalogs. Requires an authenticated Virtual Life session in the same browser because the root game Service Worker decrypts this art at runtime. No plaintext original assets are copied.
+2. **Asset Pipeline art**: original official v6b characters and any genuinely published sprite output (currently the hotel sample).
+3. **Official pipeline *metadata***: building dimensions, orientations and anchors in `assets/street_buildings/manifest.json`, and 17 active tree + 15 ground sprite IDs from `assets/vegetation_kebonsirih/manifest.json`. Most output PNGs have **not been committed** to that source repository. Shrubs on hold are excluded.
+4. **Explicit placeholders**: labelled pixel planes for missing standalone props, and 3D building block studies matching official footprint. Placeholders are not equivalent to completed source art. A baked GPT street background is not separable into editable building meshes; view it from **Map Reference** for comparison.
 
-Open `/world-builder/?v=p4`. Choose an item under Add Object; tap it to select; Move (drag), Rotate, Scale, Delete, Duplicate, Export JSON. Actor rotation and scale are locked. Walk Test uses WASD, arrow keys or touch D-pad to animate the real v6b frames in 3D.
+## Visual calibration
 
-The World Builder does not change the live Virtual Life online game. The retired Rebuild project is not used. If you have an old saved local map, the new pipeline v3 storage namespace loads the latest default separately.
+- Canonical reference: 2:1 isometric; map tile is **64×32 px**; frame is **64×112 px**; character pivot at **(32,100)**; standing height about **84–88 visible pixels**.
+- Orthographic camera at a **30° elevation** instead of the old ~35.8°. Sprite geometry compensates for vertical projection; all source pixels use a common 64-px tile width scale instead of separate guessed character scale.
+- Sprite planes maintain nearest-neighbor texture sampling, alpha-tested outlines, camera-facing placement and depth testing. Character scale remains locked to 1.
+- Drag and snap by half-tile, 90° allowed rotation where source directional variants exist. Other objects have uniform 0.85–1.15 map scale.
+- Mobile **two-finger pinch zoom/pan** is anchored to the world position under the fingers. One finger pans empty ground; **Move** + drag places selected entities. Desktop wheel remains a convenience, but there are no zoom +/- UI buttons.
 
-### Next integration work
+## Workspace
 
-Render and publish PNG outputs from the pipeline building generators or use authenticated GPT map assets; bind prefab images to physically accurate mesh faces and collision footprints; validate on Android; then link approved map JSON to gameplay/multiplayer services.
+- **FILES / ASSETS**: searchable source-aware categories for Buildings, Street, Vegetation, Interior, Characters, and Logic Markers. Labels distinguish verified GPT originals, published Pipeline PNGs, and metadata-only placeholders.
+- **Canvas**: 3D WebGL depth + orthographic camera. Select, move, rotate, duplicate, undo/redo and a 4-way character walk preview.
+- **LAYOUT inspector**: C / R / height, 90-degree facing, source-locked character proportions.
+- **LOGIC inspector**: object name, layer/subtype, tags, interactions, capacity, optional entrance facing, blocking, and notes.
+- **Map markers**: spawn, entrance, interaction, patrol, and trigger. These are authoring markers, not real runtime trigger volumes.
+- **Export Map JSON**: data-only `virtual-life-ai-map-v2` schema with source provenance, footprint dimensions and *disabled proposal hooks*. No executable AI/game code embedded in JSON.
 
+Existing map layouts saved in browser local storage are preserved. To see the new default 32-object study, **export your current layout first**, then use **View / Reset**. The new sample includes five candidate markers. Candidate locations are **not** a verified copy of the protected production scene.
 
-## Style-lock & canonical placement (2026-11-03)
-
-Both /world-builder/ and /world-builder/gpt/ now share `style-rules.js` and a 27-object street study. Buildings/shops are added as named **official pipeline prefab IDs** (rather than arbitrary recolored boxes). Canonical dimensions use source manifest footprint. Street props such as benches, lamps, park tables and trash bins are separate movable alpha-cutout **2D sprite planes** in 3D with GPU depth testing; trees are also pixel-style planes. Original GPT prop art remains prioritized when an authenticated game session makes it available.
-
-- Placement: half-tile snap, editable world coordinates, bounds check, overlap check against collidable footprints, and automatic nearest empty location when adding/duplicating. Static objects cannot occupy the carriageway at z=32.75–36.3. Actors can move on the road and retain canonical four-way animations.
-- Orientation: quarter-turns (90°); single-view GPT sprites are direction-locked. Uniform visual scale is limited to 0.85–1.15 to protect native proportions, with original catalog dimensions preserved in JSON. Position changes that violate placement rules are rejected.
-- Source gaps: most pipeline building/taman PNG output paths exist in **metadata but not in the repository**. Those props show explicitly provisional, low-res pixel plane illustrations. Large buildings without PNG show labeled geometry previews with their official footprint. Neither proxy is claimed to be final Virtual Life artwork. Once official PNGs are published the renderer can use their canonical source.
-- The sample street layout includes benches, a shaded tree, an original GPT metal bin, a lamp, a table and a pipeline trash bin. The two editors remain isolated from production saves, online accounts, gameplay and multiplayer.
-- Saved drafts are retained in local browser storage. Use **Reset Map** (with confirmation) to load the new 27-object default if your browser already saved an older layout. Export JSON first to keep your changes.
+For schema contracts and game-logic handoff, see [MAP_SCHEMA.md](./MAP_SCHEMA.md).
