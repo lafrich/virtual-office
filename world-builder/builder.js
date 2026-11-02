@@ -236,7 +236,7 @@ function sanitize(v){
   };
   for(const k of ['w','d','h','width','height'])if(Number.isFinite(Number(p[k])))e[k]=clamp(Number(p[k]),.2,80);
   if(typeof p.color==='string'&&/^#[0-9a-fA-F]{6}$/.test(p.color))e.color=p.color;
-  if(p.type==='sprite'&&/^[a-z0-9_-]+\.svg$/.test(p.asset||'')&&assetByName.has(p.asset))e.asset=p.asset;
+  if(p.type==='sprite'&&/^(?:env|street2)\/[a-z0-9_/-]+\.png$/.test(p.asset||'')&&assetByName.has(p.asset))e.asset=p.asset;
   if(actorType(p.type)){
     e.facing=directions.includes(p.facing)?p.facing:'sw';
     e.pose=['sit','sleep','bathe','toilet','work'].includes(p.pose)?p.pose:null;
