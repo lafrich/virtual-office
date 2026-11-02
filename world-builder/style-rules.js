@@ -78,8 +78,17 @@ function reason(o,objects,map,catalog){
  if(x-w/2<bounds.minX||x+w/2>bounds.maxX||z-d/2<bounds.minZ||z+d/2>bounds.maxZ)
   return 'Di luar batas map/footprint.';
  const road=map?.road||{z0:ROAD[0],z1:ROAD[1]};
- if(z+d/2>road.z0+.25&&z-d/2<road.z1-.25)
+ if(!map?.terrain&&z+d/2>road.z0+.25&&z-d/2<road.z1-.25)
   return 'Objek statis tidak boleh menutup badan jalan.';
+ if(map?.terrain&&Array.isArray(map.terrain.cells)){
+  const tiles=new Map(map.terrain.cells.map(t=>[t.c+','+t.r,t.type]));
+  const minC=Math.floor(x-w/2+.08),maxC=Math.ceil(x+w/2-.08);
+  const minR=Math.floor(z-d/2+.08),maxR=Math.ceil(z+d/2-.08);
+  for(let c=minC;c<maxC;c++)for(let r=minR;r<maxR;r++){
+   const kind=tiles.get(c+','+r)||map.terrain.default||'grass';
+   if(kind==='road'||kind==='water')return kind==='road'?'Bangunan/prop tidak boleh menutupi jalan.':'Bangunan/prop tidak boleh menutupi air.';
+  }
+ }
  const k=category(o,catalog);
  if(k==='lamp'||k==='trash'||k==='bench'||k==='tree'||k==='prop'||k==='furniture'){
   // Keep small furniture/street objects off the middle of the main road;
