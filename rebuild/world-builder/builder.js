@@ -41,7 +41,11 @@ const seed={
   {id:'bench-pixel',type:'sprite',name:'Bench · existing art',x:24,z:38.3,y:0,rotation:0,scale:1,asset:'park_bench_base.svg',width:4.6,height:4.6},
   {id:'avatar-test',type:'avatar',name:'Avatar depth test',x:20.5,z:34,y:0,rotation:0,scale:1}
  ]};
-let documentMap=clone(seed),selectedId=null,mode='select',snap=true,undoStack=[],redoStack=[];
+let documentMap=clone(seed),defaultSeed=clone(seed),selectedId=null,mode='select',snap=true,undoStack=[],redoStack=[];
+try{
+ const r=await fetch('./world.json?v=1',{cache:'no-store'});
+ if(r.ok){defaultSeed=sanitize(await r.json());documentMap=clone(defaultSeed);}
+}catch(err){console.warn('Using built-in map if world.json is unavailable',err);}
 try{
  const saved=JSON.parse(localStorage.getItem(STORE)||'null');
  if(saved&&saved.format===seed.format&&Array.isArray(saved.objects))documentMap=sanitize(saved);
@@ -450,7 +454,7 @@ $('redo').onclick=()=>restoreStack(redoStack,undoStack);
 $('snap').onclick=()=>{snap=!snap;$('snap').textContent='Snap: '+(snap?'ON':'OFF');};
 $('reset').onclick=()=>{
  if(!confirm('Reset seluruh map draft 3D ke default?'))return;
- undoPoint();documentMap=clone(seed);selectedId=null;rebuild();saved();tell('Map reset');
+ undoPoint();documentMap=clone(defaultSeed);selectedId=null;rebuild();saved();tell('Map reset');
 };
 $('export').onclick=()=>{
  let json=JSON.stringify(documentMap,null,2),blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob);
