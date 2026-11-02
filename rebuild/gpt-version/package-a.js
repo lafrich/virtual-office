@@ -132,7 +132,7 @@ function gptWorldV16(){
     // passage/sidewalk; keep independent poles, NPCs and vehicles depth-sorted.
     var atGateFloor=me.c>=20.4&&me.c<=25.3&&me.r>=35.65&&me.r<=40.15;
     var roadLevel=far&&S2X.lv&&S2X.lv.g&&(
-      atGateFloor || (me.r>=36.35&&me.r<=38.05) ||
+      atGateFloor ||
       (me.r>=51.25&&me.r<=54.85));
     if(roadLevel)back.push(S2X.lv.g);
     XC.skip=back.length?back:null;
