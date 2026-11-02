@@ -2,7 +2,7 @@
    Retrieves the real original AES-GCM source and assets from the existing GitHub Pages root.
    Production Cloudflare Worker/network is never used. */
 'use strict';
-importScripts('./package-a.js?v=a13'); // GPT beta patch 13 (soft compact office-tree shadows)
+importScripts('./package-a.js?v=a14'); // GPT beta patch 14 (no office shadow; early gateway floor depth)
 const ROOT=new URL('../../',self.registration.scope),SUB=new URL(self.registration.scope).pathname;
 const ENC_CACHE='vl-gpt-encrypted-v1'; // Only original AES-GCM blobs; never plaintext.
 async function immutableBlob(id){
