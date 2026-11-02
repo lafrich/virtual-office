@@ -62,8 +62,8 @@ function enrich(map,catalog,style){
  doc.objects=doc.objects.map(o=>{
   normalize(o,catalog,style);
   const spec=o.type==='sprite'?catalog.get(o.asset):null;
-  o.assetSource=o.type==='sprite'?(spec?.source||'unknown'):o.type==='marker'?'editor-marker':o.type==='avatar'||o.type==='npc'?'virtual-life-v6b':'editor-tool';
-  o.assetPublished=o.type==='sprite'?spec?.source==='gpt-original'||spec?.published===true:!['tree','bench','lamp','box'].includes(o.type);
+  o.assetSource=o.type==='sprite'?(spec?.source||'unknown'):o.type==='marker'?'editor-marker':o.type==='building'||o.type==='shop'?'builder-placeholder':o.type==='avatar'||o.type==='npc'?'virtual-life-v6b':'editor-tool';
+  o.assetPublished=o.type==='sprite'?spec?.source==='gpt-original'||spec?.published===true:o.type==='building'||o.type==='shop'?false:!['tree','bench','lamp','box'].includes(o.type);
   const fp=style.footprint(o,catalog);
   o.footprint={w:Math.round(fp[0]*100)/100,d:Math.round(fp[1]*100)/100};
   o.interactionHooks=o.interactions.map(name=>({id:slug(name),kind:'proposed',enabled:false}));
