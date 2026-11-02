@@ -1,10 +1,11 @@
-/* sw v2 2026-10-29 game-only: no caching of office files (always network + decrypt) */
+/* sw v3 2026-11-03: online enhancements after decrypt; native online authentication preserved. */
 /* Virtual Office decrypting service worker. Holds the AES key in memory only;
    when restarted it asks an unlocked tab (which keeps it in sessionStorage). */
 'use strict';
+importScripts('./rebuild/gpt-version/package-a.js?v=a17','./rebuild/gpt-version/loading-guard.js?v=a16','./game-assets/online-enhancement.js?v=o1');
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
-const PLAIN = new Set(['', 'index.html', 'sw.js', 'game-assets/rig-runtime.js', 'game-assets/asset-bridge.js', '.nojekyll', '404.html']);
+const PLAIN = new Set(['', 'index.html', 'sw.js', 'game-assets/rig-runtime.js', 'game-assets/asset-bridge.js', 'game-assets/online-enhancement.js', '.nojekyll', '404.html']);
 let KEY = null, MAN = null, MANP = null, MANT = 0;
 
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -64,23 +65,33 @@ async function handle(ev, p, u) {
     const r = await fetch(SCOPE + 'b/' + ent[0]);
     if (!r.ok) return new Response('', { status: r.status });
     const plaintext = await decrypt(await r.arrayBuffer());
-    // Developer asset inspector only. The retired experimental Cove Room
-    // is never injected. Protected world and multiplayer stay unchanged.
-    if (p === 'office.html' && ent[1].includes('text/html') &&
-        u.searchParams.get('assetbridge') === '1') {
-      const html = new TextDecoder().decode(plaintext);
-      const anchor = '</body>';
-      if (html.includes(anchor)) {
-        let scripts = '';
-        if (u.searchParams.get('assetbridge') === '1' && !html.includes('game-assets/asset-bridge.js')) {
-          scripts += '<script src="./game-assets/rig-runtime.js?v=1" defer></script>';
-          scripts += '<script src="./game-assets/asset-bridge.js?v=1" defer></script>';
-        }
-        if (scripts) {
-          return new Response(html.replace(anchor, scripts + anchor),
-            { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
+    // Online world upgrade is applied in-memory after decrypting office.html.
+    // No login, token, world-save or multiplayer API payload is modified.
+    // ?classic=1 bypasses enhancements without touching account state.
+    if (p === 'office.html' && ent[1].includes('text/html')) {
+      let html = new TextDecoder().decode(plaintext);
+      if (u.searchParams.get('classic') !== '1') {
+        try {
+          const upgraded = self.onlineEnhanceHtml(html);
+          html = upgraded.html;
+        } catch (enhancementError) {
+          // Fail open into the original authenticated world, rather than
+          // locking players out when future encrypted source changes.
+          console.warn('[online] World enhancement skipped; native online restored:',
+                       enhancementError);
         }
       }
+      // Keep the independent developer asset inspector opt-in.
+      if (u.searchParams.get('assetbridge') === '1' &&
+          html.includes('</body>') &&
+          !html.includes('game-assets/asset-bridge.js')) {
+        const scripts = '<script src="./game-assets/rig-runtime.js?v=1" defer></script>' +
+                        '<script src="./game-assets/asset-bridge.js?v=1" defer></script>';
+        html = html.replace('</body>', scripts + '</body>');
+      }
+      return new Response(html, {
+        headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' }
+      });
     }
     return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
   } catch (e) {
