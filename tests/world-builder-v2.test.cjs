@@ -30,7 +30,7 @@ assert.notEqual(style.reason(original,[],data.map,catalog),'');
 assert.equal(style.nearest(original,[],data.map,catalog),true);
 assert.equal(style.reason(original,[],data.map,catalog),'');
 const out=schema.enrich(data,catalog,style);
-assert.deepEqual(schema.validate(out,catalog,style),[]);
+assert.equal(schema.validate(out,catalog,style).length,0);
 assert.equal(out.schema,'virtual-life-ai-map-v2');
 assert.ok(out.objects.some(o=>o.markerKind==='spawn'));
 assert.ok(out.objects.every(o=>o.interactionHooks.every(h=>h.enabled===false)));
