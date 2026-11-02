@@ -13,7 +13,7 @@ for (const part of [
  "var y0=Math.max(238,Math.floor(h*0.58)),ww=Math.min(75,w)",
  "if(floor)d[j+3]=0",
  "ctx.putImageData(a,0,y0)",
- "if(!/\\/lv_\\d+\\.png(?:[?#]|$)/.test(u))return i",
+ "var cleaned=new Image();cleaned.src=cv.toDataURL('image/png')",
  "GPT VERSION · v16a.15"
 ])assert.ok(source.includes(part),'Missing PNG integration: '+part);
 assert.ok(!source.includes('var atGateFloor='),'Do not delay gate floor layering based on player coordinate');
