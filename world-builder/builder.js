@@ -712,6 +712,26 @@ function pick(e){
  return null;
 }
 let drag=null,pointers=new Map(),pinch=null;
+let activeTerrain='road',placementType=null,replaceTarget=null;
+const placementPreview=new THREE.Mesh(new THREE.BoxGeometry(1,.07,1),new THREE.MeshBasicMaterial({color:0x50e677,transparent:true,opacity:.43,depthWrite:false}));
+placementPreview.visible=false;placementPreview.position.y=.065;scene.add(placementPreview);
+function previewPlace(point){
+ if(!placementType||!point){placementPreview.visible=false;return;}
+ const test=makeObject(placementType,point);if(!test)return;
+ const [fw,fd]=style.footprint(test,assetByName);
+ test.x=Math.floor(point.x-fw/2)+fw/2;test.z=Math.floor(point.z-fd/2)+fd/2;
+ const reason=style.reason(test,documentMap.objects,documentMap.map,assetByName);
+ placementPreview.position.set(test.x,.065,test.z);placementPreview.scale.set(fw,1,fd);
+ placementPreview.material.color.setHex(reason?0xe35f5f:0x50e677);placementPreview.visible=true;
+}
+function paintAt(point,fill=false){
+ if(!point)return 0;
+ const c=Math.floor(point.x),r=Math.floor(point.z);
+ const options={bounds:documentMap.map.worldBounds,roadClass:$('roadClass').value,autoSidewalk:$('autoSidewalk').checked};
+ const t=documentMap.map.terrain;
+ const n=fill?terrain.fill(t,c,r,activeTerrain,options):terrain.paint(t,c,r,activeTerrain,Number($('brushSize').value),options);
+ if(n)rebuildTerrain();return n;
+}
 function onDown(e){
  if(e.button!==0&&e.pointerType==='mouse')return;
  e.preventDefault();canvas.setPointerCapture(e.pointerId);
