@@ -557,6 +557,7 @@ function updateSelection(){
    $('profile').value=cur.profile||'ichsan';
  }
  $('profile').disabled=!actor;
+ updateLogicUI();
  if(highlight&&highlight.userData.selected===cur?.id){
    highlight.update();
  }else{
@@ -660,6 +661,8 @@ function onDown(e){
  if(pointers.size===2){
   const pts=[...pointers.values()],mid={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
   pinch={dist:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),mid,view:viewSize,focus:cameraFocus.clone()};
+  // Pinching must never start an accidental object drag.
+  for(const holder of rigs.values())holder.rig.setMoving(0,0,false);
   drag=null;return;
  }
  const hit=pick(e);
@@ -681,7 +684,13 @@ function onMove(e){
  const old=pointers.get(e.pointerId);old.x=e.clientX;old.y=e.clientY;
  if(pointers.size>=2&&pinch){
   const pts=[...pointers.values()],len=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
-  viewSize=clamp(pinch.view*pinch.dist/Math.max(10,len),10,100);fitCamera();renderer.render(scene,camera);return;
+  const mid={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
+  viewSize=clamp(pinch.view*pinch.dist/Math.max(10,len),8,110);
+  const rect=canvas.getBoundingClientRect(),pixel=viewSize/Math.max(1,rect.height);
+  const horizontal=new THREE.Vector3(1,0,-1).normalize(),vertical=new THREE.Vector3(1,0,1).normalize();
+  cameraFocus.copy(pinch.focus).addScaledVector(horizontal,-(mid.x-pinch.mid.x)*pixel)
+   .addScaledVector(vertical,-(mid.y-pinch.mid.y)*pixel*2);
+  fitCamera();return;
  }
  if(!drag||drag.id!==e.pointerId)return;
  const p=floorPoint(e);
@@ -725,7 +734,12 @@ canvas.addEventListener('pointerdown',onDown);
 canvas.addEventListener('pointermove',onMove);
 canvas.addEventListener('pointerup',onUp);
 canvas.addEventListener('pointercancel',onUp);
-canvas.addEventListener('wheel',e=>{e.preventDefault();viewSize=clamp(viewSize*(e.deltaY>0?1.12:.89),10,100);fitCamera();renderer.render(scene,camera);},{passive:false});
+// Desktop precision wheel stays as a non-UI fallback. Mobile uses pinch.
+canvas.addEventListener('wheel',e=>{
+ if(e.ctrlKey||e.pointerType==='mouse'||e.deltaMode===0){
+  e.preventDefault();viewSize=clamp(viewSize*(e.deltaY>0?1.12:.89),8,110);fitCamera();
+ }
+},{passive:false});
 // Walk Test previews canonical movement and 3D occlusion without mutating
 // the authored map or touching multiplayer / player data.
 const walkInput={up:false,down:false,left:false,right:false};
@@ -791,6 +805,99 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
 $('profile').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.profile=$('profile').value;});};
+
+function assetCategory(spec){
+ if(!spec)return 'street';
+ const kind=style.category({type:'sprite',asset:spec.file},assetByName);
+ if(spec.source==='pipeline-vegetation'||kind==='tree'||kind==='ground')return 'vegetation';
+ if(spec.group==='Office'||spec.group==='Interior')return 'interior';
+ if(kind==='building')return 'building';
+ return 'street';
+}
+function updateLogicUI(){
+ const cur=item();
+ $('inspectorCount').textContent=documentMap.objects.length+' OBJ';
+ const fields={
+  logicName:cur?.name||'',logicLayer:cur?.layer||'prop',
+  logicSubtype:cur?.subtype||'',logicTags:(cur?.tags||[]).join(', '),
+  logicActions:(cur?.interactions||[]).join(', '),
+  logicCapacity:cur?.capacity??1,
+  logicFacing:cur?.entranceFacing||'',logicMarkerKind:cur?.markerKind||'',
+  logicBlocking:cur?.blocking||'auto',logicNotes:cur?.notes||''
+ };
+ for(const [id,v] of Object.entries(fields)){$(id).value=v;$(id).disabled=!cur;}
+ $('logicMarkerKind').disabled=!cur||cur.type!=='marker';
+}
+function renderAssetList(){
+ const q=$('searchAsset').value.trim().toLowerCase(),cat=$('assetCategory').value;
+ const assets=[
+  ...[{title:'Player Spawn',tag:'marker:spawn',category:'logic',label:'LOGIC / SPAWN'},
+      {title:'Entrance Point',tag:'marker:entrance',category:'logic',label:'LOGIC / DOOR'},
+      {title:'Interaction Point',tag:'marker:interaction',category:'logic',label:'LOGIC / ACTION'},
+      {title:'Patrol Point',tag:'marker:patrol',category:'logic',label:'LOGIC / PATH'},
+      {title:'Trigger Zone',tag:'marker:trigger',category:'logic',label:'LOGIC / TRIGGER'},
+      {title:'Character · Player',tag:'avatar',category:'character',label:'V6B / 64×112'},
+      {title:'Character · NPC',tag:'npc',category:'character',label:'V6B / 64×112'}],
+  ...assetCatalog.map(spec=>({
+   title:spec.label,tag:'sprite:'+spec.file,category:assetCategory(spec),
+   label:spec.source==='gpt-original'?'GPT / ORIGINAL · login':
+    spec.published?'PIPELINE / PNG':'PIPELINE / MANIFEST ONLY',
+   origin:spec.source==='gpt-original'?'original':spec.published?'published':'unpublished'
+  }))
+ ];
+ const list=assets.filter(a=>(cat==='all'||a.category===cat)&&
+  (a.title+' '+a.tag).toLowerCase().includes(q));
+ $('assetCount').textContent=String(list.length).padStart(2,'0');
+ const holder=$('assetList');holder.replaceChildren();
+ for(const a of list){
+  const btn=document.createElement('button');btn.type='button';
+  const name=document.createElement('span');name.className='asset-title';name.textContent=a.title;
+  const origin=document.createElement('span');origin.className='asset-origin '+(a.origin||'');origin.textContent=a.label;
+  btn.append(name,origin);
+  btn.onclick=()=>{
+   add(a.tag);setMode('move');
+   $('assetsPanel').classList.remove('mobile-open');
+   $('inspector').classList.add('mobile-open');
+  };
+  holder.appendChild(btn);
+ }
+}
+$('searchAsset').oninput=renderAssetList;
+$('assetCategory').onchange=renderAssetList;
+for(const [key,field,kind] of [
+ ['logicName','name','text'],['logicLayer','layer','text'],['logicSubtype','subtype','text'],
+ ['logicTags','tags','csv'],['logicActions','interactions','csv'],
+ ['logicCapacity','capacity','number'],['logicFacing','entranceFacing','text'],
+ ['logicMarkerKind','markerKind','text'],['logicBlocking','blocking','text'],
+ ['logicNotes','notes','text']
+]){
+ $(key).addEventListener('change',()=>{
+  if(!item())return;
+  const val=$(key).value;
+  edit(o=>{o[field]=kind==='csv'?val.split(',').map(x=>x.trim()).filter(Boolean):
+   kind==='number'?Math.max(0,Math.round(Number(val)||0)):val;},false);
+ });
+}
+for(const [tab,pane,other,otherPane] of [
+ ['tabLayout','layoutPane','tabLogic','logicPane'],
+ ['tabLogic','logicPane','tabLayout','layoutPane']
+]){
+ $(tab).onclick=()=>{
+  $(pane).hidden=false;$(otherPane).hidden=true;
+  $(tab).classList.add('active');$(other).classList.remove('active');
+ };
+}
+$('mobileAssets').onclick=()=>{
+ $('assetsPanel').classList.toggle('mobile-open');
+ $('inspector').classList.remove('mobile-open');
+};
+$('mobileInspector').onclick=()=>{
+ $('inspector').classList.toggle('mobile-open');
+ $('assetsPanel').classList.remove('mobile-open');
+};
+$('exportShortcut').onclick=()=>$('export').click();
+renderAssetList();
+
 $('refreshAssets').onclick=()=>{
  window.VLCharacterRig?.retry();
  for(const tex of spriteTexture.values())tex.dispose();
@@ -809,15 +916,19 @@ $('reset').onclick=()=>{
  undoPoint();documentMap=clone(defaultSeed);selectedId=null;rebuild();saved();tell('Map reset');
 };
 $('export').onclick=()=>{
- let json=JSON.stringify(documentMap,null,2),blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob);
- let a=document.createElement('a');a.href=url;a.download='virtual-life-world-layout.json';a.click();
+ const ready=schema.enrich(documentMap,assetByName,style);
+ const errors=schema.validate(ready,assetByName,style);
+ if(errors.length){tell('Map validation: '+errors.slice(0,2).join('; '));return;}
+ let json=JSON.stringify(ready,null,2),blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob);
+ let a=document.createElement('a');a.href=url;a.download='virtual-life-ai-world-map-v2.json';a.click();
  setTimeout(()=>URL.revokeObjectURL(url),1000);tell('Map JSON exported');
 };
 $('import').onclick=()=>$('file').click();
 $('file').onchange=async e=>{
  let f=e.target.files?.[0];if(!f)return;
  try{
-  const d=sanitize(JSON.parse(await f.text()));undoPoint();documentMap=d;selectedId=null;rebuild();saved();tell('Map imported');
+  const payload=JSON.parse(await f.text());const errors=schema.validate(payload,assetByName,style);if(errors.length)throw Error(errors[0]);
+  const d=sanitize(payload);undoPoint();documentMap=d;selectedId=null;rebuild();saved();tell('Map imported');
  }catch(err){tell('Import gagal: '+err.message);}
  e.target.value='';
 };
