@@ -433,7 +433,8 @@ function makeBox(root,item){cuboid(root,0,.8,0,2,1.6,2,new THREE.Color(item.colo
 const billboardSprites=[];
 function makePixelProp(root,type,item){
  const kind=style.isPixelProxy(type)?type:'box',art=style.proxyTexture(THREE,kind);
- const w=item.width||art.width,h=item.height||art.height;
+ // Keep fallback pixel art undistorted; published asset sizes stay canonical.
+ const w=art.width,h=art.height;
  const mat=new THREE.MeshBasicMaterial({map:art.texture,transparent:false,alphaTest:.49,depthWrite:true,depthTest:true,side:THREE.DoubleSide});
  const plane=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
  plane.position.y=h*(art.pivot-.5);
