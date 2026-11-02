@@ -17,12 +17,14 @@
  <button id="import" type="button"><u>E</u>dit / Import</button>
  <button id="reset" type="button"><u>V</u>iew / Reset</button>
  <button id="openGame" type="button"><u>H</u>elp / Game</button>
- <span class="version">VIRTUAL LIFE / MAP DATABASE V2</span>
+ <span class="version">VIRTUAL LIFE / CITY MAP V3</span>
 </nav>
 <div id="workspace">
  <aside id="toolsPanel" aria-label="Tools">
   <button class="chrome-tool active" id="selectMode" title="Select / tap">↖</button>
   <button class="chrome-tool" id="moveMode" title="Move selected object">✥</button>
+  <button class="chrome-tool" id="paintMode" title="Paint terrain with one finger">▧</button>
+  <button class="chrome-tool" id="fillMode" title="Fill connected terrain">▰</button>
   <button class="chrome-tool" id="walkMode" title="Character walk preview">▶</button>
   <button class="chrome-tool" id="home" title="Fit map view">⌂</button>
   <button class="chrome-tool" id="undo" title="Undo">↶</button>
@@ -35,7 +37,7 @@
   <div id="assetSearch">
    <input type="search" id="searchAsset" placeholder="⌕ Find asset..." aria-label="Find asset" autocomplete="off">
    <select id="assetCategory" aria-label="Asset category">
-    <option value="all">ALL ASSETS</option>
+    <option value="all">ALL ASSETS</option><option value="terrain">TERRAIN / ROADS</option><option value="custom">CUSTOM BUILDINGS</option>
     <option value="building">BUILDINGS</option><option value="street">STREET</option>
     <option value="vegetation">VEGETATION</option><option value="interior">INTERIOR</option>
     <option value="character">CHARACTERS</option><option value="logic">LOGIC MARKERS</option>
@@ -47,10 +49,10 @@
   </select>
  </aside>
  <section id="canvasPanel" aria-label="World canvas">
-  <div class="canvas-head"><span class="canvas-title">WORLD / STREET2</span><span class="right">64×32 ISO · PINCH TO ZOOM</span></div>
+  <div class="canvas-head"><span class="canvas-title">WORLD / CITY BUILDER</span><span class="right">64×32 ISO · PINCH TO ZOOM</span></div>
   <main id="canvas-wrap">
    <canvas id="world" aria-label="Interactive Virtual Life isometric map canvas"></canvas>
-   <div id="hint">Tap object = select · Move + drag = place · 2 fingers = zoom/pan</div>
+   <div id="hint">Tap = select · Paint + drag = terrain · Move = place · Pinch = zoom</div>
    <div id="status">LOADING MAP...</div><div id="toast"></div><div id="empty" role="alert"></div>
    <div id="walkPad" aria-label="Four directional movement">
     <button data-walk="up" aria-label="Up">↑</button><button data-walk="left" aria-label="Left">←</button><button data-walk="down" aria-label="Down">↓</button><button data-walk="right" aria-label="Right">→</button>
@@ -63,6 +65,10 @@
    </div>
   </main>
   <div class="canvas-toolbar">
+   <label id="brushSettings">BRUSH <select id="brushSize"><option value="1">1×1</option><option value="2">2×2</option><option value="4">4×4</option></select></label>
+   <label id="roadSettings">ROAD <select id="roadClass"><option value="two_lane">2 Lane</option><option value="local">Local</option><option value="service">Service</option><option value="pedestrian">Pedestrian</option></select></label>
+   <label class="toggle"><input id="autoSidewalk" type="checkbox" checked> Auto Sidewalk</label>
+   <span id="terrainLabel" aria-live="polite">GRASS</span>
    <button id="mobileAssets" type="button">▣ Assets</button>
    <button id="mobileInspector" type="button">☷ Inspector</button>
    <button id="viewRef" class="chrome-button" type="button">Map Reference</button>
@@ -93,6 +99,11 @@
      <label>Rotation ° <input id="rotation" type="number" step="90"></label>
      <label>Scale <input id="scale" type="number" step=".05" min=".85" max="1.15"></label>
      <label>Object ID <input id="objectId" type="text" readonly></label>
+    </div>
+    <div id="buildingControls" hidden>
+      <div class="section-label">BUILDING FOOTPRINT · PLACEHOLDER</div>
+      <div class="building-dims"><label>Width / C <input id="buildingW" type="number" min="2" max="20" step="1"></label><label>Depth / R <input id="buildingD" type="number" min="2" max="20" step="1"></label><label>Height <input id="buildingH" type="number" min="2" max="20" step="1"></label></div>
+      <button id="replaceAsset" type="button">⇄ Replace with asset...</button>
     </div>
     <div id="actorControls">
      <div class="section-label">CHARACTER</div>
@@ -134,6 +145,7 @@
 <script src="./vegetation-catalog.js?v=builder-v3"></script>
 <script src="./pipeline-character-rig.js?v=calibrated4"></script>
 <script src="./style-rules.js?v=builder-v3"></script>
+<script src="./map-terrain.js?v=city-v3"></script>
 <script src="./map-schema.js?v=builder-v3"></script>
 <script type="module" src="./builder.js?v=builder-v4"></script>
 </body></html>
