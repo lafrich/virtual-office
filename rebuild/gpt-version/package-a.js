@@ -4,13 +4,15 @@ function gptWorldV16(){
   const CA=['sedan_red','taxi_bluebird','hatchback_orange','van_cream','sedan_teal','mpv_silver'];
   const RI=['gojek','maxim_pax','commuter_batik_sogan','sma_triple','maxim','commuter_batik_blue','gojek_pax','commuter_batik_red'];
   const ROUTES=[[33.05,1,14,-1,0,0],[33.05,1,14,-4.5,0,1],[33.05,1,14,-8,0,2],[33.05,1,14,-11.5,0,3],[34.85,-1,16,-2,2,0],[34.85,-1,16,-7.333333,0,4],[34.85,-1,16,-12.666667,0,5],[33.05,1,14,-2.75,1,0],[33.05,1,14,-6.25,1,1],[33.05,1,14,-9.75,1,2],[33.05,1,14,-13.25,1,3],[34.85,-1,16,-4.666667,1,4],[34.85,-1,16,-10,1,5],[34.85,-1,16,-14.444444,1,6],[34.85,-1,16,-16.222222,1,7]];
-  var V16={T:{epoch:1767225600000,cyc:{period:40000,busy:12000,clear:[26000,32000]},road:{n:32.7,f:36.3,c0:-20,c1:34},spawn:{near:{r:32,c0:-20,c1:34},far:{r:36.95,c0:19.9,c1:25.1}},veh:ROUTES.map(function(a){return {r:a[0],d:a[1],dur:a[2],del:a[3],rot:a[4]===2?['bus_transjakarta']:a[4]===1?RI:CA,k0:a[5],pc:a[1]>0?0.6319:0.3681,t:a[4]===1?'rid':'car'};})},made:false,cars:[],start:'near',hitT:0,hits:0,lastSync:0,onRoad:false,farLoaded:false};
+  var V16={T:{epoch:1767225600000,cyc:{period:40000,busy:12000,clear:[26000,32000]},road:{n:32.7,f:36.3,c0:-20,c1:34},spawn:{near:{r:32,c0:-20,c1:34},far:{r:36.95,c0:19.9,c1:25.1}},veh:ROUTES.map(function(a){return {r:a[0],d:a[1],dur:a[2],del:a[3],rot:a[4]===2?['bus_transjakarta']:a[4]===1?RI:CA,k0:a[5],pc:a[1]>0?0.6319:0.3681,t:a[4]===1?'rid':'car'};})},made:false,cars:[],laneA:[],backLaneA:false,start:'near',hitT:0,hits:0,lastSync:0,onRoad:false,farLoaded:false};
   function trfHash(i,n){var x=Math.imul(i+1,0x9e3779b1)^Math.imul(n|0,0x85ebca77);x^=x>>>15;x=Math.imul(x,0x2c1b3c6d);x^=x>>>12;x=Math.imul(x,0x297a2d39);x^=x>>>15;return (x>>>0)/4294967296;}
   function trfPhase(t){var x=((t-V16.T.epoch)%40000+40000)%40000;return x<12000?'busy':x>=26000&&x<32000?'clear':'quiet';}
-  function trfDim(k){if(k==='bus_transjakarta')return [2.75,6.6,.85];if(RI.indexOf(k)>=0)return [.1562,1.3,.55];if(k==='van_cream')return [1.0938,3.4,.75];return [.9,3.0,.75];}
+  // Exact hitbox dimensions from Grok v16a/src/traffic.json; these also match each visual sprite.
+  const VEH_DIMS={sedan_red:[.875,2.9,.75],taxi_bluebird:[.9688,3.1,.75],hatchback_orange:[.7188,2.6,.75],van_cream:[1.0938,3.4,.75],sedan_teal:[.875,2.9,.75],mpv_silver:[.9688,3.1,.75],bus_transjakarta:[2.75,6.6,.85],gojek:[.1562,1.3,.55],maxim_pax:[.1562,1.3,.55],commuter_batik_sogan:[.1562,1.3,.55],sma_triple:[.2812,1.55,.55],maxim:[.1562,1.3,.55],commuter_batik_blue:[.1562,1.3,.55],gojek_pax:[.1562,1.3,.55],commuter_batik_red:[.1562,1.3,.55]};
+  function trfDim(k){var dims=VEH_DIMS[k];if(!dims)throw Error('Unknown vehicle sprite kind: '+k);return dims;}
   function trfVeh(i,t){var V=V16.T.veh[i],dur=V.dur*1000,a=t-V16.T.epoch-V.del*1000,n=Math.floor(a/dur),pr=(a-n*dur)/dur,tp=V16.T.epoch+V.del*1000+n*dur+V.pc*dur,phase=trfPhase(tp),on=trfHash(i,n)<(phase==='busy'?1:phase==='clear'?0:.2);
     var kind=V.rot[((V.k0+n)%V.rot.length+V.rot.length)%V.rot.length],dims=trfDim(kind),c=(V.d>0?-28:52)+(V.d>0?80*pr:-80*pr)+dims[0];
-    return {on:on,kind:kind,n:n,c0:c-dims[1]/2,c1:c+dims[1]/2,hw:dims[2],r:V.r};}
+    return {on:on,kind:kind,n:n,pr:pr,c0:c-dims[1]/2,c1:c+dims[1]/2,hw:dims[2],r:V.r};}
   function trfHit(c,r,t){if(!(r>32.7&&r<36.3))return null;for(var i=0;i<V16.T.veh.length;i++){var x=trfVeh(i,t);if(x.on&&Math.abs(r-x.r)<x.hw&&c>=x.c0-.2&&c<=x.c1+.2)return x;}return null;}
   function v16Now(){return Date.now()+(V16.off==null?(S2X.sig&&S2X.sig.off||0):V16.off);}
   function v16RoadOK(c,r){if(c<-20||c>34||r<EXT.yard.r1-.05||r>36.5)return false;return !EXT.blk.some(function(b){return Math.hypot(c-b.c,r-b.r)<b.rad;});}
@@ -19,15 +21,20 @@ function gptWorldV16(){
   function s2xCtx(){return false;}
   function s2xAction(){}
   function s2Signals(){}
-  function v16Make(){if(!EXT.cars||EXT.cars.length!==V16.T.veh.length)return false;V16.cars=EXT.cars.map(function(w,i){return {w:w,V:V16.T.veh[i],i:i,n:null,a:null};});return true;}
-  function v16LaneA(){return V16.cars.filter(function(o){return o.V.r===33.05;}).map(function(o){return o.w;});}
+  function v16Make(){if(!EXT.cars||EXT.cars.length!==V16.T.veh.length)return false;V16.cars=EXT.cars.map(function(w,i){return {w:w,V:V16.T.veh[i],i:i,n:null,a:null};});V16.laneA=V16.cars.filter(function(o){return o.V.r===33.05;}).map(function(o){return o.w;});return true;}
+  function v16LaneA(){return V16.laneA;}
   function v16Traffic(){var t=v16Now(),sync=performance.now()-V16.lastSync>600;if(sync)V16.lastSync=performance.now();V16.cars.forEach(function(o){
     var v=trfVeh(o.i,t),w=o.w;if(v.n!==o.n){o.n=v.n;if(w._vk!==v.kind){if(o.V.t==='rid')vRidSet(w,v.kind);else vSprSet(w,v.kind);}}
     var opacity=v.on?'':'0';if(w.style.opacity!==opacity)w.style.opacity=opacity;
     if(sync){var anims=w.getAnimations?w.getAnimations():[],a=o.a||anims[0];o.a=a;if(a){var dur=o.V.dur*1000,want=((t-V16.T.epoch)%dur+dur)%dur,ct=+a.currentTime||0,d=((want-ct)%dur+dur)%dur;if(d>dur/2)d-=dur;if(Math.abs(d)>40)a.currentTime=want;if(a.playbackRate!==1)a.playbackRate=1;}}});}
   function v16Side(c,r){return r<=32.7?'near':r>=36.3&&s2xInFar(c,r)?'far':null;}
-  function v16Respawn(side){var S=V16.T.spawn[side],c=Math.max(S.c0,Math.min(S.c1,me.c));if(!extOK(c,S.r))c=22.55;
-    V16.hitT=performance.now();V16.hits++;me.path=[];me.c=c;me.r=S.r;me.dir=side==='far'?'ne':'sw';me.forceAnim=null;me.moving=false;
+  // Search for a collision-free curb position, rather than dropping the player inside a stall or wall.
+  function v16Spawn(side,atC){var S=V16.T.spawn[side],c=Math.max(S.c0,Math.min(S.c1,atC));
+    for(var k=0;k<40;k++){var delta=k===0?0:(k%2?1:-1)*Math.ceil(k/2)*.3;
+      var x=Math.min(S.c1,Math.max(S.c0,c+delta));if(extOK(x,S.r))return {c:x,r:S.r};}
+    return {c:22.55,r:S.r};}
+  function v16Respawn(side){var q=v16Spawn(side,me.c);
+    V16.hitT=performance.now();V16.hits++;me.path=[];me.c=q.c;me.r=q.r;me.dir=side==='far'?'ne':'sw';me.forceAnim=null;me.moving=false;
     try{tmark.classList.remove('on');}catch(e){}
     try{say('Awas kendaraan! Balik ke tepi jalan');}catch(e){}
     try{meEl.classList.add('v16hit');setTimeout(function(){meEl.classList.remove('v16hit');},900);}catch(e){}}
@@ -50,12 +57,17 @@ function gptWorldV16(){
     if(V16.made)v16Traffic();v16Player();s2xCrossers(dt);
     var far=!WT.on&&!CV.on&&!FMI.on&&me.r>XG.curbF;s2xFar(far);if(far)s2xFarDepth();
     // Native painter order: never reparent vehicles to a synthetic lane group.
-    XC.skip=far?[EXT.gC,S2X.gFB]:(V16.made&&!WT.on&&!CV.on&&!FMI.on&&me.r>33.4?v16LaneA():null);
+    // Hysteresis prevents rapidly toggling the vehicle back-canvas at the lane boundary.
+    var canBack=V16.made&&!WT.on&&!CV.on&&!FMI.on;
+    V16.backLaneA=canBack&&(V16.backLaneA?me.r>33.24:me.r>33.56);
+    XC.skip=far?[EXT.gC,S2X.gFB]:(V16.backLaneA?v16LaneA():null);
   };
   (function(){var old=window.__s2xPost,owned=false;window.__s2xPost=function(){if(old)old();var active=OUT_ON&&((typeof S2L!=='undefined'&&S2L.p&&S2L.p.an)||(S2X.p&&S2X.p.an));if(active){owned=true;return;}if(owned){owned=false;if(me.forceAnim==='idle'||me.forceAnim==='walk')me.forceAnim=null;}};})();
   window.__v16={phase:function(t){return trfPhase(t==null?v16Now():t);},hit:function(c,r,t){return trfHit(c,r,t==null?v16Now():t);},
-    st:function(){return {made:V16.made,hits:V16.hits,start:V16.start,onRoad:V16.onRoad,farLoaded:V16.farLoaded,cars:V16.cars.length};},
-    cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,inNativeLayer:o.w.parentNode===EXT.gC};});},setOff:function(ms){V16.off=ms;},roadOK:function(c,r){return extOK(c,r);}};
+    st:function(){return {made:V16.made,hits:V16.hits,start:V16.start,onRoad:V16.onRoad,farLoaded:V16.farLoaded,cars:V16.cars.length,backLaneA:V16.backLaneA};},
+    cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,inNativeLayer:o.w.parentNode===EXT.gC};});},
+    veh:function(t){return V16.T.veh.map(function(_,i){return trfVeh(i,t==null?v16Now():t);});},
+    spawn:function(side,c){return v16Spawn(side,c);},setOff:function(ms){V16.off=ms;},roadOK:function(c,r){return extOK(c,r);}};
 }
 function gptApplyA(html){
   if(html.indexOf('vc-street2-xing')<0||html.indexOf('Virtual Life v15a')<0)throw Error('GROK_V16_INCOMPATIBLE_BASE');
