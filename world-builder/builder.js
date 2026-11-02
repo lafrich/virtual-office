@@ -17,7 +17,7 @@ if(!THREE){
   fail.textContent='WebGL editor engine gagal dimuat. Periksa koneksi internet dan muat ulang. Map online tidak berubah.';
   throw Error('THREE_MODULE_NOT_AVAILABLE');
 }
-const STORE='virtual-life-world-builder-v1';
+const STORE='virtual-life-independent-world-builder-v1';
 const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const actorType=t=>t==='avatar'||t==='npc';
@@ -63,7 +63,7 @@ const seed={
  ]};
 let documentMap=clone(seed),defaultSeed=clone(seed),selectedId=null,mode='select',snap=true,undoStack=[],redoStack=[];
 try{
- const r=await fetch('./world.json?v=2',{cache:'no-store'});
+ const r=await fetch('./world.json?v=clean1',{cache:'no-store'});
  if(r.ok){defaultSeed=sanitize(await r.json());documentMap=clone(defaultSeed);}
 }catch(err){console.warn('Using built-in map if world.json is unavailable',err);}
 try{
@@ -76,7 +76,7 @@ function sanitize(v){
  let ids=new Set(),out=clone(seed);out.objects=[];
  for(const p of v.objects){
   if(!p||typeof p.id!=='string'||p.id.length>100||ids.has(p.id))continue;
-  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc'].includes(p.type))continue;
+  if(!['building','shop','bench','lamp','tree','box','avatar','npc'].includes(p.type))continue;
   ids.add(p.id);
   let e={
    id:p.id,name:String(p.name||p.type).slice(0,90),type:p.type,

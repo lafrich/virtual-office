@@ -2,7 +2,7 @@
 <html lang="id"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0752cb"><meta name="robots" content="noindex,nofollow">
-<title>Virtual Life · 3D World Builder</title>
+<title>Virtual Life · Independent World Builder</title>
 <style>
 :root{--blue:#0849c6;--text:#233956;--edge:#7e9abc;--cream:#ece9d8}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font:12px Tahoma,Verdana,sans-serif;color:var(--text);background:#243345}
@@ -50,28 +50,17 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <div id="app">
 <div id="titlebar"><span class="mark">▦</span> Virtual Life · 3D World Builder <span class="mode">ISOMETRIC · EDIT ONLY</span></div>
 <div id="bar">
-<button id="selectMode" class="active">↖ Select</button><button id="moveMode">✥ Move</button><button id="walkMode">▶ Walk Test</button>
+<button id="selectMode" class="active">↖ Select</button><button id="moveMode">✥ Move</button><button id="walkMode">▶ Movement Preview</button>
 <select id="addType" aria-label="Tambah objek">
 <option value="">＋ Add object…</option><optgroup label="Character puppets"><option value="avatar">Character · 4-way rig</option><option value="npc">NPC · same rig</option></optgroup><optgroup label="3D geometry">
 <option value="building">Building</option><option value="shop">Shop</option><option value="bench">Park Bench</option><option value="lamp">Street Lamp</option><option value="tree">Tree</option><option value="box">Box / Prop</option>
-</optgroup><optgroup id="assetGroup" label="Existing Virtual Life Pixel Assets">
-<option value="sprite:park_bench_base.svg">Pixel Bench (SVG)</option>
-<option value="sprite:plant_base.svg">Pixel Plant (SVG)</option>
-<option value="sprite:desk_base.svg">Work Desk (SVG)</option>
-<option value="sprite:chair_base.svg">Chair (SVG)</option>
-<option value="sprite:sofa_base.svg">Sofa (SVG)</option>
-<option value="sprite:bed_base.svg">Bed (SVG)</option>
-<option value="sprite:warteg_buffet_base.svg">Warteg Buffet (SVG)</option>
-<option value="sprite:warteg_house_base.svg">Warteg House (SVG)</option>
-<option value="sprite:bathtub_base.svg">Bathtub (SVG)</option>
-<option value="sprite:toilet_base.svg">Toilet (SVG)</option>
 </optgroup></select>
 <span class="spacer"></span>
 <button id="zoomOut" aria-label="Zoom out">−</button><button id="zoomIn" aria-label="Zoom in">＋</button>
 <button id="home" aria-label="Reset camera">◎</button>
 </div>
 <main id="canvas-wrap"><canvas id="world" aria-label="Editable 3D isometric world"></canvas>
-<div id="hint">Tap objek untuk memilih. <b>Move</b> lalu drag. Karakter auto-ganti sisi, bukan di-rotate. <b>Walk Test</b> untuk cek arah.</div>
+<div id="hint">Tap objek untuk memilih. <b>Move</b> lalu drag. Karakter masih placeholder sampai aset online terpasang. <b>Walk Test</b> untuk cek arah.</div>
 <div id="status">3D Depth · Pixel Assets</div>
 <div id="walkPad" aria-label="Four directional character movement">
 <button data-walk="up" aria-label="Move north">↑</button><button data-walk="left" aria-label="Move west">←</button>
@@ -89,12 +78,12 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <label>Pose <select id="pose"><option value="">Idle</option><option value="sit">Sit</option><option value="sleep">Sleep</option><option value="bathe">Bathe</option><option value="toilet">Toilet</option><option value="work">Work</option></select></label>
 <span id="actorLock">Rotation locked · proportions preserved</span></div>
 <div id="detail"><label>X / C<input id="x" type="number" step="0.1"></label><label>Z / R<input id="z" type="number" step="0.1"></label><label>Y / Height<input id="y" type="number" step="0.1"></label><label>Rotation °<input id="rotation" type="number" step="15"></label><label>Scale<input id="scale" type="number" step="0.1" min="0.1" max="8"></label><label>Object ID<input id="objectId" type="text" readonly></label></div>
-<div class="help" id="detailHint">Karakter pakai sprite sheet asli Virtual Life; objek punya transform sendiri. Belum tersambung ke multiplayer.</div>
+<div class="help" id="detailHint">Karakter masih placeholder; belum memakai aset resmi Virtual Life Online.</div>
 </section>
 <footer id="footer"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="snap">Snap: ON</button><button id="export">Export JSON</button><button id="import">Import</button><button id="reset">Reset Map</button><input type="file" id="file" accept=".json,application/json"><span class="saved" id="saveStatus">● Draft</span></footer>
 </div>
-<script src="../character-system.js?v=2"></script>
-<script src="./asset-catalog.js?v=2"></script>
-<script src="./character-rig.js?v=2"></script>
-<script type="module" src="./builder.js?v=3"></script>
+
+<script src="./asset-catalog.js?v=clean1"></script>
+
+<script type="module" src="./builder.js?v=clean1"></script>
 </body></html>

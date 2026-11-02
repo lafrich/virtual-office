@@ -2,7 +2,7 @@
 /* Virtual Office decrypting service worker. Holds the AES key in memory only;
    when restarted it asks an unlocked tab (which keeps it in sessionStorage). */
 'use strict';
-importScripts('./rebuild/gpt-version/package-a.js?v=a17','./rebuild/gpt-version/loading-guard.js?v=a16','./game-assets/online-enhancement.js?v=o2');
+importScripts('./game-core/world-patches.js?v=clean1','./game-core/xp-loading.js?v=clean1','./game-assets/online-enhancement.js?v=o2');
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
 const PLAIN = new Set(['', 'index.html', 'sw.js', 'game-assets/rig-runtime.js', 'game-assets/asset-bridge.js', 'game-assets/online-enhancement.js', '.nojekyll', '404.html']);
@@ -44,7 +44,7 @@ self.addEventListener('fetch', ev => {
   const req = ev.request, u = new URL(req.url);
   if (req.method !== 'GET' || u.origin !== location.origin || !u.pathname.startsWith(BASE)) return;
   let p; try { p = decodeURIComponent(u.pathname.slice(BASE.length)); } catch (e) { return; }
-  if (p.startsWith('staging/') || p.startsWith('rebuild/')) return; // independent apps bypass encrypted game routing
+  if (p.startsWith('staging/') || p.startsWith('world-builder/')) return; // independent apps bypass encrypted game routing
   if (PLAIN.has(p) || p.endsWith('.enc')) return;               // lock page + ciphertext straight from the network
   ev.respondWith(handle(ev, p, u));
 });
