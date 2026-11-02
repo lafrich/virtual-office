@@ -176,6 +176,11 @@ function gptApplyA(html){
   // Preserve the complete baked world across crossings; never hide whole
   // front occluder bitmaps (that caused the background pop/dropout).
   // The player-only alpha cutout is applied AFTER XC.f is drawn.
+  // A single transient draw failure must not permanently shut down both
+  // outdoor canvases (the original catch sets XC.b=null and strips body.xcv).
+  // Drop the suspect skip list for that frame and recover on the next frame.
+  rep("console.warn('xcFrame',e); XC.b=null; document.body.classList.remove('xcv');",
+      "if(!XC._gptWarned){console.warn('xcFrame recovery',e);XC._gptWarned=true;} XC.skip=null;");
   // No global player alpha mask: use the original two-canvas compositor and per-node depth.
   // Prior patch enlarged only the aisle; the ORIGINAL far-region checker still
   // rejected positions beyond r=50. Add the baked rear-road rectangle to the
