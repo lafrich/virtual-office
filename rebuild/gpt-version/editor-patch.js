@@ -254,7 +254,7 @@ body.gpt-edit-active #dpad,body.gpt-edit-active .ctl,body.gpt-edit-active .acts{
     if(data.repairs.length){
       let attempts=0,timer=setInterval(()=>{attempts++;if(S2.url){clearInterval(timer);ensureImage(redrawRaster);}else if(attempts>100)clearInterval(timer);},220);
     }
-    function frame(){if(active)highlight();requestAnimationFrame(frame);}requestAnimationFrame(frame);
+    let lastObjectCount=-1;function frame(){let count=items().length;if(count!==lastObjectCount){lastObjectCount=count;refreshObjects();}if(active)highlight();requestAnimationFrame(frame);}requestAnimationFrame(frame);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
   window.__gptMapEditor={open:()=>toggle(true),close:()=>toggle(false),get:()=>data};
