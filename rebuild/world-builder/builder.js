@@ -464,7 +464,11 @@ function onDown(e){
   drag=null;return;
  }
  const hit=pick(e);
- if(hit){select(hit);}
+ if(hit&&mode!=='walk')select(hit);
+ if(hit&&mode==='walk'){
+   const touched=documentMap.objects.find(x=>x.id===hit);
+   if(touched&&actorType(touched.type)){walkActorId=hit;select(hit);}
+ }
  const p=floorPoint(e);
  if(mode==='move'&&hit&&p){
   undoPoint();const o=item();
