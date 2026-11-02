@@ -55,7 +55,7 @@ function step(dt,camera,pos){
 if(camera){const p=pos||{x:0,z:0};mesh.rotation.set(0,Math.atan2(camera.position.x-p.x,camera.position.z-p.z),0);}
 const anim=state.pose?POSES[state.pose]:state.moving?'walk':'idle',cfg=ANIMS[anim];
 state.clock+=Math.max(0,Math.min(.1,dt));
-const col=Math.floor(state.clock*cfg[2])%cfg[1],row=DIRS.indexOf(state.direction)*11+cfg[0];
+const col=Math.floor(state.clock*cfg[2])%cfg[1],row=cfg[0]*4+DIRS.indexOf(state.direction);
 const key=state.profile+':'+row+':'+col;
 state.status=entry.status;mesh.visible=entry.status==='ready';
 if(entry.status==='ready'&&state.last!==key){
