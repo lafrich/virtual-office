@@ -43,6 +43,7 @@ if(assetGroup){
  assetGroup.remove();
 }
 const clone=x=>JSON.parse(JSON.stringify(x));
+const BUILD_SIZES=Object.freeze({small:{w:3,d:3,h:3.8,color:'#d2a883'},medium:{w:5,d:4,h:6.2,color:'#90a9ba'},large:{w:8,d:6,h:10.5,color:'#b9b9ae'}});
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const round=v=>Math.round(v*100)/100;
 const seed={
@@ -268,7 +269,7 @@ function undoPoint(){undoStack.push(JSON.stringify(documentMap));if(undoStack.le
 function restoreStack(from,to){
  if(!from.length)return;
  to.push(JSON.stringify(documentMap));
- documentMap=sanitize(JSON.parse(from.pop()));selectedId=null;rebuild();saved();
+ documentMap=sanitize(JSON.parse(from.pop()));selectedId=null;rebuild();rebuildTerrain();saved();
 }
 let toastTimer=null;
 function tell(msg){
@@ -637,28 +638,38 @@ function applyItem(){
  updateSelection();renderer.render(scene,camera);
 }
 function id(type){return type+'-'+Math.random().toString(36).slice(2,8);}
-function add(type){
- if(!type)return;
+function makeObject(type,point){
  const preset=style.presets[type],chosen=preset?'sprite:'+preset:type;
+ const isCustom=type.startsWith('building:'),sizeClass=type.split(':')[1];
  const isMarker=type.startsWith('marker:'),isSprite=chosen.startsWith('sprite:'),asset=isSprite?chosen.slice(7):undefined;
- const spec=assetByName.get(asset);
- const o={id:id(isMarker?'marker':isSprite?'sprite':type),type:isMarker?'marker':isSprite?'sprite':type,
-  name:isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
-  x:round(cameraFocus.x),z:round(cameraFocus.z),y:0,rotation:0,scale:1};
- if(isSprite){
-  if(!spec){tell('Asset belum tersedia dalam katalog resmi');return;}
-  o.asset=asset;o.width=spec.width;o.height=spec.height;o.collision=spec.collision!==false;
+ const spec=assetByName.get(asset),dims=BUILD_SIZES[sizeClass]||BUILD_SIZES.small;
+ const obj={id:id(isCustom?'building':isMarker?'marker':isSprite?'sprite':type),
+  type:isCustom?'building':isMarker?'marker':isSprite?'sprite':type,
+  name:isCustom?sizeClass.toUpperCase()+' Building · replaceable':isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
+  x:round(point?.x??cameraFocus.x),z:round(point?.z??cameraFocus.z),y:0,rotation:0,scale:1};
+ if(isCustom){Object.assign(obj,dims);obj.sizeClass=sizeClass;obj.replaceable=true;obj.collision=true;obj.layer='structure';obj.subtype='custom_building';obj.tags=['placeholder','building'];}
+ if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;}
+ if(actorType(type)){obj.facing='sw';obj.pose=null;obj.variant='pipeline-v6b';obj.profile=type==='npc'?'noor':'ichsan';obj.collision=true;}
+ if(isMarker){obj.markerKind=type.split(':')[1]||'interaction';obj.name=obj.markerKind+' marker';obj.collision=false;}
+ if(type==='tree')obj.collision=true;
+ if((type==='building'||type==='shop')&&!isSprite)return null;
+ style.normalize(obj,assetByName);schema.normalize(obj,assetByName,style);
+ return obj;
+}
+function add(type,point=null){
+ const obj=makeObject(type,point);
+ if(!obj){tell('Asset/prefab belum tersedia');return false;}
+ if(point){
+  const [fw,fd]=style.footprint(obj,assetByName);
+  obj.x=Math.floor(point.x-fw/2)+fw/2;
+  obj.z=Math.floor(point.z-fd/2)+fd/2;
+  const reason=style.reason(obj,documentMap.objects,documentMap.map,assetByName);
+  if(reason){tell(reason);return false;}
+ }else if(!style.nearest(obj,documentMap.objects,documentMap.map,assetByName)){
+  tell('Tidak ada lokasi kosong untuk objek baru');return false;
  }
- if(actorType(type)){o.facing='sw';o.pose=null;o.variant='pipeline-v6b';o.profile=type==='npc'?'noor':'ichsan';o.collision=true;}
- if(isMarker){o.markerKind=type.split(':')[1]||'interaction';o.name=o.markerKind+' marker';o.collision=false;}
- if(type==='tree')o.collision=true;
- if((type==='building'||type==='shop')&&!isSprite){tell('Pilih prefab resmi dari katalog');return;}
- style.normalize(o,assetByName);schema.normalize(o,assetByName,style);
- if(!style.nearest(o,documentMap.objects,documentMap.map,assetByName)){
-  tell('Tidak ada lokasi kosong. Geser kamera atau pindahkan objek lain.');return;
- }
- undoPoint();documentMap.objects.push(o);instantiate(o);select(o.id);saved();
- tell('Prefab mengikuti footprint Virtual Life · Move untuk mengatur');
+ undoPoint();documentMap.objects.push(obj);instantiate(obj);select(obj.id);saved();
+ tell('Placed: '+obj.name);return true;
 }
 function duplicate(){
  const o=item();if(!o)return;
@@ -954,7 +965,7 @@ $('redo').onclick=()=>restoreStack(redoStack,undoStack);
 $('snap').onclick=()=>{snap=!snap;$('snap').textContent='Snap: '+(snap?'ON':'OFF');};
 $('reset').onclick=()=>{
  if(!confirm('Reset seluruh map draft 3D ke default?'))return;
- undoPoint();documentMap=clone(defaultSeed);selectedId=null;rebuild();saved();tell('Map reset');
+ undoPoint();documentMap=clone(defaultSeed);selectedId=null;rebuild();rebuildTerrain();saved();tell('Map reset');
 };
 $('export').onclick=()=>{
  const ready=schema.enrich(documentMap,assetByName,style);
@@ -969,7 +980,7 @@ $('file').onchange=async e=>{
  let f=e.target.files?.[0];if(!f)return;
  try{
   const payload=JSON.parse(await f.text());const errors=schema.validate(payload,assetByName,style);if(errors.length)throw Error(errors[0]);
-  const d=sanitize(payload);undoPoint();documentMap=d;selectedId=null;rebuild();saved();tell('Map imported');
+  const d=sanitize(payload);undoPoint();documentMap=d;selectedId=null;rebuild();rebuildTerrain();saved();tell('Map imported');
  }catch(err){tell('Import gagal: '+err.message);}
  e.target.value='';
 };
