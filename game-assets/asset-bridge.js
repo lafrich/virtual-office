@@ -108,7 +108,10 @@ function draw(ctx,point,zoom,opts={}){
  if(state.status!=="ready"||!ctx||!point||!Number.isFinite(zoom)||zoom<=0)return false;
  const clip=selectClip(opts);if(!clip)return false;
  const img=state.images.get(clip.atlas);
- if(!img||!img.naturalWidth)return false;
+ if(!img||!img.naturalWidth){
+  if(!state.pending.has(clip.atlas))loadImage(clip); // asynchronously prepare action transition
+  return false;
+ }
  const dir=DIRECTIONS.includes(opts.direction)?opts.direction:"se";
  const key=opts.actionId||opts.pose||(opts.moving?"walk":"idle");
  if(state.motion!==key){state.motion=key;state.started=performance.now();}
