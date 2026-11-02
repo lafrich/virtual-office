@@ -2,7 +2,7 @@
    Retrieves the real original AES-GCM source and assets from the existing GitHub Pages root.
    Production Cloudflare Worker/network is never used. */
 'use strict';
-importScripts('./package-a.js?v=a17','./park-patch.js?v=a21','./grass-park.js?v=g2','./loading-guard.js?v=a16'); // GPT beta 16: XP loading recovery overlay
+importScripts('./package-a.js?v=a17','./park-patch.js?v=a21','./grass-correct.js?v=g3','./loading-guard.js?v=a16'); // GPT beta 16: XP loading recovery overlay
 const ROOT=new URL('../../',self.registration.scope),SUB=new URL(self.registration.scope).pathname;
 const ENC_CACHE='vl-gpt-encrypted-v1'; // Only original AES-GCM blobs; never plaintext.
 async function immutableBlob(id){
@@ -22,7 +22,7 @@ async function decrypt(bytes){const b=new Uint8Array(bytes);return crypto.subtle
 async function getKey(){if(key)return key;for(const c of await clients.matchAll({type:'window',includeUncontrolled:true})){const ch=new MessageChannel();const k=await new Promise(resolve=>{const t=setTimeout(()=>resolve(null),1500);ch.port1.onmessage=e=>{clearTimeout(t);resolve(e.data?.key||null)};c.postMessage({type:'need-key'},[ch.port2])});if(k){try{await unlock(k);return key}catch(e){}}}return null}
 async function man(){if(!manifestPromise)manifestPromise=(async()=>{const r=await fetch(new URL('manifest.enc',ROOT),{cache:'no-store'});if(!r.ok)throw Error('manifest '+r.status);return JSON.parse(new TextDecoder().decode(await decrypt(await r.arrayBuffer()))).files})();try{return await manifestPromise}catch(e){manifestPromise=null;throw e}}
 function patch(html,useV16){
- if(useV16){const result=self.gptApplyA(html);html=self.gptLoadingPatch(self.gptGrassPatch(self.gptParkPatch(result.html)));console.info('[gpt-v16a] Package A and loading guard applied',result.applied,'phone map',result.phoneMap);}
+ if(useV16){const result=self.gptApplyA(html);html=self.gptLoadingPatch(self.gptGrassCorrect(self.gptParkPatch(result.html)));console.info('[gpt-v16a] Package A and loading guard applied',result.applied,'phone map',result.phoneMap);}
  const old='  MP.me=null; MP.tok=null; showLogin(true);';
  if(!html.includes(old))throw Error('Beta incompatible with current login anchor');
  if(!html.includes('Virtual Life v15a')&&!html.includes('Virtual Life v16a · GPT beta'))throw Error('Beta incompatible with current engine version');
@@ -44,7 +44,7 @@ self.addEventListener('fetch',e=>{
  const url=new URL(e.request.url);
  if(e.request.method!=='GET'||url.origin!==location.origin||!url.pathname.startsWith(SUB))return;
  const path=decodeURIComponent(url.pathname.slice(SUB.length));
- if(path===''||path==='index.html'||path==='sw.js'||path==='package-a.js'|| path==='park-patch.js'||path==='grass-park.js'||path==='loading-guard.js')return;
+ if(path===''||path==='index.html'||path==='sw.js'||path==='package-a.js'|| path==='park-patch.js'||path==='grass-correct.js'||path==='loading-guard.js')return;
  e.respondWith((async()=>{
   if(!await getKey()){if(e.request.mode==='navigate')return Response.redirect(self.registration.scope+'index.html',302);return new Response('beta locked',{status:401})}
   try{
