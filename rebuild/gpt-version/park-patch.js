@@ -46,8 +46,8 @@ function gptParkPatch(html) {
   // Draw ONLY bench/lamp pixels; trees/buildings keep their native painter.
   change('if(!OUT_ON||!EXT.dyn||!EXT.dyn.length||!XC.b){',
     'if(!OUT_ON||!EXT.props||!EXT.props.length||!XC.b){');
-  change('for(var i=0;i<EXT.dyn.length;i++){\\n      var n=EXT.dyn[i];',
-    'for(var i=0;i<EXT.props.length;i++){\\n      var n=EXT.props[i];');
+  change('for(var i=0;i<EXT.dyn.length;i++){\n      var n=EXT.dyn[i];',
+    'for(var i=0;i<EXT.props.length;i++){\n      var n=EXT.props[i];');
   change('if(!n||!n.isConnected||n._b==null||n._b<pd-.08)continue;',
     "if(!n||!n.isConnected||n._b==null)continue; if(n._k!=='bench'&&n._k!=='lamp'&&!n._gptPark)continue; if(n._b<pd-.30)continue;");
   // Seated players stay above the seat cushions; only the near/front lower
