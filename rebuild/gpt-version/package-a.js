@@ -185,6 +185,15 @@ function gptApplyA(html){
   // Drop the suspect skip list for that frame and recover on the next frame.
   rep("console.warn('xcFrame',e); XC.b=null; document.body.classList.remove('xcv');",
       "if(!XC._gptWarned){console.warn('xcFrame recovery',e);XC._gptWarned=true;} XC.skip=null;");
+  // Office-front shadow only: keep v12 tree size, bake a smaller/fainter
+  // projected shadow once from the active PNG's black-alpha shadow pixels.
+  // This does not resize or edit the live encrypted source asset.
+  rep("function vegHref(n) { return VEG.data[n] || (VEG.dir + n + '.png'); }",
+      "function vegHref(n) { return VEG.data[n] || (VEG.dir + n + '.png'); }\nfunction gptOfficeShadowData(n) {\n  // PNG originals encode their broad projected shadow as black pixels\n  // with alpha 56/90. Keep tree crown, trunk and lawn untouched.\n  const im=VEG.img[n], sz=VEG.sprites[n]; if(!im||!sz) return VEG.data[n];\n  try {\n    const w=im.naturalWidth,h=im.naturalHeight;\n    const clean=document.createElement('canvas');clean.width=w;clean.height=h;\n    const cleanCtx=clean.getContext('2d',{willReadFrequently:true});\n    cleanCtx.drawImage(im,0,0);\n    const data=cleanCtx.getImageData(0,0,w,h);\n    const shadow=document.createElement('canvas');shadow.width=w;shadow.height=h;\n    const sx=shadow.getContext('2d'),sp=sx.createImageData(w,h);\n    let found=0;\n    for(let i=0;i<data.data.length;i+=4) {\n      if(data.data[i]===0&&data.data[i+1]===0&&data.data[i+2]===0\n         &&data.data[i+3]>0&&data.data[i+3]<=110) {\n        sp.data[i+3]=data.data[i+3];\n        data.data[i+3]=0; found++;\n      }\n    }\n    if(!found) return VEG.data[n];\n    sx.putImageData(sp,0,0);cleanCtx.putImageData(data,0,0);\n    const out=document.createElement('canvas');out.width=w;out.height=h;\n    const ctx=out.getContext('2d');ctx.imageSmoothingEnabled=false;\n    const scaleX=0.52,scaleY=0.48,footX=sz[2],footY=sz[3];\n    ctx.globalAlpha=0.5;\n    ctx.drawImage(shadow,footX*(1-scaleX),footY*(1-scaleY),w*scaleX,h*scaleY);\n    ctx.globalAlpha=1;\n    ctx.drawImage(clean,0,0);\n    return out.toDataURL('image/png');\n  } catch(err) { console.warn('gpt tree shadow',err);return VEG.data[n]; }\n}");
+  rep("VEG.imgs.push([im, nm]); g._k = 'veg:' + nm;",
+      "VEG.imgs.push([im, officeLawn ? 'gpt-office-shadow:'+nm : nm]); g._k = 'veg:' + nm;");
+  rep("VEG.data[n] = u; VEG.img[n] = im; res();",
+      "VEG.data[n] = u; VEG.img[n] = im; if([].concat(...Object.values(VEG.layout.trees.front)).includes(n)) VEG.data['gpt-office-shadow:'+n]=gptOfficeShadowData(n); res();");
   // ACTIVE tree renderer: VEG.on routes extTree() to vegTree() BEFORE any
   // legacy SVG tWide/tRound is executed. Previous 09–11 changes only touched
   // that legacy path and were invisible for the PNG vegetation in screenshots.
@@ -220,7 +229,7 @@ function gptApplyA(html){
   if(phoneMap)css+="body.y2k .y2-map,#vs-hud .vs-mini{display:none!important}";
   rep("</head>","<style id=\"gpt-v16a-css\">"+css+"</style></head>");
   rep("window.__vsBuild = 'Virtual Life v15a';","window.__vsBuild = 'Virtual Life v16a · GPT beta';");
-  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.12</div></body>");
+  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.13</div></body>");
   if(!phoneMap)console.warn('[gpt-a] Phone map absent; HUD minimap retained');
   return {html:s,applied:applied.length,phoneMap:phoneMap};
 }
