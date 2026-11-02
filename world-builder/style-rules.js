@@ -46,10 +46,12 @@ function footprint(o,catalog){
  const kind=category(o,catalog);
  if(kind==='actor')return [0.65,0.65];
  if(kind==='marker')return [.15,.15];
- if(kind==='building')return [
-  Math.max(.5,Number(s?.footprint?.[0]||o.w||6))*Number(o.scale||1),
-  Math.max(.5,Number(s?.footprint?.[1]||o.d||5))*Number(o.scale||1)
- ];
+ if(kind==='building'){
+  let width=Math.max(.5,Number(s?.footprint?.[0]||o.w||6));
+  let depth=Math.max(.5,Number(s?.footprint?.[1]||o.d||5));
+  if([90,270].includes(((Number(o.rotation)||0)%360+360)%360)) [width,depth]=[depth,width];
+  return [width*Number(o.scale||1),depth*Number(o.scale||1)];
+ }
  const native={
   tree:[1.4,1.4],ground:[.2,.2],bench:[2,1],table:[2,1.6],trash:[.95,.95],lamp:[.75,.75],
   prop:[1.25,1],furniture:[1.4,1.2]
