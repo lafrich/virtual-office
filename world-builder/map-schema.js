@@ -22,7 +22,7 @@ function defaults(item,catalog,style){
  const interactions=kind==='bench'?['sit']:kind==='trash'?['dispose']:
   kind==='building'?['enter']:item.type==='marker'?['activate']:[];
  return {layer,subtype:String(subtype).slice(0,60),tags:[],interactions,
-  capacity:kind==='bench'?2:1,entranceFacing:kind==='building'?'sw':'',
+  capacity:kind==='bench'?2:1,entranceFacing:'', // Only manually confirmed doors become entrance anchors.
   markerKind:item.type==='marker'?'interaction':'',
   blocking:item.collision===false?'no':'auto',notes:''};
 }
