@@ -10,7 +10,7 @@ const match=(pattern,label)=>{
  const found=code.match(pattern);assert.ok(found,'Missing '+label);return found;
 };
 const lane=JSON.parse('['+match(/region\.lane=\[([0-9.,]+)\]/,'alley corridor')[1]+']');
-const terminal=JSON.parse('['+match(/region\.terminal=\[([0-9.,]+)\]/,'rear local road')[1]+']');
+const terminal=JSON.parse('['+match(/region\.terminal=\[([0-9.,-]+)\]/,'rear local road')[1]+']');
 match(/rep\("return inR\(R\.side\) \|\| inR\(R\.lane\); }",\s*"return inR\(R\.side\) \|\| inR\(R\.lane\) \|\| \(R\.terminal \? inR\(R\.terminal\) : false\); }"\)/,'original s2xInFar guard must include rear road');
 match(/function s2xOK\(c,r\)\{return v16RoadOK\(c,r\)\|\|\(s2xInFar\(c,r\)/,'real extOK must continue through region');
 const R={side:[19.4,25.6,36.45,37.65],lane,terminal};
