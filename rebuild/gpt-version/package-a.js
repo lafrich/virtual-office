@@ -134,7 +134,7 @@ function gptApplyA(html){
   // Baked foreground occluder level changes only after crossing a small dead-band.
   rep("const e = LV[k][1];\n  if (!S2X.lv)",
       "if(S2X.lv&&S2X.lv.k>=0&&k!==S2X.lv.k){var oldk=S2X.lv.k,edge=k>oldk?LV[k][0]+.12:LV[oldk][0]-.12; if(k>oldk?pd<edge:pd>edge)k=oldk;} const e = LV[k][1];\n  if (!S2X.lv)");
-  rep("const G_ = b > pd + 0.02 ? EXT.gF;",
+  rep("const G_ = b > pd + 0.02 ? EXT.gF : S2X.gFB;",
       "const band=0.16; const G_=n.parentNode===EXT.gF ? (pd>b+band?S2X.gFB:EXT.gF) : (pd<b-band?EXT.gF:S2X.gFB);");
   rep("const G_ = s2xGroupFor(c, r, c + r > me.c + me.r + 0.02);",
       "const depth=c+r-me.c-me.r; n._gptFront=n._gptFront===undefined ? depth>0 : (n._gptFront ? depth>-.15 : depth>.15); const G_ = s2xGroupFor(c,r,n._gptFront);");
