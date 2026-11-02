@@ -2,6 +2,7 @@
    Retrieves the real original AES-GCM source and assets from the existing GitHub Pages root.
    Production Cloudflare Worker/network is never used. */
 'use strict';
+importScripts('./package-a.js');
 const ROOT=new URL('../../',self.registration.scope),SUB=new URL(self.registration.scope).pathname;
 let key=null,manifestPromise=null;
 function b64(v){return Uint8Array.from(atob(v),c=>c.charCodeAt(0))}
@@ -9,10 +10,11 @@ async function unlock(v){key=await crypto.subtle.importKey('raw',b64(v),'AES-GCM
 async function decrypt(bytes){const b=new Uint8Array(bytes);return crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(0,12)},key,b.slice(12))}
 async function getKey(){if(key)return key;for(const c of await clients.matchAll({type:'window',includeUncontrolled:true})){const ch=new MessageChannel();const k=await new Promise(resolve=>{const t=setTimeout(()=>resolve(null),1500);ch.port1.onmessage=e=>{clearTimeout(t);resolve(e.data?.key||null)};c.postMessage({type:'need-key'},[ch.port2])});if(k){try{await unlock(k);return key}catch(e){}}}return null}
 async function man(){if(!manifestPromise)manifestPromise=(async()=>{const r=await fetch(new URL('manifest.enc',ROOT),{cache:'no-store'});if(!r.ok)throw Error('manifest '+r.status);return JSON.parse(new TextDecoder().decode(await decrypt(await r.arrayBuffer()))).files})();try{return await manifestPromise}catch(e){manifestPromise=null;throw e}}
-function patch(html){
+function patch(html,useV16){
+ if(useV16){const result=self.gptApplyA(html);html=result.html;console.info('[gpt-v16a] Package A applied',result.applied,'phone map',result.phoneMap);}
  const old='  MP.me=null; MP.tok=null; showLogin(true);';
  if(!html.includes(old))throw Error('Beta incompatible with current login anchor');
- if(!html.includes('Virtual Life v15a'))throw Error('Beta incompatible with current engine version');
+ if(!html.includes('Virtual Life v15a')&&!html.includes('Virtual Life v16a · GPT beta'))throw Error('Beta incompatible with current engine version');
  html=html.replace(old,"  MP.me=(sessionStorage.getItem('vl-gpt-char')==='noorz'?'noorz':'ichsan'); MP.user=MP.me; MP.tok=null; setStatus('live');");
  const tap="const p=toSvg(e), g=toGrid(p.x,p.y); if(okG(g.c,g.r)) goTo({c:g.c,r:g.r});";
  if(html.includes(tap))html=html.replace(tap,'/* GPT beta: empty-floor tap-to-walk disabled */');
@@ -31,7 +33,7 @@ self.addEventListener('fetch',e=>{
  const url=new URL(e.request.url);
  if(e.request.method!=='GET'||url.origin!==location.origin||!url.pathname.startsWith(SUB))return;
  const path=decodeURIComponent(url.pathname.slice(SUB.length));
- if(path===''||path==='index.html'||path==='sw.js')return;
+ if(path===''||path==='index.html'||path==='sw.js'||path==='package-a.js')return;
  e.respondWith((async()=>{
   if(!await getKey()){if(e.request.mode==='navigate')return Response.redirect(self.registration.scope+'index.html',302);return new Response('beta locked',{status:401})}
   try{
@@ -44,7 +46,7 @@ self.addEventListener('fetch',e=>{
     if(!r.ok)throw Error('asset '+r.status);
     bytes=await decrypt(await r.arrayBuffer());type=entry[1]||'application/octet-stream';
    }
-   if(path==='office.html')return new Response(patch(new TextDecoder().decode(bytes)),{headers:{'content-type':'text/html;charset=utf-8','cache-control':'no-store','X-GPT-Version':'offline-beta'}});
+   if(path==='office.html')return new Response(patch(new TextDecoder().decode(bytes),url.searchParams.get('v16')==='1'),{headers:{'content-type':'text/html;charset=utf-8','cache-control':'no-store','X-GPT-Version':'offline-beta'}});
    return new Response(bytes,{headers:{'content-type':type,'cache-control':'no-store'}});
   }catch(ex){return new Response('GPT beta decode error: '+(ex.message||ex),{status:500,headers:{'content-type':'text/plain'}})}
  })());
