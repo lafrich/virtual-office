@@ -37,6 +37,52 @@ function onlineEnhanceHtml(html){
   replaceOne('<div id="gpt-pkg-a" style="position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma">GPT VERSION · v16a.17</div>','');
   replaceOne("window.__vsBuild = 'Virtual Life v16a · GPT beta';",
              "window.__vsBuild = 'Virtual Life v16a · Online';");
+  // Online painter fix: the preview was built for a single offline player.
+  // It skipped individual vehicle sprites based on center-point depth and
+  // placed a second clip canvas over the avatar. In the multiplayer map this
+  // could make the character appear to stand ON a bus or street furniture.
+  // Use the native two-canvas renderer, with road vehicles kept on its true
+  // front canvas. Keep the far-side background and gate-pavement safety logic.
+  replaceOne(
+    "xcDraw(XC.f,EXT.RF); if(window.__gptDepthDraw)window.__gptDepthDraw(); }catch(e){",
+    "xcDraw(XC.f,EXT.RF); }catch(e){"
+  );
+  const skipStart=out.indexOf('function v16DepthSkip(far){');
+  const skipEnd=out.indexOf('  // Precise foreground safety pass.',skipStart);
+  if(skipStart<0||skipEnd<0||out.indexOf('function v16DepthSkip(far){',skipStart+1)>=0)
+    throw Error('ONLINE_DEPTH_SORT_ANCHOR');
+  const oldSort=out.slice(skipStart,skipEnd);
+  if(!oldSort.includes('o.back=far||')||
+     !oldSort.includes('XC.skip=back.length?back:null;')||
+     !oldSort.includes('var roadLevel=far'))
+    throw Error('ONLINE_DEPTH_SORT_INCOMPATIBLE');
+  const safeSort=`function v16DepthSkip(far){
+    // Never move animated traffic to the rear based on its sprite center.
+    // All traffic remains in EXT.gC (front); individual NPCs and furniture
+    // retain the native engine's group ordering and footprint depth.
+    var back=[];
+    if(far&&S2X.gFB)back.push(S2X.gFB);
+    var roadLevel=far&&S2X.lv&&S2X.lv.g&&me.r>=51.25&&me.r<=54.85;
+    if(roadLevel)back.push(S2X.lv.g);
+    XC.skip=back.length?back:null;
+  }
+  `;
+  out=out.slice(0,skipStart)+safeSort+out.slice(skipEnd);
+
+  // Undo the beta's altered Level-PNG transparency mask: painting some
+  // gate floor colors as transparent also erased overlapping artwork in
+  // the online map, so fall back to the original, unmodified PNG decoder.
+  const changedXcImg="function xcImg(u){ let i=XC.imgs.get(u); if(!i){ i=new Image(); i.src=u; XC.imgs.set(u,i); } if(!i.complete||!i.naturalWidth)return null;";
+  const imgStart=out.indexOf(changedXcImg);
+  const imgStop=out.indexOf("function xcFrame(dt)",imgStart);
+  if(imgStart<0||imgStop<0||imgStop-imgStart>2900)
+    throw Error('ONLINE_LEVEL_ASSET_ANCHOR');
+  const originalXcImg="function xcImg(u){ let i=XC.imgs.get(u); if(!i){ i=new Image(); i.src=u; XC.imgs.set(u,i); } return i.complete&&i.naturalWidth?i:null; }";
+  const currentAssetBlock=out.slice(imgStart,imgStop);
+  if(!currentAssetBlock.includes("i._gptFloorDone")||!currentAssetBlock.includes("return clean&&clean.complete"))
+    throw Error('ONLINE_LEVEL_ASSET_INCOMPATIBLE');
+  out=out.slice(0,imgStart)+originalXcImg+"\\n"+out.slice(imgStop);
+
   // Reuse the established XP loading screen. It reads local game-renderer
   // readiness only, never auth state or multiplayer tokens.
   out=self.gptLoadingPatch(out);
