@@ -48,3 +48,13 @@ Procedural 3D models own solid depth geometry. Existing isometric art can be dis
 Open [World Builder](https://lafrich.github.io/virtual-office/rebuild/world-builder/). Tap a building or lamp to select it. Press **Move** and drag; Rotate and Scale are directly underneath the canvas. Export JSON is the portable version of the layout.
 
 Three.js is currently loaded from a pinned CDN with fallback; editor requires internet to fetch the module. The app's map data and local asset paths are served by GitHub Pages, independent of online auth.
+
+## v2: Existing artwork and actor rig
+
+Uses the original rebuild/character-system.js sprite sheets: character_iso_sheet_v17.svg (SW/SE/NW/NE, idle and three walking frames), character_flat_poses.svg (sit, sleep, bathe, toilet, work) and character_baymax_poses.svg for alternate poses. The actor is a camera-facing, alpha-tested 3D plane. Facing and animation frames change when moving, not actor yaw. Actor rotation and scale are locked in the UI and sanitized on import.
+
+The Add menu exposes 26 existing rebuild SVG art assets; eight have original optional foreground art. 3D buildings use mesh surfaces, while existing furniture art uses independent depth-tested cutout cards. Single-angle art does not provide unseen rotated views.
+
+Use Walk Test with arrows, WASD, or mobile D-pad. This only moves actors in a local preview. Exit test to restore saved spawn positions. The default world.json includes 22 map objects with two actor rigs and eleven original-art furniture objects; Reset Map loads the latest example if a previous local draft was saved.
+
+The original online multiplayer remains unchanged. The asset library comes from the accessible Rebuild art and is not a full extraction of the separately encrypted online world.
