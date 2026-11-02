@@ -24,10 +24,9 @@ for(let c=-39.9;c<=33.9;c+=.1){assert.ok(walk(c,53),'rear road must allow side e
 for(const [c,r] of [[22.55,55],[-40.5,53],[34.5,53],[17.9,50],[22.55,56]])
  assert.ok(!walk(c,r),'player may not cross baked art boundary '+c+','+r);
 assert.ok(code.includes("V16.gangEntered=true"),'beta must expose exploration status');
-assert.ok(code.includes("window.__gptPunchFront=function(cv)"),'player silhouette mask required');
-assert.ok(code.includes("x.globalCompositeOperation='destination-out'"),'only player-shaped pixels should be cleared');
-assert.ok(code.includes('window.__gptPunchFront(XC.f)'),'compositor must run after foreground paint');
+assert.ok(!code.includes("__gptPunchFront"),'do not force player above cars/pedestrians via alpha mask');
+assert.ok(code.includes("v16DepthSkip(far)"),'original back/front canvas depth sorting must be used');
 assert.ok(!code.includes("if(floorRoad&&g.getAttribute"),'whole foreground must never disappear at the crossing');
 assert.ok(code.includes("var far=V16.farLoaded"),'do not switch foreground layers before assets load');
 assert.ok(code.includes("const G_=n.parentNode===EXT.gF"),'normal foreground prop sorting must remain in place');
-console.log('PASS: '+steps+' walk samples, full lateral road and bounded ends; alpha foreground mask, preload guard and native depth preserved.');
+console.log('PASS: '+steps+' walk samples, full lateral road and bounded ends; native foreground, per-car depth split and preload guard preserved.');
