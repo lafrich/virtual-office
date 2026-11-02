@@ -1,0 +1,42 @@
+name: Game Asset Bridge — Validate
+
+on:
+  push:
+    branches:
+      - main
+      - feature/game-asset-pipeline-bridge-v1
+    paths:
+      - "game-assets/**"
+      - "rebuild/game.js"
+      - "rebuild/index.html"
+      - "cove-reskin.js"
+      - "sw.js"
+      - "tests/asset-bridge.test.cjs"
+      - ".github/workflows/game-asset-bridge.yml"
+  pull_request:
+    paths:
+      - "game-assets/**"
+      - "rebuild/game.js"
+      - "rebuild/index.html"
+      - "cove-reskin.js"
+      - "sw.js"
+      - "tests/asset-bridge.test.cjs"
+      - ".github/workflows/game-asset-bridge.yml"
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout virtual-office
+        uses: actions/checkout@v4
+      - name: Validate production and game scripts
+        run: |
+          node --check sw.js
+          node --check cove-reskin.js
+          node --check rebuild/game.js
+          node --check rebuild/character-system.js
+          node --check game-assets/rig-runtime.js
+          node --check game-assets/asset-bridge.js
+      - name: Integration regression
+        run: node tests/asset-bridge.test.cjs
