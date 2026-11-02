@@ -876,6 +876,20 @@ function setMode(m){
 }
 $('selectMode').onclick=()=>setMode('select');
 $('moveMode').onclick=()=>setMode('move');
+$('paintMode').onclick=()=>setMode('paint');
+$('fillMode').onclick=()=>setMode('fill');
+function toggleGrid(){
+ gridShown=!gridShown;gridOverlay.visible=gridShown;
+ $('gridToggle').classList.toggle('active',gridShown);
+ $('gridToggle').setAttribute('aria-pressed',String(gridShown));
+ $('gridToolbar').textContent='# Grid '+(gridShown?'ON':'OFF');
+ $('gridToolbar').setAttribute('aria-pressed',String(gridShown));
+}
+$('gridToggle').onclick=toggleGrid;
+$('gridToolbar').onclick=toggleGrid;
+$('gridToggle').classList.add('active');
+$('snap').textContent='▦';$('snap').title='Snap: ON';
+
 $('walkMode').onclick=()=>setMode(mode==='walk'?'select':'walk');
 for(const b of $('walkPad').querySelectorAll('button[data-walk]')){
  const d=b.dataset.walk;
@@ -1013,7 +1027,7 @@ $('viewRef').onclick=()=>{$('assetReference').hidden=false;};
 $('closeRef').onclick=()=>{$('assetReference').hidden=true;};
 $('undo').onclick=()=>restoreStack(undoStack,redoStack);
 $('redo').onclick=()=>restoreStack(redoStack,undoStack);
-$('snap').onclick=()=>{snap=!snap;$('snap').textContent='Snap: '+(snap?'ON':'OFF');};
+$('snap').onclick=()=>{snap=!snap;$('snap').title='Snap: '+(snap?'ON':'OFF');$('snap').classList.toggle('active',snap);};
 $('reset').onclick=()=>{
  if(!confirm('Reset seluruh map draft 3D ke default?'))return;
  undoPoint();documentMap=clone(defaultSeed);selectedId=null;rebuild();rebuildTerrain();saved();tell('Map reset');
@@ -1038,6 +1052,7 @@ $('file').onchange=async e=>{
 window.addEventListener('keydown',e=>{
  if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();restoreStack(undoStack,redoStack);}
+  else if(e.key.toLowerCase()==='h'){toggleGrid();}
  else if(e.key==='Delete'&&item())remove();
  else if(e.key.toLowerCase()==='g')setMode('move');
  else if(e.key==='Escape')select(null);
