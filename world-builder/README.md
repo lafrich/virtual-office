@@ -33,3 +33,14 @@ This is an authoring companion for [Virtual Life Asset Pipeline](https://lafrich
 Existing map layouts saved in browser local storage are preserved. To see the new default 32-object study, **export your current layout first**, then use **View / Reset**. The new sample includes five candidate markers. Candidate locations are **not** a verified copy of the protected production scene.
 
 For schema contracts and game-logic handoff, see [MAP_SCHEMA.md](./MAP_SCHEMA.md).
+
+## City Builder v3 — roads, tiles, grid, placeholders
+
+- **Grid**: the editor shows a full 1×1 c/r tile grid over the projected 3D floor, aligned to the native 64×32-px iso grid. Use the `#` toolbar control, `# Grid ON/OFF`, or the `H` shortcut to toggle visibility. Placement stays grid-aligned; the independent Snap tool controls half-tile object dragging.
+- **Terrain**: choose Road, Sidewalk, Grass, Water, Plaza or Soil under FILES → TERRAIN / ROADS. The Paint tool draws with 1×1, 2×2 or 4×4 brushes. The Fill tool replaces a connected terrain region (up to the map limit). Roads automatically expose an adjacency shape (`straight`, `corner`, `t`, `cross`, `end`). Automatic neighboring sidewalk is optional. Roads and water block new building/prop placement.
+- **Buildings**: FILES → CUSTOM BUILDINGS offers **Small 3×3**, **Medium 5×4**, **Large 8×6** replaceable drafts. Tap/click the canvas to place; valid/invalid footprints are shown in green/red. Width, depth and height can be changed in the inspector. Replace with official prefab art using **Replace with asset**; the source catalog remains distinct from placeholders.
+- **Props**: tree, streetlamp, bench, native catalog props; select a prop and tap the map to place repeatedly. Pinch zoom and two-finger camera pan remain enabled; pointer gesture cannot move authored objects while pinching.
+- **City Sample**: choose **City Sample** for an optional editable layout with road intersections, sidewalks, central park, a small pond, 10 replaceable buildings and 8 street/park props. Existing Street2 draft and browser saves are not changed unless you confirm. Export your draft before replacing it.
+- **Persistence**: terrain resides in `map.terrain` (`default` and individual `cells`). Undo/Redo and JSON export/import include the terrain layer. Road cells export their adjacency shape and driveable/walkable/buildable hints in `virtual-life-ai-map-v3`. These are annotations, not active driving or NPC code.
+
+The visual road/ground tile colors and custom building models are **editor placeholders**, not final pixel assets.
