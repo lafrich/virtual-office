@@ -18,12 +18,32 @@ function gptClickEditorRuntime(){
     try{let b=n.getBBox(),m=n.getScreenCTM();if(!m)return null;let xy=[[b.x,b.y],[b.x+b.width,b.y],[b.x+b.width,b.y+b.height],[b.x,b.y+b.height]].map(v=>({x:v[0]*m.a+v[1]*m.c+m.e,y:v[0]*m.b+v[1]*m.d+m.f}));return {left:Math.min(...xy.map(v=>v.x)),top:Math.min(...xy.map(v=>v.y)),right:Math.max(...xy.map(v=>v.x)),bottom:Math.max(...xy.map(v=>v.y)),width:Math.max(...xy.map(v=>v.x))-Math.min(...xy.map(v=>v.x)),height:Math.max(...xy.map(v=>v.y))-Math.min(...xy.map(v=>v.y))};}catch(e){return null;}
   }
   function pickVector(e){
-    let found=null,score=Infinity;
+    // The street renderer draws props onto canvas. SVG nodes may be invisible
+    // to native hit-testing, so pick from their original world anchors too.
+    let found=null,score=Infinity,ctm=room.getScreenCTM();
     for(let n of props()){
-      if(!n.isConnected||state.nodes[key(n)]?.deleted)continue;
-      let r=vectorRect(n);if(!r||r.width<2||r.height<2||r.width>480||r.height>550)continue;
-      if(e.clientX<r.left-6||e.clientX>r.right+6||e.clientY<r.top-6||e.clientY>r.bottom+6)continue;
-      let rank=Math.hypot(e.clientX-(r.left+r.right)/2,e.clientY-(r.top+r.bottom)/2)+(r.width*r.height/1400);
+      if(!n||!n.isConnected||state.nodes[key(n)]?.deleted)continue;
+      let r=vectorRect(n),rank=Infinity;
+      if(r&&r.width>=2&&r.height>=2&&r.width<550&&r.height<680&&
+        e.clientX>=r.left-9&&e.clientX<=r.right+9&&
+        e.clientY>=r.top-9&&e.clientY<=r.bottom+9){
+        rank=Math.hypot(e.clientX-(r.left+r.right)/2,e.clientY-(r.top+r.bottom)/2)*.42;
+      }
+      if(ctm&&n._a){
+        let ax=ctm.a*n._a.x+ctm.c*n._a.y+ctm.e;
+        let ay=ctm.b*n._a.x+ctm.d*n._a.y+ctm.f;
+        let scale=Math.max(.65,Math.hypot(ctm.a,ctm.b));
+        let isBench=n._k==='bench',isLamp=n._k==='lamp';
+        let x0=ax-(isBench?19:isLamp?5:12)*scale;
+        let x1=ax+(isBench?19:isLamp?9:12)*scale;
+        let y0=ay-(isBench?21:isLamp?70:25)*scale;
+        let y1=ay+(isBench?8:isLamp?7:12)*scale;
+        if(e.clientX>=x0-7&&e.clientX<=x1+7&&
+          e.clientY>=y0-7&&e.clientY<=y1+7){
+          let cx=(x0+x1)/2,cy=(y0+y1)/2;
+          rank=Math.min(rank,Math.hypot(e.clientX-cx,e.clientY-cy)*.35+4);
+        }
+      }
       if(rank<score){score=rank;found=n;}
     }
     return found;
@@ -195,7 +215,7 @@ function gptClickEditorRuntime(){
     applyNodes();if(origin)redrawRaster();store();selection=null;moveMode=false;menuState();drawOutline();}
   function start(e){
     if(!on||e.pointerType==='touch'&&!e.isPrimary)return;
-    e.preventDefault();shield.setPointerCapture(e.pointerId);
+    e.preventDefault();
     let p=svgPoint(e.clientX,e.clientY);if(!p)return;
     drag={id:e.pointerId,p,start:e};
     if(moveMode&&selection){
@@ -242,7 +262,7 @@ function gptClickEditorRuntime(){
     let css=document.createElement('style');
     css.textContent=`
     #gpt-click-editor{position:fixed;right:9px;top:70px;z-index:2147483020;background:linear-gradient(#fff,#aecaf0);border:1px solid #1350ad;border-radius:4px;color:#123b70;padding:8px 10px;font:bold 12px Tahoma}
-    #gpt-click-shield{position:absolute;inset:0;z-index:45;touch-action:none;cursor:crosshair}
+    #gpt-click-shield{position:absolute;inset:0;z-index:45;touch-action:none;pointer-events:none;cursor:crosshair}
     #gpt-click-outline{position:absolute;border:2px solid #ffd23b;box-shadow:0 0 0 1px #244775;pointer-events:none;display:none}
     #gpt-click-menu{position:fixed;left:8px;right:8px;bottom:calc(14px + env(safe-area-inset-bottom,0px));margin:auto;max-width:460px;z-index:2147483021;background:#ece9d8;border:2px solid #1156c5;border-radius:6px;box-shadow:0 10px 32px #18345477;display:none;flex-direction:column;font:12px Tahoma;color:#213856;overflow:hidden}
     #gpt-click-head{background:linear-gradient(#5aaafd,#064dc7);color:white;padding:7px 10px;font:bold 12px Tahoma}
@@ -258,8 +278,34 @@ function gptClickEditorRuntime(){
     toggleButton=document.createElement('button');toggleButton.id='gpt-click-editor';toggleButton.textContent='✎ Edit Map';document.body.appendChild(toggleButton);
     shield=document.createElement('div');shield.id='gpt-click-shield';shield.style.display='none';floor.appendChild(shield);
     outline=document.createElement('div');outline.id='gpt-click-outline';shield.appendChild(outline);
-    shield.addEventListener('pointerdown',start);shield.addEventListener('pointermove',moving);shield.addEventListener('pointerup',finish);
-    shield.addEventListener('pointercancel',function(){drag=null;});
+    // Capture input at document level. Canvas, avatar, road SVG, XP HUD and
+    // mobile browser stacking contexts can otherwise intercept pointer taps.
+    function inWorld(e){
+      if(!on)return false;
+      if(toggleButton.contains(e.target)||menu.contains(e.target))return false;
+      let r=floor.getBoundingClientRect();
+      return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
+    }
+    function captureDown(e){
+      if(!inWorld(e))return;
+      e.preventDefault();e.stopImmediatePropagation();start(e);
+    }
+    function captureMove(e){
+      if(!on||!drag||e.pointerId!==drag.id)return;
+      e.preventDefault();e.stopImmediatePropagation();moving(e);
+    }
+    function captureUp(e){
+      if(!on||!drag||e.pointerId!==drag.id)return;
+      e.preventDefault();e.stopImmediatePropagation();finish(e);
+    }
+    document.addEventListener('pointerdown',captureDown,true);
+    document.addEventListener('pointermove',captureMove,true);
+    document.addEventListener('pointerup',captureUp,true);
+    document.addEventListener('pointercancel',function(e){if(drag&&drag.id===e.pointerId)drag=null;},true);
+    document.addEventListener('click',function(e){
+      if(!inWorld(e))return;
+      e.preventDefault();e.stopImmediatePropagation();
+    },true);
     menu=document.createElement('div');menu.id='gpt-click-menu';
     menu.innerHTML='<div id="gpt-click-head">Object Editor</div><div id="gpt-click-actions"><button>Move</button><button>Rotate ↻</button><button>Delete</button></div><div id="gpt-click-label"></div><div id="gpt-click-controls"><button id="gpt-click-undo">Undo</button><button id="gpt-click-reset">Reset</button></div>';
     document.body.appendChild(menu);
@@ -294,7 +340,7 @@ function gptClickEditorPatch(html){
   one("var parkLevel=(S2X.far&&S2X.lv&&S2X.lv.g&&S2X.lv.g.getAttribute('display')!=='none'&&me.r>=36.35&&me.r<=51)?S2X.lv.g:null;","var parkLevel=null;");
   one("window.__gptDepthDraw=v16DrawOcclusion;",
       "window.__gptDepthDraw=v16DrawOcclusion;\n"+gptClickEditorRuntime.toString()+"\ngptClickEditorRuntime();");
-  one("GPT VERSION · v16a.21","GPT VERSION · v16a.25");
+  one("GPT VERSION · v16a.21","GPT VERSION · v16a.26");
   return html;
 }
 self.gptClickEditorPatch=gptClickEditorPatch;
