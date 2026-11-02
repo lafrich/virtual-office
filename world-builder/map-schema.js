@@ -45,11 +45,20 @@ function normalize(obj,catalog,style){
 function enrich(map,catalog,style){
  const doc=clone(map);
  doc.format='virtual-life-world-builder-v1';
- doc.version=5;
- doc.schema='virtual-life-ai-map-v2';
+ doc.version=6;
+ doc.schema='virtual-life-ai-map-v3';
  doc.map={...doc.map,projection:{type:'iso-2:1',tilePixels:[64,32],characterFramePixels:[64,112],characterPivotPixels:[32,100],
   groundCoordinates:'c/r',heightAxis:'y',directions:['sw','se','ne','nw']},
-  logicStatus:'authoring-only',exportsInclude:['buildings','props','vegetation','actors','markers','interactions','entrances','footprints']};
+  logicStatus:'authoring-only',
+  exportsInclude:['terrain','roadTopology','sidewalk','water','buildings','props','vegetation','actors','markers','interactions','entrances','footprints']};
+ if(g.VLMapTerrain){
+  const t=g.VLMapTerrain.normalize(doc.map.terrain||g.VLMapTerrain.seeded(doc.map.worldBounds,doc.map.road),doc.map.worldBounds);
+  t.cells=g.VLMapTerrain.exported(t).map(cell=>({
+   ...cell,walkable:!['water','road'].includes(cell.type),driveable:cell.type==='road',
+   buildable:['grass','soil','plaza'].includes(cell.type)
+  }));
+  doc.map.terrain=t;
+ }
  doc.objects=doc.objects.map(o=>{
   normalize(o,catalog,style);
   const spec=o.type==='sprite'?catalog.get(o.asset):null;
@@ -67,6 +76,7 @@ function enrich(map,catalog,style){
 function validate(map,catalog,style){
  const errors=[];
  if(!Array.isArray(map?.objects)){errors.push('Missing objects array');return errors;}
+ if(map.map?.terrain&&(!Array.isArray(map.map.terrain.cells)||map.map.terrain.cells.length>12000))errors.push('Invalid terrain tiles');
  const seen=new Set();
  for(const o of map.objects){
   if(!o.id||seen.has(o.id))errors.push('Duplicate/missing ID '+o.id);
