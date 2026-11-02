@@ -2,7 +2,7 @@
 <html lang="id"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0752cb"><meta name="robots" content="noindex,nofollow">
-<title>Virtual Life · Independent World Builder</title>
+<title>Virtual Life · GPT World Builder</title>
 <style>
 :root{--blue:#0849c6;--text:#233956;--edge:#7e9abc;--cream:#ece9d8}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font:12px Tahoma,Verdana,sans-serif;color:var(--text);background:#243345}
@@ -48,11 +48,11 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(max-width:600px){#titlebar{font-size:12px}#detail{grid-template-columns:repeat(3,minmax(0,1fr))}#bar{min-height:44px}#inspector{padding:7px;max-height:39dvh}#tools button{padding:9px 7px}#hint{font-size:10px;max-width:67vw}#footer{padding:5px}}
 </style></head><body>
 <div id="app">
-<div id="titlebar"><span class="mark">▦</span> Virtual Life · 3D World Builder <span class="mode">ISOMETRIC · EDIT ONLY</span></div>
+<div id="titlebar"><span class="mark">▦</span> Virtual Life · GPT World Builder <span class="mode">ISOMETRIC · EDIT ONLY</span></div>
 <div id="bar">
 <button id="selectMode" class="active">↖ Select</button><button id="moveMode">✥ Move</button><button id="walkMode">▶ Movement Preview</button>
 <select id="addType" aria-label="Tambah objek">
-<option value="">＋ Add object…</option><optgroup label="Character puppets"><option value="avatar">Character · 4-way rig</option><option value="npc">NPC · same rig</option></optgroup><optgroup label="3D geometry">
+<option value="">＋ Add object…</option><optgroup label="GPT Characters"><option value="avatar">Original Character</option><option value="npc">Original NPC</option></optgroup><optgroup label="3D geometry">
 <option value="building">Building</option><option value="shop">Shop</option><option value="bench">Park Bench</option><option value="lamp">Street Lamp</option><option value="tree">Tree</option><option value="box">Box / Prop</option>
 </optgroup></select>
 <span class="spacer"></span>
@@ -78,12 +78,12 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <label>Pose <select id="pose"><option value="">Idle</option><option value="sit">Sit</option><option value="sleep">Sleep</option><option value="bathe">Bathe</option><option value="toilet">Toilet</option><option value="work">Work</option></select></label>
 <span id="actorLock">Rotation locked · proportions preserved</span></div>
 <div id="detail"><label>X / C<input id="x" type="number" step="0.1"></label><label>Z / R<input id="z" type="number" step="0.1"></label><label>Y / Height<input id="y" type="number" step="0.1"></label><label>Rotation °<input id="rotation" type="number" step="15"></label><label>Scale<input id="scale" type="number" step="0.1" min="0.1" max="8"></label><label>Object ID<input id="objectId" type="text" readonly></label></div>
-<div class="help" id="detailHint">Karakter masih placeholder; belum memakai aset resmi Virtual Life Online.</div>
+<div class="help" id="detailHint">Karakter dan props memakai asset GPT. Model gedung masih proxy 3D terpisah, bukan background baked.</div>
 </section>
 <footer id="footer"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="snap">Snap: ON</button><button id="export">Export JSON</button><button id="import">Import</button><button id="reset">Reset Map</button><input type="file" id="file" accept=".json,application/json"><span class="saved" id="saveStatus">● Draft</span></footer>
 </div>
 
-<script src="./asset-catalog.js?v=clean1"></script>
+<script src="./asset-catalog.js?v=gpt1"></script><script src="./gpt-character-rig.js?v=gpt1"></script>
 
-<script type="module" src="./builder.js?v=clean1"></script>
+<script type="module" src="./builder.js?v=gpt1"></script>
 </body></html>
