@@ -127,8 +127,12 @@ function gptWorldV16(){
     // The generated level overlays also contain FLAT pavement (not only roofs).
     // On the road, put the baked ground overlay behind the avatar, but keep
     // individual cars, NPCs and solid foreground props correctly depth-sorted.
+    // The baked gate/frontage atlas includes a redundant horizontal floor plane.
+    // Move THAT raster behind the avatar only while their feet are on the
+    // passage/sidewalk; keep independent poles, NPCs and vehicles depth-sorted.
+    var atGateFloor=me.c>=20.4&&me.c<=25.3&&me.r>=35.65&&me.r<=40.15;
     var roadLevel=far&&S2X.lv&&S2X.lv.g&&(
-      (me.r>=36.35&&me.r<=38.05) ||
+      atGateFloor ||
       (me.r>=51.25&&me.r<=54.85));
     if(roadLevel)back.push(S2X.lv.g);
     XC.skip=back.length?back:null;
@@ -181,6 +185,16 @@ function gptApplyA(html){
   // Drop the suspect skip list for that frame and recover on the next frame.
   rep("console.warn('xcFrame',e); XC.b=null; document.body.classList.remove('xcv');",
       "if(!XC._gptWarned){console.warn('xcFrame recovery',e);XC._gptWarned=true;} XC.skip=null;");
+  // Scale the ORIGINAL vector trees before pxBake / extCompose flattens them.
+  // P(c,r) is unchanged, so the trunk base stays pinned to its ground tile.
+  // Shrubs, potted plants and any Street2 building art are not rescaled.
+  rep("(kind==='tall'?tTall:kind==='wide'?tWide:tRound)(g,p,(s||1)*1.8);",
+      "(kind==='tall'?tTall:kind==='wide'?tWide:tRound)(g,p,(s||1)*1.8*(kind==='tall'?1.28:kind==='wide'?1.20:1.26));");
+  // Limit the expensive CANVAS raster compositor to 30fps on touch devices.
+  // Physics, player input, collisions and the main game update loop still run
+  // normally. On desktop we retain the original frequency.
+  rep("function xcFrame(dt){ if(!XC.b) return; if(OUT_ON) XC.t=0.6;",
+      "function xcFrame(dt){ if(!XC.b) return; if(OUT_ON&&navigator.maxTouchPoints>0){var tn=performance.now();if(XC._gptLastPaint&&tn-XC._gptLastPaint<32)return;XC._gptLastPaint=tn;} if(OUT_ON) XC.t=0.6;");
   // No global player alpha mask: use the original two-canvas compositor and per-node depth.
   // Prior patch enlarged only the aisle; the ORIGINAL far-region checker still
   // rejected positions beyond r=50. Add the baked rear-road rectangle to the
