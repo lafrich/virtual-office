@@ -1,102 +1,139 @@
 <!doctype html>
 <html lang="id"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0752cb"><meta name="robots" content="noindex,nofollow">
-<title>Virtual Life · 3D World Builder — Asset Pipeline</title>
-<style>
-:root{--blue:#0849c6;--text:#233956;--edge:#7e9abc;--cream:#ece9d8}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font:12px Tahoma,Verdana,sans-serif;color:var(--text);background:#243345}
-button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
-#app{display:grid;grid-template-rows:38px auto minmax(0,1fr) auto;height:100dvh;overflow:hidden}
-#titlebar{display:flex;align-items:center;gap:10px;background:linear-gradient(#60b9ff,#1669e9 38%,#0750cd 84%,#0644b4);color:white;padding:0 13px;font:bold 14px Tahoma;text-shadow:0 1px #003778;white-space:nowrap}
-#titlebar .mark{font-size:18px}#titlebar .mode{margin-left:auto;background:#153f8b;border:1px solid #83baf6;border-radius:3px;padding:4px 6px;font-size:10px}
-#bar{background:#ece9d8;border-bottom:1px solid #9badbf;padding:6px;display:flex;align-items:center;gap:6px;min-height:47px;overflow-x:auto;scrollbar-width:none}
-#bar button,#bar select,.tool,#inspector button,#footer button{border:1px solid #90a5c0;border-radius:3px;background:linear-gradient(white,#d9e6f6);color:#183a67;padding:7px 10px;white-space:nowrap;font-weight:bold}
-#bar button.active{background:linear-gradient(#cde2ff,#90b9ed);border-color:#245db3}#bar .spacer{flex:1}
-#canvas-wrap{position:relative;min-height:0;overflow:hidden;touch-action:none;background:#b5d4d9}
-#world{width:100%;height:100%;display:block;touch-action:none;outline:none;cursor:crosshair}
-#hint{position:absolute;top:8px;left:8px;max-width:min(330px,78vw);background:#f7f5eae8;border:1px solid #7198c6;border-radius:3px;padding:7px 9px;pointer-events:none;line-height:1.45}
-#status{position:absolute;right:8px;top:8px;background:#193b62dc;color:#e8f2fa;border-radius:4px;padding:5px 7px;font-size:10px;pointer-events:none}
-#empty{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;padding:24px;background:#243345;color:white;font:14px Tahoma;line-height:1.7}
-#inspector{background:#ece9d8;border-top:2px solid #0b51b8;padding:9px;box-shadow:0 -2px 10px #1c365844;max-height:43dvh;overflow-y:auto}
-#inspector .selection{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-#inspector .selection strong{font-size:13px;max-width:calc(100% - 30px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#inspector .selection .small{margin-left:auto;font-size:10px;color:#67798f}
-#tools{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-#tools button{flex:1;min-width:58px}
-#tools button.danger{color:#9b312d}
-#detail{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
-#detail label{display:flex;flex-direction:column;gap:3px;min-width:0;color:#5d6572;font-size:10px}
-#detail input{width:100%;min-width:0;background:white;border:1px solid #94abc2;padding:6px 4px;border-radius:2px;color:#233956}
-#inspector .help{font-size:10px;color:#65718a;margin-top:7px}
-#footer{display:flex;align-items:center;gap:6px;background:#e8edf6;padding:6px 8px;border-top:1px solid #9badbf;overflow-x:auto;white-space:nowrap}
-#footer button{padding:7px 9px}#footer .saved{margin-left:auto;font-size:10px;color:#43764f}
-#file{display:none}
-#walkPad{position:absolute;bottom:14px;left:12px;display:none;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,42px);gap:3px;z-index:8;touch-action:none}
-#walkPad.active{display:grid}
-#walkPad button{touch-action:none;border:1px solid #446e9b;border-radius:9px;background:#dde8f5d9;color:#173f6e;font:bold 19px Tahoma}
-#walkPad [data-walk="up"]{grid-column:2;grid-row:1}
-#walkPad [data-walk="left"]{grid-column:1;grid-row:2}
-#walkPad [data-walk="down"]{grid-column:2;grid-row:3}
-#walkPad [data-walk="right"]{grid-column:3;grid-row:2}
-#actorControls{display:none;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap}
-#actorControls.visible{display:flex}
-#actorControls label{display:flex;align-items:center;gap:4px;font-size:11px}
-#actorControls select{background:#fff;border:1px solid #9eb4c9;padding:5px 3px;max-width:145px}
-#actorLock{font-size:10px;color:#5a728d}
-#toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:8px 12px;background:#153b62ec;color:white;border:1px solid #6ea7db;border-radius:4px;pointer-events:none;display:none;max-width:80vw}
-@media(max-width:600px){#titlebar{font-size:12px}#detail{grid-template-columns:repeat(3,minmax(0,1fr))}#bar{min-height:44px}#inspector{padding:7px;max-height:39dvh}#tools button{padding:9px 7px}#hint{font-size:10px;max-width:67vw}#footer{padding:5px}}
-</style></head><body>
-<div id="app">
-<div id="titlebar"><span class="mark">▦</span> Virtual Life · GPT World Builder <span class="mode">ISOMETRIC · EDIT ONLY</span></div>
-<div id="bar">
-<button id="selectMode" class="active">↖ Select</button><button id="moveMode">✥ Move</button><button id="walkMode">▶ Movement Preview</button>
-<select id="addType" aria-label="Tambah objek">
-<option value="">＋ Add object…</option><optgroup label="GPT Characters"><option value="avatar">Original Character</option><option value="npc">Original NPC</option></optgroup><optgroup label="3D geometry">
-<option value="building">Building (official prefab)</option><option value="shop">Shop (official prefab)</option><option value="bench">Park Bench · plane</option><option value="lamp">Street Lamp · plane</option><option value="tree">Tree · plane</option><option value="trash">Trash Bin · native sprite</option><option value="box">Stacked Boxes · native sprite</option>
-</optgroup><optgroup id="assetGroup" label="Original GPT assets"></optgroup></select>
-<span class="spacer"></span>
-<button id="zoomOut" aria-label="Zoom out">−</button><button id="zoomIn" aria-label="Zoom in">＋</button>
-<button id="home" aria-label="Reset camera">◎</button>
+<meta name="theme-color" content="#073a9d"><meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="only light">
+<title>WORLD_MAP.PNT — Virtual Life Builder</title>
+<link rel="stylesheet" href="./xp.css?v=builder-v2">
+</head>
+<body><div id="desktop"><div id="app">
+<header id="titlebar">
+ <span class="window-icon" aria-hidden="true">✳</span>
+ <div class="titletext"><strong>WORLD_MAP</strong><span>.PNT — Virtual Life Builder</span></div>
+ <div class="win-controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div>
+</header>
+<nav id="menubar" aria-label="XP Paint menus">
+ <button id="export" type="button"><u>F</u>ile / Export</button>
+ <button id="import" type="button"><u>E</u>dit / Import</button>
+ <button id="reset" type="button"><u>V</u>iew / Reset</button>
+ <button id="openGame" type="button"><u>H</u>elp / Game</button>
+ <span class="version">VIRTUAL LIFE / MAP DATABASE V2</span>
+</nav>
+<div id="workspace">
+ <aside id="toolsPanel" aria-label="Tools">
+  <button class="chrome-tool active" id="selectMode" title="Select / tap">↖</button>
+  <button class="chrome-tool" id="moveMode" title="Move selected object">✥</button>
+  <button class="chrome-tool" id="walkMode" title="Character walk preview">▶</button>
+  <button class="chrome-tool" id="home" title="Fit map view">⌂</button>
+  <button class="chrome-tool" id="undo" title="Undo">↶</button>
+  <button class="chrome-tool" id="redo" title="Redo">↷</button>
+  <button class="chrome-tool" id="snap" title="Toggle half-tile snapping">▦</button>
+  <div class="stamp">✳<div>V/L<br>MAP</div></div>
+ </aside>
+ <aside id="assetsPanel" aria-label="Asset browser">
+  <div class="panel-heading"><strong>FILES / ASSETS</strong><span id="assetCount">0</span></div>
+  <div id="assetSearch">
+   <input type="search" id="searchAsset" placeholder="⌕ Find asset..." aria-label="Find asset" autocomplete="off">
+   <select id="assetCategory" aria-label="Asset category">
+    <option value="all">ALL ASSETS</option>
+    <option value="building">BUILDINGS</option><option value="street">STREET</option>
+    <option value="vegetation">VEGETATION</option><option value="interior">INTERIOR</option>
+    <option value="character">CHARACTERS</option><option value="logic">LOGIC MARKERS</option>
+   </select>
+  </div>
+  <div id="assetList" role="list" aria-label="Available original and pipeline assets"></div>
+  <select id="addType" aria-label="Asset loading fallback" tabindex="-1">
+   <option value="">Add object</option><optgroup id="assetGroup" label="Assets"></optgroup>
+  </select>
+ </aside>
+ <section id="canvasPanel" aria-label="World canvas">
+  <div class="canvas-head"><span class="canvas-title">WORLD / STREET2</span><span class="right">64×32 ISO · PINCH TO ZOOM</span></div>
+  <main id="canvas-wrap">
+   <canvas id="world" aria-label="Interactive Virtual Life isometric map canvas"></canvas>
+   <div id="hint">Tap object = select · Move + drag = place · 2 fingers = zoom/pan</div>
+   <div id="status">LOADING MAP...</div><div id="toast"></div><div id="empty" role="alert"></div>
+   <div id="walkPad" aria-label="Four directional movement">
+    <button data-walk="up" aria-label="Up">↑</button><button data-walk="left" aria-label="Left">←</button><button data-walk="down" aria-label="Down">↓</button><button data-walk="right" aria-label="Right">→</button>
+   </div>
+   <div id="assetReference" hidden>
+    <strong>Original Virtual Life Street2 map reference</strong>
+    <button id="closeRef">Close</button>
+    <p>Official baked map reference (not separated 3D meshes). Log in to Virtual Life to view protected images.</p>
+    <img src="../assets/street2/base.png" alt="Original Virtual Life scene">
+   </div>
+  </main>
+  <div class="canvas-toolbar">
+   <button id="mobileAssets" type="button">▣ Assets</button>
+   <button id="mobileInspector" type="button">☷ Inspector</button>
+   <button id="viewRef" class="chrome-button" type="button">Map Reference</button>
+   <button id="refreshAssets" class="chrome-button" type="button">Reload Assets</button>
+   <span class="source">Original GPT → Pipeline → explicit preview</span>
+  </div>
+ </section>
+ <aside id="inspector" aria-label="Object inspector">
+  <div class="inspector-head">PROPERTIES / LOGIC <span style="margin-left:auto" id="inspectorCount">00</span></div>
+  <div class="inspector-body">
+   <div class="selection"><strong id="selectedName">No selection</strong><span id="selectedType">WORLD MAP</span></div>
+   <div id="tools">
+    <button id="rotateL" title="Rotate counterclockwise">↶ 90°</button><button id="rotateR" title="Rotate clockwise">90° ↷</button>
+    <button id="duplicate" title="Duplicate">Duplicate</button>
+    <button id="scaleDown" title="Scale down">− Size</button><button id="scaleUp" title="Scale up">+ Size</button>
+    <button id="delete" class="danger" title="Delete selected">Delete</button>
+   </div>
+   <div class="tabs" role="tablist">
+    <button class="tab active" id="tabLayout" type="button">LAYOUT</button>
+    <button class="tab" id="tabLogic" type="button">LOGIC</button>
+   </div>
+   <section id="layoutPane">
+    <div class="section-label">POSITION / TRANSFORM</div>
+    <div id="detail">
+     <label>C / X <input id="x" type="number" step=".5"></label>
+     <label>R / Z <input id="z" type="number" step=".5"></label>
+     <label>H / Y <input id="y" type="number" step=".1"></label>
+     <label>Rotation ° <input id="rotation" type="number" step="90"></label>
+     <label>Scale <input id="scale" type="number" step=".05" min=".85" max="1.15"></label>
+     <label>Object ID <input id="objectId" type="text" readonly></label>
+    </div>
+    <div id="actorControls">
+     <div class="section-label">CHARACTER</div>
+     <label>Profile<select id="profile"><option value="ichsan">Ichsan</option><option value="theodore">Theodore</option><option value="noor">Noor</option><option value="grok">Grok Bot</option><option value="raka">Raka</option><option value="bima">Bima</option><option value="ellen">Ellen</option><option value="nadia">Nadia</option><option value="warteg">Bu Warteg</option><option value="barista">Barista</option><option value="kasir">Kasir</option></select></label>
+     <label>Facing<select id="facing"><option value="sw">SW</option><option value="se">SE</option><option value="nw">NW</option><option value="ne">NE</option></select></label>
+     <label>Pose<select id="pose"><option value="">Idle</option><option value="sit">Sit</option><option value="sleep">Sleep</option><option value="bathe">Bathe</option><option value="toilet">Toilet</option><option value="work">Work</option></select></label>
+     <span id="actorLock">Official frame 64×112 · pivot (32,100) · aspect locked</span>
+    </div>
+    <p class="help" id="detailHint">Choose an asset in FILES to create a map object. Existing GPT art takes priority; unpublished sprites have labeled previews.</p>
+   </section>
+   <section id="logicPane" hidden>
+    <div class="section-label">AI-READY MAP DATA</div>
+    <div class="logic-form">
+     <label>Display name <input id="logicName" type="text" maxlength="90" placeholder="Building / object name"></label>
+     <label>Layer<select id="logicLayer"><option value="structure">Structure</option><option value="prop">Prop</option><option value="vegetation">Vegetation</option><option value="interior">Interior</option><option value="character">Character</option><option value="marker">Logic marker</option></select></label>
+     <label>Category / subtype <input id="logicSubtype" type="text" maxlength="60" placeholder="warung / bench / door"></label>
+     <label>Tags (comma-separated)<input id="logicTags" type="text" placeholder="public, outdoor, cafe"></label>
+     <label>Interactions (comma-separated)<input id="logicActions" type="text" placeholder="sit, enter, buy"></label>
+     <label>Capacity <input id="logicCapacity" type="number" min="0" max="1000" step="1"></label>
+     <label>Entrance facing<select id="logicFacing"><option value="">None</option><option value="sw">SW</option><option value="se">SE</option><option value="ne">NE</option><option value="nw">NW</option></select></label>
+     <label>Marker type<select id="logicMarkerKind"><option value="">Not a marker</option><option value="spawn">Spawn point</option><option value="entrance">Entrance point</option><option value="interaction">Interaction point</option><option value="patrol">Patrol point</option><option value="trigger">Trigger zone</option></select></label>
+     <label>Blocking<select id="logicBlocking"><option value="auto">Use asset footprint</option><option value="yes">Solid</option><option value="no">Passable</option></select></label>
+     <label>Developer notes<textarea id="logicNotes" placeholder="Instructions for next AI developer; no executable code"></textarea></label>
+    </div>
+    <p class="help">Export JSON includes asset provenance, footprint, map coordinates and human-readable interaction hooks. No mechanics execute inside the editor.</p>
+   </section>
+  </div>
+ </aside>
 </div>
-<main id="canvas-wrap"><canvas id="world" aria-label="Editable 3D isometric world"></canvas>
-<div id="hint">Gunakan prefab Virtual Life · rotasi 90° dan scale 85–115% · footprint tidak boleh menutup jalan. Sprites asli GPT perlu login.</div>
-<div id="status">3D Depth · Pixel Assets</div>
-<div id="walkPad" aria-label="Four directional character movement">
-<button data-walk="up" aria-label="Move north">↑</button><button data-walk="left" aria-label="Move west">←</button>
-<button data-walk="down" aria-label="Move south">↓</button><button data-walk="right" aria-label="Move east">→</button>
-</div><div id="empty" role="alert"></div><div id="toast"></div><div id="assetReference" hidden style="position:absolute;inset:6%;z-index:50;background:#efeee4;border:2px solid #1b4ea2;overflow:auto;padding:10px;box-shadow:0 6px 25px #20314e66">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>GPT Street2 · original visual reference</b><button id="closeRef">Close</button></div>
-<p>Gambar sumber Street2 merupakan background gabungan, bukan geometry 3D.</p>
-<img src="../assets/street2/base.png" alt="Original Street2 reference" style="width:100%;height:auto;image-rendering:pixelated">
-</div>
-</main>
-<section id="inspector">
-<div class="selection"><strong id="selectedName">Belum ada objek dipilih</strong><span class="small" id="selectedType">Map Draft</span></div>
-<div id="tools">
-<button id="rotateL" title="Rotate −15°">↶ Rotate</button><button id="rotateR" title="Rotate +15°">Rotate ↷</button>
-<button id="scaleDown">− Scale</button><button id="scaleUp">＋ Scale</button>
-<button id="duplicate">Duplicate</button><button id="delete" class="danger">Delete</button>
-</div>
-<div id="actorControls"><label>Character <select id="profile">
-<option value="ichsan">Ichsan</option><option value="theodore">Theodore</option>
-<option value="noor">Noor</option><option value="grok">Grok Bot</option>
-<option value="raka">Raka</option><option value="bima">Bima</option>
-<option value="ellen">Ellen</option><option value="nadia">Nadia</option>
-<option value="warteg">Bu Warteg</option><option value="barista">Barista</option>
-<option value="kasir">Kasir</option></select></label><label>Facing <select id="facing"><option value="sw">SW</option><option value="se">SE</option><option value="nw">NW</option><option value="ne">NE</option></select></label>
-<label>Pose <select id="pose"><option value="">Idle</option><option value="sit">Sit</option><option value="sleep">Sleep</option><option value="bathe">Bathe</option><option value="toilet">Toilet</option><option value="work">Work</option></select></label>
-<span id="actorLock">Rotation locked · proportions preserved</span></div>
-<div id="detail"><label>X / C<input id="x" type="number" step="0.1"></label><label>Z / R<input id="z" type="number" step="0.1"></label><label>Y / Height<input id="y" type="number" step="0.1"></label><label>Rotation °<input id="rotation" type="number" step="90"></label><label>Scale<input id="scale" type="number" step="0.1" min="0.85" max="1.15"></label><label>Object ID<input id="objectId" type="text" readonly></label></div>
-<div class="help" id="detailHint">Style Lock ON: bangunan dari prefab resmi, pohon/props sebagai plane, rotasi 90°, skala 85–115%, validasi jalan & footprint. Draft belum sinkron multiplayer.</div>
-</section>
-<footer id="footer"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="snap">Snap: ON</button><button id="export">Export JSON</button><button id="import">Import</button><button id="reset">Reset Map</button><button id="refreshAssets">Reload Sprites</button><button id="openGame">Open Virtual Life</button><button id="viewRef">View GPT Map</button><input type="file" id="file" accept=".json,application/json"><span class="saved" id="saveStatus">● Draft</span></footer>
-</div>
-
-<script src="./asset-catalog.js?v=gpt1"></script>
+<footer id="footer">
+ <button id="exportShortcut" type="button">💾 Export Map JSON</button>
+ <span>🗺️ Draft only / Game unchanged</span>
+ <input id="file" type="file" accept=".json,application/json" hidden>
+ <span class="status" id="saveStatus">● Draft</span>
+</footer>
+</div></div>
+<script src="./asset-catalog.js?v=2"></script>
 <script src="./pipeline-catalog.js?v=p4"></script>
-<script src="./pipeline-character-rig.js?v=p4"></script>
+<script src="./vegetation-catalog.js?v=2"></script>
+<script src="./pipeline-character-rig.js?v=calibrated2"></script>
 <script src="./style-rules.js?v=style2"></script>
-
-<script type="module" src="./builder.js?v=style2"></script>
+<script src="./map-schema.js?v=2"></script>
+<script type="module" src="./builder.js?v=builder-v2"></script>
 </body></html>
