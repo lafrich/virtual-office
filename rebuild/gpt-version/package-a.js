@@ -130,13 +130,10 @@ function gptWorldV16(){
     // The baked gate/frontage atlas includes a redundant horizontal floor plane.
     // Move THAT raster behind the avatar only while their feet are on the
     // passage/sidewalk; keep independent poles, NPCs and vehicles depth-sorted.
-    // Pre-sort the *flat* gateway apron BEFORE the feet enter it, rather
-    // than changing order on the crossing line. Preserve native vertical
-    // pillars, poles, cars, and pedestrians as separate foreground nodes.
-    var atGateFloor=me.c>=18.6&&me.c<=27.1&&me.r>=31.6&&me.r<=40.8;
-    var roadLevel=S2X.lv&&S2X.lv.g&&(
-      atGateFloor ||
-      (far&&me.r>=51.25&&me.r<=54.85));
+    // The front level image is cleaned ON LOAD: gate pavement removed from
+    // foreground, while the red/white pillars, poles and shop roof remain.
+    // Do not move the entire level group based on player's r coordinate.
+    var roadLevel=far&&S2X.lv&&S2X.lv.g&&me.r>=51.25&&me.r<=54.85;
     if(roadLevel)back.push(S2X.lv.g);
     XC.skip=back.length?back:null;
   }
@@ -197,8 +194,10 @@ function gptApplyA(html){
       "function vegHref(n) { return VEG.data[n] || (VEG.dir + n + '.png'); }\nfunction gptOfficeShadowData(n) {\n  // These PNGs use *exactly* alpha 56/90 black pixels for the projected\n  // shadow. Remove only those semi-transparent shadow pixels; leave every\n  // opaque trunk, canopy, root, and grass pixel untouched.\n  const im=VEG.img[n]; if(!im) return VEG.data[n];\n  try {\n    const w=im.naturalWidth,h=im.naturalHeight;\n    const cv=document.createElement('canvas');cv.width=w;cv.height=h;\n    const ctx=cv.getContext('2d',{willReadFrequently:true});\n    ctx.drawImage(im,0,0);\n    const pixels=ctx.getImageData(0,0,w,h);\n    let removed=0;\n    for(let i=0;i<pixels.data.length;i+=4){\n      if(pixels.data[i]===0 && pixels.data[i+1]===0 &&\n         pixels.data[i+2]===0 && pixels.data[i+3]>0 &&\n         pixels.data[i+3]<=110){\n        pixels.data[i+3]=0;\n        removed++;\n      }\n    }\n    if(!removed)return VEG.data[n];\n    ctx.putImageData(pixels,0,0);\n    return cv.toDataURL('image/png');\n  } catch(err){\n    console.warn('office shadow variant',err);\n    return VEG.data[n];\n  }\n}");
   rep("VEG.imgs.push([im, nm]); g._k = 'veg:' + nm;",
       "VEG.imgs.push([im, officeLawn ? 'gpt-office-shadow:'+nm : nm]); g._k = 'veg:' + nm;");
+  // Replace the original tree PNG data BEFORE vegApply() / extCompose() bake.
+  // The older variant-only approach could miss the already-composed outdoor raster.
   rep("VEG.data[n] = u; VEG.img[n] = im; res();",
-      "VEG.data[n] = u; VEG.img[n] = im; if([].concat(...Object.values(VEG.layout.trees.front)).includes(n)) VEG.data['gpt-office-shadow:'+n]=gptOfficeShadowData(n); res();");
+      "VEG.data[n] = u; VEG.img[n] = im; if(/^pohon_/.test(n)) VEG.data[n]=gptOfficeShadowData(n); if([].concat(...Object.values(VEG.layout.trees.front)).includes(n)) VEG.data['gpt-office-shadow:'+n]=VEG.data[n]; res();");
   // ACTIVE tree renderer: VEG.on routes extTree() to vegTree() BEFORE any
   // legacy SVG tWide/tRound is executed. Previous 09–11 changes only touched
   // that legacy path and were invisible for the PNG vegetation in screenshots.
@@ -221,6 +220,13 @@ function gptApplyA(html){
   // normally. On desktop we retain the original frequency.
   rep("function xcFrame(dt){ if(!XC.b) return; if(OUT_ON) XC.t=0.6;",
       "function xcFrame(dt){ if(!XC.b) return; if(OUT_ON&&navigator.maxTouchPoints>0){var tn=performance.now();if(XC._gptLastPaint&&tn-XC._gptLastPaint<32)return;XC._gptLastPaint=tn;} if(OUT_ON) XC.t=0.6;");
+  // The level overlays are composite PNGs: some include the GATE PAVEMENT.
+  // Remove just its grey/tan road-plane pixels from the front layer at load
+  // time. The base street already contains the floor, while white/red pillars
+  // and other upright structures stay in the native foreground painter.
+  // One pre-processing pass per image; never per animation frame.
+  rep("function xcImg(u){ let i=XC.imgs.get(u); if(!i){ i=new Image(); i.src=u; XC.imgs.set(u,i); } return i.complete&&i.naturalWidth?i:null; }",
+      "function xcImg(u){ let i=XC.imgs.get(u); if(!i){ i=new Image(); i.src=u; XC.imgs.set(u,i); } if(!i.complete||!i.naturalWidth)return null; if(!/\\/lv_\\d+\\.png(?:[?#]|$)/.test(u))return i; if(!i._gptFloorDone){i._gptFloorDone=true;try{var w=i.naturalWidth,h=i.naturalHeight,cv=document.createElement('canvas');cv.width=w;cv.height=h;var ctx=cv.getContext('2d',{willReadFrequently:true});ctx.drawImage(i,0,0);var y0=Math.max(238,Math.floor(h*0.58)),ww=Math.min(75,w),a=ctx.getImageData(0,y0,ww,h-y0),d=a.data;for(var y=0;y<h-y0;y++)for(var x=0;x<ww;x++){var j=(y*ww+x)*4,r=d[j],g=d[j+1],b=d[j+2],alpha=d[j+3];var floor=(r===184&&g===178&&b===168)||(r===157&&g===154&&b===145)||(r===200&&g===188&&b===159)||(r===118&&g===107&&b===89)||(r===0&&g===0&&b===0&&alpha>0&&alpha<=90);if(floor)d[j+3]=0;}ctx.putImageData(a,0,y0);var cleaned=new Image();cleaned.src=cv.toDataURL('image/png');i._gptFloorImg=cleaned;}catch(e){console.warn('gpt level-floor',e);i._gptFloorImg=i;}}var clean=i._gptFloorImg;return clean&&clean.complete&&clean.naturalWidth?clean:null; }");
   // No global player alpha mask: use the original two-canvas compositor and per-node depth.
   // Prior patch enlarged only the aisle; the ORIGINAL far-region checker still
   // rejected positions beyond r=50. Add the baked rear-road rectangle to the
@@ -234,7 +240,7 @@ function gptApplyA(html){
   if(phoneMap)css+="body.y2k .y2-map,#vs-hud .vs-mini{display:none!important}";
   rep("</head>","<style id=\"gpt-v16a-css\">"+css+"</style></head>");
   rep("window.__vsBuild = 'Virtual Life v15a';","window.__vsBuild = 'Virtual Life v16a · GPT beta';");
-  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.14</div></body>");
+  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.15</div></body>");
   if(!phoneMap)console.warn('[gpt-a] Phone map absent; HUD minimap retained');
   return {html:s,applied:applied.length,phoneMap:phoneMap};
 }
