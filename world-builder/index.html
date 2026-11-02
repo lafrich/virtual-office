@@ -65,7 +65,11 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <div id="walkPad" aria-label="Four directional character movement">
 <button data-walk="up" aria-label="Move north">↑</button><button data-walk="left" aria-label="Move west">←</button>
 <button data-walk="down" aria-label="Move south">↓</button><button data-walk="right" aria-label="Move east">→</button>
-</div><div id="empty" role="alert"></div><div id="toast"></div>
+</div><div id="empty" role="alert"></div><div id="toast"></div><div id="assetReference" hidden style="position:absolute;inset:6%;z-index:50;background:#efeee4;border:2px solid #1b4ea2;overflow:auto;padding:10px;box-shadow:0 6px 25px #20314e66">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>GPT Street2 · original visual reference</b><button id="closeRef">Close</button></div>
+<p>Gambar sumber Street2 merupakan background gabungan, bukan geometry 3D.</p>
+<img src="../assets/street2/base.png" alt="Original Street2 reference" style="width:100%;height:auto;image-rendering:pixelated">
+</div>
 </main>
 <section id="inspector">
 <div class="selection"><strong id="selectedName">Belum ada objek dipilih</strong><span class="small" id="selectedType">Map Draft</span></div>
@@ -86,7 +90,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <div id="detail"><label>X / C<input id="x" type="number" step="0.1"></label><label>Z / R<input id="z" type="number" step="0.1"></label><label>Y / Height<input id="y" type="number" step="0.1"></label><label>Rotation °<input id="rotation" type="number" step="15"></label><label>Scale<input id="scale" type="number" step="0.1" min="0.1" max="8"></label><label>Object ID<input id="objectId" type="text" readonly></label></div>
 <div class="help" id="detailHint">Karakter dan props memakai asset GPT. Model gedung masih proxy 3D terpisah, bukan background baked.</div>
 </section>
-<footer id="footer"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="snap">Snap: ON</button><button id="export">Export JSON</button><button id="import">Import</button><button id="reset">Reset Map</button><input type="file" id="file" accept=".json,application/json"><span class="saved" id="saveStatus">● Draft</span></footer>
+<footer id="footer"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="snap">Snap: ON</button><button id="export">Export JSON</button><button id="import">Import</button><button id="reset">Reset Map</button><button id="refreshAssets">Reload Sprites</button><button id="openGame">Open Virtual Life</button><button id="viewRef">View GPT Map</button><input type="file" id="file" accept=".json,application/json"><span class="saved" id="saveStatus">● Draft</span></footer>
 </div>
 
 <script src="./asset-catalog.js?v=gpt1"></script><script src="./gpt-character-rig.js?v=gpt1"></script>
