@@ -80,13 +80,17 @@ function gptWorldV16(){
       for(var f=0;f<3;f++)V16.fxQueue.push(S2LA+'kilau_item_f'+f+'.png');
     }
     if(V16.fxQueue&&V16.fxQueue.length){var budget=3;while(budget--&&V16.fxQueue.length)xcImg(V16.fxQueue.shift());}
-    // Existing baked alley extends to r=50; expose its full walkable corridor.
-    if(S2X.cfg&&S2X.cfg.region&&S2X.cfg.region.lane){
-      S2X.cfg.region.lane=[21.85,24.15,37.6,50];
+    // The artwork extends BEYOND the old r=50 collision edge: facade F=51,
+    // rear local road r=51..55. Keep this path continuous with the existing alley.
+    // Only expose ground actually present in Grok's baked Street2 scene.
+    if(S2X.cfg&&S2X.cfg.region){
+      var region=S2X.cfg.region;
+      region.lane=[21.85,24.15,37.6,52.05];
+      region.terminal=[18.8,27.2,51.4,54.7];
     }
-    if(!V16.gangEntered&&me.r>=47&&me.c>=21.85&&me.c<=24.15){
+    if(!V16.gangEntered&&me.r>51&&me.r<54.8&&me.c>=21.85&&me.c<=24.15){
       V16.gangEntered=true;
-      try{say('Ujung gang bisa dijelajahi');}catch(e){}
+      try{say('Gang tembus ke jalan belakang!');}catch(e){}
     }
     if(!V16.made&&EXT.cars&&EXT.cars.length)V16.made=v16Make();
     if(!OUT_ON){if(S2X.far)s2xFar(false);V16.onRoad=false;return;}
@@ -103,7 +107,8 @@ function gptWorldV16(){
     st:function(){return {made:V16.made,hits:V16.hits,start:V16.start,onRoad:V16.onRoad,farLoaded:V16.farLoaded,cars:V16.cars.length,backLaneA:V16.backLaneA,fxPending:V16.fxQueue?V16.fxQueue.length:null,gangEntered:V16.gangEntered};},
     cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,xy:o.xy,inNativeLayer:o.w.parentNode===EXT.gC,cssAnimation:o.w.style.animation};});},
     veh:function(t){return V16.T.veh.map(function(_,i){return trfVeh(i,t==null?v16Now():t);});},
-    spawn:function(side,c){return v16Spawn(side,c);},setOff:function(ms){V16.off=ms;},roadOK:function(c,r){return extOK(c,r);}};
+    spawn:function(side,c){return v16Spawn(side,c);},setOff:function(ms){V16.off=ms;},roadOK:function(c,r){return extOK(c,r);},
+    passage:function(){return {lane:S2X.cfg.region.lane,terminal:S2X.cfg.region.terminal,player:{c:me.c,r:me.r},entered:V16.gangEntered};}};
 }
 function gptApplyA(html){
   if(html.indexOf('vc-street2-xing')<0||html.indexOf('Virtual Life v15a')<0)throw Error('GROK_V16_INCOMPATIBLE_BASE');
@@ -138,6 +143,11 @@ function gptApplyA(html){
       "const band=0.16; const G_=n.parentNode===EXT.gF ? (pd>b+band?S2X.gFB:EXT.gF) : (pd<b-band?EXT.gF:S2X.gFB);");
   rep("const G_ = s2xGroupFor(c, r, c + r > me.c + me.r + 0.02);",
       "const depth=c+r-me.c-me.r; n._gptFront=n._gptFront===undefined ? depth>0 : (n._gptFront ? depth>-.15 : depth>.15); const G_ = s2xGroupFor(c,r,n._gptFront);");
+  // Prior patch enlarged only the aisle; the ORIGINAL far-region checker still
+  // rejected positions beyond r=50. Add the baked rear-road rectangle to the
+  // same checked region. No fake geometry, no unbounded/no-clip movement.
+  rep("return inR(R.side) || inR(R.lane); }",
+      "return inR(R.side) || inR(R.lane) || (R.terminal ? inR(R.terminal) : false); }");
   rep("function dmTick(dt){ if(!DM.built){","function dmTick(dt){ if(!DM.built && !DM.run && !/[?&]demo=(noon|eve)/.test(location.search)) return; if(!DM.built){");
   // Keep the HUD map ONLY if the in-phone map is absent.
   var phoneMap=s.indexOf("if (id === 'map')")>=0&&s.indexOf('vs-bigmap')>=0;
