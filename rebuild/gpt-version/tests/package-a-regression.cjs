@@ -88,7 +88,7 @@ for(let i=0;i<rows.length;i++){
   const w=rows[i],v=samplesLive[i],dir=[0,1,2,3,7,8,9,10].includes(i)?1:-1;
   assert.equal(w.style.animation,'none');
   assert.equal(w.parentNode,lane,'native SVG layer must be preserved');
-  const xy=/^translate\\(([-\\d.]+) ([-\\d.]+)\\)$/.exec(w.attrs.transform);
+  const xy=/^translate\(([-\d.]+) ([-\d.]+)\)$/.exec(w.attrs.transform);
   assert.ok(xy,'missing deterministic SVG transform');
   assert.ok(Math.abs(+xy[1]-((dir>0?-448:832)+(dir>0?1280:-1280)*v.pr))<=.26,'render/collision x mismatch');
 }
