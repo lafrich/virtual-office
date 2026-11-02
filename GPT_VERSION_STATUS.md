@@ -88,3 +88,15 @@ User reported the far alley end was still impassable. Root cause verified: the o
 - Added beta introspection `__v16.passage()` and corrected the on-enter message to trigger only after reaching the rear road.
 - 25 patch anchors applied successfully against actual decrypted original game source; output JavaScript blocks compiled successfully. New `gang-exit-regression.cjs` test passed 262 continuous walking samples and 5 out-of-art boundary checks.
 - Scoped beta `package-a.js` and `sw.js` updated under `rebuild/gpt-version/` only, SW version `a5`. Production sw.js and encrypted game remain unchanged. Full Android/browser motion QA is still unverified.
+
+## 2026-11-02 — GPT Version patch 06 (published; screenshot-specific road layering)
+
+Owner's Android screenshot showed the static street/sidewalk occluder drawing above the player near the gang entry; owner also requested the entire east-west rear road be traversable to its left/right baked artwork ends.
+
+- Root cause: `street2/xing/lv_NN.png` foreground occluder atlases include some flattened pavement/road textures (confirmed by visually inspecting `lv_00.png` and `lv_16.png`). Rendering the entire level over the player hides their body even when the player is actually standing on ground.
+- Scoped beta-only source patch suppresses the **baked** front occluder group on the road/sidewalk bands (`r 36.35..38.05` and `r 51.25..54.85`). The original world ground/base image remains below the sprite; dynamic foreground props (`EXT.gF`) and depth sorting continue normally elsewhere. Production build and encrypted assets untouched.
+- Rear-road collision rectangle widened from `c 18.8..27.2` to `c -40..34`, `r 51.4..54.7`, matching the long horizontal strip already baked in Ellen's v15a Street2 source (`S.render(V4.ground, -42, V4.C_MAX, 37.7, 75)`). It overlaps the connecting alley. No infinite noclip.
+- Removed duplicate "OFFLINE BETA" banner only for v16, preserving classic fallback.
+- Original encrypted game patch: 26 anchors applied; executable main scripts syntax-check; 6 embedded JSON data script tags are not executable JS. Regression: 919 sampled walkable points and 5 out-of-bounds checks PASS.
+- Deployed only `rebuild/gpt-version/package-a.js` and `rebuild/gpt-version/sw.js` as patch `a6`. Live game sw.js, encrypted files, Cloudflare Worker unaffected.
+- **Not yet independently verified visually in browser**. The user should check the gateway player's feet, both ends of the rear street, and interactions with foreground posts/roofs.
