@@ -56,7 +56,45 @@ vm.runInContext('gptWorldV16()',pre);
 let bursts=[];
 for(let i=0;i<7;i++){const before=loaded.length;pre.window.__s2xTick(.016);bursts.push(loaded.length-before);}
 assert.equal(bursts.join(','),'3,3,3,3,3,2,0','preload should be spread over 6 frames and not repeat');
-assert.ok(src.includes("if(!a||a.playState==='idle')"),'reuse cached vehicle animation instances');
+assert.ok(src.includes("w.style.animation='none'"),'disable CSS animation once the deterministic renderer owns traffic');
+assert.ok(src.includes("w.setAttribute('transform',transform)"),'vehicle visual and hitbox must derive from one clock');
+assert.ok(src.includes("const on = !S2L.st || !S2L.bag || s2lReady(o.s)"),'offline Loak prop sparkle must be visible');
+assert.ok(src.includes("const band=0.16"),'far-side props must use painter hysteresis');
+assert.ok(src.includes("n._gptFront"),'NPC/prop fronts must use stable depth ordering');
+assert.ok(src.includes("var oldk=S2X.lv.k,edge="),'baked occlusion layer must use hysteresis');
+assert.ok(src.includes("S2X.cfg.region.lane=[21.85,24.15,37.6,50]"),'deep original alley corridor must be walkable');
+assert.ok(src.includes("V16.fxQueue.shift()"),'item sparkle frames must be preloaded');
+const vehicleWindow={};
+const lane={};
+const rows=[];
+let animationCalls=0;
+for(let i=0;i<15;i++)rows.push({_vk:'old',style:{},attrs:{},parentNode:lane,
+   getAnimations(){animationCalls++;return []},setAttribute(name,val){this.attrs[name]=val}});
+const trafficContext={self:{},window:vehicleWindow,console,
+  S2X:{made:true,cfg:{levels:[],region:{lane:[22.15,23.85,37.6,50]}},cr:[],sig:{off:0},p:{}},
+  EXT:{built:true,gC:lane,cars:rows,blk:[],yard:{r1:32}},
+  WT:{on:true},CV:{on:false},FMI:{on:false},SPEC:false,
+  me:{c:22,r:31,forceAnim:null},XC:{},XG:{curbF:36.3},
+  S2XA:'assets/street2/xing/',S2LA:'assets/street2/loak/',S2L:{props:[]},
+  OUT_ON:true,xcImg:()=>{},s2xFar:()=>{},s2xFarDepth:()=>{},
+  vSprSet:(w,k)=>{w._vk=k},vRidSet:(w,k)=>{w._vk=k},
+  performance:{now:()=>1000},Date:{now:()=>1767225605000},extOK:()=>true};
+vm.createContext(trafficContext);
+vm.runInContext(src,trafficContext);
+vm.runInContext('gptWorldV16()',trafficContext);
+trafficContext.window.__s2xTick(.016);
+const samplesLive=trafficContext.window.__v16.veh(1767225605000);
+for(let i=0;i<rows.length;i++){
+  const w=rows[i],v=samplesLive[i],dir=[0,1,2,3,7,8,9,10].includes(i)?1:-1;
+  assert.equal(w.style.animation,'none');
+  assert.equal(w.parentNode,lane,'native SVG layer must be preserved');
+  const xy=/^translate\\(([-\\d.]+) ([-\\d.]+)\\)$/.exec(w.attrs.transform);
+  assert.ok(xy,'missing deterministic SVG transform');
+  assert.ok(Math.abs(+xy[1]-((dir>0?-448:832)+(dir>0?1280:-1280)*v.pr))<=.26,'render/collision x mismatch');
+}
+assert.equal(animationCalls,0,'CSSAnimation query must not cause periodic visual jumps');
+assert.equal(trafficContext.S2X.cfg.region.lane.join(','),'21.85,24.15,37.6,50');
+
 
 assert.ok(src.includes('V16.laneA=V16.cars.filter'),'cache lane members instead of making SVG groups');
 assert.ok(!src.includes("V16.gA.appendChild"),'never create a synthetic lane group');
