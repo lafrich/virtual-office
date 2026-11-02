@@ -52,7 +52,7 @@ function gptWorldV16(){
     // Native painter order: never reparent vehicles to a synthetic lane group.
     XC.skip=far?[EXT.gC,S2X.gFB]:(V16.made&&!WT.on&&!CV.on&&!FMI.on&&me.r>33.4?v16LaneA():null);
   };
-  (function(){var old=window.__s2xPost,owned=false;window.__s2xPost=function(){if(old)old();if(!OUT_ON&&me.forceAnim==='idle'){me.forceAnim=null;owned=false;}if(me.forceAnim==='walk')me.forceAnim=null;};})();
+  (function(){var old=window.__s2xPost,owned=false;window.__s2xPost=function(){if(old)old();var active=OUT_ON&&((typeof S2L!=='undefined'&&S2L.p&&S2L.p.an)||(S2X.p&&S2X.p.an));if(active){owned=true;return;}if(owned){owned=false;if(me.forceAnim==='idle'||me.forceAnim==='walk')me.forceAnim=null;}};})();
   window.__v16={phase:function(t){return trfPhase(t==null?v16Now():t);},hit:function(c,r,t){return trfHit(c,r,t==null?v16Now():t);},
     st:function(){return {made:V16.made,hits:V16.hits,start:V16.start,onRoad:V16.onRoad,farLoaded:V16.farLoaded,cars:V16.cars.length};},
     cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,inNativeLayer:o.w.parentNode===EXT.gC};});},setOff:function(ms){V16.off=ms;},roadOK:function(c,r){return extOK(c,r);}};
@@ -66,6 +66,12 @@ function gptApplyA(html){
   rep("w.addEventListener('animationiteration',()=>vRidSet(w,RROT[(RROT.indexOf(w._vk)+1)%RROT.length]));   /* next rider kind at the off-screen loop wrap */","/* v16: riders follow traffic schedule */");
   var fn=gptWorldV16.toString(),start=fn.indexOf('{'),end=fn.lastIndexOf('}');
   rep("\n\n/* vc-street2-loak (v15a PREVIEW", "\n"+fn.slice(start+1,end)+"\n\n/* vc-street2-loak (v15a PREVIEW");
+  // Grok's roof-occlusion fix: relocate loak search spots from the buried roof cells.
+  var spotsAt=s.indexOf('"spots":[{"id":"s1"');
+  if(spotsAt<0)throw Error('GROK_V16_LOAK_SPOTS_MISSING');
+  var spotsEnd=s.indexOf('],"sell"',spotsAt);
+  if(spotsEnd<0)throw Error('GROK_V16_LOAK_SPOTS_END');
+  rep(s.slice(spotsAt,spotsEnd+1),'"spots":'+JSON.stringify([{"id":"s1","prop":"tong_sampah_besi","dir":"sw","area":"trotoar","c":15.6,"r":32.25},{"id":"s2","prop":"got_kecil","dir":"sw","area":"jalan","c":29.2,"r":32.3},{"id":"s3","prop":"tong_sampah_besi","dir":"se","area":"belakang_indomaret","c":20.2,"r":37.9},{"id":"s4","prop":"tumpukan_kardus","dir":"sw","area":"sekitar_warung","c":24.8,"r":37.95},{"id":"s6","prop":"kantong_kresek","dir":"se","area":"gang","c":22.3,"r":37.85},{"id":"s7","prop":"karung_rongsok","dir":"se","area":"gang","c":23.5,"r":37.85}]));
   rep("sp=(running?190:83)*K*dt*(window.__vjSlow||1);","sp=(running?64:44)*K*dt*(window.__vjSlow||1);");
   rep("stp=(running?4.4:2.1)*dt*(window.__vjSlow||1);","stp=(running?2.9:1.7)*dt*(window.__vjSlow||1);");
   rep("me.at+=(dt||0)*(an==='walk'&&!MOB&&(me.run||keys.has('run'))?1.8:1);","me.at+=(dt||0)*(an==='walk'?(!MOB&&(me.run||keys.has('run'))?1.3:0.8):1);");
