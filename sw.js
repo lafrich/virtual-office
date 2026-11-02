@@ -4,7 +4,7 @@
 'use strict';
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
-const PLAIN = new Set(['', 'index.html', 'sw.js', 'cove-reskin.js', '.nojekyll', '404.html']);
+const PLAIN = new Set(['', 'index.html', 'sw.js', 'cove-reskin.js', 'game-assets/rig-runtime.js', 'game-assets/asset-bridge.js', '.nojekyll', '404.html']);
 let KEY = null, MAN = null, MANP = null, MANT = 0;
 
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -64,14 +64,24 @@ async function handle(ev, p, u) {
     const r = await fetch(SCOPE + 'b/' + ent[0]);
     if (!r.ok) return new Response('', { status: r.status });
     const plaintext = await decrypt(await r.arrayBuffer());
-    // Authenticated feature preview: preserve the original Grok engine and ciphertext.
-    // Only the opt-in Cove URL gets an isolated visual/playable room module.
-    if (p === 'office.html' && u.searchParams.get('cove') === '1' && ent[1].includes('text/html')) {
+    // Opt-in modules are injected into the decoded response in memory only.
+    // No protected source, multiplayer logic, or encrypted blob is modified.
+    if (p === 'office.html' && ent[1].includes('text/html') &&
+        (u.searchParams.get('cove') === '1' || u.searchParams.get('assetbridge') === '1')) {
       const html = new TextDecoder().decode(plaintext);
       const anchor = '</body>';
-      if (html.includes(anchor) && !html.includes('cove-reskin.js')) {
-        const patched = html.replace(anchor, '<script src="./cove-reskin.js?v=1" defer></script>' + anchor);
-        return new Response(patched, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
+      if (html.includes(anchor)) {
+        let scripts = '';
+        if (u.searchParams.get('cove') === '1' && !html.includes('cove-reskin.js'))
+          scripts += '<script src="./cove-reskin.js?v=1" defer></script>';
+        if (u.searchParams.get('assetbridge') === '1' && !html.includes('game-assets/asset-bridge.js')) {
+          scripts += '<script src="./game-assets/rig-runtime.js?v=1" defer></script>';
+          scripts += '<script src="./game-assets/asset-bridge.js?v=1" defer></script>';
+        }
+        if (scripts) {
+          return new Response(html.replace(anchor, scripts + anchor),
+            { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
+        }
       }
     }
     return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
