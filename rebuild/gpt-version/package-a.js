@@ -118,12 +118,12 @@ function gptWorldV16(){
   window.__gptPunchFront=function(cv){
     if(!OUT_ON||!meEl||!meSpr||!meEl.classList.contains('spr'))return;
     if(!(me.r>=31&&me.r<=38.2||me.r>=50.8&&me.r<=54.9))return;
-    var st=meSpr.style,match=(st.backgroundImage||'').match(/^url\\(["']?([^"')]+)["']?\\)$/);
+    var st=meSpr.style,match=(st.backgroundImage||'').match(/^url\(["']?([^"')]+)["']?\)$/);
     if(!match)return;
     var im=xcImg(match[1]);if(!im||!im.naturalWidth)return;
     var R=meSpr.getBoundingClientRect(),C=cv.getBoundingClientRect();
     if(!R.width||!R.height||!C.width||!C.height)return;
-    var sizes=(st.backgroundSize||'').split(/\\s+/),pos=(st.backgroundPosition||'').split(/\\s+/);
+    var sizes=(st.backgroundSize||'').split(/\s+/),pos=(st.backgroundPosition||'').split(/\s+/);
     var bgw=parseFloat(sizes[0]),bgh=parseFloat(sizes[1]),px=parseFloat(pos[0]),py=parseFloat(pos[1]);
     if(![bgw,bgh,px,py].every(Number.isFinite)||bgw<=0||bgh<=0)return;
     var rx=im.naturalWidth/bgw,ry=im.naturalHeight/bgh;
