@@ -53,14 +53,14 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <button id="selectMode" class="active">↖ Select</button><button id="moveMode">✥ Move</button><button id="walkMode">▶ Movement Preview</button>
 <select id="addType" aria-label="Tambah objek">
 <option value="">＋ Add object…</option><optgroup label="GPT Characters"><option value="avatar">Original Character</option><option value="npc">Original NPC</option></optgroup><optgroup label="3D geometry">
-<option value="building">Building</option><option value="shop">Shop</option><option value="bench">Park Bench</option><option value="lamp">Street Lamp</option><option value="tree">Tree</option><option value="box">Box / Prop</option>
+<option value="building">Building (official prefab)</option><option value="shop">Shop (official prefab)</option><option value="bench">Park Bench · plane</option><option value="lamp">Street Lamp · plane</option><option value="tree">Tree · plane</option><option value="trash">Trash Bin · native sprite</option><option value="box">Stacked Boxes · native sprite</option>
 </optgroup><optgroup id="assetGroup" label="Original GPT assets"></optgroup></select>
 <span class="spacer"></span>
 <button id="zoomOut" aria-label="Zoom out">−</button><button id="zoomIn" aria-label="Zoom in">＋</button>
 <button id="home" aria-label="Reset camera">◎</button>
 </div>
 <main id="canvas-wrap"><canvas id="world" aria-label="Editable 3D isometric world"></canvas>
-<div id="hint">Asset GPT asli memerlukan sesi Virtual Life yang aktif. Karakter punya 4 sisi, tidak boleh di-rotate.</div>
+<div id="hint">Gunakan prefab Virtual Life · rotasi 90° dan scale 85–115% · footprint tidak boleh menutup jalan. Sprites asli GPT perlu login.</div>
 <div id="status">GPT Original Art · 3D Depth</div>
 <div id="walkPad" aria-label="Four directional character movement">
 <button data-walk="up" aria-label="Move north">↑</button><button data-walk="left" aria-label="Move west">←</button>
@@ -87,8 +87,8 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <option value="kasir">Kasir</option></select></label><label>Facing <select id="facing"><option value="sw">SW</option><option value="se">SE</option><option value="nw">NW</option><option value="ne">NE</option></select></label>
 <label>Pose <select id="pose"><option value="">Idle</option><option value="sit">Sit</option><option value="sleep">Sleep</option><option value="bathe">Bathe</option><option value="toilet">Toilet</option><option value="work">Work</option></select></label>
 <span id="actorLock">Rotation locked · proportions preserved</span></div>
-<div id="detail"><label>X / C<input id="x" type="number" step="0.1"></label><label>Z / R<input id="z" type="number" step="0.1"></label><label>Y / Height<input id="y" type="number" step="0.1"></label><label>Rotation °<input id="rotation" type="number" step="15"></label><label>Scale<input id="scale" type="number" step="0.1" min="0.1" max="8"></label><label>Object ID<input id="objectId" type="text" readonly></label></div>
-<div class="help" id="detailHint">Karakter v6b dari Asset Pipeline. Bangunan dari katalog pipeline, props GPT tetap tersedia bila akses game aktif. Objek belum sinkron multiplayer.</div>
+<div id="detail"><label>X / C<input id="x" type="number" step="0.1"></label><label>Z / R<input id="z" type="number" step="0.1"></label><label>Y / Height<input id="y" type="number" step="0.1"></label><label>Rotation °<input id="rotation" type="number" step="90"></label><label>Scale<input id="scale" type="number" step="0.1" min="0.85" max="1.15"></label><label>Object ID<input id="objectId" type="text" readonly></label></div>
+<div class="help" id="detailHint">Style Lock ON: bangunan dari prefab resmi, pohon/props sebagai plane, rotasi 90°, skala 85–115%, validasi jalan & footprint. Draft belum sinkron multiplayer.</div>
 </section>
 <footer id="footer"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="snap">Snap: ON</button><button id="export">Export JSON</button><button id="import">Import</button><button id="reset">Reset Map</button><button id="refreshAssets">Reload Sprites</button><button id="openGame">Open Virtual Life</button><button id="viewRef">View GPT Map</button><input type="file" id="file" accept=".json,application/json"><span class="saved" id="saveStatus">● Draft</span></footer>
 </div>
@@ -96,6 +96,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <script src="./gpt/original-props.js?v=1"></script>
 <script src="./gpt/optional-facades.js?v=1"></script>
 <script src="./gpt/original-character-rig.js?v=1"></script>
+<script src="./style-rules.js?v=style1"></script>
 
-<script type="module" src="./gpt/builder.js?v=gpt1"></script>
+<script type="module" src="./gpt/builder.js?v=style1"></script>
 </body></html>
