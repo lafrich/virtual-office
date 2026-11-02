@@ -74,18 +74,15 @@ function onlineEnhanceHtml(html){
   // the online map, so fall back to the original, unmodified PNG decoder.
   const changedXcImg="function xcImg(u){ let i=XC.imgs.get(u); if(!i){ i=new Image(); i.src=u; XC.imgs.set(u,i); } if(!i.complete||!i.naturalWidth)return null;";
   const imgStart=out.indexOf(changedXcImg);
-  const imgStop=out.indexOf("function xcFrame(dt)",imgStart);
-  if(imgStart<0||imgStop<0||imgStop-imgStart>2900)
+  const tail="return clean&&clean.complete&&clean.naturalWidth?clean:null; }";
+  const imgStop=out.indexOf(tail,imgStart);
+  if(imgStart<0||imgStop<0||imgStop-imgStart>4000)
     throw Error('ONLINE_LEVEL_ASSET_ANCHOR');
   const originalXcImg="function xcImg(u){ let i=XC.imgs.get(u); if(!i){ i=new Image(); i.src=u; XC.imgs.set(u,i); } return i.complete&&i.naturalWidth?i:null; }";
-  const currentAssetBlock=out.slice(imgStart,imgStop);
+  const currentAssetBlock=out.slice(imgStart,imgStop+tail.length);
   if(!currentAssetBlock.includes("i._gptFloorDone")||!currentAssetBlock.includes("return clean&&clean.complete"))
     throw Error('ONLINE_LEVEL_ASSET_INCOMPATIBLE');
-  const tail="return clean&&clean.complete&&clean.naturalWidth?clean:null; }";
-  const tailAt=currentAssetBlock.indexOf(tail);
-  if(tailAt<0||currentAssetBlock.indexOf(tail,tailAt+1)>=0)
-    throw Error('ONLINE_LEVEL_ASSET_END');
-  out=out.slice(0,imgStart)+originalXcImg+out.slice(imgStart+tailAt+tail.length);
+  out=out.slice(0,imgStart)+originalXcImg+out.slice(imgStop+tail.length);
 
   // Reuse the established XP loading screen. It reads local game-renderer
   // readiness only, never auth state or multiplayer tokens.
