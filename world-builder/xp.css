@@ -68,8 +68,19 @@
 #assetReference{position:absolute;inset:5%;overflow:auto;background:#ece9d8;border:3px solid #1b4ea2;z-index:15;padding:12px}
 #assetReference img{max-width:100%;image-rendering:pixelated}
 #assetReference button{float:right}#mobileAssets,#mobileInspector{display:none}
+.sheet-count{margin-left:auto;font:10px "Courier New",monospace}
+.sheet-close{display:none;flex:none;align-items:center;justify-content:center;min-width:37px;min-height:33px;border:2px solid #fff;background:#d6d2cb;color:#1a1a1a;font-size:24px;font-weight:bold;line-height:1;cursor:pointer}
+.floating-inspector{display:none}
 @media(max-width:1000px){#workspace{grid-template-columns:52px 164px minmax(0,1fr) 245px}#assetList button{min-height:42px}#hint{max-width:180px}}
 @media(max-width:780px){
+ .sheet-close{display:inline-flex}
+ #assetsPanel,#inspector{max-height:min(57dvh,490px);overscroll-behavior:contain}
+ #assetsPanel.mobile-open,#inspector.mobile-open{display:flex}
+ .inspector-head,.panel-heading{position:sticky;top:0;z-index:4;min-height:44px;height:44px}
+ .inspector-head strong{flex:1}
+ .floating-inspector{display:block;position:absolute;z-index:5;right:10px;bottom:12px;padding:9px 12px;border:2px solid #fbfbfb;background:#d7d5d0;color:#132b53;font:bold 12px Tahoma;box-shadow:2px 3px 0 #2d2c2b}
+ #workspace:has(#inspector.mobile-open) .floating-inspector,
+ #workspace:has(#assetsPanel.mobile-open) .floating-inspector{display:none}
  #desktop{padding:0}#app{height:100dvh;min-height:0;width:100%;border:0;outline:0;box-shadow:none}#titlebar{height:37px;padding:0 8px}.win-controls span{width:22px;height:21px;font-size:14px}
  #menubar{height:34px;padding:0 4px}#menubar button{font-size:11px;padding:7px 9px}
  #workspace{position:relative;grid-template-columns:46px minmax(0,1fr);grid-template-rows:minmax(0,1fr);min-height:0}
