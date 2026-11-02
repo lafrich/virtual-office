@@ -246,7 +246,7 @@ function makeTree(root){
 function makeBox(root,item){cuboid(root,0,.8,0,2,1.6,2,new THREE.Color(item.color||'#d4a86a'));}
 function makeSprite(root,item){
  const width=item.width||4,height=item.height||4;
- const mat=new THREE.MeshBasicMaterial({map:pixelTexture(item.asset),transparent:true,alphaTest:.38,
+ const mat=new THREE.MeshBasicMaterial({map:pixelTexture(item.asset),transparent:false,alphaTest:.5,
    depthWrite:true,depthTest:true,side:THREE.DoubleSide});
  const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
  plane.rotation.y=Math.PI/4;
@@ -266,7 +266,7 @@ function characterTexture(){
 const avatarTex=characterTexture();
 function makeAvatar(root){
  const p=new THREE.Mesh(new THREE.PlaneGeometry(1.8,3.6),
-  new THREE.MeshBasicMaterial({map:avatarTex,transparent:true,alphaTest:.5,depthWrite:true,depthTest:true,side:THREE.DoubleSide}));
+  new THREE.MeshBasicMaterial({map:avatarTex,transparent:false,alphaTest:.5,depthWrite:true,depthTest:true,side:THREE.DoubleSide}));
  p.rotation.y=Math.PI/4;p.position.y=1.8;root.add(p);
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
