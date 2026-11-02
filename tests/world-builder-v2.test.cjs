@@ -7,7 +7,7 @@ const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
 const w={};
 const ctx=vm.createContext({window:w});
-for(const file of ['asset-catalog.js','pipeline-catalog.js','vegetation-catalog.js','style-rules.js','map-schema.js']){
+for(const file of ['asset-catalog.js','pipeline-catalog.js','vegetation-catalog.js','style-rules.js','map-terrain.js','map-schema.js']){
   vm.runInContext(fs.readFileSync(path.join(root,'world-builder',file),'utf8'),ctx,{filename:file});
 }
 const catalog=new Map(w.VLAssetCatalog.map(x=>[x.file,x]));
@@ -31,7 +31,19 @@ assert.equal(style.nearest(original,[],data.map,catalog),true);
 assert.equal(style.reason(original,[],data.map,catalog),'');
 const out=schema.enrich(data,catalog,style);
 assert.equal(schema.validate(out,catalog,style).length,0);
-assert.equal(out.schema,'virtual-life-ai-map-v2');
+assert.equal(out.schema,'virtual-life-ai-map-v3');
+const terrain=w.VLMapTerrain;
+const t=terrain.seeded(data.map.worldBounds,data.map.road);
+assert.equal(terrain.read(t,0,34,terrain.dict(t)),'road');
+terrain.paint(t,5,45,'water',2,{bounds:data.map.worldBounds});
+assert.equal(terrain.read(t,5,45,terrain.dict(t)),'water');
+terrain.paint(t,6,45,'grass',1,{bounds:data.map.worldBounds});
+assert.equal(terrain.read(t,6,45,terrain.dict(t)),'grass');
+const invalid={id:'new',type:'building',w:3,d:3,x:5.5,z:45.5,scale:1,rotation:0};
+assert.ok(style.reason(invalid,[],{...data.map,terrain:t},catalog).includes('air'));
+assert.ok(out.map.terrain.cells.length>0);
+assert.ok(out.map.terrain.cells.some(x=>x.type==='road'&&x.shape));
+assert.equal(out.map.terrain.cells.find(x=>x.type==='road').driveable,true);
 assert.ok(out.objects.some(o=>o.markerKind==='spawn'));
 assert.ok(out.objects.every(o=>o.interactionHooks.every(h=>h.enabled===false)));
 assert.ok(out.objects.find(o=>o.asset==='pipeline:kantor_a').footprint.w>0);
@@ -41,4 +53,4 @@ assert.ok(!html.includes('id="zoomIn"'));assert.ok(!html.includes('id="zoomOut"'
 assert.ok(!fs.existsSync(path.join(root,'world-builder/gpt/index.html')),'retired secondary builder must be removed');
 const rig=fs.readFileSync(path.join(root,'world-builder/pipeline-character-rig.js'),'utf8');
 assert.ok(rig.includes('Math.SQRT2/64'),'character must use native tile px to world conversion');
-console.log('World Builder v2: PASS ('+out.objects.length+' map objects, '+catalog.size+' assets)');
+console.log('World Builder v3: PASS ('+out.objects.length+' map objects, '+catalog.size+' assets)');
