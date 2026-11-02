@@ -2,7 +2,7 @@
    Retrieves the real original AES-GCM source and assets from the existing GitHub Pages root.
    Production Cloudflare Worker/network is never used. */
 'use strict';
-importScripts('./package-a.js?v=a5'); // GPT v16a patch 05 (walkable rear road beyond alley)
+importScripts('./package-a.js?v=a6'); // GPT v16a patch 06 (full rear street; road behind player)
 const ROOT=new URL('../../',self.registration.scope),SUB=new URL(self.registration.scope).pathname;
 let key=null,manifestPromise=null;
 function b64(v){return Uint8Array.from(atob(v),c=>c.charCodeAt(0))}
@@ -23,7 +23,7 @@ function patch(html,useV16){
  html=html.replace('</head>',`<script>if('serviceWorker'in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='need-key'&&e.ports&&e.ports[0])e.ports[0].postMessage({key:sessionStorage.getItem('vl-gpt-k')})});</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'">
 <style id="gpt-beta-style">body .app>header{display:none!important}html,body{height:100%;min-height:100%;overflow:hidden}body .app{height:100dvh;min-height:0;grid-template-rows:minmax(0,1fr)}#stage{min-height:0;overflow:hidden}@media(max-width:600px){#vj-toast{top:clamp(192px,32dvh,285px)!important;bottom:auto!important;max-width:min(300px,calc(100vw - 28px))}}</style></head>`);
- html=html.replace('</body>',`<div style="position:fixed;top:4px;left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;background:#172b49df;color:#fff;font:700 10px Tahoma,sans-serif;padding:4px 10px;border-radius:3px;letter-spacing:1px">GPT VERSION · OFFLINE BETA</div></body>`);
+ if(!useV16)html=html.replace('</body>',`<div style="position:fixed;top:4px;left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;background:#172b49df;color:#fff;font:700 10px Tahoma,sans-serif;padding:4px 10px;border-radius:3px;letter-spacing:1px">GPT VERSION · OFFLINE BETA</div></body>`);
  return html;
 }
 self.addEventListener('install',()=>self.skipWaiting());
