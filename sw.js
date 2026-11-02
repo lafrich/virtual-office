@@ -2,7 +2,7 @@
 /* Virtual Office decrypting service worker. Holds the AES key in memory only;
    when restarted it asks an unlocked tab (which keeps it in sessionStorage). */
 'use strict';
-importScripts('./rebuild/gpt-version/package-a.js?v=a17','./rebuild/gpt-version/loading-guard.js?v=a16','./game-assets/online-enhancement.js?v=o1');
+importScripts('./rebuild/gpt-version/package-a.js?v=a17','./rebuild/gpt-version/loading-guard.js?v=a16','./game-assets/online-enhancement.js?v=o2');
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
 const PLAIN = new Set(['', 'index.html', 'sw.js', 'game-assets/rig-runtime.js', 'game-assets/asset-bridge.js', 'game-assets/online-enhancement.js', '.nojekyll', '404.html']);
