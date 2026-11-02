@@ -189,7 +189,7 @@ function gptApplyA(html){
   // P(c,r) is unchanged, so the trunk base stays pinned to its ground tile.
   // Shrubs, potted plants and any Street2 building art are not rescaled.
   rep("(kind==='tall'?tTall:kind==='wide'?tWide:tRound)(g,p,(s||1)*1.8);",
-      "(kind==='tall'?tTall:kind==='wide'?tWide:tRound)(g,p,(s||1)*1.8*(kind==='tall'?1.28:kind==='wide'?1.20:1.26));");
+      "(kind==='tall'?tTall:kind==='wide'?tWide:tRound)(g,p,(s||1)*1.8*(kind==='tall'?1.85:kind==='wide'?1.95:2.05));");
   // Limit the expensive CANVAS raster compositor to 30fps on touch devices.
   // Physics, player input, collisions and the main game update loop still run
   // normally. On desktop we retain the original frequency.
