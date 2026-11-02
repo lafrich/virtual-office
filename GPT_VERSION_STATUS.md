@@ -1,6 +1,6 @@
 # GPT Version — isolated beta workspace
 
-Status: **v16a Package A development / NOT DEPLOYED**.
+Status: **v16a Package A isolated public beta deployed; NOT production-ready**.
 
 This branch was created from `main` to keep GPT Version separate from the live Virtual Life game. The production encrypted site and Cloudflare Worker are unchanged.
 
@@ -40,3 +40,15 @@ New files/edits under `rebuild/gpt-version/` **only**; published as additive fil
 - Browser/Android screenshot QA and live end-to-end user testing are still pending. A5 locked-asset deferral, A6 performance optimizations, and full A7 flicker regression are deliberately NOT represented as completed without measurements. Multiplayer/Worker v16a server changes are NOT deployed and remain out of scope for this offline beta.
 
 SAFETY: Never merge unencrypted game HTML, never connect the beta to the live Worker, and never claim that unit checks prove end-to-end gameplay.
+
+## 2026-11-02 — GPT Version patch 02 (deployed)
+
+Public beta unchanged: https://lafrich.github.io/virtual-office/rebuild/gpt-version/
+
+- Replaced approximate vehicle footprint values with the exact Grok handover `traffic.json` metadata for all 15 sprite kinds; added a read-only vehicle snapshot inspector.
+- Replaced one-step fallback respawn with nearest walkable curb-slot search (near/far), retaining the old emergency spawn if none can be found.
+- Stabilized the near-lane back-canvas toggle with a 0.32-cell hysteresis band (33.24–33.56), avoiding flip-flop/flicker near the player threshold.
+- Cached lane-A vehicle nodes on scene setup rather than scanning/filtering the native SVG painter group every frame. No synthetic SVG lane group was added.
+- Added Node-only offline regression suite at `rebuild/gpt-version/tests/package-a-regression.cjs`. Isolated tests: 3600 vehicle samples, all 15 kinds, exact hitbox widths, clear crossing, positive collisions, safe curb spawns, painter-layer invariants PASS.
+- Bumped scoped service worker import version for immediate beta update. Files published on `main` are limited to `rebuild/gpt-version/package-a.js` and `rebuild/gpt-version/sw.js`. The production `sw.js` and encrypted files remain unchanged.
+- Still pending: real-browser end-to-end visual inspection, mobile screenshots, quantitative FPS/load-time A6 measurements, and full flickering QA A7. Do not merge beta code into the live game without these checks.
