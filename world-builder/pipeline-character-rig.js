@@ -84,5 +84,10 @@ function createRig(THREE,opt={}){
   source(who);
   return {mesh,state,setMoving,setPose,setDirection,setCharacter,setProfile:setCharacter,step,dispose};
 }
-g.VLCharacterRig=Object.freeze({createRig,DIR,ROW,FRAME,directionFromWorld,profiles});
+function retry(){
+ for(const [url,state] of cache){
+  if(state.error||!state.ready)cache.delete(url);
+ }
+}
+g.VLCharacterRig=Object.freeze({createRig,retry,DIR,ROW,FRAME,directionFromWorld,profiles});
 })(window);
