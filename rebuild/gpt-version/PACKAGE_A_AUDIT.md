@@ -46,3 +46,17 @@ Earlier turns separately requested expanding the rear alley and full lateral str
 2. Close any remaining visual layering issues.
 3. Test interactions, item placement and Map in a dedicated beta environment with an isolated test backend.
 4. Measure A6 changes; then implement and test WebP, redraw culling, adaptive FPS, and WebSocket update-rate changes safely.
+
+## 2026-11-02 — Patch 08: correcting player/vehicle/pedestrian depth (published)
+
+After Patch 07 user reported the player suddenly rendered ABOVE road traffic and crossing NPCs; far-side background still disappeared near crossing.
+
+Actual original compositor: `XC.b` (outdoor background and behind-player sprites) and `XC.f` (foreground), plus CSS player `.me` at z-index 7. Previous Patch 07 `destination-out` alpha punching of `XC.f` removed **all** foreground pixels in the player's silhouette, including vehicles and pedestrians, forcing the player to appear in front regardless of depth. **This entire mask is removed.**
+
+- Patch 08 uses native `XC.skip` on **individual vehicles**, not entire `EXT.gC` (which would incorrectly move crossing NPCs behind the player). Sort by moving sprite's projected foot depth `c+r` versus player `c+r`, with hysteresis to limit flickering; the back canvas draws skipped car sprites before the HTML player, and the front canvas draws remaining cars/NPCs in front.
+- The generated far-side level overlay includes pavement. When the player stands on the relevant road bands, move only the baked `S2X.lv.g` to `XC.b`. Do not mask the player or hide all street art.
+- Far-side painter switch requires *both* level images and `S2` base to be decoded and present in the native `XC.imgs` cache. A missing/late background therefore does not trigger an empty far-side layer.
+- A transient `xcFrame` exception no longer destroys `XC.b` permanently; discard suspect skip list and retry next frame, with a single diagnostic warning.
+- Explicit regression suites: `tests/render-layer-regression.cjs`, `tests/gang-exit-regression.cjs`. Both pass in an isolated VM harness. Latest original encrypted game's 26 patch anchors apply; all executable JavaScript snippets syntactically valid.
+- **Android visual check not yet completed by assistant**; cannot state the remaining flicker/background issue is 100% fixed before actual gameplay recording. `main` files other than `rebuild/gpt-version/` unchanged. Beta patch loaded via scoped service worker import `a8`.
+
