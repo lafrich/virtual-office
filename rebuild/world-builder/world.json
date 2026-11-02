@@ -1,0 +1,186 @@
+{
+  "format": "virtual-life-world-builder-v1",
+  "version": 1,
+  "map": {
+    "name": "Virtual Life · Street / Office Study",
+    "grid": "game:c,r",
+    "units": "tile",
+    "origin": {
+      "x": 0,
+      "z": 0
+    },
+    "worldBounds": {
+      "minX": -30,
+      "maxX": 40,
+      "minZ": 20,
+      "maxZ": 55
+    },
+    "road": {
+      "z0": 32.75,
+      "z1": 36.3
+    },
+    "notes": "Initial authored 3D mapping study based on existing world coordinate system; not a pixel-exact migration of encrypted world."
+  },
+  "objects": [
+    {
+      "id": "office-main",
+      "type": "building",
+      "name": "Virtual Office",
+      "x": -6,
+      "z": 25,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "w": 15,
+      "d": 7,
+      "h": 8,
+      "color": "#647d95"
+    },
+    {
+      "id": "office-annex",
+      "type": "building",
+      "name": "Office Annex",
+      "x": 9,
+      "z": 25.8,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "w": 12,
+      "d": 5.3,
+      "h": 7,
+      "color": "#486a86"
+    },
+    {
+      "id": "warteg-front",
+      "type": "shop",
+      "name": "Warteg",
+      "x": 20,
+      "z": 25.3,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "w": 9,
+      "d": 6,
+      "h": 4.8,
+      "color": "#e5c17e"
+    },
+    {
+      "id": "shop-east",
+      "type": "shop",
+      "name": "Toko Loak",
+      "x": 26,
+      "z": 42.7,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "w": 11,
+      "d": 8,
+      "h": 5.8,
+      "color": "#cdb7a3"
+    },
+    {
+      "id": "market-stalls",
+      "type": "shop",
+      "name": "Warung Sebrang",
+      "x": 10,
+      "z": 42.7,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "w": 13,
+      "d": 7,
+      "h": 5.2,
+      "color": "#8dbdb9"
+    },
+    {
+      "id": "shop-west",
+      "type": "shop",
+      "name": "Ruko Samping",
+      "x": -8,
+      "z": 42.7,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "w": 13,
+      "d": 7.7,
+      "h": 6.3,
+      "color": "#b6bdc7"
+    },
+    {
+      "id": "bench-near",
+      "type": "bench",
+      "name": "Park Bench",
+      "x": -1,
+      "z": 29.1,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    },
+    {
+      "id": "lamp-near",
+      "type": "lamp",
+      "name": "Street Lamp",
+      "x": 8,
+      "z": 31.2,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    },
+    {
+      "id": "tree-near",
+      "type": "tree",
+      "name": "Tree",
+      "x": -13,
+      "z": 28.1,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    },
+    {
+      "id": "tree-front",
+      "type": "tree",
+      "name": "Tree near Office",
+      "x": 14,
+      "z": 28.3,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    },
+    {
+      "id": "plant-pixel",
+      "type": "sprite",
+      "name": "Plant · existing art",
+      "x": 28,
+      "z": 29,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "plant_base.svg",
+      "width": 3,
+      "height": 3
+    },
+    {
+      "id": "bench-pixel",
+      "type": "sprite",
+      "name": "Bench · existing art",
+      "x": 24,
+      "z": 38.3,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "park_bench_base.svg",
+      "width": 4.6,
+      "height": 4.6
+    },
+    {
+      "id": "avatar-test",
+      "type": "avatar",
+      "name": "Avatar depth test",
+      "x": 20.5,
+      "z": 34,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1
+    }
+  ]
+}
