@@ -1085,6 +1085,61 @@ $('closeRef').onclick=()=>{$('assetReference').hidden=true;};
 $('undo').onclick=()=>restoreStack(undoStack,redoStack);
 $('redo').onclick=()=>restoreStack(redoStack,undoStack);
 $('snap').onclick=()=>{snap=!snap;$('snap').title='Snap: '+(snap?'ON':'OFF');$('snap').classList.toggle('active',snap);};
+function makeCityExample(){
+ const city=clone(defaultSeed);
+ city.objects=[];
+ city.map.name='Virtual Life · City Sample (editable placeholders)';
+ city.map.notes='Independent city-block authoring example. Buildings, parks and road intersections are replaceable layout drafts.';
+ const bounds=city.map.worldBounds;
+ const cells=new Map();
+ const roads=new Set();
+ const K=(c,r)=>c+','+r;
+ for(let r=Math.ceil(bounds.minZ);r<bounds.maxZ;r++)for(let c=Math.ceil(bounds.minX);c<bounds.maxX;c++){
+  const horizontal=(r>=24&&r<=26)||(r>=44&&r<=46);
+  const vertical=(c>=-13&&c<=-11)||(c>=12&&c<=14)||(c>=29&&c<=31);
+  if(horizontal||vertical)roads.add(K(c,r));
+ }
+ for(let r=Math.ceil(bounds.minZ);r<bounds.maxZ;r++)for(let c=Math.ceil(bounds.minX);c<bounds.maxX;c++){
+  const key=K(c,r);
+  if(roads.has(key)){cells.set(key,{c,r,type:'road',roadClass:'two_lane'});continue;}
+  if([[1,0],[-1,0],[0,1],[0,-1]].some(([x,z])=>roads.has(K(c+x,r+z))))
+   cells.set(key,{c,r,type:'sidewalk'});
+ }
+ // Park plaza with a small pond; all separate ground cells.
+ for(let r=29;r<41;r++)for(let c=-8;c<9;c++){
+  const k=K(c,r);if(roads.has(k))continue;
+  if((c>=-1&&c<=2)&&(r>=34&&r<=36))cells.set(k,{c,r,type:'water'});
+  else if(c===4||r===32||r===39)cells.set(k,{c,r,type:'plaza'});
+  else cells.delete(k);
+ }
+ city.map.terrain={default:'grass',cells:[...cells.values()].sort((a,b)=>a.r-b.r||a.c-b.c)};
+ const prefabs=[
+  ['building:large',-22,30,'Hospital','hospital'],['building:medium',-21,40,'Office','office'],
+  ['building:large',-22,51,'Factory','factory'],['building:medium',2,22,'Bank','bank'],
+  ['building:medium',21,22,'School','school'],['building:large',21,34,'Office Tower','office'],
+  ['building:medium',21,51,'Warehouse','warehouse'],['building:medium',1,51,'Shopping Row','shop'],
+  ['building:small',-5,51,'Cafe','cafe'],['building:small',35,32,'House','house'],
+  ['sprite:vegetation:pohon_asam_M',-6,31,'Park Tree','tree'],
+  ['sprite:vegetation:pohon_asam_M',7,31,'Park Tree','tree'],
+  ['sprite:vegetation:pohon_asam_M',-6,39,'Park Tree','tree'],
+  ['sprite:vegetation:pohon_asam_M',7,39,'Park Tree','tree'],
+  ['bench',-4,36,'Park Bench','bench'],['bench',6,36,'Park Bench','bench'],
+  ['lamp',-9,34,'Street Light','lamp'],['lamp',10,33,'Street Light','lamp']
+ ];
+ for(const [tag,x,z,name,subtype] of prefabs){
+  const obj=makeObject(tag,{x,z});if(!obj)continue;
+  obj.name=name;obj.subtype=subtype;obj.tags=['city-sample','replaceable'];
+  obj.replaceable=true;
+  if(!style.reason(obj,city.objects,city.map,assetByName))city.objects.push(obj);
+ }
+ return sanitize(city);
+}
+$('newCity').onclick=()=>{
+ if(!confirm('Start City Sample? Map draft saat ini akan diganti. Export JSON dulu jika ingin menyimpan layout lama.'))return;
+ undoPoint();documentMap=makeCityExample();selectedId=null;
+ rebuild();rebuildTerrain();resetCamera();saved();
+ tell('City Sample ready · roads, park, water, placeholders');
+};
 $('reset').onclick=()=>{
  if(!confirm('Reset seluruh map draft 3D ke default?'))return;
  undoPoint();documentMap=clone(defaultSeed);selectedId=null;rebuild();rebuildTerrain();saved();tell('Map reset');
