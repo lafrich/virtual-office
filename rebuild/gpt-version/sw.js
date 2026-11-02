@@ -2,7 +2,7 @@
    Retrieves the real original AES-GCM source and assets from the existing GitHub Pages root.
    Production Cloudflare Worker/network is never used. */
 'use strict';
-importScripts('./package-a.js?v=a3'); // GPT v16a patch 03 (hitbox, depth, staggered scene load)
+importScripts('./package-a.js?v=a4'); // GPT v16a patch 04 (traffic clock, items, occlusion, alley)
 const ROOT=new URL('../../',self.registration.scope),SUB=new URL(self.registration.scope).pathname;
 let key=null,manifestPromise=null;
 function b64(v){return Uint8Array.from(atob(v),c=>c.charCodeAt(0))}
