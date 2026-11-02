@@ -739,9 +739,20 @@ function onDown(e){
  if(pointers.size===2){
   const pts=[...pointers.values()],mid={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
   pinch={dist:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),mid,view:viewSize,focus:cameraFocus.clone(),ground:floorPoint({clientX:mid.x,clientY:mid.y})};
-  // Pinching must never start an accidental object drag.
+  if(drag?.kind==='paint'&&drag.changed)saved();
   for(const holder of rigs.values())holder.rig.setMoving(0,0,false);
-  drag=null;return;
+  drag=null;placementPreview.visible=false;return;
+ }
+ const point=floorPoint(e);
+ if(mode==='place'&&placementType){add(placementType,point);previewPlace(point);return;}
+ if(mode==='paint'||mode==='fill'){
+  if(!point)return;
+  const c=Math.floor(point.x),r=Math.floor(point.z),kind=mode;
+  undoPoint();
+  const changed=paintAt(point,kind==='fill');
+  drag=kind==='paint'?{kind:'paint',id:e.pointerId,last:c+','+r,changed:!!changed}:null;
+  if(kind==='fill'){if(changed)saved();else undoStack.pop();}
+  return;
  }
  const hit=pick(e);
  if(hit&&mode!=='walk')select(hit);
