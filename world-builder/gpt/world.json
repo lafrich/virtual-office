@@ -1,6 +1,6 @@
 {
   "format": "virtual-life-world-builder-v1",
-  "version": 3,
+  "version": 4,
   "map": {
     "name": "GPT Source 3D Map",
     "grid": "game:c,r",
@@ -19,7 +19,7 @@
       "z0": 32.75,
       "z1": 36.3
     },
-    "notes": "Original GPT character and environment PNG files are the visual source. Large buildings still require separate 3D geometry and remain editable approximation. Optional pipeline buildings are labeled.",
+    "notes": "Style-lock v1: original Virtual Life sprite planes, canonical asset-pipeline prefabs, 90-degree directions, scale 85–115%, road and footprint placement protection. Unpublished pipeline illustrations show clearly provisional pixel-plane art or 3D building studies.",
     "source": "GPT Version renderer using original Virtual Life encrypted asset manifest",
     "nativeReference": {
       "street2": "assets/street2/base.png",
@@ -320,6 +320,101 @@
       "y": 0,
       "rotation": 0,
       "scale": 1,
+      "collision": true
+    },
+    {
+      "id": "street-tree-west",
+      "type": "tree",
+      "name": "Pohon Peneduh · pixel plane preview",
+      "x": -25,
+      "z": 29,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "collision": true
+    },
+    {
+      "id": "park-bench-west",
+      "type": "sprite",
+      "name": "Bangku Taman · pipeline preview",
+      "asset": "pipeline:bangku_taman",
+      "x": -18,
+      "z": 30.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "width": 2.19,
+      "height": 2.251,
+      "collision": true
+    },
+    {
+      "id": "park-lamp-west",
+      "type": "sprite",
+      "name": "Lampu Taman · pipeline preview",
+      "asset": "pipeline:lampu_taman",
+      "x": -28,
+      "z": 30.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "width": 2,
+      "height": 11.455,
+      "collision": true
+    },
+    {
+      "id": "park-bin-west",
+      "type": "sprite",
+      "name": "Tong Sampah Besi · original GPT",
+      "asset": "street2/loak/props/tong_sampah_besi_se.png",
+      "x": -21,
+      "z": 30.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "width": 2.7,
+      "height": 2.9,
+      "collision": true
+    },
+    {
+      "id": "park-bench-east",
+      "type": "sprite",
+      "name": "Bangku Taman · pipeline preview",
+      "asset": "pipeline:bangku_taman",
+      "x": 2,
+      "z": 38.3,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "width": 2.19,
+      "height": 2.251,
+      "collision": true
+    },
+    {
+      "id": "park-bin-east",
+      "type": "sprite",
+      "name": "Tong Sampah · pipeline preview",
+      "asset": "pipeline:tong_sampah",
+      "x": 5,
+      "z": 38.3,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "width": 2,
+      "height": 2.737,
+      "collision": true
+    },
+    {
+      "id": "park-table-west",
+      "type": "sprite",
+      "name": "Meja Taman · pipeline preview",
+      "asset": "pipeline:meja_taman",
+      "x": -25,
+      "z": 39,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "width": 2.92,
+      "height": 1.597,
       "collision": true
     }
   ]
