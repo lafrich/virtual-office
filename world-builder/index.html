@@ -30,6 +30,7 @@
   <button class="chrome-tool" id="undo" title="Undo">↶</button>
   <button class="chrome-tool" id="redo" title="Redo">↷</button>
   <button class="chrome-tool" id="snap" title="Toggle half-tile snapping">▦</button>
+  <button class="chrome-tool active" id="gridToggle" aria-pressed="true" title="Show / hide placement grid">#</button>
   <div class="stamp">✳<div>V/L<br>MAP</div></div>
  </aside>
  <aside id="assetsPanel" aria-label="Asset browser">
@@ -68,7 +69,7 @@
    <label id="brushSettings">BRUSH <select id="brushSize"><option value="1">1×1</option><option value="2">2×2</option><option value="4">4×4</option></select></label>
    <label id="roadSettings">ROAD <select id="roadClass"><option value="two_lane">2 Lane</option><option value="local">Local</option><option value="service">Service</option><option value="pedestrian">Pedestrian</option></select></label>
    <label class="toggle"><input id="autoSidewalk" type="checkbox" checked> Auto Sidewalk</label>
-   <span id="terrainLabel" aria-live="polite">GRASS</span>
+   <span id="terrainLabel" aria-live="polite">GRASS</span><button type="button" id="gridToolbar" class="chrome-button" aria-pressed="true"># Grid ON</button>
    <button id="mobileAssets" type="button">▣ Assets</button>
    <button id="mobileInspector" type="button">☷ Inspector</button>
    <button id="viewRef" class="chrome-button" type="button">Map Reference</button>
