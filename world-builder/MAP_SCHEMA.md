@@ -74,3 +74,35 @@ The editor exports a **data-only** document. The online game does not consume th
 6. Roundtrip export/import tests and compare visually with the authenticated game's canonical map before promoting to multiplayer.
 
 The new 32-object default map is deliberately a mapping study, **not** a production-faithful copy of all Street2 buildings.
+
+## v3 terrain and road graph authoring
+
+The current exporter uses `schema: "virtual-life-ai-map-v3"`, `version: 6`; its previous v2 object schema remains readable on import.
+
+`map.terrain.default` is the default ground type, usually `grass`. `map.terrain.cells` stores sparse integer-grid overrides. Each cell includes `c`, `r`, `type`, and for roads `roadClass`, `shape` (automatic adjacency), plus `walkable`, `driveable`, `buildable` flags. Valid terrain: `grass`, `road`, `sidewalk`, `water`, `plaza`, `soil`. Road classes: `local`, `two_lane`, `service`, `pedestrian`. Road shape is recomputed from North, East, South, West neighbors.
+
+Example:
+
+```json
+{
+  "map": {
+    "terrain": {
+      "default": "grass",
+      "cells": [
+        {
+          "c": 10, "r": 25,
+          "type": "road",
+          "roadClass": "two_lane",
+          "shape": "straight",
+          "walkable": false,
+          "driveable": true,
+          "buildable": false
+        },
+        {"c": 11, "r": 26, "type": "water", "walkable": false, "driveable": false, "buildable": false}
+      ]
+    }
+  }
+}
+```
+
+The terrain grid is authored on whole tiles and rendered as actual square ground planes in the 3D scene; the 2:1 orthographic camera makes each appear as an isometric diamond. The visible editor grid may be hidden without affecting exported coordinate accuracy. These flags are suggested design semantics, **not connected runtime pathfinding/physics**.
