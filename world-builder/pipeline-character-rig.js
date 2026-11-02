@@ -8,6 +8,12 @@
 const DIR=['se','sw','ne','nw'];
 const ROW={walk:0,idle:4,talk:8,sit:12,sit_type:16,sleep:20,tired:24,swim:28,float:32,lie:36,perch:40};
 const FRAME={w:64,h:112,pivotX:32,pivotY:100};
+const ALIAS={grok:'grok_bot',warteg:'bu_warteg',barista:'fm_barista',kasir:'fm_kasir'};
+const profiles=Object.fromEntries(
+ [...(g.VLPipelineAssets?.characters||[]).map(x=>x.id),...Object.keys(ALIAS)]
+ .map(id=>[id,ALIAS[id]||id])
+);
+const canonical=id=>profiles[id]||'ichsan';
 const cache=new Map();
 function source(id){
   const url=g.VLPipelineAssets?.character(id);
@@ -27,7 +33,7 @@ function directionFromWorld(dx,dz,last='sw'){
   return Math.abs(dx)>=Math.abs(dz)?dx>0?'se':'nw':dz>0?'sw':'ne';
 }
 function createRig(THREE,opt={}){
-  let who=g.VLPipelineAssets?.character(opt.characterId)?opt.characterId:'ichsan';
+  let who=canonical(opt.profile||opt.characterId||'ichsan');
   const cv=document.createElement('canvas');cv.width=64;cv.height=112;
   const ctx=cv.getContext('2d',{alpha:true});ctx.imageSmoothingEnabled=false;
   const texture=new THREE.CanvasTexture(cv);texture.colorSpace=THREE.SRGBColorSpace;
@@ -38,14 +44,14 @@ function createRig(THREE,opt={}){
   const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
   mesh.position.y=h*(FRAME.pivotY/FRAME.h-.5);
   mesh.userData.characterBillboard=true;mesh.userData.characterSource='pipeline-v6b';
-  const state={direction:normalize(opt.direction),moving:false,walk:0,pose:opt.pose||null,characterId:who,loaded:false,failed:false};
+  const state={direction:normalize(opt.direction),moving:false,walk:0,pose:opt.pose||null,profile:opt.profile||opt.characterId||'ichsan',characterId:who,loaded:false,failed:false};
   let previous='',time=0;
   function draw(){
-    const anim=ROW[state.pose]!==undefined?state.pose:state.moving?'walk':'idle';
-    const frames=anim==='walk'?6:anim==='idle'?4:6;
-    const frame=Math.floor(time/(anim==='walk'?.145:.24))%frames;
-    const row=ROW[anim]+DIR.indexOf(state.direction);
-    const key=who+':'+anim+':'+row+':'+frame;
+    const anim=({bathe:'swim',toilet:'sit',work:'sit_type'}[state.pose]||state.pose); const mode=ROW[anim]!==undefined?anim:state.moving?'walk':'idle';
+    const frames=mode==='walk'?6:mode==='idle'?4:6;
+    const frame=Math.floor(time/(mode==='walk'?.145:.24))%frames;
+    const row=ROW[mode]+DIR.indexOf(state.direction);
+    const key=who+':'+mode+':'+row+':'+frame;
     const sheet=source(who);
     state.loaded=!!sheet?.ready;state.failed=!!sheet?.error;
     if(!sheet?.ready||key===previous)return;
@@ -58,9 +64,9 @@ function createRig(THREE,opt={}){
     if(state.moving){state.direction=directionFromWorld(dx,dz,state.direction);state.pose=null;}
     if(was!==state.moving)previous='';
   }
-  function setPose(p){state.pose=Object.hasOwn(ROW,p)?p:null;state.moving=false;previous=''}
+  function setPose(p){state.pose=Object.hasOwn(ROW,p)||['bathe','toilet','work'].includes(p)?p:null;state.moving=false;previous=''}
   function setDirection(d){state.direction=normalize(d);state.moving=false;previous=''}
-  function setCharacter(id){if(g.VLPipelineAssets?.character(id)){who=id;state.characterId=id;state.loaded=false;state.failed=false;previous='';}}
+  function setCharacter(id){const name=canonical(id);if(g.VLPipelineAssets?.character(name)){who=name;state.profile=id;state.characterId=name;state.loaded=false;state.failed=false;previous='';source(who);}}
   function step(dt,camera,position){
     time+=Math.min(.1,Math.max(0,dt));
     if(camera){
@@ -71,7 +77,7 @@ function createRig(THREE,opt={}){
   }
   function dispose(){mesh.geometry.dispose();mat.dispose();texture.dispose()}
   source(who);
-  return {mesh,state,setMoving,setPose,setDirection,setCharacter,step,dispose};
+  return {mesh,state,setMoving,setPose,setDirection,setCharacter,setProfile:setCharacter,step,dispose};
 }
-g.VLCharacterRig=Object.freeze({createRig,DIR,ROW,FRAME,directionFromWorld});
+g.VLCharacterRig=Object.freeze({createRig,DIR,ROW,FRAME,directionFromWorld,profiles});
 })(window);
