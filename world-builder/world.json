@@ -2,7 +2,7 @@
   "format": "virtual-life-world-builder-v1",
   "version": 2,
   "map": {
-    "name": "GPT Version · Editable 3D World Study",
+    "name": "Virtual Life · Canonical pipeline sprite world study",
     "grid": "game:c,r",
     "units": "tile",
     "origin": {
@@ -19,7 +19,7 @@
       "z0": 32.75,
       "z1": 36.3
     },
-    "notes": "Source of truth: original GPT Version/Virtual Life canonical encrypted assets. Buildings are editable 3D geometry proxies because parts of original street/buildings are baked. Character sheets and separated props use original asset URLs; no failed Rebuild artwork.",
+    "notes": "3D prototype authored from the official asset pipeline v6b sprites and official street-buildings manifest; approximate positions, not a pixel-exact clone of encrypted online map. Character rotation and scale are locked.",
     "source": "GPT Version renderer using original Virtual Life encrypted asset manifest",
     "nativeReference": {
       "street2": "assets/street2/base.png",
@@ -33,108 +33,117 @@
         "r0": 22,
         "r1": 28
       }
+    },
+    "assetSources": {
+      "character": "lafrich/virtual-life-asset-pipeline/game/assets/chars",
+      "building": "lafrich/virtual-life-asset-pipeline/assets/street_buildings",
+      "otherProps": "GPT Version if authenticated"
     }
   },
   "objects": [
     {
       "id": "office-main",
-      "type": "building",
-      "name": "Virtual Office",
+      "type": "sprite",
+      "name": "Kantor A",
       "x": -6,
       "z": 25,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "w": 15,
-      "d": 7,
-      "h": 8,
-      "color": "#647d95",
-      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh",
+      "asset": "pipeline:kantor_a",
+      "width": 9.49,
+      "height": 13.855,
+      "collision": true
     },
     {
       "id": "office-annex",
-      "type": "building",
-      "name": "Office Annex",
+      "type": "sprite",
+      "name": "Kantor B",
       "x": 9,
       "z": 25.8,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "w": 12,
-      "d": 5.3,
-      "h": 7,
-      "color": "#486a86",
-      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh",
+      "asset": "pipeline:kantor_b",
+      "width": 8.76,
+      "height": 18.828,
+      "collision": true
     },
     {
       "id": "warteg-front",
-      "type": "shop",
-      "name": "Warteg · GPT World Geometry Proxy",
+      "type": "sprite",
+      "name": "Warung Madura",
       "x": 31.8,
       "z": 25,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "w": 7,
-      "d": 6,
-      "h": 4.8,
-      "color": "#e5c17e",
-      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh",
+      "asset": "pipeline:warung_madura",
+      "width": 4.38,
+      "height": 4.012,
+      "collision": true
     },
     {
       "id": "shop-east",
-      "type": "shop",
+      "type": "sprite",
       "name": "Toko Loak",
       "x": 26,
       "z": 42.7,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "w": 11,
-      "d": 8,
-      "h": 5.8,
-      "color": "#cdb7a3",
-      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh",
+      "asset": "pipeline:toko_loak",
+      "width": 5.47,
+      "height": 4.936,
+      "collision": true
     },
     {
       "id": "market-stalls",
-      "type": "shop",
-      "name": "Warung Sebrang",
+      "type": "sprite",
+      "name": "Lapak Tas",
       "x": 10,
       "z": 42.7,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "w": 13,
-      "d": 7,
-      "h": 5.2,
-      "color": "#8dbdb9",
-      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh",
+      "asset": "pipeline:lapak_tas",
+      "width": 2.55,
+      "height": 3.593,
+      "collision": true
     },
     {
       "id": "shop-west",
-      "type": "shop",
-      "name": "Ruko Samping",
+      "type": "sprite",
+      "name": "Ruko A",
       "x": -8,
       "z": 42.7,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "w": 13,
-      "d": 7.7,
-      "h": 6.3,
-      "color": "#b6bdc7",
-      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh",
+      "asset": "pipeline:ruko_a",
+      "width": 6.57,
+      "height": 8.747,
+      "collision": true
     },
     {
       "id": "lamp-near",
-      "type": "lamp",
-      "name": "Street Lamp",
+      "type": "sprite",
+      "name": "Lampu Taman",
       "x": 8,
       "z": 31.2,
       "y": 0,
       "rotation": 0,
-      "scale": 1
+      "scale": 1,
+      "asset": "pipeline:lampu_taman",
+      "width": 2,
+      "height": 11.455,
+      "collision": false
     },
     {
       "id": "tree-near",
@@ -159,7 +168,7 @@
     {
       "id": "avatar-test",
       "type": "avatar",
-      "name": "Ichsan · Original GPT Sprite",
+      "name": "Ichsan · v6b Pipeline",
       "x": 20.5,
       "z": 34,
       "y": 0,
@@ -167,14 +176,14 @@
       "scale": 1,
       "facing": "sw",
       "pose": null,
-      "variant": "gpt-original",
+      "variant": "pipeline-v6b",
       "collision": true,
       "profile": "ichsan"
     },
     {
       "id": "npc-preview",
       "type": "npc",
-      "name": "Noor · Original GPT Sprite",
+      "name": "Noor · v6b Pipeline",
       "x": 11,
       "z": 34.7,
       "y": 0,
@@ -182,7 +191,7 @@
       "scale": 1,
       "facing": "nw",
       "pose": null,
-      "variant": "gpt-original",
+      "variant": "pipeline-v6b",
       "collision": true,
       "profile": "noor"
     },
@@ -282,6 +291,35 @@
       "asset": "street2/loak/props/karung_rongsok_se.png",
       "width": 2.3,
       "height": 2.5,
+      "collision": true
+    },
+    {
+      "id": "pipeline-indomaret",
+      "type": "sprite",
+      "name": "Indomaret · Pipeline",
+      "asset": "pipeline:indomaret",
+      "x": 34,
+      "z": 25.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "width": 8.76,
+      "height": 7.35,
+      "collision": true
+    },
+    {
+      "id": "pipeline-theodore",
+      "type": "npc",
+      "name": "Theodore · v6b Pipeline",
+      "profile": "theodore",
+      "variant": "pipeline-v6b",
+      "facing": "se",
+      "pose": null,
+      "x": 25,
+      "z": 30.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
       "collision": true
     }
   ]
