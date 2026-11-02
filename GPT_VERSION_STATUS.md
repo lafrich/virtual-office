@@ -25,3 +25,18 @@ Do not commit decrypted game HTML or developer passwords to this public reposito
 - The builder reuses the handover's Grok patch and runtime assets and fetches genuinely missing encrypted assets from GitHub, with path and version checks.
 - Added `gpt-version/tests/test_builder.py` for encrypted fixture and network-isolation guard tests. Equivalent local test fixtures pass. Actual GitHub download, complete patch application against latest `main`, and full game QA are NOT YET VERIFIED.
 - No Vercel, new hosting provider, live Worker changes, or public plaintext game build. `main` stays untouched.
+
+## 2026-11-02 — GPT Version v16a public beta (isolated)
+
+Public beta: https://lafrich.github.io/virtual-office/rebuild/gpt-version/
+Rollback to prior beta: https://lafrich.github.io/virtual-office/rebuild/gpt-version/?classic=1
+
+New files/edits under `rebuild/gpt-version/` **only**; published as additive files on `main` to work with existing GitHub Pages. The production `sw.js`, encrypted manifests, main game shell, and Cloudflare Worker have NOT been changed.
+
+- `package-a.js` applies v16a original-engine transforms in the scoped beta SW. The original encrypted game and original sprites are fetched unchanged, decrypted in browser memory. The patch is not a standalone game and is never applied to production.
+- Owner feedback covered: free crossing anywhere, 40s traffic density cycle (busy 12s/quiet 28s/clear 6s), 15 vehicles, local vehicle collisions and respawn to starting kerb with no gameplay penalty, slower walk/run, walk animation release, loak roof-occluded search spots, A1 no floor tap, A2 scheduled demo NPC off, A3 toast mobile, A4 fullscreen, A5 far-side image preload near crossing, lower sparkles, fewer NPC crossers, phone-map-verified HUD minimap removal.
+- A7 depth fix: cars stay attached to the native `EXT.gC` painter; no synthetic lane-A SVG group. The existing far-side world layer contract is preserved.
+- Verified against GitHub encrypted production build: 20 exact replacements applied; all resulting JavaScript script blocks compiled successfully. Traffic phases and the 26–32s clear crossing interval checked at both lane positions. Beta login and SW are syntax checked; `main/sw.js` SHA unchanged.
+- Browser/Android screenshot QA and live end-to-end user testing are still pending. A5 locked-asset deferral, A6 performance optimizations, and full A7 flicker regression are deliberately NOT represented as completed without measurements. Multiplayer/Worker v16a server changes are NOT deployed and remain out of scope for this offline beta.
+
+SAFETY: Never merge unencrypted game HTML, never connect the beta to the live Worker, and never claim that unit checks prove end-to-end gameplay.
