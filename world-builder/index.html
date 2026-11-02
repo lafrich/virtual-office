@@ -60,7 +60,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <button id="home" aria-label="Reset camera">◎</button>
 </div>
 <main id="canvas-wrap"><canvas id="world" aria-label="Editable 3D isometric world"></canvas>
-<div id="hint">Tap objek untuk memilih. <b>Move</b> lalu drag. Karakter masih placeholder sampai aset online terpasang. <b>Walk Test</b> untuk cek arah.</div>
+<div id="hint">Asset GPT asli memerlukan sesi Virtual Life yang aktif. Karakter punya 4 sisi, tidak boleh di-rotate.</div>
 <div id="status">3D Depth · Pixel Assets</div>
 <div id="walkPad" aria-label="Four directional character movement">
 <button data-walk="up" aria-label="Move north">↑</button><button data-walk="left" aria-label="Move west">←</button>
@@ -74,7 +74,13 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <button id="scaleDown">− Scale</button><button id="scaleUp">＋ Scale</button>
 <button id="duplicate">Duplicate</button><button id="delete" class="danger">Delete</button>
 </div>
-<div id="actorControls"><label>Facing <select id="facing"><option value="sw">SW</option><option value="se">SE</option><option value="nw">NW</option><option value="ne">NE</option></select></label>
+<div id="actorControls"><label>Character <select id="profile">
+<option value="ichsan">Ichsan</option><option value="theodore">Theodore</option>
+<option value="noor">Noor</option><option value="grok">Grok Bot</option>
+<option value="raka">Raka</option><option value="bima">Bima</option>
+<option value="ellen">Ellen</option><option value="nadia">Nadia</option>
+<option value="warteg">Bu Warteg</option><option value="barista">Barista</option>
+<option value="kasir">Kasir</option></select></label><label>Facing <select id="facing"><option value="sw">SW</option><option value="se">SE</option><option value="nw">NW</option><option value="ne">NE</option></select></label>
 <label>Pose <select id="pose"><option value="">Idle</option><option value="sit">Sit</option><option value="sleep">Sleep</option><option value="bathe">Bathe</option><option value="toilet">Toilet</option><option value="work">Work</option></select></label>
 <span id="actorLock">Rotation locked · proportions preserved</span></div>
 <div id="detail"><label>X / C<input id="x" type="number" step="0.1"></label><label>Z / R<input id="z" type="number" step="0.1"></label><label>Y / Height<input id="y" type="number" step="0.1"></label><label>Rotation °<input id="rotation" type="number" step="15"></label><label>Scale<input id="scale" type="number" step="0.1" min="0.1" max="8"></label><label>Object ID<input id="objectId" type="text" readonly></label></div>
