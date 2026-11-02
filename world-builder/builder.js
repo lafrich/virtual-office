@@ -21,6 +21,8 @@ const STORE='virtual-life-gpt-world-builder-pipeline-v3';
 const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
+const schema=window.VLMapSchema;
+const PIXEL_WORLD=Math.SQRT2/64, VERTICAL_COMP=2/Math.sqrt(3);
 const actorType=t=>t==='avatar'||t==='npc';
 const directions=['sw','se','nw','ne'];
 // Actual catalog artwork is 2D. These objects are independent world nodes;
@@ -225,7 +227,7 @@ function sanitize(v){
  let ids=new Set(),out=clone(seed);out.objects=[];
  for(const p of v.objects){
   if(!p||typeof p.id!=='string'||p.id.length>100||ids.has(p.id))continue;
-  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc'].includes(p.type))continue;
+  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc','marker'].includes(p.type))continue;
   ids.add(p.id);
   let e={
    id:p.id,name:String(p.name||p.type).slice(0,90),type:p.type,
@@ -242,13 +244,16 @@ function sanitize(v){
   if(actorType(p.type)){
     e.facing=directions.includes(p.facing)?p.facing:'sw';
     e.pose=['sit','sleep','bathe','toilet','work'].includes(p.pose)?p.pose:null;
-    e.variant='gpt-original';
+    e.variant='pipeline-v6b';
     e.profile=window.VLCharacterRig?.profiles?.[p.profile]?p.profile:'ichsan';
   }
   // Keep unknown action metadata as data only. No gameplay execution.
   if(p.action&&typeof p.action==='object')e.action=clone(p.action);
   if(p.collision!==undefined)e.collision=!!p.collision;
-  style.normalize(e,assetByName);
+  for(const key of ['layer','subtype','tags','interactions','capacity','entranceFacing','markerKind','blocking','notes']){
+   if(Object.hasOwn(p,key))e[key]=clone(p[key]);
+  }
+  style.normalize(e,assetByName);schema.normalize(e,assetByName,style);
   out.objects.push(e);
  }
  if(v.map&&typeof v.map==='object')out.map={...out.map,...clone(v.map)};
@@ -275,7 +280,8 @@ renderer.setClearColor(0xbad0d8,1);
 renderer.sortObjects=true;
 const camera=new THREE.OrthographicCamera(-20,20,20,-20,.1,350);
 const cameraFocus=new THREE.Vector3(4,0,35);
-const direction=new THREE.Vector3(1,1.02,1).normalize();
+// True 2:1 pixel-isometric ground (30° elevation), orthographic = no perspective resizing.
+const direction=new THREE.Vector3(1,Math.sqrt(2/3),1).normalize();
 let viewSize=35;
 function resetCamera(){cameraFocus.set(4,0,34.8);viewSize=35;fitCamera();}
 function fitCamera(){
@@ -363,7 +369,8 @@ function pixelTexture(name,dir='sw'){
  const view=spec?.variants?.[dir]?dir:spec?.variants?.sw?'sw':spec?.variants?.se?'se':dir;
  const id=name+'|'+view;
  if(!spriteTexture.has(id)){
-  const src=spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):'../assets/'+name;
+  const src=spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):
+    spec?.source==='pipeline-vegetation'?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+spec.relativeFile:'../assets/'+name;
   const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,()=>console.warn('Missing sprite',name));
   t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
   spriteTexture.set(id,t);
@@ -444,7 +451,7 @@ function makePixelProp(root,type,item){
 }
 function makeSprite(root,item){
  const spec=assetByName.get(item.asset);if(!spec)return;
- if(spec.source==='pipeline-street'&&!spec.published){
+ if((spec.source==='pipeline-street'||spec.source==='pipeline-vegetation')&&!spec.published){
   const kind=style.category(item,assetByName);
   if(kind==='building'){
    makeBuilding(root,{...item,type:spec.group==='loak'||spec.group==='kampung'?'shop':'building',
@@ -466,7 +473,7 @@ function makeSprite(root,item){
   const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
   plane.position.set(px,height*(py-.5),part.off);
   plane.userData.billboardPart=true;plane.userData.assetFile=part.file;
-  plane.userData.displayFacing=view;plane.userData.authorWidth=width;
+  plane.userData.displayFacing=view;plane.userData.pivotY=py;plane.userData.pivotX=pivot&&size?(size[0]/2-pivot[0])/size[0]:0;plane.userData.authorWidth=width;
   plane.userData.authorHeight=height;plane.userData.aspectFixed=false;
   root.add(plane);billboardSprites.push({root,plane});
  }
@@ -480,6 +487,16 @@ function makeAvatar(root,item){
  }else{
    console.warn('Canonical GPT character rig unavailable; actor art stays hidden.');
  }
+}
+function makeMarker(root,item){
+ // Authoring-only marker: no production art, collision or gameplay side effects.
+ const tag={spawn:'S',entrance:'E',interaction:'!',patrol:'P',trigger:'T'}[item.markerKind]||'!';
+ const mat=new THREE.MeshBasicMaterial({color:0xfbd652,side:THREE.DoubleSide,depthTest:true,depthWrite:true});
+ const body=new THREE.Mesh(new THREE.OctahedronGeometry(.23),mat);
+ body.position.y=.5;root.add(body);
+ const pole=new THREE.Mesh(new THREE.BoxGeometry(.045,.43,.045),mat);
+ pole.position.y=.23;root.add(pole);
+ root.userData.editorMarker=tag;
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
 let highlight=null;
@@ -495,6 +512,7 @@ function instantiate(o){
   case 'box':makePixelProp(root,'box',o);break;
   case 'sprite':makeSprite(root,o);break;
   case 'avatar':case 'npc':makeAvatar(root,o);break;
+  case 'marker':makeMarker(root,o);break;
  }
  assetRoots.add(root);owners.set(o.id,root);
 }
