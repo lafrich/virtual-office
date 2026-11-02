@@ -185,6 +185,13 @@ function gptApplyA(html){
   // Drop the suspect skip list for that frame and recover on the next frame.
   rep("console.warn('xcFrame',e); XC.b=null; document.body.classList.remove('xcv');",
       "if(!XC._gptWarned){console.warn('xcFrame recovery',e);XC._gptWarned=true;} XC.skip=null;");
+  // ACTIVE tree renderer: VEG.on routes extTree() to vegTree() BEFORE any
+  // legacy SVG tWide/tRound is executed. Previous 09–11 changes only touched
+  // that legacy path and were invisible for the PNG vegetation in screenshots.
+  // Scale actual vegetation PNGs from their metadata pivot e[2]/e[3],
+  // keeping the foot P(c,r) fixed in world coordinates.
+  rep("const w = e[0] / PPU * k, h = e[1] / PPU * k, x = Math.round((p.x - e[2] / PPU * k) * PPU) / PPU, y = Math.round((p.y - e[3] / PPU * k) * PPU) / PPU;",
+      "const officeLawn = vegZone(c,r)==='front' && c>=-12 && c<=37; const treeScale = officeLawn ? (kind==='tall'?1.85:kind==='wide'?2.1:2.15) : 1; const vk = k * treeScale; const w = e[0] / PPU * vk, h = e[1] / PPU * vk, x = Math.round((p.x - e[2] / PPU * vk) * PPU) / PPU, y = Math.round((p.y - e[3] / PPU * vk) * PPU) / PPU;");
   // Scale the ORIGINAL vector trees before pxBake / extCompose flattens them.
   // P(c,r) is unchanged, so the trunk base stays pinned to its ground tile.
   // Shrubs, potted plants and any Street2 building art are not rescaled.
@@ -213,7 +220,7 @@ function gptApplyA(html){
   if(phoneMap)css+="body.y2k .y2-map,#vs-hud .vs-mini{display:none!important}";
   rep("</head>","<style id=\"gpt-v16a-css\">"+css+"</style></head>");
   rep("window.__vsBuild = 'Virtual Life v15a';","window.__vsBuild = 'Virtual Life v16a · GPT beta';");
-  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.11</div></body>");
+  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.12</div></body>");
   if(!phoneMap)console.warn('[gpt-a] Phone map absent; HUD minimap retained');
   return {html:s,applied:applied.length,phoneMap:phoneMap};
 }
