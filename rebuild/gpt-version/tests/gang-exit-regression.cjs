@@ -17,11 +17,14 @@ const R={side:[19.4,25.6,36.45,37.65],lane,terminal};
 const inside=(r,c,y)=>c>=r[0]&&c<=r[1]&&y>=r[2]&&y<=r[3];
 const walk=(c,y)=>inside(R.side,c,y)||inside(R.lane,c,y)||inside(R.terminal,c,y);
 assert.deepEqual(lane,[21.85,24.15,37.6,52.05]);
-assert.deepEqual(terminal,[18.8,27.2,51.4,54.7]);
+assert.deepEqual(terminal,[-40,34,51.4,54.7]);
 let steps=0;
 for(let r=36.6;r<=54.69;r+=.1){assert.ok(walk(22.55,r),'alley pass must stay continuous at r='+r);steps++;}
-for(let c=19;c<=27.1;c+=.1){assert.ok(walk(c,53),'rear road must allow side exploration at c='+c);steps++;}
-for(const [c,r] of [[22.55,55],[18.5,53],[27.5,53],[17.9,50],[22.55,56]])
+for(let c=-39.9;c<=33.9;c+=.1){assert.ok(walk(c,53),'rear road must allow side exploration at c='+c);steps++;}
+for(const [c,r] of [[22.55,55],[-40.5,53],[34.5,53],[17.9,50],[22.55,56]])
  assert.ok(!walk(c,r),'player may not cross baked art boundary '+c+','+r);
 assert.ok(code.includes("V16.gangEntered=true"),'beta must expose exploration status');
-console.log('PASS: '+steps+' connected walk samples from main street to rear road, 5 art-boundary checks; no changes to live World.');
+assert.ok(code.includes("var floorRoad=(me.r>=51.25&&me.r<=54.85"),'road floor overlay must be disabled over the player');
+assert.ok(code.includes("if(floorRoad&&g.getAttribute('display')!=='none')"),'only road should hide the baked front occluder');
+assert.ok(code.includes("const G_=n.parentNode===EXT.gF"),'normal foreground prop sorting must remain in place');
+console.log('PASS: '+steps+' walk samples, full lateral road and bounded ends; road occluder guard and native depth logic present.');
