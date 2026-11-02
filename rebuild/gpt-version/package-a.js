@@ -91,7 +91,7 @@ function gptWorldV16(){
     if(!V16.made&&EXT.cars&&EXT.cars.length)V16.made=v16Make();
     if(!OUT_ON){if(S2X.far)s2xFar(false);V16.onRoad=false;return;}
     if(V16.made)v16Traffic();v16Player();s2xCrossers(dt);
-    var far=!WT.on&&!CV.on&&!FMI.on&&me.r>XG.curbF;s2xFar(far);if(far)s2xFarDepth();
+    var far=!WT.on&&!CV.on&&!FMI.on&&(S2X.far?me.r>XG.curbF-.14:me.r>XG.curbF+.14);s2xFar(far);if(far)s2xFarDepth();
     // Native painter order: never reparent vehicles to a synthetic lane group.
     // Hysteresis prevents rapidly toggling the vehicle back-canvas at the lane boundary.
     var canBack=V16.made&&!WT.on&&!CV.on&&!FMI.on;
@@ -131,7 +131,10 @@ function gptApplyA(html){
   rep("const on = s2lReady(o.s); if (on !== o.on)",
       "const on = !S2L.st || !S2L.bag || s2lReady(o.s); if (on !== o.on)");
   // Stabilize layering at the original far-side painter boundary.
-  rep("const G_ = b > pd + 0.02 ? EXT.gF : S2X.gFB;",
+  // Baked foreground occluder level changes only after crossing a small dead-band.
+  rep("const e = LV[k][1];\n  if (!S2X.lv)",
+      "if(S2X.lv&&S2X.lv.k>=0&&k!==S2X.lv.k){var oldk=S2X.lv.k,edge=k>oldk?LV[k][0]+.12:LV[oldk][0]-.12; if(k>oldk?pd<edge:pd>edge)k=oldk;} const e = LV[k][1];\n  if (!S2X.lv)");
+  rep("const G_ = b > pd + 0.02 ? EXT.gF;",
       "const band=0.16; const G_=n.parentNode===EXT.gF ? (pd>b+band?S2X.gFB:EXT.gF) : (pd<b-band?EXT.gF:S2X.gFB);");
   rep("const G_ = s2xGroupFor(c, r, c + r > me.c + me.r + 0.02);",
       "const depth=c+r-me.c-me.r; n._gptFront=n._gptFront===undefined ? depth>0 : (n._gptFront ? depth>-.15 : depth>.15); const G_ = s2xGroupFor(c,r,n._gptFront);");
