@@ -16,6 +16,7 @@ const PROP_NAMES=new Set(['tree','bench','lamp','box','trash']);
 const PIXELS={
  tree:{w:80,h:116,width:4.3,height:6.3,pivot:.95},
  bench:{w:88,h:60,width:3.1,height:2.15,pivot:.92},
+ table:{w:88,h:64,width:3.15,height:2.25,pivot:.94},
  lamp:{w:36,h:112,width:1.5,height:6.1,pivot:.96},
  trash:{w:52,h:64,width:1.8,height:2.2,pivot:.96},
  box:{w:60,h:60,width:2.1,height:2.1,pivot:.96}
@@ -27,6 +28,7 @@ function category(o,catalog){
  if(spec){
   const id=String(spec.id||'').toLowerCase(),file=String(o.asset||'').toLowerCase();
   if(/bangku|chair|armchair|stool/.test(id+' '+file))return 'bench';
+  if(/meja|table/.test(id+' '+file))return 'table';
   if(/lamp|tiang/.test(id+' '+file))return 'lamp';
   if(/tong_sampah|trash|bin/.test(id+' '+file))return 'trash';
   if(/pohon|tree|vegetation/.test(id+' '+file))return 'tree';
@@ -45,7 +47,7 @@ function footprint(o,catalog){
   Math.max(.5,Number(s?.footprint?.[1]||o.d||5))*Number(o.scale||1)
  ];
  const native={
-  tree:[1.4,1.4],bench:[2,1],trash:[.95,.95],lamp:[.75,.75],
+  tree:[1.4,1.4],bench:[2,1],table:[2,1.6],trash:[.95,.95],lamp:[.75,.75],
   prop:[1.25,1],furniture:[1.4,1.2]
  }[kind]||[1.2,1.2];
  const dims=s?.footprint||native;
@@ -80,7 +82,7 @@ function reason(o,objects,map,catalog){
  }
  for(const other of objects||[]){
   if(other.id===o.id||category(other,catalog)==='actor'||other.collision===false)continue;
-  const [ow,od]=footprint(other,catalog),pad=(k==='building'||category(other,catalog)==='building')?.2:.12;
+  const [ow,od]=footprint(other,catalog),pad=(k==='building'||category(other,catalog)==='building')?0.2:0.12;
   if(Math.abs(x-other.x)<(w+ow)/2+pad&&Math.abs(z-other.z)<(d+od)/2+pad)
    return 'Footprint bertabrakan dengan '+(other.name||other.id)+'.';
  }
@@ -126,6 +128,10 @@ function proxyTexture(THREE,type){
   rect(ink,7,41,74,10);rect(wood,10,43,68,6);rect(light,12,43,60,2);
   rect(ink,15,50,8,10);rect(steel,17,50,4,8);
   rect(ink,65,50,8,10);rect(steel,67,50,4,8);
+ }else if(type==='table'){
+  rect(ink,9,23,71,22);rect(wood,12,26,65,15);
+  rect(woodHi,14,28,60,4);rect(ink,17,42,9,20);rect(steel,19,44,5,16);
+  rect(ink,61,42,9,20);rect(steel,63,44,5,16);
  }else if(type==='lamp'){
   rect(ink,14,17,10,88);rect(steel,17,19,4,83);
   rect(ink,7,13,23,8);rect(light,9,15,19,4);
