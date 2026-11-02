@@ -220,6 +220,12 @@ function gptApplyA(html){
   // normally. On desktop we retain the original frequency.
   rep("function xcFrame(dt){ if(!XC.b) return; if(OUT_ON) XC.t=0.6;",
       "function xcFrame(dt){ if(!XC.b) return; if(OUT_ON&&navigator.maxTouchPoints>0){var tn=performance.now();if(XC._gptLastPaint&&tn-XC._gptLastPaint<32)return;XC._gptLastPaint=tn;} if(OUT_ON) XC.t=0.6;");
+  // Outdoor character .me has z-index:7, so the front canvas must be 8.
+  // The native XC.f canvas was also 7, causing screen-order ties where an
+  // avatar could visually sit on top of benches, lamps and other occluders.
+  // Keep world-footpoint depth selection intact; only correct canvas stacking.
+  rep("XC.f=mk(EXT.RF,7); document.body.classList.add('xcv');",
+      "XC.f=mk(EXT.RF,8); document.body.classList.add('xcv');");
   // The level overlays are composite PNGs: some include the GATE PAVEMENT.
   // Remove just its grey/tan road-plane pixels from the front layer at load
   // time. The base street already contains the floor, while white/red pillars
@@ -240,7 +246,7 @@ function gptApplyA(html){
   if(phoneMap)css+="body.y2k .y2-map,#vs-hud .vs-mini{display:none!important}";
   rep("</head>","<style id=\"gpt-v16a-css\">"+css+"</style></head>");
   rep("window.__vsBuild = 'Virtual Life v15a';","window.__vsBuild = 'Virtual Life v16a · GPT beta';");
-  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.15</div></body>");
+  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.16</div></body>");
   if(!phoneMap)console.warn('[gpt-a] Phone map absent; HUD minimap retained');
   return {html:s,applied:applied.length,phoneMap:phoneMap};
 }
