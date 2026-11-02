@@ -28,7 +28,7 @@ function gptLoadingUI(){
     retry.hidden=true;
   }
   window.__gptLoader={
-    fault:function(reason){lastReason=reason||'render';lastFault=performance.now();},
+    fault:function(reason){lastReason=reason||'render';lastFault=performance.now(); if(reason==='renderer'||reason==='canvas')show(lastFault);},
     state:function(){return {visible:visible,reason:lastReason,hadHealthyScene:wasReady};}
   };
   function tick(now){
@@ -66,9 +66,11 @@ function gptLoadingPatch(html){
   }
   // State is read from the same lexical scope as the encrypted world engine.
   replaceOnce('window.__v16={phase:function(t){',
-    "window.__gptLoaderHealth=function(){"+
+    "var gptHadCompositor=false; window.__gptLoaderHealth=function(){"+
     "if(!OUT_ON)return {ready:true};"+
     "if(!EXT.built||!XC.b)return {ready:false,reason:'world'};"+
+    "if(document.body.classList.contains('xcv'))gptHadCompositor=true;"+
+    "if(gptHadCompositor&&!document.body.classList.contains('xcv'))return {ready:false,reason:'canvas'};"+
     "var farExpected=me.r>XG.curbF+.20&&!WT.on&&!CV.on&&!FMI.on;"+
     "if(farExpected){"+
     "if(!V16.farLoaded)return {ready:false,reason:'map'};"+
