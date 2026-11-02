@@ -254,6 +254,8 @@ function sanitize(v){
   // Keep unknown action metadata as data only. No gameplay execution.
   if(p.action&&typeof p.action==='object')e.action=clone(p.action);
   if(p.collision!==undefined)e.collision=!!p.collision;
+  if(p.type==='building'&&['small','medium','large'].includes(p.sizeClass))e.sizeClass=p.sizeClass;
+  if(p.replaceable!==undefined)e.replaceable=!!p.replaceable;
   for(const key of ['layer','subtype','tags','interactions','capacity','entranceFacing','markerKind','blocking','notes']){
    if(Object.hasOwn(p,key))e[key]=clone(p[key]);
   }
@@ -597,6 +599,12 @@ function updateSelection(){
    $('profile').value=cur.profile||'ichsan';
  }
  $('profile').disabled=!actor;
+ const editableBuilding=cur?.type==='building'||cur?.type==='shop';
+ $('buildingControls').hidden=!editableBuilding;
+ for(const [key,field] of [['buildingW','w'],['buildingD','d'],['buildingH','h']]){
+  $(key).value=editableBuilding?cur[field]||'':'';
+  $(key).disabled=!editableBuilding;
+ }
  updateLogicUI();
  if(highlight&&highlight.userData.selected===cur?.id){
    highlight.update();
@@ -813,7 +821,10 @@ function clearWalk(){
 function setMode(m){
  if(mode==='walk'&&m!=='walk')clearWalk();
  mode=m;
- for(const type of ['select','move','walk'])$(type+'Mode').classList.toggle('active',m===type);
+ for(const type of ['select','move','walk','paint','fill'])
+  $(type+'Mode')?.classList.toggle('active',m===type);
+ if(m!=='place')placementType=null;
+ if(placementPreview)placementPreview.visible=m==='place';
  $('walkPad').classList.toggle('active',m==='walk');
  if(m==='walk'){
    const first=(item()&&actorType(item().type)?item():documentMap.objects.find(x=>actorType(x.type)));
