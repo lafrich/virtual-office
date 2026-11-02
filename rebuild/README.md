@@ -1,16 +1,16 @@
-# Virtual Office — Editable Rebuild 01
+# Virtual Office — Archived separate Rebuild prototype
 
-Playable, independently editable prototype at **https://lafrich.github.io/virtual-office/rebuild/**.
+**Retired November 2, 2026.** This independent demo was not the main Virtual Life game. Its public entry page (`rebuild/index.html`) has been removed at the owner's request, and its optional Asset Bridge renderer hook has been reverted. The remaining code is kept solely as an unmaintained historical source reference—not a playable or supported deployment.
 
 ## Why this exists
 The original Virtual Office and staging game ship encrypted. Editing decrypted markup through service-worker injections caused unreliable asset depth sorting and chair flickering. **This rebuild is fresh source code**, so every object, interaction, scene, and UI can be edited directly. It does not copy private game code or expose original encrypted assets.
 
 ## Files
-- `index.html` — UI skeleton, menu, buttons, Status Player / Notifikasi.
+- `index.html` — retired/deleted; the old UI entry point is no longer published.
 - `style.css` — responsive mobile HUD, pixel-themed interface.
 - `game.js` — isometric Canvas 2D world, furniture drawing, needs simulation and actions.
 
-No build step, backend, dependency, password, decryption, npm, or API keys required. Open `index.html` via a local HTTP server (e.g. `python3 -m http.server 8000` in the repo root), or publish on GitHub Pages.
+This directory no longer contains a public `index.html` entry point. The notes below describe the historical prototype only.
 
 ## Current playable scope
 - Isometric maps: Office (lounge, desks, Baymax, Migi), Taman (benches, warteg exterior, recliner), Warteg (food display and bar-stool seating). Original game is not modified.
