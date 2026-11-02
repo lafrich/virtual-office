@@ -18,6 +18,26 @@ if(!THREE){
   throw Error('THREE_MODULE_NOT_AVAILABLE');
 }
 const STORE='virtual-life-world-builder-v1';
+const assetCatalog=window.VLAssetCatalog||[];
+const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
+const actorType=t=>t==='avatar'||t==='npc';
+const directions=['sw','se','nw','ne'];
+// Actual catalog artwork is 2D. These objects are independent world nodes;
+// only authored meshes have complete depth geometry.
+const assetGroup=$('assetGroup');
+if(assetGroup){
+ assetGroup.replaceChildren();
+ for(const group of ['Home & Living','Interior / Fixtures','Street / Park','Warteg']){
+   const section=document.createElement('optgroup');section.label=group;
+   for(const entry of assetCatalog.filter(e=>e.group===group)){
+     const option=document.createElement('option');
+     option.value='sprite:'+entry.file;option.textContent=entry.label;
+     section.appendChild(option);
+   }
+   assetGroup.parentNode.appendChild(section);
+ }
+ assetGroup.remove();
+}
 const clone=x=>JSON.parse(JSON.stringify(x));
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const round=v=>Math.round(v*100)/100;
@@ -56,19 +76,24 @@ function sanitize(v){
  let ids=new Set(),out=clone(seed);out.objects=[];
  for(const p of v.objects){
   if(!p||typeof p.id!=='string'||p.id.length>100||ids.has(p.id))continue;
-  if(!['building','shop','bench','lamp','tree','box','sprite','avatar'].includes(p.type))continue;
+  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc'].includes(p.type))continue;
   ids.add(p.id);
   let e={
    id:p.id,name:String(p.name||p.type).slice(0,90),type:p.type,
    x:clamp(Number(p.x)||0,-100,100),
    z:clamp(Number(p.z)||0,-100,100),
    y:clamp(Number(p.y)||0,-20,45),
-   rotation:((Number(p.rotation)||0)%360+360)%360,
-   scale:clamp(Number(p.scale)||1,.1,8)
+   rotation:actorType(p.type)?0:((Number(p.rotation)||0)%360+360)%360,
+   scale:actorType(p.type)?1:clamp(Number(p.scale)||1,.1,8)
   };
   for(const k of ['w','d','h','width','height'])if(Number.isFinite(Number(p[k])))e[k]=clamp(Number(p[k]),.2,80);
   if(typeof p.color==='string'&&/^#[0-9a-fA-F]{6}$/.test(p.color))e.color=p.color;
-  if(p.type==='sprite'&&/^[a-z0-9_-]+\.svg$/.test(p.asset||''))e.asset=p.asset;
+  if(p.type==='sprite'&&/^[a-z0-9_-]+\.svg$/.test(p.asset||'')&&assetByName.has(p.asset))e.asset=p.asset;
+  if(actorType(p.type)){
+    e.facing=directions.includes(p.facing)?p.facing:'sw';
+    e.pose=['sit','sleep','bathe','toilet','work'].includes(p.pose)?p.pose:null;
+    e.variant=p.variant==='baymax'?'baymax':'player';
+  }
   // Keep unknown action metadata as data only. No gameplay execution.
   if(p.action&&typeof p.action==='object')e.action=clone(p.action);
   if(p.collision!==undefined)e.collision=!!p.collision;
@@ -248,15 +273,27 @@ function makeTree(root){
  for(const [x,y,z,w,h,d]of leaves)cuboid(root,x,y,z,w,h,d,0x318e55);
 }
 function makeBox(root,item){cuboid(root,0,.8,0,2,1.6,2,new THREE.Color(item.color||'#d4a86a'));}
+const billboardSprites=[];
 function makeSprite(root,item){
- const width=item.width||4,height=item.height||4;
- const mat=new THREE.MeshBasicMaterial({map:pixelTexture(item.asset),transparent:false,alphaTest:.5,
-   depthWrite:true,depthTest:true,side:THREE.DoubleSide});
- const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
- plane.rotation.y=Math.PI/4;
- plane.position.y=height*.2375;
- root.add(plane);
+ const spec=assetByName.get(item.asset);
+ const width=item.width||spec?.width||4,height=item.height||spec?.height||4;
+ const pivotY=spec?.pivotY??.79;
+ const parts=[{file:item.asset,offset:0}];
+ if(spec?.front)parts.push({file:spec.front,offset:.025});
+ for(const part of parts){
+   const mat=new THREE.MeshBasicMaterial({
+     map:pixelTexture(part.file),transparent:false,alphaTest:.5,
+     depthWrite:true,depthTest:true,side:THREE.DoubleSide
+   });
+   const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
+   plane.position.set(0,height*(pivotY-.5),part.offset);
+   plane.userData.billboardPart=true;
+   root.add(plane);
+   billboardSprites.push({root,plane});
+ }
 }
+// Existing canonical 4-row / 4-column character rig is in character-rig.js.
+// Retain the legacy fallback only if its shared script fails to load.
 function characterTexture(){
  const c=document.createElement('canvas');c.width=32;c.height=64;
  const g=c.getContext('2d'),r=(x,y,w,h,color)=>{g.fillStyle=color;g.fillRect(x,y,w,h)};
@@ -268,17 +305,26 @@ function characterTexture(){
  return tex;
 }
 const avatarTex=characterTexture();
-function makeAvatar(root){
- const p=new THREE.Mesh(new THREE.PlaneGeometry(1.8,3.6),
-  new THREE.MeshBasicMaterial({map:avatarTex,transparent:false,alphaTest:.5,depthWrite:true,depthTest:true,side:THREE.DoubleSide}));
- p.rotation.y=Math.PI/4;p.position.y=1.8;root.add(p);
+const rigs=new Map();
+function makeAvatar(root,item){
+ const factory=window.VLCharacterRig;
+ if(factory){
+   const rig=factory.createRig(THREE,{direction:item.facing||'sw',pose:item.pose||null,variant:item.variant||'player'});
+   root.add(rig.mesh);rigs.set(item.id,{rig,root});
+ }else{
+   const mat=new THREE.MeshBasicMaterial({map:avatarTex,transparent:false,
+     alphaTest:.5,depthWrite:true,depthTest:true,side:THREE.DoubleSide});
+   const plane=new THREE.Mesh(new THREE.PlaneGeometry(1.8,3.6),mat);
+   plane.position.y=1.8;root.add(plane);
+   billboardSprites.push({root,plane});
+ }
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
 let highlight=null;
 function instantiate(o){
  const root=new THREE.Group();root.name=o.name;root.userData.itemId=o.id;
- root.position.set(o.x,o.y,o.z);root.rotation.y=(o.rotation||0)*Math.PI/180;
- root.scale.setScalar(o.scale||1);
+ root.position.set(o.x,o.y,o.z);root.rotation.y=actorType(o.type)?0:(o.rotation||0)*Math.PI/180;
+ root.scale.setScalar(actorType(o.type)?1:(o.scale||1));
  switch(o.type){
   case 'building':case 'shop':makeBuilding(root,o);break;
   case 'bench':makeBench(root);break;
@@ -286,11 +332,13 @@ function instantiate(o){
   case 'tree':makeTree(root);break;
   case 'box':makeBox(root,o);break;
   case 'sprite':makeSprite(root,o);break;
-  case 'avatar':makeAvatar(root);break;
+  case 'avatar':case 'npc':makeAvatar(root,o);break;
  }
  assetRoots.add(root);owners.set(o.id,root);
 }
 function clearAll(){
+ for(const {rig} of rigs.values())rig.dispose();
+ rigs.clear();billboardSprites.length=0;
  while(assetRoots.children.length){
   const ch=assetRoots.children[0];assetRoots.remove(ch);
   ch.traverse(o=>{if(o.geometry)o.geometry.dispose();
