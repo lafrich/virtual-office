@@ -371,10 +371,16 @@ function updateSelection(){
  $('actorControls').classList.toggle('visible',actor);
  $('facing').disabled=!actor;$('pose').disabled=!actor;
  if(actor){$('facing').value=cur.facing||'sw';$('pose').value=cur.pose||'';}
- if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
- if(cur&&owners.has(cur.id)){
-  highlight=new THREE.BoxHelper(owners.get(cur.id),0xf5df42);highlight.material.depthTest=false;
-  highlight.material.transparent=true;highlight.renderOrder=100;scene.add(highlight);
+ if(highlight&&highlight.userData.selected===cur?.id){
+   highlight.update();
+ }else{
+   if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
+   if(cur&&owners.has(cur.id)){
+     highlight=new THREE.BoxHelper(owners.get(cur.id),0xf5df42);
+     highlight.userData.selected=cur.id;
+     highlight.material.depthTest=false;highlight.material.transparent=true;
+     highlight.renderOrder=100;scene.add(highlight);
+   }
  }
 }
 function select(id){
@@ -462,7 +468,7 @@ function onDown(e){
  const p=floorPoint(e);
  if(mode==='move'&&hit&&p){
   undoPoint();const o=item();
-  drag={kind:'move',id:e.pointerId,start:p.clone(),x:o.x,z:o.z,changed:false};
+  drag={kind:'move',id:e.pointerId,start:p.clone(),x:o.x,z:o.z,changed:false,actor:actorType(o.type)};
  }else{
   drag={kind:'pan',id:e.pointerId,start:p?.clone()||null,focus:cameraFocus.clone(),sx:e.clientX,sy:e.clientY,hit:!!hit,changed:false};
  }
@@ -478,9 +484,15 @@ function onMove(e){
  const p=floorPoint(e);
  if(drag.kind==='move'&&p&&item()){
   const o=item();let dx=p.x-drag.start.x,dz=p.z-drag.start.z;
+  const oldX=o.x,oldZ=o.z;
   o.x=snap?Math.round((drag.x+dx)*2)/2:round(drag.x+dx);
   o.z=snap?Math.round((drag.z+dz)*2)/2:round(drag.z+dz);
+  if(drag.actor&&(o.x!==oldX||o.z!==oldZ)){
+    o.facing=window.VLCharacterRig?.directionFromWorld(o.x-oldX,o.z-oldZ,o.facing||'sw')||o.facing;
+    o.pose=null;
+  }
   drag.changed=true;applyItem();
+  if(drag.actor)rigs.get(o.id)?.rig.setMoving(o.x-oldX,o.z-oldZ,true);
  }else if(drag.kind==='pan'&&!drag.hit){
   // Use camera-aligned world pan; horizontal drag translates on iso ground.
   let sx=e.clientX-drag.sx,sy=e.clientY-drag.sy,r=canvas.getBoundingClientRect(),
@@ -493,7 +505,13 @@ function onMove(e){
 function onUp(e){
  pointers.delete(e.pointerId);
  if(pointers.size<2)pinch=null;
- if(drag?.kind==='move'&&drag.id===e.pointerId){if(drag.changed)saved();else undoStack.pop();}
+ if(drag?.kind==='move'&&drag.id===e.pointerId){
+   if(drag.actor){
+     const rig=rigs.get(item()?.id)?.rig;
+     if(rig)rig.setMoving(0,0,false);
+   }
+   if(drag.changed)saved();else undoStack.pop();
+ }
  drag=null;
 }
 canvas.addEventListener('pointerdown',onDown);
@@ -501,8 +519,54 @@ canvas.addEventListener('pointermove',onMove);
 canvas.addEventListener('pointerup',onUp);
 canvas.addEventListener('pointercancel',onUp);
 canvas.addEventListener('wheel',e=>{e.preventDefault();viewSize=clamp(viewSize*(e.deltaY>0?1.12:.89),10,100);fitCamera();renderer.render(scene,camera);},{passive:false});
-function setMode(m){mode=m;for(const type of ['select','move'])$(type+'Mode').classList.toggle('active',m===type);}
-$('selectMode').onclick=()=>setMode('select');$('moveMode').onclick=()=>setMode('move');
+// Walk Test previews canonical movement and 3D occlusion without mutating
+// the authored map or touching multiplayer / player data.
+const walkInput={up:false,down:false,left:false,right:false};
+let walkActorId=null;
+function clearWalk(){
+ for(const k of Object.keys(walkInput))walkInput[k]=false;
+ for(const [id,rec] of rigs){
+   rec.rig.setMoving(0,0,false);
+   const source=documentMap.objects.find(a=>a.id===id);
+   if(source){
+     rec.root.position.set(source.x,source.y,source.z);
+     rec.rig.setPose(source.pose||null);
+     rec.rig.setDirection(source.facing||'sw');
+     if(source.pose)rec.rig.setPose(source.pose);
+   }
+ }
+}
+function setMode(m){
+ if(mode==='walk'&&m!=='walk')clearWalk();
+ mode=m;
+ for(const type of ['select','move','walk'])$(type+'Mode').classList.toggle('active',m===type);
+ $('walkPad').classList.toggle('active',m==='walk');
+ if(m==='walk'){
+   const first=(item()&&actorType(item().type)?item():documentMap.objects.find(x=>actorType(x.type)));
+   if(!first){tell('Add character before Walk Test');setMode('select');return;}
+   walkActorId=first.id;select(first.id);
+   rigs.get(walkActorId)?.rig.setPose(null);
+   tell('Walk Test: WASD / arrow keys / touch D-pad. Edits are not saved.');
+ }
+}
+$('selectMode').onclick=()=>setMode('select');
+$('moveMode').onclick=()=>setMode('move');
+$('walkMode').onclick=()=>setMode(mode==='walk'?'select':'walk');
+for(const b of $('walkPad').querySelectorAll('button[data-walk]')){
+ const d=b.dataset.walk;
+ b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);walkInput[d]=true;});
+ for(const ev of ['pointerup','pointercancel','lostpointercapture'])
+   b.addEventListener(ev,()=>walkInput[d]=false);
+}
+function walkKey(e,down){
+ if(mode!=='walk'||e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return false;
+ const keys={w:'up',arrowup:'up',s:'down',arrowdown:'down',a:'left',arrowleft:'left',d:'right',arrowright:'right'};
+ const target=keys[String(e.key).toLowerCase()];if(!target)return false;
+ walkInput[target]=down;e.preventDefault();return true;
+}
+window.addEventListener('keydown',e=>walkKey(e,true),true);
+window.addEventListener('keyup',e=>walkKey(e,false),true);
+window.addEventListener('blur',()=>{for(const k of Object.keys(walkInput))walkInput[k]=false;});
 $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');};
 $('zoomIn').onclick=()=>{viewSize=clamp(viewSize*.8,10,100);fitCamera();};
 $('zoomOut').onclick=()=>{viewSize=clamp(viewSize*1.25,10,100);fitCamera();};
@@ -550,8 +614,33 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('error',e=>{console.error('World Builder runtime',e.error);});
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();fail.style.display='flex';fail.textContent='WebGL context lost. Reload editor; changes are saved locally.';});
 rebuild();resetCamera();resize();saved();
-function frame(){
+let priorFrame=performance.now();
+function frame(now){
  requestAnimationFrame(frame);
+ const dt=Math.min(.05,Math.max(0,(now-priorFrame)/1000));priorFrame=now;
+ if(mode==='walk'&&walkActorId&&rigs.has(walkActorId)){
+   const holder=rigs.get(walkActorId);
+   let dx=Number(walkInput.right)-Number(walkInput.left);
+   let dz=Number(walkInput.down)-Number(walkInput.up);
+   const len=Math.hypot(dx,dz);
+   if(len>.1){
+     dx/=len;dz/=len;
+     const speed=4.1;
+     // Only editor preview movement, bounded to authored map envelope.
+     let bounds=documentMap.map.worldBounds||{minX:-30,maxX:40,minZ:20,maxZ:55};
+     holder.root.position.x=clamp(holder.root.position.x+dx*speed*dt,bounds.minX,bounds.maxX);
+     holder.root.position.z=clamp(holder.root.position.z+dz*speed*dt,bounds.minZ,bounds.maxZ);
+     holder.rig.setMoving(dx,dz,true);
+   }else holder.rig.setMoving(0,0,false);
+ }
+ for(const {rig,root} of rigs.values())rig.step(dt,camera,root.position);
+ // Old pixel assets are isometric single-view illustrations. Keep every
+ // art plane CAMERA-FACING so rotating its parent never squashes the art.
+ for(const entry of billboardSprites){
+   const {root,plane}=entry;
+   const yaw=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z);
+   plane.rotation.y=yaw-root.rotation.y;
+ }
  renderer.render(scene,camera);
 }
-frame();
+requestAnimationFrame(frame);
