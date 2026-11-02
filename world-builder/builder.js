@@ -783,8 +783,14 @@ function onMove(e){
   }
   fitCamera();return;
  }
+ if(mode==='place'&&placementType&&pointers.size===1)previewPlace(floorPoint(e));
  if(!drag||drag.id!==e.pointerId)return;
  const p=floorPoint(e);
+ if(drag.kind==='paint'&&p){
+  const cell=Math.floor(p.x)+','+Math.floor(p.z);
+  if(cell!==drag.last){drag.last=cell;drag.changed=!!paintAt(p)||drag.changed;}
+  return;
+ }
  if(drag.kind==='move'&&p&&item()){
   const o=item();let dx=p.x-drag.start.x,dz=p.z-drag.start.z;
   const oldX=o.x,oldZ=o.z;
@@ -808,6 +814,9 @@ function onMove(e){
 function onUp(e){
  pointers.delete(e.pointerId);
  if(pointers.size<2)pinch=null;
+ if(drag?.kind==='paint'&&drag.id===e.pointerId){
+  if(drag.changed)saved();else undoStack.pop();
+ }
  if(drag?.kind==='move'&&drag.id===e.pointerId){
    if(drag.actor){
      const rig=rigs.get(item()?.id)?.rig;
