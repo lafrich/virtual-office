@@ -8,11 +8,9 @@ const bridgeSrc=fs.readFileSync(path.join(__dirname,"../game-assets/asset-bridge
 const gameSrc=fs.readFileSync(path.join(__dirname,"../rebuild/game.js"),"utf8");
 const coveSrc=fs.readFileSync(path.join(__dirname,"../cove-reskin.js"),"utf8");
 const swSrc=fs.readFileSync(path.join(__dirname,"../sw.js"),"utf8");
-const html=fs.readFileSync(path.join(__dirname,"../rebuild/index.html"),"utf8");
-
-assert.ok(html.includes("../game-assets/asset-bridge.js"));
-assert.ok(html.indexOf("asset-bridge.js")<html.indexOf("game.js"));
-assert.ok(gameSrc.includes("VOAssetBridge?.draw(g,p,zoom"));
+// The independent Rebuild demo is intentionally retired, not part of the live game.
+assert.equal(fs.existsSync(path.join(__dirname,"../rebuild/index.html")),false);
+assert.ok(!gameSrc.includes("VOAssetBridge?.draw(g,p,zoom"));
 assert.ok(coveSrc.includes("VOAssetBridge?.draw(ctx,p,.73"));
 assert.ok(swSrc.includes("u.searchParams.get('assetbridge') === '1'"));
 assert.ok(swSrc.includes("'game-assets/asset-bridge.js'"));
