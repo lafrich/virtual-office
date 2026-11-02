@@ -1,6 +1,6 @@
 {
   "format": "virtual-life-world-builder-v1",
-  "version": 5,
+  "version": 6,
   "map": {
     "name": "Virtual Life · Authoring Map / Street2",
     "grid": "game:c,r",
@@ -19,7 +19,7 @@
       "z0": 32.75,
       "z1": 36.3
     },
-    "notes": "Draft layout for AI mechanics authoring; placement markers are candidate locations, not verified against exact encrypted production map. Original game and multiplayer unaffected. Door and interaction coordinates are placeholders until validated against original authenticated game source.",
+    "notes": "Draft layout for AI mechanics authoring; placement markers are candidate locations, not verified against exact encrypted production map. Original game and multiplayer unaffected. Door and interaction coordinates are placeholders until validated against original authenticated game source. City Builder v3 provides editable road/sidewalk/grass/water terrain and 1-tile grid alignment.",
     "source": "GPT Version renderer using original Virtual Life encrypted asset manifest",
     "nativeReference": {
       "street2": "assets/street2/base.png",
@@ -55,6 +55,2671 @@
       ],
       "groundCoordinates": "c/r",
       "heightAxis": "y"
+    },
+    "terrain": {
+      "default": "grass",
+      "cells": [
+        {
+          "c": -30,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -29,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -28,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -27,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -26,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -25,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -24,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -23,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -22,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -21,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -20,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -19,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -18,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -17,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -16,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -15,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -14,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -13,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -12,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -11,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -10,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -9,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -8,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -7,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -6,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -5,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -4,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -3,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -2,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -1,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 0,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 1,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 2,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 3,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 4,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 5,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 6,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 7,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 8,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 9,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 10,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 11,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 12,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 13,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 14,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 15,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 16,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 17,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 18,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 19,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 20,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 21,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 22,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 23,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 24,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 25,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 26,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 27,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 28,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 29,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 30,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 31,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 32,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 33,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 34,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 35,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 36,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 37,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 38,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": 39,
+          "r": 31,
+          "type": "sidewalk"
+        },
+        {
+          "c": -30,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -29,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -28,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -27,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -26,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -25,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -24,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -23,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -22,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -21,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -20,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -19,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -18,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -17,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -16,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -15,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -14,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -13,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -12,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -11,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -10,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -9,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -8,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -7,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -6,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -5,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -4,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -3,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -2,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -1,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 0,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 1,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 2,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 3,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 4,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 5,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 6,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 7,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 8,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 9,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 10,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 11,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 12,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 13,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 14,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 15,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 16,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 17,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 18,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 19,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 20,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 21,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 22,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 23,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 24,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 25,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 26,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 27,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 28,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 29,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 30,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 31,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 32,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 33,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 34,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 35,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 36,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 37,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 38,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": 39,
+          "r": 32,
+          "type": "sidewalk"
+        },
+        {
+          "c": -30,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -29,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -28,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -27,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -26,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -25,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -24,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -23,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -22,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -21,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -20,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -19,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -18,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -17,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -16,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -15,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -14,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -13,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -12,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -11,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -10,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -9,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -8,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -7,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -6,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -5,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -4,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -3,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -2,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -1,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 0,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 1,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 2,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 3,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 4,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 5,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 6,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 7,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 8,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 9,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 10,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 11,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 12,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 13,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 14,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 15,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 16,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 17,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 18,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 19,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 20,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 21,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 22,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 23,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 24,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 25,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 26,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 27,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 28,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 29,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 30,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 31,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 32,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 33,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 34,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 35,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 36,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 37,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 38,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 39,
+          "r": 33,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -30,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -29,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -28,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -27,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -26,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -25,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -24,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -23,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -22,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -21,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -20,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -19,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -18,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -17,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -16,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -15,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -14,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -13,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -12,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -11,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -10,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -9,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -8,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -7,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -6,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -5,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -4,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -3,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -2,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -1,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 0,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 1,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 2,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 3,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 4,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 5,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 6,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 7,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 8,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 9,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 10,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 11,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 12,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 13,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 14,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 15,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 16,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 17,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 18,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 19,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 20,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 21,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 22,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 23,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 24,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 25,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 26,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 27,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 28,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 29,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 30,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 31,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 32,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 33,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 34,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 35,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 36,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 37,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 38,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 39,
+          "r": 34,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -30,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -29,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -28,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -27,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -26,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -25,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -24,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -23,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -22,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -21,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -20,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -19,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -18,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -17,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -16,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -15,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -14,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -13,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -12,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -11,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -10,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -9,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -8,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -7,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -6,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -5,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -4,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -3,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -2,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -1,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 0,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 1,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 2,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 3,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 4,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 5,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 6,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 7,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 8,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 9,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 10,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 11,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 12,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 13,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 14,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 15,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 16,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 17,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 18,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 19,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 20,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 21,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 22,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 23,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 24,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 25,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 26,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 27,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 28,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 29,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 30,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 31,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 32,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 33,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 34,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 35,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 36,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 37,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 38,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": 39,
+          "r": 35,
+          "type": "road",
+          "roadClass": "two_lane"
+        },
+        {
+          "c": -30,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -29,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -28,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -27,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -26,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -25,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -24,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -23,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -22,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -21,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -20,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -19,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -18,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -17,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -16,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -15,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -14,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -13,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -12,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -11,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -10,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -9,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -8,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -7,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -6,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -5,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -4,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -3,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -2,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -1,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 0,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 1,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 2,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 3,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 4,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 5,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 6,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 7,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 8,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 9,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 10,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 11,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 12,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 13,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 14,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 15,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 16,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 17,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 18,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 19,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 20,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 21,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 22,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 23,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 24,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 25,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 26,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 27,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 28,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 29,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 30,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 31,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 32,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 33,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 34,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 35,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 36,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 37,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 38,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": 39,
+          "r": 36,
+          "type": "sidewalk"
+        },
+        {
+          "c": -30,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -29,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -28,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -27,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -26,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -25,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -24,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -23,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -22,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -21,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -20,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -19,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -18,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -17,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -16,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -15,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -14,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -13,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -12,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -11,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -10,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -9,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -8,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -7,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -6,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -5,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -4,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -3,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -2,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": -1,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 0,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 1,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 2,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 3,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 4,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 5,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 6,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 7,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 8,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 9,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 10,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 11,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 12,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 13,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 14,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 15,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 16,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 17,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 18,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 19,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 20,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 21,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 22,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 23,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 24,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 25,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 26,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 27,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 28,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 29,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 30,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 31,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 32,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 33,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 34,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 35,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 36,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 37,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 38,
+          "r": 37,
+          "type": "sidewalk"
+        },
+        {
+          "c": 39,
+          "r": 37,
+          "type": "sidewalk"
+        }
+      ]
     }
   },
   "objects": [
@@ -902,5 +3567,5 @@
       "collision": false
     }
   ],
-  "schema": "virtual-life-ai-map-v2"
+  "schema": "virtual-life-ai-map-v3"
 }
