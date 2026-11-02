@@ -1,8 +1,8 @@
 {
   "format": "virtual-life-world-builder-v1",
-  "version": 1,
+  "version": 2,
   "map": {
-    "name": "Virtual Life · Street / Office Study",
+    "name": "GPT Version · Editable 3D World Study",
     "grid": "game:c,r",
     "units": "tile",
     "origin": {
@@ -19,7 +19,21 @@
       "z0": 32.75,
       "z1": 36.3
     },
-    "notes": "Standalone 3D layout prototype. Obsolete Rebuild character and furniture art removed. Official Virtual Life Online art not yet migrated."
+    "notes": "Source of truth: original GPT Version/Virtual Life canonical encrypted assets. Buildings are editable 3D geometry proxies because parts of original street/buildings are baked. Character sheets and separated props use original asset URLs; no failed Rebuild artwork.",
+    "source": "GPT Version renderer using original Virtual Life encrypted asset manifest",
+    "nativeReference": {
+      "street2": "assets/street2/base.png",
+      "characters": "assets/chars/*_v6b_sheet.png",
+      "interiors": "assets/env/",
+      "roadNear": 32.75,
+      "roadFar": 36.3,
+      "warteg": {
+        "c0": 28.3,
+        "c1": 35.3,
+        "r0": 22,
+        "r1": 28
+      }
+    }
   },
   "objects": [
     {
@@ -34,7 +48,8 @@
       "w": 15,
       "d": 7,
       "h": 8,
-      "color": "#647d95"
+      "color": "#647d95",
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
     },
     {
       "id": "office-annex",
@@ -48,21 +63,23 @@
       "w": 12,
       "d": 5.3,
       "h": 7,
-      "color": "#486a86"
+      "color": "#486a86",
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
     },
     {
       "id": "warteg-front",
       "type": "shop",
-      "name": "Warteg",
-      "x": 20,
-      "z": 25.3,
+      "name": "Warteg · GPT World Geometry Proxy",
+      "x": 31.8,
+      "z": 25,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "w": 9,
+      "w": 7,
       "d": 6,
       "h": 4.8,
-      "color": "#e5c17e"
+      "color": "#e5c17e",
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
     },
     {
       "id": "shop-east",
@@ -76,7 +93,8 @@
       "w": 11,
       "d": 8,
       "h": 5.8,
-      "color": "#cdb7a3"
+      "color": "#cdb7a3",
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
     },
     {
       "id": "market-stalls",
@@ -90,7 +108,8 @@
       "w": 13,
       "d": 7,
       "h": 5.2,
-      "color": "#8dbdb9"
+      "color": "#8dbdb9",
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
     },
     {
       "id": "shop-west",
@@ -104,7 +123,8 @@
       "w": 13,
       "d": 7.7,
       "h": 6.3,
-      "color": "#b6bdc7"
+      "color": "#b6bdc7",
+      "reference": "GPT procedural geometry / original environment palette; not extracted mesh"
     },
     {
       "id": "lamp-near",
@@ -139,7 +159,7 @@
     {
       "id": "avatar-test",
       "type": "avatar",
-      "name": "3D Character Placeholder",
+      "name": "Ichsan · Original GPT Sprite",
       "x": 20.5,
       "z": 34,
       "y": 0,
@@ -147,21 +167,121 @@
       "scale": 1,
       "facing": "sw",
       "pose": null,
-      "variant": "player",
-      "collision": true
+      "variant": "gpt-original",
+      "collision": true,
+      "profile": "ichsan"
     },
     {
       "id": "npc-preview",
       "type": "npc",
-      "name": "3D Character Placeholder",
+      "name": "Noor · Original GPT Sprite",
       "x": 11,
       "z": 34.7,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "facing": "sw",
+      "facing": "nw",
       "pose": null,
-      "variant": "player",
+      "variant": "gpt-original",
+      "collision": true,
+      "profile": "noor"
+    },
+    {
+      "id": "gpt-chair-01",
+      "type": "sprite",
+      "name": "GPT Meeting Chair · original",
+      "x": -19,
+      "z": 47,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "env/coordination/meeting_chair_se.png",
+      "width": 2.3,
+      "height": 2.5,
+      "collision": true
+    },
+    {
+      "id": "gpt-table-01",
+      "type": "sprite",
+      "name": "GPT Meeting Table · original",
+      "x": -16,
+      "z": 47,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "env/coordination/meeting_table_se.png",
+      "width": 4.6,
+      "height": 2.8,
+      "collision": true
+    },
+    {
+      "id": "gpt-armchair-01",
+      "type": "sprite",
+      "name": "GPT Armchair · original",
+      "x": -24,
+      "z": 47,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "env/library/armchair_leather_se.png",
+      "width": 2.8,
+      "height": 3,
+      "collision": true
+    },
+    {
+      "id": "gpt-easel-01",
+      "type": "sprite",
+      "name": "GPT Gallery Easel · original",
+      "x": -28,
+      "z": 45.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "env/gallery/easel_se.png",
+      "width": 2.7,
+      "height": 3.5,
+      "collision": true
+    },
+    {
+      "id": "gpt-trash-01",
+      "type": "sprite",
+      "name": "GPT Street2 Trash Bin · original",
+      "x": 16,
+      "z": 29.4,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "street2/loak/props/tong_sampah_besi_se.png",
+      "width": 2.7,
+      "height": 2.9,
+      "collision": true
+    },
+    {
+      "id": "gpt-box-01",
+      "type": "sprite",
+      "name": "GPT Street2 Cardboard · original",
+      "x": 34.5,
+      "z": 44.7,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "street2/loak/props/tumpukan_kardus_sw.png",
+      "width": 2.8,
+      "height": 2.5,
+      "collision": true
+    },
+    {
+      "id": "gpt-sack-01",
+      "type": "sprite",
+      "name": "GPT Street2 Sack · original",
+      "x": 31,
+      "z": 46,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "street2/loak/props/karung_rongsok_se.png",
+      "width": 2.3,
+      "height": 2.5,
       "collision": true
     }
   ]
