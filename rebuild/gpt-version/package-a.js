@@ -103,44 +103,42 @@ function gptWorldV16(){
     if(!V16.made&&EXT.cars&&EXT.cars.length)V16.made=v16Make();
     if(!OUT_ON){if(S2X.far)s2xFar(false);V16.onRoad=false;return;}
     if(V16.made)v16Traffic();v16Player();s2xCrossers(dt);
-    var far=V16.farLoaded&&!WT.on&&!CV.on&&!FMI.on&&(S2X.far?me.r>XG.curbF-.14:me.r>XG.curbF+.14);s2xFar(far);if(far)s2xFarDepth();
+    var far=V16.farLoaded&&(typeof S2==='undefined'||!!(S2.ready&&!S2.fail&&S2.url&&xcImg(S2.url)))&&!WT.on&&!CV.on&&!FMI.on&&(S2X.far?me.r>XG.curbF-.14:me.r>XG.curbF+.14);s2xFar(far);if(far)s2xFarDepth();
     // Native painter order: never reparent vehicles to a synthetic lane group.
     // Hysteresis prevents rapidly toggling the vehicle back-canvas at the lane boundary.
     var canBack=V16.made&&!WT.on&&!CV.on&&!FMI.on;
     V16.backLaneA=canBack&&(V16.backLaneA?me.r>33.24:me.r>33.56);
-    XC.skip=far?[EXT.gC,S2X.gFB]:(V16.backLaneA?v16LaneA():null);
+    if(V16.made)v16DepthSkip(far);
+    else XC.skip=far?[EXT.gC,S2X.gFB]:null;
   };
   (function(){var old=window.__s2xPost,owned=false;window.__s2xPost=function(){if(old)old();var active=OUT_ON&&((typeof S2L!=='undefined'&&S2L.p&&S2L.p.an)||(S2X.p&&S2X.p.an));if(active){owned=true;return;}if(owned){owned=false;if(me.forceAnim==='idle'||me.forceAnim==='walk')me.forceAnim=null;}};})();
-  // The native XC.f canvas is z-index 7, later in DOM than the player (also 7).
-  // A full baked foreground image (roof + road) can therefore cover the avatar.
-  // Erase ONLY opaque avatar-shaped pixels from that foreground, leaving the
-  // street, building, roof and pillars unchanged outside the player's silhouette.
-  window.__gptPunchFront=function(cv){
-    if(!OUT_ON||!meEl||!meSpr||!meEl.classList.contains('spr'))return;
-    if(!(me.r>=31&&me.r<=38.2||me.r>=50.8&&me.r<=54.9))return;
-    var st=meSpr.style,match=(st.backgroundImage||'').match(/^url\(["']?([^"')]+)["']?\)$/);
-    if(!match)return;
-    var im=xcImg(match[1]);if(!im||!im.naturalWidth)return;
-    var R=meSpr.getBoundingClientRect(),C=cv.getBoundingClientRect();
-    if(!R.width||!R.height||!C.width||!C.height)return;
-    var sizes=(st.backgroundSize||'').split(/\s+/),pos=(st.backgroundPosition||'').split(/\s+/);
-    var bgw=parseFloat(sizes[0]),bgh=parseFloat(sizes[1]),px=parseFloat(pos[0]),py=parseFloat(pos[1]);
-    if(![bgw,bgh,px,py].every(Number.isFinite)||bgw<=0||bgh<=0)return;
-    var rx=im.naturalWidth/bgw,ry=im.naturalHeight/bgh;
-    var sx=-px*rx,sy=-py*ry,sw=R.width*rx,sh=R.height*ry;
-    if(sx<0||sy<0||sx+sw>im.naturalWidth+1||sy+sh>im.naturalHeight+1)return;
-    var dw=R.width*cv.width/C.width,dh=R.height*cv.height/C.height;
-    var dx=(R.left-C.left)*cv.width/C.width,dy=(R.top-C.top)*cv.height/C.height;
-    var x=cv.getContext('2d');x.save();x.setTransform(1,0,0,1,0,0);
-    x.globalCompositeOperation='destination-out';x.globalAlpha=1;x.imageSmoothingEnabled=false;
-    x.drawImage(im,sx,sy,sw,sh,dx,dy,dw,dh);x.restore();
-  };
+  // Real-world depth: XC.b renders behind the player, XC.f in front.
+  // Never erase the entire foreground with the player's alpha: that makes
+  // the player render ABOVE pedestrians and cars that should occlude them.
+  function v16DepthSkip(far){
+    var back=[], playerFoot=me.c+me.r, now=v16Now();
+    V16.cars.forEach(function(o){
+      var v=trfVeh(o.i,now), footprint=(v.c0+v.c1)*.5+v.r;
+      var delta=footprint-playerFoot, previous=!!o.back;
+      o.back=far|| (previous ? delta<.18 : delta<-.18);
+      if(o.back)back.push(o.w);
+    });
+    if(far&&S2X.gFB)back.push(S2X.gFB);
+    // The generated level overlays also contain FLAT pavement (not only roofs).
+    // On the road, put the baked ground overlay behind the avatar, but keep
+    // individual cars, NPCs and solid foreground props correctly depth-sorted.
+    var roadLevel=far&&S2X.lv&&S2X.lv.g&&(
+      (me.r>=36.35&&me.r<=38.05) ||
+      (me.r>=51.25&&me.r<=54.85));
+    if(roadLevel)back.push(S2X.lv.g);
+    XC.skip=back.length?back:null;
+  }
   window.__v16={phase:function(t){return trfPhase(t==null?v16Now():t);},hit:function(c,r,t){return trfHit(c,r,t==null?v16Now():t);},
     st:function(){return {made:V16.made,hits:V16.hits,start:V16.start,onRoad:V16.onRoad,farLoaded:V16.farLoaded,cars:V16.cars.length,backLaneA:V16.backLaneA,fxPending:V16.fxQueue?V16.fxQueue.length:null,gangEntered:V16.gangEntered};},
     cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,xy:o.xy,inNativeLayer:o.w.parentNode===EXT.gC,cssAnimation:o.w.style.animation};});},
     veh:function(t){return V16.T.veh.map(function(_,i){return trfVeh(i,t==null?v16Now():t);});},
     spawn:function(side,c){return v16Spawn(side,c);},setOff:function(ms){V16.off=ms;},roadOK:function(c,r){return extOK(c,r);},
-    passage:function(){return {lane:S2X.cfg.region.lane,terminal:S2X.cfg.region.terminal,player:{c:me.c,r:me.r},entered:V16.gangEntered,foregroundPreserved:true};}};
+    passage:function(){return {lane:S2X.cfg.region.lane,terminal:S2X.cfg.region.terminal,player:{c:me.c,r:me.r},entered:V16.gangEntered,foregroundPreserved:true,depthSort:'node-based'};}};
 }
 function gptApplyA(html){
   if(html.indexOf('vc-street2-xing')<0||html.indexOf('Virtual Life v15a')<0)throw Error('GROK_V16_INCOMPATIBLE_BASE');
@@ -178,8 +176,12 @@ function gptApplyA(html){
   // Preserve the complete baked world across crossings; never hide whole
   // front occluder bitmaps (that caused the background pop/dropout).
   // The player-only alpha cutout is applied AFTER XC.f is drawn.
-  rep("xcDraw(XC.f,EXT.RF);",
-      "xcDraw(XC.f,EXT.RF); if(window.__gptPunchFront)window.__gptPunchFront(XC.f);");
+  // A single transient draw failure must not permanently shut down both
+  // outdoor canvases (the original catch sets XC.b=null and strips body.xcv).
+  // Drop the suspect skip list for that frame and recover on the next frame.
+  rep("console.warn('xcFrame',e); XC.b=null; document.body.classList.remove('xcv');",
+      "if(!XC._gptWarned){console.warn('xcFrame recovery',e);XC._gptWarned=true;} XC.skip=null;");
+  // No global player alpha mask: use the original two-canvas compositor and per-node depth.
   // Prior patch enlarged only the aisle; the ORIGINAL far-region checker still
   // rejected positions beyond r=50. Add the baked rear-road rectangle to the
   // same checked region. No fake geometry, no unbounded/no-clip movement.
