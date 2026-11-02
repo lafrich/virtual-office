@@ -101,7 +101,7 @@ function gptGrassPatch(html){
       "var parkLevel=null;");
   one("window.__gptDepthDraw=v16DrawOcclusion;",
       "window.__gptDepthDraw=v16DrawOcclusion;\n"+gptGrassRuntime.toString()+"\ngptGrassRuntime();");
-  one("GPT VERSION · v16a.21","GPT VERSION · v16a.22 · GRASS");
+  one("GPT VERSION · v16a.21","GPT VERSION · v16a.27 · GRASS");
   return html;
 }
 self.gptGrassPatch=gptGrassPatch;
