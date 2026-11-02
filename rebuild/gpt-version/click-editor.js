@@ -209,7 +209,7 @@ function gptClickEditorRuntime(){
   }
   function moveSelected(){moveMode=!moveMode;menuState();hint(moveMode?'Tarik objek untuk memindahkan.':'Tap objek untuk memilih.');}
   function rotateSelected(){let v=selectedData();mutate({angle:((v?.angle||0)+15)%360});}
-  function deleteSelected(){let v=selectedData();mutate({deleted:!v?.deleted});if(selectedData()?.deleted)selection=null;moveMode=false;menuState();drawOutline();}
+  function deleteSelected(){let v=selectedData();mutate({deleted:!v?.deleted});moveMode=false;menuState();drawOutline();hint(selectedData()?.deleted?'Objek dihapus. Tekan Restore atau Undo untuk mengembalikan.':'Objek dikembalikan.');}
   function undo(){if(!history.length){hint('Belum ada perubahan.');return;}
     try{state=JSON.parse(history.pop());}catch(e){return;}
     applyNodes();if(origin)redrawRaster();store();selection=null;moveMode=false;menuState();drawOutline();}
