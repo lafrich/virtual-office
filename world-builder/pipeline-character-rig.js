@@ -40,10 +40,15 @@ function createRig(THREE,opt={}){
   texture.magFilter=texture.minFilter=THREE.NearestFilter;texture.generateMipmaps=false;
   const mat=new THREE.MeshBasicMaterial({map:texture,transparent:false,alphaTest:.45,
     depthTest:true,depthWrite:true,side:THREE.DoubleSide});
-  const h=3.6,w=h*64/112;
+  // 64×32 source tile must project to a 2:1 diamond.
+// A horizontal world tile projects to sqrt(2) units. At 30° elevation,
+// vertical planes shorten by cos(30°); compensate that projection exactly.
+ const pixelWorld=Math.SQRT2/64;
+ const h=FRAME.h*pixelWorld/(Math.sqrt(3)/2),w=FRAME.w*pixelWorld;
   const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
   mesh.position.y=h*(FRAME.pivotY/FRAME.h-.5);
   mesh.userData.characterBillboard=true;mesh.userData.characterSource='pipeline-v6b';
+  mesh.userData.nativeFrame=FRAME;mesh.userData.tilePixels=[64,32];mesh.userData.pixelWorld=pixelWorld;
   const state={direction:normalize(opt.direction),moving:false,walk:0,pose:opt.pose||null,profile:opt.profile||opt.characterId||'ichsan',characterId:who,loaded:false,failed:false};
   let previous='',time=0;
   function draw(){
