@@ -54,7 +54,12 @@ function gptParkPatch(html) {
   // portions of that bench are restored over the avatar.
   change('try{for(var j=0;j<hits.length;j++)xcDraw(cv,hits[j],true);}',
     "try{for(var j=0;j<hits.length;j++){var obj=hits[j];if(obj._k==='bench'&&me.forceAnim==='sit'){ctx.save();var rr=obj.getBoundingClientRect();var yy=(rr.top-fr.top+rr.height*.65)*d;ctx.beginPath();ctx.rect(clipX,Math.max(clipY,yy),clipW,Math.max(0,clipY+clipH-yy));ctx.clip();xcDraw(cv,obj,true);ctx.restore();}else xcDraw(cv,obj,true);}}");
-  change('GPT VERSION · v16a.17','GPT VERSION · v16a.19');
+  // When seated, draw the chosen bench behind the avatar and restore only
+  // its lower/front pixels via the overlay above. This avoids either a
+  // floating sitter or a chair obscuring the entire seated character.
+  change('XC.skip=back.length?back:null;',
+    "if(me.forceAnim==='sit'&&me._lifeSeat&&EXT.props){var sitP=P(me._lifeSeat.c,me._lifeSeat.r),sitBench=null,sitDist=1e9;EXT.props.forEach(function(g){if(g._k!=='bench'||!g._a)return;var d=Math.hypot(g._a.x-sitP.x,g._a.y-sitP.y);if(d<sitDist){sitBench=g;sitDist=d;}});if(sitBench&&sitDist<35&&back.indexOf(sitBench)<0)back.push(sitBench);} XC.skip=back.length?back:null;");
+  change('GPT VERSION · v16a.17','GPT VERSION · v16a.20');
   return html;
 }
 self.gptParkPatch=gptParkPatch;
