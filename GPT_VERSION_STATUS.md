@@ -60,3 +60,19 @@ Public beta unchanged: https://lafrich.github.io/virtual-office/rebuild/gpt-vers
 - Scoped SW import URL bumped to `package-a.js?v=a3`. Only subfolder `rebuild/gpt-version/` was changed on the published `main` branch.
 - Regression test suite was extended at `rebuild/gpt-version/tests/package-a-regression.cjs`; equivalent harness assertions for loading batches, 15 vehicle kinds and traffic phases passed.
 - A6 is still *partial*: quantitative FPS, long-task, resource-transfer and Android load-time comparisons remain outstanding. The beta is not the approved production build.
+
+## 2026-11-02 — GPT Version patch 04 (deployed, user feedback)
+
+Confirmed owner reports remaining vehicle glitches/flickering, missing Loak item blinking, unstable visual layering, and an alley endpoint that should be explorable.
+
+Changes isolated to `rebuild/gpt-version/`:
+- Vehicle sprites now use a deterministic transform computed every frame from exactly the same `trfVeh().pr` used by the collision system; CSS animation is disabled for the scoped beta cars. This avoids repeated 600ms CSSAnimation currentTime snapping and vehicle sprite/collision mismatch. Original 15 vehicle sprites and `EXT.gC` parent ordering stay intact.
+- Loak spot sparkle in isolated offline preview no longer relies on unavailable multiplayer `S2L.st/bag` state; the original 3-frame sequence `s2lKilau()` is preserved, with incremental sprite prefetch. Live-game search and inventory logic are NOT changed.
+- Added hysteresis for far-mode transition, far-side prop/NPC layer splits, moving NPC painter order, and baked occluder level changes; retains the original world layering without a synthetic group.
+- Expanded only the **existing baked gang corridor** walkability (c 21.85–24.15, r 37.6–50). No art beyond the drawn map was invented; deep-gang package C content remains deferred.
+- Added/updated isolated regression assertions for deterministic vehicle visual vs clock position, 15 kinds, empty-road cycle, safe spawn, sparkle restoration, gang corridor, and painter hysteresis.
+
+Validation: v16a patch applied to the encrypted GitHub original (24 exact source replacements, resulting main game scripts syntax-checked); deterministic 15-car renderer simulated with zero CSSAnimation reads and native `EXT.gC` nodes; previously 3600 traffic samples and 17-art-image prefetch checks passed.
+The headless browser in this environment blocks navigation, so flicker-free Android/desktop gameplay is NOT yet independently verified visually. Do not mistake automated checks for screen QA.
+
+Deployment: beta scoped SW import version `a4`; changes on published `main` are confined to `rebuild/gpt-version/package-a.js` and `rebuild/gpt-version/sw.js`. Production `sw.js`, main game source, encrypted manifest, and Cloudflare Worker are unchanged. Rollback: `/rebuild/gpt-version/?classic=1`.
