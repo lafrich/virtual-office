@@ -43,3 +43,10 @@ Limitations: This is an asset-mapping prototype, not a pixel-perfect import
 of the native online world, and game mechanics / multiplayer have not been
 migrated. Camera-facing image cards have real depth-test behavior but are
 not a substitute for complete front/side/rear geometry for every building.
+
+
+## Native art placement rules
+
+The GPT editor shares `../style-rules.js` with the pipeline editor. New buildings and shops reference the official pipeline prefab catalog rather than freeform generic 3D buildings. Existing encrypted GPT character and prop PNGs remain the first choice. Single-view original art cannot rotate, available directional assets turn by 90°, actor scale/rotation remain locked, other uniform scale remains between 85–115%. Floor footprint and road occupancy are validated when adding, moving, or duplicating.
+
+The default draft now has 27 objects including native GPT trash bins and pipeline-referenced park objects. **Tree/bench/lamp/table pixel-art cutouts are temporary previews** where official generated sprites have not yet been published. Large building geometry still is not a faithful conversion of original encrypted scene art. Original game login is required to see protected source sprite paths. Existing local draft users can choose Reset Map after first exporting their JSON.
