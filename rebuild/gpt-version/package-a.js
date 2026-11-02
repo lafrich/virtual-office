@@ -137,6 +137,54 @@ function gptWorldV16(){
     if(roadLevel)back.push(S2X.lv.g);
     XC.skip=back.length?back:null;
   }
+  // Precise foreground safety pass. Only world props whose footpoints are in
+  // front of the player and whose pixels intersect the sprite get drawn.
+  // Preserve native geometry, collisions, original source and other characters.
+  var v16OccCanvas=null,v16OccCtx=null;
+  function v16DrawOcclusion(){
+    if(!OUT_ON||!EXT.dyn||!EXT.dyn.length||!XC.b){
+      if(v16OccCanvas&&v16OccCtx)v16OccCtx.clearRect(0,0,v16OccCanvas.width,v16OccCanvas.height);
+      return;
+    }
+    if(!v16OccCanvas){
+      v16OccCanvas=document.createElement('canvas');
+      v16OccCanvas.className='gpt-depth-overlay';
+      v16OccCanvas.setAttribute('aria-hidden','true');
+      v16OccCanvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;z-index:12;pointer-events:none;image-rendering:pixelated';
+      floor.appendChild(v16OccCanvas);
+      v16OccCtx=v16OccCanvas.getContext('2d');
+    }
+    var cv=v16OccCanvas,ctx=v16OccCtx,fr=floor.getBoundingClientRect(),d=window.devicePixelRatio||1;
+    var W=Math.max(1,Math.round(fr.width*d)),H=Math.max(1,Math.round(fr.height*d));
+    if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,W,H);
+    if(meEl.style.visibility==='hidden')return;
+    var avatar=meSpr.getBoundingClientRect();
+    if(avatar.width<2||avatar.height<2)avatar=meSvg.getBoundingClientRect();
+    if(avatar.width<2||avatar.height<2)return;
+    // Pixel-precise overlap clips to the body, never the floating YOU label.
+    var clipX=Math.max(0,Math.floor((avatar.left-fr.left-2)*d)),clipY=Math.max(0,Math.floor((avatar.top-fr.top-2)*d));
+    var clipW=Math.min(W-clipX,Math.ceil((avatar.width+4)*d)),clipH=Math.min(H-clipY,Math.ceil((avatar.height+4)*d));
+    if(clipW<=0||clipH<=0)return;
+    var pd=me.c+me.r,hits=[];
+    for(var i=0;i<EXT.dyn.length;i++){
+      var n=EXT.dyn[i];
+      if(!n||!n.isConnected||n._b==null||n._b<pd-.08)continue;
+      var b=n.getBoundingClientRect();
+      if(b.width<1||b.height<1)continue;
+      if(b.right<avatar.left||b.left>avatar.right||b.bottom<avatar.top||b.top>avatar.bottom)continue;
+      if(!n.querySelector('image'))continue;
+      hits.push(n);
+    }
+    hits.sort(function(a,b){return (a._d||0)-(b._d||0);});
+    if(!hits.length)return;
+    ctx.save();ctx.beginPath();ctx.rect(clipX,clipY,clipW,clipH);ctx.clip();
+    try{for(var j=0;j<hits.length;j++)xcDraw(cv,hits[j],true);}
+    catch(e){if(!cv._gptWarned){console.warn('gpt depth occlusion',e);cv._gptWarned=true;}}
+    finally{ctx.restore();ctx.globalAlpha=1;ctx.setTransform(1,0,0,1,0,0);}
+  }
+  window.__gptDepthDraw=v16DrawOcclusion;
   window.__v16={phase:function(t){return trfPhase(t==null?v16Now():t);},hit:function(c,r,t){return trfHit(c,r,t==null?v16Now():t);},
     st:function(){return {made:V16.made,hits:V16.hits,start:V16.start,onRoad:V16.onRoad,farLoaded:V16.farLoaded,cars:V16.cars.length,backLaneA:V16.backLaneA,fxPending:V16.fxQueue?V16.fxQueue.length:null,gangEntered:V16.gangEntered};},
     cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,xy:o.xy,inNativeLayer:o.w.parentNode===EXT.gC,cssAnimation:o.w.style.animation};});},
@@ -226,6 +274,10 @@ function gptApplyA(html){
   // Keep world-footpoint depth selection intact; only correct canvas stacking.
   rep("XC.f=mk(EXT.RF,7); document.body.classList.add('xcv');",
       "XC.f=mk(EXT.RF,8); document.body.classList.add('xcv');");
+  // Draw true foreground pixels above the HTML sprite, even if the native
+  // world and foreground SVGs land in separate DOM stacking contexts.
+  rep("xcDraw(XC.f,EXT.RF); }catch(e){",
+      "xcDraw(XC.f,EXT.RF); if(window.__gptDepthDraw)window.__gptDepthDraw(); }catch(e){");
   // The level overlays are composite PNGs: some include the GATE PAVEMENT.
   // Remove just its grey/tan road-plane pixels from the front layer at load
   // time. The base street already contains the floor, while white/red pillars
@@ -246,7 +298,7 @@ function gptApplyA(html){
   if(phoneMap)css+="body.y2k .y2-map,#vs-hud .vs-mini{display:none!important}";
   rep("</head>","<style id=\"gpt-v16a-css\">"+css+"</style></head>");
   rep("window.__vsBuild = 'Virtual Life v15a';","window.__vsBuild = 'Virtual Life v16a · GPT beta';");
-  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.16</div></body>");
+  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.17</div></body>");
   if(!phoneMap)console.warn('[gpt-a] Phone map absent; HUD minimap retained');
   return {html:s,applied:applied.length,phoneMap:phoneMap};
 }
