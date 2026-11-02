@@ -17,7 +17,7 @@ if(!THREE){
   fail.textContent='WebGL editor engine gagal dimuat. Periksa koneksi internet dan muat ulang. Map online tidak berubah.';
   throw Error('THREE_MODULE_NOT_AVAILABLE');
 }
-const STORE='virtual-life-independent-world-builder-v1';
+const STORE='virtual-life-gpt-world-builder-v2';
 const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const actorType=t=>t==='avatar'||t==='npc';
@@ -27,7 +27,7 @@ const directions=['sw','se','nw','ne'];
 const assetGroup=$('assetGroup');
 if(assetGroup){
  assetGroup.replaceChildren();
- for(const group of ['Home & Living','Interior / Fixtures','Street / Park','Warteg']){
+ for(const group of [...new Set(assetCatalog.map(e=>e.group))]){
    const section=document.createElement('optgroup');section.label=group;
    for(const entry of assetCatalog.filter(e=>e.group===group)){
      const option=document.createElement('option');
@@ -211,7 +211,7 @@ const seed={
 };
 let documentMap=clone(seed),defaultSeed=clone(seed),selectedId=null,mode='select',snap=true,undoStack=[],redoStack=[];
 try{
- const r=await fetch('./world.json?v=clean1',{cache:'no-store'});
+ const r=await fetch('./world.json?v=gpt1',{cache:'no-store'});
  if(r.ok){defaultSeed=sanitize(await r.json());documentMap=clone(defaultSeed);}
 }catch(err){console.warn('Using built-in map if world.json is unavailable',err);}
 try{
@@ -240,7 +240,8 @@ function sanitize(v){
   if(actorType(p.type)){
     e.facing=directions.includes(p.facing)?p.facing:'sw';
     e.pose=['sit','sleep','bathe','toilet','work'].includes(p.pose)?p.pose:null;
-    e.variant=p.variant==='baymax'?'baymax':'player';
+    e.variant='gpt-original';
+    e.profile=window.VLCharacterRig?.profiles?.[p.profile]?p.profile:'ichsan';
   }
   // Keep unknown action metadata as data only. No gameplay execution.
   if(p.action&&typeof p.action==='object')e.action=clone(p.action);
@@ -463,7 +464,7 @@ const rigs=new Map();
 function makeAvatar(root,item){
  const factory=window.VLCharacterRig;
  if(factory){
-   const rig=factory.createRig(THREE,{direction:item.facing||'sw',pose:item.pose||null,variant:item.variant||'player'});
+   const rig=factory.createRig(THREE,{direction:item.facing||'sw',pose:item.pose||null,profile:item.profile||'ichsan'});
    root.add(rig.mesh);rigs.set(item.id,{rig,root});
  }else{
    const mat=new THREE.MeshBasicMaterial({map:avatarTex,transparent:false,
@@ -524,7 +525,11 @@ function updateSelection(){
  const actor=!!cur&&actorType(cur.type);
  $('actorControls').classList.toggle('visible',actor);
  $('facing').disabled=!actor;$('pose').disabled=!actor;
- if(actor){$('facing').value=cur.facing||'sw';$('pose').value=cur.pose||'';}
+ if(actor){
+   $('facing').value=cur.facing||'sw';$('pose').value=cur.pose||'';
+   $('profile').value=cur.profile||'ichsan';
+ }
+ $('profile').disabled=!actor;
  if(highlight&&highlight.userData.selected===cur?.id){
    highlight.update();
  }else{
@@ -558,6 +563,7 @@ function applyItem(){
  if(holder){
    if(holder.rig.state.direction!==o.facing)holder.rig.setDirection(o.facing||'sw');
    if((holder.rig.state.pose||null)!==(o.pose||null))holder.rig.setPose(o.pose||null);
+   if(holder.rig.state.profile!==(o.profile||'ichsan'))holder.rig.setProfile(o.profile||'ichsan');
  }
  updateSelection();renderer.render(scene,camera);
 }
@@ -573,7 +579,7 @@ function add(type){
    if(!spec){tell('Unknown pixel asset');undoStack.pop();return;}
    o.asset=asset;o.width=spec.width;o.height=spec.height;o.collision=spec.collision;
  }
- if(actorType(type)){o.facing='sw';o.pose=null;o.variant='player';o.collision=true;}
+ if(actorType(type)){o.facing='sw';o.pose=null;o.variant='gpt-original';o.profile=type==='npc'?'noor':'ichsan';o.collision=true;}
  if(type==='building'||type==='shop'){o.w=7;o.d=5;o.h=5;}
  documentMap.objects.push(o);instantiate(o);select(o.id);saved();tell('New object added · Move to place');
 }
@@ -690,6 +696,7 @@ function clearWalk(){
      rec.root.position.set(source.x,source.y,source.z);
      rec.rig.setPose(source.pose||null);
      rec.rig.setDirection(source.facing||'sw');
+     rec.rig.setProfile(source.profile||'ichsan');
      if(source.pose)rec.rig.setPose(source.pose);
    }
  }
@@ -742,6 +749,7 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
 });
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
+$('profile').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.profile=$('profile').value;});};
 $('undo').onclick=()=>restoreStack(undoStack,redoStack);
 $('redo').onclick=()=>restoreStack(redoStack,undoStack);
 $('snap').onclick=()=>{snap=!snap;$('snap').textContent='Snap: '+(snap?'ON':'OFF');};
