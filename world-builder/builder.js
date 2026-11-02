@@ -211,7 +211,7 @@ const seed={
 };
 let documentMap=clone(seed),defaultSeed=clone(seed),selectedId=null,mode='select',snap=true,undoStack=[],redoStack=[];
 try{
- const r=await fetch('./world.json?v=gpt1',{cache:'no-store'});
+ const r=await fetch('./world.json?v=p3',{cache:'no-store'});
  if(r.ok){defaultSeed=sanitize(await r.json());documentMap=clone(defaultSeed);}
 }catch(err){console.warn('Using built-in map if world.json is unavailable',err);}
 try{
