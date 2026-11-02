@@ -173,7 +173,7 @@ function gptRemoveParkFurniturePatch(html){
       gptParkCleanupRuntime.toString()+'\ngptParkCleanupRuntime();\nwindow.__gptDepthDraw=v16DrawOcclusion;');
   one("class: 's2base' }, S2.slot); }",
       "class: 's2base' }, S2.slot); if(window.__gptRemoveParkFurniture)window.__gptRemoveParkFurniture(); }");
-  one('GPT VERSION · v16a.21','GPT VERSION · v16a.22');
+  one('GPT VERSION · v16a.21','GPT VERSION · v16a.23');
   return html;
 }
 self.gptRemoveParkFurniturePatch=gptRemoveParkFurniturePatch;
