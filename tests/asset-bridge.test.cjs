@@ -6,12 +6,14 @@ const path=require("node:path");
 const runtime=require("../game-assets/rig-runtime.js");
 const bridgeSrc=fs.readFileSync(path.join(__dirname,"../game-assets/asset-bridge.js"),"utf8");
 const gameSrc=fs.readFileSync(path.join(__dirname,"../rebuild/game.js"),"utf8");
-const coveSrc=fs.readFileSync(path.join(__dirname,"../cove-reskin.js"),"utf8");
 const swSrc=fs.readFileSync(path.join(__dirname,"../sw.js"),"utf8");
 // The independent Rebuild demo is intentionally retired, not part of the live game.
 assert.equal(fs.existsSync(path.join(__dirname,"../rebuild/index.html")),false);
 assert.ok(!gameSrc.includes("VOAssetBridge?.draw(g,p,zoom"));
-assert.ok(coveSrc.includes("VOAssetBridge?.draw(ctx,p,.73"));
+assert.equal(fs.existsSync(path.join(__dirname,"../cove-reskin.js")),false);
+assert.equal(fs.existsSync(path.join(__dirname,"../COVE_INTEGRATION.md")),false);
+assert.ok(!swSrc.includes("cove-reskin.js"));
+assert.ok(!swSrc.includes("searchParams.get('cove')"));
 assert.ok(swSrc.includes("u.searchParams.get('assetbridge') === '1'"));
 assert.ok(swSrc.includes("'game-assets/asset-bridge.js'"));
 assert.ok(swSrc.includes("if (p === 'office.html'"));
@@ -75,7 +77,7 @@ assert.equal(Object.keys(normal.listeners).length,0);
 
 async function flush(){for(let i=0;i<5;i++)await new Promise(resolve=>setImmediate(resolve));}
 (async()=>{
- const test=makeContext("?assetbridge=1&cove=1");
+ const test=makeContext("?assetbridge=1");
  assert.equal(test.window.VOAssetBridge.enabled,true);
  assert.equal(test.window.VOAssetBridge.draw(null,null,1),false);
  test.listeners.DOMContentLoaded();

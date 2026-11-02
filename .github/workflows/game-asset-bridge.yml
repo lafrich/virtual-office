@@ -7,7 +7,6 @@ on:
       - feature/game-asset-pipeline-bridge-v1
     paths:
       - "game-assets/**"
-      - "cove-reskin.js"
       - "sw.js"
       - "tests/asset-bridge.test.cjs"
       - ".github/workflows/game-asset-bridge.yml"
@@ -16,7 +15,6 @@ on:
       - "game-assets/**"
       - "rebuild/game.js"
       - "rebuild/index.html"
-      - "cove-reskin.js"
       - "sw.js"
       - "tests/asset-bridge.test.cjs"
       - ".github/workflows/game-asset-bridge.yml"
@@ -31,7 +29,6 @@ jobs:
       - name: Validate production and game scripts
         run: |
           node --check sw.js
-          node --check cove-reskin.js
           node --check game-assets/rig-runtime.js
           node --check game-assets/asset-bridge.js
       - name: Integration regression

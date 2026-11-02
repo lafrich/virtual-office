@@ -1,93 +1,38 @@
-# Virtual Life — Game Asset Bridge v1
+# Virtual Life — Asset Pipeline developer inspector
 
-This connects the existing [Virtual Life Asset Pipeline](https://lafrich.github.io/virtual-life-asset-pipeline/#rigs) to the actual `virtual-office` repository, with an optional asset inspector on the encrypted main game and original-sprite rendering inside its authenticated Cove module.
+The original [Virtual Life Asset Pipeline](https://lafrich.github.io/virtual-life-asset-pipeline/#rigs) remains an **independent asset authoring and preview service**. This repository optionally exposes its model/rig preview **inside the original authenticated game page**, but **does not integrate animations into the encrypted game's live character or multiplayer renderer**.
 
-**Important:** The main `office.html` game is AES-encrypted. Its original renderer and multiplayer code remain unchanged; a public asset bridge cannot transparently hook inaccessible internal sprites. In the main encrypted world the bridge offers the developer picker and public sprite preview. **Actual sprite replacement** is wired only in the authenticated `cove-reskin.js` room module. The independent `/rebuild/` test game has been retired.
+## Game access
 
-## Entry points
+- Original game, unchanged: https://lafrich.github.io/virtual-office/
+- Optional developer-only asset picker/preview: open `office.html?assetbridge=1` after normal login.
 
-- Original locked game without changes: https://lafrich.github.io/virtual-office/
-- **Authenticated main world + asset inspector:** open `office.html?assetbridge=1` after logging in.
-- **Authenticated Cove + imported character sprite:** open `office.html?cove=1&assetbridge=1` after logging in, then launch **COVE ROOM**.
-- Login redirect shortcut: https://lafrich.github.io/virtual-office/?next=office.html%3Fcove%3D1%26assetbridge%3D1
+The experimental, separately developed **Cove Room mode was removed on November 2, 2026** at the owner's request. The `cove-reskin.js` injection, its menu button, its room canvas and its documentation are gone. Adding `?cove=1` no longer activates any extra mode. **Any original Cove location that exists in the authenticated game's own assets is not altered.**
 
-This is a **developer feature flag**, not automatic rollout. Remove `assetbridge=1` to restore existing visuals and performance.
+The unrelated `/rebuild/` test game was retired earlier. Neither that archived prototype nor the deleted Cove addon is a target for future development.
 
-## What is actually integrated
+## What is retained
 
-On enabling the flag, local `game-assets/asset-bridge.js` fetches the public pipeline's `rigs.json` and the selected character's `motion-packs/<actor>.json`. The repo vendors `game-assets/rig-runtime.js`, the tested frame renderer, **locally**; no external executable JavaScript runs.
+- `game-assets/rig-runtime.js`: local, self-contained 2D motion helper, without externally loaded executable JavaScript.
+- `game-assets/asset-bridge.js`: an **opt-in inspector**, which reads the public asset pipeline `rigs.json`, loads actor-specific approved `motion-packs/<actor>.json`, previews actual 4-way sprite frames and exposes a developer-only API.
+- `sw.js`: existing decrypting service worker. Only when `assetbridge=1` does it inject the inspector scripts into the decrypted `office.html` response **in memory**. No other query flag injects Cove-specific modules.
 
-The bridge validates the requested actor, model type, atlas path, 64×112 layout and frame durations, and fetches original PNGs **on demand**. It exposes:
+The API still has `VOAssetBridge.preloadActor(id)`, `getClip(id)`, `drawActor(ctx,point,zoom,options)`, and `getStatus()` for eventual, **explicit** integration into an editable original engine. It is *not currently wired to the production world's NPC renderer*.
 
-- `window.VOAssetBridge.preloadActor(id)`: load the specific actor's motion metadata, without replacing the selected local player.
-- `window.VOAssetBridge.getClip(id)`: selected actor's reviewed/ready clip, or null.
-- `window.VOAssetBridge.selectActor(id)`: change dev preview and the opt-in avatar, preserving underlying player state.
-- `window.VOAssetBridge.draw(ctx, point, zoom, options)`: return `true` after rendering a **real** source-actor clip, or `false` to keep the original game's renderer.
-- `window.VOAssetBridge.drawActor(...)`: equivalent, explicitly for NPC integrations.
-- `window.VOAssetBridge.getStatus()`: status and ready-action list.
+## Correct production integration
 
-Suggested game renderer:
+1. Add and approve original actor-specific animations in the asset pipeline. The shared action database includes planned actions that aren't yet playable.
+2. Modify the original engine's character/NPC renderer **before its encryption/build process** to call `drawActor` on the correct entity and action ID, with reliable depth ordering and fallback.
+3. Validate collisions, animation pivots, gameplay callbacks, multiplayer replication, and release versioning. Do not splice unrelated test scenes into the live game.
+4. Keep login, encrypted assets, account state and native areas (including any built-in Cove location) unchanged unless explicitly requested.
 
-```js
-const rendered = window.VOAssetBridge?.drawActor(ctx, screenPoint, zoom, {
-  actorId: "legacy_gfunk",
-  instanceId: "npc-42",
-  direction: "sw",
-  moving: true
-}) || false;
-if (!rendered) renderExistingNPC();
-```
-
-The ready clip ID is `walk` for native human rigs but some aliens use `move` or other character-specific actions. For a nonstandard clip, use:
-
-```js
-window.VOAssetBridge?.drawActor(ctx, screenPoint, zoom, {
-  actorId: "legacy_gfunk",
-  instanceId: "npc-42",
-  actionId: "move",
-  direction: "sw"
-});
-```
-
-Each actor and instance uses its own motion timer. The engine continues to own the gameplay state and draw ordering. **A clip being present in the central 203-action database does not mean it is authored for that actor.** Unavailable actor-specific pose = `draw()` returns false.
-
-The authenticated Cove module maps `bed`, `toilet`, `tub`, and `desk` to appropriate original actor-specific clips. When unavailable, the original Cove renderer remains in use. The main encrypted game world continues to use its existing character renderer.
-
-## Studio-to-game workflow
-
-1. Author a new animation in `virtual-life-asset-pipeline` with **actual original poses for the correct model rig**, not just a `planned` ID.
-2. Review sprite continuity (4 directions, frame dimensions, pivot, anatomy and Z layering), and publish.
-3. Pipeline builder creates/updates that actor's motion pack and `rigs.json`.
-4. Refresh a `?assetbridge=1` game session. **No copy/paste and no game source edit** is needed for an action already mapped by the game renderer.
-5. To add a **new gameplay action type** (e.g. cooking, sweeping, toilet), add the relevant gameplay logic and `actionId` trigger in the game's renderer/interaction system. The bridge handles the sprite data, **not** economy, AI, collisions, pathfinding, save state or multiplayer.
-6. Keep current deployed fallback visual if missing; never silently retarget Bowie pixels onto Milk or Gfunk.
-
-## Security, performance and constraints
-
-- Main protected assets, `b/` ciphertext, `manifest.enc`, authentication and service-worker key handling are untouched.
-- Only public asset definitions and PNGs from the pinned **pipeline hostname and path prefix** can be loaded. No arbitrary remote script or dynamic code execution.
-- `sw.js` treats only the two new `game-assets/*.js` files as public, and injects these scripts into decrypted `office.html` *only* when `assetbridge=1`. `?cove=1` remains independently supported.
-- Original game default (without opt-in) does not fetch pipeline metadata or extra PNGs.
-- Image loading and per-character metadata are lazy, cached within the session. Rendering returns false while loading.
-- Assets are hosted publicly on GitHub Pages, so this is appropriate for **public character packs**, not secret/proprietary sprites. For shipping or offline multiplayer, snapshot/version and publish asset files through a controlled game CDN with a release manifest.
-- CORS and authenticated on-device behavior must be confirmed with the deployed site on user devices. Failures fall back; no successful online load is assumed before verification.
-
-## Testing
+## Tests
 
 ```bash
+node --check sw.js
 node --check game-assets/rig-runtime.js
 node --check game-assets/asset-bridge.js
-node --check sw.js
-node --check cove-reskin.js
 node tests/asset-bridge.test.cjs
 ```
 
-The test verifies default-off, opt-in metadata, original sprite frame drawing, four direction mapping, fallback on unrigged actions, lazy NPC loading, and that NPC selection does not override the player's chosen actor.
-
-## Retired test game
-
-The separate `/rebuild/` prototype was not the Virtual Life game in use. Its public entry point was removed at the user's request, and its optional Asset Bridge drawing hook was also removed. Old editable source files may remain in the repository for historical reference but are not a supported game build or an Asset Bridge target.
-
-## Next integration stage
-
-To apply imported pipeline sprites to *all* characters throughout the primary encrypted multiplayer game, modify its original pre-encryption character renderer/build, rather than unconditionally injecting a canvas overlay into encrypted HTML. Hook the engine's NPC entity ID and animation state to `drawActor` and package or pin an approved rig snapshot. Avoid duplicating layers over the street, cars, doors, or other NPCs.
+The tests assert that the separate Cove addon cannot be loaded by the service worker, that the original developer inspector is strictly opt-in, and that actor-specific sprite preview remains source-correct. The original protected `b/` assets, `manifest.enc`, and game logic are untouched.
