@@ -52,3 +52,11 @@ Public beta unchanged: https://lafrich.github.io/virtual-office/rebuild/gpt-vers
 - Added Node-only offline regression suite at `rebuild/gpt-version/tests/package-a-regression.cjs`. Isolated tests: 3600 vehicle samples, all 15 kinds, exact hitbox widths, clear crossing, positive collisions, safe curb spawns, painter-layer invariants PASS.
 - Bumped scoped service worker import version for immediate beta update. Files published on `main` are limited to `rebuild/gpt-version/package-a.js` and `rebuild/gpt-version/sw.js`. The production `sw.js` and encrypted files remain unchanged.
 - Still pending: real-browser end-to-end visual inspection, mobile screenshots, quantitative FPS/load-time A6 measurements, and full flickering QA A7. Do not merge beta code into the live game without these checks.
+
+## 2026-11-02 — GPT Version patch 03 (deployed)
+
+- Split far-side scene prefetch of 17 level images into batches of at most 3 per frame while the player approaches; on a direct teleport very close to the far side, prioritize all images to prevent pop-in. Tested 17 assets over 6 frames without duplicate loads.
+- Reuse cached CSSAnimation handles; query `getAnimations()` again only if no handle exists or the previous animation is idle.
+- Scoped SW import URL bumped to `package-a.js?v=a3`. Only subfolder `rebuild/gpt-version/` was changed on the published `main` branch.
+- Regression test suite was extended at `rebuild/gpt-version/tests/package-a-regression.cjs`; equivalent harness assertions for loading batches, 15 vehicle kinds and traffic phases passed.
+- A6 is still *partial*: quantitative FPS, long-task, resource-transfer and Android load-time comparisons remain outstanding. The beta is not the approved production build.
