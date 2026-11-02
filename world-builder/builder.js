@@ -21,6 +21,7 @@ const STORE='virtual-life-gpt-world-builder-pipeline-v3';
 const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
+const terrain=window.VLMapTerrain;
 const schema=window.VLMapSchema;
 const PIXEL_WORLD=Math.SQRT2/64, VERTICAL_COMP=2/Math.sqrt(3);
 const actorType=t=>t==='avatar'||t==='npc';
@@ -221,6 +222,8 @@ try{
  const saved=JSON.parse(localStorage.getItem(STORE)||'null');
  if(saved&&saved.format===seed.format&&Array.isArray(saved.objects))documentMap=sanitize(saved);
 }catch(e){console.warn('World Builder previous draft',e);}
+documentMap.map.terrain=terrain.normalize(documentMap.map.terrain||terrain.seeded(documentMap.map.worldBounds,documentMap.map.road),documentMap.map.worldBounds);
+defaultSeed.map.terrain=terrain.normalize(defaultSeed.map.terrain||terrain.seeded(defaultSeed.map.worldBounds,defaultSeed.map.road),defaultSeed.map.worldBounds);
 function sanitize(v){
  if(!v||!Array.isArray(v.objects))throw Error('Expected objects array');
  if(v.objects.length>350)throw Error('Maximum 350 objects');
@@ -257,6 +260,7 @@ function sanitize(v){
   out.objects.push(e);
  }
  if(v.map&&typeof v.map==='object')out.map={...out.map,...clone(v.map)};
+ out.map.terrain=terrain.normalize(v.map?.terrain||terrain.seeded(out.map.worldBounds,out.map.road),out.map.worldBounds);
  return out;
 }
 function saved(){try{localStorage.setItem(STORE,JSON.stringify(documentMap));$('saveStatus').textContent='● Saved locally';}catch(e){$('saveStatus').textContent='⚠ Storage full';}}
@@ -336,31 +340,66 @@ function plate(x,z,w,d,y,kind){
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,d),texMat(kind,w,d));
  mesh.rotation.x=-Math.PI/2;mesh.position.set(x,y,z);scene.add(mesh);return mesh;
 }
-function ground(){
- const g=new THREE.Group();g.name='Locked ground (non-editable)';scene.add(g);
- plate(5,37.5,72,43,0,'grass');
- // Road and pavement are independent real meshes: they never appear above buildings.
- plate(5,34.52,72,4.08,.012,'road');
- plate(5,31.7,72,1.55,.017,'pave');
- plate(5,37.23,72,1.35,.017,'pave');
- for(const rz of [32.52,36.58]){
-  const stripe=cuboid(g,5,.042,rz,72,.028,.12,0xe3b53b);
- }
- for(let x=-27;x<39;x+=3.3){
-  if(x>=18&&x<=28)continue;
-  cuboid(g,x,.043,34.53,1.6,.018,.075,0xd9dde1);
- }
- for(let x=19.6;x<=27.1;x+=.74){
-  cuboid(g,x,.046,34.52,.40,.03,3.55,0xf4f1e8);
- }
- // Paving rhythm along the outer ground, only where the sidewalks exist.
- for(const z of [31.7,37.23]){
-  for(let x=-30;x<=40;x+=2.0){
-   cuboid(g,x,.034,z,.018,.006,1.45,0x8d999e);
-  }
+
+const tileGround=new THREE.Group();tileGround.name='Editable terrain';scene.add(tileGround);
+const gridOverlay=new THREE.Group();gridOverlay.name='Grid overlay';scene.add(gridOverlay);
+let gridShown=true;
+const tilePalette={
+ grass:0x409750,road:0x565d69,sidewalk:0xc2c6c8,
+ water:0x459ac5,plaza:0xd9cfb5,soil:0x9c815e
+};
+function clearTerrain(){
+ while(tileGround.children.length){
+  const mesh=tileGround.children[0];tileGround.remove(mesh);
+  mesh.material.dispose();mesh.geometry.dispose();
  }
 }
-ground();
+function rebuildTerrain(){
+ clearTerrain();
+ const map=documentMap.map,b=map.worldBounds||{minX:-30,maxX:40,minZ:20,maxZ:55};
+ const t=map.terrain,index=terrain.dict(t);
+ const cells=Object.fromEntries(terrain.types.map(x=>[x,[]]));
+ for(let r=Math.ceil(b.minZ);r<Math.ceil(b.maxZ);r++)for(let c=Math.ceil(b.minX);c<Math.ceil(b.maxX);c++){
+  const type=terrain.read(t,c,r,index);
+  cells[type]?.push({c,r});
+ }
+ const tmp=new THREE.Object3D();
+ for(const [kind,items] of Object.entries(cells)){
+  if(!items.length)continue;
+  const color=tilePalette[kind],mat=new THREE.MeshBasicMaterial({color,depthTest:true,depthWrite:true});
+  const inst=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),mat,items.length);
+  inst.name='Terrain '+kind;
+  items.forEach((cell,i)=>{
+   tmp.position.set(cell.c+.5,kind==='road'?.012:kind==='sidewalk'?.024:kind==='water'?.008:.016,cell.r+.5);
+   tmp.rotation.set(-Math.PI/2,0,0);tmp.scale.set(1,1,1);tmp.updateMatrix();
+   inst.setMatrixAt(i,tmp.matrix);
+   if(kind==='grass'||kind==='water'||kind==='soil'){
+    const variant=((cell.c*12347+cell.r*2917)>>>0)%9;
+    inst.setColorAt(i,new THREE.Color(color).multiplyScalar(.91+variant*.015));
+   }
+  });
+  inst.instanceMatrix.needsUpdate=true;
+  if(inst.instanceColor)inst.instanceColor.needsUpdate=true;
+  inst.frustumCulled=false;tileGround.add(inst);
+ }
+ rebuildGrid();
+}
+function rebuildGrid(){
+ while(gridOverlay.children.length){
+  const mesh=gridOverlay.children[0];gridOverlay.remove(mesh);
+  mesh.geometry.dispose();mesh.material.dispose();
+ }
+ const b=documentMap.map.worldBounds||{minX:-30,maxX:40,minZ:20,maxZ:55};
+ const verts=[];
+ for(let c=Math.ceil(b.minX);c<=Math.floor(b.maxX);c++)verts.push(c,.054,b.minZ,c,.054,b.maxZ);
+ for(let r=Math.ceil(b.minZ);r<=Math.floor(b.maxZ);r++)verts.push(b.minX,.054,r,b.maxX,.054,r);
+ const geo=new THREE.BufferGeometry();
+ geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+ const lines=new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0xf6f2d6,transparent:true,opacity:.34,depthTest:true,depthWrite:false}));
+ lines.renderOrder=4;gridOverlay.add(lines);gridOverlay.visible=gridShown;
+}
+rebuildTerrain();
+
 const texLoader=new THREE.TextureLoader();
 const spriteTexture=new Map();
 function spriteDirection(deg=0){return ['sw','se','ne','nw'][((Math.round(deg/90)%4)+4)%4]}
