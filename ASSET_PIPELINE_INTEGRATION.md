@@ -1,13 +1,11 @@
 # Virtual Life — Game Asset Bridge v1
 
-This connects the existing [Virtual Life Asset Pipeline](https://lafrich.github.io/virtual-life-asset-pipeline/#rigs) to the actual `virtual-office` repository, with an opt-in player renderer on the editable Rebuild and opt-in rendering inside the authenticated Cove module.
+This connects the existing [Virtual Life Asset Pipeline](https://lafrich.github.io/virtual-life-asset-pipeline/#rigs) to the actual `virtual-office` repository, with an optional asset inspector on the encrypted main game and original-sprite rendering inside its authenticated Cove module.
 
-**Important:** The main `office.html` game is AES-encrypted. Its original renderer and multiplayer code remain unchanged; a public asset bridge cannot transparently hook inaccessible internal sprites. In the main encrypted world the bridge offers the developer picker and public sprite preview. **Actual sprite replacement** is wired in two editable renderers: `rebuild/game.js` and the authenticated `cove-reskin.js` room module.
+**Important:** The main `office.html` game is AES-encrypted. Its original renderer and multiplayer code remain unchanged; a public asset bridge cannot transparently hook inaccessible internal sprites. In the main encrypted world the bridge offers the developer picker and public sprite preview. **Actual sprite replacement** is wired only in the authenticated `cove-reskin.js` room module. The independent `/rebuild/` test game has been retired.
 
 ## Entry points
 
-- Rebuild without modification: https://lafrich.github.io/virtual-office/rebuild/
-- **Rebuild + live rig asset rendering:** https://lafrich.github.io/virtual-office/rebuild/?assetbridge=1
 - Original locked game without changes: https://lafrich.github.io/virtual-office/
 - **Authenticated main world + asset inspector:** open `office.html?assetbridge=1` after logging in.
 - **Authenticated Cove + imported character sprite:** open `office.html?cove=1&assetbridge=1` after logging in, then launch **COVE ROOM**.
@@ -53,7 +51,7 @@ window.VOAssetBridge?.drawActor(ctx, screenPoint, zoom, {
 
 Each actor and instance uses its own motion timer. The engine continues to own the gameplay state and draw ordering. **A clip being present in the central 203-action database does not mean it is authored for that actor.** Unavailable actor-specific pose = `draw()` returns false.
 
-Rebuild's playable player mapping uses `walk` and `idle`, plus action-aware poses (`sit`, `sleep`, `sit_type`, etc.) when the actor actually has that original animation. If missing, legacy sprite/pose remains. The Cove module also maps `bed`, `toilet`, `tub`, and `desk`, with identical fallback behavior.
+The authenticated Cove module maps `bed`, `toilet`, `tub`, and `desk` to appropriate original actor-specific clips. When unavailable, the original Cove renderer remains in use. The main encrypted game world continues to use its existing character renderer.
 
 ## Studio-to-game workflow
 
@@ -81,11 +79,14 @@ node --check game-assets/rig-runtime.js
 node --check game-assets/asset-bridge.js
 node --check sw.js
 node --check cove-reskin.js
-node --check rebuild/game.js
 node tests/asset-bridge.test.cjs
 ```
 
 The test verifies default-off, opt-in metadata, original sprite frame drawing, four direction mapping, fallback on unrigged actions, lazy NPC loading, and that NPC selection does not override the player's chosen actor.
+
+## Retired test game
+
+The separate `/rebuild/` prototype was not the Virtual Life game in use. Its public entry point was removed at the user's request, and its optional Asset Bridge drawing hook was also removed. Old editable source files may remain in the repository for historical reference but are not a supported game build or an Asset Bridge target.
 
 ## Next integration stage
 
