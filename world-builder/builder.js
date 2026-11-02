@@ -20,6 +20,7 @@ if(!THREE){
 const STORE='virtual-life-gpt-world-builder-pipeline-v3';
 const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
+const style=window.VLWorldStyle;
 const actorType=t=>t==='avatar'||t==='npc';
 const directions=['sw','se','nw','ne'];
 // Actual catalog artwork is 2D. These objects are independent world nodes;
@@ -247,6 +248,7 @@ function sanitize(v){
   // Keep unknown action metadata as data only. No gameplay execution.
   if(p.action&&typeof p.action==='object')e.action=clone(p.action);
   if(p.collision!==undefined)e.collision=!!p.collision;
+  style.normalize(e,assetByName);
   out.objects.push(e);
  }
  if(v.map&&typeof v.map==='object')out.map={...out.map,...clone(v.map)};
@@ -429,21 +431,27 @@ function makeTree(root){
 }
 function makeBox(root,item){cuboid(root,0,.8,0,2,1.6,2,new THREE.Color(item.color||'#d4a86a'));}
 const billboardSprites=[];
+function makePixelProp(root,type,item){
+ const kind=style.isPixelProxy(type)?type:'box',art=style.proxyTexture(THREE,kind);
+ const w=item.width||art.width,h=item.height||art.height;
+ const mat=new THREE.MeshBasicMaterial({map:art.texture,transparent:false,alphaTest:.49,depthWrite:true,depthTest:true,side:THREE.DoubleSide});
+ const plane=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
+ plane.position.y=h*(art.pivot-.5);
+ plane.userData.billboardPart=true;plane.userData.pixelProxy=true;
+ plane.userData.aspectFixed=true;plane.userData.assetFile='__proxy:'+kind;
+ root.userData.pixelProxy=true;root.add(plane);billboardSprites.push({root,plane});
+}
 function makeSprite(root,item){
  const spec=assetByName.get(item.asset);if(!spec)return;
  if(spec.source==='pipeline-street'&&!spec.published){
-   // The upstream manifest describes these outputs but the generated PNGs
-   // are not committed. Show real editable geometry until art is published.
-   const data={...item,type:spec.group==='jalan'||spec.group==='gang'?'building':'shop',
-      w:spec.footprint?.[0]||3,d:spec.footprint?.[1]||3,
-      h:Math.max(1.5,Math.min(19,spec.height*.9)),
-      color:spec.group==='loak'?'#b39173':spec.group==='kampung'?'#b5ae9f':'#7294a8'};
-   if(spec.id.startsWith('bangku'))makeBench(root);
-   else if(spec.id.startsWith('lampu')||spec.id.includes('tiang'))makeLamp(root);
-   else if(spec.id.includes('motor'))makeBox(root,item);
-   else makeBuilding(root,data);
-   root.userData.pendingPipelineImage=spec.id;
-   return;
+  const kind=style.category(item,assetByName);
+  if(kind==='building'){
+   makeBuilding(root,{...item,type:spec.group==='loak'||spec.group==='kampung'?'shop':'building',
+    w:spec.footprint?.[0]||3,d:spec.footprint?.[1]||3,
+    h:Math.max(1.5,Math.min(19,spec.height*.9)),
+    color:spec.group==='loak'?'#b39173':spec.group==='kampung'?'#b5ae9f':'#7294a8'});
+  }else makePixelProp(root,kind,item);
+  root.userData.pendingPipelineImage=spec.id;return;
  }
 
  const view=spriteDirection(item.rotation);
@@ -480,10 +488,10 @@ function instantiate(o){
  root.scale.setScalar(actorType(o.type)?1:(o.scale||1));
  switch(o.type){
   case 'building':case 'shop':makeBuilding(root,o);break;
-  case 'bench':makeBench(root);break;
-  case 'lamp':makeLamp(root);break;
-  case 'tree':makeTree(root);break;
-  case 'box':makeBox(root,o);break;
+  case 'bench':makePixelProp(root,'bench',o);break;
+  case 'lamp':makePixelProp(root,'lamp',o);break;
+  case 'tree':makePixelProp(root,'tree',o);break;
+  case 'box':makePixelProp(root,'box',o);break;
   case 'sprite':makeSprite(root,o);break;
   case 'avatar':case 'npc':makeAvatar(root,o);break;
  }
@@ -520,6 +528,8 @@ function updateSelection(){
  $('tools').querySelectorAll('button').forEach(b=>b.disabled=!cur);
  for(const id of ['rotateL','rotateR','scaleDown','scaleUp'])
    $(id).disabled=!cur||actorType(cur.type);
+ const rotateLocked=cur?.type==='sprite'&&(!assetByName.get(cur.asset)?.variants||Object.keys(assetByName.get(cur.asset).variants).length<2);
+ if(rotateLocked){$('rotation').disabled=true;$('rotateL').disabled=true;$('rotateR').disabled=true;}
  const actor=!!cur&&actorType(cur.type);
  $('actorControls').classList.toggle('visible',actor);
  $('facing').disabled=!actor;$('pose').disabled=!actor;
@@ -542,13 +552,15 @@ function updateSelection(){
 }
 function select(id){
  selectedId=id;updateSelection();
- if(id)tell('Selected: '+item()?.name+'. Pilih Move lalu drag.');
+ if(id)tell(owners.get(id)?.userData?.pendingPipelineImage?'Preview sementara: PNG sumber belum dipublikasikan.':'Selected: '+item()?.name+'. Pilih Move lalu drag.');
  renderer.render(scene,camera);
 }
 function edit(fn){
  if(!item())return;
- undoPoint();fn(item());
- if(actorType(item().type)){item().rotation=0;item().scale=1;}
+ const before=clone(item());undoPoint();fn(item());
+ style.normalize(item(),assetByName);
+ const blocked=style.reason(item(),documentMap.objects,documentMap.map,assetByName);
+ if(blocked){Object.assign(item(),before);undoStack.pop();updateSelection();tell(blocked);return;}
  applyItem();saved();
 }
 function applyItem(){
@@ -567,24 +579,33 @@ function applyItem(){
 }
 function id(type){return type+'-'+Math.random().toString(36).slice(2,8);}
 function add(type){
- if(!type)return;undoPoint();
- const isSprite=type.startsWith('sprite:'),asset=isSprite?type.slice(7):undefined;
+ if(!type)return;
+ const preset=style.presets[type],chosen=preset?'sprite:'+preset:type;
+ const isSprite=chosen.startsWith('sprite:'),asset=isSprite?chosen.slice(7):undefined;
  const spec=assetByName.get(asset);
  const o={id:id(isSprite?'sprite':type),type:isSprite?'sprite':type,
-  name:isSprite?(spec?.label||asset.replace('_base.svg','').replaceAll('_',' ')):actorType(type)?'Virtual Life Character':type,
+  name:isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
   x:round(cameraFocus.x),z:round(cameraFocus.z),y:0,rotation:0,scale:1};
  if(isSprite){
-   if(!spec){tell('Unknown pixel asset');undoStack.pop();return;}
-   o.asset=asset;o.width=spec.width;o.height=spec.height;o.collision=spec.collision;
+  if(!spec){tell('Asset belum tersedia dalam katalog resmi');return;}
+  o.asset=asset;o.width=spec.width;o.height=spec.height;o.collision=spec.collision!==false;
  }
  if(actorType(type)){o.facing='sw';o.pose=null;o.variant='gpt-original';o.profile=type==='npc'?'noor':'ichsan';o.collision=true;}
- if(type==='building'||type==='shop'){o.w=7;o.d=5;o.h=5;}
- documentMap.objects.push(o);instantiate(o);select(o.id);saved();tell('New object added · Move to place');
+ if(type==='tree')o.collision=true;
+ if((type==='building'||type==='shop')&&!isSprite){tell('Pilih prefab resmi dari katalog');return;}
+ style.normalize(o,assetByName);
+ if(!style.nearest(o,documentMap.objects,documentMap.map,assetByName)){
+  tell('Tidak ada lokasi kosong. Geser kamera atau pindahkan objek lain.');return;
+ }
+ undoPoint();documentMap.objects.push(o);instantiate(o);select(o.id);saved();
+ tell('Prefab mengikuti footprint Virtual Life · Move untuk mengatur');
 }
 function duplicate(){
  const o=item();if(!o)return;
- undoPoint();let q=clone(o);q.id=id(o.type);q.name=o.name+' copy';q.x+=1.2;q.z+=1.2;
- documentMap.objects.push(q);instantiate(q);select(q.id);saved();
+ let q=clone(o);q.id=id(o.type);q.name=o.name+' copy';q.x+=1.2;q.z+=1.2;
+ style.normalize(q,assetByName);
+ if(!style.nearest(q,documentMap.objects,documentMap.map,assetByName)){tell('Tidak ada ruang untuk duplicate');return;}
+ undoPoint();documentMap.objects.push(q);instantiate(q);select(q.id);saved();
 }
 function remove(){
  if(!item())return;undoPoint();
@@ -672,7 +693,11 @@ function onUp(e){
      const rig=rigs.get(item()?.id)?.rig;
      if(rig)rig.setMoving(0,0,false);
    }
-   if(drag.changed)saved();else undoStack.pop();
+   if(drag.changed){
+   const o=item(),blocked=o&&style.reason(o,documentMap.objects,documentMap.map,assetByName);
+   if(blocked){o.x=drag.x;o.z=drag.z;applyItem();undoStack.pop();tell(blocked);}
+   else saved();
+  }else undoStack.pop();
  }
  drag=null;
 }
@@ -734,16 +759,16 @@ $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');
 $('zoomIn').onclick=()=>{viewSize=clamp(viewSize*.8,10,100);fitCamera();};
 $('zoomOut').onclick=()=>{viewSize=clamp(viewSize*1.25,10,100);fitCamera();};
 $('home').onclick=resetCamera;
-$('rotateL').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation-15+360)%360;});};
-$('rotateR').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation+15)%360;});};
-$('scaleDown').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale-.1),.1,8);});};
-$('scaleUp').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale+.1),.1,8);});};
+$('rotateL').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation-90+360)%360;});};
+$('rotateR').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation+90)%360;});};
+$('scaleDown').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale-.05),.85,1.15);});};
+$('scaleUp').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale+.05),.85,1.15);});};
 $('duplicate').onclick=duplicate;$('delete').onclick=remove;
 for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('change',()=>{
  const v=Number($(prop).value);
  if(!Number.isFinite(v)||!item())return;
  if(actorType(item().type)&&['rotation','scale'].includes(prop)){updateSelection();return;}
- edit(o=>{o[prop]=prop==='scale'?clamp(v,.1,8):prop==='rotation'?((v%360)+360)%360:clamp(v,-100,100);});
+ edit(o=>{o[prop]=prop==='scale'?clamp(v,.85,1.15):prop==='rotation'?((v%360)+360)%360:clamp(v,-100,100);});
 });
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
