@@ -2,8 +2,19 @@
    Retrieves the real original AES-GCM source and assets from the existing GitHub Pages root.
    Production Cloudflare Worker/network is never used. */
 'use strict';
-importScripts('./package-a.js?v=a6'); // GPT v16a patch 06 (full rear street; road behind player)
+importScripts('./package-a.js?v=a7'); // GPT beta patch 07 (silhouette renderer + guarded far layer + immutable cipher cache)
 const ROOT=new URL('../../',self.registration.scope),SUB=new URL(self.registration.scope).pathname;
+const ENC_CACHE='vl-gpt-encrypted-v1'; // Only original AES-GCM blobs; never plaintext.
+async function immutableBlob(id){
+ const url=new URL('b/'+id,ROOT);
+ let bucket=null;
+ try{if(self.caches)bucket=await caches.open(ENC_CACHE);}catch(e){}
+ if(bucket){try{const hit=await bucket.match(url.href);if(hit)return hit.arrayBuffer();}catch(e){}}
+ const response=await fetch(url,{cache:'no-store'});
+ if(!response.ok)throw Error('encrypted asset '+response.status);
+ if(bucket){try{await bucket.put(url.href,response.clone());}catch(e){}}
+ return response.arrayBuffer();
+}
 let key=null,manifestPromise=null;
 function b64(v){return Uint8Array.from(atob(v),c=>c.charCodeAt(0))}
 async function unlock(v){key=await crypto.subtle.importKey('raw',b64(v),'AES-GCM',false,['decrypt']);manifestPromise=null}
@@ -42,9 +53,8 @@ self.addEventListener('fetch',e=>{
    else{
     const m=await man(),entry=m[path];
     if(!entry)return new Response('asset not found '+path,{status:404});
-    const r=await fetch(new URL('b/'+entry[0],ROOT),{cache:'no-store'});
-    if(!r.ok)throw Error('asset '+r.status);
-    bytes=await decrypt(await r.arrayBuffer());type=entry[1]||'application/octet-stream';
+    if(!/^[0-9a-f]{32}\.enc$/.test(entry[0]))throw Error('bad encrypted asset id');
+    bytes=await decrypt(await immutableBlob(entry[0]));type=entry[1]||'application/octet-stream';
    }
    if(path==='office.html')return new Response(patch(new TextDecoder().decode(bytes),url.searchParams.get('v16')==='1'),{headers:{'content-type':'text/html;charset=utf-8','cache-control':'no-store','X-GPT-Version':'offline-beta'}});
    return new Response(bytes,{headers:{'content-type':type,'cache-control':'no-store'}});
