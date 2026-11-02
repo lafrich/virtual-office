@@ -29,10 +29,10 @@ function gptParkCleanupRuntime(){
           for(let x=0;x<w;x++){
             let cell=toGrid(baseX+(x+.5)*dx,yy);
             // The park is SOUTH of the road, not the market or the gang.
-            if(cell.r<36.65||cell.r>49.6||cell.c< -21||cell.c>42)continue;
+            if(cell.r<30.5||cell.r>49.6||cell.c< -21||cell.c>42)continue;
             let z=y*w+x,i=z*4,r=data[i],g=data[i+1],b=data[i+2];
             inside[z]=1;
-            if(wood(r,g,b))seeds[z]=1;
+            if(cell.r>=34.2&&wood(r,g,b))seeds[z]=1;
             if(yellow(r,g,b))lit[z]=1;
           }
         }
