@@ -60,3 +60,10 @@ Actual original compositor: `XC.b` (outdoor background and behind-player sprites
 - Explicit regression suites: `tests/render-layer-regression.cjs`, `tests/gang-exit-regression.cjs`. Both pass in an isolated VM harness. Latest original encrypted game's 26 patch anchors apply; all executable JavaScript snippets syntactically valid.
 - **Android visual check not yet completed by assistant**; cannot state the remaining flicker/background issue is 100% fixed before actual gameplay recording. `main` files other than `rebuild/gpt-version/` unchanged. Beta patch loaded via scoped service worker import `a8`.
 
+
+## 2026-11-02 — Patch 09: gate floor, tree proportion, mobile canvas
+- Following owner screenshot and request to remove only the obstructing plane: narrowed the original baked `S2X.lv.g` front-to-back painter routing to the actual gate/sidewalk footprint (`c=20.4..25.3, r=35.65..40.15`). **Not** an indiscriminate removal of building, roof or pillar geometry. All other native movable cars and NPCs retain normal sorting.
+- Enlarged original `extTree` vector art BEFORE `pxBake/extCompose`, anchored at the same ground pivot: tall 1.28x, round 1.26x, wide 1.20x. Small planters, other environmental props and the collider radius are unchanged.
+- Caps only the expensive `xcFrame` compositor painting to ~30 FPS on touch devices; input/physics/game tick is not capped. Original desktop painting remains uncapped.
+- Regression: real encrypted source transformation passed 28 anchors, all executable JS scripts parse; the simulated gate road overlay is behind player on passage, not behind player in adjacent shop frontage, and vehicle/NPC group is never moved wholesale.
+- Deployed only the `rebuild/gpt-version/` beta overlay and service worker import `a9` to GitHub Pages. Not merged into encrypted production game. Actual Android visual/performance measurements still pending.
