@@ -1047,6 +1047,25 @@ $('mobileInspector').onclick=()=>{
  $('inspector').classList.toggle('mobile-open');
  $('assetsPanel').classList.remove('mobile-open');
 };
+for(const [input,field] of [['buildingW','w'],['buildingD','d'],['buildingH','h']]){
+ $(input).addEventListener('change',()=>{
+  if(!item()||!['building','shop'].includes(item().type))return;
+  const n=Number($(input).value);
+  if(!Number.isFinite(n)){updateSelection();return;}
+  edit(o=>{o[field]=Math.max(2,Math.min(20,field==='h'?Math.round(n*10)/10:Math.round(n)));});
+  rebuild();
+ });
+}
+$('replaceAsset').onclick=()=>{
+ const current=item();
+ if(!current||!['building','shop'].includes(current.type))return;
+ replaceTarget=current.id;
+ $('assetCategory').value='building';$('searchAsset').value='';
+ renderAssetList();
+ $('assetsPanel').classList.add('mobile-open');
+ $('inspector').classList.remove('mobile-open');
+ tell('Pilih asset dari BUILDINGS untuk mengganti placeholder');
+};
 $('exportShortcut').onclick=()=>$('export').click();
 renderAssetList();
 
