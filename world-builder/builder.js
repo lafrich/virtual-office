@@ -431,6 +431,21 @@ function makeBox(root,item){cuboid(root,0,.8,0,2,1.6,2,new THREE.Color(item.colo
 const billboardSprites=[];
 function makeSprite(root,item){
  const spec=assetByName.get(item.asset);if(!spec)return;
+ if(spec.source==='pipeline-street'&&!spec.published){
+   // The upstream manifest describes these outputs but the generated PNGs
+   // are not committed. Show real editable geometry until art is published.
+   const data={...item,type:spec.group==='jalan'||spec.group==='gang'?'building':'shop',
+      w:spec.footprint?.[0]||3,d:spec.footprint?.[1]||3,
+      h:Math.max(1.5,Math.min(19,spec.height*.9)),
+      color:spec.group==='loak'?'#b39173':spec.group==='kampung'?'#b5ae9f':'#7294a8'};
+   if(spec.id.startsWith('bangku'))makeBench(root);
+   else if(spec.id.startsWith('lampu')||spec.id.includes('tiang'))makeLamp(root);
+   else if(spec.id.includes('motor'))makeBox(root,item);
+   else makeBuilding(root,data);
+   root.userData.pendingPipelineImage=spec.id;
+   return;
+ }
+
  const view=spriteDirection(item.rotation);
  const data=spec.variants?.[view]||spec.variants?.sw||spec.variants?.se;
  const size=data?.size||spec.size,pivot=data?.pivot||spec.pivot;
