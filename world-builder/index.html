@@ -34,7 +34,7 @@
   <div class="stamp">✳<div>V/L<br>MAP</div></div>
  </aside>
  <aside id="assetsPanel" aria-label="Asset browser">
-  <div class="panel-heading"><strong>FILES / ASSETS</strong><span id="assetCount">0</span></div>
+  <div class="panel-heading"><strong>FILES / ASSETS</strong><span id="assetCount">0</span><button id="closeAssets" class="sheet-close" type="button" aria-label="Close asset library">×</button></div>
   <div id="assetSearch">
    <input type="search" id="searchAsset" placeholder="⌕ Find asset..." aria-label="Find asset" autocomplete="off">
    <select id="assetCategory" aria-label="Asset category">
@@ -53,7 +53,7 @@
   <div class="canvas-head"><span class="canvas-title">WORLD / CITY BUILDER</span><span class="right">64×32 ISO · PINCH TO ZOOM</span></div>
   <main id="canvas-wrap">
    <canvas id="world" aria-label="Interactive Virtual Life isometric map canvas"></canvas>
-   <div id="hint">Tap = select · Paint + drag = terrain · Move = place · Pinch = zoom</div>
+   <div id="hint">Tap = select · Paint + drag = terrain · Move = place · Pinch = zoom</div><button id="floatingInspector" class="floating-inspector" type="button" aria-label="Open properties inspector">☷ Properties</button>
    <div id="status">LOADING MAP...</div><div id="toast"></div><div id="empty" role="alert"></div>
    <div id="walkPad" aria-label="Four directional movement">
     <button data-walk="up" aria-label="Up">↑</button><button data-walk="left" aria-label="Left">←</button><button data-walk="down" aria-label="Down">↓</button><button data-walk="right" aria-label="Right">→</button>
@@ -79,7 +79,7 @@
   </div>
  </section>
  <aside id="inspector" aria-label="Object inspector">
-  <div class="inspector-head">PROPERTIES / LOGIC <span style="margin-left:auto" id="inspectorCount">00</span></div>
+  <div class="inspector-head"><strong>PROPERTIES / LOGIC</strong><span id="inspectorCount" class="sheet-count">00</span><button id="closeInspector" class="sheet-close" type="button" aria-label="Minimize properties panel" title="Minimize panel">⌄</button></div>
   <div class="inspector-body">
    <div class="selection"><strong id="selectedName">No selection</strong><span id="selectedType">WORLD MAP</span></div>
    <div id="tools">
