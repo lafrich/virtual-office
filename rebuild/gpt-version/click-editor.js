@@ -187,7 +187,7 @@ function gptClickEditorRuntime(){
     }
     store();drawOutline();menuState();
   }
-  function moveSelected(){moveMode=!moveMode;menuState();hint(moveMode?'Drag objek untuk memindahkannya.':'Tap objek untuk memilih.');}
+  function moveSelected(){moveMode=!moveMode;menuState();hint(moveMode?'Tarik objek untuk memindahkan.':'Tap objek untuk memilih.');}
   function rotateSelected(){let v=selectedData();mutate({angle:((v?.angle||0)+15)%360});}
   function deleteSelected(){let v=selectedData();mutate({deleted:!v?.deleted});if(selectedData()?.deleted)selection=null;moveMode=false;menuState();drawOutline();}
   function undo(){if(!history.length){hint('Belum ada perubahan.');return;}
@@ -198,7 +198,11 @@ function gptClickEditorRuntime(){
     e.preventDefault();shield.setPointerCapture(e.pointerId);
     let p=svgPoint(e.clientX,e.clientY);if(!p)return;
     drag={id:e.pointerId,p,start:e};
-    if(moveMode&&selection){drag.moving=true;drag.startValue={...selectedData()};return;}
+    if(moveMode&&selection){
+      backup();
+      if(selection.type==='raster'&&!state.raster.some(x=>x.id===selection.item.id))state.raster.push(selection.item);
+      drag.moving=true;drag.startValue={...selectedData()};return;
+    }
   }
   function moving(e){
     if(!drag||e.pointerId!==drag.id||!drag.moving)return;
@@ -216,7 +220,7 @@ function gptClickEditorRuntime(){
   function finish(e){
     if(!drag||e.pointerId!==drag.id)return;
     e.preventDefault();let d=drag;drag=null;
-    if(d.moving){backup();store();if(selection?.type==='raster')redrawRaster();moveMode=false;menuState();drawOutline();return;}
+    if(d.moving){store();if(selection?.type==='raster')redrawRaster();moveMode=false;menuState();drawOutline();return;}
     let n=pickVector(e);
     if(n){selection={type:'vector',node:n};menuState();drawOutline();return;}
     let p=svgPoint(e.clientX,e.clientY);if(!p)return;
