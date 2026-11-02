@@ -188,8 +188,13 @@ function gptApplyA(html){
   // Scale the ORIGINAL vector trees before pxBake / extCompose flattens them.
   // P(c,r) is unchanged, so the trunk base stays pinned to its ground tile.
   // Shrubs, potted plants and any Street2 building art are not rescaled.
-  rep("(kind==='tall'?tTall:kind==='wide'?tWide:tRound)(g,p,(s||1)*1.8);",
-      "(kind==='tall'?tTall:kind==='wide'?tWide:tRound)(g,p,(s||1)*1.8*(kind==='tall'?1.85:kind==='wide'?1.95:2.05));");
+  // Office-lawn trees (c 18.9 / 27.7, r ~29) need more height than
+  // their stock squat canopy. A nested SVG transform stretches upwards around
+  // P(c,r); the ground anchor and collision coordinates remain unchanged.
+  // The distinct sprite cache key prevents office trees reusing smaller sprites
+  // baked for elsewhere on the map.
+  rep("g._k='t'+kind+(s||1); g._a=p; (kind==='tall'?tTall:kind==='wide'?tWide:tRound)(g,p,(s||1)*1.8);",
+      "var officeTree=r>=28.6&&r<=29.6&&c>=15&&c<=30; g._k='t'+kind+(s||1)+(officeTree?'-office-v11':''); g._a=p; var treeG=officeTree?el('g',{transform:'translate('+p.x+' '+p.y+') scale(1.12 1.65) translate('+(-p.x)+' '+(-p.y)+')'},g):g; (kind==='tall'?tTall:kind==='wide'?tWide:tRound)(treeG,p,(s||1)*1.8*(kind==='tall'?1.85:kind==='wide'?1.95:2.05));");
   // Limit the expensive CANVAS raster compositor to 30fps on touch devices.
   // Physics, player input, collisions and the main game update loop still run
   // normally. On desktop we retain the original frequency.
@@ -208,7 +213,7 @@ function gptApplyA(html){
   if(phoneMap)css+="body.y2k .y2-map,#vs-hud .vs-mini{display:none!important}";
   rep("</head>","<style id=\"gpt-v16a-css\">"+css+"</style></head>");
   rep("window.__vsBuild = 'Virtual Life v15a';","window.__vsBuild = 'Virtual Life v16a · GPT beta';");
-  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a</div></body>");
+  rep("</body>","<div id=\"gpt-pkg-a\" style=\"position:fixed;top:4px;right:8px;z-index:2147483000;pointer-events:none;background:#183758d9;color:#fff;padding:3px 7px;font:bold 10px Tahoma\">GPT VERSION · v16a.11</div></body>");
   if(!phoneMap)console.warn('[gpt-a] Phone map absent; HUD minimap retained');
   return {html:s,applied:applied.length,phoneMap:phoneMap};
 }
