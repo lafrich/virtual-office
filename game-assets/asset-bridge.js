@@ -11,8 +11,9 @@ const DIRECTIONS=["se","sw","ne","nw"];
 const POSES={bed:"sleep",tub:"bath",toilet:"toilet_sit",desk:"sit_type",
  work:"sit_type",sleep:"sleep",bathe:"bath",sit:"sit",lie:"sleep"};
 const state={status:ACTIVE?"loading":"off",actor:"",pack:null,clips:[],catalog:null,
- images:new Map(),pending:new Map(),error:"",motion:"",started:0,preview:"",dir:"se",previewStart:0};
-const api={enabled:ACTIVE,base:BASE,draw,selectActor,getStatus,
+ images:new Map(),pending:new Map(),packs:new Map(),loadingPacks:new Map(),
+ motionStates:new Map(),error:"",preview:"",dir:"se",previewStart:0};
+const api={enabled:ACTIVE,base:BASE,draw,drawActor:draw,selectActor,preloadActor,getStatus,
  ready:()=>state.status==="ready",getClip:id=>state.clips.find(c=>c.id===id)||null};
 global.VOAssetBridge=Object.freeze(api);
 if(!ACTIVE)return;
@@ -67,6 +68,26 @@ function approvedClip(clip){
   Array.isArray(clip.frame_ms)&&clip.frame_ms.length===clip.frames&&
   clip.frame_ms.every(t=>Number.isInteger(t)&&t>0);
 }
+async function preloadActor(id){
+ if(!state.catalog)return null;
+ if(state.packs.has(id))return state.packs.get(id);
+ if(state.loadingPacks.has(id))return state.loadingPacks.get(id);
+ const actor=state.catalog.characters.find(c=>c.id===id);
+ if(!actor)return null;
+ const promise=(async()=>{
+  const pack=await jsonFile(actor.pack,"pack");
+  if(pack.format!=="virtual-life-sprite-motion-v1"||pack.actor!==id||
+     pack.model_type!==actor.model_type||!Array.isArray(pack.clips))
+    throw Error("Wrong actor rig pack");
+  const ready=pack.clips.filter(approvedClip);
+  const record={pack,clips:ready};
+  state.packs.set(id,record);
+  return record;
+ })();
+ state.loadingPacks.set(id,promise);
+ try{return await promise;}
+ finally{state.loadingPacks.delete(id);}
+}
 let generation=0;
 async function selectActor(id){
  if(!state.catalog||!ACTIVE)return false;
@@ -77,12 +98,10 @@ async function selectActor(id){
  state.pack=null;state.clips=[];state.motion="";state.preview="";
  updatePanel();
  try{
-  const pack=await jsonFile(actor.pack,"pack");
+  const record=await preloadActor(id);
   if(seq!==generation)return false;
-  if(pack.format!=="virtual-life-sprite-motion-v1"||pack.actor!==id||
-     pack.model_type!==actor.model_type||!Array.isArray(pack.clips))
-    throw Error("Wrong actor rig pack");
-  state.pack=pack;state.clips=pack.clips.filter(approvedClip);
+  if(!record)throw Error("Unknown character asset");
+  state.pack=record.pack;state.clips=record.clips;
   const first=state.clips.find(c=>c.id==="walk")||
     state.clips.find(c=>c.id==="idle")||state.clips[0];
   state.preview=first?.id||"";
@@ -96,17 +115,23 @@ async function selectActor(id){
   state.status="error";state.error=e.message;updatePanel();return false;
  }
 }
-function selectClip(opts={}){
+function selectClip(clips,opts={}){
  const id=opts.actionId||POSES[opts.pose]||(opts.moving?"walk":"idle");
- let clip=state.clips.find(c=>c.id===id);
- if(!clip&&!opts.pose&&!opts.actionId)clip=state.clips.find(c=>c.id==="walk");
+ let clip=clips.find(c=>c.id===id);
+ if(!clip&&!opts.pose&&!opts.actionId)clip=clips.find(c=>c.id==="walk");
  return clip||null;
 }
 // Called from an existing render frame. True ONLY after a genuine actor's
 // original atlas has loaded; missing action/asset => game's native renderer.
 function draw(ctx,point,zoom,opts={}){
- if(state.status!=="ready"||!ctx||!point||!Number.isFinite(zoom)||zoom<=0)return false;
- const clip=selectClip(opts);if(!clip)return false;
+ if(!ACTIVE||!state.catalog||!ctx||!point||!Number.isFinite(zoom)||zoom<=0)return false;
+ const actorId=opts.actorId||state.actor;
+ const record=state.packs.get(actorId);
+ if(!record){
+  if(!state.loadingPacks.has(actorId))preloadActor(actorId).catch(()=>{});
+  return false;
+ }
+ const clip=selectClip(record.clips,opts);if(!clip)return false;
  const img=state.images.get(clip.atlas);
  if(!img||!img.naturalWidth){
   if(!state.pending.has(clip.atlas))loadImage(clip); // asynchronously prepare action transition
@@ -114,8 +139,12 @@ function draw(ctx,point,zoom,opts={}){
  }
  const dir=DIRECTIONS.includes(opts.direction)?opts.direction:"se";
  const key=opts.actionId||opts.pose||(opts.moving?"walk":"idle");
- if(state.motion!==key){state.motion=key;state.started=performance.now();}
- const t=key==="idle"&&clip.id==="walk"?0:performance.now()-state.started;
+ const instance=opts.instanceId||actorId;
+ const anim=state.motionStates.get(instance);
+ const started=anim?.action===key&&anim.actor===actorId?anim.started:performance.now();
+ if(!anim||anim.action!==key||anim.actor!==actorId)
+  state.motionStates.set(instance,{action:key,actor:actorId,started});
+ const t=key==="idle"&&clip.id==="walk"?0:performance.now()-started;
  ctx.save();const ok=runtime.draw(ctx,img,clip,dir,t,point.x,point.y,zoom*.9);ctx.restore();
  return ok;
 }
@@ -140,8 +169,8 @@ function createUI(){
  if(panel)return;
  const css=document.createElement("style");
  css.textContent=[
-  "#vo-asset-btn{position:fixed;left:12px;bottom:80px;z-index:2147482000;padding:8px;background:#eaf2ff;color:#163972;border:2px solid #29406d;font:bold 11px monospace;cursor:pointer}",
-  "#vo-asset-panel{position:fixed;left:12px;bottom:120px;z-index:2147482100;width:min(350px,calc(100vw - 24px));max-height:72vh;overflow:auto;padding:10px;background:#ece9d8;border:3px solid #29406d;color:#172542;font:11px/1.5 monospace}",
+  "#vo-asset-btn{position:fixed;right:12px;top:70px;z-index:2147483350;padding:8px;background:#eaf2ff;color:#163972;border:2px solid #29406d;font:bold 11px monospace;cursor:pointer}",
+  "#vo-asset-panel{position:fixed;right:12px;top:112px;z-index:2147483450;width:min(350px,calc(100vw - 24px));max-height:72vh;overflow:auto;padding:10px;background:#ece9d8;border:3px solid #29406d;color:#172542;font:11px/1.5 monospace}",
   "#vo-asset-panel[hidden]{display:none!important}#vo-asset-panel select{display:block;width:100%;min-height:31px;margin:5px 0 9px;border:1px solid #7e8ca6;background:#fff}",
   "#vo-asset-panel button{border:1px solid #637999;background:#fff;padding:5px;cursor:pointer}#vo-asset-panel .ab-row{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin:7px 0}",
   "#vo-asset-panel canvas{display:block;background:#e2eaf8;margin:8px auto;max-width:100%;image-rendering:pixelated}#vo-asset-panel a{color:#123f82}"
