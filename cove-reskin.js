@@ -116,7 +116,11 @@ function avatar(){
  if(player.mode==='toilet'){x=13.55;y=8;z=18}
  if(player.mode==='desk'){x=6.6;y=2.45;z=8}
  const p=projection(x,y,z);ellipse(x,y,13,4,'#334b552a');
- if(sprite.complete&&sprite.naturalWidth===384){
+ const linked=window.VOAssetBridge?.draw(ctx,p,.73,{
+   direction:player.dir,moving:!player.mode&&moving,pose:player.mode
+ })||false;
+ if(linked){/* Character is drawn by its original pipeline pack. */}
+ else if(sprite.complete&&sprite.naturalWidth===384){
  const row={se:0,sw:1,ne:2,nw:3}[player.dir]||0,col=moving?Math.floor(player.step*10)%6:0,s=.73;
  ctx.save();ctx.imageSmoothingEnabled=false;
  ctx.drawImage(sprite,col*64,row*112,64,112,p.x-32*s,p.y-100*s,64*s,112*s);
