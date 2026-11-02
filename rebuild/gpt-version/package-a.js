@@ -4,7 +4,7 @@ function gptWorldV16(){
   const CA=['sedan_red','taxi_bluebird','hatchback_orange','van_cream','sedan_teal','mpv_silver'];
   const RI=['gojek','maxim_pax','commuter_batik_sogan','sma_triple','maxim','commuter_batik_blue','gojek_pax','commuter_batik_red'];
   const ROUTES=[[33.05,1,14,-1,0,0],[33.05,1,14,-4.5,0,1],[33.05,1,14,-8,0,2],[33.05,1,14,-11.5,0,3],[34.85,-1,16,-2,2,0],[34.85,-1,16,-7.333333,0,4],[34.85,-1,16,-12.666667,0,5],[33.05,1,14,-2.75,1,0],[33.05,1,14,-6.25,1,1],[33.05,1,14,-9.75,1,2],[33.05,1,14,-13.25,1,3],[34.85,-1,16,-4.666667,1,4],[34.85,-1,16,-10,1,5],[34.85,-1,16,-14.444444,1,6],[34.85,-1,16,-16.222222,1,7]];
-  var V16={T:{epoch:1767225600000,cyc:{period:40000,busy:12000,clear:[26000,32000]},road:{n:32.7,f:36.3,c0:-20,c1:34},spawn:{near:{r:32,c0:-20,c1:34},far:{r:36.95,c0:19.9,c1:25.1}},veh:ROUTES.map(function(a){return {r:a[0],d:a[1],dur:a[2],del:a[3],rot:a[4]===2?['bus_transjakarta']:a[4]===1?RI:CA,k0:a[5],pc:a[1]>0?0.6319:0.3681,t:a[4]===1?'rid':'car'};})},made:false,cars:[],laneA:[],backLaneA:false,start:'near',hitT:0,hits:0,lastSync:0,onRoad:false,farLoaded:false,farQueue:null};
+  var V16={T:{epoch:1767225600000,cyc:{period:40000,busy:12000,clear:[26000,32000]},road:{n:32.7,f:36.3,c0:-20,c1:34},spawn:{near:{r:32,c0:-20,c1:34},far:{r:36.95,c0:19.9,c1:25.1}},veh:ROUTES.map(function(a){return {r:a[0],d:a[1],dur:a[2],del:a[3],rot:a[4]===2?['bus_transjakarta']:a[4]===1?RI:CA,k0:a[5],pc:a[1]>0?0.6319:0.3681,t:a[4]===1?'rid':'car'};})},made:false,cars:[],laneA:[],backLaneA:false,start:'near',hitT:0,hits:0,lastSync:0,onRoad:false,farLoaded:false,farQueue:null,gangEntered:false};
   function trfHash(i,n){var x=Math.imul(i+1,0x9e3779b1)^Math.imul(n|0,0x85ebca77);x^=x>>>15;x=Math.imul(x,0x2c1b3c6d);x^=x>>>12;x=Math.imul(x,0x297a2d39);x^=x>>>15;return (x>>>0)/4294967296;}
   function trfPhase(t){var x=((t-V16.T.epoch)%40000+40000)%40000;return x<12000?'busy':x>=26000&&x<32000?'clear':'quiet';}
   // Exact hitbox dimensions from Grok v16a/src/traffic.json; these also match each visual sprite.
@@ -21,12 +21,29 @@ function gptWorldV16(){
   function s2xCtx(){return false;}
   function s2xAction(){}
   function s2Signals(){}
-  function v16Make(){if(!EXT.cars||EXT.cars.length!==V16.T.veh.length)return false;V16.cars=EXT.cars.map(function(w,i){return {w:w,V:V16.T.veh[i],i:i,n:null,a:null};});V16.laneA=V16.cars.filter(function(o){return o.V.r===33.05;}).map(function(o){return o.w;});return true;}
+  function v16Make(){if(!EXT.cars||EXT.cars.length!==V16.T.veh.length)return false;
+    V16.cars=EXT.cars.map(function(w,i){
+      // Own the visible transform: native CSS keyframes and clock corrections must never fight.
+      w.style.animation='none';w.style.animationPlayState='paused';
+      return {w:w,V:V16.T.veh[i],i:i,n:null,xy:''};
+    });
+    V16.laneA=V16.cars.filter(function(o){return o.V.r===33.05;}).map(function(o){return o.w;});
+    return true;}
   function v16LaneA(){return V16.laneA;}
-  function v16Traffic(){var t=v16Now(),sync=performance.now()-V16.lastSync>600;if(sync)V16.lastSync=performance.now();V16.cars.forEach(function(o){
-    var v=trfVeh(o.i,t),w=o.w;if(v.n!==o.n){o.n=v.n;if(w._vk!==v.kind){if(o.V.t==='rid')vRidSet(w,v.kind);else vSprSet(w,v.kind);}}
-    var opacity=v.on?'':'0';if(w.style.opacity!==opacity)w.style.opacity=opacity;
-    if(sync){var a=o.a;if(!a||a.playState==='idle'){var anims=w.getAnimations?w.getAnimations():[];a=anims[0]||null;o.a=a;}if(a){var dur=o.V.dur*1000,want=((t-V16.T.epoch)%dur+dur)%dur,ct=+a.currentTime||0,d=((want-ct)%dur+dur)%dur;if(d>dur/2)d-=dur;if(Math.abs(d)>40)a.currentTime=want;if(a.playbackRate!==1)a.playbackRate=1;}}});}
+  function v16VisualXY(v,dir){
+    // Original CSS keys: carA (-448,-224)→(832,416), carB reverse.
+    // Progress is EXACTLY the same trfVeh() value used for the collision box.
+    var x=(dir>0?-448:832)+(dir>0?1280:-1280)*v.pr;
+    var y=(dir>0?-224:416)+(dir>0?640:-640)*v.pr;
+    return [Math.round(x*2)/2,Math.round(y*2)/2];
+  }
+  function v16Traffic(){var t=v16Now();V16.cars.forEach(function(o){
+    var v=trfVeh(o.i,t),w=o.w;
+    if(v.n!==o.n){o.n=v.n;if(w._vk!==v.kind){if(o.V.t==='rid')vRidSet(w,v.kind);else vSprSet(w,v.kind);}}
+    var op=v.on?'':'0';if(w.style.opacity!==op)w.style.opacity=op;
+    var xy=v16VisualXY(v,o.V.d),transform='translate('+xy[0]+' '+xy[1]+')';
+    if(transform!==o.xy){o.xy=transform;w.setAttribute('transform',transform);}
+  });}
   function v16Side(c,r){return r<=32.7?'near':r>=36.3&&s2xInFar(c,r)?'far':null;}
   // Search for a collision-free curb position, rather than dropping the player inside a stall or wall.
   function v16Spawn(side,atC){var S=V16.T.spawn[side],c=Math.max(S.c0,Math.min(S.c1,atC));
@@ -69,7 +86,7 @@ function gptWorldV16(){
   (function(){var old=window.__s2xPost,owned=false;window.__s2xPost=function(){if(old)old();var active=OUT_ON&&((typeof S2L!=='undefined'&&S2L.p&&S2L.p.an)||(S2X.p&&S2X.p.an));if(active){owned=true;return;}if(owned){owned=false;if(me.forceAnim==='idle'||me.forceAnim==='walk')me.forceAnim=null;}};})();
   window.__v16={phase:function(t){return trfPhase(t==null?v16Now():t);},hit:function(c,r,t){return trfHit(c,r,t==null?v16Now():t);},
     st:function(){return {made:V16.made,hits:V16.hits,start:V16.start,onRoad:V16.onRoad,farLoaded:V16.farLoaded,cars:V16.cars.length,backLaneA:V16.backLaneA};},
-    cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,inNativeLayer:o.w.parentNode===EXT.gC};});},
+    cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,xy:o.xy,inNativeLayer:o.w.parentNode===EXT.gC,cssAnimation:o.w.style.animation};});},
     veh:function(t){return V16.T.veh.map(function(_,i){return trfVeh(i,t==null?v16Now():t);});},
     spawn:function(side,c){return v16Spawn(side,c);},setOff:function(ms){V16.off=ms;},roadOK:function(c,r){return extOK(c,r);}};
 }
