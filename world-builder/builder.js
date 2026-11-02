@@ -1011,8 +1011,8 @@ function renderAssetList(){
     placementType=a.tag;setMode('place');placementType=a.tag;
     tell('Tap map to place '+a.title+' · green footprint = valid');
    }
-   $('assetsPanel').classList.remove('mobile-open');
-   if(!a.tag.startsWith('terrain:'))$('inspector').classList.add('mobile-open');
+   closeMobileSheets(); // The canvas must remain usable for building placement.
+
   };
   holder.appendChild(btn);
  }
@@ -1042,14 +1042,28 @@ for(const [tab,pane,other,otherPane] of [
   $(tab).classList.add('active');$(other).classList.remove('active');
  };
 }
-$('mobileAssets').onclick=()=>{
- $('assetsPanel').classList.toggle('mobile-open');
- $('inspector').classList.remove('mobile-open');
-};
-$('mobileInspector').onclick=()=>{
- $('inspector').classList.toggle('mobile-open');
+function closeMobileSheets(){
  $('assetsPanel').classList.remove('mobile-open');
-};
+ $('inspector').classList.remove('mobile-open');
+ $('mobileAssets').setAttribute('aria-expanded','false');
+ $('mobileInspector').setAttribute('aria-expanded','false');
+}
+function toggleMobileSheet(which){
+ const panel=$(which),wasOpen=panel.classList.contains('mobile-open');
+ closeMobileSheets();
+ if(!wasOpen)panel.classList.add('mobile-open');
+ const trigger=which==='inspector'?'mobileInspector':'mobileAssets';
+ $(trigger).setAttribute('aria-expanded',String(!wasOpen));
+}
+$('mobileAssets').onclick=()=>toggleMobileSheet('assetsPanel');
+$('mobileInspector').onclick=()=>toggleMobileSheet('inspector');
+$('floatingInspector').onclick=()=>toggleMobileSheet('inspector');
+$('closeAssets').onclick=closeMobileSheets;
+$('closeInspector').onclick=closeMobileSheets;
+window.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&($('inspector').classList.contains('mobile-open')||
+  $('assetsPanel').classList.contains('mobile-open')))closeMobileSheets();
+});
 for(const [input,field] of [['buildingW','w'],['buildingD','d'],['buildingH','h']]){
  $(input).addEventListener('change',()=>{
   if(!item()||!['building','shop'].includes(item().type))return;
