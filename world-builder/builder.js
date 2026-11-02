@@ -769,7 +769,10 @@ function onDown(e){
  }
 }
 function onMove(e){
- if(!pointers.has(e.pointerId))return;
+ if(!pointers.has(e.pointerId)){
+  if(mode==='place'&&placementType)previewPlace(floorPoint(e));
+  return;
+ }
  const old=pointers.get(e.pointerId);old.x=e.clientX;old.y=e.clientY;
  if(pointers.size>=2&&pinch){
   const pts=[...pointers.values()],len=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
