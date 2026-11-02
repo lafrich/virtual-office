@@ -86,7 +86,9 @@ function gptWorldV16(){
     if(S2X.cfg&&S2X.cfg.region){
       var region=S2X.cfg.region;
       region.lane=[21.85,24.15,37.6,52.05];
-      region.terminal=[18.8,27.2,51.4,54.7];
+      // Rear local road baked by Grok covers the full east-west street.
+      // Keep finite art bounds, rather than stopping 4 cells either side of the alley.
+      region.terminal=[-40,34,51.4,54.7];
     }
     if(!V16.gangEntered&&me.r>51&&me.r<54.8&&me.c>=21.85&&me.c<=24.15){
       V16.gangEntered=true;
@@ -108,7 +110,7 @@ function gptWorldV16(){
     cars:function(){return V16.cars.map(function(o){return {kind:o.w._vk,op:o.w.style.opacity,xy:o.xy,inNativeLayer:o.w.parentNode===EXT.gC,cssAnimation:o.w.style.animation};});},
     veh:function(t){return V16.T.veh.map(function(_,i){return trfVeh(i,t==null?v16Now():t);});},
     spawn:function(side,c){return v16Spawn(side,c);},setOff:function(ms){V16.off=ms;},roadOK:function(c,r){return extOK(c,r);},
-    passage:function(){return {lane:S2X.cfg.region.lane,terminal:S2X.cfg.region.terminal,player:{c:me.c,r:me.r},entered:V16.gangEntered};}};
+    passage:function(){return {lane:S2X.cfg.region.lane,terminal:S2X.cfg.region.terminal,player:{c:me.c,r:me.r},entered:V16.gangEntered,occluderOnRoad:!(me.r>=51.25&&me.r<=54.85||me.r>=36.35&&me.r<=38.05)};}};
 }
 function gptApplyA(html){
   if(html.indexOf('vc-street2-xing')<0||html.indexOf('Virtual Life v15a')<0)throw Error('GROK_V16_INCOMPATIBLE_BASE');
@@ -143,6 +145,11 @@ function gptApplyA(html){
       "const band=0.16; const G_=n.parentNode===EXT.gF ? (pd>b+band?S2X.gFB:EXT.gF) : (pd<b-band?EXT.gF:S2X.gFB);");
   rep("const G_ = s2xGroupFor(c, r, c + r > me.c + me.r + 0.02);",
       "const depth=c+r-me.c-me.r; n._gptFront=n._gptFront===undefined ? depth>0 : (n._gptFront ? depth>-.15 : depth>.15); const G_ = s2xGroupFor(c,r,n._gptFront);");
+  // The generated "front occluder" PNGs also include flat road/sidewalk tiles.
+  // In the two ROAD bands they cannot sit above the player's sprite.
+  // Keep foreground props (EXT.gF) and depth sorting elsewhere untouched.
+  rep("else if (e && g.getAttribute('display') === 'none') g.setAttribute('display', 'inline'); }",
+      "else if (e && g.getAttribute('display') === 'none') g.setAttribute('display', 'inline');\n  var floorRoad=(me.r>=51.25&&me.r<=54.85&&me.c>=-40&&me.c<=34)||(me.r>=36.35&&me.r<=38.05);\n  if(floorRoad&&g.getAttribute('display')!=='none')g.setAttribute('display','none'); }");
   // Prior patch enlarged only the aisle; the ORIGINAL far-region checker still
   // rejected positions beyond r=50. Add the baked rear-road rectangle to the
   // same checked region. No fake geometry, no unbounded/no-clip movement.
