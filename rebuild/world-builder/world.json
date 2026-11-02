@@ -19,7 +19,7 @@
       "z0": 32.75,
       "z1": 36.3
     },
-    "notes": "Initial authored 3D mapping study based on existing world coordinate system; not a pixel-exact migration of encrypted world."
+    "notes": "Editable draft based on old c/r coordinate conventions. 3D geometry approximates the encrypted online map; independent original SVG artwork and v17 character frames are available. Not a pixel-exact migration or multiplayer."
   },
   "objects": [
     {
@@ -107,16 +107,6 @@
       "color": "#b6bdc7"
     },
     {
-      "id": "bench-near",
-      "type": "bench",
-      "name": "Park Bench",
-      "x": -1,
-      "z": 29.1,
-      "y": 0,
-      "rotation": 0,
-      "scale": 1
-    },
-    {
       "id": "lamp-near",
       "type": "lamp",
       "name": "Street Lamp",
@@ -160,27 +150,172 @@
       "height": 3
     },
     {
-      "id": "bench-pixel",
-      "type": "sprite",
-      "name": "Bench · existing art",
-      "x": 24,
-      "z": 38.3,
-      "y": 0,
-      "rotation": 0,
-      "scale": 1,
-      "asset": "park_bench_base.svg",
-      "width": 4.6,
-      "height": 4.6
-    },
-    {
       "id": "avatar-test",
       "type": "avatar",
-      "name": "Avatar depth test",
+      "name": "Character · Original 4-Direction Sheet",
       "x": 20.5,
       "z": 34,
       "y": 0,
       "rotation": 0,
-      "scale": 1
+      "scale": 1,
+      "facing": "sw",
+      "pose": null,
+      "variant": "player",
+      "collision": true
+    },
+    {
+      "id": "vl-park-bench",
+      "type": "sprite",
+      "name": "Original Pixel Park Bench",
+      "x": -1,
+      "z": 29.1,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "park_bench_base.svg",
+      "width": 3.9,
+      "height": 2.7,
+      "collision": true
+    },
+    {
+      "id": "vl-street-lamp",
+      "type": "sprite",
+      "name": "Street Props Original Art",
+      "x": 4.2,
+      "z": 30.9,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "street_props_base.svg",
+      "width": 2.8,
+      "height": 3.4,
+      "collision": false
+    },
+    {
+      "id": "vl-sofa",
+      "type": "sprite",
+      "name": "Sofa Original Art",
+      "x": -27,
+      "z": 44,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "sofa_base.svg",
+      "width": 4,
+      "height": 2.9,
+      "collision": true
+    },
+    {
+      "id": "vl-bed",
+      "type": "sprite",
+      "name": "Bed Original Art",
+      "x": -22,
+      "z": 44,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "bed_base.svg",
+      "width": 3.3,
+      "height": 2.8,
+      "collision": true
+    },
+    {
+      "id": "vl-bathtub",
+      "type": "sprite",
+      "name": "Bathtub Original Art",
+      "x": -17,
+      "z": 44,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "bathtub_base.svg",
+      "width": 3.8,
+      "height": 2.5,
+      "collision": true
+    },
+    {
+      "id": "vl-bookshelf",
+      "type": "sprite",
+      "name": "Bookshelf Original Art",
+      "x": -27,
+      "z": 49,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "bookshelf_base.svg",
+      "width": 2.2,
+      "height": 3.4,
+      "collision": true
+    },
+    {
+      "id": "vl-desk",
+      "type": "sprite",
+      "name": "Work Desk Original Art",
+      "x": -23,
+      "z": 49,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "desk_base.svg",
+      "width": 3.2,
+      "height": 2.9,
+      "collision": true
+    },
+    {
+      "id": "vl-chair",
+      "type": "sprite",
+      "name": "Chair Original Art",
+      "x": -19,
+      "z": 50,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "chair_base.svg",
+      "width": 1.9,
+      "height": 2.4,
+      "collision": true
+    },
+    {
+      "id": "vl-warteg-buffet",
+      "type": "sprite",
+      "name": "Warteg Buffet Original Art",
+      "x": 34,
+      "z": 48,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "warteg_buffet_base.svg",
+      "width": 6,
+      "height": 3.5,
+      "collision": true
+    },
+    {
+      "id": "vl-warteg-table",
+      "type": "sprite",
+      "name": "Warteg Table Original Art",
+      "x": 35,
+      "z": 53,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "asset": "warteg_table_base.svg",
+      "width": 4.5,
+      "height": 2.8,
+      "collision": true
+    },
+    {
+      "id": "npc-preview",
+      "type": "npc",
+      "name": "NPC · Canonical Rig",
+      "x": 11,
+      "z": 34.7,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "facing": "nw",
+      "pose": null,
+      "variant": "player",
+      "collision": true
     }
   ]
 }
