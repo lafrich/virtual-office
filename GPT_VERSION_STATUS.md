@@ -76,3 +76,15 @@ Validation: v16a patch applied to the encrypted GitHub original (24 exact source
 The headless browser in this environment blocks navigation, so flicker-free Android/desktop gameplay is NOT yet independently verified visually. Do not mistake automated checks for screen QA.
 
 Deployment: beta scoped SW import version `a4`; changes on published `main` are confined to `rebuild/gpt-version/package-a.js` and `rebuild/gpt-version/sw.js`. Production `sw.js`, main game source, encrypted manifest, and Cloudflare Worker are unchanged. Rollback: `/rebuild/gpt-version/?classic=1`.
+
+## 2026-11-02 — GPT Version patch 05 (deployed: true alley exit)
+
+User reported the far alley end was still impassable. Root cause verified: the original `s2xInFar()` checker had an explicit far-lane cutoff at `r=50`; previous GPT patch merely widened its `c` range and left the `r` cutoff unchanged. The original Grok v15a/V16a artwork describes an existing secondary local road at `r=51..55` (facade line F=51).
+
+- Extended the **connected** existing alley walking region to `c=21.85..24.15, r=37.6..52.05`.
+- Introduced a carefully bounded rear local road `c=18.8..27.2, r=51.4..54.7`. The overlapping walkable rectangles allow stepping through r=50 and then moving sideways on the rear road; no invisible open world beyond the baked image.
+- Updated **the original** `s2xInFar()` return expression via the encrypted-engine patch, not only the config mutation. This fixes the actual collision rejection.
+- Kept buildings/objects' `EXT.blk` blocker checks in `s2xOK()`; no noclip or unbounded movement.
+- Added beta introspection `__v16.passage()` and corrected the on-enter message to trigger only after reaching the rear road.
+- 25 patch anchors applied successfully against actual decrypted original game source; output JavaScript blocks compiled successfully. New `gang-exit-regression.cjs` test passed 262 continuous walking samples and 5 out-of-art boundary checks.
+- Scoped beta `package-a.js` and `sw.js` updated under `rebuild/gpt-version/` only, SW version `a5`. Production sw.js and encrypted game remain unchanged. Full Android/browser motion QA is still unverified.
