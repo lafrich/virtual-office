@@ -67,3 +67,9 @@ Actual original compositor: `XC.b` (outdoor background and behind-player sprites
 - Caps only the expensive `xcFrame` compositor painting to ~30 FPS on touch devices; input/physics/game tick is not capped. Original desktop painting remains uncapped.
 - Regression: real encrypted source transformation passed 28 anchors, all executable JS scripts parse; the simulated gate road overlay is behind player on passage, not behind player in adjacent shop frontage, and vehicle/NPC group is never moved wholesale.
 - Deployed only the `rebuild/gpt-version/` beta overlay and service worker import `a9` to GitHub Pages. Not merged into encrypted production game. Actual Android visual/performance measurements still pending.
+
+## 2026-11-02 — Patch 10: roadside trees resized after actual Android screenshot
+
+The owner showed roadside trees beside the office still shorter than expected relative to a human avatar. The previous Patch 09 factors (tall 1.28, wide 1.20, round 1.26) were too conservative. Patch 10 adjusts the single original `extTree()` generator prior to `pxBake` to tall 1.85, wide 1.95, round 2.05, on top of the existing common 1.8 factor. The ground pivot `P(c,r)`, position `c/r`, blockers, street and non-tree props remain untouched. This targets roughly 1.8–2.7 human-character heights depending on silhouette (geometry estimate, not browser-measured). Relative scale increase over Patch 09 is 45–63%.
+
+Updated `tests/plane-tree-perf-smoke.cjs` and verified source transform token, smoke checks and package-a.js JavaScript syntax. Published only `rebuild/gpt-version/package-a.js` and scoped `rebuild/gpt-version/sw.js` with import `a10`. The public GitHub Pages app still needs visual testing after a fresh reload to confirm the screenshot result.
