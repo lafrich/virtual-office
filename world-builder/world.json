@@ -19,7 +19,7 @@
       "z0": 32.75,
       "z1": 36.3
     },
-    "notes": "Draft layout for AI mechanics authoring; placement markers are candidate locations, not verified against exact encrypted production map. Original game and multiplayer unaffected.",
+    "notes": "Draft layout for AI mechanics authoring; placement markers are candidate locations, not verified against exact encrypted production map. Original game and multiplayer unaffected. Door and interaction coordinates are placeholders until validated against original authenticated game source.",
     "source": "GPT Version renderer using original Virtual Life encrypted asset manifest",
     "nativeReference": {
       "street2": "assets/street2/base.png",
@@ -85,7 +85,7 @@
       "capacity": 1,
       "markerKind": "",
       "blocking": "auto",
-      "notes": ""
+      "notes": "Candidate front direction from street layout; verify against source art before AI wiring."
     },
     {
       "id": "office-annex",
@@ -114,7 +114,7 @@
       "capacity": 1,
       "markerKind": "",
       "blocking": "auto",
-      "notes": ""
+      "notes": "Candidate front direction from street layout; verify against source art before AI wiring."
     },
     {
       "id": "warteg-front",
@@ -143,7 +143,7 @@
       "capacity": 1,
       "markerKind": "",
       "blocking": "auto",
-      "notes": ""
+      "notes": "Candidate front direction from street layout; verify against source art before AI wiring."
     },
     {
       "id": "shop-east",
@@ -163,7 +163,7 @@
       "interactions": [
         "enter"
       ],
-      "entranceFacing": "sw",
+      "entranceFacing": "",
       "tags": [
         "building",
         "outdoor"
@@ -172,7 +172,7 @@
       "capacity": 1,
       "markerKind": "",
       "blocking": "auto",
-      "notes": ""
+      "notes": "Entrance direction not verified; choose facing after checking canonical art."
     },
     {
       "id": "market-stalls",
@@ -192,7 +192,7 @@
       "interactions": [
         "enter"
       ],
-      "entranceFacing": "sw",
+      "entranceFacing": "",
       "tags": [
         "building",
         "outdoor"
@@ -201,7 +201,7 @@
       "capacity": 1,
       "markerKind": "",
       "blocking": "auto",
-      "notes": ""
+      "notes": "Entrance direction not verified; choose facing after checking canonical art."
     },
     {
       "id": "shop-west",
@@ -221,7 +221,7 @@
       "interactions": [
         "enter"
       ],
-      "entranceFacing": "sw",
+      "entranceFacing": "",
       "tags": [
         "building",
         "outdoor"
@@ -230,7 +230,7 @@
       "capacity": 1,
       "markerKind": "",
       "blocking": "auto",
-      "notes": ""
+      "notes": "Entrance direction not verified; choose facing after checking canonical art."
     },
     {
       "id": "lamp-near",
@@ -554,7 +554,7 @@
       "interactions": [
         "enter"
       ],
-      "entranceFacing": "sw",
+      "entranceFacing": "",
       "tags": [
         "building",
         "outdoor"
@@ -563,7 +563,7 @@
       "capacity": 1,
       "markerKind": "",
       "blocking": "auto",
-      "notes": ""
+      "notes": "Entrance direction not verified; choose facing after checking canonical art."
     },
     {
       "id": "pipeline-theodore",
