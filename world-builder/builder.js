@@ -449,17 +449,8 @@ function makeSprite(root,item){
 }
 // Existing canonical 4-row / 4-column character rig is in character-rig.js.
 // Retain the legacy fallback only if its shared script fails to load.
-function characterTexture(){
- const c=document.createElement('canvas');c.width=32;c.height=64;
- const g=c.getContext('2d'),r=(x,y,w,h,color)=>{g.fillStyle=color;g.fillRect(x,y,w,h)};
- r(8,8,16,18,'#242b39');r(11,14,11,10,'#dba887');r(10,8,13,6,'#191d27');
- r(9,26,14,23,'#33435a');r(8,48,7,14,'#272b3e');r(17,48,7,14,'#263147');
- r(12,18,4,3,'#191b22');r(19,18,3,3,'#191b22');r(11,20,12,2,'#50555f');
- r(7,32,3,12,'#dcaa87');r(23,32,3,12,'#dcaa87');r(7,62,9,2,'#1a2430');r(17,62,9,2,'#1a2430');
- const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.NearestFilter;
- return tex;
-}
-const avatarTex=characterTexture();
+// Original GPT sprite sheets are loaded by gpt-character-rig.js.
+ // No Rebuild-character or invented player artwork is drawn here.
 const rigs=new Map();
 function makeAvatar(root,item){
  const factory=window.VLCharacterRig;
@@ -467,11 +458,7 @@ function makeAvatar(root,item){
    const rig=factory.createRig(THREE,{direction:item.facing||'sw',pose:item.pose||null,profile:item.profile||'ichsan'});
    root.add(rig.mesh);rigs.set(item.id,{rig,root});
  }else{
-   const mat=new THREE.MeshBasicMaterial({map:avatarTex,transparent:false,
-     alphaTest:.5,depthWrite:true,depthTest:true,side:THREE.DoubleSide});
-   const plane=new THREE.Mesh(new THREE.PlaneGeometry(1.8,3.6),mat);
-   plane.position.y=1.8;root.add(plane);
-   billboardSprites.push({root,plane});
+   console.warn('Canonical GPT character rig unavailable; actor art stays hidden.');
  }
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
@@ -750,6 +737,16 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
 $('profile').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.profile=$('profile').value;});};
+$('refreshAssets').onclick=()=>{
+ window.VLCharacterRig?.retry();
+ for(const tex of spriteTexture.values())tex.dispose();
+ spriteTexture.clear();
+ rebuild();
+ tell('Sprites reloaded. If locked, open Virtual Life and sign in first.');
+};
+$('openGame').onclick=()=>window.open('../','_blank','noopener');
+$('viewRef').onclick=()=>{$('assetReference').hidden=false;};
+$('closeRef').onclick=()=>{$('assetReference').hidden=true;};
 $('undo').onclick=()=>restoreStack(undoStack,redoStack);
 $('redo').onclick=()=>restoreStack(redoStack,undoStack);
 $('snap').onclick=()=>{snap=!snap;$('snap').textContent='Snap: '+(snap?'ON':'OFF');};
