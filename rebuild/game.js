@@ -47,6 +47,14 @@ function drawHuman(x,y,{sitting=false,lying=false,dir='sw',
  const protagonist=!npc&&(hair==='#171b24'||hair==='#161c25');
  const baymax=!npc&&hair==='#949ca7'&&sitting;
  const state=pose||(lying?'sleep':sitting?'sit':null);
+ // Source-authored pipeline sprites can replace the editable rebuild avatar
+ // only in ?assetbridge=1; missing or unrigged actions use the original renderer.
+ if(protagonist&&window.VOAssetBridge?.draw(g,p,zoom,{
+   direction:dir,moving:!state&&moving,pose:state
+ })){
+   if(label){const q=iso(x,y,64);pixelText(label,q.x,q.y,PAL.cream,9)}
+   return;
+ }
  // First choice: consistent flat Cove-reference sprite sheet.
  // Fallback keeps a visible actor if an SVG has not loaded yet.
  if((protagonist||baymax)&&window.VOCharacterSystem?.draw(g,p,zoom,{
