@@ -100,3 +100,14 @@ Owner's Android screenshot showed the static street/sidewalk occluder drawing ab
 - Original encrypted game patch: 26 anchors applied; executable main scripts syntax-check; 6 embedded JSON data script tags are not executable JS. Regression: 919 sampled walkable points and 5 out-of-bounds checks PASS.
 - Deployed only `rebuild/gpt-version/package-a.js` and `rebuild/gpt-version/sw.js` as patch `a6`. Live game sw.js, encrypted files, Cloudflare Worker unaffected.
 - **Not yet independently verified visually in browser**. The user should check the gateway player's feet, both ends of the rear street, and interactions with foreground posts/roofs.
+
+## 2026-11-02 — Patch 07: screenshot-driven foreground and crossing repair (published)
+
+User supplied screenshot and mandatory Grok first-package brief. A package-wide truthful completion matrix is now recorded at `rebuild/gpt-version/PACKAGE_A_AUDIT.md` on this branch.
+
+- Fixed earlier GPT beta error: never suppress full foreground `lv_*.png` on roadway, because those files combine road/sidewalk and building/roof rasters. Replaced whole-overlay hiding with exact player-sprite alpha cutout on canvas `XC.f` (normal sprite crop, canvas DPR/viewport scale). Other pixels in roads, buildings, roofs and posts remain unchanged.
+- Begins staggered far foreground image prefetch on outdoor activation, not only once crossing is underway; waits for all 17 level images to decode before swapping far-side canvas layers. Prevents transition to an empty/missing foreground image.
+- Added `vl-gpt-encrypted-v1` CacheStorage for immutable AES-GCM blob files only, no decrypted game assets or accounts cached. This is **not** complete offline game support.
+- Old crossing/gang walking and user-requested experimental rear street retained; no changed production Worker, main game, or encrypted manifest.
+- Tests: 26 exact patch anchors applied to decrypted game source, executable scripts syntactically valid, isolated sprite alpha crop test passed, updated gang-path regression guard; new `render-layer-regression.cjs` test added for future CI.
+- Limitation: browser access to the hosted GitHub Pages preview is blocked in the test runtime, so Android visual QA is still pending. A6 WebP/dirty redraw/adaptive FPS/WebSocket rate/offscreen item culling/locked feature lazy load are still not complete; do not claim Package A is finished.
