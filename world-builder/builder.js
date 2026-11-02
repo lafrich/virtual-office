@@ -964,6 +964,17 @@ function frame(now){
    }else holder.rig.setMoving(0,0,false);
  }
  for(const {rig,root} of rigs.values())rig.step(dt,camera,root.position);
+ const actorStates=[...rigs.values()].map(x=>x.rig.state);
+ const notAvailable=actorStates.filter(x=>x.failed).length;
+ const loading=actorStates.filter(x=>!x.loaded&&!x.failed).length;
+ const pending=documentMap.objects.filter(o=>o.type==='sprite'&&assetByName.has(o.asset)&&
+  (assetByName.get(o.asset).source==='pipeline-vegetation'||
+   (assetByName.get(o.asset).source==='pipeline-street'&&!assetByName.get(o.asset).published))).length;
+ const statusText=notAvailable?'V6B SPRITES UNAVAILABLE: '+notAvailable+' · reload/login':
+  loading?'LOADING V6B ('+loading+')':
+  'WORLD MAP READY · '+documentMap.objects.length+' OBJECTS';
+ const finalStatus=statusText+(pending?' · '+pending+' source previews':'');
+ if($('status').textContent!==finalStatus)$('status').textContent=finalStatus;
  // Old pixel assets are isometric single-view illustrations. Keep every
  // art plane CAMERA-FACING so rotating its parent never squashes the art.
  for(const entry of billboardSprites){
