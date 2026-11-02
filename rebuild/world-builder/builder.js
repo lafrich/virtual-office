@@ -287,7 +287,13 @@ function makeSprite(root,item){
    });
    const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
    plane.position.set(0,height*(pivotY-.5),part.offset);
+   // Source SVG canvases vary (160x160, 256x200, 512x250...).
+   // Correct physical X extent from the loaded texture's intrinsic
+   // dimensions. Never stretch pixels independently on X versus Y.
    plane.userData.billboardPart=true;
+   plane.userData.authorWidth=width;
+   plane.userData.authorHeight=height;
+   plane.userData.aspectFixed=false;
    root.add(plane);
    billboardSprites.push({root,plane});
  }
@@ -642,6 +648,13 @@ function frame(now){
  // art plane CAMERA-FACING so rotating its parent never squashes the art.
  for(const entry of billboardSprites){
    const {root,plane}=entry;
+   const tex=plane.material.map,img=tex?.image;
+   if(!plane.userData.aspectFixed&&img&&(img.naturalWidth||img.width)&&
+       (img.naturalHeight||img.height)){
+     const iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
+     plane.scale.x=plane.userData.authorHeight*iw/ih/plane.userData.authorWidth;
+     plane.userData.aspectFixed=true;
+   }
    const yaw=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z);
    plane.rotation.y=yaw-root.rotation.y;
  }
