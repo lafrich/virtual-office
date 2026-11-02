@@ -39,8 +39,8 @@ function createRig(THREE,options={}){
  });
  // Character dimensions are authored in WORLD UNITS. No affine nonuniform
  // scaling of the sprite can occur when a world object is rotated.
- const width=Number(options.width)||1.72;
  const height=Number(options.height)||2.55;
+ const width=height*(FRAME.w/FRAME.h); // Exact 128:160 ratio; never squashed
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
  mesh.name='Canonical 4-direction character puppet';
  mesh.position.y=height*(FRAME.pivotY/FRAME.h-.5);
