@@ -85,3 +85,19 @@
  #hint{max-width:65%;font-size:9px}
 }
 @media(max-width:380px){#menubar .version{display:none}.titletext{font-size:11px}.canvas-toolbar button{font-size:10px}}
+
+/* City authoring brush / grid controls */
+#brushSettings,#roadSettings{display:inline-flex;align-items:center;gap:4px;font:10px "Courier New",monospace;white-space:nowrap}
+#brushSettings select,#roadSettings select{border:2px inset #9d9b97;background:white;padding:5px 4px;font:11px Tahoma}
+#autoSidewalk{accent-color:#0a48a2}
+.canvas-toolbar .toggle{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;font:10px "Courier New",monospace}
+#terrainLabel{padding:5px 7px;background:#f2f0df;border:1px solid #a9a499;font:bold 10px "Courier New"}
+#gridToolbar{font-size:10px;padding:5px 8px;white-space:nowrap}
+#gridToolbar[aria-pressed="true"],#gridToggle.active{background:#bdd0ef;border-color:#5672a5}
+#buildingControls{background:#e8e5df;border:1px solid #a19d94;margin:10px 0;padding:7px}
+.building-dims{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.building-dims label{display:flex;flex-direction:column;gap:3px;font-size:10px}
+.building-dims input{width:100%;min-width:0;border:2px inset #aaa;padding:5px 3px;background:white}
+#replaceAsset{width:100%;margin-top:8px;text-align:center}
+#canvas-wrap{user-select:none;-webkit-user-select:none}
+@media(max-width:780px){.canvas-toolbar{gap:5px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}#brushSettings,#roadSettings,.canvas-toolbar .toggle,#terrainLabel,#gridToolbar{flex:none}}
