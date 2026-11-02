@@ -2,11 +2,11 @@
 function gptClickEditorRuntime(){
   const KEY='vl-gpt-click-editor-v2';
   let state={nodes:{},raster:[]},history=[],on=false,selection=null,moveMode=false,drag=null;
-  let toggleButton,menu,label,outline,shield,editButtons,origin=null,ready=false,pending=false,saving=false;
+  let toggleButton,menu,label,outline,shield,editButtons,toast,origin=null,ready=false,pending=false,saving=false;
   function read(){try{let x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&x.nodes&&Array.isArray(x.raster))state=x;}catch(e){}}
   function store(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){hint('Memori browser penuh — reset beberapa edit.');}}
   function backup(){history.push(JSON.stringify(state));if(history.length>30)history.shift();}
-  function hint(s){if(label)label.textContent=s;}
+  function hint(s){if(label)label.textContent=s;if(toast){toast.textContent=s;toast.style.display=on?'block':'none';}}
   function svgPoint(clientX,clientY){
     let p=room.createSVGPoint();p.x=clientX;p.y=clientY;let m=room.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;
   }
@@ -242,14 +242,16 @@ function gptClickEditorRuntime(){
     e.preventDefault();let d=drag;drag=null;
     if(d.moving){store();if(selection?.type==='raster')redrawRaster();moveMode=false;menuState();drawOutline();return;}
     let n=pickVector(e);
-    if(n){selection={type:'vector',node:n};menuState();drawOutline();return;}
-    let p=svgPoint(e.clientX,e.clientY);if(!p)return;
-    detectImageObject(p,function(obj){selection={type:'raster',item:obj};menuState();drawOutline();});
+    if(n){selection={type:'vector',node:n};menuState();drawOutline();hint('Objek '+(n._k||'map')+' dipilih.');return;}
+    let p=svgPoint(e.clientX,e.clientY);if(!p){hint('Tidak bisa membaca koordinat sentuhan.');return;}
+    hint('Tap diterima · memilih objek gambar…');
+    detectImageObject(p,function(obj){selection={type:'raster',item:obj};menuState();drawOutline();hint('Objek dipilih. Pilih Move, Rotate, atau Delete.');});
   }
   function setOn(v){
     on=v;shield.style.display=on?'block':'none';toggleButton.textContent=on?'✕ Close Editor':'✎ Edit Map';
     selection=null;moveMode=false;menuState();drawOutline();
-    if(on){hint('Tap objek untuk memilih.');applyNodes();}
+    if(toast)toast.style.display=on?'block':'none';
+    if(on){hint('Tap bangku, lampu, atau objek di map.');applyNodes();}
   }
   function reset(){
     if(!confirm('Reset semua edit map GPT Version pada browser ini?'))return;
@@ -261,6 +263,7 @@ function gptClickEditorRuntime(){
     read();
     let css=document.createElement('style');
     css.textContent=`
+    #gpt-click-tip{position:fixed;right:9px;top:111px;max-width:min(250px,70vw);z-index:2147483020;background:#ece9d8;border:1px solid #4779b9;padding:6px 9px;color:#234468;font:11px Tahoma;border-radius:3px;pointer-events:none;box-shadow:0 2px 7px #1233}
     #gpt-click-editor{position:fixed;right:9px;top:70px;z-index:2147483020;background:linear-gradient(#fff,#aecaf0);border:1px solid #1350ad;border-radius:4px;color:#123b70;padding:8px 10px;font:bold 12px Tahoma}
     #gpt-click-shield{position:absolute;inset:0;z-index:45;touch-action:none;pointer-events:none;cursor:crosshair}
     #gpt-click-outline{position:absolute;border:2px solid #ffd23b;box-shadow:0 0 0 1px #244775;pointer-events:none;display:none}
@@ -276,6 +279,7 @@ function gptClickEditorRuntime(){
     `;
     document.head.appendChild(css);
     toggleButton=document.createElement('button');toggleButton.id='gpt-click-editor';toggleButton.textContent='✎ Edit Map';document.body.appendChild(toggleButton);
+    toast=document.createElement('div');toast.id='gpt-click-tip';toast.style.display='none';document.body.appendChild(toast);
     shield=document.createElement('div');shield.id='gpt-click-shield';shield.style.display='none';floor.appendChild(shield);
     outline=document.createElement('div');outline.id='gpt-click-outline';shield.appendChild(outline);
     // Capture input at document level. Canvas, avatar, road SVG, XP HUD and
