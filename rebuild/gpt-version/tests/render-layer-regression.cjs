@@ -1,0 +1,24 @@
+/* node rebuild/gpt-version/tests/render-layer-regression.cjs */
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const code=fs.readFileSync(path.join(__dirname,'../package-a.js'),'utf8');
+const draw=[];
+const canvas={width:600,height:1200,getBoundingClientRect:()=>({left:0,top:0,width:300,height:600}),getContext:()=>({save(){},restore(){},setTransform(){},drawImage(...args){draw.push(args)},set globalCompositeOperation(v){draw.push({op:v})},set globalAlpha(v){},set imageSmoothingEnabled(v){}})};
+const sprite={style:{backgroundImage:'url("assets/chars/ichsan_sheet.png")',backgroundSize:'256px 448px',backgroundPosition:'-64px -112px'},getBoundingClientRect:()=>({left:90,top:80,width:64,height:112})};
+const ctx={self:{},window:{},console,OUT_ON:true,meEl:{classList:{contains:()=>true}},meSpr:sprite,me:{r:32},xcImg:()=>({naturalWidth:256,naturalHeight:448})};
+vm.createContext(ctx);
+vm.runInContext(code,ctx);
+vm.runInContext('gptWorldV16()',ctx);
+assert.equal(typeof ctx.window.__gptPunchFront,'function');
+ctx.window.__gptPunchFront(canvas);
+assert.equal(draw.filter(x=>Array.isArray(x)).length,1,'foreground must alpha-cut only the player');
+const args=draw.find(x=>Array.isArray(x));
+assert.deepEqual(Array.from(args.slice(1)),[64,112,64,112,180,160,128,224]);
+assert.ok(draw.some(x=>x.op==='destination-out'),'use sprite alpha as the foreground mask');
+ctx.me.r=29;ctx.window.__gptPunchFront(canvas);
+assert.equal(draw.filter(x=>Array.isArray(x)).length,1,'do not alter building foreground when away from roadway');
+assert.ok(code.includes('window.__gptPunchFront(XC.f)'),'mask must be attached AFTER foreground renderer');
+assert.ok(!code.includes("if(floorRoad&&g.getAttribute"),'never blank the entire foreground bitmap');
+assert.ok(code.includes('var far=V16.farLoaded'),'far-side layers must wait until artwork is loaded');
+assert.ok(code.includes('V16.farImages.every'),'all far-side images must be decoded before transition');
+console.log('PASS player alpha mask crop, screen scale, off-road guard; foreground preserved; far-side prefetch barrier');
