@@ -19,13 +19,16 @@ const PIXELS={
  table:{w:88,h:64,width:3.15,height:2.25,pivot:.94},
  lamp:{w:36,h:112,width:1.5,height:6.1,pivot:.96},
  trash:{w:52,h:64,width:1.8,height:2.2,pivot:.96},
- box:{w:60,h:60,width:2.1,height:2.1,pivot:.96}
+ box:{w:60,h:60,width:2.1,height:2.1,pivot:.96},
+ ground:{w:32,h:22,width:.8,height:.65,pivot:.9}
 };
 function category(o,catalog){
  const spec=o?.type==='sprite'?catalog?.get(o.asset):null;
  if(o?.type==='avatar'||o?.type==='npc')return 'actor';
+ if(o?.type==='marker')return 'marker';
  if(PROP_NAMES.has(o?.type))return o.type==='box'?'prop':o.type;
  if(spec){
+  if(spec.source==='pipeline-vegetation')return spec.group.includes('trees')?'tree':'ground';
   const id=String(spec.id||'').toLowerCase(),file=String(o.asset||'').toLowerCase();
   if(/bangku|chair|armchair|stool/.test(id+' '+file))return 'bench';
   if(/meja|table/.test(id+' '+file))return 'table';
@@ -42,12 +45,13 @@ function footprint(o,catalog){
  const s=o?.type==='sprite'?catalog?.get(o.asset):null;
  const kind=category(o,catalog);
  if(kind==='actor')return [0.65,0.65];
+ if(kind==='marker')return [.15,.15];
  if(kind==='building')return [
   Math.max(.5,Number(s?.footprint?.[0]||o.w||6))*Number(o.scale||1),
   Math.max(.5,Number(s?.footprint?.[1]||o.d||5))*Number(o.scale||1)
  ];
  const native={
-  tree:[1.4,1.4],bench:[2,1],table:[2,1.6],trash:[.95,.95],lamp:[.75,.75],
+  tree:[1.4,1.4],ground:[.2,.2],bench:[2,1],table:[2,1.6],trash:[.95,.95],lamp:[.75,.75],
   prop:[1.25,1],furniture:[1.4,1.2]
  }[kind]||[1.2,1.2];
  const dims=s?.footprint||native;
@@ -55,7 +59,7 @@ function footprint(o,catalog){
          Math.max(.5,Number(dims[1]||native[1]))*Number(o.scale||1)];
 }
 function normalize(o,catalog){
- if(o.type==='avatar'||o.type==='npc'){o.rotation=0;o.scale=1;return o;}
+ if(o.type==='avatar'||o.type==='npc'||o.type==='marker'){o.rotation=0;o.scale=1;return o;}
  const s=o.type==='sprite'?catalog?.get(o.asset):null;
  const hasViews=s?.variants&&Object.keys(s.variants).length>1;
  const lockRotation=o.type==='sprite'&&!hasViews;
@@ -68,6 +72,7 @@ function normalize(o,catalog){
 }
 function reason(o,objects,map,catalog){
  if(category(o,catalog)==='actor')return '';
+ if(category(o,catalog)==='marker')return ''; // Editor-only logic anchors are not solid objects.
  const bounds=map?.worldBounds||BOUNDS;
  const [w,d]=footprint(o,catalog),x=Number(o.x),z=Number(o.z);
  if(x-w/2<bounds.minX||x+w/2>bounds.maxX||z-d/2<bounds.minZ||z+d/2>bounds.maxZ)
@@ -128,6 +133,8 @@ function proxyTexture(THREE,type){
   rect(ink,7,41,74,10);rect(wood,10,43,68,6);rect(light,12,43,60,2);
   rect(ink,15,50,8,10);rect(steel,17,50,4,8);
   rect(ink,65,50,8,10);rect(steel,67,50,4,8);
+ }else if(type==='ground'){
+  rect(leaf,4,15,22,5);rect(leafHi,8,11,15,5);rect(leaf,13,7,8,6);
  }else if(type==='table'){
   rect(ink,9,23,71,22);rect(wood,12,26,65,15);
   rect(woodHi,14,28,60,4);rect(ink,17,42,9,20);rect(steel,19,44,5,16);
