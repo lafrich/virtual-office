@@ -574,11 +574,11 @@ function select(id){
  if(id)tell(owners.get(id)?.userData?.pendingPipelineImage?'Preview sementara: PNG sumber belum dipublikasikan.':'Selected: '+item()?.name+'. Pilih Move lalu drag.');
  renderer.render(scene,camera);
 }
-function edit(fn){
+function edit(fn,validatePosition=true){
  if(!item())return;
  const before=clone(item());undoPoint();fn(item());
- style.normalize(item(),assetByName);
- const blocked=style.reason(item(),documentMap.objects,documentMap.map,assetByName);
+ style.normalize(item(),assetByName);schema.normalize(item(),assetByName,style);
+ const blocked=validatePosition?style.reason(item(),documentMap.objects,documentMap.map,assetByName):'';
  if(blocked){Object.assign(item(),before);undoStack.pop();updateSelection();tell(blocked);return;}
  applyItem();saved();
 }
@@ -600,19 +600,20 @@ function id(type){return type+'-'+Math.random().toString(36).slice(2,8);}
 function add(type){
  if(!type)return;
  const preset=style.presets[type],chosen=preset?'sprite:'+preset:type;
- const isSprite=chosen.startsWith('sprite:'),asset=isSprite?chosen.slice(7):undefined;
+ const isMarker=type.startsWith('marker:'),isSprite=chosen.startsWith('sprite:'),asset=isSprite?chosen.slice(7):undefined;
  const spec=assetByName.get(asset);
- const o={id:id(isSprite?'sprite':type),type:isSprite?'sprite':type,
+ const o={id:id(isMarker?'marker':isSprite?'sprite':type),type:isMarker?'marker':isSprite?'sprite':type,
   name:isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
   x:round(cameraFocus.x),z:round(cameraFocus.z),y:0,rotation:0,scale:1};
  if(isSprite){
   if(!spec){tell('Asset belum tersedia dalam katalog resmi');return;}
   o.asset=asset;o.width=spec.width;o.height=spec.height;o.collision=spec.collision!==false;
  }
- if(actorType(type)){o.facing='sw';o.pose=null;o.variant='gpt-original';o.profile=type==='npc'?'noor':'ichsan';o.collision=true;}
+ if(actorType(type)){o.facing='sw';o.pose=null;o.variant='pipeline-v6b';o.profile=type==='npc'?'noor':'ichsan';o.collision=true;}
+ if(isMarker){o.markerKind=type.split(':')[1]||'interaction';o.name=o.markerKind+' marker';o.collision=false;}
  if(type==='tree')o.collision=true;
  if((type==='building'||type==='shop')&&!isSprite){tell('Pilih prefab resmi dari katalog');return;}
- style.normalize(o,assetByName);
+ style.normalize(o,assetByName);schema.normalize(o,assetByName,style);
  if(!style.nearest(o,documentMap.objects,documentMap.map,assetByName)){
   tell('Tidak ada lokasi kosong. Geser kamera atau pindahkan objek lain.');return;
  }
@@ -622,7 +623,7 @@ function add(type){
 function duplicate(){
  const o=item();if(!o)return;
  let q=clone(o);q.id=id(o.type);q.name=o.name+' copy';q.x+=1.2;q.z+=1.2;
- style.normalize(q,assetByName);
+ style.normalize(q,assetByName);schema.normalize(q,assetByName,style);
  if(!style.nearest(q,documentMap.objects,documentMap.map,assetByName)){tell('Tidak ada ruang untuk duplicate');return;}
  undoPoint();documentMap.objects.push(q);instantiate(q);select(q.id);saved();
 }
@@ -775,8 +776,6 @@ window.addEventListener('keydown',e=>walkKey(e,true),true);
 window.addEventListener('keyup',e=>walkKey(e,false),true);
 window.addEventListener('blur',()=>{for(const k of Object.keys(walkInput))walkInput[k]=false;});
 $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');};
-$('zoomIn').onclick=()=>{viewSize=clamp(viewSize*.8,10,100);fitCamera();};
-$('zoomOut').onclick=()=>{viewSize=clamp(viewSize*1.25,10,100);fitCamera();};
 $('home').onclick=resetCamera;
 $('rotateL').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation-90+360)%360;});};
 $('rotateR').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation+90)%360;});};
@@ -868,7 +867,13 @@ function frame(now){
    if(!plane.userData.aspectFixed&&img&&(img.naturalWidth||img.width)&&
        (img.naturalHeight||img.height)){
      const iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
-     plane.scale.x=plane.userData.authorHeight*iw/ih/plane.userData.authorWidth;
+     // Width is measured in 64px tile units; height compensates the camera
+     // elevation so sprite pixels remain square in screen space.
+     const realW=iw*PIXEL_WORLD,realH=ih*PIXEL_WORLD*VERTICAL_COMP;
+     plane.scale.x=realW/plane.userData.authorWidth;
+     plane.scale.y=realH/plane.userData.authorHeight;
+     plane.position.y=realH*((plane.userData.pivotY??.8)-.5);
+     plane.position.x=realW*(plane.userData.pivotX||0);
      plane.userData.aspectFixed=true;
    }
    const yaw=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z);
