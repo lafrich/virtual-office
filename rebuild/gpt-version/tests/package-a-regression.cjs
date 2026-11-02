@@ -41,6 +41,23 @@ for(const side of ['near','far']){
  assert.ok(context.extOK(p.c,p.r),'spawn must avoid blockers at the curb');
 }
 assert.ok(src.includes('V16.backLaneA?me.r>33.24:me.r>33.56'),'native-lane depth hysteresis required');
+const loaded=[];
+const pre={self:{},window:{},console,OUT_ON:true,
+  S2X:{made:true,cfg:{levels:Array.from({length:17},(_,i)=>[i,{file:'level'+i+'.png'}])},cr:[]},
+  EXT:{built:true,gC:{},cars:[],yard:{r1:32},blk:[]},
+  WT:{on:true},CV:{on:false},FMI:{on:false},SPEC:false,
+  me:{c:22,r:31,forceAnim:null},XC:{skip:null},XG:{curbF:36.3},
+  S2XA:'assets/street2/xing/',
+  xcImg:url=>loaded.push(url),s2xFar:()=>{},s2xFarDepth:()=>{},
+  performance:{now:()=>1000},extOK:()=>true};
+vm.createContext(pre);
+vm.runInContext(src,pre);
+vm.runInContext('gptWorldV16()',pre);
+let bursts=[];
+for(let i=0;i<7;i++){const before=loaded.length;pre.window.__s2xTick(.016);bursts.push(loaded.length-before);}
+assert.equal(bursts.join(','),'3,3,3,3,3,2,0','preload should be spread over 6 frames and not repeat');
+assert.ok(src.includes("if(!a||a.playState==='idle')"),'reuse cached vehicle animation instances');
+
 assert.ok(src.includes('V16.laneA=V16.cars.filter'),'cache lane members instead of making SVG groups');
 assert.ok(!src.includes("V16.gA.appendChild"),'never create a synthetic lane group');
 assert.ok(src.includes('floor tap disabled'),'control A1 must stay enabled');
