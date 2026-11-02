@@ -660,7 +660,7 @@ function onDown(e){
  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
  if(pointers.size===2){
   const pts=[...pointers.values()],mid={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
-  pinch={dist:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),mid,view:viewSize,focus:cameraFocus.clone()};
+  pinch={dist:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),mid,view:viewSize,focus:cameraFocus.clone(),ground:floorPoint({clientX:mid.x,clientY:mid.y})};
   // Pinching must never start an accidental object drag.
   for(const holder of rigs.values())holder.rig.setMoving(0,0,false);
   drag=null;return;
@@ -686,10 +686,12 @@ function onMove(e){
   const pts=[...pointers.values()],len=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
   const mid={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
   viewSize=clamp(pinch.view*pinch.dist/Math.max(10,len),8,110);
-  const rect=canvas.getBoundingClientRect(),pixel=viewSize/Math.max(1,rect.height);
-  const horizontal=new THREE.Vector3(1,0,-1).normalize(),vertical=new THREE.Vector3(1,0,1).normalize();
-  cameraFocus.copy(pinch.focus).addScaledVector(horizontal,-(mid.x-pinch.mid.x)*pixel)
-   .addScaledVector(vertical,-(mid.y-pinch.mid.y)*pixel*2);
+  cameraFocus.copy(pinch.focus);fitCamera();
+  const groundUnderFingers=floorPoint({clientX:mid.x,clientY:mid.y});
+  if(groundUnderFingers&&pinch.ground){
+    cameraFocus.x+=pinch.ground.x-groundUnderFingers.x;
+    cameraFocus.z+=pinch.ground.z-groundUnderFingers.z;
+  }
   fitCamera();return;
  }
  if(!drag||drag.id!==e.pointerId)return;
