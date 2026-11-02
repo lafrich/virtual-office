@@ -1,8 +1,8 @@
 {
   "format": "virtual-life-world-builder-v1",
-  "version": 4,
+  "version": 5,
   "map": {
-    "name": "Virtual Life · Canonical pipeline sprite world study",
+    "name": "Virtual Life · Authoring Map / Street2",
     "grid": "game:c,r",
     "units": "tile",
     "origin": {
@@ -19,7 +19,7 @@
       "z0": 32.75,
       "z1": 36.3
     },
-    "notes": "Style-lock v1: original Virtual Life sprite planes, canonical asset-pipeline prefabs, 90-degree directions, scale 85–115%, road and footprint placement protection. Unpublished pipeline illustrations show clearly provisional pixel-plane art or 3D building studies.",
+    "notes": "Draft layout for AI mechanics authoring; placement markers are candidate locations, not verified against exact encrypted production map. Original game and multiplayer unaffected.",
     "source": "GPT Version renderer using original Virtual Life encrypted asset manifest",
     "nativeReference": {
       "street2": "assets/street2/base.png",
@@ -38,6 +38,23 @@
       "character": "lafrich/virtual-life-asset-pipeline/game/assets/chars",
       "building": "lafrich/virtual-life-asset-pipeline/assets/street_buildings",
       "otherProps": "GPT Version if authenticated"
+    },
+    "projection": {
+      "type": "iso-2:1",
+      "tilePixels": [
+        64,
+        32
+      ],
+      "characterFramePixels": [
+        64,
+        112
+      ],
+      "characterPivotPixels": [
+        32,
+        100
+      ],
+      "groundCoordinates": "c/r",
+      "heightAxis": "y"
     }
   },
   "objects": [
@@ -54,7 +71,21 @@
       "asset": "pipeline:kantor_a",
       "width": 9.49,
       "height": 13.855,
-      "collision": true
+      "collision": true,
+      "layer": "structure",
+      "interactions": [
+        "enter"
+      ],
+      "entranceFacing": "sw",
+      "tags": [
+        "building",
+        "outdoor"
+      ],
+      "subtype": "kantor_a",
+      "capacity": 1,
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "office-annex",
@@ -69,7 +100,21 @@
       "asset": "pipeline:kantor_b",
       "width": 8.76,
       "height": 18.828,
-      "collision": true
+      "collision": true,
+      "layer": "structure",
+      "interactions": [
+        "enter"
+      ],
+      "entranceFacing": "sw",
+      "tags": [
+        "building",
+        "outdoor"
+      ],
+      "subtype": "kantor_b",
+      "capacity": 1,
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "warteg-front",
@@ -84,7 +129,21 @@
       "asset": "pipeline:warung_madura",
       "width": 4.38,
       "height": 4.012,
-      "collision": true
+      "collision": true,
+      "layer": "structure",
+      "interactions": [
+        "enter"
+      ],
+      "entranceFacing": "sw",
+      "tags": [
+        "building",
+        "outdoor"
+      ],
+      "subtype": "warung_madura",
+      "capacity": 1,
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "shop-east",
@@ -99,7 +158,21 @@
       "asset": "pipeline:toko_loak",
       "width": 5.47,
       "height": 4.936,
-      "collision": true
+      "collision": true,
+      "layer": "structure",
+      "interactions": [
+        "enter"
+      ],
+      "entranceFacing": "sw",
+      "tags": [
+        "building",
+        "outdoor"
+      ],
+      "subtype": "toko_loak",
+      "capacity": 1,
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "market-stalls",
@@ -114,7 +187,21 @@
       "asset": "pipeline:lapak_tas",
       "width": 2.55,
       "height": 3.593,
-      "collision": true
+      "collision": true,
+      "layer": "structure",
+      "interactions": [
+        "enter"
+      ],
+      "entranceFacing": "sw",
+      "tags": [
+        "building",
+        "outdoor"
+      ],
+      "subtype": "lapak_tas",
+      "capacity": 1,
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "shop-west",
@@ -129,7 +216,21 @@
       "asset": "pipeline:ruko_a",
       "width": 6.57,
       "height": 8.747,
-      "collision": true
+      "collision": true,
+      "layer": "structure",
+      "interactions": [
+        "enter"
+      ],
+      "entranceFacing": "sw",
+      "tags": [
+        "building",
+        "outdoor"
+      ],
+      "subtype": "ruko_a",
+      "capacity": 1,
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "lamp-near",
@@ -143,27 +244,68 @@
       "asset": "pipeline:lampu_taman",
       "width": 2,
       "height": 11.455,
-      "collision": false
+      "collision": false,
+      "layer": "prop",
+      "subtype": "lampu_taman",
+      "tags": [],
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "no",
+      "notes": ""
     },
     {
       "id": "tree-near",
-      "type": "tree",
-      "name": "Tree",
+      "type": "sprite",
+      "name": "Asam jawa (sedang) · source pending",
       "x": -13,
       "z": 28.1,
       "y": 0,
       "rotation": 0,
-      "scale": 1
+      "scale": 1,
+      "asset": "vegetation:pohon_asam_M",
+      "width": 3.27,
+      "height": 4.134,
+      "collision": true,
+      "tags": [
+        "greenery",
+        "outdoor"
+      ],
+      "layer": "vegetation",
+      "subtype": "pohon_asam_M",
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "tree-front",
-      "type": "tree",
-      "name": "Tree near Office",
+      "type": "sprite",
+      "name": "Angsana (sedang) · source pending",
       "x": 14,
       "z": 28.3,
       "y": 0,
       "rotation": 0,
-      "scale": 1
+      "scale": 1,
+      "asset": "vegetation:pohon_angsana_M",
+      "width": 2.254,
+      "height": 3.164,
+      "collision": true,
+      "tags": [
+        "greenery",
+        "outdoor"
+      ],
+      "layer": "vegetation",
+      "subtype": "pohon_angsana_M",
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "avatar-test",
@@ -178,7 +320,16 @@
       "pose": null,
       "variant": "pipeline-v6b",
       "collision": true,
-      "profile": "ichsan"
+      "profile": "ichsan",
+      "layer": "character",
+      "subtype": "actor",
+      "tags": [],
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "npc-preview",
@@ -193,7 +344,16 @@
       "pose": null,
       "variant": "pipeline-v6b",
       "collision": true,
-      "profile": "noor"
+      "profile": "noor",
+      "layer": "character",
+      "subtype": "actor",
+      "tags": [],
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "gpt-chair-01",
@@ -207,7 +367,21 @@
       "asset": "env/coordination/meeting_chair_se.png",
       "width": 2.3,
       "height": 2.5,
-      "collision": true
+      "collision": true,
+      "interactions": [
+        "sit"
+      ],
+      "capacity": 2,
+      "tags": [
+        "park",
+        "public"
+      ],
+      "layer": "interior",
+      "subtype": "Meeting Chair",
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "gpt-table-01",
@@ -221,7 +395,16 @@
       "asset": "env/coordination/meeting_table_se.png",
       "width": 4.6,
       "height": 2.8,
-      "collision": true
+      "collision": true,
+      "layer": "interior",
+      "subtype": "Meeting Table",
+      "tags": [],
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "gpt-armchair-01",
@@ -235,7 +418,21 @@
       "asset": "env/library/armchair_leather_se.png",
       "width": 2.8,
       "height": 3,
-      "collision": true
+      "collision": true,
+      "interactions": [
+        "sit"
+      ],
+      "capacity": 2,
+      "tags": [
+        "park",
+        "public"
+      ],
+      "layer": "interior",
+      "subtype": "Leather Armchair",
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "gpt-easel-01",
@@ -249,7 +446,16 @@
       "asset": "env/gallery/easel_se.png",
       "width": 2.7,
       "height": 3.5,
-      "collision": true
+      "collision": true,
+      "layer": "interior",
+      "subtype": "Gallery Easel",
+      "tags": [],
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "gpt-trash-01",
@@ -263,7 +469,21 @@
       "asset": "street2/loak/props/tong_sampah_besi_se.png",
       "width": 2.7,
       "height": 2.9,
-      "collision": true
+      "collision": true,
+      "interactions": [
+        "dispose"
+      ],
+      "tags": [
+        "public",
+        "street"
+      ],
+      "layer": "prop",
+      "subtype": "Metal Trash Bin",
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "gpt-box-01",
@@ -277,7 +497,19 @@
       "asset": "street2/loak/props/tumpukan_kardus_sw.png",
       "width": 2.8,
       "height": 2.5,
-      "collision": true
+      "collision": true,
+      "tags": [
+        "greenery",
+        "outdoor"
+      ],
+      "layer": "vegetation",
+      "subtype": "Stacked Boxes",
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "gpt-sack-01",
@@ -291,7 +523,19 @@
       "asset": "street2/loak/props/karung_rongsok_se.png",
       "width": 2.3,
       "height": 2.5,
-      "collision": true
+      "collision": true,
+      "tags": [
+        "greenery",
+        "outdoor"
+      ],
+      "layer": "vegetation",
+      "subtype": "Scrap Sack",
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "pipeline-indomaret",
@@ -305,7 +549,21 @@
       "scale": 1,
       "width": 8.76,
       "height": 7.35,
-      "collision": true
+      "collision": true,
+      "layer": "structure",
+      "interactions": [
+        "enter"
+      ],
+      "entranceFacing": "sw",
+      "tags": [
+        "building",
+        "outdoor"
+      ],
+      "subtype": "indomaret",
+      "capacity": 1,
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "pipeline-theodore",
@@ -320,18 +578,42 @@
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "collision": true
+      "collision": true,
+      "layer": "character",
+      "subtype": "actor",
+      "tags": [],
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "street-tree-west",
-      "type": "tree",
-      "name": "Pohon Peneduh · pixel plane preview",
+      "type": "sprite",
+      "name": "Trembesi / ki hujan (besar) · source pending",
       "x": -25,
       "z": 29,
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "collision": true
+      "collision": true,
+      "asset": "vegetation:pohon_trembesi_L",
+      "width": 4.464,
+      "height": 3.7,
+      "tags": [
+        "greenery",
+        "outdoor"
+      ],
+      "layer": "vegetation",
+      "subtype": "pohon_trembesi_L",
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "park-bench-west",
@@ -345,7 +627,21 @@
       "scale": 1,
       "width": 2.19,
       "height": 2.251,
-      "collision": true
+      "collision": true,
+      "interactions": [
+        "sit"
+      ],
+      "capacity": 2,
+      "tags": [
+        "park",
+        "public"
+      ],
+      "layer": "prop",
+      "subtype": "bangku_taman",
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "park-lamp-west",
@@ -359,7 +655,16 @@
       "scale": 1,
       "width": 2,
       "height": 11.455,
-      "collision": true
+      "collision": true,
+      "layer": "prop",
+      "subtype": "lampu_taman",
+      "tags": [],
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "park-bin-west",
@@ -373,7 +678,21 @@
       "scale": 1,
       "width": 2.7,
       "height": 2.9,
-      "collision": true
+      "collision": true,
+      "interactions": [
+        "dispose"
+      ],
+      "tags": [
+        "public",
+        "street"
+      ],
+      "layer": "prop",
+      "subtype": "Metal Trash Bin",
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "park-bench-east",
@@ -387,7 +706,21 @@
       "scale": 1,
       "width": 2.19,
       "height": 2.251,
-      "collision": true
+      "collision": true,
+      "interactions": [
+        "sit"
+      ],
+      "capacity": 2,
+      "tags": [
+        "park",
+        "public"
+      ],
+      "layer": "prop",
+      "subtype": "bangku_taman",
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "park-bin-east",
@@ -401,7 +734,21 @@
       "scale": 1,
       "width": 2,
       "height": 2.737,
-      "collision": true
+      "collision": true,
+      "interactions": [
+        "dispose"
+      ],
+      "tags": [
+        "public",
+        "street"
+      ],
+      "layer": "prop",
+      "subtype": "tong_sampah",
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
     },
     {
       "id": "park-table-west",
@@ -415,7 +762,145 @@
       "scale": 1,
       "width": 2.92,
       "height": 1.597,
-      "collision": true
+      "collision": true,
+      "layer": "prop",
+      "subtype": "meja_taman",
+      "tags": [],
+      "interactions": [],
+      "capacity": 1,
+      "entranceFacing": "",
+      "markerKind": "",
+      "blocking": "auto",
+      "notes": ""
+    },
+    {
+      "id": "map-player-spawn",
+      "type": "marker",
+      "name": "Player Spawn · Street2",
+      "markerKind": "spawn",
+      "x": 20,
+      "z": 31,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "capacity": 1,
+      "tags": [
+        "outside",
+        "player"
+      ],
+      "notes": "Preview spawn anchor; connect to game server spawn rules later",
+      "layer": "marker",
+      "subtype": "spawn",
+      "interactions": [
+        "activate"
+      ],
+      "entranceFacing": "",
+      "blocking": "auto",
+      "collision": false
+    },
+    {
+      "id": "map-office-entrance",
+      "type": "marker",
+      "name": "Office Entrance · candidate",
+      "markerKind": "entrance",
+      "x": -4,
+      "z": 30.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "tags": [
+        "office",
+        "entrance"
+      ],
+      "notes": "Candidate anchor; verify against actual authenticated GPT Street2 map",
+      "layer": "marker",
+      "subtype": "entrance",
+      "interactions": [
+        "activate"
+      ],
+      "capacity": 1,
+      "entranceFacing": "",
+      "blocking": "auto",
+      "collision": false
+    },
+    {
+      "id": "map-warteg-entrance",
+      "type": "marker",
+      "name": "Warteg Interaction · candidate",
+      "markerKind": "interaction",
+      "x": 31,
+      "z": 29.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "tags": [
+        "warung",
+        "food",
+        "interaction"
+      ],
+      "interactions": [
+        "enter",
+        "buy"
+      ],
+      "notes": "Editor marker only; verify door artwork in production",
+      "layer": "marker",
+      "subtype": "interaction",
+      "capacity": 1,
+      "entranceFacing": "",
+      "blocking": "auto",
+      "collision": false
+    },
+    {
+      "id": "map-street-patrol",
+      "type": "marker",
+      "name": "Street Patrol · candidate",
+      "markerKind": "patrol",
+      "x": 1,
+      "z": 34.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "tags": [
+        "road",
+        "npc",
+        "patrol"
+      ],
+      "notes": "AI logic waypoint; no movement mechanic connected",
+      "layer": "marker",
+      "subtype": "patrol",
+      "interactions": [
+        "activate"
+      ],
+      "capacity": 1,
+      "entranceFacing": "",
+      "blocking": "auto",
+      "collision": false
+    },
+    {
+      "id": "map-crossing-trigger",
+      "type": "marker",
+      "name": "Crossing Trigger · candidate",
+      "markerKind": "trigger",
+      "x": 22.5,
+      "z": 34.5,
+      "y": 0,
+      "rotation": 0,
+      "scale": 1,
+      "tags": [
+        "zebra-crossing",
+        "navigation"
+      ],
+      "notes": "AI trigger location for crossing behavior; not an actual collision volume",
+      "layer": "marker",
+      "subtype": "trigger",
+      "interactions": [
+        "activate"
+      ],
+      "capacity": 1,
+      "entranceFacing": "",
+      "blocking": "auto",
+      "collision": false
     }
-  ]
+  ],
+  "schema": "virtual-life-ai-map-v2"
 }
