@@ -1,6 +1,6 @@
 /* Virtual Life · World Builder 3D
  * True WebGL depth buffer + orthographic camera; canonical c/r grid.
- * Reuses the local rebuild SVG sprites. Layout data is JSON, not game logic.
+ * Official characters and buildings come from the asset pipeline; GPT props remain optional.
  * Intentionally separate from production: no auth, economy or NPC side effects.
  */
 const $=id=>document.getElementById(id);
@@ -17,7 +17,7 @@ if(!THREE){
   fail.textContent='WebGL editor engine gagal dimuat. Periksa koneksi internet dan muat ulang. Map online tidak berubah.';
   throw Error('THREE_MODULE_NOT_AVAILABLE');
 }
-const STORE='virtual-life-gpt-world-builder-v2';
+const STORE='virtual-life-gpt-world-builder-pipeline-v3';
 const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const actorType=t=>t==='avatar'||t==='npc';
@@ -224,7 +224,7 @@ function sanitize(v){
  let ids=new Set(),out=clone(seed);out.objects=[];
  for(const p of v.objects){
   if(!p||typeof p.id!=='string'||p.id.length>100||ids.has(p.id))continue;
-  if(!['building','shop','bench','lamp','tree','box','avatar','npc'].includes(p.type))continue;
+  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc'].includes(p.type))continue;
   ids.add(p.id);
   let e={
    id:p.id,name:String(p.name||p.type).slice(0,90),type:p.type,
@@ -236,6 +236,7 @@ function sanitize(v){
   };
   for(const k of ['w','d','h','width','height'])if(Number.isFinite(Number(p[k])))e[k]=clamp(Number(p[k]),.2,80);
   if(typeof p.color==='string'&&/^#[0-9a-fA-F]{6}$/.test(p.color))e.color=p.color;
+  if(p.type==='sprite'){if(typeof p.asset!=='string'||!assetByName.has(p.asset))continue;e.asset=p.asset;}
   if(p.type==='sprite'&&/^(?:env|street2)\/[a-z0-9_/-]+\.png$/.test(p.asset||'')&&assetByName.has(p.asset))e.asset=p.asset;
   if(actorType(p.type)){
     e.facing=directions.includes(p.facing)?p.facing:'sw';
@@ -354,13 +355,18 @@ function ground(){
 ground();
 const texLoader=new THREE.TextureLoader();
 const spriteTexture=new Map();
-function pixelTexture(name){
- if(!spriteTexture.has(name)){
-  const tex=texLoader.load('../assets/'+name,()=>{renderer.render(scene,camera);},undefined,err=>tell('Asset '+name+' tidak bisa dimuat.'));
-  tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
-  spriteTexture.set(name,tex);
+function spriteDirection(deg=0){return ['sw','se','ne','nw'][((Math.round(deg/90)%4)+4)%4]}
+function pixelTexture(name,dir='sw'){
+ const spec=assetByName.get(name);
+ const view=spec?.variants?.[dir]?dir:spec?.variants?.sw?'sw':spec?.variants?.se?'se':dir;
+ const id=name+'|'+view;
+ if(!spriteTexture.has(id)){
+  const src=spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):'../assets/'+name;
+  const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,()=>console.warn('Missing sprite',name));
+  t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
+  spriteTexture.set(id,t);
  }
- return spriteTexture.get(name);
+ return spriteTexture.get(id);
 }
 function labelTexture(text){
  const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');
@@ -424,33 +430,23 @@ function makeTree(root){
 function makeBox(root,item){cuboid(root,0,.8,0,2,1.6,2,new THREE.Color(item.color||'#d4a86a'));}
 const billboardSprites=[];
 function makeSprite(root,item){
- const spec=assetByName.get(item.asset);
- const width=item.width||spec?.width||4,height=item.height||spec?.height||4;
- const pivotY=spec?.pivotY??.79;
- const parts=[{file:item.asset,offset:0}];
- if(spec?.front)parts.push({file:spec.front,offset:.025});
- for(const part of parts){
-   const mat=new THREE.MeshBasicMaterial({
-     map:pixelTexture(part.file),transparent:false,alphaTest:.5,
-     depthWrite:true,depthTest:true,side:THREE.DoubleSide
-   });
-   const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
-   plane.position.set(0,height*(pivotY-.5),part.offset);
-   // Source SVG canvases vary (160x160, 256x200, 512x250...).
-   // Correct physical X extent from the loaded texture's intrinsic
-   // dimensions. Never stretch pixels independently on X versus Y.
-   plane.userData.billboardPart=true;
-   plane.userData.authorWidth=width;
-   plane.userData.authorHeight=height;
-   plane.userData.aspectFixed=false;
-   root.add(plane);
-   billboardSprites.push({root,plane});
+ const spec=assetByName.get(item.asset);if(!spec)return;
+ const view=spriteDirection(item.rotation);
+ const data=spec.variants?.[view]||spec.variants?.sw||spec.variants?.se;
+ const size=data?.size||spec.size,pivot=data?.pivot||spec.pivot;
+ const width=item.width||spec.width||4,height=item.height||spec.height||4;
+ const py=pivot&&size?pivot[1]/size[1]:spec.pivotY??.8;
+ const px=pivot&&size?(size[0]/2-pivot[0])/size[0]*width:0;
+ for(const part of [{file:item.asset,off:0},...(spec.front?[{file:spec.front,off:.025}]:[])]){
+  const mat=new THREE.MeshBasicMaterial({map:pixelTexture(part.file,view),transparent:false,alphaTest:.5,depthWrite:true,depthTest:true,side:THREE.DoubleSide});
+  const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
+  plane.position.set(px,height*(py-.5),part.off);
+  plane.userData.billboardPart=true;plane.userData.assetFile=part.file;
+  plane.userData.displayFacing=view;plane.userData.authorWidth=width;
+  plane.userData.authorHeight=height;plane.userData.aspectFixed=false;
+  root.add(plane);billboardSprites.push({root,plane});
  }
 }
-// Existing canonical 4-row / 4-column character rig is in character-rig.js.
-// Retain the legacy fallback only if its shared script fails to load.
-// Original GPT sprite sheets are loaded by gpt-character-rig.js.
- // No Rebuild-character or invented player artwork is drawn here.
 const rigs=new Map();
 function makeAvatar(root,item){
  const factory=window.VLCharacterRig;
@@ -801,6 +797,14 @@ function frame(now){
  // art plane CAMERA-FACING so rotating its parent never squashes the art.
  for(const entry of billboardSprites){
    const {root,plane}=entry;
+   const key=plane.userData.assetFile,spec=assetByName.get(key);
+   if(spec?.source==='pipeline-street'){
+     const dir=spriteDirection(root.rotation.y*180/Math.PI);
+     if(dir!==plane.userData.displayFacing){
+       plane.material.map=pixelTexture(key,dir);plane.material.needsUpdate=true;
+       plane.userData.displayFacing=dir;plane.userData.aspectFixed=false;
+     }
+   }
    const tex=plane.material.map,img=tex?.image;
    if(!plane.userData.aspectFixed&&img&&(img.naturalWidth||img.width)&&
        (img.naturalHeight||img.height)){
