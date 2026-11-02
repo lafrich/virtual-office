@@ -10,6 +10,7 @@ assert.ok(!code.includes("if(floorRoad&&g.getAttribute"),'do not hide whole fore
 assert.ok(code.includes('v16DepthSkip(far)'),'compositor should depth-sort individual sprites');
 assert.ok(code.includes('S2.ready&&!S2.fail&&S2.url&&xcImg(S2.url)'),'do not switch layers before the base image is decoded');
 assert.ok(code.includes('var far=V16.farLoaded'),'do not switch before level overlays finish loading');
+assert.ok(code.includes("XC.skip=null;"),'transient canvas error must clear suspect depth list without disabling entire background');
 
 const gC={name:'native-car-and-pedestrian-group'},npc={name:'crossing NPC',parentNode:gC};
 const cars=Array.from({length:15},(_,i)=>({
