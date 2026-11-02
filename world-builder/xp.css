@@ -1,0 +1,87 @@
+/* Virtual Life World Builder — XP Paint shared UI language */
+:root{--chrome:#c9c8c4;--chrome-light:#f8f7f3;--shadow:#74716f;--blue:#073a9d;--ink:#151515;--canvas:#f8f6f0;--field:#e5e3df;font-family:Tahoma,"MS Sans Serif",Verdana,sans-serif;color:var(--ink)}
+*{box-sizing:border-box}html,body{margin:0;min-width:320px;min-height:100%;font:12px Tahoma,Verdana,sans-serif}body{background:#0b357e}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}a{color:inherit;text-decoration:none}[hidden]{display:none!important}
+#desktop{min-height:100dvh;padding:clamp(8px,1.5vw,24px);background:radial-gradient(circle at 10% 5%,#1873ce55,transparent 42%),linear-gradient(125deg,#0a2c77,#164d9a 63%,#0d3581)}
+#app{display:flex;flex-direction:column;width:min(100%,1560px);height:calc(100dvh - clamp(16px,3vw,48px));min-height:540px;margin:0 auto;background:var(--chrome);border:2px solid #fdfdfd;outline:2px solid #292929;box-shadow:3px 5px 0 #0008,12px 16px 0 #07174555;overflow:hidden}
+#titlebar{height:45px;flex:none;background:linear-gradient(90deg,#042777 0%,#0755b5 64%,#2c88dd 100%);border-bottom:2px solid #0c2267;color:white;display:flex;align-items:center;gap:10px;padding:0 10px 0 13px}
+.window-icon{width:25px;height:25px;flex:none;border:2px solid #fff;background:linear-gradient(135deg,#e4ec68 0 40%,#e85f40 42% 60%,#36b7c5 64%);color:#082e8b;display:grid;place-items:center;font-size:19px;box-shadow:1px 2px #141414}
+.titletext{font-size:clamp(12px,1.4vw,19px);letter-spacing:-.045em;text-shadow:1px 2px #001f64;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.titletext span{font-weight:400}
+.win-controls{display:flex;gap:5px;margin-left:auto}.win-controls span{display:grid;place-items:center;width:28px;height:27px;background:#c4c4c3;border:2px solid #ececec;box-shadow:2px 2px #242424,inset -2px -2px #777;color:#090909;font-size:18px;font-weight:bold}.win-controls span:last-child{background:#db4d35;color:white}
+#menubar{display:flex;align-items:center;gap:2px;height:38px;background:#d4d2ce;border-bottom:2px solid #85827e;padding:0 8px;flex:none}
+#menubar button{border:0;background:transparent;font-size:13px;padding:7px 12px;color:#242121}#menubar button:hover{background:#0b429f;color:white}#menubar .version{margin-left:auto;font:11px "Courier New",monospace;color:#56514a}
+#workspace{display:grid;grid-template-columns:58px 210px minmax(0,1fr) 273px;min-height:0;flex:1;background:#b8b6b1}
+#toolsPanel,#assetsPanel,#inspector{min-height:0;background:var(--chrome);border-right:2px solid #7e7c77}
+#toolsPanel{display:flex;flex-direction:column;gap:5px;padding:8px 5px;align-items:stretch}
+.chrome-button,#bar button,#inspector button,#footer button,#tools button,.chrome-tool,#assetList button,.tab,#mobileAssets,#mobileInspector{border:2px solid;border-color:#fcfcfa #888782 #888782 #fcfcfa;background:#d7d5d0;color:#141414;padding:6px 9px;box-shadow:none;font-weight:bold}
+.chrome-button:active,#bar button:active,#inspector button:active,.chrome-tool:active,.chrome-tool.active,#tools button:active,.tab.active{border-color:#777 #eee #eee #777;background:#aac2f8}
+.chrome-tool{display:grid;place-items:center;width:100%;aspect-ratio:1;font-size:20px;padding:0}
+.chrome-tool.active{background:#aac2f8;border-color:#4d6bb8}
+#toolsPanel .stamp{margin-top:auto;background:#ebe9e4;border:2px inset #999;padding:12px 3px;text-align:center;color:#1232b0;font:bold 10px "Courier New";letter-spacing:.08em}
+#assetsPanel{display:flex;flex-direction:column;overflow:hidden}
+.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:6px;height:35px;padding:0 10px;background:#d2d0cb;border-top:1px solid #fafafa;border-bottom:2px solid #87847e;font:bold 11px "Courier New";letter-spacing:.05em}
+#assetSearch{padding:8px 7px 6px;display:flex;flex-direction:column;gap:7px}
+#searchAsset{width:100%;background:white;border:2px inset #aaa;padding:7px;outline:0}
+#assetCategory{width:100%;padding:5px;background:white;border:2px inset #aaa;color:#252525}
+#assetList{overflow:auto;flex:1;padding:5px 7px}
+#assetList button{display:flex;flex-direction:column;align-items:stretch;width:100%;min-height:45px;margin-bottom:5px;padding:7px 8px;gap:3px;background:#e9e6e1;text-align:left;font-weight:500}
+#assetList button:hover{background:#c1d4f7}
+#assetList .asset-title{font-weight:bold;overflow-wrap:anywhere}
+.asset-origin{font:10px "Courier New";color:#545454}.asset-origin.original{color:#0c5a30}.asset-origin.unpublished{color:#8a4830}
+#canvasPanel{display:flex;flex-direction:column;min-width:0;min-height:0}
+.canvas-head{height:36px;display:flex;align-items:center;gap:8px;padding:0 11px;background:#dedbd6;border-bottom:2px solid #88847e;font:bold 11px "Courier New"}
+.canvas-head .canvas-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.canvas-head .right{margin-left:auto;color:#595348;font-size:10px}
+#canvas-wrap{position:relative;flex:1;min-height:0;background:#bec6c0;overflow:hidden;touch-action:none}
+#world{display:block;width:100%;height:100%;touch-action:none;outline:0;image-rendering:auto;cursor:crosshair}
+#hint{position:absolute;left:8px;top:8px;pointer-events:none;background:#faf6e9dd;border:1px solid #8b8a7b;max-width:300px;padding:5px 7px;font-size:10px}
+#status{position:absolute;right:8px;top:8px;pointer-events:none;background:#eae6d4e9;border:1px solid #817f73;font:10px "Courier New";padding:5px 7px;max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toast{display:none;position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:#17459c;color:white;padding:7px 11px;border:2px solid #fff;max-width:88%;z-index:20;box-shadow:2px 3px #0006;font-size:11px}
+#empty{display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:#28394a;color:white;padding:25px;text-align:center}
+#walkPad{display:none;position:absolute;bottom:12px;left:12px;z-index:10;grid-template-columns:repeat(3,40px);grid-template-rows:repeat(3,40px);gap:3px}
+#walkPad.active{display:grid}#walkPad button{border:2px solid #a7b4bd;background:#ebf0f5c9;color:#184c7a;font-size:20px}#walkPad [data-walk=up]{grid-column:2;grid-row:1}#walkPad [data-walk=left]{grid-column:1;grid-row:2}#walkPad [data-walk=down]{grid-column:2;grid-row:3}#walkPad [data-walk=right]{grid-column:3;grid-row:2}
+.canvas-toolbar{min-height:45px;display:flex;align-items:center;gap:6px;background:#d4d1cb;padding:6px 9px;border-top:2px solid #fff;flex-wrap:wrap}
+.canvas-toolbar button{padding:5px 8px;font-size:11px;white-space:nowrap}
+.canvas-toolbar .source{margin-left:auto;font:10px "Courier New";color:#474747}
+#inspector{display:flex;flex-direction:column;border-right:0;border-left:2px solid #86837e;overflow:auto}
+.inspector-head{height:35px;display:flex;align-items:center;gap:8px;padding:0 10px;background:#d2d0cb;border-bottom:2px solid #87847e;font:bold 11px "Courier New";flex:none}
+.inspector-body{padding:9px;overflow:auto;flex:1}
+.selection{display:flex;flex-direction:column;gap:3px;margin-bottom:8px;min-width:0}
+#selectedName{font-size:13px;overflow-wrap:anywhere}#selectedType{font:10px "Courier New";color:#4b4b4b}
+.tabs{display:flex;gap:3px;margin-bottom:10px}.tab{flex:1;padding:7px 2px;text-align:center;font-size:10px}
+#tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-bottom:10px}
+#tools button{padding:6px 3px;font-size:10px}.danger{color:#8c1c13!important}
+.section-label{font:bold 11px "Courier New";margin:12px 0 7px;border-bottom:1px solid #8a8882;padding-bottom:5px}
+#detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+#detail label,.logic-form label{display:flex;flex-direction:column;gap:4px;color:#424242;font-size:10px}
+#detail input,.logic-form input,.logic-form textarea,.logic-form select,#actorControls select{padding:6px 5px;background:#fff;border:2px inset #aaa;color:#111;width:100%;min-width:0}
+#detail label:last-child{grid-column:1/-1}
+#actorControls{display:none;flex-direction:column;gap:7px;margin:8px 0}
+#actorControls.visible{display:flex}
+#actorControls label{font-size:10px;display:flex;flex-direction:column;gap:2px}
+#actorLock{font-size:10px;color:#626262}
+.help{font-size:10px;line-height:1.5;color:#5e5852;margin:10px 0}
+.logic-form{display:flex;flex-direction:column;gap:10px}.logic-form textarea{min-height:54px;resize:vertical}
+#logicMarkerKind{display:block}
+#footer{display:flex;align-items:center;gap:7px;padding:6px 9px;background:#d4d1cb;border-top:2px solid #7c7773;min-height:42px;flex:none}
+#footer button{padding:5px 8px;white-space:nowrap;font-size:11px}#footer .status{margin-left:auto;font:10px "Courier New";color:#365a3b}
+#file,#addType{display:none}
+#assetReference{position:absolute;inset:5%;overflow:auto;background:#ece9d8;border:3px solid #1b4ea2;z-index:15;padding:12px}
+#assetReference img{max-width:100%;image-rendering:pixelated}
+#assetReference button{float:right}#mobileAssets,#mobileInspector{display:none}
+@media(max-width:1000px){#workspace{grid-template-columns:52px 164px minmax(0,1fr) 245px}#assetList button{min-height:42px}#hint{max-width:180px}}
+@media(max-width:780px){
+ #desktop{padding:0}#app{height:100dvh;min-height:0;width:100%;border:0;outline:0;box-shadow:none}#titlebar{height:37px;padding:0 8px}.win-controls span{width:22px;height:21px;font-size:14px}
+ #menubar{height:34px;padding:0 4px}#menubar button{font-size:11px;padding:7px 9px}
+ #workspace{position:relative;grid-template-columns:46px minmax(0,1fr);grid-template-rows:minmax(0,1fr);min-height:0}
+ #toolsPanel{grid-column:1;grid-row:1;padding:5px 3px}#toolsPanel .stamp{font-size:9px;padding:8px 2px}
+ #canvasPanel{grid-column:2;grid-row:1;min-width:0}
+ #assetsPanel,#inspector{display:none;position:absolute;bottom:0;left:46px;right:0;max-height:min(64dvh,580px);z-index:11;border:2px solid #103f9a;box-shadow:0 -5px 20px #0005}
+ #assetsPanel.mobile-open,#inspector.mobile-open{display:flex}
+ #assetList{min-height:140px}
+ #assetSearch{flex-direction:row}#searchAsset{flex:1}#assetCategory{flex:1;min-width:0}
+ #mobileAssets,#mobileInspector{display:inline-block;padding:5px 7px;font-size:11px}
+ .canvas-head{height:30px;padding:0 6px}.canvas-toolbar{min-height:44px;padding:4px;gap:4px}.canvas-toolbar .source{display:none}
+ #footer{overflow-x:auto;padding:4px 6px;min-height:41px}#footer button{padding:5px 7px}#footer .status{font-size:9px}
+ #hint{max-width:65%;font-size:9px}
+}
+@media(max-width:380px){#menubar .version{display:none}.titletext{font-size:11px}.canvas-toolbar button{font-size:10px}}
