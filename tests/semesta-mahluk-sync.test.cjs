@@ -21,8 +21,10 @@ const actors=[
  {id:'astrofrich_base',name:'Astrofrich Base',sheet:'media/astrofrich-base-sheet.png',
   template:true,template_category:'astrofrich',
   motions:[{id:'idle',row:4,frames:4,available:true,frame_ms:[250,250,250,250],loop:true},
-   {id:'walk',row:0,frames:6,available:true,frame_ms:[145,145,145,145,145,145],loop:true}],
-  expressions:[]},
+   {id:'walk',row:0,frames:6,available:true,frame_ms:[145,145,145,145,145,145],loop:true},
+   {id:'lie',row:0,frames:4,available:true,frame_ms:[420,420,420,420],loop:true,
+    sheet:'media/astrofrich-base-action-lie.png'}],
+  expressions:[],row_starts:{walk:0,idle:4}},
  {id:'legacy_otis',name:'Otis',sheet:'media/legacy_otis-sheet.png',motions:[]},
  {id:'bad',name:'Bad',sheet:'https://evil.invalid/a.png',motions:[]}
 ];
@@ -87,6 +89,23 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
  assert.equal(Object.keys(bridge.equipmentFor(named.id)).length,2);
  assert.deepEqual(Object.keys(bridge.equipmentFor(named.id)).sort(),['bag','helmet']);
  assert.ok(bridge.list().some(x=>x.id==='custom_astro_abc'));
+ // Simulate the separately versioned UMD shared sleep module,
+ // which is smoke-tested in Mahluk Hidup CI.
+ w.VLUniversalSleep={
+  IDs:['sleep_bed_right','sleep_bed_left'],
+  isSleep:id=>id==='sleep_bed_right'||id==='sleep_bed_left',
+  resolve(ch,id){
+   if(!this.isSleep(id))return null;
+   const m=ch?.motions?.find(x=>x.id==='lie'&&x.available);
+   return m?{sheet:m.sheet,row:0,frames:4,separate:true,
+    frame_ms:[380,430,470,430]}:null;
+  },
+  directionFor(id,dir){
+   const back=['ne','nw'].includes(dir);
+   return id==='sleep_bed_right'?(back?'ne':'se'):(back?'nw':'sw');
+  },
+  breathing:f=>[0,-1,0,1][f%4]
+ };
  const THREE={
   SRGBColorSpace:'srgb',NearestFilter:1,DoubleSide:2,
   CanvasTexture:class{dispose(){}},
@@ -102,6 +121,23 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
  assert.equal(factory.resolve('legacy_pak_ogah','wave_flag',false).row,0);
 
  assert.equal(factory.resolve('legacy_pak_ogah','wave_flag',false).separate,true);
+ const bed=factory.resolve('astrofrich_base','sleep_bed_right',false);
+ assert.equal(bed.source,'universal-sleep');
+ assert.equal(bed.mode,'sleep_bed_right');
+ assert.equal(bed.row,0);
+ assert.match(bed.url,/astrofrich-base-action-lie\.png/);
+ assert.equal(factory.resolve('legacy_pak_ogah','sleep_bed_right',false).unavailable,true);
+ const sleeper=factory.createRig(THREE,{profile:'astrofrich_base',
+  direction:'sw',pose:'sleep_bed_right'});
+ sleeper.step(.21,null,null);
+ let sleepingDraw=w.lastCanvas.record.draws;
+ assert.match(sleepingDraw[0][0].src,/astrofrich-base-action-lie\.png/);
+ assert.equal(sleepingDraw[0][2],0,'Bed right uses the original SE lie pose');
+ sleeper.setPose('sleep_bed_left');sleeper.step(.21,null,null);
+ sleepingDraw=w.lastCanvas.record.draws;
+ assert.equal(sleepingDraw[0][2],112,'Bed left uses the SW native lie pose');
+ sleeper.dispose();
+
  const rig=factory.createRig(THREE,{profile:'legacy_pak_ogah',direction:'nw',pose:'wave_flag'});
  rig.step(.21,null,null);
  assert.equal(rig.state.loaded,true);
@@ -124,6 +160,13 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
  assert.equal(custom.state.characterId,'custom_astro_abc');
  custom.dispose();
  const builder=loadFile('builder.js');
+ assert.match(builder,/UNIVERSAL \/ BED SLEEP/);
+ assert.match(builder,/sleep_bed_right','sleep_bed_left/);
+ const htmlSource=loadFile('index.html');
+ assert.ok(htmlSource.includes('universal-sleep.js'));
+ assert.ok(htmlSource.indexOf('universal-sleep.js')<
+  htmlSource.indexOf('pipeline-character-rig.js'));
+
  for(const token of ['await mahluk.load()','mahluk?.questProfile(obj.questId)',
  'quest-character:','character:','mahluk?.localSync()','mahluk?.available','actionChoices(',
  'resetAutoRoute(agent,obj)','Mahluk Hidup synced','virtual-life-character-storage-v1'])
