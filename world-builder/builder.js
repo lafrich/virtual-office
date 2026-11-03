@@ -1384,7 +1384,22 @@ function renderAssetList(){
     {title:'Park Tree · preview',tag:'tree',category:'vegetation',label:'PIXEL PLANE / PREVIEW'},
     {title:'Street Light · preview',tag:'lamp',category:'street',label:'PIXEL PLANE / PREVIEW'},
     {title:'Park Bench · preview',tag:'bench',category:'street',label:'PIXEL PLANE / PREVIEW'},
-    {title:'Trash Bin · original',tag:'sprite:street2/loak/props/tong_sampah_besi_se.png',category:'street',label:'GPT / ORIGINAL · login'}
+    {title:'Trash Bin · original',tag:'sprite:street2/loak/props/tong_sampah_besi_se.png',category:'street',label:'GPT / ORIGINAL · login'},
+    {title:'Walking NPC · Ichsan',tag:'pedestrian:ichsan',category:'people',label:'V6B / SIDEWALK LOOP'},
+    {title:'Walking NPC · Noor',tag:'pedestrian:noor',category:'people',label:'V6B / SIDEWALK LOOP'},
+    {title:'Walking NPC · Raka',tag:'pedestrian:raka',category:'people',label:'V6B / SIDEWALK LOOP'},
+    {title:'Walking NPC · Ellen',tag:'pedestrian:ellen',category:'people',label:'V6B / SIDEWALK LOOP'},
+    {title:'Walking NPC · Nadia',tag:'pedestrian:nadia',category:'people',label:'V6B / SIDEWALK LOOP'},
+    {title:'Crowd · 5 people',tag:'crowd:5',category:'people',label:'V6B / SIDEWALK LOOP'},
+    {title:'Crowd · 8 people',tag:'crowd:8',category:'people',label:'V6B / SIDEWALK LOOP'},
+    ...trafficCatalog.vehicles.map(v=>({
+     title:v.label,tag:'vehicle:'+v.id,category:'vehicles',
+     label:'OFFICIAL SOURCE ID / PIXEL PREVIEW',origin:'unpublished'
+    })),
+    ...trafficCatalog.questNPCs.map(v=>({
+     title:v.label,tag:'quest:'+v.id,category:'quest',
+     label:'STATIONARY JOB NPC / PIXEL PREVIEW',origin:'unpublished'
+    }))
    ],
   ...[{title:'Player Spawn',tag:'marker:spawn',category:'logic',label:'LOGIC / SPAWN'},
       {title:'Entrance Point',tag:'marker:entrance',category:'logic',label:'LOGIC / DOOR'},
