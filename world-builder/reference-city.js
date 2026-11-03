@@ -213,7 +213,7 @@ function create(base,catalog,style,schema){
  // immediately on new reference maps. Walking remains preview-only.
  place({
   id:'ref-player-preview',type:'avatar',name:'Player · Camera Preview',
-  x:-4,z:73,y:0,rotation:0,scale:1,facing:'sw',
+  x:-4.5,z:70.5,y:0,rotation:0,scale:1,facing:'sw',
   variant:'pipeline-v6b',profile:'ichsan',collision:true,
   layer:'character',subtype:'player',tags:['reference-city','camera-preview','player'],
   interactions:[],notes:'Editable character spawn for camera-follow and Walk Test. No multiplayer player entity.'
