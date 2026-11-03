@@ -322,7 +322,7 @@ renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.setClearColor(0xbad0d8,1);
 renderer.sortObjects=true;
-let refreshWindow=()=>{};
+let refreshWindow=()=>{},refreshAutoRoutes=()=>{};
 const camera=new THREE.OrthographicCamera(-20,20,20,-20,.1,350);
 const cameraFocus=new THREE.Vector3(4,0,35);
 // True 2:1 pixel-isometric ground (30° elevation), orthographic = no perspective resizing.
@@ -492,6 +492,7 @@ function rebuildTerrain(force=true){
   tileGround.add(mesh);
  }
  rebuildGrid(b);
+ if(force)refreshAutoRoutes();
 }
 refreshWindow=()=>rebuildTerrain(false);
 rebuildTerrain();
@@ -650,7 +651,88 @@ function makeSprite(root,item){
   root.add(plane);billboardSprites.push({root,plane});
  }
 }
-const rigs=new Map();
+const rigs=new Map(),automatedAgents=new Map();
+function resetAutoRoute(agent,obj){
+ const mode=obj.type==='vehicle'?'vehicle':'pedestrian';
+ agent.settings=traffic.config(obj);
+ agent.distance=0;
+ agent.route=obj.type==='quest_npc'?null:traffic.makeRoute(documentMap.map,obj.x,obj.z,mode,agent.settings.direction);
+ if(agent.route)agent.distance=traffic.nearestDistance(agent.route,{x:obj.x,z:obj.z});
+}
+function makeAutomated(root,obj){
+ const kind=obj.type,settings=traffic.config(obj);
+ const agent={root,kind,route:null,distance:0,settings,parts:[],graphic:null};
+ if(kind==='vehicle'){
+  const gfx=trafficArt.vehicleGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;
+ }else if(kind==='quest_npc'){
+  const gfx=trafficArt.questGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;
+ }else{
+  const factory=window.VLCharacterRig;
+  if(factory){
+   const candidates=['ichsan','noor','nadia','raka','ellen','bima','theodore','warteg','barista','kasir'];
+   const n=kind==='crowd'?settings.count:1;
+   for(let i=0;i<n;i++){
+    const profile=kind==='crowd'?candidates[(i*3+2)%candidates.length]:obj.profile||'ichsan';
+    const rig=factory.createRig(THREE,{profile,direction:obj.facing||'sw'});
+    const child=new THREE.Group();root.add(child);child.add(rig.mesh);
+    agent.parts.push({child,rig,part:i});
+   }
+  }
+ }
+ automatedAgents.set(obj.id,agent);resetAutoRoute(agent,obj);
+}
+refreshAutoRoutes=()=>{
+ for(const [id,agent] of automatedAgents){
+  const o=documentMap.objects.find(v=>v.id===id);
+  if(o)resetAutoRoute(agent,o);
+ }
+};
+function updateAutomated(dt){
+ const blockers=documentMap.objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&!automaticType(o.type));
+ for(const [id,agent] of automatedAgents){
+  const record=documentMap.objects.find(o=>o.id===id);
+  if(!record)continue;
+  const cfg=traffic.config(record);
+  if(record.type==='quest_npc'){
+   agent.graphic?.step(dt,camera,agent.root,cfg.idleAction);continue;
+  }
+  const route=agent.route;
+  if(!route||!route.length){
+   if(agent.graphic)agent.graphic.update('se',camera,agent.root);
+   for(const part of agent.parts){
+    part.rig.setMoving(0,0,false);part.rig.step(dt,camera,agent.root.position);
+   }
+   continue;
+  }
+  if(cfg.enabled)agent.distance=(agent.distance+cfg.speed*dt)%route.length;
+  const isCrowd=record.type==='crowd',n=isCrowd?agent.parts.length:1;
+  for(let i=0;i<n;i++){
+   const offset=isCrowd?i*route.length/n:0;
+   const p=traffic.sample(route,agent.distance+offset);
+   if(!p)continue;
+   const member=isCrowd?agent.parts[i]:agent.parts[0];
+   const oldX=isCrowd?member.child.position.x+agent.root.position.x:agent.root.position.x;
+   const oldZ=isCrowd?member.child.position.z+agent.root.position.z:agent.root.position.z;
+   const probe={id:id+(isCrowd?':'+i:''),type:'pedestrian',x:oldX,z:oldZ,scale:1};
+   const result=physics.check(probe,{x:p.x,z:p.z},blockers,documentMap.map,assetByName,style,new Map());
+   const wrapped=Math.hypot(p.x-oldX,p.z-oldZ)>12;
+   if(!result.ok&&!wrapped){
+    if(member){member.rig.setMoving(0,0,false);member.rig.step(dt,camera,{x:oldX,z:oldZ});}
+    continue;
+   }
+   if(isCrowd)member.child.position.set(p.x-agent.root.position.x,0,p.z-agent.root.position.z);
+   else agent.root.position.set(p.x,record.y||0,p.z);
+   if(member){
+    member.rig.setMoving(p.dx,p.dz,cfg.enabled);
+    member.rig.step(dt,camera,{x:p.x,z:p.z});
+   }else if(agent.graphic){
+    const dir=window.VLCharacterRig?.directionFromWorld(p.dx,p.dz,'se')||'se';
+    agent.graphic.update(dir,camera,agent.root);
+   }
+  }
+ }
+}
+
 function makeAvatar(root,item){
  const factory=window.VLCharacterRig;
  if(factory){
@@ -737,12 +819,18 @@ function instantiate(o){
   case 'box':makePixelProp(root,'box',o);break;
   case 'sprite':makeSprite(root,o);break;
   case 'avatar':case 'npc':makeAvatar(root,o);break;
+  case 'vehicle':case 'pedestrian':case 'crowd':case 'quest_npc':makeAutomated(root,o);break;
   case 'marker':makeMarker(root,o);break;
  }
  assetRoots.add(root);owners.set(o.id,root);
  registerBigOccluder(root,o);
 }
 function clearAll(){
+ for(const agent of automatedAgents.values()){
+  agent.graphic?.dispose();
+  for(const part of agent.parts)part.rig.dispose();
+ }
+ automatedAgents.clear();
  bigOccluders.clear();
  for(const {rig} of rigs.values())rig.dispose();
  rigs.clear();billboardSprites.length=0;
@@ -1669,6 +1757,8 @@ function frame(now){
    }
   }
  }
+ updateAutomated(dt);
+ if(highlight&&selectedId&&automatedAgents.has(selectedId))highlight.update();
  for(const {rig,root} of rigs.values())rig.step(dt,camera,root.position);
  const actorStates=[...rigs.values()].map(x=>x.rig.state);
  const notAvailable=actorStates.filter(x=>x.failed).length;
