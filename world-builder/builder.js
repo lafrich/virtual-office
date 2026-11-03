@@ -282,6 +282,7 @@ function sanitize(v){
   }
   // Keep unknown action metadata as data only. No gameplay execution.
   if(p.action&&typeof p.action==='object')e.action=clone(p.action);
+  if(p.type==='quest_npc'&&typeof p.jobId==='string')e.jobId=p.jobId.slice(0,80);
   if(p.collision!==undefined)e.collision=!!p.collision;
   if(p.type==='building'&&['small','medium','large'].includes(p.sizeClass))e.sizeClass=p.sizeClass;
   if(p.replaceable!==undefined)e.replaceable=!!p.replaceable;
@@ -1046,6 +1047,18 @@ function makeObject(type,point){
   obj.collision=automatic==='quest_npc';
   obj.blocking=automatic==='quest_npc'?'auto':'no';
   obj.tags=['semesta','loop-preview',automatic];
+  if(automatic==='quest_npc'){
+   obj.tags.push('job_provider');
+   obj.interactions=['talk','accept_job'];
+   obj.jobId={
+    manusia_silver:'street_performer',
+    pak_ogah:'traffic_assistant',
+    kang_parkir:'parking_attendant',
+    babeh_pemilik:'flea_market_trade',
+    babeh_jam:'watch_vendor',
+    babeh_tas:'secondhand_bag_vendor'
+   }[variation]||'community_job';
+  }
   obj.notes=automatic==='quest_npc'?'Idle job NPC preview. Source art not yet published.':'Auto-loop on painted '+obj.motion.mode+' cells. Non-production preview.';
  }
  if(isMarker){obj.markerKind=type.split(':')[1]||'interaction';obj.name=obj.markerKind+' marker';obj.collision=false;}
