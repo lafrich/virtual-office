@@ -13,7 +13,9 @@ const legacyIds=Object.fromEntries(
  [...(g.VLPipelineAssets?.characters||[]).map(x=>x.id),...Object.keys(ALIAS)]
  .map(id=>[id,ALIAS[id]||id]));
 const bridge=()=>g.VLMahlukHidup;
-const canonical=id=>bridge()?.has(id)?id:(legacyIds[id]||'ichsan');
+const canonical=id=>bridge()?.has(id)?id:
+ bridge()?.has('legacy_'+id)?'legacy_'+id:
+ (legacyIds[id]||'ichsan');
 const imgCache=new Map();
 function image(url){
  if(!url)return null;
@@ -32,13 +34,14 @@ function directionFromWorld(dx,dz,last='sw'){
  return Math.abs(dx)>=Math.abs(dz)?dx>0?'se':'nw':dz>0?'sw':'ne';
 }
 function resolve(id,requested,moving){
+ const sourceId=canonical(id);
  // Local published templates outrank the stock rig. A mere frame edit or
  // planned action is NOT a playable animation until published in all 4 views.
- const template=requested&&g.VLActionTemplates?.get(id,requested);
+ const template=requested&&g.VLActionTemplates?.get(sourceId,requested);
  if(template?.ready)return {url:null,mode:requested,frames:template.frames,
   row:0,durations:Array(template.frames).fill(template.frameMs),
   loop:template.loop,separate:true,source:'template',objectLayer:template.objectLayer};
- const entry=bridge()?.get(id);
+ const entry=bridge()?.get(sourceId);
  if(entry){
   const actions=entry.motions;
   const possible=({bathe:['swim','bathe'],shower:['swim','bathe'],
@@ -131,11 +134,13 @@ function createRig(THREE,opt={}){
    wash:['wash_hands'],work:['office_type'],study:['study_online','office_type'],
    cook:['cook_stir'],sit:['sit_idle'],relax:['sit_idle']
   };
-  const editedExact=action?g.VLActionFrames?.get(state.profile,action,state.direction,frame):null;
+  const editedExact=action?(g.VLActionFrames?.get(who,action,state.direction,frame)||
+   g.VLActionFrames?.get(state.profile,action,state.direction,frame)):null;
   const editURL=spec.source==='template'?
    g.VLActionTemplates?.frame(who,action,state.direction,frame):
    editedExact||(actionFallback[action]||[]).map(id=>
-    g.VLActionFrames?.get(state.profile,id,state.direction,frame)).find(Boolean)||null;
+    (g.VLActionFrames?.get(who,id,state.direction,frame)||
+    g.VLActionFrames?.get(state.profile,id,state.direction,frame))).find(Boolean)||null;
   const edited=editURL?image(editURL):null;
   const status=overlays.map(o=>o?.ready?'1':'0').join('');
   // Full content fingerprint prevents two same-length pixel edits from sharing
