@@ -249,6 +249,11 @@ documentMap.map.unbounded=true;
 documentMap.map.terrain=terrain.normalize(documentMap.map.terrain||terrain.seeded(documentMap.map.worldBounds,documentMap.map.road),null);
 defaultSeed.map.unbounded=true;
 defaultSeed.map.terrain=terrain.normalize(defaultSeed.map.terrain||terrain.seeded(defaultSeed.map.worldBounds,defaultSeed.map.road),null);
+const dayClock=window.VLSemestaDayNight.makeClock(documentMap.map.environmentClock);
+function syncClockToMap(){documentMap.map.environmentClock=dayClock.snapshot();}
+function restoreCityClock(){
+ dayClock.restore(documentMap.map.environmentClock||{minute:420,day:1,speed:1,paused:false});
+}
 function sanitize(v){
  if(!v||!Array.isArray(v.objects))throw Error('Expected objects array');
  if(v.objects.length>10000)throw Error('Too many objects (max 10000 per draft)');
@@ -312,6 +317,7 @@ function sanitize(v){
  return out;
 }
 function saved(){
+ syncClockToMap();
  draftDirty=true;
  try{
   localStorage.setItem(STORE,JSON.stringify(documentMap));
@@ -323,7 +329,7 @@ function restoreStack(from,to){
  if(!from.length)return;
  if(cameraFollowId)leaveCharacterCamera(true);
  to.push(JSON.stringify(documentMap));
- documentMap=sanitize(JSON.parse(from.pop()));selectedId=null;rebuild();rebuildTerrain();saved();
+ documentMap=sanitize(JSON.parse(from.pop()));restoreCityClock();selectedId=null;rebuild();rebuildTerrain();saved();
 }
 let toastTimer=null;
 function tell(msg){
@@ -2299,7 +2305,7 @@ $('loadDraft').onclick=async()=>{
   const errors=schema.validate(record.document,assetByName,style);
   if(errors.length)throw Error(errors.join('; '));
   if(cameraFollowId)leaveCharacterCamera(false);
-  undoPoint();documentMap=sanitize(record.document);
+  undoPoint();documentMap=sanitize(record.document);restoreCityClock();
   selectedId=null;activeDraftId=record.id;draftDirty=false;
   try{localStorage.setItem(ACTIVE_DRAFT_KEY,record.id);}catch{}
   rebuild();rebuildTerrain();resetCamera();saved();draftDirty=false;
@@ -2334,7 +2340,7 @@ function loadReferencePreset(){
  try{
   const reference=window.VLReferenceCity.create(defaultSeed,assetByName,style,schema);
   if(cameraFollowId)leaveCharacterCamera(false);
-  undoPoint();documentMap=sanitize(reference);selectedId=null;
+  undoPoint();documentMap=sanitize(reference);restoreCityClock();selectedId=null;
   activeDraftId=null;draftDirty=true;
   try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
   closeMobileSheets();setMode('select');
@@ -2395,7 +2401,7 @@ function makeCityExample(){
 $('newCity').onclick=()=>{
  if(!confirm('Start City Sample? Map draft saat ini akan diganti. Export JSON dulu jika ingin menyimpan layout lama.'))return;
  if(cameraFollowId)leaveCharacterCamera(false);
- undoPoint();documentMap=makeCityExample();selectedId=null;
+ undoPoint();documentMap=makeCityExample();restoreCityClock();selectedId=null;
  activeDraftId=null;draftDirty=true;
  try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
  rebuild();rebuildTerrain();resetCamera();saved();
@@ -2404,7 +2410,7 @@ $('newCity').onclick=()=>{
 $('reset').onclick=()=>{
  if(!confirm('Reset seluruh map draft 3D ke default?'))return;
  if(cameraFollowId)leaveCharacterCamera(false);
- undoPoint();documentMap=clone(defaultSeed);selectedId=null;
+ undoPoint();documentMap=clone(defaultSeed);restoreCityClock();selectedId=null;
  activeDraftId=null;draftDirty=true;
  try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
  rebuild();rebuildTerrain();resetCamera();saved();tell('Reference City reset (working copy)');
@@ -2424,7 +2430,7 @@ $('file').onchange=async e=>{
   const payload=JSON.parse(await f.text());const errors=schema.validate(payload,assetByName,style);if(errors.length)throw Error(errors[0]);
   const d=sanitize(payload);
    if(cameraFollowId)leaveCharacterCamera(false);
-   undoPoint();documentMap=d;selectedId=null;
+   undoPoint();documentMap=d;restoreCityClock();selectedId=null;
    activeDraftId=null;draftDirty=true;
    try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
    rebuild();rebuildTerrain();resetCamera();saved();tell('Map imported as working copy');
