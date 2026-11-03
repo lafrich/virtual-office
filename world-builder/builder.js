@@ -1168,8 +1168,9 @@ function updateSelection(){
  $('actorControls').classList.toggle('visible',actor);
  $('facing').disabled=!actor;$('pose').disabled=!actor;
  if(actor){
-   $('facing').value=cur.facing||'sw';$('pose').value=cur.pose||'';
+   $('facing').value=cur.facing||'sw';
    $('profile').value=cur.profile||'ichsan';
+   actionChoices(cur.profile,'pose',cur.pose||'');
  }
  $('profile').disabled=!actor;
  const dynamic=cur&&automaticType(cur.type);
@@ -1184,7 +1185,10 @@ function updateSelection(){
   $('motionDirection').disabled=cur.type==='quest_npc';
   $('crowdCount').value=cfg.count;
   $('crowdCount').closest('label').hidden=cur.type!=='crowd';
-  $('questAction').value=cfg.idleAction;
+  if(cur.type==='quest_npc'){
+   const charProfile=mahluk?.has(cur.profile)?cur.profile:mahluk?.questProfile(cur.questId);
+   actionChoices(charProfile,'questAction',cfg.idleAction);
+  }else $('questAction').value=cfg.idleAction;
   $('questAction').closest('label').hidden=cur.type!=='quest_npc';
   $('jobRoleLabel').hidden=cur.type!=='quest_npc';
   $('jobRole').value=cur.jobId||'community_job';
@@ -1708,7 +1712,8 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
 });
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
-$('profile').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.profile=$('profile').value;});};
+$('profile').onchange=()=>{if(item()&&actorType(item().type))
+ edit(o=>{o.profile=$('profile').value;o.pose=null;});};
 function changeMotion(field,value,rebuildCrowd=false){
  const selected=item();if(!selected||!automaticType(selected.type))return;
  edit(o=>{o.motion={...o.motion,[field]:value};},false);
@@ -1743,6 +1748,43 @@ function updateLogicUI(){
  for(const [id,v] of Object.entries(fields)){$(id).value=v;$(id).disabled=!cur;}
  $('logicMarkerKind').disabled=!cur||cur.type!=='marker';
 }
+function refreshCharacterOptions(){
+ const current=$('profile').value;
+ const sel=$('profile');
+ sel.replaceChildren();
+ const old=document.createElement('optgroup');old.label='VIRTUAL LIFE / ORIGINAL';
+ for(const [id,name] of [['ichsan','Ichsan'],['theodore','Theodore'],['noor','Noor'],['raka','Raka'],['ellen','Ellen'],['nadia','Nadia']]){
+  const opt=document.createElement('option');opt.value=id;opt.textContent=name;old.append(opt);
+ }
+ sel.append(old);
+ const published=document.createElement('optgroup');published.label='MAHLUK HIDUP / PUBLISHED';
+ const custom=document.createElement('optgroup');custom.label='MAHLUK HIDUP / CHAR STORAGE';
+ for(const c of (mahluk?.list()||[])){
+  const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.name;
+  (c.custom?custom:published).append(opt);
+ }
+ if(published.children.length)sel.append(published);
+ if(custom.children.length)sel.append(custom);
+ if(Array.from(sel.options).some(o=>o.value===current))sel.value=current;
+}
+function actionChoices(actorId,selectId,selectedAction){
+ const sel=$(selectId),actions=mahluk?.motions(actorId)||[];
+ if(!actions.length){
+  if(Array.from(sel.options).some(o=>o.value===selectedAction))sel.value=selectedAction;
+  return;
+ }
+ sel.replaceChildren();
+ if(selectId==='pose'){
+  const blank=document.createElement('option');blank.value='';blank.textContent='Idle';sel.append(blank);
+ }
+ for(const action of actions){
+  const opt=document.createElement('option');opt.value=action.id;
+  opt.textContent=action.name||action.id.replace(/_/g,' ').toUpperCase();sel.append(opt);
+ }
+ const candidate=actions.some(m=>m.id===selectedAction)?selectedAction:
+  actions.find(m=>m.id==='idle')?.id||actions[0].id;
+ sel.value=selectId==='pose'&&!selectedAction?'':candidate;
+}
 function renderAssetList(){
  const q=$('searchAsset').value.trim().toLowerCase(),cat=$('assetCategory').value;
  const assets=[
@@ -1773,7 +1815,23 @@ function renderAssetList(){
     })),
     ...trafficCatalog.questNPCs.map(v=>({
      title:v.label,tag:'quest:'+v.id,category:'quest',
-     label:'STATIONARY JOB NPC / PIXEL PREVIEW',origin:'unpublished'
+     label:mahluk?.questProfile(v.id)?'MAHLUK HIDUP / REAL ACTIONS':
+       'STATIONARY JOB NPC / PIXEL PREVIEW',
+     origin:mahluk?.questProfile(v.id)?'published':'unpublished'
+    })),
+    ...(mahluk?.list()||[]).map(c=>({
+     title:c.name,tag:'character:'+c.id,category:'character',
+     label:c.custom?'MAHLUK HIDUP / CHARACTER STORAGE':
+       'MAHLUK HIDUP / '+c.motions.length+' REAL ACTIONS',origin:'published'
+    })),
+    ...(mahluk?.list()||[]).filter(c=>c.motions.some(m=>m.id==='walk')).map(c=>({
+     title:'Walker · '+c.name,tag:'pedestrian:'+c.id,category:'people',
+     label:c.custom?'CHAR STORAGE / SIDEWALK':'MAHLUK HIDUP / SIDEWALK',origin:'published'
+    })),
+    ...(mahluk?.list()||[]).filter(c=>c.motions.some(m=>m.id!=='idle'&&m.id!=='walk')).map(c=>({
+     title:'NPC Quest · '+c.name,tag:'quest-character:'+c.id,category:'quest',
+     label:c.custom?'CHAR STORAGE / STATIONARY':'MAHLUK HIDUP / STATIONARY ACTION',
+     origin:'published'
     }))
    ],
   ...[{title:'Player Spawn',tag:'marker:spawn',category:'logic',label:'LOGIC / SPAWN'},
@@ -1886,6 +1944,7 @@ window.addEventListener('semesta-vault-autolink',event=>{
  tell(changed.length+' vehicles / job NPCs linked to original image references');
 });
 
+refreshCharacterOptions();
 $('searchAsset').oninput=renderAssetList;
 $('assetCategory').onchange=renderAssetList;
 for(const [key,field,kind] of [
@@ -1955,13 +2014,21 @@ $('replaceAsset').onclick=()=>{
 $('exportShortcut').onclick=()=>$('export').click();
 renderAssetList();
 
-$('refreshAssets').onclick=()=>{
+async function refreshMahlukHidup(full=true){
+ const stat=full?await mahluk?.load():mahluk?.localSync();
+ refreshCharacterOptions();renderAssetList();
  window.VLCharacterRig?.retry();
  for(const tex of spriteTexture.values())tex.dispose();
  spriteTexture.clear();
- rebuild();
- tell('Sprites reloaded. If locked, open Virtual Life and sign in first.');
-};
+ rebuild();updateSelection();
+ tell(stat?.loaded===false?'Mahluk Hidup catalog unavailable; older game sprites retained':
+  'Mahluk Hidup synced · '+(mahluk?.list().length||0)+' characters, outfits and customs');
+}
+$('refreshAssets').onclick=()=>refreshMahlukHidup(true);
+window.addEventListener('storage',e=>{
+ if(['virtual-life-character-storage-v1','virtual-life-accessory-equipment-v1',
+     'virtual-life-accessories-v1'].includes(e.key))refreshMahlukHidup(false);
+});
 $('openGame').onclick=()=>window.open('../','_blank','noopener');
 $('viewRef').onclick=()=>{$('assetReference').hidden=false;};
 $('closeRef').onclick=()=>{$('assetReference').hidden=true;};
