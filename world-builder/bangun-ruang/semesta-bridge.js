@@ -15,7 +15,7 @@ try{
 for(const a of list){
  if(!a||!/^br-[a-z0-9-]{1,72}$/.test(a.id||'')||!a.views||!a.config)continue;
  const w=Number(a.config.w),d=Number(a.config.d);
- if(!Number.isInteger(w)||!Number.isInteger(d)||w<2||d<2||w>12||d>12)continue;
+ if(!Number.isFinite(w)||!Number.isFinite(d)||w<2||d<2||w>24||d>24)continue;
  const variants={};
  for(const dir of ['sw','se','ne','nw']){
   const v=a.views[dir],s=v?.size,p=v?.pivot;
@@ -26,14 +26,28 @@ for(const a of list){
  }
  if(!Object.keys(variants).length)continue;
  const canonical=variants.sw||Object.values(variants)[0];
+ const enterable=a.interactive===true&&a.enterable===true&&
+  a.interior?.format==='virtual-life-interiors-v1';
+ const interior=enterable&&Array.isArray(a.interior?.floors)&&a.interior.floors.length<=12?
+  JSON.parse(JSON.stringify(a.interior)):null;
+ const actionSlots=interior&&Array.isArray(a.actionSlots)?
+  a.actionSlots.filter(x=>typeof x?.id==='string'&&
+   typeof x.interaction==='string'&&x.interaction.length<80).slice(0,200):[];
+ const entrance=interior?{
+  facing:['sw','se'].includes(a.entrance?.facing)?a.entrance.facing:'sw',
+  groundFloor:1,entry:interior.floors[0]?.entrance||null
+ }:null;
  const spec=Object.freeze({
   id:a.id,file:'studio:'+a.id,label:String(a.name||'Building').slice(0,80),
   group:'kampung',source:'custom-building',published:true,
   footprint:[w,d],size:canonical.size,pivot:canonical.pivot,
   width:canonical.size[0]/50,height:canonical.size[1]/50,
   collision:a.config.collision!=='no',
-  entranceFacing:['sw','se'].includes(a.entranceFacing)?a.entranceFacing:'sw',
-  interactions:Array.isArray(a.interactions)?a.interactions.filter(x=>typeof x==='string').slice(0,20):['enter'],
+  entranceFacing:enterable&&['sw','se'].includes(a.entranceFacing)?a.entranceFacing:'',
+  interactive:enterable,enterable,
+  entrance,interior,actionSlots,
+  interactions:Array.isArray(a.interactions)?
+   a.interactions.filter(x=>typeof x==='string'&&(enterable||x!=='enter')).slice(0,20):(enterable?['enter']:[]),
   blocking:a.config.collision==='no'?'no':'yes',
   variants:Object.freeze(variants)
  });
