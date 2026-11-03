@@ -115,8 +115,9 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
   sit:["sit_idle"],relax:["sit_idle"]
  };
  const edits=g.VLActionFrames;
+ const storageActor=rig?.canonical(actor.profile)||actor.profile;
  // Pixel offset comes from Mahluk Hidup, never moves fixture/collision data.
- const shift=action?edits?.offset(actor.profile,action):null;
+ const shift=action?edits?.offset(storageActor,action):null;
  const x=Math.round(footX-FRAME.pivotX*scale+(shift?.x||0));
  const y=Math.round(footY-FRAME.pivotY*scale+(shift?.y||0));
  const drawWidth=FRAME.w*scale,drawHeight=FRAME.h*scale;
@@ -132,11 +133,13 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
   const sx=frame*FRAME.w,sy=row*FRAME.h;
   const pic=sprite.pic;
   if(sx+FRAME.w<=pic.naturalWidth&&sy+FRAME.h<=pic.naturalHeight){
-   const saved=action?edits?.get(actor.profile,action,actor.direction,frame):null;
+   const saved=action?(edits?.get(storageActor,action,actor.direction,frame)||
+    edits?.get(actor.profile,action,actor.direction,frame)):null;
    const matched=saved||(actionFallback[action]||[]).map(id=>
-    edits?.get(actor.profile,id,actor.direction,frame)).find(Boolean)||null;
+    (edits?.get(storageActor,id,actor.direction,frame)||
+     edits?.get(actor.profile,id,actor.direction,frame))).find(Boolean)||null;
    const patched=matched?image(matched):null;
-   const worn=bridge?.equipmentFor(actor.profile)||{};
+   const worn=bridge?.equipmentFor(storageActor)||{};
    const urls=['bag','shoes','pants','shirt','helmet'].map(k=>worn[k]?.frames?.[actor.direction]||null);
    const layers=urls.map(image);
    const drawPart=entry=>{
