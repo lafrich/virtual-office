@@ -18,6 +18,7 @@
  <button id="export" type="button"><u>F</u>ile / Export</button>
  <button id="import" type="button"><u>E</u>dit / Import</button>
  <button id="reset" type="button"><u>V</u>iew / Reset</button>
+ <button id="openTutorial" type="button" title="Open the quick start guide">❔ Quick Tutorial</button>
  <button id="openGame" type="button"><u>H</u>elp / Game</button>
  <span class="version">VIRTUAL LIFE / REFERENCE CITY + DRAFTS</span>
 </nav>
@@ -172,6 +173,27 @@
   </div>
  </div>
 </div>
+<div id="tutorialOverlay" class="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle" hidden>
+ <section class="tutorial-window">
+  <header class="tutorial-header">
+   <span aria-hidden="true">✳</span><strong>VIRTUAL LIFE · SETUP WIZARD</strong>
+   <button id="tutorialClose" type="button" aria-label="Skip tutorial">×</button>
+  </header>
+  <div class="tutorial-content">
+   <div class="tutorial-progress"><span id="tutorialStepCounter">STEP 01 / 05</span><span id="tutorialProgressDots" aria-hidden="true"></span></div>
+   <div id="tutorialIcon" class="tutorial-illustration" aria-hidden="true">🗺</div>
+   <h2 id="tutorialTitle">Welcome to City Builder!</h2>
+   <p id="tutorialText"></p>
+   <div id="tutorialHint" class="tutorial-tip"></div>
+  </div>
+  <footer class="tutorial-actions">
+   <button id="tutorialSkip" type="button">Skip</button>
+   <span class="tutorial-space"></span>
+   <button id="tutorialPrev" type="button">← Back</button>
+   <button id="tutorialNext" type="button">Next →</button>
+  </footer>
+ </section>
+</div>
 </div></div>
 <script src="./asset-catalog.js?v=2"></script>
 <script src="./pipeline-catalog.js?v=p4"></script>
@@ -182,5 +204,7 @@
 <script src="./map-schema.js?v=infinite-grid-mobile-fix4"></script>
 <script src="./reference-city.js?v=camera-character-v1"></script>
 <script src="./city-drafts.js?v=reference-city-drafts1"></script>
+<script src="./world-physics.js?v=solid-world-1"></script>
+<script src="./quick-tutorial.js?v=solid-world-1"></script>
 <script type="module" src="./builder.js?v=camera-character-v1"></script>
 </body></html>
