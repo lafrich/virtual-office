@@ -67,7 +67,11 @@ function refresh(){
  }
  byId.clear();entries.length=0;
  for(const [id,{asset,spec}] of next){byId.set(id,asset);entries.push(spec);}
- g.VLAssetCatalog=Object.freeze([...base,...entries]);
+ // Live sync must preserve custom pixel objects and vegetation catalogs
+ // registered later, not recreate the original startup-only catalog.
+ const existing=(Array.isArray(g.VLAssetCatalog)?g.VLAssetCatalog:base)
+  .filter(spec=>spec?.source!=='custom-building');
+ g.VLAssetCatalog=Object.freeze([...existing,...entries]);
  return Object.freeze({count:entries.length,entries:Object.freeze([...entries])});
 }
 const api=Object.freeze({
