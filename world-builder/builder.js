@@ -51,7 +51,7 @@ if(assetGroup){
  assetGroup.remove();
 }
 const clone=x=>JSON.parse(JSON.stringify(x));
-const BUILD_SIZES=Object.freeze({small:{w:3,d:3,h:3.8,color:'#d2a883'},medium:{w:5,d:4,h:6.2,color:'#90a9ba'},large:{w:8,d:6,h:10.5,color:'#b9b9ae'}});
+const BUILD_SIZES=window.VLSemestaBuildingSpecs?.nativeDefaults||Object.freeze({small:{w:3,d:3,h:3.8,color:'#d2a883'},medium:{w:5,d:4,h:6.2,color:'#90a9ba'},large:{w:8,d:6,h:10.5,color:'#b9b9ae'}});
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const round=v=>Math.round(v*100)/100;
 const seed={
@@ -1949,11 +1949,17 @@ function frame(now){
  for(const entry of billboardSprites){
    const {root,plane}=entry;
    const key=plane.userData.assetFile,spec=assetByName.get(key);
-   if(spec?.source==='pipeline-street'){
+   if(spec&&['pipeline-street','custom-building'].includes(spec.source)){
      const dir=spriteDirection(root.rotation.y*180/Math.PI);
      if(dir!==plane.userData.displayFacing){
-       plane.material.map=pixelTexture(key,dir);plane.material.needsUpdate=true;
+       plane.material.map=pixelTexture(key,dir);
+       plane.material.needsUpdate=true;
        plane.userData.displayFacing=dir;plane.userData.aspectFixed=false;
+       const native=spec.variants?.[dir]||spec.variants?.sw||spec.variants?.se;
+       if(native?.size&&native?.pivot){
+         plane.userData.pivotY=native.pivot[1]/native.size[1];
+         plane.userData.pivotX=(native.size[0]/2-native.pivot[0])/native.size[0];
+       }
      }
    }
    const tex=plane.material.map,img=tex?.image;
