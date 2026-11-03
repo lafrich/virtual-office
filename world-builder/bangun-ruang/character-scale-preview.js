@@ -105,8 +105,12 @@ function silhouette(ctx,x,y,scale=ACTOR_SCALE,pose='idle'){
 }
 function drawActor(ctx,actor,time,footX,footY,options={}){
  const scale=ACTOR_SCALE;
- const x=Math.round(footX-FRAME.pivotX*scale);
- const y=Math.round(footY-FRAME.pivotY*scale);
+ const action=({toilet:"toilet",bathe:"bathe",sleep:"sleep"})[actor.pose]||null;
+ const edits=g.VLActionFrames;
+ // Pixel offset comes from Mahluk Hidup, never moves fixture/collision data.
+ const shift=action?edits?.offset(actor.profile,action):null;
+ const x=Math.round(footX-FRAME.pivotX*scale+(shift?.x||0));
+ const y=Math.round(footY-FRAME.pivotY*scale+(shift?.y||0));
  const drawWidth=FRAME.w*scale,drawHeight=FRAME.h*scale;
  const resolved=rig?.resolve(actor.profile,actor.pose,actor.moving);
  const sprite=resolved?.url?image(resolved.url):null;
@@ -120,6 +124,8 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
   const sx=frame*FRAME.w,sy=row*FRAME.h;
   const pic=sprite.pic;
   if(sx+FRAME.w<=pic.naturalWidth&&sy+FRAME.h<=pic.naturalHeight){
+   const saved=action?edits?.get(actor.profile,action,actor.direction,frame):null;
+   const patched=saved?image(saved):null;
    const worn=bridge?.equipmentFor(actor.profile)||{};
    const urls=['bag','shoes','pants','shirt','helmet'].map(k=>worn[k]?.frames?.[actor.direction]||null);
    const layers=urls.map(image);
@@ -128,7 +134,9 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
      ctx.drawImage(entry.pic,0,0,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
    };
    drawPart(layers[0]);
-   ctx.drawImage(pic,sx,sy,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
+   if(patched?.ready)
+    ctx.drawImage(patched.pic,0,0,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
+   else ctx.drawImage(pic,sx,sy,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
    for(let i=1;i<layers.length;i++)drawPart(layers[i]);
    drawn=true;
   }
