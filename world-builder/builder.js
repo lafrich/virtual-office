@@ -849,7 +849,13 @@ function makeObject(type,point){
   name:isCustom?sizeClass.toUpperCase()+' Building · replaceable':isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
   x:round(point?.x??cameraFocus.x),z:round(point?.z??cameraFocus.z),y:0,rotation:0,scale:1};
  if(isCustom){Object.assign(obj,dims);obj.sizeClass=sizeClass;obj.replaceable=true;obj.collision=true;obj.layer='structure';obj.subtype='custom_building';obj.tags=['placeholder','building'];}
- if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;}
+ if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;
+  if(spec.source==='custom-building'){
+   obj.layer='structure';obj.subtype=spec.id;obj.tags=['bangun-ruang','building'];
+   obj.interactions=spec.interactions||['enter'];obj.entranceFacing=spec.entranceFacing||'';
+   obj.blocking=spec.blocking||'auto';
+  }
+ }
  if(actorType(type)){obj.facing='sw';obj.pose=null;obj.variant='pipeline-v6b';obj.profile=type==='npc'?'noor':'ichsan';obj.collision=true;}
  if(automatic){
   const variation=type.slice(type.indexOf(':')+1);
