@@ -286,7 +286,7 @@ function sanitize(v){
   if(p.collision!==undefined)e.collision=!!p.collision;
   if(p.type==='building'&&['small','medium','large'].includes(p.sizeClass))e.sizeClass=p.sizeClass;
   if(p.replaceable!==undefined)e.replaceable=!!p.replaceable;
-  for(const key of ['layer','subtype','tags','interactions','capacity','entranceFacing','markerKind','blocking','notes']){
+  for(const key of ['layer','subtype','tags','interactions','capacity','entranceFacing','markerKind','blocking','notes','interactive','enterable','entrance','interior','actionSlots']){
    if(Object.hasOwn(p,key))e[key]=clone(p[key]);
   }
   style.normalize(e,assetByName);schema.normalize(e,assetByName,style);
@@ -935,6 +935,7 @@ function rebuild(){
  renderer.render(scene,camera);
 }
 function item(){return documentMap.objects.find(o=>o.id===selectedId)||null;}
+let interiorPreview=null;
 function updateSelection(){
  const cur=item();
  $('selectedName').textContent=cur?cur.name:'Belum ada objek dipilih';
@@ -986,6 +987,7 @@ function updateSelection(){
   $(key).disabled=!editableBuilding;
  }
  updateLogicUI();
+ interiorPreview?.update(cur,cur?.type==='sprite'?assetByName.get(cur.asset):null);
  if(highlight&&highlight.userData.selected===cur?.id){
    highlight.update();
  }else{
@@ -1050,6 +1052,10 @@ function makeObject(type,point){
    obj.layer='structure';obj.subtype=spec.id;obj.tags=['bangun-ruang','building'];
    obj.interactions=spec.interactions||['enter'];obj.entranceFacing=spec.entranceFacing||'';
    obj.blocking=spec.blocking||'auto';
+   obj.interactive=spec.interactive===true;obj.enterable=spec.enterable===true;
+   obj.interior=spec.interior?clone(spec.interior):null;
+   obj.entrance=spec.entrance?clone(spec.entrance):null;
+   obj.actionSlots=spec.actionSlots?clone(spec.actionSlots):[];
   }
  }
  if(actorType(type)){obj.facing='sw';obj.pose=null;obj.variant='pipeline-v6b';obj.profile=type==='npc'?'noor':'ichsan';obj.collision=true;}
@@ -1558,7 +1564,12 @@ function renderAssetList(){
     if(old&&spec){
      const previous=clone(old);
      Object.assign(old,{type:'sprite',asset:file,name:spec.label,collision:spec.collision!==false,replaceable:true,
-      w:undefined,d:undefined,h:undefined,sizeClass:undefined,width:spec.width,height:spec.height});
+      w:undefined,d:undefined,h:undefined,sizeClass:undefined,width:spec.width,height:spec.height,
+      interactive:spec.interactive===true,enterable:spec.enterable===true,
+      entrance:spec.entrance?clone(spec.entrance):null,
+      interior:spec.interior?clone(spec.interior):null,
+      actionSlots:spec.actionSlots?clone(spec.actionSlots):[],
+      interactions:spec.interactions||[],entranceFacing:spec.entranceFacing||''});
      style.normalize(old,assetByName);schema.normalize(old,assetByName,style);
      const collision=style.reason(old,documentMap.objects,documentMap.map,assetByName);
      if(collision){Object.assign(old,previous);tell('Replace gagal: '+collision);}
@@ -1886,6 +1897,17 @@ window.addEventListener('keydown',e=>{
 });
 window.addEventListener('error',e=>{console.error('World Builder runtime',e.error);});
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();fail.style.display='flex';fail.textContent='WebGL context lost. Reload editor; changes are saved locally.';});
+interiorPreview=window.VLSemestaInteriorPreview?.mount({
+ getSelected:()=>item(),catalog:assetByName,message:tell,
+ previewAction:(prop,action)=>{
+  if(!action?.pose)return false;
+  const avatar=documentMap.objects.find(o=>actorType(o.type)&&rigs.has(o.id));
+  if(!avatar)return false;
+  const rig=rigs.get(avatar.id)?.rig;
+  if(!rig)return false;
+  rig.setPose(action.pose);renderer.render(scene,camera);return true;
+ }
+})||null;
 rebuild();resetCamera();resize();saved();
 let priorFrame=performance.now();
 function frame(now){
