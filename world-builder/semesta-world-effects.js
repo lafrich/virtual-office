@@ -47,7 +47,8 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
  const tmp=new THREE.Object3D();
  const GROUND_ROT=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2);
  const UP=new THREE.Vector3(0,1,0);
- let elapsed=0,previousLightKey='',lastSize='';
+ let elapsed=0,shadowElapsed=0,previousLightKey='',lastSize='';
+ const lastCamera={x:NaN,y:NaN,z:NaN,zoom:NaN};
  const glowCtx=glows.getContext('2d',{alpha:true});
  const pos3=new THREE.Vector3();
  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -136,12 +137,15 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
   if(px<-90||py<-90||px>rect.width+90||py>rect.height+90)return null;
   return {x:px,y:py};
  }
- function glowCircle(x,y,radius,alpha){
+ function glowCircle(x,y,radius,alpha,tone='warm'){
   if(alpha<=.003)return;
   const grad=glowCtx.createRadialGradient(x,y,0,x,y,radius);
-  grad.addColorStop(0,'rgba(255,229,152,'+cl(alpha,0,.85)+')');
-  grad.addColorStop(.38,'rgba(255,186,82,'+cl(alpha*.44,0,.6)+')');
-  grad.addColorStop(1,'rgba(255,180,60,0)');
+  const rgb=tone==='head'?[243,248,255]:tone==='tail'?[255,70,52]:
+   tone==='body'?[188,220,255]:[255,229,152];
+  const middle=tone==='tail'?[255,90,60]:tone==='body'?[178,212,245]:tone==='head'?[237,239,215]:[255,186,82];
+  grad.addColorStop(0,'rgba('+rgb.join(',')+','+cl(alpha,0,.86)+')');
+  grad.addColorStop(.38,'rgba('+middle.join(',')+','+cl(alpha*.46,0,.6)+')');
+  grad.addColorStop(1,'rgba('+rgb.join(',')+',0)');
   glowCtx.fillStyle=grad;
   glowCtx.fillRect(x-radius,y-radius,radius*2,radius*2);
  }
@@ -158,7 +162,30 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
    const root=getRoot(o.id);if(!root||!root.visible)continue;
    const cat=getCategory(o),lamp=o.type==='lamp'||/lampu|lamp|light/i.test(o.name||'');
    const building=(cat==='building'||o.type==='building'||o.type==='shop');
-   if(!lamp&&!building)continue;
+   const vehicle=o.type==='vehicle';
+   if(!lamp&&!building&&!vehicle)continue;
+   if(vehicle){
+    // A restrained vehicle body highlight and directional white/red lamps
+    // render over the night tint, using the actual moving vehicle heading.
+    const moving=getAgent(o.id);
+    let dx=Number(moving?.lastDx)||0,dz=Number(moving?.lastDz)||0;
+    if(Math.hypot(dx,dz)<.1){
+     const dir=o.motion?.direction||'east';
+     dx=dir==='west'?-1:dir==='east'?1:0;
+     dz=dir==='north'?-1:dir==='south'?1:0;
+     if(!dx&&!dz)dx=1;
+    }
+    const mag=Math.hypot(dx,dz)||1;dx/=mag;dz/=mag;
+    const fp=getFootprint(o),len=Math.max(.8,Math.min(3.5,Number(fp?.[0])||2));
+    const x=root.position.x,z=root.position.z;
+    const body=project(x,.78,z,rect);
+    const front=project(x+dx*len*.45,.46,z+dz*len*.45,rect);
+    const back=project(x-dx*len*.45,.42,z-dz*len*.45,rect);
+    if(body)glowCircle(body.x,body.y,size*1.4,model.glow*.22,'body');
+    if(front)glowCircle(front.x,front.y,size*1.3,model.glow*.63,'head');
+    if(back)glowCircle(back.x,back.y,size*.72,model.glow*.38,'tail');
+    n++;continue;
+   }
    const h=lamp?4.4:Math.max(2,Math.min(10,Number(o.h)||5))*.47;
    const p=project(root.position.x,h,root.position.z,rect);
    if(!p)continue;
@@ -177,12 +204,18 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
   scene.background.set(model.sky);
  }
  function update(dt,model,force=false){
-  elapsed+=Math.max(0,dt||0);
-  if(!force&&elapsed<.12)return;
+  const delta=Math.max(0,dt||0);
+  elapsed+=delta;shadowElapsed+=delta;
+  // The original 120ms throttle made streetlights lag the follow camera.
+  const pos=camera.position;
+  const cameraMoving=Math.abs(pos.x-lastCamera.x)+Math.abs(pos.y-lastCamera.y)+
+   Math.abs(pos.z-lastCamera.z)>.0002||camera.zoom!==lastCamera.zoom;
+  lastCamera.x=pos.x;lastCamera.y=pos.y;lastCamera.z=pos.z;lastCamera.zoom=camera.zoom;
+  if(!force&&!cameraMoving&&elapsed<.035)return;
   elapsed=0;
   const key=model.sky+'/'+Math.round(model.night*100)+'/'+Math.round(model.glow*100);
   if(key!==previousLightKey||force){previousLightKey=key;applyTint(model);}
-  collect(model);
+  if(force||shadowElapsed>=.05){collect(model);shadowElapsed=0;}
   drawNightLights(model);
  }
  function dispose(){
