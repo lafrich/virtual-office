@@ -127,3 +127,11 @@ Use **BUILDING VIEW → ◇ Outline** on the canvas toolbar or the **◇** icon 
 - Both controls use the same toggle state. The view setting is saved in this browser's localStorage only; it never modifies the City Draft or JSON world file.
 - Original Virtual Life images unlocked after a view switch rebuild their matching guide geometry; locking restores their preview geometry. Outline meshes are disposed when buildings or maps are replaced.
 - This is a **visual inspection aid**, not a mesh-editing CAD application. Complex sprites use a bounding and footprint reference in place of unavailable physical 3D surface geometry.
+
+## Compact TransJakarta and editable yellow markers (2026-11-03)
+
+- **TransJakarta occupies 2×1 Semesta grid units** (visual sprite, static collision footprint, moving overlap and traffic following distance). This is an explicit editor override: its upstream Virtual Life manifest still describes a 6.6×1.3 source footprint, which is retained as metadata, not silently altered.
+- **Yellow diamond pins** in the Reference City are `type: "marker"` objects: spawn, entrance, interaction, patrol or trigger points for future AI gameplay. They are not NPCs, props, or solid obstacles.
+- Marker pins have a larger invisible touch target and a 20–27 screen-pixel tap-selection radius. Select one with a tap, open **Properties → Delete**, or use the **Logic** tab's **Yellow Logic Markers** selector with **Find / Delete / Remove All**. Removal is undoable. **Remove All** requires confirmation and affects only actual `type:"marker"` records.
+- Use **⚑ Markers ON/OFF** in the canvas toolbar or ⚑ in the left tool strip to hide/show the pins without editing or deleting the City Draft. Marker visibility is remembered locally on this browser.
+- **Golden building footprint/door lines** are purely the *Building Outline* guide geometry. These are not separate assets to select/delete. Set **BUILDING VIEW → ■ Solid** or use ◇ to turn the guides off; the real building stays editable.
