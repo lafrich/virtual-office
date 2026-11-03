@@ -132,3 +132,14 @@ It now uses the shared isometric WC geometry to define a true fixture seat conta
 The preview hides scale guide lines during seating. Selecting Idle returns the actor to its last free approach tile before restoring the idle pose, so a later path search never starts inside a blocking toilet cell. Changing character profiles and deleting the selected WC also clears seating state.
 
 The calibration applies only to the editor reference character. The source Mahluk Hidup sprites, original building PNGs, saved interior object actions and online gameplay are unchanged.
+
+
+## v7 — Same unit scale inside/outside; Mahluk Hidup WC size
+
+The previous interior room grid incorrectly multiplied the original Semesta footprint by two: a 3×3 exterior room was rendered as 6×6 inside. This distorted furniture-to-character proportions and made the interior appear much bigger than the building.
+
+- **Shared unit:** one exterior ground tile equals exactly one interior tile, projected as **64×32 pixels**. A 3×3 building has a 3×3 interior; a 5×4 building has a 5×4 interior. Fractional footprints retain the complete walkable interior tiles within the footprint (e.g. 3×3.2 has a 3×3 complete-tile room; the 0.2 exterior remainder is not stretched).
+- **Proportions:** one-storey cutaway walls are 128 pixels tall, above the native Mahluk Hidup 112px character. WC seat and tank have been resized to 36px / 70px above ground. The sit pose uses the shared seat anchor and a corrected foot-to-hip offset. The WC foreground masks the character's lower legs so the sprite appears seated behind the bowl rather than standing on the toilet.
+- **Mobile preview:** both the exterior pixel PNG and interior iso canvas use the same preview-height cap. No automatic 2× interior zoom or stretching of sprite pixels.
+- **Existing rooms:** older interior layouts (v1, double-size 6×6 rooms) migrate on load to version 2 using proportional re-layout while preserving compatible object IDs, action choices, and collision-free positioning. Users can re-place furniture if a reduced floor plan has less space. The Semesta Enter Building preview performs read-only normalization of old saved floors using the building's real footprint; it does not silently rewrite saved City Drafts.
+- **Isolation:** no changes to Mahluk Hidup sprite sheets, account characters, building exterior PNG exports or multiplayer gameplay. Seat scale adjustments are editor preview geometry.
