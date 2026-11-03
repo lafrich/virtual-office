@@ -209,6 +209,15 @@ function create(base,catalog,style,schema){
  ];
  for(const p of markers)place({...p,type:'marker',y:0,rotation:0,scale:1,collision:false,
   layer:'marker',tags:['reference-city','logic-proposal'],notes:'Candidate only; gameplay logic not connected.'});
+ // An editable, real v6b character makes Camera to Character available
+ // immediately on new reference maps. Walking remains preview-only.
+ place({
+  id:'ref-player-preview',type:'avatar',name:'Player · Camera Preview',
+  x:-4,z:73,y:0,rotation:0,scale:1,facing:'sw',
+  variant:'pipeline-v6b',profile:'ichsan',collision:true,
+  layer:'character',subtype:'player',tags:['reference-city','camera-preview','player'],
+  interactions:[],notes:'Editable character spawn for camera-follow and Walk Test. No multiplayer player entity.'
+ });
  city.objects=objects;
  city.map.presetObjectCount=objects.length;
  city.map.presetWarnings=errors.length;
