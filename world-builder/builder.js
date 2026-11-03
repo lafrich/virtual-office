@@ -1761,7 +1761,7 @@ function refreshCharacterOptions(){
  const sel=$('profile');
  sel.replaceChildren();
  const old=document.createElement('optgroup');old.label='VIRTUAL LIFE / ORIGINAL';
- for(const [id,name] of [['ichsan','Ichsan'],['theodore','Theodore'],['noor','Noor'],['raka','Raka'],['ellen','Ellen'],['nadia','Nadia']]){
+ for(const [id,name] of [['ichsan','Ichsan'],['theodore','Theodore'],['noor','Noor'],['grok','Grok Bot'],['raka','Raka'],['bima','Bima'],['ellen','Ellen'],['nadia','Nadia'],['warteg','Bu Warteg'],['barista','Barista'],['kasir','Kasir']]){
   const opt=document.createElement('option');opt.value=id;opt.textContent=name;old.append(opt);
  }
  sel.append(old);
