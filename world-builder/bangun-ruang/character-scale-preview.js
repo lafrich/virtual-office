@@ -398,12 +398,21 @@ function mount(api){
   }
   e.preventDefault();
  });
- showProfiles();
- if(bridge){
-  Promise.resolve(bridge.ready?bridge.localSync():bridge.load()).then(()=>{
-   showProfiles();status(bridge.ready?'Mahluk Hidup synced · 64×112 true scale':'Mahluk Hidup unavailable · scale fallback');
-  }).catch(()=>status('Mahluk Hidup unavailable · scale fallback'));
+ async function refreshProfiles(full=false){
+  try{
+   if(bridge){
+    if(full||!bridge.ready)await bridge.load();
+    else bridge.localSync();
+   }
+   showProfiles();updateControls();draw();
+   status(bridge?.ready?'Mahluk Hidup synced · 64×112 native frame':
+    'Mahluk Hidup unavailable · size-only fallback');
+  }catch(error){
+   status('Mahluk Hidup refresh failed · current character kept');
+  }
  }
+ showProfiles();
+ refreshProfiles(true);
  function tick(now){
   const dt=lastFrame?Math.min(.06,Math.max(0,(now-lastFrame)/1000)):0;
   lastFrame=now;
@@ -415,7 +424,7 @@ function mount(api){
  }
  requestAnimationFrame(tick);
  updateControls();
- return Object.freeze({placeAt,sync(){updateControls();draw();},reset(){
+ return Object.freeze({placeAt,refreshProfiles,sync(){updateControls();draw();},reset(){
   actor.active=false;actor.armed=false;stop();canvas.hidden=true;updateControls();
  },get actor(){return {...actor};},pathTo});
 }

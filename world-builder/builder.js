@@ -25,7 +25,7 @@ try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
 // before loading any saved city, so custom profiles survive import.
 const mahluk=window.VLMahlukHidup;
 const characterSync=mahluk?await mahluk.load():{loaded:false,total:0,custom:0};
-const assetCatalog=window.VLAssetCatalog||[];
+let assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
 const terrain=window.VLMapTerrain;
@@ -2220,6 +2220,42 @@ $('exportShortcut').onclick=()=>$('export').click();
 renderAssetList();
 window.addEventListener('semesta-vehicle-source-loaded',()=>renderAssetList());
 
+/* Local Membangun sync: apply authored buildings without reloading the map.
+ * Preserve explicit per-instance edits, coordinate transforms, and draft state.
+ * Never changes the protected original Virtual Life Online game.
+ */
+function refreshBangunRuang(){
+ const bridge=window.VLBuildingBridge;
+ if(!bridge)return;
+ const oldByName=new Map(assetByName);
+ const summary=bridge.refresh();
+ assetCatalog=window.VLAssetCatalog||[];
+ assetByName.clear();
+ for(const spec of assetCatalog)assetByName.set(spec.file,spec);
+ let updated=0,missing=0;
+ const fields=['width','height','collision','interactive','enterable',
+  'entrance','interior','actionSlots','interactions','entranceFacing'];
+ for(const obj of documentMap.objects){
+  if(obj.type!=='sprite'||!String(obj.asset||'').startsWith('studio:'))continue;
+  const next=assetByName.get(obj.asset),old=oldByName.get(obj.asset);
+  if(!next){missing++;continue;}
+  // A city instance can override actions/entry settings independently.
+  // Only follow revisions from the studio when its value still matches the
+  // former source prefab, so explicit local city edits are not overwritten.
+  for(const field of fields){
+   const prior=old?.[field];
+   if(!old||JSON.stringify(obj[field])===JSON.stringify(prior)){
+    if(next[field]!==undefined)obj[field]=clone(next[field]);
+   }
+  }
+  updated++;
+ }
+ for(const texture of spriteTexture.values())texture.dispose();
+ spriteTexture.clear();
+ rebuild();updateSelection();renderAssetList();saved();
+ tell('Bangun Ruang synced · '+summary.count+' assets · '+updated+
+  ' placed updated'+(missing?' · '+missing+' missing in studio':''));
+}
 async function refreshMahlukHidup(full=true){
  const stat=full?await mahluk?.load():mahluk?.localSync();
  if(full)trafficArt?.retrySources();
@@ -2235,7 +2271,18 @@ $('refreshAssets').onclick=()=>refreshMahlukHidup(true);
 window.addEventListener('storage',e=>{
  if(['virtual-life-character-storage-v1','virtual-life-accessory-equipment-v1',
      'virtual-life-accessories-v1'].includes(e.key))refreshMahlukHidup(false);
+ if(e.key===window.VLBuildingBridge?.key)refreshBangunRuang();
 });
+// Backgrounded mobile tabs can miss a StorageEvent while suspended.
+// Reconciling on focus also covers a same-tab visit back from Bangun Ruang.
+let lastBuildingPayload=null;
+try{lastBuildingPayload=localStorage.getItem(window.VLBuildingBridge?.key||'virtual-life-bangun-ruang-v1');}catch{}
+window.addEventListener('focus',()=>{
+ let next;
+ try{next=localStorage.getItem(window.VLBuildingBridge?.key||'virtual-life-bangun-ruang-v1');}catch{return;}
+ if(next!==lastBuildingPayload){lastBuildingPayload=next;refreshBangunRuang();}
+});
+
 $('openGame').onclick=()=>window.open('../','_blank','noopener');
 $('viewRef').onclick=()=>{$('assetReference').hidden=false;};
 $('closeRef').onclick=()=>{$('assetReference').hidden=true;};
