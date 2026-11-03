@@ -1353,12 +1353,17 @@ function makeCityExample(){
 $('newCity').onclick=()=>{
  if(!confirm('Start City Sample? Map draft saat ini akan diganti. Export JSON dulu jika ingin menyimpan layout lama.'))return;
  undoPoint();documentMap=makeCityExample();selectedId=null;
+ activeDraftId=null;draftDirty=true;
+ try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
  rebuild();rebuildTerrain();resetCamera();saved();
  tell('City Sample ready · roads, park, water, placeholders');
 };
 $('reset').onclick=()=>{
  if(!confirm('Reset seluruh map draft 3D ke default?'))return;
- undoPoint();documentMap=clone(defaultSeed);selectedId=null;rebuild();rebuildTerrain();saved();tell('Map reset');
+ undoPoint();documentMap=clone(defaultSeed);selectedId=null;
+ activeDraftId=null;draftDirty=true;
+ try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
+ rebuild();rebuildTerrain();resetCamera();saved();tell('Reference City reset (working copy)');
 };
 $('export').onclick=()=>{
  const ready=schema.enrich(documentMap,assetByName,style);
@@ -1373,7 +1378,10 @@ $('file').onchange=async e=>{
  let f=e.target.files?.[0];if(!f)return;
  try{
   const payload=JSON.parse(await f.text());const errors=schema.validate(payload,assetByName,style);if(errors.length)throw Error(errors[0]);
-  const d=sanitize(payload);undoPoint();documentMap=d;selectedId=null;rebuild();rebuildTerrain();saved();tell('Map imported');
+  const d=sanitize(payload);undoPoint();documentMap=d;selectedId=null;
+   activeDraftId=null;draftDirty=true;
+   try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
+   rebuild();rebuildTerrain();resetCamera();saved();tell('Map imported as working copy');
  }catch(err){tell('Import gagal: '+err.message);}
  e.target.value='';
 };
