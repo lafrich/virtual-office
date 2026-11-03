@@ -14,10 +14,14 @@ const names=v=>Array.isArray(v)?v.map(text).filter(Boolean).slice(0,20):
 function defaults(item,catalog,style){
  const kind=style.category(item,catalog);
  const spec=item.type==='sprite'?catalog.get(item.asset):null;
- const layer=item.type==='marker'?'marker':kind==='actor'?'character':
+ const layer=item.type==='marker'?'marker':item.type==='vehicle'?'prop':kind==='actor'?'character':
   ['tree'].includes(kind)||spec?.source==='pipeline-vegetation'?'vegetation':
   kind==='building'?'structure':spec?.group==='Interior'||spec?.group==='Office'?'interior':'prop';
- const subtype=item.type==='marker'?(item.markerKind||'interaction'):
+ const subtype=item.type==='vehicle'?(item.vehicleId||'vehicle'):
+  item.type==='quest_npc'?(item.questId||'job'):
+  item.type==='crowd'?'crowd':
+  item.type==='pedestrian'?'walker':
+  item.type==='marker'?(item.markerKind||'interaction'):
   spec?.id||spec?.label||kind;
  const interactions=kind==='bench'?['sit']:kind==='trash'?['dispose']:
   kind==='building'?['enter']:item.type==='marker'?['activate']:[];
@@ -38,6 +42,22 @@ function normalize(obj,catalog,style){
  obj.blocking=['yes','no','auto'].includes(obj.blocking)?obj.blocking:d.blocking;
  obj.notes=text(obj.notes||'');
  if(obj.type==='marker'){obj.rotation=0;obj.scale=1;obj.collision=false;}
+ if(['vehicle','pedestrian','crowd','quest_npc'].includes(obj.type)){
+  const isVehicle=obj.type==='vehicle',isQuest=obj.type==='quest_npc';
+  const cfg=g.VLSemestaTraffic?.config(obj);
+  const direction=['auto','east','west','north','south'].includes(obj.motion?.direction)?obj.motion.direction:'auto';
+  obj.motion={
+    mode:isVehicle?'road':isQuest?'idle':'sidewalk',
+    direction,
+    speed:Math.min(10,Math.max(.2,Number(obj.motion?.speed)|| (isVehicle?4:1.5))),
+    enabled:obj.motion?.enabled!==false,
+    count:Math.max(2,Math.min(12,Math.round(Number(obj.motion?.count)||5))),
+    idleAction:obj.motion?.idleAction||obj.action?.kind||(isQuest?'idle':'')
+  };
+  obj.collision=isQuest;
+  obj.blocking=isQuest?'auto':'no';
+  obj.scale=1;
+ }
  if(obj.blocking==='yes')obj.collision=true;
  if(obj.blocking==='no')obj.collision=false;
  return obj;
@@ -50,7 +70,7 @@ function enrich(map,catalog,style){
  doc.map={...doc.map,projection:{type:'iso-2:1',tilePixels:[64,32],characterFramePixels:[64,112],characterPivotPixels:[32,100],
   groundCoordinates:'c/r',heightAxis:'y',directions:['sw','se','ne','nw']},
   unbounded:true,terrainRendering:'camera-windowed',logicStatus:'authoring-only',
-  exportsInclude:['terrain','roadTopology','sidewalk','water','buildings','props','vegetation','actors','markers','interactions','entrances','footprints']};
+  exportsInclude:['terrain','roadTopology','sidewalk','water','buildings','props','vegetation','actors','markers','interactions','entrances','footprints','autoTrafficRoutes','crowds','jobNPCs']};
  if(g.VLMapTerrain){
   const t=g.VLMapTerrain.normalize(doc.map.terrain||g.VLMapTerrain.seeded(doc.map.worldBounds,doc.map.road),doc.map.unbounded?null:doc.map.worldBounds);
   t.cells=g.VLMapTerrain.exported(t).map(cell=>({
@@ -62,8 +82,12 @@ function enrich(map,catalog,style){
  doc.objects=doc.objects.map(o=>{
   normalize(o,catalog,style);
   const spec=o.type==='sprite'?catalog.get(o.asset):null;
-  o.assetSource=o.type==='sprite'?(spec?.source||'unknown'):o.type==='marker'?'editor-marker':o.type==='building'||o.type==='shop'?'builder-placeholder':o.type==='avatar'||o.type==='npc'?'virtual-life-v6b':'editor-tool';
-  o.assetPublished=o.type==='sprite'?spec?.source==='gpt-original'||spec?.published===true:o.type==='building'||o.type==='shop'?false:!['tree','bench','lamp','box'].includes(o.type);
+  o.assetSource=['vehicle','quest_npc'].includes(o.type)?'virtual-life-pipeline-preview-metadata':
+   ['pedestrian','crowd'].includes(o.type)?'virtual-life-v6b':
+   o.type==='sprite'?(spec?.source||'unknown'):o.type==='marker'?'editor-marker':o.type==='building'||o.type==='shop'?'builder-placeholder':o.type==='avatar'||o.type==='npc'?'virtual-life-v6b':'editor-tool';
+  o.assetPublished=['vehicle','quest_npc'].includes(o.type)?false:
+   ['pedestrian','crowd'].includes(o.type)?true:
+   o.type==='sprite'?spec?.source==='gpt-original'||spec?.published===true:o.type==='building'||o.type==='shop'?false:!['tree','bench','lamp','box'].includes(o.type);
   const fp=style.footprint(o,catalog);
   o.footprint={w:Math.round(fp[0]*100)/100,d:Math.round(fp[1]*100)/100};
   o.interactionHooks=o.interactions.map(name=>({id:slug(name),kind:'proposed',enabled:false}));
@@ -84,6 +108,8 @@ function validate(map,catalog,style){
   if(!Number.isFinite(o.x)||!Number.isFinite(o.z))errors.push('Invalid position '+o.id);
   if(o.type==='sprite'&&!catalog.has(o.asset))errors.push('Unknown asset '+o.id);
   if(o.type==='marker'&&!TYPES.includes(o.markerKind))errors.push('Unknown marker '+o.id);
+  if(o.type==='vehicle'&&!g.VLSemestaCatalog?.vehicle(o.vehicleId))errors.push('Unknown vehicle '+o.id);
+  if(o.type==='quest_npc'&&!g.VLSemestaCatalog?.quest(o.questId))errors.push('Unknown job NPC '+o.id);
  }
  return errors;
 }
