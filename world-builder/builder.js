@@ -223,11 +223,13 @@ try{
  const saved=JSON.parse(localStorage.getItem(STORE)||'null');
  if(saved&&saved.format===seed.format&&Array.isArray(saved.objects))documentMap=sanitize(saved);
 }catch(e){console.warn('World Builder previous draft',e);}
-documentMap.map.terrain=terrain.normalize(documentMap.map.terrain||terrain.seeded(documentMap.map.worldBounds,documentMap.map.road),documentMap.map.worldBounds);
-defaultSeed.map.terrain=terrain.normalize(defaultSeed.map.terrain||terrain.seeded(defaultSeed.map.worldBounds,defaultSeed.map.road),defaultSeed.map.worldBounds);
+documentMap.map.unbounded=true;
+documentMap.map.terrain=terrain.normalize(documentMap.map.terrain||terrain.seeded(documentMap.map.worldBounds,documentMap.map.road),null);
+defaultSeed.map.unbounded=true;
+defaultSeed.map.terrain=terrain.normalize(defaultSeed.map.terrain||terrain.seeded(defaultSeed.map.worldBounds,defaultSeed.map.road),null);
 function sanitize(v){
  if(!v||!Array.isArray(v.objects))throw Error('Expected objects array');
- if(v.objects.length>350)throw Error('Maximum 350 objects');
+ if(v.objects.length>10000)throw Error('Too many objects (max 10000 per draft)');
  let ids=new Set(),out=clone(seed);out.objects=[];
  for(const p of v.objects){
   if(!p||typeof p.id!=='string'||p.id.length>100||ids.has(p.id))continue;
@@ -235,8 +237,8 @@ function sanitize(v){
   ids.add(p.id);
   let e={
    id:p.id,name:String(p.name||p.type).slice(0,90),type:p.type,
-   x:clamp(Number(p.x)||0,-100,100),
-   z:clamp(Number(p.z)||0,-100,100),
+   x:clamp(Number(p.x)||0,-1000000,1000000),
+   z:clamp(Number(p.z)||0,-1000000,1000000),
    y:clamp(Number(p.y)||0,-20,45),
    rotation:actorType(p.type)?0:((Number(p.rotation)||0)%360+360)%360,
    scale:actorType(p.type)?1:clamp(Number(p.scale)||1,.1,8)
@@ -263,7 +265,8 @@ function sanitize(v){
   out.objects.push(e);
  }
  if(v.map&&typeof v.map==='object')out.map={...out.map,...clone(v.map)};
- out.map.terrain=terrain.normalize(v.map?.terrain||terrain.seeded(out.map.worldBounds,out.map.road),out.map.worldBounds);
+ out.map.unbounded=true;
+ out.map.terrain=terrain.normalize(v.map?.terrain||terrain.seeded(out.map.worldBounds,out.map.road),null);
  return out;
 }
 function saved(){try{localStorage.setItem(STORE,JSON.stringify(documentMap));$('saveStatus').textContent='● Saved locally';}catch(e){$('saveStatus').textContent='⚠ Storage full';}}
@@ -285,6 +288,7 @@ renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.setClearColor(0xbad0d8,1);
 renderer.sortObjects=true;
+let refreshWindow=()=>{};
 const camera=new THREE.OrthographicCamera(-20,20,20,-20,.1,350);
 const cameraFocus=new THREE.Vector3(4,0,35);
 // True 2:1 pixel-isometric ground (30° elevation), orthographic = no perspective resizing.
@@ -298,6 +302,7 @@ function fitCamera(){
  camera.top=viewSize/2;camera.bottom=-viewSize/2;
  camera.position.copy(cameraFocus).addScaledVector(direction,100);
  camera.lookAt(cameraFocus);camera.updateProjectionMatrix();
+ refreshWindow();
 }
 function resize(){
  const r=$('canvas-wrap').getBoundingClientRect(),w=Math.max(10,Math.round(r.width)),h=Math.max(10,Math.round(r.height));
@@ -727,10 +732,10 @@ function previewPlace(point){
 function paintAt(point,fill=false){
  if(!point)return 0;
  const c=Math.floor(point.x),r=Math.floor(point.z);
- const options={bounds:documentMap.map.worldBounds,roadClass:$('roadClass').value,autoSidewalk:$('autoSidewalk').checked};
+ const options={bounds:null,fillBounds:visibleWorldBounds(),roadClass:$('roadClass').value,autoSidewalk:$('autoSidewalk').checked};
  const t=documentMap.map.terrain;
  const n=fill?terrain.fill(t,c,r,activeTerrain,options):terrain.paint(t,c,r,activeTerrain,Number($('brushSize').value),options);
- if(n)rebuildTerrain();return n;
+ if(n)rebuildTerrain(true);return n;
 }
 function onDown(e){
  if(e.button!==0&&e.pointerType==='mouse')return;
@@ -920,7 +925,7 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
  const v=Number($(prop).value);
  if(!Number.isFinite(v)||!item())return;
  if(actorType(item().type)&&['rotation','scale'].includes(prop)){updateSelection();return;}
- edit(o=>{o[prop]=prop==='scale'?clamp(v,.85,1.15):prop==='rotation'?((v%360)+360)%360:clamp(v,-100,100);});
+ edit(o=>{o[prop]=prop==='scale'?clamp(v,.85,1.15):prop==='rotation'?((v%360)+360)%360:clamp(v,-1000000,1000000);});
 });
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
@@ -1200,8 +1205,8 @@ function frame(now){
      const speed=4.1;
      // Only editor preview movement, bounded to authored map envelope.
      let bounds=documentMap.map.worldBounds||{minX:-30,maxX:40,minZ:20,maxZ:55};
-     holder.root.position.x=clamp(holder.root.position.x+dx*speed*dt,bounds.minX,bounds.maxX);
-     holder.root.position.z=clamp(holder.root.position.z+dz*speed*dt,bounds.minZ,bounds.maxZ);
+     holder.root.position.x+=dx*speed*dt;
+     holder.root.position.z+=dz*speed*dt;
      holder.rig.setMoving(dx,dz,true);
    }else holder.rig.setMoving(0,0,false);
  }
