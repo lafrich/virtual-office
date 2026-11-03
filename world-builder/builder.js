@@ -1821,6 +1821,33 @@ function toggleGrid(){
 $('gridToggle').onclick=toggleGrid;
 $('gridToolbar').onclick=toggleGrid;
 $('gridToggle').classList.add('active');
+$('markerVisibility').onclick=()=>setMarkerVisible(!markerShown);
+$('markerVisibilityTool').onclick=()=>setMarkerVisible(!markerShown);
+$('markerPicker').onchange=()=>{const id=$('markerPicker').value;if(id)select(id);};
+$('markerFind').onclick=()=>{
+ const id=$('markerPicker').value;
+ const marker=documentMap.objects.find(o=>o.id===id&&o.type==='marker');
+ if(!marker){tell('No logic marker selected');return;}
+ if(!markerShown)setMarkerVisible(true);
+ cameraFocus.x=marker.x;cameraFocus.z=marker.z;fitCamera();
+ select(marker.id);closeMobileSheets();
+ tell('⚑ Marker selected: '+marker.name+' · use Delete in Properties or LOGIC tab');
+};
+$('markerDelete').onclick=()=>{
+ const id=$('markerPicker').value;
+ if(!documentMap.objects.some(o=>o.type==='marker'&&o.id===id))return;
+ select(id);remove();
+ tell('⚑ Yellow logic marker removed (Undo available)');
+};
+$('markerDeleteAll').onclick=()=>{
+ const count=visibleMarkerCount();if(!count)return;
+ if(!confirm('Remove '+count+' yellow LOGIC MARKERS from this City Draft? Buildings and collision stay unchanged. Undo is available.'))return;
+ undoPoint();
+ documentMap.objects=documentMap.objects.filter(o=>o.type!=='marker');
+ selectedId=null;rebuild();saved();
+ tell(count+' yellow logic markers removed · Undo available');
+};
+syncMarkerButtons();
 $('buildingViewMode').onchange=()=>setBuildingView($('buildingViewMode').value);
 $('buildingOutlineTool').onclick=()=>setBuildingView(buildingViewMode==='solid'?'outline':'solid');
 syncBuildingViewControls();
