@@ -24,7 +24,7 @@ test('WC seat anchor is located at the actual porcelain seat in all four directi
   assert.ok(Math.abs(seat.c-c)<.001,'WC C coordinate '+rotation);
   assert.ok(Math.abs(seat.r-r)<.001,'WC R coordinate '+rotation);
   assert.equal(seat.direction,dir);
-  assert.equal(seat.pixelOffsetY,27-iso.WC_SEAT_Z);
+  assert.equal(seat.pixelOffsetY,27*iso.ACTOR_SCALE-iso.WC_SEAT_Z);
   assert.equal(seat.itemId,'wc');
  }
 });
@@ -115,6 +115,6 @@ test('WC alignment remains editor-only and is not written into original asset JS
  const save=html.slice(start,end);
  assert.ok(!save.includes('actionAnchor'));
  assert.ok(!save.includes('scaleController'));
- assert.ok(html.includes('interior-isometric.js?v=seat-v7'));
- assert.ok(html.includes('character-scale-preview.js?v=seat-v7'));
+ assert.ok(html.includes('interior-isometric.js?v=door-v8'));
+ assert.ok(html.includes('character-scale-preview.js?v=door-v8'));
 });

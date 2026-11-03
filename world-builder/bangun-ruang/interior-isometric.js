@@ -7,11 +7,12 @@
  */
 (function(g){
 'use strict';
-// One interior 64x32 tile is exactly one Semesta exterior tile.
- // A one-floor cutaway wall must be taller than the 112px Mahluk Hidup actor:
- // former WALL=64 made characters taller than the whole room.
-const TILE_W=64,TILE_H=32,HALF_W=32,HALF_H=16,WALL=128,SLAB=8,PAD=35;
-const WC_SEAT_Z=36,WC_TANK_Z=70;
+// Preserve a 1:1 exterior/interior ground tile (64x32). Semesta's one-floor
+// building renderer has 96px walls. A 64x112 source character is displayed
+// at 0.5x (56px) in BOTH views so it can actually fit through its ~58px door.
+const ACTOR_SCALE=0.5;
+const TILE_W=64,TILE_H=32,HALF_W=32,HALF_H=16,WALL=96,SLAB=8,PAD=35;
+const WC_SEAT_Z=14,WC_TANK_Z=26;
 const TYPES=g.VLBuildingInterior?.types||{};
 const PALETTES={
  cream:{floor:['#E8DEC6','#D4C8AE','#C3AD8D'],wall:['#F4EBDA','#E8DEC6','#C3AD8D'],skirt:'#9B866F'},
@@ -129,10 +130,9 @@ function actionAnchor(item){
  let seat=null,hip=0;
  switch(item.assetId){
   case 'wc':
-   // Mahluk Hidup feet pivot is y=100; a rigged sit sprite's pelvis is
-   // approximately 27 px above that pivot. Align it with the porcelain
-   // seat at 36 px above the floor (rather than the former 14 px stool).
-   seat=[.50,.64];hip=27-WC_SEAT_Z;break;
+   // Mahluk Hidup uses the original 64x112 sheet at ACTOR_SCALE, including
+   // its approximately 27px hip-to-pivot sit offset. The bowl is 14px tall.
+   seat=[.50,.64];hip=27*ACTOR_SCALE-WC_SEAT_Z;break;
   case 'chair':
   case 'office_chair':
    seat=[.50,.55];hip=8;break;
@@ -173,12 +173,12 @@ function furniture(ctx,geo,item,selected=false){
  const place=()=>{
  switch(type){
  case 'wc':
-  // Full-size WC, scaled to the native 64x112 Mahluk Hidup actor. The
-  // bowl reaches the seated character's hips; the tank is behind the back.
-  B(.13,.29,w-.26,d-.36,3,WC_SEAT_Z-4,'white');
-  B(.13,.06,w-.26,.30,5,WC_TANK_Z,'white');
-  B(.22,.39,w-.44,d-.47,WC_SEAT_Z-3,WC_SEAT_Z,'glass');
-  B(.18,.36,w-.36,d-.43,WC_SEAT_Z-2,WC_SEAT_Z+1,'white');
+  // Compact WC proportional to a ~56px-tall in-world character. Keep the
+  // 1x1 collision tile unchanged; only the porcelain geometry gets smaller.
+  B(.21,.31,w-.42,d-.41,2,WC_SEAT_Z-4,'white');
+  B(.24,.10,w-.48,.25,3,WC_TANK_Z,'white');
+  B(.30,.44,w-.60,d-.57,WC_SEAT_Z-3,WC_SEAT_Z,'glass');
+  B(.25,.40,w-.50,d-.51,WC_SEAT_Z-2,WC_SEAT_Z+1,'white');
   break;
  case 'shower':
   B(.07,.07,w-.14,d-.14,1,5,'white');
@@ -275,7 +275,7 @@ function furniture(ctx,geo,item,selected=false){
 function drawSeatForeground(ctx,geometry,item){
  if(!item||item.assetId!=='wc')return;
  const {c,r}=item,rot=fixtureRotation(item);
- const coords={x:.16,y:.71,w:.68,d:.18};
+ const coords={x:.27,y:.72,w:.46,d:.14};
  let {x,y,w,d}=coords;
  if(rot===1){[x,y,w,d]=[1-(y+d),x,d,w];}
  else if(rot===2){[x,y]=[1-(x+w),1-(y+d)];}
@@ -362,7 +362,8 @@ function pointer(canvas,event,geometry,opts={}){
  const y=(event.clientY-box.top)*canvas.height/box.height;
  return pick(geometry,x,y,opts);
 }
-g.VLInteriorIso=Object.freeze({version:'v7',tilePixels:Object.freeze([64,32]),
+g.VLInteriorIso=Object.freeze({version:'v8',tilePixels:Object.freeze([64,32]),
  bounds,point,pick,pointer,draw,tileAt,itemFootprint,
- fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground,insidePolygon,WC_SEAT_Z,WC_TANK_Z,WALL});
+ fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground,insidePolygon,
+ ACTOR_SCALE,WC_SEAT_Z,WC_TANK_Z,WALL});
 })(window);

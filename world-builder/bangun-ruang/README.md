@@ -143,3 +143,15 @@ The previous interior room grid incorrectly multiplied the original Semesta foot
 - **Mobile preview:** both the exterior pixel PNG and interior iso canvas use the same preview-height cap. No automatic 2× interior zoom or stretching of sprite pixels.
 - **Existing rooms:** older interior layouts (v1, double-size 6×6 rooms) migrate on load to version 2 using proportional re-layout while preserving compatible object IDs, action choices, and collision-free positioning. Users can re-place furniture if a reduced floor plan has less space. The Semesta Enter Building preview performs read-only normalization of old saved floors using the building's real footprint; it does not silently rewrite saved City Drafts.
 - **Isolation:** no changes to Mahluk Hidup sprite sheets, account characters, building exterior PNG exports or multiplayer gameplay. Seat scale adjustments are editor preview geometry.
+
+
+## v8 — Matching Mahluk Hidup character / exterior door / interior WC
+
+The 3×3 world footprint and 64×32 pixel isometric tile units remain **unchanged**. This update repairs their **visual proportions**, not map scale:
+
+- Original 64×112 Mahluk Hidup character sheets are still read using their existing 32×100 source pivot and authentic rig/motion metadata. In *both* exterior and interior world previews, the same source frames (including equipped accessories) render at **0.50×** (32×56 px drawing). Actors no longer grow or shrink when crossing a doorway.
+- Exterior door clear opening increased from 49 to **58 px** high, fitting the displayed 56px character, with proportional width adjusted as well. The building's roof and footprint remain as before.
+- WC is intentionally **smaller relative to the avatar**, not just scaled down by the same amount: a **14px seat** and a **26px cistern/tank**, versus a 56px character. The seat anchor adjusts the original Mahluk Hidup sit-pose pivot by the same 0.50× factor.
+- Toilet use now holds the final frame of Mahluk Hidup's sit transition rather than looping back through frames that can look upright. The foreground porcelain rim continues to mask the feet.
+- New preview calibration applies **one screen-pixel zoom per 64×32 world tile** to both exterior PNG and interior isometric canvas. Plan/Edit remains independently zoomable for touch placement.
+- This is a reference-character/editor simulation only. Original Mahluk Hidup sprites, recorded tile positions, export footprint, Semesta multiplayer actions, and production game code remain untouched.

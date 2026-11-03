@@ -137,6 +137,7 @@ function init(api){
   if(!enabled||preview!=='interior')return;
   if(interiorView==='iso'&&iso){
    lastIso=iso.draw(canvas,scene(),{selectedId:selected,grid:true});
+   g.VLBuildingPreviewScale?.interior([canvas.width,canvas.height],'iso');
    $('placementHint').textContent=placing?
     'Tap an empty diamond tile to place '+(model.types[placing]?.label||placing)+'. Door tile stays clear.':
     selected?'Tap furniture to edit, or tap an empty diamond to move it. Switch to Plan for precise placement.':
@@ -176,6 +177,7 @@ function init(api){
     ctx.strokeRect(x+2,y+2,w*CELL-4,d*CELL-4);ctx.lineWidth=1;
    }
   }
+  g.VLBuildingPreviewScale?.interior([canvas.width,canvas.height],'plan');
   $('placementHint').textContent=placing?
    'Tap an empty tile to place '+(model.types[placing]?.label||placing)+'. Entrance is kept clear.':
    selected?'Tap a free tile to move the selected object. Tap another object to select it.':

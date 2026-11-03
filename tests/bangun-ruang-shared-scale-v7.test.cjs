@@ -30,14 +30,14 @@ test('partial footprints never create more full walkable interior tiles',()=>{
  assert.equal(room.depth,3);
  assert.equal(room.sourceFootprint.join(','),'3,3.2');
 });
-test('single-floor cutaway wall fits the 112px Mahluk Hidup reference',()=>{
+test('cutaway walls match the exterior and the half-scale in-world character',()=>{
  const {VLInteriorIso:iso}=modules();
- assert.equal(iso.WALL,128);
- assert.ok(iso.WALL>=112);
- assert.equal(iso.WC_SEAT_Z,36);
- assert.equal(iso.WC_TANK_Z,70);
+ assert.equal(iso.WALL,96);
+ assert.ok(iso.WALL>=112*iso.ACTOR_SCALE);
+ assert.equal(iso.WC_SEAT_Z,14);
+ assert.equal(iso.WC_TANK_Z,26);
  const seat=iso.actionAnchor({id:'wc',assetId:'wc',c:1,r:1,rotation:0});
- assert.equal(seat.pixelOffsetY,27-iso.WC_SEAT_Z);
+ assert.equal(seat.pixelOffsetY,27*iso.ACTOR_SCALE-iso.WC_SEAT_Z);
  assert.equal(seat.direction,'ne');
 });
 test('old 6x6 interior migrates to 3x3 without losing WC action or blocking entry',()=>{
@@ -65,6 +65,6 @@ test('Semesta also normalizes old interior floors without rewriting map data',()
  assert.ok(code.includes('spec?.footprint||item?.footprint'));
  const studio=read('bangun-ruang/index.html');
  assert.ok(studio.includes('interior-model.js?v=units-v7'));
- assert.ok(studio.includes('interior-isometric.js?v=seat-v7'));
- assert.ok(studio.includes('character-scale-preview.js?v=seat-v7'));
+ assert.ok(studio.includes('interior-isometric.js?v=door-v8'));
+ assert.ok(studio.includes('character-scale-preview.js?v=door-v8'));
 });
