@@ -116,5 +116,5 @@ test('WC alignment remains editor-only and is not written into original asset JS
  assert.ok(!save.includes('actionAnchor'));
  assert.ok(!save.includes('scaleController'));
  assert.ok(html.includes('interior-isometric.js?v=source-v9'));
- assert.ok(html.includes('character-scale-preview.js?v=source-v9'));
+ assert.ok(html.includes('character-scale-preview.js?v=live-sync-1'));
 });
