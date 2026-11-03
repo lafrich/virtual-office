@@ -102,3 +102,17 @@ Upstream `assets/street_vehicles/cars/`, `riders_v3/sheets/`, and the job NPC `f
 
 ### Inspector and controls
 Select a traffic object and open **Properties**. The **AUTO LOOP / SIMULATION** section lets you set speed, choose the straight walking direction, pause movement, adjust crowd size, or change a stationary NPC's idle action. **MOBIL / MOTOR**, **NPC / CROWD** and **NPC QUEST / JOB** are available in the Assets category filter. Save with **💾 Save Draft** or Export JSON for AI map handoff.
+
+## Virtual Life original asset access (session-only)
+
+Semesta includes **🔐 Virtual Life Assets** to browse the original game image manifest from the protected `lafrich/virtual-office` site. Images stay encrypted at rest in the public repository.
+
+- The asset vault uses the **same PBKDF2-SHA256 / AES-GCM format** as the official Virtual Life login screen. When the user arrives from the authenticated game in the same browser tab, it can use their existing session key; otherwise it asks them to enter their own password locally. **No login password or decryption key is hardcoded, transmitted to GitHub, or added to the City Draft**.
+- The `↗ Login Virtual Life` link uses the native login flow and returns to the Semesta editor. Authentication is provided by the existing login screen, not by this editor.
+- The browser loads `../manifest.enc` as ciphertext, validates image entries, fetches the corresponding `../b/<blob>.enc`, decrypts them **in the current browser session**, and creates in-memory image URLs. Only PNG/JPEG/WebP/GIF images are exposed in the vault UI. Search and preview are lazy to avoid opening all assets.
+- **Replace selected:** attach an original image reference to an existing building, shop, sprite, vehicle or stationary quest NPC. **Place on map:** add the selected image as an editable building / prop / tree with footprint and collision. **Auto-match:** link only assets with strong filename matches to existing traffic/quest IDs. No filename match means the old temporary pixel preview stays.
+- All original file bytes remain in memory; only the original relative `assetPath` and category are persisted in the JSON City Draft. Rendering after a reload requires another authenticated/unlocked session. Unlock and Lock trigger rebuilding of the preview sprites.
+- This is **not** an authenticated export endpoint or a method to republish original assets: the encrypted source and existing game/login/worker remain untouched. Image availability depends on the real protected manifest. Many vehicle and special NPC visuals may still be drawn procedurally by the game, in which case no matching standalone PNG exists.
+- **Security:** do not paste your login password in GitHub issues, comments, source code or JSON exports. Unlock only via the official game or the local Semesta password field.
+
+The bridge has source/DOM/syntax checks, but cannot verify live user credentials without a real browser session. Browser verification is required before claiming a particular locked source image is available.
