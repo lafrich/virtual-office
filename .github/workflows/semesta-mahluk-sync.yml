@@ -1,0 +1,39 @@
+name: Semesta + Mahluk Hidup — Sync Validation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "world-builder/**"
+      - "tests/semesta-mahluk-sync.test.cjs"
+      - ".github/workflows/semesta-mahluk-sync.yml"
+  pull_request:
+    paths:
+      - "world-builder/**"
+      - "tests/semesta-mahluk-sync.test.cjs"
+      - ".github/workflows/semesta-mahluk-sync.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Semesta
+        uses: actions/checkout@v4
+      - name: Check Mahluk Hidup sync and world builder scripts
+        run: |
+          node --check world-builder/mahluk-hidup-bridge.js
+          node --check world-builder/pipeline-character-rig.js
+          node --check world-builder/style-rules.js
+          node --check world-builder/map-schema.js
+          node --input-type=module --check < world-builder/builder.js
+      - name: Mahluk Hidup catalog, frames and custom equipment integration
+        run: node tests/semesta-mahluk-sync.test.cjs
+      - name: Semesta existing world and traffic regressions
+        run: |
+          node tests/world-builder-v2.test.cjs
+          node tests/semesta-traffic.test.cjs
+          node tests/semesta-vehicle-queue.test.cjs
