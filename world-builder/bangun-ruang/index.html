@@ -64,7 +64,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 @media(max-width:1000px){body{padding:0}#app{border-radius:0;min-height:100dvh}.workspace{grid-template-columns:190px minmax(260px,1fr)}.panel.right{grid-column:1/-1;border-top:1px solid #b8c6d4;border-left:0}.properties{display:grid;grid-template-columns:repeat(3,1fr);gap:7px 12px}.properties>*{min-width:0}.properties label{margin:5px 0}.properties .note,.properties .controls{grid-column:1/-1}}
 @media(max-width:640px){.workspace{display:flex;flex-direction:column}.panel{border-right:0}.panel.left{max-height:210px}.preset{padding:6px 10px}.preset-grid{grid-template-columns:repeat(5,1fr)}.preset-grid button{padding:5px 2px;font-size:10px}.library{max-height:100px}.stage{min-height:340px}.properties{grid-template-columns:1fr 1fr}.titlebar small{display:none}nav{gap:5px}nav button,nav a.button{padding:6px;font-size:10px}.canvas-head{font-size:10px}}
 </style>
-<link rel="stylesheet" href="./mobile-ui.css?v=units-v7">
+<link rel="stylesheet" href="./mobile-ui.css?v=door-v8">
 </head>
 <body>
 <div id="app">
@@ -108,7 +108,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <div id="interiorQuickBar" class="interior-quick-scroll" role="group" aria-label="Scroll horizontally to choose interior furniture"></div>
  </div>
  <div id="characterScaleTools" class="character-scale-tools" aria-label="Mahluk Hidup character placement and action test">
-  <div class="character-scale-heading"><strong>MAHLUK HIDUP / SCALE TEST</strong><span id="scaleStatus">64×112 px · pivot 32,100 · read-only preview</span></div>
+  <div class="character-scale-heading"><strong>MAHLUK HIDUP / SCALE TEST</strong><span id="scaleStatus">Original 64×112 · world 50% · 1:1 inside/outside</span></div>
   <div class="character-scale-row">
    <select id="scaleCharacter" aria-label="Choose original Mahluk Hidup character"><option value="ichsan">Loading Mahluk Hidup…</option></select>
    <button id="scaleSpawn" type="button">＋ Place</button>
@@ -237,12 +237,13 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <script src="../semesta-building-spec.js?v=bangun-ruang-v2"></script>
 <script src="./interior-model.js?v=units-v7"></script>
 <script src="./interior-pixel-art.js?v=interior-v3"></script>
-<script src="./interior-isometric.js?v=seat-v7"></script>
+<script src="./interior-isometric.js?v=door-v8"></script>
 <script src="./building-guides.js?v=outline-v5"></script>
 <script src="../mahluk-hidup-bridge.js?v=scale-v5"></script>
 <script src="../pipeline-character-rig.js?v=scale-v5"></script>
-<script src="./character-scale-preview.js?v=seat-v7"></script>
-<script src="./studio-interior-ui.js?v=tray-v5"></script>
+<script src="./character-scale-preview.js?v=door-v8"></script>
+<script src="./preview-scale.js?v=door-v8"></script>
+<script src="./studio-interior-ui.js?v=door-v8"></script>
 <script>
 (function(){
 'use strict';
@@ -389,9 +390,11 @@ function makeView(c,dir){
    faceRect(side,-Math.min(1.07,axisLen/2-.15),Math.min(1.07,axisLen/2-.15),15,51,glass[1]);
    faceRect(side,-.06,.06,14,52,shade);
   }
-  faceRect(side,-.48,.48,1,55,shade);
-  faceRect(side,-.40,.40,3,52,c.doorStyle==='glass'?glass[2]:c.doorStyle==='metal'?wall[4]:roof[3]);
-  if(c.doorStyle==='metal')for(let j=8;j<52;j+=8)faceRect(side,-.39,.39,j,j+1,wall[2]);
+  // An actual clearance for the same ~56px in-world Mahluk Hidup actor
+  // used inside. Old 49px door made the sprite clip through the lintel.
+  faceRect(side,-.56,.56,1,64,shade);
+  faceRect(side,-.48,.48,3,61,c.doorStyle==='glass'?glass[2]:c.doorStyle==='metal'?wall[4]:roof[3]);
+  if(c.doorStyle==='metal')for(let j=8;j<61;j+=8)faceRect(side,-.47,.47,j,j+1,wall[2]);
   faceRect(side,.26,.31,20,23,roof[0]);
   if(c.detail!=='simple'||c.kind==='warung'){
    // Awnings are polygon planes in native iso, never a rotated bitmap.
@@ -445,6 +448,7 @@ function viewResult(c,d){
 function render(){
  const c=config(),r=viewResult(c,view);
  $('preview').src=r.url;
+ window.VLBuildingPreviewScale?.exterior(r.size);
  exteriorGuides?.update(r,c,view);
  scaleController?.sync();
  $('canvasName').textContent=c.name.toUpperCase()+' / '+view.toUpperCase();
