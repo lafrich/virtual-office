@@ -52,7 +52,50 @@ function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height
 function line(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function poly(c,color,pts){c.fillStyle=color;c.beginPath();c.moveTo(...pts[0]);for(const p of pts.slice(1))c.lineTo(...p);c.closePath();c.fill();}
 function shade(hex,factor){const n=parseInt(String(hex).replace('#',''),16);const f=x=>Math.min(255,Math.max(0,Math.round(x*factor)));return '#'+[n>>16&255,n>>8&255,n&255].map(x=>f(x).toString(16).padStart(2,'0')).join('');}
+// Exact-size motor preview for the Mahluk Hidup source while original PNGs load.
+// Unlike the old two-head generic proxy, this keeps 1 / 2 / 3 riders distinct.
+function riderPreview(id,face){
+ const triple=id==='sma_triple',pax=id==='gojek_pax'||id==='maxim_pax';
+ const w=triple?88:80,h=triple?120:116;
+ const c=canvas(w,h),q=c.getContext('2d');q.imageSmoothingEnabled=false;
+ const green=id.startsWith('gojek'),yellow=id.startsWith('maxim');
+ const bike=triple?'#4664bd':green?'#299661':'#e2b645';
+ if(face==='ne'||face==='nw'){q.translate(w,0);q.scale(-1,1);}
+ // Opaque pixel silhouette and flat translucent contact, never blurry shadow.
+ line(q,'#18243136',12,h-11,w-23,3);
+ for(const x of [21,w-19]){
+  q.fillStyle='#222d3c';q.beginPath();q.arc(x,h-21,9,0,Math.PI*2);q.fill();
+  q.fillStyle='#b3bbc4';q.beginPath();q.arc(x,h-21,4,0,Math.PI*2);q.fill();
+ }
+ poly(q,'#253444',[[15,h-31],[29,h-50],[w-22,h-50],[w-12,h-29],[w-29,h-21],[29,h-24]]);
+ poly(q,shade(bike,.72),[[21,h-46],[43,h-55],[w-19,h-49],[w-18,h-35],[40,h-30],[23,h-35]]);
+ poly(q,bike,[[24,h-46],[46,h-57],[w-19,h-50],[w-27,h-41],[39,h-37]]);
+ line(q,'#202d38',w-20,h-78,4,25);line(q,'#202d38',w-25,h-79,15,4);
+ line(q,'#28323b',27,h-58,w-48,5);
+ const riders=triple?[
+  {x:21,y:39,coat:'#e0e5ec',helmet:'#e8ebf0'},
+  {x:42,y:34,coat:'#a8b7c9',helmet:'#273c51'},
+  {x:62,y:29,coat:'#e2e7ef',helmet:'#f0f1f4'}
+ ]:pax?[
+  {x:36,y:38,coat:green?'#7894aa':'#a34e57',helmet:green?'#2eb45d':'#edc94f'},
+  {x:60,y:31,coat:green?'#2eb45d':'#d4b43e',helmet:green?'#37ca67':'#eac94f'}
+ ]:[{x:58,y:31,coat:green?'#2eb45d':'#d4b43e',helmet:green?'#37ca67':'#eac94f'}];
+ // Rear silhouettes are drawn first, then the driver. Heads remain separated.
+ for(const rider of riders){
+  const x=rider.x,y=rider.y;
+  poly(q,shade(rider.coat,.69),[[x-8,y+14],[x+4,y+12],[x+10,y+23],[x+7,y+43],[x-10,y+43],[x-11,y+26]]);
+  line(q,rider.coat,x-6,y+17,11,22);
+  line(q,'#2d3b48',x-7,y+39,5,19);line(q,'#2d3b48',x+1,y+39,5,19);
+  q.fillStyle='#c89578';q.beginPath();q.arc(x,y+5,7,0,Math.PI*2);q.fill();
+  poly(q,shade(rider.helmet,.80),[[x-8,y+3],[x-7,y-3],[x-2,y-7],[x+5,y-6],[x+8,y],[x+8,y+3]]);
+  line(q,shade(rider.helmet,.65),x-3,y+1,12,3);
+  line(q,rider.coat,x+6,y+22,6,5);
+ }
+ if(green&&!pax){line(q,'#d54d47',20,h-72,11,24);line(q,'#e57c64',20,h-72,11,4);}
+ return c;
+}
 function vehicleCanvas(id,face='se'){
+ if(/^(?:gojek|gojek_pax|maxim|maxim_pax|sma_triple)$/.test(id))return riderPreview(id,face);
  const src=canvas(160,108),q=src.getContext('2d');q.imageSmoothingEnabled=false;
  const bus=id.includes('bus'),motor=/gojek|maxim|sma/.test(id);
  const color=palette[id]||'#8d9fae';
