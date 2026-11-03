@@ -122,12 +122,20 @@ function createRig(THREE,opt={}){
    state.failed=true;state.loaded=false;return;
   }
   ctx.clearRect(0,0,64,112);
-  // A backpack is BEHIND the skull and torso, even when facing away.
-  if(overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
+  const rearView=state.direction==='ne'||state.direction==='nw';
+  // A front-facing bag is behind the avatar, while rear views expose the
+  // pack on the BACK torso surface. Keep rear head/neck above the bag.
+  if(!rearView&&overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
   if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
   else ctx.drawImage(pic,sx,sy,64,112,0,0,64,112);
-  for(let i=1;i<overlays.length;i++)if(overlays[i]?.ready)
+  for(let i=1;i<4;i++)if(overlays[i]?.ready)
    ctx.drawImage(overlays[i].pic,0,0,64,112);
+  if(rearView&&overlays[0]?.ready){
+   ctx.save();ctx.beginPath();ctx.rect(0,56,64,56);ctx.clip();
+   ctx.drawImage(overlays[0].pic,0,0,64,112);
+   ctx.restore();
+  }
+  if(overlays[4]?.ready)ctx.drawImage(overlays[4].pic,0,0,64,112);
   texture.needsUpdate=true;previous=key;
  }
  function setMoving(dx,dz,active){
