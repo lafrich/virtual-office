@@ -22,11 +22,18 @@ function overlapDepth(a,b){
  return Math.max(0,Math.min(a.maxX,b.maxX)-Math.max(a.minX,b.minX))*
         Math.max(0,Math.min(a.maxZ,b.maxZ)-Math.max(a.minZ,b.minZ));
 }
+const terrainCache=new WeakMap();
+function tileIndex(terrain){
+ const entry=terrainCache.get(terrain);
+ if(entry?.cells===terrain.cells)return entry.index;
+ const index=new Map((terrain.cells||[]).map(tile=>[tile.c+','+tile.r,tile.type]));
+ terrainCache.set(terrain,{cells:terrain.cells,index});
+ return index;
+}
 function check(actor,point,objects,map,catalog,style,livePositions){
  const candidate=area(actor,catalog,style,point);
  const terrain=map?.terrain||{default:'grass',cells:[]};
- const cells=terrain.cells||[];
- const at=new Map(cells.map(tile=>[tile.c+','+tile.r,tile.type]));
+ const at=tileIndex(terrain);
  const minC=Math.floor(candidate.minX+EPS),maxC=Math.ceil(candidate.maxX-EPS);
  const minR=Math.floor(candidate.minZ+EPS),maxR=Math.ceil(candidate.maxZ-EPS);
  for(let c=minC;c<maxC;c++)for(let r=minR;r<maxR;r++){
@@ -74,7 +81,7 @@ function bigBox(o,catalog,style){
  const spec=o.type==='sprite'?catalog?.get(o.asset):null;
  const h=Math.max(1,Number(o.h||spec?.height||o.height||5)*Number(o.scale||1));
  const x=Number(o.x)||0,z=Number(o.z)||0,y=Number(o.y)||0;
- return {min:{x:x-w/2,y,max:undefined,z:z-d/2},
+ return {min:{x:x-w/2,y,z:z-d/2},
   max:{x:x+w/2,y:y+h,z:z+d/2}};
 }
 g.VLWorldPhysics=Object.freeze({solid,area,intersect,check,move,bigStructure,bigBox});
