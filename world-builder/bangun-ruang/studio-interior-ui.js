@@ -87,11 +87,27 @@ function init(api){
   }
   updateTray();
  }
+ function syncToolRail(){
+  for(const [id,active] of [
+   ['toolExterior',preview==='exterior'],
+   ['toolInterior',preview==='interior'],
+   ['toolIso',preview==='interior'&&interiorView==='iso'],
+   ['toolPlan',preview==='interior'&&interiorView==='plan']
+  ]){
+   const button=$(id);if(!button)continue;
+   button.classList.toggle('active',active);
+   button.setAttribute('aria-pressed',String(active));
+   button.disabled=id!=='toolExterior'&&!enabled;
+  }
+ }
  function updateRotateBar(){
+  syncToolRail();
   const item=enabled&&preview==='interior'&&!placing?
    scene().items.find(x=>x.id===selected):null;
   const bar=$('interiorRotateBar');
   bar.hidden=!item;
+  $('toolRotateLeft').disabled=!item;
+  $('toolRotateRight').disabled=!item;
   if(!item)return;
   const facing=['↙ SW','↘ SE','↗ NE','↖ NW'][((item.rotation||0)/90)%4];
   $('rotateSelection').textContent=(model.types[item.assetId]?.glyph||'□')+' '+item.name;
@@ -156,6 +172,7 @@ function init(api){
   $('interiorViewIso').setAttribute('aria-pressed',String(interiorView==='iso'));
   $('interiorViewPlan').setAttribute('aria-pressed',String(interiorView==='plan'));
   draw();
+  syncToolRail();
  }
  function draw(){
   if(!enabled||preview!=='interior')return;
@@ -378,6 +395,12 @@ function init(api){
  $('quickCancel').onclick=()=>{placing=null;draw();updateTray();updateRotateBar();};
  $('rotateLeft').onclick=()=>rotateSelected(-1);
  $('rotateRight').onclick=()=>rotateSelected(1);
+ $('toolExterior').onclick=()=>selectTab('exterior');
+ $('toolInterior').onclick=()=>selectTab('interior');
+ $('toolIso').onclick=()=>{selectTab('interior');setInteriorView('iso');};
+ $('toolPlan').onclick=()=>{selectTab('interior');setInteriorView('plan');};
+ $('toolRotateLeft').onclick=()=>rotateSelected(-1);
+ $('toolRotateRight').onclick=()=>rotateSelected(1);
  // Desktop shortcut: R clockwise, Shift+R counter-clockwise. Never steal
  // keystrokes while editing a text input or using a dropdown.
  document.addEventListener('keydown',e=>{
