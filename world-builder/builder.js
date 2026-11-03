@@ -734,6 +734,23 @@ function resetAutoRoute(agent,obj){
   }
  }
 }
+function loadVehicleImage(gfx,obj){
+ const source=obj.assetPath||window.VLAssetVault?.automaticMatch(obj.vehicleId||obj.questId);
+ if(!source||!window.VLAssetVault?.allowed(source))return;
+ window.VLAssetVault.getImage(source).then(img=>{
+  if(!gfx.mesh.parent)return;
+  const tex=new THREE.Texture(img);tex.colorSpace=THREE.SRGBColorSpace;
+  tex.minFilter=tex.magFilter=THREE.NearestFilter;tex.needsUpdate=true;
+  const originalUpdate=gfx.update;
+  if(originalUpdate)gfx.update=(dir,cam,root)=>{
+   originalUpdate(dir,cam,root);
+   gfx.mesh.material.map=tex;gfx.mesh.material.needsUpdate=true;
+  };
+  gfx.mesh.material.map=tex;gfx.mesh.material.needsUpdate=true;
+  const prevDispose=gfx.dispose;
+  gfx.dispose=()=>{tex.dispose();prevDispose();};
+ }).catch(()=>{});
+}
 function makeAutomated(root,obj){
  const kind=obj.type,settings=traffic.config(obj);
  const agent={root,kind,route:null,distance:0,settings,parts:[],graphic:null};
