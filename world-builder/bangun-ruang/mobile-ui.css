@@ -131,3 +131,30 @@
  .studio-tabs button{font-size:9px}
  .direction-bar button{padding:5px 6px}
 }
+
+
+/* v4 / Isometric interior: same 2:1 pixel projection as Semesta.
+   Keep the mode chooser in normal flow so mobile panels cannot overlap. */
+.interior-view-tools{
+ display:flex;align-items:center;gap:5px;padding:7px 10px;
+ background:#f2f5f7;border-bottom:1px solid #bdc9d4;
+}
+.interior-view-tools button{
+ flex:1;min-width:0;font-size:11px;font-weight:700;padding:7px;
+}
+.interior-view-tools button.active{
+ background:#165db9;color:#fff;border-color:#154890;
+}
+.interior-view-tools span{
+ font-size:10px;color:#5b7184;white-space:nowrap;margin-left:3px;
+}
+#interiorCanvas{
+ display:block;width:auto;height:auto;object-fit:contain;
+ max-width:100%;image-rendering:pixelated;
+}
+@media(max-width:640px){
+ .interior-view-tools{padding:6px 10px;gap:6px}
+ .interior-view-tools button{padding:8px 5px}
+ .interior-view-tools span{display:none}
+ #interiorCanvas{max-height:294px;max-width:100%;width:auto;height:auto}
+}
