@@ -155,3 +155,29 @@ The 3×3 world footprint and 64×32 pixel isometric tile units remain **unchange
 - Toilet use now holds the final frame of Mahluk Hidup's sit transition rather than looping back through frames that can look upright. The foreground porcelain rim continues to mask the feet.
 - New preview calibration applies **one screen-pixel zoom per 64×32 world tile** to both exterior PNG and interior isometric canvas. Plan/Edit remains independently zoomable for touch placement.
 - This is a reference-character/editor simulation only. Original Mahluk Hidup sprites, recorded tile positions, export footprint, Semesta multiplayer actions, and production game code remain untouched.
+
+
+## v9 — Virtual Life source-grounded proportions (2026-11-02 snapshot)
+
+The user supplied the actual Virtual Life source bundle, including the complete 2026-11-02 patch chain and approved V6B character sheets. These are the **measured rendering contracts** in the original game, replacing v7/v8's guessed dimensions:
+
+| Property | Original source | Bangun Ruang v9 |
+|---|---|---|
+| Isometric tile | \`TW=32, TH=16, PPU=2\` | 64×32 art pixels |
+| Character image frame | \`SL.frame=[64,112], SL.pivot=[32,100]\` | Draw at native 1× art resolution, same inside/outside |
+| Character visible body | Ichsan V6B PNG nontransparent rows y31–102 | ~72 art pixels (do **not** mistake 112-pixel transparent frame for height) |
+| Interior wall | Cove \`HW=40\`, height scale \`HS=1.6\` | 128 art pixels |
+| Entrance opening | Cove \`faceSW(...,0,30)\` | 96 art pixels, sufficient for ~72px character body |
+| Toilet bowl seat | \`h1=4.6\` at \`HS=1.6\` | ~15 art pixels above ground |
+| Toilet tank | Cove \`h1=12\` at \`HS=1.6\` | ~38 art pixels |
+| Toilet animation | \`me.forceAnim='sit'; me.dir='sw'\` | Real V6B side-on SW sit cycle |
+| Toilet docking | Specific \`sc,sr\` close to bowl centre | Actor foot pivot at local (0.61,0.69), no arbitrary Y offset |
+
+### Sources inside supplied ZIP
+- \`workspace/vo-patch/abc-backup-20261031/index.html\` — world projection, pixel ratio, sprite sheet layout, and animation frame logic.
+- \`workspace/vo-mp/ind/p_cove.py\` — Cove corridor, room doors, toilet dimensions, per-toilet sitting position.
+- \`workspace/vo-mp/ind/p_indoor.py\` — office toilet geometry and seated coordinates.
+- \`workspace/vo-mp/ind/p_v6b.py\` — actual WC seat action with SW-facing V6B sit animation.
+- \`workspace/virtual-office/assets/chars/ichsan_v6b_sheet.png\` — original sprite rows, visually checked.
+
+The source ZIP is **reference only**; none of its auth/server/client code is imported or deployed. Bangun Ruang remains an asset authoring tool with local simulation. Mahluk Hidup and the production Virtual Life game remain unchanged. Existing interior tile coordinates and room sizes are preserved; only procedural visual geometry is recalibrated. Existing manually painted exterior PNGs may require manual reinspection after a change in default building height; the original saved asset is not overwritten without the user saving.

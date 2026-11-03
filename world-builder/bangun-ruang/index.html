@@ -108,7 +108,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <div id="interiorQuickBar" class="interior-quick-scroll" role="group" aria-label="Scroll horizontally to choose interior furniture"></div>
  </div>
  <div id="characterScaleTools" class="character-scale-tools" aria-label="Mahluk Hidup character placement and action test">
-  <div class="character-scale-heading"><strong>MAHLUK HIDUP / SCALE TEST</strong><span id="scaleStatus">Original 64×112 · world 50% · 1:1 inside/outside</span></div>
+  <div class="character-scale-heading"><strong>MAHLUK HIDUP / SCALE TEST</strong><span id="scaleStatus">V6B sprite 64×112 · actual body ≈72px · native tile scale</span></div>
   <div class="character-scale-row">
    <select id="scaleCharacter" aria-label="Choose original Mahluk Hidup character"><option value="ichsan">Loading Mahluk Hidup…</option></select>
    <button id="scaleSpawn" type="button">＋ Place</button>
@@ -237,11 +237,12 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <script src="../semesta-building-spec.js?v=bangun-ruang-v2"></script>
 <script src="./interior-model.js?v=units-v7"></script>
 <script src="./interior-pixel-art.js?v=interior-v3"></script>
-<script src="./interior-isometric.js?v=door-v8"></script>
+<script src="./game-proportions.js?v=source-v9"></script>
+<script src="./interior-isometric.js?v=source-v9"></script>
 <script src="./building-guides.js?v=outline-v5"></script>
 <script src="../mahluk-hidup-bridge.js?v=scale-v5"></script>
 <script src="../pipeline-character-rig.js?v=scale-v5"></script>
-<script src="./character-scale-preview.js?v=door-v8"></script>
+<script src="./character-scale-preview.js?v=source-v9"></script>
 <script src="./preview-scale.js?v=door-v8"></script>
 <script src="./studio-interior-ui.js?v=door-v8"></script>
 <script>
@@ -325,7 +326,10 @@ function shape(ctx,pts,color){
 }
 function makeView(c,dir){
  const turn=dir==='se'||dir==='nw';
- const W=turn?c.d:c.w,D=turn?c.w:c.d,H=c.floors*88+8;
+ // Same 128px art wall height and 96px entrance used by Virtual Life Cove.
+ // Tile scale stays 64x32; only the building's vertical architecture changes.
+ const W=turn?c.d:c.w,D=turn?c.w:c.d;
+ const H=c.floors*(window.VLGameProportions?.building.wallHeight||128);
  const spec=semesta?.byId(c.baseId);
  const native=spec?.variants?.[dir]||spec?.variants?.[dir==='nw'?'se':'sw']||null;
  let width=Math.max(Math.ceil((W+D)*32+32),native?.size?.[0]||0);
@@ -370,7 +374,7 @@ function makeView(c,dir){
  function frontage(side,axisLen,isFront){
   const visible=isFront;const windowCount=Math.min(c.windows,Math.max(1,Math.floor(axisLen/1.0)));
   for(let floor=0;floor<c.floors;floor++){
-   const yy=24+floor*88;
+   const yy=35+floor*(window.VLGameProportions?.building.wallHeight||128);
    for(let i=0;i<windowCount;i++){
     let u=-axisLen/2+axisLen*(i+.5)/windowCount;
     if(visible&&floor===0&&Math.abs(u)<.65)continue;
@@ -386,19 +390,23 @@ function makeView(c,dir){
   if(!visible)return;
   const frontIsShop=(c.detail==='storefront'||c.kind==='warung');
   if(frontIsShop){
-   faceRect(side,-Math.min(1.15,axisLen/2-.15),Math.min(1.15,axisLen/2-.15),9,57,glass[2]);
-   faceRect(side,-Math.min(1.07,axisLen/2-.15),Math.min(1.07,axisLen/2-.15),15,51,glass[1]);
-   faceRect(side,-.06,.06,14,52,shade);
+   faceRect(side,-Math.min(1.15,axisLen/2-.15),Math.min(1.15,axisLen/2-.15),9,93,glass[2]);
+   faceRect(side,-Math.min(1.07,axisLen/2-.15),Math.min(1.07,axisLen/2-.15),15,89,glass[1]);
+   faceRect(side,-.06,.06,14,90,shade);
   }
-  // An actual clearance for the same ~56px in-world Mahluk Hidup actor
-  // used inside. Old 49px door made the sprite clip through the lintel.
-  faceRect(side,-.56,.56,1,64,shade);
-  faceRect(side,-.48,.48,3,61,c.doorStyle==='glass'?glass[2]:c.doorStyle==='metal'?wall[4]:roof[3]);
-  if(c.doorStyle==='metal')for(let j=8;j<61;j+=8)faceRect(side,-.47,.47,j,j+1,wall[2]);
-  faceRect(side,.26,.31,20,23,roof[0]);
+  // Source game: PPU=2, HS=1.6; Cove door 0..30 => 96px of vertical
+  // artwork. The v6b character's visible body is only 72px (not the
+  // transparent 112px sheet frame). It passes without clipping the lintel.
+  const doorTop=(window.VLGameProportions?.building.doorHeight||96)+4;
+  faceRect(side,-.56,.56,0,doorTop+2,shade);
+  faceRect(side,-.48,.48,4,doorTop,
+   c.doorStyle==='glass'?glass[2]:c.doorStyle==='metal'?wall[4]:roof[3]);
+  if(c.doorStyle==='metal')for(let j=10;j<doorTop;j+=8)
+   faceRect(side,-.47,.47,j,j+1,wall[2]);
+  faceRect(side,.26,.31,31,34,roof[0]);
   if(c.detail!=='simple'||c.kind==='warung'){
    // Awnings are polygon planes in native iso, never a rotated bitmap.
-   const ext=.37,ey=56,lo=-axisLen/2+.08,hi=axisLen/2-.08;
+   const ext=.37,ey=108,lo=-axisLen/2+.08,hi=axisLen/2-.08;
    const aw=side==='sw'?
      [P(lo,D/2,ey+7),P(hi,D/2,ey+7),P(hi,D/2+ext,ey),P(lo,D/2+ext,ey)]:
      [P(W/2,lo,ey+7),P(W/2,hi,ey+7),P(W/2+ext,hi,ey),P(W/2+ext,lo,ey)];
@@ -407,7 +415,7 @@ function makeView(c,dir){
   }
   if(c.sign&&axisLen>=2.5){
    const txt=c.sign.toUpperCase().slice(0,Math.min(12,Math.floor((axisLen-.3)/.38)));
-   const cell=.095,unit=cell*4,start=-txt.length*unit/2+cell/2,top=61;
+   const cell=.095,unit=cell*4,start=-txt.length*unit/2+cell/2,top=106;
    faceRect(side,start-cell/2,start+txt.length*unit-cell/2,top-3,top+16,roof[3],.08);
    for(let i=0;i<txt.length;i++){
     const glyph=PXFONT[txt[i]]||PXFONT[' '];
