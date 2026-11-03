@@ -397,7 +397,7 @@ function pointer(canvas,event,geometry,opts={}){
  return pick(geometry,x,y,opts);
 }
 g.VLInteriorIso=Object.freeze({version:'v10-furniture-docking',tilePixels:Object.freeze([64,32]),
- bounds,point,pick,pointer,draw,tileAt,itemFootprint,
+ bounds,point,pick,pointer,draw,drawFurniture:furniture,tileAt,itemFootprint,
  fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground,insidePolygon,
  ACTOR_SCALE,WC_SEAT_Z,WC_TANK_Z,WALL});
 })(window);
