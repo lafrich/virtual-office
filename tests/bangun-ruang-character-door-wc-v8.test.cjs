@@ -19,8 +19,8 @@ test('character, doorway, WC and cutaway wall share believable world proportions
  assert.equal(64*iso.ACTOR_SCALE,32);
  assert.equal(112*iso.ACTOR_SCALE,56);
  assert.equal(iso.WALL,96);
- assert.equal(iso.WC_SEAT_Z,19);
- assert.equal(iso.WC_TANK_Z,36);
+ assert.equal(iso.WC_SEAT_Z,14);
+ assert.equal(iso.WC_TANK_Z,26);
  assert.ok(iso.WC_TANK_Z<112*iso.ACTOR_SCALE);
  assert.ok(iso.WC_SEAT_Z<iso.WC_TANK_Z);
  const html=read('bangun-ruang/index.html');
