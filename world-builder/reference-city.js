@@ -90,7 +90,6 @@ function create(base,catalog,style,schema){
  }
  // Important civic landmarks.
  building('hospital','HOSPITAL',-21,30,17,14,17,'hospital');
- building('medical-wing','Emergency Wing',-24,32,8,7,5,'hospital',{color:'#bed1cf'}); // may collide; intentionally skipped
  building('church','Church / Community Hall',7,30,12,14,10,'church');
  building('city-hall','City Hall',33,30,16,13,10,'civic');
  building('civic-annex','Civic Administration',60,30,15,12,9,'civic');
@@ -100,7 +99,7 @@ function create(base,catalog,style,schema){
  building('gas-station','Gas Station',-42,59,10,11,4,'service');
  building('central-library','Public Library',-20,87,16,12,8,'library');
  building('market','Supermarket',7,87,16,13,7,'store');
- building('factory','FACTORY',59,87,20,15,10,'factory');
+ building('factory','FACTORY',60,87,17,15,10,'factory');
  building('warehouse','Warehouse',34,87,17,13,6,'warehouse');
  building('school','SCHOOL',-20,4,17,12,8,'school');
  building('hotel','HOTEL',7,4,14,11,13,'hotel');
@@ -113,12 +112,12 @@ function create(base,catalog,style,schema){
   ['north-row-c','Community Office',-21,13,13,4,5,'office',0],
   ['row-west-a','Three Story Shop',-42,83,9,10,9,'store',1],
   ['row-west-b','Old Town Store',-42,93,8,8,8,'store',1],
-  ['south-west-a','Coffee Shop',-20,102,8,5,4,'cafe',1],
-  ['south-west-b','Retail Shop',-3,104,7,5,5,'shop',1],
-  ['south-central-a','Bakery',31,104,7,5,5,'cafe',1],
-  ['south-central-b','Shophouse',41,104,7,5,7,'shop',1],
-  ['south-east-a','Corner Store',59,104,8,5,7,'shop',1],
-  ['east-center-a','Orange Apartment',59,70,10,5,12,'residential',0],
+  ['south-west-a','Coffee Shop',-20,105,8,5,4,'cafe',1],
+  ['south-west-b','Retail Shop',-3,105,7,5,5,'shop',1],
+  ['south-central-a','Bakery',31,105,7,5,5,'cafe',1],
+  ['south-central-b','Shophouse',41,105,7,5,7,'shop',1],
+  ['south-east-a','Corner Store',59,105,8,5,7,'shop',1],
+  ['east-center-a','Orange Apartment',59,68,10,5,12,'residential',0],
   ['east-center-b','Office Block',59,48,10,4,8,'office',0],
   ['west-center-a','Town Shops',-42,50,9,5,5,'shop',1],
   ['east-north-a','Pharmacy',59,39,9,4,5,'store',1],
@@ -149,6 +148,21 @@ function create(base,catalog,style,schema){
       '#d09b85','#9fb5c3','#bfa4a0','#e0c99e','#aaad9a','#b8adb9'
      ][Math.floor(rnd()*6)]}))count++;
    }
+ }
+ // Secondary shophouse grid enriches smaller parcels without moving landmarks.
+ // Density comes from valid 3×3 lots rather than drawing non-editable facades.
+ for(let r=-5;r<=109;r+=6){
+  for(let c=-45;c<=69;c+=6){
+   if(c<-35&&r<15)continue; // preserve lake/forest land
+   if(c>=22&&c<=45&&r>=46&&r<=71)continue; // preserve park
+   if(rnd()<.27)continue;
+   const subtype=['house','store','office','residential','cafe'][Math.floor(rnd()*5)];
+   const height=Math.round((3.3+rnd()*5.5)*10)/10;
+   building('infill-extra-'+count,'Town '+(subtype==='house'?'House':subtype==='store'?'Store':subtype==='office'?'Office':subtype==='cafe'?'Cafe':'Apartment')+' '+(count+1),
+    c,r,3,3,height,subtype,{shop:subtype==='store'||subtype==='cafe',
+    color:['#d3ad8a','#d1b9a2','#aab5c9','#c39d92','#b5bcaa'][Math.floor(rnd()*5)]});
+   count++;
+  }
  }
  // Landmark park props and vegetation, all editable individual plane sprites.
  let propSerial=0;
