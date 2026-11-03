@@ -8,6 +8,18 @@ if(!bridge){console.warn('Pixel Creator: object bridge not ready');return;}
 const byId=id=>document.getElementById(id),DIR=['sw','se','ne','nw'],W=96,H=144;
 const palettes=['#344657','#535969','#788197','#A7B2C4','#C7CFDC','#F4EBDA','#D4C8AE','#9B866F','#6B4F3A','#B48455','#F2A066','#C9692F','#86E59A','#4FB36B','#22894A','#1A6A3A','#BFD8E4','#3F7FE0','#F2B530','#EE4D72'];
 let opened=false,objectId=null,view='sw',tool='pencil',pixel='#535969',painting=false,canvas={},undo={},redo={};
+const GRID_STORAGE='virtual-life-pixel-creator-guide-v1';
+let gridEnabled=true,gridStep=8,referenceEnabled=true,referenceProfile='ichsan';
+try{
+ const settings=JSON.parse(localStorage.getItem(GRID_STORAGE)||'null');
+ if(settings&&typeof settings==='object'){
+  gridEnabled=settings.grid!==false;
+  if([1,4,8,16].includes(settings.step))gridStep=settings.step;
+  referenceEnabled=settings.reference!==false;
+  if(typeof settings.profile==='string'&&/^[a-z0-9_-]{1,50}$/.test(settings.profile))referenceProfile=settings.profile;
+ }
+}catch{}
+const characterCache=new Map();
 const css=`
 #objectPixelDialog{width:min(1180px,98vw);max-width:1180px;max-height:94dvh;border:1px solid #3863a3;border-radius:5px;background:#f3f5f8;padding:0;color:#253b56;box-shadow:0 22px 65px #101f3c77}
 #objectPixelDialog::backdrop{background:#0a1b4088}
@@ -38,6 +50,62 @@ const css=`
 #objectPixelDialog .opc-meta{font:10px/1.6 Tahoma;color:#556f8a}
 @media(max-width:850px){#objectPixelDialog .opc-layout{grid-template-columns:160px 1fr;overflow:auto}#objectPixelDialog .opc-inspector{grid-column:1/-1;border-left:0;border-top:1px solid #b8c4d0}#objectPixelDialog .opc-stage{min-height:520px}}
 @media(max-width:550px){#objectPixelDialog .opc-layout{display:flex;flex-direction:column}#objectPixelDialog .opc-sidebar{order:3;max-height:200px}#objectPixelDialog .opc-stage{order:1;min-height:410px}#objectPixelDialog .opc-inspector{order:2}#objectPixelDialog #opcCanvas{width:260px;height:390px}}
+
+/* Identical Windows XP chrome to Bangun Ruang, Mahluk Hidup and Semesta. */
+#objectPixelDialog{width:min(1280px,98vw);max-width:1280px;max-height:94dvh;border:2px solid #fefefe;outline:2px solid #292929;border-radius:0;background:#c9c8c4;color:#151515;font-family:Tahoma,"MS Sans Serif",Verdana,sans-serif;box-shadow:4px 6px 0 #0008,12px 18px 0 #06193644}
+#objectPixelDialog header{min-height:44px;background:linear-gradient(90deg,#042777 0%,#0755b5 64%,#2c88dd 100%);border-bottom:2px solid #0c2267;color:#fff;padding:8px 11px;letter-spacing:0;text-shadow:1px 1px #001f64}
+#objectPixelDialog header strong{font:bold 13px Tahoma,sans-serif}
+#objectPixelDialog header span{font:10px "Courier New",monospace;color:#e7f0ff;white-space:nowrap}
+#objectPixelDialog #opcClose{min-width:27px;min-height:25px;background:#db4d35;color:#fff;border:2px solid;border-color:#f4bcae #8d261b #8d261b #f4bcae;font:bold 19px/1 Tahoma;box-shadow:1px 1px #14244a;padding:0}
+#objectPixelDialog .opc-layout{grid-template-columns:190px minmax(0,1fr) 280px;min-height:520px;max-height:calc(94dvh - 45px)}
+#objectPixelDialog .opc-sidebar,#objectPixelDialog .opc-inspector{background:#d2d0cb;padding:10px}
+#objectPixelDialog .opc-sidebar{border-right:2px solid #7e7c77}
+#objectPixelDialog .opc-inspector{border-left:2px solid #86837e}
+#objectPixelDialog .opc-stage{background:#b8b6b1;padding:9px 10px;gap:8px}
+#objectPixelDialog label{font:bold 10px "Courier New",monospace;letter-spacing:.02em;color:#37332e;margin-top:10px}
+#objectPixelDialog input,#objectPixelDialog select{background:#fff;border:2px inset #a6a39d;border-radius:0;box-shadow:none;color:#151515;min-width:0}
+#objectPixelDialog button{border:2px solid;border-color:#fff #888782 #888782 #fff;background:#d7d5d0;color:#141414;border-radius:0;box-shadow:none;font-weight:700;min-height:30px;padding:6px 8px}
+#objectPixelDialog button:hover{background:#b7cef9}
+#objectPixelDialog button.active,#objectPixelDialog button:active{background:#aac2f8;border-color:#737270 #f1f1f1 #f1f1f1 #737270}
+#objectPixelDialog button.primary{background:#b6c9f1;color:#142b59;border-color:#fff #6177a8 #6177a8 #fff}
+#objectPixelDialog button.primary:hover{background:#9fbdf8}
+#objectPixelDialog .opc-pixelstage{display:block;width:100%;min-height:0;max-width:none;padding:9px;background:#f8f6f0;border:2px inset #8b8883;box-shadow:none}
+#objectPixelDialog .opc-canvas-row{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:10px;width:100%;max-width:650px;margin:0 auto;align-items:start}
+#objectPixelDialog .opc-canvas-row.no-reference{grid-template-columns:minmax(0,1fr);max-width:410px}
+#objectPixelDialog .opc-artcolumn,#objectPixelDialog .opc-reference-column{min-width:0}
+#objectPixelDialog .opc-canvas-frame,#objectPixelDialog .opc-character-frame{position:relative;width:100%;border:2px solid #78756e;background:repeating-conic-gradient(#e7e6e1 0 25%,#fff 0 50%) 50%/16px 16px}
+#objectPixelDialog #opcCanvas,#objectPixelDialog #opcCharacterCanvas{display:block;width:100%;height:auto;max-height:none;image-rendering:pixelated;border:0;touch-action:none}
+#objectPixelDialog #opcGridOverlay{position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.85}
+#objectPixelDialog .opc-ground-guide{position:absolute;left:0;right:0;top:94.444%;border-top:1px dashed #b76712;opacity:.8;pointer-events:none;z-index:3}
+#objectPixelDialog .opc-ref-caption{display:block;margin-top:6px;font:10px/1.5 "Courier New",monospace;color:#3d3a35;text-align:center}
+#objectPixelDialog .opc-ref-info{margin:7px 0 0;text-align:center;font:10px/1.4 "Courier New",monospace;color:#333}
+#objectPixelDialog .opc-char-tools{width:100%;display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:wrap;padding:6px 7px;background:#cdcbc6;border:1px solid #918e87}
+#objectPixelDialog .opc-char-tools select{width:auto;max-width:170px;font:11px Tahoma;padding:4px;min-height:28px}
+#objectPixelDialog .opc-char-tools .opc-tool-label{font:bold 10px "Courier New",monospace;color:#35312a}
+#objectPixelDialog .opc-guide{background:#e5e3df;border:2px inset #a29f99;color:#45423d;padding:9px}
+#objectPixelDialog .opc-guide strong{color:#142b59}
+#objectPixelDialog .opc-asset{border:2px solid #98989c;background:#e8e5ec;box-shadow:inset 1px 1px #fff,2px 2px #a6a2a4;margin-bottom:5px}
+#objectPixelDialog .opc-asset small{color:#5a5a57}
+#objectPixelDialog .opc-palette button{border:1px solid #8e8b85;min-height:25px}
+#objectPixelDialog .opc-status{background:#d7d4ce;border:1px solid #918e87;align-self:stretch;padding:6px;color:#333;font:10px/1.45 "Courier New",monospace}
+#objectPixelDialog .opc-meta{color:#55514b;font:10px/1.55 Tahoma}
+#objectPixelDialog .opc-tools-row{flex:none;width:100%;justify-content:center;background:#cdcbc6;padding:6px;border:1px solid #918e87}
+@media(max-width:850px){
+ #objectPixelDialog .opc-layout{grid-template-columns:155px minmax(0,1fr);overflow:auto}
+ #objectPixelDialog .opc-inspector{grid-column:1/-1;border-left:0;border-top:2px solid #86837e}
+ #objectPixelDialog .opc-stage{min-height:0}
+}
+@media(max-width:550px){
+ #objectPixelDialog .opc-layout{display:flex;flex-direction:column}
+ #objectPixelDialog .opc-stage{order:1;min-height:0}
+ #objectPixelDialog .opc-inspector{order:2}
+ #objectPixelDialog .opc-sidebar{order:3;max-height:240px}
+ #objectPixelDialog #opcCanvas{width:100%;height:auto}
+ #objectPixelDialog header span{display:none}
+ #objectPixelDialog .opc-char-tools{gap:4px}
+ #objectPixelDialog .opc-char-tools button{padding:5px 6px;min-height:29px}
+}
+
 `;
 const style=document.createElement('style');style.textContent=css;document.head.append(style);
 const button=byId('openObjectPixelCreator')||document.createElement('button');
@@ -60,8 +128,28 @@ dlg.innerHTML=`
  <section class="opc-stage"><div class="opc-buttons" id="opcViews" aria-label="Native directional views">
   <button type="button" data-view="sw" class="active">SW</button><button type="button" data-view="se">SE</button><button type="button" data-view="ne">NE</button><button type="button" data-view="nw">NW</button>
  </div>
- <div class="opc-buttons" id="opcTools"><button type="button" data-tool="pencil" class="active">✎ Pencil</button><button type="button" data-tool="erase">⌫ Erase</button><button type="button" data-tool="fill">▨ Fill</button><button type="button" data-tool="picker">◉ Picker</button></div>
- <div class="opc-pixelstage"><canvas id="opcCanvas" width="${W}" height="${H}" aria-label="Draw pixel object with mouse or touch"></canvas></div>
+ <div class="opc-buttons opc-tools-row" id="opcTools"><button type="button" data-tool="pencil" class="active">✎ Pencil</button><button type="button" data-tool="erase">⌫ Erase</button><button type="button" data-tool="fill">▨ Fill</button><button type="button" data-tool="picker">◉ Picker</button></div>
+ <div class="opc-char-tools" aria-label="Pixel art guides">
+  <span class="opc-tool-label">VIEW / GUIDE</span>
+  <button id="opcGridToggle" type="button" aria-pressed="true">▦ Grid ON</button>
+  <select id="opcGridSize" aria-label="Grid spacing"><option value="1">1 px</option><option value="4">4 px</option><option value="8" selected>8 px</option><option value="16">16 px</option></select>
+  <button id="opcRefToggle" type="button" aria-pressed="true">♟ Character ON</button>
+  <select id="opcReferenceProfile" aria-label="Character reference"><option value="ichsan">Ichsan</option><option value="theodore">Theodore</option><option value="noor">Noor</option></select>
+ </div>
+ <div class="opc-pixelstage">
+  <div id="opcCanvasRow" class="opc-canvas-row">
+   <div class="opc-artcolumn"><div class="opc-canvas-frame">
+    <canvas id="opcCanvas" width="${W}" height="${H}" aria-label="Draw pixel object with mouse or touch"></canvas>
+    <div id="opcGridOverlay" aria-hidden="true"></div><div class="opc-ground-guide" aria-hidden="true"></div>
+   </div><span class="opc-ref-caption">OBJECT · 96×144 px</span></div>
+   <div id="opcReferencePanel" class="opc-reference-column">
+    <div class="opc-character-frame"><canvas id="opcCharacterCanvas" width="64" height="${H}" aria-label="Mahluk Hidup character proportion reference"></canvas>
+    <div class="opc-ground-guide" aria-hidden="true"></div></div>
+    <span class="opc-ref-caption">MAHLUK HIDUP · 64×112 px frame</span>
+   </div>
+  </div>
+  <p id="opcReferenceInfo" class="opc-ref-info">1:1 native pixels · shared floor pivot</p>
+ </div>
  <div class="opc-buttons"><button type="button" id="opcUndo">↶ Undo</button><button type="button" id="opcRedo">↷ Redo</button><button type="button" id="opcMirror">⇋ Flip current</button><button type="button" id="opcCopyViews">▣ Copy to 4 views</button><button type="button" id="opcClear">✕ Clear view</button></div>
  <div id="opcStatus" class="opc-status" role="status"></div>
  </section>
@@ -96,6 +184,75 @@ function show(){
  ctx.drawImage(canvas[view],0,0);
  $('opcViews').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
  $('opcTools').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));
+ updateGuides(false);
+}
+function rememberGuides(){
+ try{localStorage.setItem(GRID_STORAGE,JSON.stringify({grid:gridEnabled,step:gridStep,reference:referenceEnabled,profile:referenceProfile}));}catch{}
+}
+function updateGuides(shouldRenderCharacter=true){
+ const layer=$('opcGridOverlay'),grid=$('opcGridToggle'),ref=$('opcRefToggle'),panel=$('opcReferencePanel');
+ if(!layer||!grid||!ref||!panel)return;
+ grid.textContent=gridEnabled?'▦ Grid ON':'▦ Grid OFF';
+ grid.classList.toggle('active',gridEnabled);grid.setAttribute('aria-pressed',String(gridEnabled));
+ $('opcGridSize').value=String(gridStep);$('opcGridSize').disabled=!gridEnabled;
+ layer.hidden=!gridEnabled;layer.style.display=gridEnabled?'block':'none';
+ layer.style.backgroundImage=gridEnabled?
+  'linear-gradient(to right,rgba(26,66,135,.35) 1px, transparent 1px),linear-gradient(to bottom,rgba(26,66,135,.35) 1px, transparent 1px)':'none';
+ layer.style.backgroundSize=(gridStep/W*100)+'% '+(gridStep/H*100)+'%';
+ ref.textContent=referenceEnabled?'♟ Character ON':'♟ Character OFF';
+ ref.classList.toggle('active',referenceEnabled);ref.setAttribute('aria-pressed',String(referenceEnabled));
+ panel.hidden=!referenceEnabled;panel.style.display=referenceEnabled?'block':'none';
+ $('opcCanvasRow').classList.toggle('no-reference',!referenceEnabled);
+ $('opcReferenceProfile').value=referenceProfile;
+ $('opcReferenceProfile').disabled=!referenceEnabled;
+ if(shouldRenderCharacter)renderCharacter();
+}
+function drawCharacterPlaceholder(ctx,profile){
+ // Fallback when the actual Mahluk Hidup sprite is offline or inaccessible.
+ const yy=H-8,mid=32;
+ ctx.fillStyle='#354e80';ctx.fillRect(mid-10,yy-46,20,31);
+ ctx.fillStyle='#142f65';ctx.fillRect(mid-11,yy-15,9,18);ctx.fillRect(mid+2,yy-15,9,18);
+ ctx.fillStyle='#e6bd9c';ctx.fillRect(mid-9,yy-69,18,22);
+ ctx.fillStyle='#202e3c';ctx.fillRect(mid-11,yy-72,22,8);
+ ctx.fillStyle='#253448';ctx.font='bold 7px monospace';ctx.textAlign='center';
+ ctx.fillText('PREVIEW',mid,17);
+}
+function renderCharacter(){
+ const cv=$('opcCharacterCanvas');if(!cv)return;
+ const ctx=cv.getContext('2d');ctx.clearRect(0,0,64,H);ctx.imageSmoothingEnabled=false;
+ if(!referenceEnabled)return;
+ const rig=g.VLCharacterRig;
+ const spec=rig?.resolve?.(referenceProfile,'idle',false);
+ const url=spec?.url||g.VLPipelineAssets?.character?.(referenceProfile);
+ const DIRS=rig?.DIR||['se','sw','ne','nw'];
+ const index=Math.max(0,DIRS.indexOf(view));
+ const row=(Number(spec?.row)||4)+index;
+ // 64x112 native sprite; foot pivot y=100, same 136px floor as object editor.
+ const y=H-8-(rig?.FRAME?.pivotY||100);
+ const info=$('opcReferenceInfo');
+ const draw=entry=>{
+  if(!referenceEnabled||referenceProfile!==entry.profile||view!==entry.view)return;
+  ctx.clearRect(0,0,64,H);ctx.imageSmoothingEnabled=false;
+  try{ctx.drawImage(entry.image,0,row*112,64,112,0,y,64,112);
+   info.textContent='Native 1:1 · body ≈72px · floor aligned · '+referenceProfile.toUpperCase();
+  }catch{drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Character guide · image frame unavailable';}
+ };
+ if(!url){drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Character guide · original sprite offline';return;}
+ let entry=characterCache.get(url);
+ if(!entry){
+  const image=new Image();if(!url.startsWith('data:'))image.crossOrigin='anonymous';
+  entry={image,ready:false,error:false,profile:referenceProfile,view};
+  characterCache.set(url,entry);
+  image.onload=()=>{entry.ready=true;renderCharacter();};
+  image.onerror=()=>{entry.error=true;renderCharacter();};
+  image.src=url;
+ }
+ if(entry.ready&&entry.image.naturalWidth>=64&&entry.image.naturalHeight>=(row+1)*112){
+  draw({...entry,profile:referenceProfile,view});
+ }else{
+  drawCharacterPlaceholder(ctx,referenceProfile);
+  info.textContent=entry.error?'Character guide · original not reachable':'Loading Mahluk Hidup reference…';
+ }
 }
 function snapshot(){
  const s=canvas[view].toDataURL('image/png');undo[view].push(s);if(undo[view].length>25)undo[view].shift();redo[view].length=0;
@@ -197,6 +354,10 @@ $('opcCanvas').addEventListener('pointerdown',e=>{
 $('opcCanvas').addEventListener('pointermove',e=>{if(!painting||tool==='fill'||tool==='picker')return;paintAt(e);});
 for(const ev of ['pointerup','pointercancel','lostpointercapture'])$('opcCanvas').addEventListener(ev,()=>painting=false);
 $('opcViews').onclick=e=>{const b=e.target.closest('button[data-view]');if(b){view=b.dataset.view;show();}};
+$('opcGridToggle').onclick=()=>{gridEnabled=!gridEnabled;rememberGuides();updateGuides();};
+$('opcGridSize').onchange=()=>{const n=Number($('opcGridSize').value);if(![1,4,8,16].includes(n))return;gridStep=n;rememberGuides();updateGuides(false);};
+$('opcRefToggle').onclick=()=>{referenceEnabled=!referenceEnabled;rememberGuides();updateGuides();};
+$('opcReferenceProfile').onchange=()=>{referenceProfile=$('opcReferenceProfile').value;rememberGuides();renderCharacter();};
 $('opcTools').onclick=e=>{const b=e.target.closest('button[data-tool]');if(b){tool=b.dataset.tool;show();}};
 $('opcColor').oninput=()=>{pixel=$('opcColor').value;$('opcColorText').textContent=pixel;};
 for(const color of palettes){
@@ -246,6 +407,7 @@ $('opcGoSemesta').onclick=()=>{window.location.href='../';};
 function open(){
  if(!opened){fresh();library();opened=true;}else{library();show();}
  if(!dlg.open)dlg.showModal();
+ updateGuides();
 }
 if(!button.hasAttribute('onclick'))button.addEventListener('click',open);
 const sidebar=byId('openObjectCreatorShelf');
