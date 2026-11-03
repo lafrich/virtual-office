@@ -236,3 +236,28 @@
  .character-scale-row button{padding:8px 6px;font-size:10px}
  .character-scale-row select{font-size:10px}
 }
+
+
+/* v7: the exterior PNG and isometric interior share the exact same Semesta
+   ground tile (64×32). They also share a maximum preview viewport height;
+   switching between them never silently doubles the pixel scale. */
+#preview,#interiorCanvas,#buildingGuideCanvas{
+ max-height:430px;
+ image-rendering:pixelated;
+ object-fit:contain;
+}
+@media(max-width:1000px){
+ #preview,#interiorCanvas,#buildingGuideCanvas{
+  max-height:340px;
+ }
+}
+@media(max-width:640px){
+ #preview,#interiorCanvas,#buildingGuideCanvas{
+  max-height:294px!important;
+ }
+}
+@media(max-width:370px){
+ #preview,#interiorCanvas,#buildingGuideCanvas{
+  max-height:252px!important;
+ }
+}
