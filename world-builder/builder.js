@@ -1382,11 +1382,17 @@ function updateSelection(){
  $('objectId').value=cur?.id||'';
  for(const k of ['x','z','y','rotation','scale']){
   $(k).value=cur?String(round(cur[k]??0)):'';
-  $(k).disabled=!cur||(actorType(cur?.type)&&['rotation','scale'].includes(k));
+  $(k).disabled=!cur||(actorType(cur?.type)&&['rotation','scale'].includes(k))||
+   (cur?.type==='vehicle'&&k==='rotation');
  }
  $('tools').querySelectorAll('button').forEach(b=>b.disabled=!cur);
  for(const id of ['rotateL','rotateR','scaleDown','scaleUp'])
-   $(id).disabled=!cur||actorType(cur.type);
+   $(id).disabled=!cur||actorType(cur.type)||(cur.type==='vehicle'&&id.startsWith('rotate'));
+ // Vehicle artwork is camera-facing: regular 90° object rotation cannot
+ // steer it, so hide misleading tools and offer a real route-direction flip.
+ const isVehicle=cur?.type==='vehicle';
+ $('rotateL').hidden=isVehicle;$('rotateR').hidden=isVehicle;
+ $('rotationField').hidden=isVehicle;
  const rotateLocked=cur?.type==='sprite'&&(!assetByName.get(cur.asset)?.variants||Object.keys(assetByName.get(cur.asset).variants).length<2);
  if(rotateLocked){$('rotation').disabled=true;$('rotateL').disabled=true;$('rotateR').disabled=true;}
  const actor=!!cur&&actorType(cur.type);
@@ -1410,6 +1416,13 @@ function updateSelection(){
   $('vehicleOffsetX').value=String(offset.x);
   $('vehicleOffsetY').value=String(offset.y);
   $('vehicleOffsetZ').value=String(offset.z);
+  const agent=automatedAgents.get(cur.id);
+  const heading=traffic.routeHeading(agent?.route,agent?.distance)||
+   traffic.config(cur).direction;
+  const labels={east:'EAST →',west:'WEST ←',south:'SOUTH ↓',north:'NORTH ↑'};
+  $('vehicleHeadingLabel').textContent=labels[heading]||'NO ROAD DIRECTION';
+  $('vehicleFlipDirection').disabled=!traffic.flipDirection(
+   traffic.config(cur).direction,agent?.route,agent?.distance);
  }else{
   $('scale').min='.85';$('scale').max='1.15';
  }
@@ -2043,8 +2056,8 @@ window.addEventListener('keyup',e=>walkKey(e,false),true);
 window.addEventListener('blur',()=>{for(const k of Object.keys(walkInput))walkInput[k]=false;});
 $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');};
 $('home').onclick=cameraMapView;
-$('rotateL').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation-90+360)%360;});};
-$('rotateR').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation+90)%360;});};
+$('rotateL').onclick=()=>{if(item()&&!actorType(item().type)&&item().type!=='vehicle')edit(o=>{o.rotation=(o.rotation-90+360)%360;});};
+$('rotateR').onclick=()=>{if(item()&&!actorType(item().type)&&item().type!=='vehicle')edit(o=>{o.rotation=(o.rotation+90)%360;});};
 $('scaleDown').onclick=()=>{
  if(item()?.type==='vehicle')editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(o.scale-.05);});
  else if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale-.05),.85,1.15);});
@@ -2057,7 +2070,8 @@ $('duplicate').onclick=duplicate;$('delete').onclick=remove;
 for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('change',()=>{
  const v=Number($(prop).value);
  if(!Number.isFinite(v)||!item())return;
- if(actorType(item().type)&&['rotation','scale'].includes(prop)){updateSelection();return;}
+ if((actorType(item().type)&&['rotation','scale'].includes(prop))||
+  (item().type==='vehicle'&&prop==='rotation')){updateSelection();return;}
  if(prop==='scale'&&item().type==='vehicle'){
   editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(v);});return;
  }
@@ -2109,6 +2123,43 @@ for(const [id,axis] of [['vehicleOffsetX','x'],['vehicleOffsetY','y'],['vehicleO
 $('vehicleResetVisual').onclick=()=>editVehicleVisual(o=>{
  o.scale=1;o.visualOffset={x:0,y:0,z:0};
 });
+// Change an existing vehicle's ACTUAL lane direction, not just its picture.
+// Keep its live position mid-route, even while driving or paused. This also
+// updates the correct original four-view sprite immediately.
+function setVehicleDirection(direction){
+ const o=item();if(o?.type!=='vehicle')return;
+ if(!['auto','east','west','south','north'].includes(direction))return;
+ if(traffic.config(o).direction===direction)return;
+ const agent=automatedAgents.get(o.id);
+ const before=agent?.route?{x:agent.root.position.x,z:agent.root.position.z}:null;
+ undoPoint();
+ o.motion={...o.motion,direction};
+ if(agent){
+  resetAutoRoute(agent,o);
+  if(agent.route?.length){
+   // Reset the route's arc-length based on where the transport was already
+   // driving; reversing it must not teleport it back to its City Draft spawn.
+   if(before)agent.distance=traffic.nearestDistance(agent.route,before);
+   const p=traffic.sample(agent.route,Math.min(agent.distance,agent.route.length-.0001));
+   if(p){
+    agent.root.position.set(p.x,o.y||0,p.z);
+    agent.lastDx=p.dx;agent.lastDz=p.dz;
+    const view=window.VLCharacterRig?.directionFromWorld(p.dx,p.dz,'se')||'se';
+    agent.graphic?.update(view,camera,agent.root);
+   }
+  }
+ }
+ updateSelection();renderer.render(scene,camera);saved();
+ tell('⇄ Kendaraan menghadap '+direction.toUpperCase()+' · arah perjalanan dibalik');
+}
+$('vehicleFlipDirection').onclick=()=>{
+ const o=item();if(o?.type!=='vehicle')return;
+ const agent=automatedAgents.get(o.id);
+ const opposite=traffic.flipDirection(traffic.config(o).direction,
+  agent?.route,agent?.distance);
+ if(!opposite){tell('Letakkan kendaraan pada ruas jalan untuk flip arah');return;}
+ setVehicleDirection(opposite);
+};
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
 $('profile').onchange=()=>{if(item()&&actorType(item().type))
@@ -2119,7 +2170,10 @@ function changeMotion(field,value,rebuildCrowd=false){
  if(rebuildCrowd)rebuild();
 }
 $('motionSpeed').onchange=()=>changeMotion('speed',Number($('motionSpeed').value));
-$('motionDirection').onchange=()=>changeMotion('direction',$('motionDirection').value);
+$('motionDirection').onchange=()=>{
+ if(item()?.type==='vehicle')setVehicleDirection($('motionDirection').value);
+ else changeMotion('direction',$('motionDirection').value);
+};
 $('crowdCount').onchange=()=>changeMotion('count',Number($('crowdCount').value),true);
 $('questAction').onchange=()=>changeMotion('idleAction',$('questAction').value);
 $('motionEnabled').onchange=()=>changeMotion('enabled',$('motionEnabled').checked);
