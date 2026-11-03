@@ -21,26 +21,27 @@ const RIDER_V3={
  maxim_pax:{size:[54,92],pivot:[27,80]},
  sma_triple:{size:[66,96],pivot:[33,82]}
 };
-const originalKey=(id,dir)=>id+':'+dir;
-function sourceURL(spec,dir,variant='v3'){
+const originalKey=(id,dir,frame=0)=>id+':'+dir+(frame?':'+frame:'');
+function sourceURL(spec,dir,variant='v3',frame=0){
  const v3=RIDER_V3[spec?.id];
  if(v3&&variant==='v3'&&['se','sw','ne','nw'].includes(dir))
-  return new URL('riders_v3/frames/'+spec.id+'_'+dir+'_f0.png',SOURCE).href;
+  return new URL('riders_v3/frames/'+spec.id+'_'+dir+'_f'+frame+'.png',SOURCE).href;
  const path=spec?.views?.[dir];
  return typeof path==='string'&&validPath.test(path)?new URL(path,SOURCE).href:null;
 }
 function sourcePublished(id){return originalCache.has(originalKey(id,'se'));}
 function originalCount(){return [...new Set([...originalCache.keys()].map(k=>k.split(':')[0]))].length;}
 function retrySources(){missingOriginals.clear();}
-function requestOriginal(THREE,spec,dir){
- const key=originalKey(spec.id,dir),known=originalCache.get(key);
+function requestOriginal(THREE,spec,dir,frame=0){
+ frame=RIDER_V3[spec.id]?Math.max(0,Math.min(3,frame|0)):0;
+ const key=originalKey(spec.id,dir,frame),known=originalCache.get(key);
  if(known)return Promise.resolve(known);
  if(missingOriginals.has(key))return Promise.resolve(null);
  if(pendingOriginals.has(key))return pendingOriginals.get(key);
  const v3=RIDER_V3[spec.id];
  const candidates=v3?[
-  {url:sourceURL(spec,dir,'v3'),size:v3.size,pivot:v3.pivot},
-  {url:sourceURL(spec,dir,'legacy'),size:spec.size,pivot:spec.pivot}
+  {url:sourceURL(spec,dir,'v3',frame),size:v3.size,pivot:v3.pivot},
+  ...(frame===0?[{url:sourceURL(spec,dir,'legacy'),size:spec.size,pivot:spec.pivot}]:[])
  ]:[{url:sourceURL(spec,dir,'legacy'),size:spec.size,pivot:spec.pivot}];
  const task=new Promise(resolve=>{
    let index=0;
@@ -239,15 +240,27 @@ function vehicleGraphic(THREE,record){
  setGroundPivot(false);
  mesh.userData.semestaVehicle=true;mesh.userData.assetPublished=false;
  mesh.userData.catalogId=spec.id;
- let direction='se',disposed=false;
+ let direction='se',displayedFrame=0,disposed=false;
  const allowOriginal=!record.assetPath;
- function show(dir){
-   const key=originalKey(spec.id,dir),ready=allowOriginal&&originalCache.get(key);
+ function show(dir,frame=0){
+   frame=RIDER_V3[spec.id]?frame:0;
+   displayedFrame=frame;
+   const key=originalKey(spec.id,dir,frame);
+   const baseKey=originalKey(spec.id,dir,0);
+   const base=allowOriginal&&originalCache.get(baseKey);
+   const ready=allowOriginal&&(originalCache.get(key)||base);
    mat.map=ready||texture(THREE,spec.id,dir);mat.needsUpdate=true;
    setGroundPivot(!!ready);
    mesh.userData.assetPublished=!!ready;
-   if(!ready&&allowOriginal)requestOriginal(THREE,spec,dir).then(actual=>{
-     if(disposed||direction!==dir||!actual)return;
+   if(!ready&&allowOriginal&&frame>0){
+     requestOriginal(THREE,spec,dir,0).then(actual=>{
+       if(disposed||direction!==dir||displayedFrame!==frame||!actual)return;
+       mat.map=actual;mat.needsUpdate=true;mesh.userData.assetPublished=true;
+       setGroundPivot(true);
+     });
+   }
+   if(allowOriginal && !originalCache.has(key))requestOriginal(THREE,spec,dir,frame).then(actual=>{
+     if(disposed||direction!==dir||displayedFrame!==frame||!actual)return;
      mat.map=actual;mat.needsUpdate=true;mesh.userData.assetPublished=true;
      setGroundPivot(true);
    });
@@ -255,7 +268,9 @@ function vehicleGraphic(THREE,record){
  show('se');
  return {mesh,setGroundPivot,update(dir,camera,root){
    if(!spec.views?.[dir])dir='se';
-   if(dir!==direction){direction=dir;show(dir);}
+   // Four real Mahluk Hidup rider frames cycle every 120ms; cars stay static.
+   const frame=RIDER_V3[spec.id]?Math.floor(Date.now()/120)%4:0;
+   if(dir!==direction||frame!==displayedFrame){direction=dir;show(dir,frame);}
    if(camera)mesh.rotation.y=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y;
  },dispose(){disposed=true;mat.dispose();mesh.geometry.dispose();}};
 }
