@@ -504,7 +504,8 @@ function pixelTexture(name,dir='sw'){
  const view=spec?.variants?.[dir]?dir:spec?.variants?.sw?'sw':spec?.variants?.se?'se':dir;
  const id=name+'|'+view;
  if(!spriteTexture.has(id)){
-  const src=spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):
+  const src=spec?.source==='custom-building'?window.VLBuildingBridge?.image(spec.id,view):
+    spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):
     spec?.source==='pipeline-vegetation'?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+spec.relativeFile:'../assets/'+name;
   const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,()=>console.warn('Missing sprite',name));
   t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
@@ -1272,7 +1273,8 @@ function renderAssetList(){
       {title:'Character · NPC',tag:'npc',category:'character',label:'V6B / 64×112'}],
   ...assetCatalog.map(spec=>({
    title:spec.label,tag:'sprite:'+spec.file,category:assetCategory(spec),
-   label:spec.source==='gpt-original'?'GPT / ORIGINAL · login':
+   label:spec.source==='custom-building'?'BANGUN RUANG / LOCAL PNG':
+    spec.source==='gpt-original'?'GPT / ORIGINAL · login':
     spec.published?'PIPELINE / PNG':'PIPELINE / MANIFEST ONLY',
    origin:spec.source==='gpt-original'?'original':spec.published?'published':'unpublished'
   }))
