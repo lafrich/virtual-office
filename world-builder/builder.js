@@ -801,6 +801,9 @@ function loadVehicleImage(gfx,obj){
    gfx.mesh.material.map=tex;gfx.mesh.material.needsUpdate=true;
   };
   gfx.mesh.material.map=tex;gfx.mesh.material.needsUpdate=true;
+  // Vault images are fitted into a padded preview canvas, not the original
+  // atlas frame. Keep the padded-asset ground pivot instead of the source one.
+  gfx.setGroundPivot?.(false);
   const prevDispose=gfx.dispose;
   gfx.dispose=()=>{tex.dispose();prevDispose();};
  }).catch(()=>{});
