@@ -135,6 +135,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
    <button id="scaleWalkDoor" type="button" disabled>▶ Enter Door</button>
    <button id="scaleUse" type="button" disabled>▶ Use Selected</button>
    <button id="scaleIdle" type="button" disabled>◉ Idle</button>
+   <button id="scaleEditAction" type="button" title="Edit player action sprites in Mahluk Hidup">✎ Edit Action</button>
   </div>
  </div>
  <div class="direction-bar"><strong>VIEW</strong>
@@ -709,7 +710,7 @@ interiorUi=window.VLStudioInteriors?.init({getConfig:config,
  onFloorClick:(c,r,hit)=>scaleController?.placeAt(c,r,'interior')||false});
 interiorUi?.reset();
 scaleController=window.VLCharacterScale?.mount({
- getConfig:config,getExterior:()=>viewResult(config(),view),
+ getConfig:config,getBuildingId:()=>current?.id||null,getExterior:()=>viewResult(config(),view),
  getFacing:()=>view,getInterior:()=>interiorUi?.getScene(),
  getInteriorView:()=>interiorUi?.getInteriorView(),
  getSelectedProp:()=>interiorUi?.getSelectedProp(),
