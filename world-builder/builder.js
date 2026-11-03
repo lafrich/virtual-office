@@ -530,6 +530,43 @@ function makeBuilding(root,item){
     new THREE.MeshBasicMaterial({map:labelTexture(item.name),depthWrite:true,depthTest:true}));
   sign.position.set(0,3.2,d/2+.31);root.add(sign);
  }
+ // Reference city landmarks have recognizable, still-replaceable silhouettes.
+ // These are intentionally simple study geometry, not production artwork.
+ const kind=String(item.subtype||'').toLowerCase();
+ if(kind==='hospital'){
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(8,w*.58),1.15),
+   new THREE.MeshBasicMaterial({map:labelTexture('HOSPITAL'),transparent:true,side:THREE.DoubleSide}));
+  sign.position.set(0,h*.78,d/2+.13);root.add(sign);
+  cuboid(root,0,h+.27,0,3.6,.12,3.6,0xecebe3);
+  cuboid(root,0,h+.36,0,2.4,.08,.35,0x42669b);
+  cuboid(root,0,h+.38,0,.35,.08,2.4,0x42669b);
+ }else if(kind==='church'){
+  cuboid(root,0,h+1.9,0,2.9,3.8,2.9,0xc4cfd2);
+  cuboid(root,0,h+4.02,0,3.5,.46,3.5,0x334960);
+  cuboid(root,0,h+5.0,0,.18,1.7,.18,0x55585c);
+  cuboid(root,0,h+5.5,0,1.05,.14,.2,0x55585c);
+ }else if(kind==='factory'){
+  for(const x of [-w*.28,0,w*.28]){
+   cuboid(root,x,h+1.75,-d*.22,1.45,3.5,1.45,0x8c7770);
+   cuboid(root,x,h+3.56,-d*.22,1.7,.28,1.7,0x4d4747);
+  }
+ }else if(kind==='civic'&&/clock/i.test(item.name)){
+  cuboid(root,0,h+2.5,0,3.6,5.0,3.6,0xc6b7a3);
+  cuboid(root,0,h+4.98,0,4.2,.4,4.2,0x354456);
+  for(const z of [-1,1]){
+   const disc=new THREE.Mesh(new THREE.CircleGeometry(1.15,20),
+    new THREE.MeshBasicMaterial({color:0xf5eedb,side:THREE.DoubleSide}));
+   disc.position.set(0,h+3.3,z*1.84);if(z<0)disc.rotation.y=Math.PI;
+   root.add(disc);
+  }
+ }else if(kind==='service'&&/gas/i.test(item.name)){
+  cuboid(root,0,3.4,d*.35,w*.9,.35,d*.65,0xc44d37);
+  for(const x of [-w*.33,w*.33])cuboid(root,x,1.7,d*.36,.28,3.4,.28,0xe3e1d5);
+ }else if(['jail','school','library','hotel','warehouse','bank','police'].includes(kind)){
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(7,w*.76),.95),
+   new THREE.MeshBasicMaterial({map:labelTexture(item.name),side:THREE.DoubleSide}));
+  sign.position.set(0,Math.max(2.9,h*.67),d/2+.17);root.add(sign);
+ }
 }
 function makeBench(root){
  const wood=0xc99a5c,legs=0x3c4a56;
