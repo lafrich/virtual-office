@@ -755,9 +755,9 @@ function makeAutomated(root,obj){
  const kind=obj.type,settings=traffic.config(obj);
  const agent={root,kind,route:null,distance:0,settings,parts:[],graphic:null};
  if(kind==='vehicle'){
-  const gfx=trafficArt.vehicleGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;
+  const gfx=trafficArt.vehicleGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;loadVehicleImage(gfx,obj);
  }else if(kind==='quest_npc'){
-  const gfx=trafficArt.questGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;
+  const gfx=trafficArt.questGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;loadVehicleImage(gfx,obj);
  }else{
   const factory=window.VLCharacterRig;
   if(factory){
