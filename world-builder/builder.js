@@ -743,7 +743,7 @@ function loadVehicleImage(gfx,obj){
  const source=obj.assetPath||window.VLAssetVault?.automaticMatch(obj.vehicleId||obj.questId);
  if(!source||!window.VLAssetVault?.allowed(source))return;
  window.VLAssetVault.getImage(source).then(img=>{
-  if(!gfx.mesh.parent)return;
+  if(gfx.mesh.parent?.parent!==assetRoots)return;
   const isNPC=obj.type==='quest_npc';
   const spec=trafficCatalog.vehicle(obj.vehicleId);
   const cv=document.createElement('canvas');
