@@ -748,8 +748,21 @@ function resetAutoRoute(agent,obj){
  // Preserve the preview's current location when a road/sidewalk is repainted;
  // only a newly authored or manually repositioned agent starts at obj.x/z.
  const origin=agent.route?{x:agent.root.position.x,z:agent.root.position.z}:{x:obj.x,z:obj.z};
- const point=traffic.spawnPosition(documentMap.map,origin.x,origin.z,mode,8);
- agent.route=point?traffic.makeRoute(documentMap.map,point.x,point.z,mode,agent.settings.direction):null;
+ // Plan around solid authored geometry; a path that ends at a bench/tree
+ // must turn around instead of freezing or popping into another tile.
+ let sidewalkOpen=null;
+ if(mode==='pedestrian'){
+  const boxes=documentMap.objects.filter(other=>
+   other.id!==obj.id&&other.collision!==false&&other.blocking!=='no'&&
+   !['vehicle','pedestrian','crowd'].includes(other.type)&&other.type!=='marker'
+  ).map(other=>physics.area(other,assetByName,style));
+  sidewalkOpen=(c,r)=>{
+   const q={minX:c+.18,maxX:c+.82,minZ:r+.18,maxZ:r+.82};
+   return !boxes.some(box=>physics.intersect(q,box));
+  };
+ }
+ const point=traffic.spawnPosition(documentMap.map,origin.x,origin.z,mode,8,sidewalkOpen);
+ agent.route=point?traffic.makeRoute(documentMap.map,point.x,point.z,mode,agent.settings.direction,sidewalkOpen):null;
  agent.root.visible=!!agent.route;
  if(agent.route){
   agent.distance=traffic.nearestDistance(agent.route,point);
