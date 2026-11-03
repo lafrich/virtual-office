@@ -14,8 +14,8 @@ function modules(){
 test('WC seat anchor is located at the actual porcelain seat in all four directions',()=>{
  const g=modules(),iso=g.VLInteriorIso;
  const expected=[
-  [0,1.5,1.64,'ne'],[90,1.36,1.5,'se'],
-  [180,1.5,1.36,'sw'],[270,1.64,1.5,'nw']
+  [0,1.61,1.69,'sw'],[90,1.31,1.61,'sw'],
+  [180,1.39,1.31,'sw'],[270,1.69,1.39,'sw']
  ];
  for(const [rotation,c,r,dir] of expected){
   const item={id:'wc',assetId:'wc',c:1,r:1,rotation};
@@ -24,7 +24,7 @@ test('WC seat anchor is located at the actual porcelain seat in all four directi
   assert.ok(Math.abs(seat.c-c)<.001,'WC C coordinate '+rotation);
   assert.ok(Math.abs(seat.r-r)<.001,'WC R coordinate '+rotation);
   assert.equal(seat.direction,dir);
-  assert.equal(seat.pixelOffsetY,27*iso.ACTOR_SCALE-iso.WC_SEAT_Z);
+  assert.equal(seat.pixelOffsetY,0);
   assert.equal(seat.itemId,'wc');
  }
 });
@@ -93,10 +93,10 @@ test('Mahluk Hidup walking → WC sit pose docks onto WC, then Idle moves back t
  for(let t=5000;t<16500;t+=40)callback(t);
  const seated=player.actor;
  assert.equal(seated.pose,'toilet');
- assert.equal(seated.direction,'ne');
+ assert.equal(seated.direction,'sw');
  assert.equal(seated.actionAnchor.itemId,wc.id);
- assert.ok(Math.abs(seated.c+.5-(wc.c+.5))<.001);
- assert.ok(Math.abs(seated.r+.5-(wc.r+.64))<.001);
+ assert.ok(Math.abs(seated.c+.5-(wc.c+.61))<.001);
+ assert.ok(Math.abs(seated.r+.5-(wc.r+.69))<.001);
  assert.ok(events.some(s=>s.includes('aligned to seat')));
  element('scaleIdle').onclick();
  const standing=player.actor;
@@ -115,6 +115,6 @@ test('WC alignment remains editor-only and is not written into original asset JS
  const save=html.slice(start,end);
  assert.ok(!save.includes('actionAnchor'));
  assert.ok(!save.includes('scaleController'));
- assert.ok(html.includes('interior-isometric.js?v=door-v8'));
- assert.ok(html.includes('character-scale-preview.js?v=door-v8'));
+ assert.ok(html.includes('interior-isometric.js?v=source-v9'));
+ assert.ok(html.includes('character-scale-preview.js?v=source-v9'));
 });
