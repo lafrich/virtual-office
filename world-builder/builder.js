@@ -2104,21 +2104,32 @@ function refreshCharacterOptions(){
 }
 function actionChoices(actorId,selectId,selectedAction){
  const sel=$(selectId),actions=mahluk?.motions(actorId)||[];
- if(!actions.length){
-  if(Array.from(sel.options).some(o=>o.value===selectedAction))sel.value=selectedAction;
-  return;
- }
+ const templates=window.VLActionTemplates?.list(actorId)||[];
  sel.replaceChildren();
  if(selectId==='pose'){
-  const blank=document.createElement('option');blank.value='';blank.textContent='Idle';sel.append(blank);
+  const blank=document.createElement('option');blank.value='';blank.textContent='Idle / no action';sel.append(blank);
  }
- for(const action of actions){
-  const opt=document.createElement('option');opt.value=action.id;
-  opt.textContent=action.name||action.id.replace(/_/g,' ').toUpperCase();sel.append(opt);
+ if(actions.length){
+  const group=document.createElement('optgroup');group.label='MAHLUK HIDUP / NATIVE MOTIONS';
+  for(const action of actions.filter(m=>m.available!==false)){
+   const opt=document.createElement('option');opt.value=action.id;
+   opt.textContent=action.name||action.id.replace(/_/g,' ').toUpperCase();group.append(opt);
+  }
+  sel.append(group);
  }
- const candidate=actions.some(m=>m.id===selectedAction)?selectedAction:
-  actions.find(m=>m.id==='idle')?.id||actions[0].id;
- sel.value=selectId==='pose'&&!selectedAction?'':candidate;
+ if(templates.length){
+  const group=document.createElement('optgroup');group.label='SEMESTA / SAVED CUSTOM ACTIONS';
+  for(const action of templates){
+   const opt=document.createElement('option');opt.value=action.action;
+   opt.textContent=(action.ready?'✓ ':'DRAFT · ')+action.name.toUpperCase();
+   opt.disabled=!action.ready;group.append(opt);
+  }
+  sel.append(group);
+ }
+ if(Array.from(sel.options).some(o=>o.value===selectedAction&&!o.disabled))
+  sel.value=selectedAction;
+ else if(selectId==='pose')sel.value='';
+ else sel.value=actions.find(m=>m.id==='idle')?.id||'';
 }
 function renderAssetList(){
  const q=$('searchAsset').value.trim().toLowerCase(),cat=$('assetCategory').value;
@@ -2402,6 +2413,11 @@ $('refreshAssets').onclick=()=>refreshMahlukHidup(true);
 window.addEventListener('storage',e=>{
  if(['virtual-life-character-storage-v1','virtual-life-accessory-equipment-v1',
      'virtual-life-accessories-v1'].includes(e.key))refreshMahlukHidup(false);
+ if([window.VLActionTemplates?.key,window.VLActionTemplates?.frameKey].includes(e.key)){
+  window.VLActionTemplates?.invalidate();window.VLActionFrames?.invalidate();
+  for(const holder of rigs.values())holder.rig?.refresh?.();
+  updateSelection();
+ }
  if(e.key===window.VLBuildingBridge?.key)refreshBangunRuang();
 });
 // Backgrounded mobile tabs can miss a StorageEvent while suspended.
@@ -2412,6 +2428,8 @@ window.addEventListener('focus',()=>{
  let next;
  try{next=localStorage.getItem(window.VLBuildingBridge?.key||'virtual-life-bangun-ruang-v1');}catch{return;}
  if(next!==lastBuildingPayload){lastBuildingPayload=next;refreshBangunRuang();}
+ window.VLActionTemplates?.invalidate();window.VLActionFrames?.invalidate();
+ updateSelection();
 });
 
 $('openGame').onclick=()=>window.open('../','_blank','noopener');
