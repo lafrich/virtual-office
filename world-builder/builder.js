@@ -1648,6 +1648,58 @@ function renderAssetList(){
   holder.appendChild(btn);
  }
 }
+
+window.addEventListener('semesta-vault-unlocked',event=>{
+ // Rebuild unlocked-original references and reattempt source-name matching.
+ rebuild();tell('Virtual Life assets unlocked · '+event.detail.count+' original images available');
+});
+window.addEventListener('semesta-vault-locked',()=>{
+ // Restore preview art rather than retaining decrypted imagery in a canvas.
+ rebuild();tell('Virtual Life asset vault locked · previews restored');
+});
+window.addEventListener('semesta-vault-apply',event=>{
+ const path=event.detail?.path,selected=item();
+ if(!window.VLAssetVault?.allowed(path)){tell('Original asset unavailable');return;}
+ if(!selected){tell('Select building, vehicle, NPC or prop first.');return;}
+ if(!['building','shop','sprite','virtual_asset','vehicle','quest_npc'].includes(selected.type)){
+  tell('Select a compatible building, prop, vehicle or job NPC');return;
+ }
+ undoPoint();selected.assetPath=path;schema.normalize(selected,assetByName,style);
+ rebuild();saved();tell('Original assigned: '+path.split('/').pop());
+});
+window.addEventListener('semesta-vault-place',async event=>{
+ const path=event.detail?.path;
+ if(!window.VLAssetVault?.allowed(path))return;
+ pendingVaultCategory=['building','tree','prop'].includes(event.detail.category)?event.detail.category:'prop';
+ try{
+  const img=await window.VLAssetVault.getImage(path);
+  pendingVaultImageSize={width:img.naturalWidth,height:img.naturalHeight};
+ }catch{
+  pendingVaultImageSize=null;
+ }
+ placementType='vault:'+encodeURIComponent(path);
+ setMode('place');placementType='vault:'+encodeURIComponent(path);
+ closeMobileSheets();
+ tell('Tap map to place original '+path.split('/').pop());
+});
+window.addEventListener('semesta-vault-autolink',event=>{
+ const matches=event.detail?.map||{},changed=[];
+ for(const o of documentMap.objects){
+  const name=o.type==='vehicle'?o.vehicleId:o.type==='quest_npc'?o.questId:null;
+  if(name&&matches[name]&&!o.assetPath){
+   changed.push(o.id);
+  }
+ }
+ if(!changed.length){tell('No additional matching original image filenames');return;}
+ undoPoint();
+ for(const o of documentMap.objects){
+  if(!changed.includes(o.id))continue;
+  o.assetPath=matches[o.type==='vehicle'?o.vehicleId:o.questId];
+ }
+ rebuild();saved();
+ tell(changed.length+' vehicles / job NPCs linked to original image references');
+});
+
 $('searchAsset').oninput=renderAssetList;
 $('assetCategory').onchange=renderAssetList;
 for(const [key,field,kind] of [
