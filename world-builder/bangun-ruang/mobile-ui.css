@@ -468,7 +468,7 @@ body{background:#0b357e;padding:clamp(12px,2.2vw,32px)}
  #app .titlebar .win span{width:24px;height:23px;font-size:16px}
  #app nav{padding:5px 7px;min-height:42px}
  #app nav button,#app nav a.button{padding:6px 7px;font-size:10px}
- #app nav #saveBtn{padding:5px 9px}
+ #app nav #saveBtn{padding:5px 9px;flex:1;display:inline-flex;align-items:center;justify-content:center}
  #app .canvas-head{padding:0 9px;min-height:31px;height:31px}
  #app .stage{height:294px;min-height:294px;max-height:294px;margin:6px}
  #app .properties{padding:10px 11px}
