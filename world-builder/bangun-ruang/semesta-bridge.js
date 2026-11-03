@@ -31,7 +31,11 @@ for(const a of list){
   group:'kampung',source:'custom-building',published:true,
   footprint:[w,d],size:canonical.size,pivot:canonical.pivot,
   width:canonical.size[0]/50,height:canonical.size[1]/50,
-  collision:a.config.collision!=='no',variants:Object.freeze(variants)
+  collision:a.config.collision!=='no',
+  entranceFacing:['sw','se'].includes(a.entranceFacing)?a.entranceFacing:'sw',
+  interactions:Array.isArray(a.interactions)?a.interactions.filter(x=>typeof x==='string').slice(0,20):['enter'],
+  blocking:a.config.collision==='no'?'no':'yes',
+  variants:Object.freeze(variants)
  });
  byId.set(a.id,a);entries.push(spec);
 }
