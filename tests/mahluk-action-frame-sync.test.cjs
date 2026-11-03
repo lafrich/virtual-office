@@ -25,4 +25,12 @@ assert.ok(bangun.includes("event.key==='virtual-life-action-frame-edits-v1'"),
 assert.ok(rig.includes("sleep:['sleep','sleep_seat','lie']"),
  "Human sleep_seat fallback must not override native character sleep");
 assert.ok(preview.includes("iso?.drawSeatForeground?."),"Saved toilet/bed occlusion must remain");
+assert.ok(rig.includes("const rearView=state.direction==='ne'||state.direction==='nw'"),
+ "Semesta must distinguish rear camera views for backpack layering");
+assert.ok(rig.includes('ctx.rect(0,56,64,56)'),
+ "Semesta must not draw rear backpack over character head/neck");
+assert.ok(preview.includes("const rearView=actor.direction==='ne'||actor.direction==='nw'"),
+ "Bangun Ruang must preserve the same back-facing bag orientation");
+assert.ok(preview.includes('ctx.rect(x,y+56*scale,drawWidth,(FRAME.h-56)*scale)'),
+ "Bangun Ruang must mask rear backpack away from head and neck");
 console.log("PASS Mahluk Hidup action edits consume same-origin storage in Bangun and Semesta without moving furniture");
