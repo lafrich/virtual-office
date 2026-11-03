@@ -57,27 +57,16 @@ function makeRoute(map,x,z,mode,direction='auto'){
  const corridor=choose(map,x,z,mode,direction);
  if(!corridor)return null;
  const points=corridor.points.slice();
- // Cars take the parallel carriageway to complete a real loop when possible.
- // If only one lane exists they wrap/respawn at the corridor start.
- let wrap=true;
- if(mode==='vehicle'&&points.length>3){
-  const [dx,dz]=[corridor.dx,corridor.dz],t=map.terrain,m=index(t);
-  for(const sign of [1,-1]){
-   const other=points.map(p=>({x:p.x-dz*sign,z:p.z+dx*sign}));
-   if(other.every(p=>kind(t,Math.floor(p.x),Math.floor(p.z),m)==='road')){
-    points.push(...other.reverse());wrap=false;break;
-   }
-  }
- }
+ // Vehicles drive forward on their selected straight road corridor.
+ // At the end the simulation despawns them and queues a safe respawn at its
+ // starting end; it never U-turns or teleports into another occupied lane.
+ const wrap=true;
  let edges=[],length=0;
  for(let i=0;i<points.length-1;i++){
   const a=points[i],b=points[i+1],len=Math.hypot(a.x-b.x,a.z-b.z);
   if(len>0){edges.push({a,b,length:len,from:length});length+=len;}
  }
- if(!wrap&&points.length>1){
-  const a=points[points.length-1],b=points[0],len=Math.hypot(a.x-b.x,a.z-b.z);
-  if(len>0){edges.push({a,b,length:len,from:length});length+=len;}
- }
+
  return {points,edges,length,wrap,loop:true,stationary:false,kind:mode};
 }
 function sample(route,distance){
