@@ -1538,7 +1538,8 @@ function renderAssetList(){
       {title:'Character · NPC',tag:'npc',category:'character',label:'V6B / 64×112'}],
   ...assetCatalog.map(spec=>({
    title:spec.label,tag:'sprite:'+spec.file,category:assetCategory(spec),
-   label:spec.source==='custom-building'?'BANGUN RUANG / LOCAL PNG':
+   label:spec.source==='custom-building'?
+    (spec.enterable?'BANGUN RUANG / ENTERABLE':'BANGUN RUANG / DECORATIVE'):
     spec.source==='gpt-original'?'GPT / ORIGINAL · login':
     spec.published?'PIPELINE / PNG':'PIPELINE / MANIFEST ONLY',
    origin:spec.source==='gpt-original'?'original':spec.published?'published':'unpublished'
