@@ -30,7 +30,7 @@ test('partial footprints never create more full walkable interior tiles',()=>{
  assert.equal(room.depth,3);
  assert.equal(room.sourceFootprint.join(','),'3,3.2');
 });
-test('cutaway walls match the exterior and the half-scale in-world character',()=>{
+test('cutaway walls match the source height and native V6B visible body',()=>{
  const {VLInteriorIso:iso}=modules();
  assert.equal(iso.WALL,128);
  assert.ok(iso.WALL>=72*iso.ACTOR_SCALE);
