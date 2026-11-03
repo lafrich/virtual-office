@@ -65,6 +65,35 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .modal-cover{position:fixed;inset:0;z-index:15;background:#102350a1;display:grid;place-items:center;padding:14px}
 .modal{width:min(460px,100%);background:var(--chrome);border:2px solid #fafafa;outline:2px solid #292929;box-shadow:6px 10px #0005}.modal .titlebar{height:39px}.modal .window-title{font-size:15px}.modal-body{padding:16px;background:#e5e3df}.modal-body label{font:bold 11px "Courier New",monospace;display:block;margin-bottom:12px}.modal-body input{display:block;background:#fff;width:100%;padding:9px;border:2px inset #a8a8a8;margin-top:5px;outline-offset:1px}.modal-buttons{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.modal-error{color:#9e2a21;min-height:14px;font:11px Tahoma,sans-serif}
 @media(max-width:800px){.workspace{grid-template-columns:190px minmax(0,1fr) 205px}.prop-inner{padding:9px}.inspector h1{font-size:20px}.file-name{font-size:10px}}
+/* Desktop: keep one coherent Windows XP app window, not three scattered columns. */
+@media (min-width:901px){
+ .desktop{padding:28px 36px;align-items:center;justify-items:center}
+ .window{width:min(1160px,100%);max-width:1160px}
+ .workspace{grid-template-columns:218px minmax(0,1fr) 236px;height:clamp(510px,69dvh,640px);min-height:510px}
+ .file-list{gap:7px;padding:13px 9px}
+ .file{min-height:84px;gap:10px;padding:9px}
+ .file-thumb{width:54px;height:58px}
+ .file-name{font-size:11px}
+ .canvas-space{margin:13px 14px}
+ .art svg{width:min(64%,260px);height:min(77%,260px)}
+ .art .mahluk-sprite,.art .mahluk-static{height:min(77%,260px);max-width:min(64%,260px)}
+ .prop-inner{padding:18px 16px 20px}
+ .inspector h1{font-size:23px;margin-bottom:18px}
+ .desc{margin:16px 0 14px}
+}
+@media (min-width:701px) and (max-width:900px){
+ .desktop{padding:18px}
+ .window{width:100%}
+ .workspace{grid-template-columns:184px minmax(0,1fr) 204px;height:clamp(480px,67dvh,590px);min-height:480px}
+ .file-list{gap:6px;padding:9px 6px}
+ .file{padding:6px;gap:7px}
+ .file-thumb{width:44px;height:51px}
+ .file-name{font-size:10px}
+ .prop-inner{padding:12px 10px}
+ .inspector h1{font-size:20px}
+ .art svg{width:min(65%,230px);height:min(76%,230px)}
+ .art .mahluk-sprite,.art .mahluk-static{height:min(76%,230px);max-width:min(65%,230px)}
+}
 @media(max-width:700px){
 .desktop{padding:0;display:block;background:#07368a}.window{width:100%;min-height:100dvh;border:0;outline:0;box-shadow:none;display:flex;flex-direction:column}
 .titlebar{height:43px;flex:none}.window-title{font-size:16px}.window-controls span{width:27px;height:26px}
