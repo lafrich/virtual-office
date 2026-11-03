@@ -261,3 +261,32 @@
   max-height:252px!important;
  }
 }
+
+/* v11: contextual 90° rotation directly under the interior canvas.
+   Always in document flow; visible on desktop and touchscreens alike. */
+.interior-rotate-bar{
+ display:flex;align-items:center;gap:7px;padding:7px 10px;
+ background:#e7eff9;border-top:1px solid #b5c9de;
+ border-bottom:1px solid #aabdd0;min-width:0;
+}
+.interior-rotate-bar[hidden]{display:none!important}
+.interior-rotate-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.interior-rotate-info strong{font:bold 11px Tahoma,Verdana,sans-serif;color:#174579;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.interior-rotate-info span{font:10px Tahoma,Verdana,sans-serif;color:#526b81}
+.interior-rotate-bar .rotate-action{
+ flex:0 0 auto;display:flex;justify-content:center;align-items:center;gap:5px;
+ min-width:77px;min-height:40px;padding:7px 11px;
+ font:bold 19px/1 Tahoma,Verdana,sans-serif;background:#fff;
+ border:1px solid #8099b5;border-radius:3px;color:#184779;
+ box-shadow:inset 1px 1px 0 #fff,1px 2px 0 #8da0b1;
+ touch-action:manipulation;
+}
+.interior-rotate-bar .rotate-action span{font:bold 11px Tahoma,Verdana,sans-serif}
+.interior-rotate-bar .rotate-action:hover{background:#d5e8ff}
+.interior-rotate-bar .rotate-action:active{background:#afcdef;box-shadow:inset 1px 2px 2px #7d91a8}
+@media(max-width:640px){
+ .interior-rotate-bar{padding:7px 9px;gap:6px}
+ .interior-rotate-info strong{font-size:10px}
+ .interior-rotate-info span{font-size:9px}
+ .interior-rotate-bar .rotate-action{min-width:67px;min-height:43px;padding:7px}
+}
