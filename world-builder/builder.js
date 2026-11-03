@@ -2458,11 +2458,81 @@ interiorPreview=window.VLSemestaInteriorPreview?.mount({
   rig.setPose(action.pose);renderer.render(scene,camera);return true;
  }
 })||null;
-rebuild();resetCamera();resize();saved();
+// The visual clock is game-time, independent of the editing and Walk Test
+// simulation. Screen-space shadows use live roots, including moving crowds.
+const worldEffects=window.VLSemestaWorldEffects.makeWorldEffects({
+ THREE,scene,camera,canvas,tint:$('dayNightTint'),glows:$('nightGlow'),
+ getObjects:()=>documentMap.objects,
+ getRoot:id=>owners.get(id),
+ getAgent:id=>automatedAgents.get(id),
+ getCategory:o=>style.category(o,assetByName),
+ getFootprint:o=>style.footprint(o,assetByName),
+ getSpec:o=>assetByName.get(o.asset),
+ isOutline:()=>buildingViewMode==='outline'
+});
+let clockLastHUD='',clockLastSaved=0,clockOpen=false;
+function updateClockHUD(force=false){
+ const snapshot=dayClock.get(),solar=dayClock.solar();
+ const time=dayClock.label(),day=''+snapshot.day;
+ const label=time+'/'+day+'/'+snapshot.speed+'/'+snapshot.paused+'/'+solar.phase;
+ if(force||label!==clockLastHUD){
+  clockLastHUD=label;
+  $('timeDisplay').textContent=time;
+  $('timeDay').textContent=dayClock.weekday()+' · DAY '+String(snapshot.day).padStart(2,'0');
+  $('timePhase').textContent=solar.phase;
+  $('timeIcon').textContent=solar.phase==='MALAM'?'☾':
+   solar.phase==='SENJA'?'☽':solar.phase==='FAJAR'?'◒':'☀';
+  $('timePause').textContent=snapshot.paused?'▶ Play':'Ⅱ Pause';
+  $('timePause').setAttribute('aria-pressed',String(snapshot.paused));
+  $('timeSpeed').value=String(snapshot.speed);
+  $('timeScrubLabel').textContent=time;
+  if(document.activeElement!==$('timeScrub'))$('timeScrub').value=String(Math.floor(snapshot.minute));
+ }
+}
+function openTimePanel(open){
+ clockOpen=!!open;
+ $('timePanel').hidden=!clockOpen;
+ $('timeToggle').setAttribute('aria-expanded',String(clockOpen));
+}
+$('timeToggle').onclick=()=>openTimePanel(!clockOpen);
+$('timeScrub').oninput=()=>{
+ dayClock.setMinute($('timeScrub').value);
+ updateClockHUD(true);worldEffects.update(.2,dayClock.solar(),true);
+ renderer.render(scene,camera);
+};
+$('timeScrub').onchange=()=>{syncClockToMap();saved();};
+$('timePause').onclick=()=>{
+ dayClock.setPaused(!dayClock.get().paused);updateClockHUD(true);saved();
+};
+$('timeSpeed').onchange=()=>{
+ dayClock.setSpeed($('timeSpeed').value);updateClockHUD(true);saved();
+};
+$('timeMorning').onclick=()=>{
+ dayClock.setMinute(7*60);updateClockHUD(true);
+ worldEffects.update(.2,dayClock.solar(),true);saved();
+};
+document.addEventListener('pointerdown',e=>{
+ if(clockOpen&&!$('worldClockHud').contains(e.target))openTimePanel(false);
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&clockOpen)openTimePanel(false);
+});
+rebuild();resetCamera();resize();saved();updateClockHUD(true);
+worldEffects.update(.2,dayClock.solar(),true);
 let priorFrame=performance.now();
 function frame(now){
  requestAnimationFrame(frame);
- const dt=Math.min(.05,Math.max(0,(now-priorFrame)/1000));priorFrame=now;
+ const elapsedReal=Math.min(.5,Math.max(0,(now-priorFrame)/1000));
+ const dt=Math.min(.05,elapsedReal);priorFrame=now;
+ dayClock.tick(elapsedReal);
+ updateClockHUD();
+ clockLastSaved+=elapsedReal;
+ // Save the running virtual time at low frequency, without dirtying the
+ // geometry/draft or hammering localStorage at 60 frames per second.
+ if(clockLastSaved>=25){
+  clockLastSaved=0;
+  try{syncClockToMap();localStorage.setItem(STORE,JSON.stringify(documentMap));}catch{}
+ }
  if(mode==='walk'&&walkActorId&&rigs.has(walkActorId)){
    const holder=rigs.get(walkActorId);
    let dx=Number(walkInput.right)-Number(walkInput.left);
@@ -2551,6 +2621,7 @@ function frame(now){
    plane.rotation.y=yaw-root.rotation.y;
  }
  updateLargeOcclusion(dt);
+ worldEffects.update(elapsedReal,dayClock.solar());
  renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);
