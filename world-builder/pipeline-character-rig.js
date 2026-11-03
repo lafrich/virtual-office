@@ -32,15 +32,26 @@ function directionFromWorld(dx,dz,last='sw'){
  return Math.abs(dx)>=Math.abs(dz)?dx>0?'se':'nw':dz>0?'sw':'ne';
 }
 function resolve(id,requested,moving){
+ // Local published templates outrank the stock rig. A mere frame edit or
+ // planned action is NOT a playable animation until published in all 4 views.
+ const template=requested&&g.VLActionTemplates?.get(id,requested);
+ if(template?.ready)return {url:null,mode:requested,frames:template.frames,
+  row:0,durations:Array(template.frames).fill(template.frameMs),
+  loop:template.loop,separate:true,source:'template',objectLayer:template.objectLayer};
  const entry=bridge()?.get(id);
  if(entry){
   const actions=entry.motions;
-  const possible=({bathe:['swim','bathe','idle'],toilet:['sit','toilet'],
-   sleep:['sleep','sleep_seat','lie'],work:['sit_type','work']}[requested]||[requested]);
+  const possible=({bathe:['swim','bathe'],shower:['swim','bathe'],
+   toilet:['sit','toilet'],toilet_sit:['sit','toilet'],
+   sleep:['sleep','sleep_seat','lie'],rest:['lie','sleep','sleep_seat'],
+   sit:['sit'],work:['sit_type','work'],office_type:['sit_type']
+   }[requested]||[requested]);
   let motion=possible.map(id=>actions.find(m=>m.id===id&&m.available!==false)).find(Boolean);
   if(!motion&&moving)motion=actions.find(m=>m.id==='walk'&&m.available!==false);
-  if(!motion)motion=actions.find(m=>m.id==='idle')||actions.find(m=>m.id==='walk')||actions[0];
-  if(!motion)return null;
+  if(!motion&&!requested)motion=actions.find(m=>m.id==='idle'&&m.available!==false);
+  if(!motion&&requested==='idle')motion=actions.find(m=>m.id==='idle'&&m.available!==false);
+  if(!motion)return {source:'unavailable',mode:requested||'idle',frames:1,
+   unavailable:true,loop:false,url:null};
   const separate=!!motion.sheet;
   const url=bridge().url(motion.sheet||entry.sheet);
   return {url,mode:motion.id,frames:motion.frames,row:separate?0:motion.row,
@@ -49,6 +60,8 @@ function resolve(id,requested,moving){
  const url=g.VLPipelineAssets?.character(id);
  if(!url)return null;
  const act=({bathe:'swim',toilet:'sit',work:'sit_type'}[requested]||requested);
+ if(requested&&!Object.hasOwn(ROW,act)&&!moving)
+  return {url:null,mode:requested,frames:1,unavailable:true,source:'unavailable'};
  const mode=Object.hasOwn(ROW,act)?act:moving?'walk':'idle';
  return {url,mode,frames:mode==='walk'?6:mode==='idle'?4:6,
   row:ROW[mode],durations:[],loop:true,separate:false,source:'pipeline-v6b'};
@@ -84,11 +97,25 @@ function createRig(THREE,opt={}){
  function render(){
   const spec=resolve(who,state.pose,state.moving);
   if(!spec){state.loaded=false;state.failed=true;return;}
+  state.objectLayer=spec.objectLayer||'front';
+  if(spec.unavailable){
+   // A missing gameplay action must NEVER silently become the idle animation.
+   const key='UNAUTHORED:'+who+':'+state.pose;
+   if(key!==previous){
+    ctx.clearRect(0,0,64,112);
+    ctx.fillStyle='#193a77';ctx.fillRect(19,43,26,44);
+    ctx.fillStyle='#8a9ab7';ctx.fillRect(24,25,16,18);
+    ctx.fillStyle='#e8dfb2';ctx.font='bold 8px monospace';
+    ctx.fillText('NO RIG',17,99);
+    texture.needsUpdate=true;previous=key;
+   }
+   state.loaded=false;state.failed=false;return;
+  }
   const motionKey=state.pose||spec.mode;
   if(lastAction!==motionKey){time=0;previous='';lastAction=motionKey;}
   const count=Math.max(1,Math.min(40,spec.frames)),frame=Math.min(frameAt(spec,time),count-1);
   const dir=DIR.indexOf(state.direction),row=spec.row+dir;
-  const sprite=image(spec.url),asset=bridge()?.get(who);
+  const sprite=spec.source==='template'?null:image(spec.url),asset=bridge()?.get(who);
   const equipped=asset?bridge().equipmentFor(who):{};
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
   const overlayUrls=['bag','shoes','pants','shirt','helmet'].map(layer);
@@ -105,20 +132,22 @@ function createRig(THREE,opt={}){
    cook:['cook_stir'],sit:['sit_idle'],relax:['sit_idle']
   };
   const editedExact=action?g.VLActionFrames?.get(state.profile,action,state.direction,frame):null;
-  const editURL=editedExact||(actionFallback[action]||[]).map(id=>
-   g.VLActionFrames?.get(state.profile,id,state.direction,frame)).find(Boolean)||null;
+  const editURL=spec.source==='template'?
+   g.VLActionTemplates?.frame(who,action,state.direction,frame):
+   editedExact||(actionFallback[action]||[]).map(id=>
+    g.VLActionFrames?.get(state.profile,id,state.direction,frame)).find(Boolean)||null;
   const edited=editURL?image(editURL):null;
   const status=overlays.map(o=>o?.ready?'1':'0').join('');
   // Full content fingerprint prevents two same-length pixel edits from sharing
   // a stale cached GPU texture while the same action frame is displayed.
   const editTag=editURL||'';
   const key=[who,spec.url,spec.mode,row,frame,...overlayUrls.map(x=>x?.length||0),status,editTag,edited?.ready].join(':');
-  state.loaded=!!sprite?.ready;
-  state.failed=!!sprite?.error;
-  if(!sprite?.ready||key===previous)return;
-  const pic=sprite.pic;
-  const sx=frame*64,sy=row*112;
-  if(sx+64>pic.naturalWidth||sy+112>pic.naturalHeight){
+  const templated=spec.source==='template';
+  state.loaded=templated?!!edited?.ready:!!sprite?.ready;
+  state.failed=!templated&&!!sprite?.error;
+  if(!state.loaded||key===previous)return;
+  const pic=sprite?.pic,sx=frame*64,sy=row*112;
+  if(!templated&&(sx+64>pic.naturalWidth||sy+112>pic.naturalHeight)){
    state.failed=true;state.loaded=false;return;
   }
   ctx.clearRect(0,0,64,112);
@@ -127,7 +156,7 @@ function createRig(THREE,opt={}){
   // pack on the BACK torso surface. Keep rear head/neck above the bag.
   if(!rearView&&overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
   if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
-  else ctx.drawImage(pic,sx,sy,64,112,0,0,64,112);
+  else if(!templated)ctx.drawImage(pic,sx,sy,64,112,0,0,64,112);
   for(let i=1;i<4;i++)if(overlays[i]?.ready)
    ctx.drawImage(overlays[i].pic,0,0,64,112);
   if(rearView&&overlays[0]?.ready){
