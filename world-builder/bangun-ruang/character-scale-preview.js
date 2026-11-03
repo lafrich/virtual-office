@@ -202,8 +202,21 @@ function mount(api){
    const geo=iso?.bounds(s);
    if(!geo)return;
    interiorGeometry=geo;
-   if(actor.actionAnchor&&!s.items?.some(item=>item.id===actor.actionAnchor.itemId))
-    leaveAction();
+   if(actor.actionAnchor){
+    const live=s.items?.find(item=>item.id===actor.actionAnchor.itemId);
+    if(!live)leaveAction();
+    else {
+     // Furniture can be moved or rotated while the actor is seated.
+     // Use the shared CURRENT fixture geometry, never a stale anchor.
+     const seat=iso.actionAnchor(live);
+     if(!seat)leaveAction();
+     else {
+      actor.actionAnchor={...seat,approach:actor.actionAnchor.approach};
+      actor.c=seat.c-.5;actor.r=seat.r-.5;
+      actor.direction=seat.direction;
+     }
+    }
+   }
    if(actor.actionAnchor){
     [x,y]=iso.point(geo,actor.actionAnchor.c,actor.actionAnchor.r,0);
     y+=actor.actionAnchor.pixelOffsetY||0;
