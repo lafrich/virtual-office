@@ -37,6 +37,7 @@
   <button class="chrome-tool" id="redo" title="Redo">↷</button>
   <button class="chrome-tool" id="snap" title="Toggle half-tile snapping">▦</button>
   <button class="chrome-tool active" id="gridToggle" aria-pressed="true" title="Show / hide placement grid">#</button>
+  <button class="chrome-tool" id="buildingOutlineTool" type="button" aria-pressed="false" title="Building View: toggle architectural outline / solid">◇</button>
   <div class="stamp">✳<div>V/L<br>MAP</div></div>
  </aside>
  <aside id="assetsPanel" aria-label="Asset browser">
@@ -80,6 +81,11 @@
    <label id="roadSettings">ROAD <select id="roadClass"><option value="two_lane">2 Lane</option><option value="local">Local</option><option value="service">Service</option><option value="pedestrian">Pedestrian</option></select></label>
    <label class="toggle"><input id="autoSidewalk" type="checkbox" checked> Auto Sidewalk</label>
    <span id="terrainLabel" aria-live="polite">GRASS</span><button type="button" id="gridToolbar" class="chrome-button" aria-pressed="true"># Grid ON</button>
+   <label class="building-view-setting" for="buildingViewMode">BUILDING VIEW
+    <select id="buildingViewMode" aria-label="Building appearance" title="Choose solid buildings or detailed architectural line outlines">
+     <option value="solid">■ Solid</option><option value="outline">◇ Outline</option>
+    </select>
+   </label>
    <button id="mobileAssets" type="button">▣ Assets</button>
    <button id="mobileInspector" type="button">☷ Inspector</button>
    <button id="cameraToCharacter" type="button" title="Jump to selected character and follow during Walk Test" aria-pressed="false">🎥 Character</button>
@@ -297,6 +303,7 @@
 <script src="./semesta-traffic.js?v=traffic-queue-v2"></script>
 <script src="./semesta-traffic-flow.js?v=traffic-queue-v2"></script>
 <script src="./virtual-life-vault.js?v=vl-vault-v1"></script>
+<script src="./building-outline.js?v=building-outline-v1"></script>
 <script src="./semesta-traffic-art.js?v=semesta-v2-final"></script>
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
