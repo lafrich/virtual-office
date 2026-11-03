@@ -26,6 +26,10 @@ function category(o,catalog){
  const spec=o?.type==='sprite'?catalog?.get(o.asset):null;
  if(['avatar','npc','pedestrian','crowd','quest_npc'].includes(o?.type))return 'actor';
  if(o?.type==='vehicle')return 'vehicle';
+ if(o?.type==='virtual_asset'){
+  return o.assetCategory==='building'?'building':
+   o.assetCategory==='tree'?'tree':'prop';
+ }
  if(o?.type==='marker')return 'marker';
  if(PROP_NAMES.has(o?.type))return o.type==='box'?'prop':o.type;
  if(spec){
@@ -46,6 +50,10 @@ function footprint(o,catalog){
  const s=o?.type==='sprite'?catalog?.get(o.asset):null;
  const kind=category(o,catalog);
  if(kind==='actor')return o.type==='crowd'?[.75,.75]:[.65,.65];
+ if(o?.type==='virtual_asset')return [
+  Math.max(.5,Number(o.w||2)*Number(o.scale||1)),
+  Math.max(.5,Number(o.d||2)*Number(o.scale||1))
+ ];
  if(kind==='vehicle'){
   const meta=g.VLSemestaCatalog?.vehicle(o.vehicleId),size=meta?.footprint||[2.9,1.05];
   let [w,d]=size;
