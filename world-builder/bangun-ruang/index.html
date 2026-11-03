@@ -422,7 +422,7 @@ function buildAsset(){
  const base=semesta?.byId(c.baseId);
  const inter=interiorUi?.serialize()||{interactive:false,enterable:false,interior:null,actionSlots:[],entrance:null,interactions:[]};
  const exteriorActions=c.actions.split(',').map(x=>x.trim()).filter(Boolean).slice(0,20);
- const combined=inter.interactive?[...new Set([...exteriorActions,...inter.interactions])]:exteriorActions.filter(x=>x!=='enter');
+ const combined=inter.interactive?[...new Set([...exteriorActions,...inter.interactions])]:[];
  return {id,name:c.name,config:c,views,editedViews:{...manualOverrides},
   semestaBase:c.baseId,semestaNativeSize:base?.variants||null,
   baseHeight:base?.height||null,format:'virtual-life-building-asset-v1',
