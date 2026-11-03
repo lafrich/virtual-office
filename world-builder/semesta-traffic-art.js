@@ -58,13 +58,8 @@ function vehicleCanvas(id,face='se'){
  const color=palette[id]||'#8d9fae';
  // Pixel art is horizontally reflected for opposite cardinal direction.
  if(face==='nw'||face==='ne'){q.translate(160,0);q.scale(-1,1);}
- // Pixel-block translucent ground contact, no blurry ellipse edges.
- q.fillStyle='#18243136';
- const shadowHalf=bus?70:motor?31:55;
- for(let row=-6;row<=6;row+=2){
-  const half=Math.round(shadowHalf*(Math.abs(row)>3?.82:1));
-  q.fillRect(80-half,95+row,half*2,2);
- }
+ // Vehicle sprites do not draw their own shadows: the simplified world
+ // contact-shadow pass is for characters/NPCs only.
  if(motor){
   // Two-wheel scooter + rider; keep deliberately simplified as a draft.
   poly(q,'#2a3947',[[46,77],[106,74],[111,84],[82,91],[54,87]]);

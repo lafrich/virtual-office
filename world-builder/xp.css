@@ -305,11 +305,11 @@
  #markerManager .marker-manager-actions button{min-height:43px}
 }
 
-/* Semesta 24h sun/shadow/weather-facing color grade — UI stays undimmed. */
+/* Semesta 24h soft color tint and crisp lamp pixels — UI stays undimmed. */
 #dayNightTint,#nightGlow{position:absolute;inset:0;width:100%;height:100%;
  pointer-events:none;user-select:none}
 #dayNightTint{z-index:1;background:#142747;opacity:0;will-change:opacity,background-color}
-#nightGlow{z-index:2;display:block;image-rendering:auto}
+#nightGlow{z-index:2;display:block;image-rendering:pixelated}
 #hint,#status,#toast,#empty,#walkPad,#cameraFollowLabel,#floatingInspector{z-index:4}
 .semesta-clock{position:absolute;z-index:8;right:8px;top:43px;
  color:#1a2b46;font-family:Tahoma,Verdana,sans-serif;
