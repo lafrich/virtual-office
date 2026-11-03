@@ -103,6 +103,46 @@ function itemFootprint(item){
  const rotated=(Number(item.rotation)||0)%180===90;
  return rotated?[m.d,m.w]:[m.w,m.d];
 }
+/* Rotation is in 90-degree grid steps. Translate LOCAL fixture geometry and
+ * interaction anchors using the SAME mapping to prevent mirrored seating.
+ */
+function fixtureRotation(item){
+ const v=((Number(item?.rotation)||0)%360+360)%360;
+ return Math.round(v/90)%4;
+}
+function fixturePoint(item,x,y){
+ const c=Number(item.c),r=Number(item.r);
+ const [w,d]=itemFootprint(item);
+ switch(fixtureRotation(item)){
+  case 1:return {c:c+w-y,r:r+x};
+  case 2:return {c:c+w-x,r:r+d-y};
+  case 3:return {c:c+y,r:r+d-x};
+  default:return {c:c+x,r:r+y};
+ }
+}
+function actionAnchor(item){
+ if(!item||!TYPES[item.assetId])return null;
+ let seat=null,hip=0;
+ switch(item.assetId){
+  case 'wc':
+   // WC bowl is painted at local c=.29..71 / r=.40..88, z=14.
+   // The 64x112 Mahluk Hidup sit pose pivots on the FEET, not hips.
+   // Sit pelvis approx 27 px above pivot, so place sprite foot 13 px
+   // BELOW floor-space bowl center to align hips to the 14px-high rim.
+   seat=[.50,.64];hip=13;break;
+  case 'chair':
+  case 'office_chair':
+   seat=[.50,.55];hip=8;break;
+  case 'sofa':
+   seat=[TYPES[item.assetId].w/2,.60];hip=2;break;
+  default:return null;
+ }
+ const p=fixturePoint(item,...seat);
+ const direction=['ne','se','sw','nw'][fixtureRotation(item)];
+ return {c:p.c,r:p.r,z:0,pixelOffsetY:hip,direction,
+  itemId:item.id,kind:item.assetId,
+  localSeat:seat};
+}
 function furniture(ctx,geo,item,selected=false){
  const [w,d]=itemFootprint(item);
  const c=Number(item.c),r=Number(item.r),type=item.assetId;
@@ -111,8 +151,17 @@ function furniture(ctx,geo,item,selected=false){
  // Physical shadow is pixel geometry projected at ground level.
  polygon(ctx,polyPoint(geo,[[c+.1,r+.08,1],[c+w+.1,r+.08,1],
   [c+w+.1,r+d+.08,1],[c+.1,r+d+.08,1]]),'#9B866F');
- const B=(x,y,cw,rd,low,top,material,outline=false)=>
-  box(ctx,geo,c+x,r+y,cw,rd,low,top,material,outline);
+ const B=(x,y,cw,rd,low,top,material,outline=false)=>{
+  if(type!=='wc'||fixtureRotation(item)===0)
+   return box(ctx,geo,c+x,r+y,cw,rd,low,top,material,outline);
+  const rot=fixtureRotation(item),W=w,D=d;
+  let X=x,Y=y,CW=cw,RD=rd;
+  // The WC must rotate visually together with its tank/seat and anchor.
+  if(rot===1){X=W-(y+rd);Y=x;CW=rd;RD=cw;}
+  else if(rot===2){X=W-(x+cw);Y=D-(y+rd);}
+  else if(rot===3){X=y;Y=D-(x+cw);CW=rd;RD=cw;}
+  return box(ctx,geo,c+X,r+Y,CW,RD,low,top,material,outline);
+ };
  const place=()=>{
  switch(type){
  case 'wc':
@@ -212,6 +261,18 @@ function furniture(ctx,geo,item,selected=false){
   minY:Math.min(...all.map(p=>p[1]))-2,maxY:Math.max(...all.map(p=>p[1]))+2,
   depth:c+r+w+d};
 }
+function drawSeatForeground(ctx,geometry,item){
+ if(!item||item.assetId!=='wc')return;
+ const {c,r}=item,rot=fixtureRotation(item);
+ const coords={x:.16,y:.71,w:.68,d:.18};
+ let {x,y,w,d}=coords;
+ if(rot===1){[x,y,w,d]=[1-(y+d),x,d,w];}
+ else if(rot===2){[x,y]=[1-(x+w),1-(y+d)];}
+ else if(rot===3){[x,y,w,d]=[y,1-(x+w),d,w];}
+ // The bowl front masks the sitting character's feet, making the body
+ // visibly sit BEHIND the rim instead of float on top of the fixture.
+ box(ctx,geometry,c+x,r+y,w,d,2,12,'white');
+}
 function draw(canvas,scene,opts={}){
  const ctx=canvas.getContext('2d');
  if(!ctx)return null;
@@ -278,6 +339,7 @@ function pointer(canvas,event,geometry,opts={}){
  const y=(event.clientY-box.top)*canvas.height/box.height;
  return pick(geometry,x,y,opts);
 }
-g.VLInteriorIso=Object.freeze({version:'v4',tilePixels:Object.freeze([64,32]),
- bounds,point,pick,pointer,draw,tileAt,itemFootprint});
+g.VLInteriorIso=Object.freeze({version:'v6',tilePixels:Object.freeze([64,32]),
+ bounds,point,pick,pointer,draw,tileAt,itemFootprint,
+ fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground});
 })(window);
