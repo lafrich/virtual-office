@@ -179,7 +179,20 @@ async function select(path){
   hintText(path+' · '+img.naturalWidth+' × '+img.naturalHeight+' px');
  }catch(e){hintText('Gagal membaca original: '+e.message,true);}
 }
-function open(){dialog.hidden=false;hintText(key?'Asset Vault unlocked. Pilih sprite.':'Gunakan sesi Virtual Life atau masukkan password akun.');if(key)renderList();}
+async function open(){
+ dialog.hidden=false;
+ hintText(key?'Asset Vault unlocked. Pilih sprite.':'Mengecek sesi Virtual Life yang sudah terbuka...');
+ if(key){renderList();return;}
+ try{
+  if(await existingKey()){
+   const count=await unlock('');
+   const found=Object.values(matches()).filter(Boolean).length;
+   hintText('Sesi Virtual Life ditemukan. '+count+' gambar siap dibuka; '+found+' nama kendaraan/NPC cocok.');
+   renderList();return;
+  }
+ }catch{}
+ hintText('Silakan login ke Virtual Life atau masukkan password akun di sini.');
+}
 function close(){dialog.hidden=true;password.value='';}
 button.onclick=open;
 $('closeVirtualAssetDialog').onclick=close;
