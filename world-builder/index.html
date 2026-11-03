@@ -4,7 +4,7 @@
 <meta name="theme-color" content="#073a9d"><meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="only light">
 <title>Semesta — City Builder</title>
-<link rel="stylesheet" href="./xp.css?v=semesta-daynight-shadows-v1">
+<link rel="stylesheet" href="./xp.css?v=vehicle-edit-v1">
 </head>
 <body><div id="desktop"><div id="app">
 <header id="titlebar">
@@ -150,6 +150,18 @@
       <div class="section-label">BUILDING FOOTPRINT · PLACEHOLDER</div>
       <div class="building-dims"><label>Width / C <input id="buildingW" type="number" min="2" max="20" step="1"></label><label>Depth / R <input id="buildingD" type="number" min="2" max="20" step="1"></label><label>Height <input id="buildingH" type="number" min="2" max="20" step="1"></label></div>
       <button id="replaceAsset" type="button">⇄ Replace with asset...</button>
+    </div>
+    <div id="vehicleControls" hidden>
+     <div class="section-label">KENDARAAN / VISUAL PLACEMENT</div>
+     <label class="vehicle-scale-label" for="vehicleVisualScale">Visual size <output id="vehicleVisualScaleValue" for="vehicleVisualScale">1.00×</output></label>
+     <input id="vehicleVisualScale" type="range" min=".45" max="2.5" step=".05" value="1">
+     <div class="vehicle-offsets">
+      <label>OFFSET X <input id="vehicleOffsetX" type="number" min="-3" max="3" step=".05" value="0"></label>
+      <label>HEIGHT Y <input id="vehicleOffsetY" type="number" min="-3" max="3" step=".05" value="0"></label>
+      <label>OFFSET Z <input id="vehicleOffsetZ" type="number" min="-3" max="3" step=".05" value="0"></label>
+     </div>
+     <button id="vehicleResetVisual" type="button">↺ Reset Visual</button>
+     <p class="help">Scale dan offset hanya memindahkan sprite kendaraan, bukan jalur atau footprint aspal. Atur titik awal lewat C/X dan R/Z di atas, atau pilih Move lalu drag mobil di jalan. Perubahan tersimpan di City Draft.</p>
     </div>
     <div id="motionControls" hidden>
      <div class="section-label">AUTO LOOP / SIMULATION</div>
@@ -329,6 +341,7 @@
 <script src="./vegetation-catalog.js?v=builder-v3"></script>
 <script src="./mahluk-hidup-bridge.js?v=sync-mahluk-1"></script>
 <script src="./pipeline-character-rig.js?v=sync-mahluk-1"></script>
+<script src="./semesta-vehicle-placement.js?v=vehicle-edit-v1"></script>
 <script src="./style-rules.js?v=bus2-markers-v1"></script>
 <script src="./map-terrain.js?v=infinite-grid-mobile-fix4"></script>
 <script src="./map-schema.js?v=semesta-v2-final"></script>
@@ -344,5 +357,5 @@
 <script src="./semesta-traffic-art.js?v=npc-flow-vehicle-ground-v2"></script>
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
-<script type="module" src="./builder.js?v=live-sync-1"></script>
+<script type="module" src="./builder.js?v=vehicle-edit-v1"></script>
 </body></html>
