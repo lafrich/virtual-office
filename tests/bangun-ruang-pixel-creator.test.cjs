@@ -31,7 +31,7 @@ test('Pixel Creator initializes and opens a modal with either static-button entr
   constructor(tag,id=''){this.tagName=tag;this.id=id;this.children=[];this.style={};
    this.classList={toggle(){},add(){}};this.value='';this.width=96;this.height=144;
    this.isConnected=true;this.open=false;}
-  set innerHTML(markup){for(const match of markup.matchAll(/<([a-z]+)[^>]*?\\bid="([^"]+)"[^>]*>/g))
+  set innerHTML(markup){for(const match of markup.matchAll(/<([a-z]+)[^>]*?\bid="([^"]+)"[^>]*>/g))
    els.set(match[2],new El(match[1],match[2]));}
   append(...children){this.children.push(...children);for(const child of children)if(child.id)els.set(child.id,child);}
   appendChild(child){this.append(child);return child;}
