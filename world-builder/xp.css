@@ -207,3 +207,27 @@
  #tutorialText{font-size:12px}
  .tutorial-actions{padding:9px 10px}
 }
+
+/* Semesta · centered tool rail and centered mobile XP dialogs. */
+#toolsPanel{justify-content:safe center;overflow-y:auto;scrollbar-width:none}
+#toolsPanel::-webkit-scrollbar{display:none}
+#toolsPanel .stamp{position:absolute;bottom:4px;left:5px;right:5px;margin-top:0}
+#toolsPanel{position:relative}
+#toolsPanel .chrome-tool{flex:0 0 auto}
+#motionControls{display:flex;flex-direction:column;gap:7px;background:#e5e7e8;
+ border:1px solid #8d949c;margin-top:9px;padding:8px}
+#motionControls[hidden]{display:none!important}
+#motionControls label{display:flex;flex-direction:column;gap:4px;font:11px Tahoma}
+#motionControls input:not([type="checkbox"]),#motionControls select{
+ min-height:32px;border:2px inset #b0b2b8;background:white;color:#202326;padding:5px;width:100%}
+#motionControls .toggle{flex-direction:row;align-items:center}
+#motionHint{margin:4px 0 0}
+@media(max-width:780px){
+ .tutorial-overlay{align-items:center!important;padding:12px!important}
+ .tutorial-window{max-height:min(86dvh,700px);border:2px solid #fff;outline:2px solid #1e4399}
+ .draft-dialog{align-items:center!important;padding:12px!important}
+ .draft-window{max-height:82dvh;border:2px solid #fff;outline:2px solid #1e4399}
+ #toolsPanel{justify-content:safe center;padding-block:5px}
+ #toolsPanel .stamp{display:none}
+ #toolsPanel .chrome-tool{min-height:35px;aspect-ratio:auto}
+}
