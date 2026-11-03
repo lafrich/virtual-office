@@ -13,9 +13,9 @@
 const $=id=>document.getElementById(id);
 const bridge=g.VLMahlukHidup,rig=g.VLCharacterRig,model=g.VLBuildingInterior,iso=g.VLInteriorIso;
 const FRAME=rig?.FRAME||{w:64,h:112,pivotX:32,pivotY:100};
- // Original sprite frames remain 64x112. Only the world-sized drawing is
- // reduced so the SAME character fits the Semesta building doorway.
-const ACTOR_SCALE=iso?.ACTOR_SCALE||0.5;
+ // Native 64×32 art tile already includes Virtual Life's PPU=2.
+ // Original V6B 64×112 image frame is drawn at 1x in both editor views.
+const ACTOR_SCALE=g.VLGameProportions?.character.scale??iso?.ACTOR_SCALE??1;
 const DIR=rig?.DIR||['se','sw','ne','nw'];
 const imageCache=new Map();
 const finite=(x,fallback)=>Number.isFinite(Number(x))?Number(x):fallback;
@@ -99,11 +99,9 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
  if(sprite?.ready&&resolved){
   const direct=DIR.indexOf(actor.direction);
   const row=(resolved.row||0)+(direct<0?1:direct);
-  // The published Mahluk Hidup sit strip is a transition. Looping it makes
-  // a seated actor repeatedly stand up. Hold its completed seated frame.
-  const frame=options.seated&&resolved.mode==='sit'
-   ?Math.max(0,Number(resolved.frames||1)-1)
-   :rig.frameAt(resolved,time);
+  // Original game sheetCell() loops its four seated frames at 3 FPS.
+  // The SW direction is what makes the knees visibly bent.
+  const frame=rig.frameAt(resolved,time);
   const sx=frame*FRAME.w,sy=row*FRAME.h;
   const pic=sprite.pic;
   if(sx+FRAME.w<=pic.naturalWidth&&sy+FRAME.h<=pic.naturalHeight){
@@ -134,7 +132,8 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
  ctx.fillRect(markerX,topY,1,FRAME.pivotY);
  ctx.fillRect(markerX-3,topY,7,1);ctx.fillRect(markerX-3,Math.round(footY)-1,7,1);
  ctx.font='9px monospace';
- ctx.fillText(Math.round(FRAME.h*scale)+' px',markerX+4,topY+10);
+ ctx.fillText('body '+(g.VLGameProportions?.character.visibleHeight||72)+' px',
+  markerX+4,topY+10);
  return drawn;
 }
 function mount(api){
