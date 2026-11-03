@@ -181,3 +181,10 @@ The user supplied the actual Virtual Life source bundle, including the complete 
 - \`workspace/virtual-office/assets/chars/ichsan_v6b_sheet.png\` — original sprite rows, visually checked.
 
 The source ZIP is **reference only**; none of its auth/server/client code is imported or deployed. Bangun Ruang remains an asset authoring tool with local simulation. Mahluk Hidup and the production Virtual Life game remain unchanged. Existing interior tile coordinates and room sizes are preserved; only procedural visual geometry is recalibrated. Existing manually painted exterior PNGs may require manual reinspection after a change in default building height; the original saved asset is not overwritten without the user saving.
+
+## v10 — Chair seating and bed sleeping alignment
+
+- Chair, office-chair, sofa, and bed action slots now share furniture-local contact points with the procedural isometric drawing. A character walks to a free neighboring tile before docking onto the actual seat or mattress; rotation (0°, 90°, 180°, 270°) updates both the drawn furniture and pose direction.
+- The bed uses a 21px mattress-height contact point. Sleep uses the Mahluk Hidup sleep rig and Rest uses lie, with a local duvet foreground that covers the lower portion of the character. Chairs and sofas use a foreground cushion to make the sit pose appear behind the seating edge. The WC's original source-calibrated SW anchor remains unchanged.
+- Idle exits the action back onto the free approach tile. Sprite fallback silhouettes also distinguish sitting/lying from standing when published art is not yet loaded. This is an editor-only character preview; no new data is embedded in exported building packages or online gameplay.
+- Rotation visuals for all procedural interior props now use the same local-coordinate transform as their collision footprint and actor anchors. UI script query versions refresh stale cached asset previews.
