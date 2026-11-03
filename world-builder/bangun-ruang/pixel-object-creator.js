@@ -226,7 +226,8 @@ function renderCharacter(){
  const url=spec?.url||g.VLPipelineAssets?.character?.(referenceProfile);
  const DIRS=rig?.DIR||['se','sw','ne','nw'];
  const index=Math.max(0,DIRS.indexOf(view));
- const row=(Number(spec?.row)||4)+index;
+ const authoredRow=Number(spec?.row);
+ const row=(Number.isFinite(authoredRow)?authoredRow:4)+index;
  // 64x112 native sprite; foot pivot y=100, same 136px floor as object editor.
  const y=H-8-(rig?.FRAME?.pivotY||100);
  const info=$('opcReferenceInfo');
