@@ -141,3 +141,20 @@
  #menubar .version{display:none}
  #footer .status{margin-left:0}
 }
+
+/* Camera-to-character (non-destructive follow mode). */
+#cameraCharacter.active,#cameraToCharacter[aria-pressed="true"]{
+ background:#acc2f0!important;border-color:#5778ab!important;color:#0a2d72!important;
+}
+#cameraToCharacter,#cameraMapView{white-space:nowrap;font-weight:bold}
+#cameraFollowLabel{
+ position:absolute;top:44px;left:8px;z-index:4;
+ background:#193e80dd;border:1px solid #dbe7fa;color:#fff;
+ font:bold 10px "Courier New",monospace;letter-spacing:.03em;
+ padding:6px 8px;max-width:min(70%,240px);overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap;pointer-events:none;
+}
+@media(max-width:780px){
+ #cameraFollowLabel{top:55px;left:6px;font-size:9px;max-width:58%}
+ #cameraToCharacter,#cameraMapView{font:11px Tahoma;padding:5px 8px}
+}
