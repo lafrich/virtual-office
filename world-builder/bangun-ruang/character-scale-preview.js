@@ -13,6 +13,9 @@
 const $=id=>document.getElementById(id);
 const bridge=g.VLMahlukHidup,rig=g.VLCharacterRig,model=g.VLBuildingInterior,iso=g.VLInteriorIso;
 const FRAME=rig?.FRAME||{w:64,h:112,pivotX:32,pivotY:100};
+ // Original sprite frames remain 64x112. Only the world-sized drawing is
+ // reduced so the SAME character fits the Semesta building doorway.
+const ACTOR_SCALE=iso?.ACTOR_SCALE||0.5;
 const DIR=rig?.DIR||['se','sw','ne','nw'];
 const imageCache=new Map();
 const finite=(x,fallback)=>Number.isFinite(Number(x))?Number(x):fallback;
@@ -71,28 +74,36 @@ function image(url){
  }
  return imageCache.get(url);
 }
-function silhouette(ctx,x,y){
- // Native 64x112 scale stand-in when a source sheet is not unlocked/loaded.
- ctx.fillStyle='#8293a8';
- ctx.fillRect(Math.round(x)+17,Math.round(y)+16,30,34);
- ctx.fillRect(Math.round(x)+21,Math.round(y)+6,22,19);
- ctx.fillRect(Math.round(x)+11,Math.round(y)+50,42,24);
- ctx.fillRect(Math.round(x)+18,Math.round(y)+74,11,28);
- ctx.fillRect(Math.round(x)+35,Math.round(y)+74,11,28);
- ctx.fillStyle='#4c617a';
- ctx.fillRect(Math.round(x)+17,Math.round(y)+99,13,2);
- ctx.fillRect(Math.round(x)+34,Math.round(y)+99,13,2);
- ctx.fillStyle='#1c436c';ctx.font='8px monospace';ctx.fillText('64x112',Math.round(x)+11,Math.round(y)+8);
+function silhouette(ctx,x,y,scale=ACTOR_SCALE){
+ const rect=(rx,ry,w,h,color)=>{
+  ctx.fillStyle=color;
+  ctx.fillRect(Math.round(x+rx*scale),Math.round(y+ry*scale),
+   Math.max(1,Math.round(w*scale)),Math.max(1,Math.round(h*scale)));
+ };
+ rect(17,16,30,34,'#8293a8');
+ rect(21,6,22,19,'#8293a8');
+ rect(11,50,42,24,'#8293a8');
+ rect(18,74,11,28,'#8293a8');
+ rect(35,74,11,28,'#8293a8');
+ rect(17,99,13,2,'#4c617a');
+ rect(34,99,13,2,'#4c617a');
 }
 function drawActor(ctx,actor,time,footX,footY,options={}){
- const x=Math.round(footX-FRAME.pivotX),y=Math.round(footY-FRAME.pivotY);
+ const scale=ACTOR_SCALE;
+ const x=Math.round(footX-FRAME.pivotX*scale);
+ const y=Math.round(footY-FRAME.pivotY*scale);
+ const drawWidth=FRAME.w*scale,drawHeight=FRAME.h*scale;
  const resolved=rig?.resolve(actor.profile,actor.pose,actor.moving);
  const sprite=resolved?.url?image(resolved.url):null;
  let drawn=false;
  if(sprite?.ready&&resolved){
   const direct=DIR.indexOf(actor.direction);
   const row=(resolved.row||0)+(direct<0?1:direct);
-  const frame=rig.frameAt(resolved,time);
+  // The published Mahluk Hidup sit strip is a transition. Looping it makes
+  // a seated actor repeatedly stand up. Hold its completed seated frame.
+  const frame=options.seated&&resolved.mode==='sit'
+   ?Math.max(0,Number(resolved.frames||1)-1)
+   :rig.frameAt(resolved,time);
   const sx=frame*FRAME.w,sy=row*FRAME.h;
   const pic=sprite.pic;
   if(sx+FRAME.w<=pic.naturalWidth&&sy+FRAME.h<=pic.naturalHeight){
@@ -101,15 +112,15 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
    const layers=urls.map(image);
    const drawPart=entry=>{
     if(entry?.ready&&entry.pic.naturalWidth>=FRAME.w&&entry.pic.naturalHeight>=FRAME.h)
-     ctx.drawImage(entry.pic,0,0,FRAME.w,FRAME.h,x,y,FRAME.w,FRAME.h);
+     ctx.drawImage(entry.pic,0,0,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
    };
    drawPart(layers[0]);
-   ctx.drawImage(pic,sx,sy,FRAME.w,FRAME.h,x,y,FRAME.w,FRAME.h);
+   ctx.drawImage(pic,sx,sy,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
    for(let i=1;i<layers.length;i++)drawPart(layers[i]);
    drawn=true;
   }
  }
- if(!drawn)silhouette(ctx,x,y);
+ if(!drawn)silhouette(ctx,x,y,scale);
  // Hide the scale ruler while sitting so it does not cover the WC/character contact.
  if(options.seated)return drawn;
  // Crosshair marks the actual Mahluk Hidup floor pivot without modifying pixels.
@@ -117,12 +128,13 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
  ctx.fillRect(Math.round(footX)-3,Math.round(footY),7,1);
  ctx.fillRect(Math.round(footX),Math.round(footY)-3,1,7);
  // The scale ruler is an overlay only, and is never exported.
- const markerX=Math.round(footX+37),topY=Math.round(footY-FRAME.pivotY);
+ const markerX=Math.round(footX+FRAME.pivotX*scale+5);
+ const topY=Math.round(footY-FRAME.pivotY*scale);
  ctx.fillStyle='#184b8a';
  ctx.fillRect(markerX,topY,1,FRAME.pivotY);
  ctx.fillRect(markerX-3,topY,7,1);ctx.fillRect(markerX-3,Math.round(footY)-1,7,1);
  ctx.font='9px monospace';
- ctx.fillText('112 px',markerX+4,topY+10);
+ ctx.fillText(Math.round(FRAME.h*scale)+' px',markerX+4,topY+10);
  return drawn;
 }
 function mount(api){
@@ -408,5 +420,5 @@ function mount(api){
   actor.active=false;actor.armed=false;stop();canvas.hidden=true;updateControls();
  },get actor(){return {...actor};},pathTo});
 }
-g.VLCharacterScale=Object.freeze({mount,pathTo,available,FRAME});
+g.VLCharacterScale=Object.freeze({mount,pathTo,available,FRAME,ACTOR_SCALE});
 })(window);
