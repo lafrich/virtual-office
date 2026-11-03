@@ -38,6 +38,7 @@
   <button class="chrome-tool" id="snap" title="Toggle half-tile snapping">▦</button>
   <button class="chrome-tool active" id="gridToggle" aria-pressed="true" title="Show / hide placement grid">#</button>
   <button class="chrome-tool" id="buildingOutlineTool" type="button" aria-pressed="false" title="Building View: toggle architectural outline / solid">◇</button>
+  <button class="chrome-tool active" id="markerVisibilityTool" type="button" aria-pressed="true" title="Show/hide yellow logic markers (not building outlines)">⚑</button>
   <div class="stamp">✳<div>V/L<br>MAP</div></div>
  </aside>
  <aside id="assetsPanel" aria-label="Asset browser">
@@ -86,6 +87,7 @@
      <option value="solid">■ Solid</option><option value="outline">◇ Outline</option>
     </select>
    </label>
+   <button id="markerVisibility" class="chrome-button" type="button" aria-pressed="true" title="Show or hide editable yellow logic markers">⚑ Markers ON</button>
    <button id="mobileAssets" type="button">▣ Assets</button>
    <button id="mobileInspector" type="button">☷ Inspector</button>
    <button id="cameraToCharacter" type="button" title="Jump to selected character and follow during Walk Test" aria-pressed="false">🎥 Character</button>
@@ -167,6 +169,16 @@
      <label>Capacity <input id="logicCapacity" type="number" min="0" max="1000" step="1"></label>
      <label>Entrance facing<select id="logicFacing"><option value="">None</option><option value="sw">SW</option><option value="se">SE</option><option value="ne">NE</option><option value="nw">NW</option></select></label>
      <label>Marker type<select id="logicMarkerKind"><option value="">Not a marker</option><option value="spawn">Spawn point</option><option value="entrance">Entrance point</option><option value="interaction">Interaction point</option><option value="patrol">Patrol point</option><option value="trigger">Trigger zone</option></select></label>
+     <div id="markerManager">
+      <div class="section-label">⚑ YELLOW LOGIC MARKERS</div>
+      <label>Choose marker <select id="markerPicker" aria-label="Select yellow logic marker"><option value="">No markers</option></select></label>
+      <div class="marker-manager-actions">
+       <button id="markerFind" type="button" title="Select and center marker on map">⌖ Find</button>
+       <button id="markerDelete" type="button" title="Delete selected marker (Undo available)">🗑 Delete</button>
+       <button id="markerDeleteAll" type="button" title="Remove every logic marker with confirmation">Remove All</button>
+      </div>
+      <p class="help">Pin kuning adalah logic marker. Bisa dipilih/hapus dari sini. Garis kuning pada gedung adalah panduan Outline; ubah ke Solid untuk menyembunyikannya.</p>
+     </div>
      <label>Blocking<select id="logicBlocking"><option value="auto">Use asset footprint</option><option value="yes">Solid</option><option value="no">Passable</option></select></label>
      <label>Developer notes<textarea id="logicNotes" placeholder="Instructions for next AI developer; no executable code"></textarea></label>
     </div>
