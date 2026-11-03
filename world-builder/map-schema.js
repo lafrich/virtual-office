@@ -17,7 +17,8 @@ function defaults(item,catalog,style){
  const layer=item.type==='marker'?'marker':item.type==='vehicle'?'prop':kind==='actor'?'character':
   ['tree'].includes(kind)||spec?.source==='pipeline-vegetation'?'vegetation':
   kind==='building'?'structure':spec?.group==='Interior'||spec?.group==='Office'?'interior':'prop';
- const subtype=item.type==='vehicle'?(item.vehicleId||'vehicle'):
+ const subtype=item.type==='virtual_asset'?(item.assetPath||'original_image').split('/').pop():
+  item.type==='vehicle'?(item.vehicleId||'vehicle'):
   item.type==='quest_npc'?(item.questId||'job'):
   item.type==='crowd'?'crowd':
   item.type==='pedestrian'?'walker':
