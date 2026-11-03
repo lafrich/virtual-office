@@ -875,8 +875,12 @@ function recycleVehicle(agent){
 function vehicleProbe(obj,position){
  return {...obj,x:position.x,z:position.z,collision:true,blocking:'auto'};
 }
-function stopVehicle(agent,cfg,dt,heading){
- if(cfg.enabled){
+function stopVehicle(agent,cfg,dt,heading,following=false){
+ if(following){
+  // A real queue stays in position until the car ahead moves. Do not
+  // recycle drivers just because normal following traffic is congested.
+  agent.stalledSeconds=0;
+ }else if(cfg.enabled){
   agent.stalledSeconds=(agent.stalledSeconds||0)+dt;
   // A permanently blocked authored road must not accumulate a static
   // pile of vehicles. Requeue this car off-map and retry from the start.
@@ -918,7 +922,7 @@ function updateVehicle(agent,obj,cfg,dt,blockers,live,cars){
  if(remaining<=.001||desired>=remaining-.0001&&desired>0){
   recycleVehicle(agent);return;
  }
- if(desired<=.00001){stopVehicle(agent,cfg,dt,dir);return;}
+ if(desired<=.00001){stopVehicle(agent,cfg,dt,dir,true);return;}
  const destination=traffic.sample(route,agent.distance+desired);
  if(!destination||!traffic.allowed(documentMap.map,destination.x,destination.z,'vehicle')){
   stopVehicle(agent,cfg,dt,dir);return;
