@@ -237,9 +237,9 @@ function renderCharacter(){
   ctx.clearRect(0,0,64,H);ctx.imageSmoothingEnabled=false;
   try{ctx.drawImage(entry.image,0,row*112,64,112,0,y,64,112);
    info.textContent='Preview '+referenceProfile.toUpperCase()+' · bukan ukuran placement';
-  }catch{drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Referensi karakter · gambar tidak tersedia';}
+  }catch{drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Referensi karakter · gambar tidak tersedia · bukan patokan ukuran placement';}
  };
- if(!url){drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Referensi karakter · sumber belum tersedia';return;}
+ if(!url){drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Referensi karakter · sumber belum tersedia · bukan patokan ukuran placement';return;}
  let entry=characterCache.get(url);
  if(!entry){
   const image=new Image();if(!url.startsWith('data:'))image.crossOrigin='anonymous';
@@ -253,7 +253,7 @@ function renderCharacter(){
   draw({...entry,profile:referenceProfile,view});
  }else{
   drawCharacterPlaceholder(ctx,referenceProfile);
-  info.textContent=entry.error?'Referensi karakter · sumber tidak tersedia':'Memuat referensi karakter…';
+  info.textContent=entry.error?'Referensi karakter · sumber tidak tersedia · bukan patokan ukuran placement':'Memuat referensi karakter… · bukan patokan ukuran placement';
  }
 }
 function snapshot(){
