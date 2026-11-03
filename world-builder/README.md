@@ -44,3 +44,12 @@ For schema contracts and game-logic handoff, see [MAP_SCHEMA.md](./MAP_SCHEMA.md
 - **Persistence**: terrain resides in `map.terrain` (`default` and individual `cells`). Undo/Redo and JSON export/import include the terrain layer. Road cells export their adjacency shape and driveable/walkable/buildable hints in `virtual-life-ai-map-v3`. These are annotations, not active driving or NPC code.
 
 The visual road/ground tile colors and custom building models are **editor placeholders**, not final pixel assets.
+
+## Mobile panel and unbounded map update (2026-11-03)
+
+- **Mobile Properties/Logic sheet**: the header now has a visible **⌄ Minimize** button. The file browser has an explicit × close button. A floating **☷ Properties** control reopens the inspector directly from the canvas. Selecting a building, terrain brush or prop no longer forces a sheet open over the placement view. Sheets are limited to roughly half the mobile viewport; their header remains visible during scroll.
+- **Unbounded grid**: the original `map.worldBounds` remains only as a historical sample-region reference. `map.unbounded=true` removes the fixed placement border and terrain painting bounds. The isometric grid and base grass plane are **camera-windowed** (rendering extends as you pan/pinch), while terrain and objects stay serialized in world coordinates. Offscreen ground tiles are not individually allocated.
+- **Viewport-limited Fill**: an unbounded grass field cannot be globally flood-filled, so Fill acts on the *current visible area*. The paint brush, roads, water, and placement are not restricted to that area.
+- Existing locally saved maps automatically migrate to unbounded mode without erasing the original Street2 placement data. Large drafts may encounter the browser's local-storage quota: export JSON regularly for long-running builds.
+
+This is a map editing system; it does **not** stream an infinite prepopulated town or enable gameplay mechanics.
