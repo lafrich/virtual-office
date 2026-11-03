@@ -156,7 +156,12 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
   glowCtx.globalCompositeOperation='screen';
   const size=cl(Math.min(rect.width,rect.height)/30,8,22);
   let n=0;
-  for(const o of getObjects()){
+  const sceneObjects=getObjects();
+  // Ambient vehicles are appended after buildings in Reference City. Draw
+  // them first so an abundance of building lamps cannot consume the glow cap.
+  const ordered=[...sceneObjects.filter(o=>o.type==='vehicle'),
+   ...sceneObjects.filter(o=>o.type!=='vehicle')];
+  for(const o of ordered){
    if(n>110)break;
    if(o.type==='marker')continue;
    const root=getRoot(o.id);if(!root||!root.visible)continue;
