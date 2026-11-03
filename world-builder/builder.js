@@ -728,8 +728,11 @@ function resetAutoRoute(agent,obj){
  agent.stalledSeconds=0;
  if(obj.type==='quest_npc'){
   agent.route=null;
-  // A stationary job NPC still requires the same pedestrian surface.
-  agent.root.visible=traffic.allowed(documentMap.map,obj.x,obj.z,'pedestrian');
+  // Stationary job NPCs are intentionally allowed on road, sidewalk and
+  // plaza (Pak Ogah can direct traffic from the road, not only sidewalk).
+  const t=documentMap.map.terrain||{default:'grass',cells:[]};
+  const tile=traffic.kind(t,Math.floor(obj.x),Math.floor(obj.z),traffic.index(t));
+  agent.root.visible=['road','sidewalk','plaza'].includes(tile);
   return;
  }
  // Preserve the preview's current location when a road/sidewalk is repainted;
@@ -1350,6 +1353,11 @@ function makeObject(type,point){
 }
 function snapAutomaticToSurface(o,point){
  if(!automaticType(o.type)||!point)return false;
+ if(o.type==='quest_npc'){
+  // A stationary NPC is an exact placement, not a sidewalk route agent.
+  o.x=Math.floor(point.x)+.5;o.z=Math.floor(point.z)+.5;
+  return true;
+ }
  const mode=o.type==='vehicle'?'vehicle':'pedestrian';
  const spot=traffic.spawnPosition(documentMap.map,point.x,point.z,mode,5);
  if(!spot)return false;
