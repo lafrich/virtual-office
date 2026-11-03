@@ -1751,6 +1751,9 @@ function toggleGrid(){
 $('gridToggle').onclick=toggleGrid;
 $('gridToolbar').onclick=toggleGrid;
 $('gridToggle').classList.add('active');
+$('buildingViewMode').onchange=()=>setBuildingView($('buildingViewMode').value);
+$('buildingOutlineTool').onclick=()=>setBuildingView(buildingViewMode==='solid'?'outline':'solid');
+syncBuildingViewControls();
 $('snap').textContent='▦';$('snap').title='Snap: ON';
 
 $('walkMode').onclick=()=>setMode(mode==='walk'?'select':'walk');
