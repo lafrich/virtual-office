@@ -84,7 +84,8 @@ function createRig(THREE,opt={}){
  function render(){
   const spec=resolve(who,state.pose,state.moving);
   if(!spec){state.loaded=false;state.failed=true;return;}
-  if(lastAction!==spec.mode){time=0;previous='';lastAction=spec.mode;}
+  const motionKey=state.pose||spec.mode;
+  if(lastAction!==motionKey){time=0;previous='';lastAction=motionKey;}
   const count=Math.max(1,Math.min(40,spec.frames)),frame=Math.min(frameAt(spec,time),count-1);
   const dir=DIR.indexOf(state.direction),row=spec.row+dir;
   const sprite=image(spec.url),asset=bridge()?.get(who);
@@ -92,8 +93,20 @@ function createRig(THREE,opt={}){
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
   const overlayUrls=['bag','shoes','pants','shirt','helmet'].map(layer);
   const overlays=overlayUrls.map(url=>image(url));
-  const action=({toilet:'toilet',bathe:'bathe',sleep:'sleep'})[state.pose]||null;
-  const editURL=action?g.VLActionFrames?.get(state.profile,action,state.direction,frame):null;
+  // Edited canonical activities follow the exact gameplay pose ID when
+  // available; legacy furniture aliases preserve old WC/shower/sleep edits.
+  const action=typeof state.pose==='string'&&/^[a-z][a-z0-9_]{0,89}$/.test(state.pose)?
+   state.pose:null;
+  const actionFallback={
+   use_toilet:['toilet_sit','toilet'],toilet:['toilet_sit'],
+   pee:['pee_stand','toilet'],poop:['toilet_sit','toilet'],
+   shower:['bathe'],bath:['bathe'],rest:['sleep'],lie:['lie_down','sleep'],
+   wash:['wash_hands'],work:['office_type'],study:['study_online','office_type'],
+   cook:['cook_stir'],sit:['sit_idle'],relax:['sit_idle']
+  };
+  const editedExact=action?g.VLActionFrames?.get(state.profile,action,state.direction,frame):null;
+  const editURL=editedExact||(actionFallback[action]||[]).map(id=>
+   g.VLActionFrames?.get(state.profile,id,state.direction,frame)).find(Boolean)||null;
   const edited=editURL?image(editURL):null;
   const status=overlays.map(o=>o?.ready?'1':'0').join('');
   // Full content fingerprint prevents two same-length pixel edits from sharing
