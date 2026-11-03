@@ -188,3 +188,11 @@ The source ZIP is **reference only**; none of its auth/server/client code is imp
 - The bed uses a 21px mattress-height contact point. Sleep uses the Mahluk Hidup sleep rig and Rest uses lie, with a local duvet foreground that covers the lower portion of the character. Chairs and sofas use a foreground cushion to make the sit pose appear behind the seating edge. The WC's original source-calibrated SW anchor remains unchanged.
 - Idle exits the action back onto the free approach tile. Sprite fallback silhouettes also distinguish sitting/lying from standing when published art is not yet loaded. This is an editor-only character preview; no new data is embedded in exported building packages or online gameplay.
 - Rotation visuals for all procedural interior props now use the same local-coordinate transform as their collision footprint and actor anchors. UI script query versions refresh stale cached asset previews.
+
+## v12 — One-tap furniture rotation and unified XP Paint interface
+
+- Pick any placed WC, bed, chair, sofa, or other prop in the isometric preview. An adjacent toolbar now offers **↶ 90°** and **↷ 90°**. On desktop, press **R** (clockwise) or **Shift+R** (counterclockwise) while not typing in a form field. A left-hand tool rail also exposes view switching and rotate shortcuts; on narrow screens it becomes a horizontal row.
+- Rotation is instant and updates the visible 3D-style furniture geometry, facing, and Mahluk Hidup action docking. There is no separate Save Placement click for a quick turn. Room layout changes still require the normal **Save Asset** to persist to local building storage.
+- Rotating wide furniture preserves its centre as closely as possible. If needed, it nudges by up to two tiles to a collision-safe position. It never overlaps another item, exceeds room bounds, or blocks the doorway. If none fits, the turn is rejected without changing the item.
+- Plan / Edit now shows a compass-style facing arrow for square-footprint assets, which otherwise look unchanged from above.
+- The Bangun Ruang window chrome, navigation, tab states, canvas surface, side panels, bevel buttons, spacing, and responsive tool rail now follow the visual system used by Mahluk Hidup and Semesta. All controls remain interactive rather than decorative.
