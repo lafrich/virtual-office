@@ -5,6 +5,23 @@
 (function(g){
 'use strict';
 const KEY='virtual-life-bangun-objects-v1', DIR=['sw','se','ne','nw'];
+const PIXEL_WORLD=Math.SQRT2/64, VERTICAL_COMP=2/Math.sqrt(3);
+const CHARACTER_HEIGHT=72*PIXEL_WORLD*VERTICAL_COMP; // Actual visible Mahluk Hidup body, not 112px sprite frame
+const DEFAULT_HEIGHT=Object.freeze({plant:5.5,lamp:4.7,furniture:1.5,street:1.4,decor:1.6});
+const BUILTIN_WORLD_HEIGHT=Object.freeze({'small-tree':5.5,'potted-plant':1.3,
+ 'park-lamp':4.7,'park-bench':1.3,'park-table':1.25,'trash-bin':1.15});
+function placementDimensions(row,dim,pivot,isBuiltIn){
+ const naturalHeight=dim[1]*PIXEL_WORLD*VERTICAL_COMP;
+ const authoredHeight=Number(row.worldHeight);
+ const useWorldHeight=(row.worldHeight!==undefined&&row.worldHeight!==null&&Number.isFinite(authoredHeight)&&authoredHeight>=.3&&authoredHeight<=24)||
+  (isBuiltIn&&Object.prototype.hasOwnProperty.call(BUILTIN_WORLD_HEIGHT,row.id));
+ if(!useWorldHeight)return {width:dim[0]*PIXEL_WORLD,height:naturalHeight};
+ // Height is measured from ground pivot to TOP, not the frame's transparent lower padding.
+ const visibleWorldHeight=isBuiltIn?BUILTIN_WORLD_HEIGHT[row.id]:authoredHeight;
+ const planeHeight=visibleWorldHeight*dim[1]/Math.max(1,pivot[1]);
+ return {width:planeHeight*dim[0]/dim[1]/VERTICAL_COMP,height:planeHeight};
+}
+
 const CATEGORY={
  plant:{label:'Tanaman',group:'Vegetation',layer:'vegetation',defaultFootprint:[1,1],collision:false,guide:'Tanaman: kanopi lebih lebar dari batang; pivot tepat pada dasar pot/batang. Cocok di rumput atau trotoar.'},
  lamp:{label:'Lampu',group:'Street / Lighting',layer:'prop',defaultFootprint:[1,1],collision:false,guide:'Lampu: tiang ramping, cahaya cukup digambar sebagai pixel solid. Jangan gunakan glow blur; pivot pada kaki tiang.'},
@@ -142,6 +159,10 @@ function valid(row){
  if(typeof row.name!=='string'||!row.name.trim()||row.name.length>80)return false;
  if(!Array.isArray(row.footprint)||row.footprint.length!==2||
   row.footprint.some(x=>!Number.isFinite(Number(x))||x<.25||x>12))return false;
+ // Optional for old authored objects. New Pixel Creator versions store their
+ // real Semesta placement height, independent of sprite resolution.
+ if(row.worldHeight!==undefined&&row.worldHeight!==null&&
+  (!Number.isFinite(Number(row.worldHeight))||Number(row.worldHeight)<.3||Number(row.worldHeight)>24))return false;
  if(!row.views||!DIR.every(d=>{
   const v=row.views[d];
   return !!v&&Array.isArray(v.size)&&v.size.length===2&&v.size.every(n=>Number.isInteger(n)&&n>=1&&n<=256)&&
@@ -160,11 +181,14 @@ function makeSpec(row,isBuiltIn){
  const id=isBuiltIn?row.id:row.id;
  const view=isBuiltIn?dimensions(id,'sw'):row.views.sw;
  const dim=view?.size||[64,96],pivot=view?.pivot||[32,90],category=CATEGORY[row.category];
+ const placement=placementDimensions(row,dim,pivot,isBuiltIn);
  return Object.freeze({
  id,file:'object:'+id,label:row.name,group:category.group,source:'bangun-object',
  objectCategory:row.category,layer:category.layer,published:true,builtIn:isBuiltIn,
  collision:row.collision!==false,footprint:row.footprint.slice(),size:dim,pivot,
- width:dim[0]*Math.SQRT2/64,height:dim[1]*Math.SQRT2/64*2/Math.sqrt(3),
+ width:placement.width,height:placement.height,
+ worldHeight:placement.height*(pivot[1]/dim[1]), // Visible height above shared foot pivot
+ characterHeight:CHARACTER_HEIGHT,
  interactions:row.interactions||[],blocking:row.collision===false?'no':'yes',
  variants:Object.fromEntries(DIR.map(d=>[d,{size:(isBuiltIn?dimensions(id,d):row.views[d])?.size||dim,
   pivot:(isBuiltIn?dimensions(id,d):row.views[d])?.pivot||pivot}]))
@@ -184,6 +208,7 @@ function refresh(){
  return {count:available.length,builtIn:builtins.length,custom:available.length-builtins.length};
 }
 const api=Object.freeze({key:KEY,categories:CATEGORY,builtins,read,valid,refresh,image,
+ characterWorldHeight:CHARACTER_HEIGHT,defaultWorldHeight:DEFAULT_HEIGHT,
  save(row){
   if(!valid(row))throw new Error('Objek tidak valid: isi 4 arah PNG, kategori dan footprint.');
   const list=read().filter(x=>x.id!==row.id);
