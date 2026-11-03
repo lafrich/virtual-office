@@ -100,6 +100,7 @@
     <button id="duplicate" title="Duplicate">Duplicate</button>
     <button id="scaleDown" title="Scale down">− Size</button><button id="scaleUp" title="Scale up">+ Size</button>
     <button id="delete" class="danger" title="Delete selected">Delete</button>
+    <button id="enterBuilding" type="button" title="Preview inside authored Bangun Ruang building" hidden>🚪 Enter Building</button>
    </div>
    <div class="tabs" role="tablist">
     <button class="tab active" id="tabLayout" type="button">LAYOUT</button>
@@ -256,11 +257,29 @@
   </div>
  </section>
 </div>
+<dialog id="interiorWalkthrough" aria-label="Enter interactive building" style="border:1px solid #1e4e91;border-radius:6px;padding:0;width:min(96vw,720px);max-height:92dvh;overflow:auto;box-shadow:0 16px 60px #152a5080">
+ <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#0b57b4;color:#fff">
+  <strong id="interiorWalkthroughTitle" style="flex:1">BUILDING / INTERIOR</strong>
+  <button id="interiorWalkthroughClose" type="button" style="padding:5px 9px" aria-label="Exit building">× Exit</button>
+ </div>
+ <div style="padding:12px;background:#f4f4eb;display:grid;gap:10px">
+  <label style="font-size:12px">Floor <select id="interiorWalkthroughFloor" style="font-size:12px;padding:7px"></select></label>
+  <div style="display:grid;place-items:center;background:repeating-conic-gradient(#dde6ee 0 25%,#f7f9fb 0 50%) 50%/16px 16px;padding:8px;min-height:230px;overflow:hidden">
+   <canvas id="interiorWalkthroughCanvas" width="320" height="320" style="image-rendering:pixelated;max-height:55dvh;max-width:100%;touch-action:manipulation"></canvas>
+  </div>
+  <p id="interiorWalkthroughDetail" style="font:12px/1.5 Tahoma;margin:0;color:#34536c">Select an interior object to inspect its action.</p>
+  <button id="interiorWalkthroughUse" type="button" disabled>▶ Use Selected Object</button>
+  <small style="color:#657b90;font:11px/1.5 Tahoma">Editor interaction preview only. This does not move the multiplayer avatar into an online interior.</small>
+ </div>
+</dialog>
 </div></div>
 <script src="./asset-catalog.js?v=2"></script>
 <script src="./pipeline-catalog.js?v=p4"></script>
 <script src="./semesta-building-spec.js?v=1"></script>
-<script src="./bangun-ruang/semesta-bridge.js?v=2"></script>
+<script src="./bangun-ruang/interior-model.js?v=3"></script>
+<script src="./bangun-ruang/interior-pixel-art.js?v=3"></script>
+<script src="./bangun-ruang/semesta-interior-preview.js?v=3"></script>
+<script src="./bangun-ruang/semesta-bridge.js?v=3"></script>
 <script src="./vegetation-catalog.js?v=builder-v3"></script>
 <script src="./pipeline-character-rig.js?v=calibrated4"></script>
 <script src="./style-rules.js?v=semesta-v2-final"></script>

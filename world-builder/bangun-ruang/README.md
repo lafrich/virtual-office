@@ -48,3 +48,43 @@ The local integration works only in the **same browser profile and GitHub Pages 
 - Modular facade options and per-direction pixel-editing are implemented, but there is not yet multi-layer interior construction or true native-room editing.
 - Large-building collision and occlusion in Semesta are approximate editor previews, not a multiplayer navmesh.
 - A production release needs sheet/atlas production, stable-ID cloud publishing, interaction-anchor offsets, and visual comparison against actual game scenes.
+
+
+## v3 — Mobile-responsive editor and enterable interiors
+
+Bangun Ruang now follows the Mahluk Hidup modular workflow: Semesta building base → exterior customization → interactive mode → room/furniture placement → character action slots → save and place in Semesta.
+
+### UI and furniture
+
+- On mobile: compact Save/Menu toolbar, Semesta base selector before preview, compact exterior/interior preview, direction switch, tabbed Exterior/Interior/Actions/Data inspector and collapsible Saved Buildings.
+- On desktop: three-pane editor remains and property tabs prevent tall stacked forms.
+- Interactive buildings have an entrance and one editable floor plan per building floor; non-interactive buildings have no entrance or interior action slots.
+- Interior templates: Empty, Rumah, Bedroom, Bathroom, Office, Warung, Cafe, Kost.
+- Assets: WC, shower, bathtub, sink, bed, wardrobe, chair, sofa, table, desk, office chair, computer, stove, fridge, kitchen sink, cashier, shelf and display counter.
+- Select an asset then tap the floor grid to place, or tap furniture to select and move. Editor blocks overlaps and doorway obstruction.
+- Each object has position, 90-degree rotation, capacity, trigger radius and an explicit selected action. It may be duplicated or removed.
+
+### Mahluk Hidup action alignment
+
+The canonical Semesta character rig maps these saved poses to original V6B sprite rows.
+
+| Interior item | Saved action | Character pose |
+|---|---|---|
+| WC | use_toilet, pee, poop | toilet (existing sit rig) |
+| Bed | sleep, rest | sleep, lie |
+| Chair | sit | sit |
+| Desk | work, study | work (sit_type rig) |
+| Shower / Bathtub | bathe | bathe (swim rig) |
+| Sofa | sit, relax | sit |
+| Cashier | buy, sell | talk |
+| Stove / Sink | cook, wash | no dedicated pose, metadata hook only |
+
+The editor does not generate nonexistent animations or modify the original Mahluk Hidup rig.
+
+### Storage and Semesta preview
+
+Building package format remains virtual-life-building-asset-v1 and adds: interactive, enterable, entrance, interior (virtual-life-interiors-v1), actionSlots, plus any object actions. The Semesta bridge now accepts decimal footprints (such as 3 x 3.2) and preserves interior and trigger data. City JSON import/export retains these fields.
+
+Select a placed interactive building in Semesta, then choose Enter Building to open the floor-plan preview. Select furniture and Use to trigger its supported VLCharacterRig preview pose on a local editor character. A game-ready multiplayer interior transition, physics and job/economy integration are still separate implementation work.
+
+Data is stored locally in the browser origin; it does not automatically sync to GitHub or the game backend. Virtual Life main game and Mahluk Hidup repositories are unchanged.

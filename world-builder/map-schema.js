@@ -94,8 +94,11 @@ function enrich(map,catalog,style){
   const fp=style.footprint(o,catalog);
   o.footprint={w:Math.round(fp[0]*100)/100,d:Math.round(fp[1]*100)/100};
   o.interactionHooks=o.interactions.map(name=>({id:slug(name),kind:'proposed',enabled:false}));
-  if(o.entranceFacing)o.entrance={facing:o.entranceFacing,localOffset:{c:0,r:o.footprint.d/2}};
-  else delete o.entrance;
+  if(o.entranceFacing){
+   if(o.enterable===true&&o.entrance?.entry){
+    o.entrance={...o.entrance,facing:o.entranceFacing};
+   }else o.entrance={facing:o.entranceFacing,localOffset:{c:0,r:o.footprint.d/2}};
+  }else delete o.entrance;
   return o;
  });
  return doc;
