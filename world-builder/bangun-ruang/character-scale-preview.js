@@ -367,7 +367,7 @@ function mount(api){
    if(anchor){
     // Last step moves from the free approach tile ONTO the fixture seat.
     // This movement is separate from the collision-safe floor path.
-    status('Aligning character with '+item.name+' seat...');
+    status('Aligning character with '+item.name+(item.assetId==='bed'?' mattress...':' seat...'));
     walk([[actor.c,actor.r],[anchor.c-.5,anchor.r-.5]],finish);
    }else finish();
   };
