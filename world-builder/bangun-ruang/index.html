@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#063c99"><meta name="color-scheme" content="only light">
+<title>Bangun Ruang — Virtual Life Building Studio</title>
+<style>
+:root{font-family:Tahoma,Verdana,sans-serif;color:#273448;background:#0860bd;font-size:12px}
+*{box-sizing:border-box}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}
+body{margin:0;min-height:100vh;background:linear-gradient(#1d76d5,#0755a8 55%,#07418a);padding:20px}
+#app{max-width:1490px;min-height:calc(100vh - 40px);margin:auto;border:1px solid #092c83;border-radius:9px 9px 4px 4px;box-shadow:0 13px 40px #001c5770;background:#ece9d8;display:flex;flex-direction:column;overflow:hidden}
+.titlebar{background:linear-gradient(#58a4ff 0%,#1466cd 12%,#0742b4 68%,#125dda 100%);color:white;display:flex;align-items:center;padding:9px 13px;gap:9px;text-shadow:0 1px #00378b;letter-spacing:.2px}
+.mark{display:grid;place-items:center;width:26px;height:26px;background:#fbd66b;color:#103c79;border:2px solid #fff;font-size:19px;font-weight:900;box-shadow:inset 0 0 0 1px #5375a4}
+.titlebar strong{font-size:14px;letter-spacing:.8px}.titlebar small{opacity:.8;margin-left:10px}
+.win{margin-left:auto;letter-spacing:5px;font-weight:bold}
+nav,.bottom{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 10px;background:#f5f4e9;border-bottom:1px solid #c5c5b8}
+button,a.button{background:linear-gradient(#fff,#e7ebf2);border:1px solid #8799ad;color:#21344d;border-radius:3px;padding:7px 10px;text-decoration:none}
+button:hover,a.button:hover{border-color:#2569c4;background:#f4f8ff}
+button.primary{background:linear-gradient(#4b9fff,#1261c2);color:white;font-weight:bold;border-color:#164f9c}
+button.danger{color:#a33335}button.active{border-color:#2259a8;background:#d7e8ff;font-weight:bold}
+nav .spacer,.bottom .spacer{flex:1}
+.workspace{display:grid;grid-template-columns:245px minmax(380px,1fr) 288px;flex:1;min-height:600px}
+.panel{min-width:0;border-right:1px solid #c5c8c2;background:#f6f5ed;display:flex;flex-direction:column}
+.panel.right{border-right:0;border-left:1px solid #c5c8c2}
+.heading{padding:10px 12px;border-bottom:1px solid #b9c3ce;background:linear-gradient(#fff,#e7ecf3);display:flex;justify-content:space-between;align-items:center;letter-spacing:.65px;font-size:11px}
+.search{display:block;margin:10px}input,select,textarea{width:100%;background:white;border:1px solid #a4b0c0;border-radius:2px;color:#243a53;padding:7px 8px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#2d6dca;box-shadow:0 0 0 2px #9dc8fb70}
+.library{overflow:auto;flex:1;min-height:150px}
+.library button{display:flex;align-items:center;gap:9px;text-align:left;width:100%;padding:10px;border:0;border-bottom:1px solid #e0e4e8;border-radius:0;background:transparent}
+.library button:hover,.library button.selected{background:#dbeaff}
+.preview-mini{width:47px;height:45px;background:repeating-conic-gradient(#e8eff9 0 25%,#f7faff 0 50%) 50%/12px 12px;display:grid;place-items:center;flex-shrink:0}
+.preview-mini img{max-width:100%;max-height:100%;image-rendering:pixelated}
+.library small{display:block;color:#6d7f8e;margin-top:4px}
+.preset{padding:10px;border-bottom:1px solid #ccd1d3}
+.preset h4,.section{font-size:10px;letter-spacing:.9px;color:#4a6e9e;margin:2px 0 10px;font-weight:800}
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.preset-grid button{font-size:11px}
+.center{background:#d9e2e7;display:flex;flex-direction:column;min-width:0}
+.canvas-head{background:#f7fafc;border-bottom:1px solid #b8c1c8;padding:11px 14px;display:flex;justify-content:space-between;font-weight:bold;gap:8px}
+.canvas-head .muted,.muted{color:#718397;font-weight:normal}
+.stage{flex:1;min-height:360px;display:grid;place-items:center;overflow:auto;padding:18px;background-color:#e8eef3;background-image:linear-gradient(45deg,#dce4eb 25%,transparent 25%),linear-gradient(-45deg,#dce4eb 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#dce4eb 75%),linear-gradient(-45deg,transparent 75%,#dce4eb 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
+#preview{width:min(100%,640px);max-height:620px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 1px #3b53601b)}
+.direction-bar{padding:10px;background:#f6f6f0;border-top:1px solid #c9d1d6;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.direction-bar span{margin-left:auto;color:#6c7983;font-size:10px}
+.info{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #c7d3df;background:#edf3f7;flex-wrap:wrap;font-size:11px}
+.info div{flex:1;white-space:nowrap}
+.properties{padding:12px;overflow:auto;flex:1}
+.properties label{display:block;font-size:11px;color:#40556a;margin:10px 0 4px;font-weight:bold}
+.properties label:first-child{margin-top:0}
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dual label{margin-top:8px}
+.colors{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.note{background:#e8f1ff;border:1px solid #c6d9ef;padding:9px;line-height:1.6;margin-top:11px;color:#425c77}
+.note b{color:#1c4a86}textarea{resize:vertical;min-height:52px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:13px}
+.status{font-size:11px;color:#4c667c}
+.bottom{border-top:1px solid #bdc8cd;border-bottom:0}
+dialog{border:1px solid #34619e;border-radius:5px;max-width:480px;width:calc(100% - 30px);box-shadow:0 15px 60px #001a4590;padding:0;background:#f8f7ed}
+dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#fff;padding:12px 15px;font-weight:bold}dialog section{padding:15px;line-height:1.7}dialog footer{padding:12px;text-align:right}
+@media(max-width:1000px){body{padding:0}#app{border-radius:0;min-height:100dvh}.workspace{grid-template-columns:190px minmax(260px,1fr)}.panel.right{grid-column:1/-1;border-top:1px solid #b8c6d4;border-left:0}.properties{display:grid;grid-template-columns:repeat(3,1fr);gap:7px 12px}.properties>*{min-width:0}.properties label{margin:5px 0}.properties .note,.properties .controls{grid-column:1/-1}}
+@media(max-width:640px){.workspace{display:flex;flex-direction:column}.panel{border-right:0}.panel.left{max-height:210px}.preset{padding:6px 10px}.preset-grid{grid-template-columns:repeat(5,1fr)}.preset-grid button{padding:5px 2px;font-size:10px}.library{max-height:100px}.stage{min-height:340px}.properties{grid-template-columns:1fr 1fr}.titlebar small{display:none}nav{gap:5px}nav button,nav a.button{padding:6px;font-size:10px}.canvas-head{font-size:10px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header class="titlebar"><div class="mark">▤</div><div><strong>BANGUN RUANG</strong><small>.PNT — Building Studio</small></div><div class="win">_ □ ×</div></header>
+<nav>
+ <button id="newBtn">▤ New</button><button id="saveBtn" class="primary">💾 Save Asset</button>
+ <button id="exportBtn">↓ Export Package</button><button id="importBtn">↑ Import</button>
+ <a class="button" href="../" title="Open Semesta City Builder">◈ Open Semesta</a>
+ <span class="spacer"></span><span class="status">VIRTUAL LIFE · V6B PIXEL ART</span>
+</nav>
+<div class="workspace">
+<aside class="panel left">
+ <div class="heading"><strong>FILES / BUILDINGS</strong><span id="count">00</span></div>
+ <div class="preset"><h4>NEW FROM TEMPLATE</h4><div class="preset-grid">
+ <button data-preset="rumah">Rumah</button><button data-preset="ruko">Ruko</button>
+ <button data-preset="warung">Warung</button><button data-preset="kost">Kost</button><button data-preset="kantor">Kantor</button>
+ </div></div>
+ <div class="search"><input id="search" type="search" placeholder="⌕ Find building..."></div>
+ <div class="library" id="library"></div>
+ <div class="heading"><span>LOCAL ASSET STORAGE</span><span>V1</span></div>
+</aside>
+<section class="center">
+ <div class="canvas-head"><span id="canvasName">UNTITLED BUILDING</span><span class="muted">ISO 2:1 · 64×32 TILE · 1X PIXELS</span></div>
+ <div class="stage"><img id="preview" alt="Pixel art isometric building preview"></div>
+ <div class="direction-bar"><strong>VIEW</strong>
+ <button class="active" data-dir="sw">SW</button><button data-dir="se">SE</button>
+ <button data-dir="ne">NE</button><button data-dir="nw">NW</button>
+ <span>4 NATIVE SPRITE VIEWS</span></div>
+ <div class="info"><div><b>FOOTPRINT</b><br><span id="footprintText">4 × 4 tiles</span></div>
+ <div><b>SPRITE / PIVOT</b><br><span id="sizeText">—</span></div>
+ <div><b>COLLISION</b><br><span id="collisionText">SOLID</span></div></div>
+</section>
+<aside class="panel right">
+ <div class="heading"><strong>PROPERTIES / ASSET</strong><span>✕</span></div>
+ <div class="properties">
+ <label>BUILDING NAME<input id="name" maxlength="50" value="Rumah Kampung 01"></label>
+ <label>BUILDING TYPE<select id="kind"><option value="rumah">Rumah</option><option value="ruko">Ruko</option><option value="warung">Warung</option><option value="kost">Kost</option><option value="kantor">Kantor</option></select></label>
+ <div class="dual"><label>WIDTH / C<input id="w" type="number" min="2" max="12" step="1" value="4"></label><label>DEPTH / R<input id="d" type="number" min="2" max="12" step="1" value="4"></label></div>
+ <div class="dual"><label>FLOORS<input id="floors" type="number" min="1" max="7" step="1" value="1"></label><label>WINDOWS / FLOOR<input id="windows" type="number" min="0" max="6" step="1" value="2"></label></div>
+ <div class="colors"><div><label>WALL PALETTE<select id="wall"><option value="cream">Cream</option><option value="concrete">Concrete</option><option value="blue">Sky Blue</option><option value="green">Mint Green</option><option value="pink">Warm Pink</option></select></label></div><div><label>ROOF PALETTE<select id="roof"><option value="terracotta">Terracotta</option><option value="slate">Slate</option><option value="navy">Navy</option><option value="green">Green</option></select></label></div></div>
+ <label>ROOF SHAPE<select id="roofShape"><option value="gable">Gable / Atap Pelana</option><option value="flat">Flat / Dak</option></select></label>
+ <label>FACADE DETAILS<select id="detail"><option value="simple">Simple</option><option value="awning">Awning / Kanopi</option><option value="storefront">Glass Storefront</option></select></label>
+ <label>SIGN TEXT (PIXEL FONT)<input id="sign" maxlength="14" placeholder="WARUNG / KOST"></label>
+ <label>ENTRANCE FACING<select id="front"><option value="sw">SW / kiri depan</option><option value="se">SE / kanan depan</option></select></label>
+ <label>INTERACTIONS (COMMA-SEPARATED)<input id="actions" value="enter" placeholder="enter,buy,work"></label>
+ <label>COLLISION<select id="collision"><option value="yes">Solid / Block character</option><option value="no">Passable / No collision</option></select></label>
+ <div class="note"><b>Virtual Life art contract</b><br>Shading 4–5 tones · light top-left · no black outline · nearest-neighbor · ground pivot · four directions. PNG uses transparent background. Interactions are proposed metadata, not playable actions.</div>
+ <div class="controls"><button id="pngBtn">↓ PNG Current View</button><button id="publishBtn" class="primary">✳ Save to Semesta</button><button id="deleteBtn" class="danger">Delete Saved Asset</button><button id="helpBtn">? Guide</button></div>
+ </div>
+</aside>
+</div>
+<footer class="bottom"><span id="status">● Ready — unsaved new building</span><span class="spacer"></span><span>Bangun Ruang / Virtual Life Building Asset Pipeline</span></footer>
+</div>
+<input type="file" id="upload" accept=".json,application/json" hidden>
+<dialog id="guide"><header>✳ BANGUN RUANG — QUICK GUIDE</header><section>
+ <b>1.</b> Pilih template bangunan dan atur footprint, lantai, material, serta detail di Properties.<br>
+ <b>2.</b> Cek SW, SE, NE, NW. Setiap arah dirender ulang di grid pixel art, bukan diputar dengan anti-aliasing.<br>
+ <b>3.</b> Save Asset menyimpan draft di browser ini. Save to Semesta mendaftarkan aset agar muncul di Semesta → BUILDINGS, di browser dan origin yang sama.<br>
+ <b>4.</b> Export Package mengunduh JSON lengkap dengan empat PNG embedded. PNG Current View mengunduh satu gambar transparan.<br>
+ <b>5.</b> Pintu, collision, dan interaksi masih metadata authoring; tidak langsung mengaktifkan gameplay atau multiplayer.<br>
+ <p><b>Penting:</b> penyimpanan bersifat lokal, bukan commit GitHub atau cloud. Export untuk backup lintas perangkat.</p>
+ </section><footer><button id="closeGuide">Close</button></footer></dialog>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const KEY='virtual-life-bangun-ruang-v1';
+const palette={
+ cream:['#FFF7E4','#E8DEC6','#CFC3A8','#a79c83','#847765'],
+ concrete:['#e5e4de','#c6c9c8','#9da8aa','#79858b','#566571'],
+ blue:['#d5ebf6','#a4d9f2','#8ecdeb','#6497b1','#476b88'],
+ green:['#dcf2da','#afd7b5','#82b89a','#5b9078','#406b60'],
+ pink:['#f8dee1','#f0adb8','#de879b','#ae627b','#81506c'],
+ terracotta:['#f1bc8a','#d89065','#b86b55','#925044','#6a3f3d'],
+ slate:['#b4bfca','#8694a3','#697988','#4a5c6c','#344657'],
+ navy:['#96b4ce','#577aab','#395f92','#29456b','#24344f']
+};
+const PXFONT={
+ A:['010','101','111','101','101'],B:['110','101','110','101','110'],C:['011','100','100','100','011'],D:['110','101','101','101','110'],E:['111','100','110','100','111'],F:['111','100','110','100','100'],G:['011','100','101','101','011'],H:['101','101','111','101','101'],I:['111','010','010','010','111'],J:['001','001','001','101','010'],K:['101','101','110','101','101'],L:['100','100','100','100','111'],M:['101','111','111','101','101'],N:['101','111','111','111','101'],O:['010','101','101','101','010'],P:['110','101','110','100','100'],Q:['010','101','101','111','011'],R:['110','101','110','101','101'],S:['011','100','010','001','110'],T:['111','010','010','010','010'],U:['101','101','101','101','111'],V:['101','101','101','101','010'],W:['101','101','111','111','101'],X:['101','101','010','101','101'],Y:['101','101','010','010','010'],Z:['111','001','010','100','111'],
+ '0':['111','101','101','101','111'],'1':['010','110','010','010','111'],'2':['110','001','010','100','111'],'3':['110','001','010','001','110'],'4':['101','101','111','001','001'],'5':['111','100','110','001','110'],'6':['011','100','110','101','010'],'7':['111','001','010','010','010'],'8':['010','101','010','101','010'],'9':['010','101','011','001','110'],' ':['000','000','000','000','000']
+};
+const presets={
+ rumah:{name:'Rumah Kampung 01',w:4,d:4,floors:1,windows:2,wall:'cream',roof:'terracotta',roofShape:'gable',detail:'simple',sign:'',front:'sw',actions:'enter'},
+ ruko:{name:'Ruko Fotokopi',w:3,d:5,floors:3,windows:2,wall:'concrete',roof:'slate',roofShape:'flat',detail:'storefront',sign:'FOTOKOPI',front:'sw',actions:'enter,buy'},
+ warung:{name:'Warung Madura',w:3,d:3,floors:1,windows:1,wall:'green',roof:'navy',roofShape:'gable',detail:'awning',sign:'WARUNG',front:'sw',actions:'enter,buy'},
+ kost:{name:'Kost Bandung',w:6,d:4,floors:2,windows:3,wall:'cream',roof:'slate',roofShape:'gable',detail:'simple',sign:'KOST',front:'sw',actions:'enter,rent'},
+ kantor:{name:'Gedung Kantor',w:7,d:6,floors:4,windows:4,wall:'blue',roof:'navy',roofShape:'flat',detail:'storefront',sign:'KANTOR',front:'sw',actions:'enter,work'}
+};
+const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision'];
+const dirs=['sw','se','ne','nw'];
+let current=null,view='sw',saved=[];
+try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||a));
+const safe=s=>String(s||'').replace(/[<>"'&]/g,'').slice(0,60);
+const config=()=>{
+ const c={};for(const k of ids)c[k]=$(k).value;
+ c.w=clamp(Math.round(c.w),2,12);c.d=clamp(Math.round(c.d),2,12);
+ c.floors=clamp(Math.round(c.floors),1,7);c.windows=clamp(Math.round(c.windows),0,6);
+ c.name=safe(c.name||'Untitled Building');c.sign=safe(c.sign||'').toUpperCase().slice(0,14);
+ c.actions=safe(c.actions||'enter');return c;
+};
+function apply(c){
+ for(const k of ids)if(Object.hasOwn(c,k))$(k).value=c[k];
+ render();
+}
+function preset(kind){const c={...presets[kind],kind,collision:'yes'};current=null;apply(c);status('New '+kind+' · unsaved');drawLibrary();}
+function status(message){$('status').textContent='● '+message;}
+function shape(ctx,pts,color){
+ if(pts.length<3)return;
+ const min=Math.floor(Math.min(...pts.map(p=>p[1]))),max=Math.ceil(Math.max(...pts.map(p=>p[1])));
+ ctx.fillStyle=color;
+ for(let y=min;y<max;y++){
+  const xs=[];for(let i=0;i<pts.length;i++){
+   const a=pts[i],b=pts[(i+1)%pts.length],yy=y+.5;
+   if((a[1]<=yy&&b[1]>yy)||(b[1]<=yy&&a[1]>yy))xs.push(a[0]+(yy-a[1])*(b[0]-a[0])/(b[1]-a[1]));
+  }xs.sort((a,b)=>a-b);
+  for(let i=0;i+1<xs.length;i+=2){const left=Math.ceil(xs[i]-.5),right=Math.ceil(xs[i+1]-.5);if(right>left)ctx.fillRect(left,y,right-left,1);}
+ }
+}
+function makeView(c,dir){
+ const W=c.w,D=c.d,H=c.floors*70+10;
+ const width=Math.ceil((W+D)*32+104),height=Math.ceil(H+(W+D)*16+100);
+ const can=document.createElement('canvas');can.width=width;can.height=height;
+ const ctx=can.getContext('2d',{alpha:true});ctx.imageSmoothingEnabled=false;
+ const ox=Math.round(width/2),oy=height-Math.round((W+D)*8+40);
+ const P=(x,z,y)=>[ox+Math.round((x-z)*32),oy+Math.round((x+z)*16-y)];
+ const wall=palette[c.wall]||palette.cream,roof=palette[c.roof]||palette.terracotta;
+ const shade=wall[4],glass=['#c4e8f4','#89b9cf','#567f99','#37556c'];
+ const A=P(-W/2,-D/2,0),B=P(W/2,-D/2,0),C=P(W/2,D/2,0),D0=P(-W/2,D/2,0);
+ const At=P(-W/2,-D/2,H),Bt=P(W/2,-D/2,H),Ct=P(W/2,D/2,H),Dt=P(-W/2,D/2,H);
+ // Exact flat alpha shadow (0/56/255 only), no blur.
+ ctx.fillStyle='rgba(0,0,0,0.2196078431)';
+ for(let y=-8;y<=8;y++){
+  const rx=Math.floor(((W+D)*19+10)*Math.sqrt(Math.max(0,1-y*y/81)));
+  ctx.fillRect(ox-rx+8,oy+y+6,rx*2,1);
+ }
+ shape(ctx,[Dt,Ct,C,D0],wall[2]);
+ shape(ctx,[Bt,Ct,C,B],wall[3]);
+ // Horizontal plinth accents instead of black outlines.
+ shape(ctx,[P(-W/2,D/2,0),P(W/2,D/2,0),P(W/2,D/2,6),P(-W/2,D/2,6)],wall[3]);
+ shape(ctx,[P(W/2,-D/2,0),P(W/2,D/2,0),P(W/2,D/2,6),P(W/2,-D/2,6)],wall[4]);
+ function faceRect(side,u0,u1,y0,y1,col,offset=.025){
+  const pts=side==='sw'?
+    [P(u0,D/2+offset,y0),P(u1,D/2+offset,y0),P(u1,D/2+offset,y1),P(u0,D/2+offset,y1)]:
+    [P(W/2+offset,u0,y0),P(W/2+offset,u1,y0),P(W/2+offset,u1,y1),P(W/2+offset,u0,y1)];
+  shape(ctx,pts,col);
+ }
+ function window(side,axis,y){
+  faceRect(side,axis-.31,axis+.31,y,y+29,wall[4]);
+  faceRect(side,axis-.25,axis+.25,y+3,y+26,glass[1]);
+  faceRect(side,axis-.25,axis-.02,y+15,y+25,glass[0]);
+  faceRect(side,axis+.02,axis+.25,y+3,y+14,glass[2]);
+  faceRect(side,axis-.02,axis+.02,y+3,y+26,wall[3]);
+  faceRect(side,axis-.34,axis+.34,y-2,y+1,wall[1]);
+ }
+ function frontage(side,axisLen,isFront){
+  const visible=isFront;const windowCount=Math.min(c.windows,Math.max(1,Math.floor(axisLen/1.0)));
+  for(let floor=0;floor<c.floors;floor++){
+   const yy=24+floor*70;
+   for(let i=0;i<windowCount;i++){
+    let u=-axisLen/2+axisLen*(i+.5)/windowCount;
+    if(visible&&floor===0&&Math.abs(u)<.65)continue;
+    if(c.kind==='warung'&&floor===0&&visible)continue;
+    window(side,u,yy);
+   }
+   if(floor>0){
+    faceRect(side,-axisLen/2+.12,axisLen/2-.12,yy-11,yy-8,wall[1]);
+   }
+  }
+  if(!visible)return;
+  const frontIsShop=(c.detail==='storefront'||c.kind==='warung');
+  if(frontIsShop){
+   faceRect(side,-Math.min(1.15,axisLen/2-.15),Math.min(1.15,axisLen/2-.15),9,57,glass[2]);
+   faceRect(side,-Math.min(1.07,axisLen/2-.15),Math.min(1.07,axisLen/2-.15),15,51,glass[1]);
+   faceRect(side,-.06,.06,14,52,shade);
+  }
+  faceRect(side,-.48,.48,1,55,shade);
+  faceRect(side,-.40,.40,3,52,frontIsShop?glass[2]:roof[3]);
+  faceRect(side,.26,.31,20,23,roof[0]);
+  if(c.detail!=='simple'||c.kind==='warung'){
+   // Awnings are polygon planes in native iso, never a rotated bitmap.
+   const ext=.37,ey=56,lo=-axisLen/2+.08,hi=axisLen/2-.08;
+   const aw=side==='sw'?
+     [P(lo,D/2,ey+7),P(hi,D/2,ey+7),P(hi,D/2+ext,ey),P(lo,D/2+ext,ey)]:
+     [P(W/2,lo,ey+7),P(W/2,hi,ey+7),P(W/2+ext,hi,ey),P(W/2+ext,lo,ey)];
+   shape(ctx,aw,roof[2]);
+   faceRect(side,lo,hi,ey-2,ey+2,roof[1],ext);
+  }
+  if(c.sign&&axisLen>=2.5){
+   const txt=c.sign.toUpperCase().slice(0,Math.min(12,Math.floor((axisLen-.3)/.38)));
+   const cell=.095,unit=cell*4,start=-txt.length*unit/2+cell/2,top=61;
+   faceRect(side,start-cell/2,start+txt.length*unit-cell/2,top-3,top+16,roof[3],.08);
+   for(let i=0;i<txt.length;i++){
+    const glyph=PXFONT[txt[i]]||PXFONT[' '];
+    for(let row=0;row<5;row++)for(let col=0;col<3;col++)if(glyph[row][col]==='1'){
+      const u=start+i*unit+col*cell,yy=top+11-row*2.6;
+      faceRect(side,u,u+cell*.70,yy,yy+2.1,'#FFF7E4',.13);
+    }
+   }
+  }
+ }
+ // Visibility follows same camera convention as street_buildings manifest.
+ frontage('sw',W,dir==='sw');
+ frontage('se',D,dir==='se');
+ if(dir==='ne')faceRect('sw',-W/2+.2,W/2-.2,12,16,wall[1]);
+ if(dir==='nw')faceRect('se',-D/2+.2,D/2-.2,12,16,wall[1]);
+ if(c.roofShape==='gable'){
+  const peak=H+23;
+  // Ridge runs across width; both roof slopes redraw per direction.
+  const RL=P(-W/2,0,peak),RR=P(W/2,0,peak);
+  shape(ctx,[At,Bt,RR,RL],roof[1]);
+  shape(ctx,[RL,RR,Ct,Dt],roof[2]);
+  shape(ctx,[P(-W/2,D/2,H),P(-W/2,0,peak),P(-W/2,-D/2,H)],roof[3]);
+  shape(ctx,[P(W/2,-D/2,H),P(W/2,0,peak),P(W/2,D/2,H)],roof[3]);
+  shape(ctx,[P(-W/2,D/2,H),P(-W/2,0,peak),P(-W/2,-D/2,H)],roof[2]);
+ }else{
+  shape(ctx,[At,Bt,Ct,Dt],roof[1]);
+  const lip=3;
+  shape(ctx,[P(-W/2,D/2,H+lip),P(W/2,D/2,H+lip),Ct,Dt],roof[3]);
+  shape(ctx,[P(W/2,-D/2,H+lip),P(W/2,D/2,H+lip),Ct,Bt],roof[4]);
+  shape(ctx,[P(-W/2,-D/2,H+lip),P(W/2,-D/2,H+lip),P(W/2,D/2,H+lip),P(-W/2,D/2,H+lip)],roof[0]);
+ }
+ return {url:can.toDataURL('image/png'),size:[width,height],pivot:[ox,oy]};
+}
+function render(){
+ const c=config(),r=makeView(c,view);
+ $('preview').src=r.url;$('canvasName').textContent=c.name.toUpperCase()+' / '+view.toUpperCase();
+ $('footprintText').textContent=c.w+' × '+c.d+' tiles · '+c.floors+' floor(s)';
+ $('sizeText').textContent=r.size.join('×')+' px / '+r.pivot.join(',');
+ $('collisionText').textContent=c.collision==='yes'?'SOLID':'PASSABLE';
+ return r;
+}
+function buildAsset(){
+ const c=config(),id=current?.id||'br-'+c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24)+'-'+Date.now().toString(36);
+ const views={};for(const d of dirs)views[d]=makeView(c,d);
+ return {id,name:c.name,config:c,views,format:'virtual-life-building-asset-v1',
+  projection:{type:'iso-2:1',tilePixels:[64,32],groundCoordinates:'c/r',directions:dirs},
+  footprint:[c.w,c.d],entranceFacing:c.front,
+  blocking:c.collision,interactions:c.actions.split(',').map(x=>x.trim()).filter(Boolean).slice(0,20),
+  updatedAt:new Date().toISOString()};
+}
+function persist(asset){
+ const index=saved.findIndex(x=>x.id===asset.id);
+ if(index>=0)saved[index]=asset;else saved.unshift(asset);
+ if(saved.length>75)saved=saved.slice(0,75);
+ try{localStorage.setItem(KEY,JSON.stringify(saved));current=asset;drawLibrary();return true;}
+ catch(e){status('⚠ Storage full; use Export Package and delete old drafts.');return false;}
+}
+function saveAsset(){const a=buildAsset();if(persist(a))status('Saved '+a.name+' · available in Semesta on reload');return a;}
+function publish(){const a=saveAsset();if(!a)return;status('✓ '+a.name+' registered. Open / reload Semesta → BUILDINGS.');}
+function download(name,text,type){
+ const blob=new Blob([text],{type:type||'application/json'});
+ const url=URL.createObjectURL(blob),link=document.createElement('a');
+ link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function downloadPNG(){
+ const c=config(),r=makeView(c,view),link=document.createElement('a');
+ link.href=r.url;link.download=(current?.id||'building')+'_'+view+'.png';
+ document.body.appendChild(link);link.click();link.remove();
+}
+function exportAsset(){
+ const a=buildAsset();
+ download(a.id+'.json',JSON.stringify(a,null,2)+'\n','application/json');
+ status('Exported four-direction asset package JSON');
+}
+function drawLibrary(){
+ const q=$('search').value.toLowerCase();$('count').textContent=String(saved.length).padStart(2,'0');
+ const lib=$('library');lib.replaceChildren();
+ for(const a of saved.filter(x=>String(x.name).toLowerCase().includes(q))){
+  const btn=document.createElement('button');btn.type='button';btn.className=a.id===current?.id?'selected':'';
+  const pic=document.createElement('span');pic.className='preview-mini';
+  const img=document.createElement('img');img.src=a.views?.sw?.url||'';img.alt='';pic.appendChild(img);
+  const t=document.createElement('span');const b=document.createElement('b'),s=document.createElement('small');
+  b.textContent=a.name;s.textContent=(a.footprint||[]).join('×')+' tile · '+a.config.floors+'F';
+  t.append(b,s);btn.append(pic,t);
+  btn.onclick=()=>{current=a;apply(a.config);drawLibrary();status('Editing '+a.name);};
+  lib.appendChild(btn);
+ }
+ if(!lib.children.length){const p=document.createElement('p');p.style.cssText='padding:12px;color:#6f8293';p.textContent='No saved buildings. Choose a template above.';lib.append(p);}
+}
+function importFile(file){
+ if(!file)return;
+ const r=new FileReader();r.onload=()=>{
+  try{
+   const a=JSON.parse(r.result);
+   if(a.format!=='virtual-life-building-asset-v1'||!a.config||!a.views)throw Error('Invalid building package');
+   current=null;apply(a.config);const rebuilt=buildAsset();
+   if(persist(rebuilt))status('Imported '+rebuilt.name+' · ready for Semesta');
+  }catch(e){status('⚠ Import failed: '+e.message);}
+ };r.readAsText(file);
+}
+function remove(){
+ if(!current){status('Select a saved asset first');return;}
+ if(!confirm('Delete "'+current.name+'" from this browser? Export backup first.'))return;
+ saved=saved.filter(x=>x.id!==current.id);localStorage.setItem(KEY,JSON.stringify(saved));
+ current=null;preset('rumah');status('Deleted saved asset; reload Semesta to update catalog');
+}
+for(const id of ids)$(id).addEventListener('input',render);
+for(const btn of document.querySelectorAll('[data-dir]'))btn.onclick=()=>{
+ view=btn.dataset.dir;document.querySelectorAll('[data-dir]').forEach(b=>b.classList.toggle('active',b===btn));render();
+};
+for(const btn of document.querySelectorAll('[data-preset]'))btn.onclick=()=>preset(btn.dataset.preset);
+$('newBtn').onclick=()=>preset('rumah');$('saveBtn').onclick=saveAsset;$('publishBtn').onclick=publish;
+$('exportBtn').onclick=exportAsset;$('pngBtn').onclick=downloadPNG;
+$('search').oninput=drawLibrary;$('deleteBtn').onclick=remove;
+$('importBtn').onclick=()=>$('upload').click();
+$('upload').onchange=e=>{importFile(e.target.files[0]);e.target.value='';};
+$('helpBtn').onclick=()=>$('guide').showModal();
+$('closeGuide').onclick=()=>$('guide').close();
+preset('rumah');
+})();
+</script>
+</body></html>
