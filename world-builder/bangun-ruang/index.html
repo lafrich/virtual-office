@@ -470,7 +470,13 @@ function drawLibrary(){
   t.append(b,s);btn.append(pic,t);
   btn.onclick=()=>{current=a;manualOverrides={...(a.editedViews||{})};
    manualSignature=artFingerprint(a.config);apply(a.config);
-   interiorUi?.load(a);drawLibrary();status('Editing '+a.name);};
+   interiorUi?.load(a);drawLibrary();status('Editing '+a.name);
+   if(window.matchMedia('(max-width:640px)').matches){
+    $('app').classList.remove('show-library');$('savedToggle').textContent='▣ Show Saved Buildings';
+    $('savedToggle').setAttribute('aria-expanded','false');
+    document.querySelector('.center')?.scrollIntoView({behavior:'smooth',block:'start'});
+   }
+  };
   lib.appendChild(btn);
  }
  if(!lib.children.length){const p=document.createElement('p');p.style.cssText='padding:12px;color:#6f8293';p.textContent='No saved buildings. Choose a template above.';lib.append(p);}
