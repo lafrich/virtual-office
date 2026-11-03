@@ -53,3 +53,12 @@ The visual road/ground tile colors and custom building models are **editor place
 - Existing locally saved maps automatically migrate to unbounded mode without erasing the original Street2 placement data. Large drafts may encounter the browser's local-storage quota: export JSON regularly for long-running builds.
 
 This is a map editing system; it does **not** stream an infinite prepopulated town or enable gameplay mechanics.
+
+## Reference City and named draft saves (2026-11-03)
+
+- The **Reference City** preset is a layout recreation inspired by the supplied bird's-eye/isometric city screenshot, not a bitmap: roughly 77 independent replaceable buildings, hospital, church, civic/police/jail buildings, clock tower, school, mixed shops and homes, factory, warehouse, north-west lake/trees, a central public park, and a city-wide road/sidewalk grid. Building geometry and other missing game assets are labelled placeholders.
+- **New installs** start with this reference-inspired editable map. Existing browser working copies continue to load first, so they are not overwritten. Use **🏙 Reference City** to load the preset intentionally, or **View / Reset** to return to the current default.
+- **Save City / Save Draft** creates a named city snapshot. **My Cities** lists local drafts with last-saved date, object count and tile count. Users can **Open**, **Save**, **Save as New** or **Delete** them. The active draft can be saved again with one tap.
+- Draft snapshots are stored **locally in IndexedDB**, with a localStorage fallback when IndexedDB is unavailable. Working edits continue to autosave separately. **These are not GitHub, online server, multiplayer or cloud saves** and are not shared between devices or browsers. Users should **Export JSON** for transferable backups.
+- Creating a new preset, resetting or importing JSON detaches the previously active named draft, to avoid accidentally overwriting the prior saved city. A confirmation precedes destructive canvas replacements.
+- Preset geometry, terrain and named drafts share the same editable `virtual-life-ai-map-v3` schema. Opening a draft restores its objects and terrain; all markers are design annotations only.
