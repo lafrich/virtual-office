@@ -96,7 +96,9 @@ function createRig(THREE,opt={}){
   const editURL=action?g.VLActionFrames?.get(state.profile,action,state.direction,frame):null;
   const edited=editURL?image(editURL):null;
   const status=overlays.map(o=>o?.ready?'1':'0').join('');
-  const editTag=editURL?editURL.length+':'+editURL.slice(-64):'';
+  // Full content fingerprint prevents two same-length pixel edits from sharing
+  // a stale cached GPU texture while the same action frame is displayed.
+  const editTag=editURL||'';
   const key=[who,spec.url,spec.mode,row,frame,...overlayUrls.map(x=>x?.length||0),status,editTag,edited?.ready].join(':');
   state.loaded=!!sprite?.ready;
   state.failed=!!sprite?.error;
