@@ -404,3 +404,13 @@
 @media(max-width:410px){
  .active-asset-heading{display:none}
 }
+
+/* Transport uses route direction, not the generic object 90° rotation.
+ * Keep other world assets' rotate tools untouched. */
+.vehicle-flip-row{display:flex;align-items:center;gap:8px;margin:8px 0 4px;min-width:0}
+#vehicleFlipDirection{flex:0 0 auto;min-height:35px;padding:7px 11px;
+ background:#dae6f9;color:#123c81;font:bold 11px Tahoma,Verdana,sans-serif}
+#vehicleFlipDirection:hover:not(:disabled){background:#c2d9f9}
+#vehicleHeadingLabel{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap;font:bold 11px "Courier New",monospace;color:#224d72}
+.vehicle-flip-note{font:10px/1.4 Tahoma,Verdana,sans-serif;color:#575951;margin:1px 0 8px}
