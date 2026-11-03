@@ -38,11 +38,11 @@ assert.ok(world.includes("virtual-life-asset-pipeline/action-template-bridge.js"
  "Semesta must load same-origin saved action template bridge");
 assert.ok(world.indexOf("action-template-bridge.js")<world.indexOf("pipeline-character-rig.js"),
  "Template registry must initialize before character rig");
-assert.ok(builder.includes("window.VLActionTemplates?.list(actorId)"),
+assert.ok(builder.includes("window.VLActionTemplates?.list(sourceId)"),
  "Semesta player Pose menu must list custom templates for the chosen actor");
 assert.ok(builder.includes("opt.disabled=!action.ready"),
  "Drafts must never be playable in Semesta's Pose menu");
-assert.ok(rig.includes("g.VLActionTemplates?.get(id,requested)"),
+assert.ok(rig.includes("g.VLActionTemplates?.get(sourceId,requested)"),
  "Saved template motion must be resolved before native fallback");
 assert.ok(rig.includes("g.VLActionTemplates?.frame(who,action,state.direction,frame)"),
  "Semesta must draw authored frames for each direction and animation frame");
@@ -52,4 +52,8 @@ assert.ok(rig.includes("if(spec.unavailable)"),
  "Missing gameplay actions need visible UNAUTHORED display");
 assert.ok(builder.includes("virtual-life-action-templates-v1")||builder.includes("window.VLActionTemplates?.frameKey"),
  "Semesta builder must observe action frame updates across tabs");
+assert.ok(rig.includes("bridge()?.has('legacy_'+id)?'legacy_'+id"),
+ "Theodore must use the rebuilt Mahluk Hidup legacy_theodore rig, not stale native v6b");
+assert.ok(builder.includes("window.VLCharacterRig?.canonical(actorId)"),
+ "Semesta action choices must resolve legacy IDs for native motions and custom template slots");
 console.log("PASS Mahluk Hidup action edits consume same-origin storage in Bangun and Semesta without moving furniture");
