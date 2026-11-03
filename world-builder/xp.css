@@ -158,3 +158,52 @@
  #cameraFollowLabel{top:55px;left:6px;font-size:9px;max-width:58%}
  #cameraToCharacter,#cameraMapView{font:11px Tahoma;padding:5px 8px}
 }
+
+/* First-run XP quick tutorial wizard. Accessible, skippable and mobile-first. */
+.tutorial-overlay{position:fixed;inset:0;z-index:140;background:#0a1e3aa9;
+ display:flex;align-items:center;justify-content:center;padding:18px}
+.tutorial-window{display:flex;flex-direction:column;overflow:hidden;
+ width:min(460px,100%);max-height:min(88dvh,700px);
+ border:3px solid #fff;outline:2px solid #113d99;background:#dedbd2;
+ box-shadow:7px 10px 0 #08163366;font-family:Tahoma,Verdana,sans-serif}
+.tutorial-header{display:flex;align-items:center;gap:9px;padding:8px 9px;
+ min-height:44px;flex:none;background:linear-gradient(90deg,#07318e,#156fc5);
+ color:white;font:bold 12px Tahoma;letter-spacing:.025em}
+.tutorial-header span{display:grid;place-items:center;width:25px;height:25px;
+ background:#e3d9c3;border:2px solid white;color:#174189;font-size:19px}
+.tutorial-header strong{flex:1}
+#tutorialClose{flex:none;min-width:32px;height:30px;border:2px solid white;
+ background:#c84836;color:#fff;font-weight:bold;font-size:21px}
+.tutorial-content{padding:21px 23px 17px;overflow:auto;text-align:center}
+.tutorial-progress{display:flex;align-items:center;justify-content:space-between;
+ font:10px "Courier New",monospace;color:#36506c;letter-spacing:.07em}
+#tutorialProgressDots{font-size:17px;letter-spacing:.08em;color:#1653a2}
+.tutorial-illustration{margin:14px auto 15px;width:88px;height:88px;
+ display:grid;place-items:center;border:3px solid #fff;outline:1px solid #aaa69d;
+ background:linear-gradient(140deg,#f7f3e6,#bdcbd4);
+ box-shadow:4px 4px #a4a49f;font-size:43px}
+#tutorialTitle{font:bold 21px Tahoma,Verdana,sans-serif;color:#1d345c;
+ margin:10px 0 10px;letter-spacing:-.04em}
+#tutorialText{font:13px/1.65 Tahoma,Verdana,sans-serif;color:#242b35;
+ margin:0 0 17px}
+.tutorial-tip{font:11px/1.55 Tahoma,Verdana,sans-serif;text-align:left;
+ background:#f3f1e6;border-left:4px solid #5c8dbd;padding:10px 12px;
+ color:#41413f}
+.tutorial-actions{display:flex;align-items:center;gap:8px;flex:none;
+ border-top:2px solid #a9a7a0;padding:11px 13px;background:#d3d0ca}
+.tutorial-actions button{min-height:38px;border:2px solid;border-color:#fff #75746e #75746e #fff;
+ background:#e6e4df;color:#141414;font:bold 12px Tahoma;padding:8px 12px}
+.tutorial-actions button:disabled{opacity:.4}
+#tutorialSkip{color:#565451}
+#tutorialNext{background:#bdd5f3;min-width:108px}
+.tutorial-space{flex:1}
+@media(max-width:780px){
+ .tutorial-overlay{padding:0;align-items:flex-end;padding-bottom:env(safe-area-inset-bottom,0px)}
+ .tutorial-window{width:100%;max-height:80dvh;border:2px solid #fff;outline:none;
+ border-radius:0;box-shadow:0 -10px 30px #0005}
+ .tutorial-content{padding:13px 17px 14px}
+ .tutorial-illustration{width:66px;height:66px;font-size:32px;margin:10px auto}
+ #tutorialTitle{font-size:18px}
+ #tutorialText{font-size:12px}
+ .tutorial-actions{padding:9px 10px}
+}
