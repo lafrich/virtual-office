@@ -311,6 +311,9 @@ const cameraFocus=new THREE.Vector3(4,0,35);
 // True 2:1 pixel-isometric ground (30° elevation), orthographic = no perspective resizing.
 const direction=new THREE.Vector3(1,Math.sqrt(2/3),1).normalize();
 let viewSize=35;
+// Camera follow tracks the live actor mesh (not the saved JSON coordinates).
+// This ensures Walk Test stays a non-destructive preview.
+let cameraFollowId=null,mapCameraBeforeFollow=null;
 function resetCamera(){
  if(documentMap.map?.preset==='reference-city-v1'){
   cameraFocus.set(14,0,49);viewSize=140;
@@ -681,6 +684,9 @@ function clearAll(){
  owners.clear();
 }
 function rebuild(){
+ if(cameraFollowId&&!documentMap.objects.some(o=>o.id===cameraFollowId&&actorType(o.type))){
+  cameraFollowId=null;mapCameraBeforeFollow=null;updateCharacterCameraUI();
+ }
  if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
  clearAll();for(const o of documentMap.objects)instantiate(o);
  updateSelection();
@@ -797,7 +803,9 @@ function duplicate(){
  undoPoint();documentMap.objects.push(q);instantiate(q);select(q.id);saved();
 }
 function remove(){
- if(!item())return;undoPoint();
+ if(!item())return;
+ if(cameraFollowId===selectedId)leaveCharacterCamera(false);
+ undoPoint();
  documentMap.objects=documentMap.objects.filter(o=>o.id!==selectedId);select(null);rebuild();saved();tell('Object deleted (Undo available)');
 }
 const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
@@ -987,6 +995,65 @@ function setMode(m){
    tell('Walk Test: WASD / arrow keys / touch D-pad. Edits are not saved.');
  }
 }
+
+function updateCharacterCameraUI(){
+ const following=!!cameraFollowId,button=$('cameraToCharacter'),icon=$('cameraCharacter');
+ button.setAttribute('aria-pressed',String(following));
+ icon.setAttribute('aria-pressed',String(following));
+ icon.classList.toggle('active',following);
+ const actor=following?documentMap.objects.find(o=>o.id===cameraFollowId):null;
+ $('cameraFollowLabel').hidden=!following;
+ $('cameraFollowLabel').textContent=actor?'🎥 FOLLOW · '+actor.name:'🎥 FOLLOW';
+ $('cameraMapView').disabled=!following&&documentMap.map?.preset!=='reference-city-v1'?false:false;
+}
+function findCameraActor(){
+ const selected=item();
+ if(selected&&actorType(selected.type)&&owners.has(selected.id))return selected;
+ const player=documentMap.objects.find(o=>o.type==='avatar'&&owners.has(o.id));
+ return player||documentMap.objects.find(o=>actorType(o.type)&&owners.has(o.id))||null;
+}
+function enterCharacterCamera(){
+ const actor=findCameraActor();
+ if(!actor){
+  tell('Belum ada karakter. Buka Assets → Characters, lalu place Player / NPC.');
+  $('assetCategory').value='character';
+  $('searchAsset').value='';
+  renderAssetList();
+  if(window.matchMedia('(max-width:780px)').matches)toggleMobileSheet('assetsPanel');
+  return;
+ }
+ if(!cameraFollowId)mapCameraBeforeFollow={focus:cameraFocus.clone(),size:viewSize};
+ cameraFollowId=actor.id;
+ select(actor.id);
+ setMode('walk');
+ const root=owners.get(actor.id);
+ if(root){
+  cameraFocus.set(root.position.x,0,root.position.z);
+  viewSize=16;
+  fitCamera();
+ }
+ updateCharacterCameraUI();
+ closeMobileSheets();
+ tell('🎥 Camera mengikuti '+actor.name+' · gunakan D-pad atau WASD');
+}
+function leaveCharacterCamera(restore=true){
+ const previous=mapCameraBeforeFollow;
+ cameraFollowId=null;mapCameraBeforeFollow=null;
+ if(mode==='walk')setMode('select'); // Clears temporary Walk Test positions.
+ if(restore){
+  if(previous){cameraFocus.copy(previous.focus);viewSize=previous.size;fitCamera();}
+  else resetCamera();
+ }
+ updateCharacterCameraUI();
+}
+function cameraMapView(){
+ if(cameraFollowId)leaveCharacterCamera(true);
+ else resetCamera();
+}
+$('cameraToCharacter').onclick=enterCharacterCamera;
+$('cameraCharacter').onclick=enterCharacterCamera;
+$('cameraMapView').onclick=cameraMapView;
+updateCharacterCameraUI();
 $('selectMode').onclick=()=>setMode('select');
 $('moveMode').onclick=()=>setMode('move');
 $('paintMode').onclick=()=>setMode('paint');
@@ -1020,7 +1087,7 @@ window.addEventListener('keydown',e=>walkKey(e,true),true);
 window.addEventListener('keyup',e=>walkKey(e,false),true);
 window.addEventListener('blur',()=>{for(const k of Object.keys(walkInput))walkInput[k]=false;});
 $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');};
-$('home').onclick=resetCamera;
+$('home').onclick=cameraMapView;
 $('rotateL').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation-90+360)%360;});};
 $('rotateR').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation+90)%360;});};
 $('scaleDown').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale-.05),.85,1.15);});};
