@@ -2103,8 +2103,9 @@ function refreshCharacterOptions(){
  if(Array.from(sel.options).some(o=>o.value===current))sel.value=current;
 }
 function actionChoices(actorId,selectId,selectedAction){
- const sel=$(selectId),actions=mahluk?.motions(actorId)||[];
- const templates=window.VLActionTemplates?.list(actorId)||[];
+ const sourceId=window.VLCharacterRig?.canonical(actorId)||actorId;
+ const sel=$(selectId),actions=mahluk?.motions(sourceId)||[];
+ const templates=window.VLActionTemplates?.list(sourceId)||[];
  sel.replaceChildren();
  if(selectId==='pose'){
   const blank=document.createElement('option');blank.value='';blank.textContent='Idle / no action';sel.append(blank);
