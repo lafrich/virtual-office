@@ -1050,6 +1050,51 @@ function makeMarker(root,item){
  root.userData.editorMarker=tag;
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
+const MARKER_VIEW_KEY='semesta-logic-marker-visible-v1';
+let markerShown=true;
+try{markerShown=localStorage.getItem(MARKER_VIEW_KEY)!=='false';}catch{}
+function visibleMarkerCount(){return documentMap.objects.filter(o=>o.type==='marker').length;}
+function syncMarkerButtons(){
+ const count=visibleMarkerCount();
+ $('markerVisibility').setAttribute('aria-pressed',String(markerShown));
+ $('markerVisibilityTool').setAttribute('aria-pressed',String(markerShown));
+ $('markerVisibilityTool').classList.toggle('active',markerShown);
+ $('markerVisibility').textContent='⚑ Markers '+(markerShown?'ON':'OFF')+' ('+count+')';
+ $('markerVisibilityTool').title='Yellow logic markers '+(markerShown?'visible':'hidden')+' · '+count+' total';
+}
+function setMarkerVisible(show){
+ markerShown=!!show;
+ for(const o of documentMap.objects)if(o.type==='marker'){
+  const root=owners.get(o.id);if(root)root.visible=markerShown;
+ }
+ if(!markerShown&&item()?.type==='marker')select(null);
+ syncMarkerButtons();
+ try{localStorage.setItem(MARKER_VIEW_KEY,String(markerShown));}catch{}
+ renderer.render(scene,camera);
+ tell(markerShown?'⚑ Logic markers visible · tap yellow pin to select':'⚑ Logic markers hidden · City Draft unchanged');
+}
+function refreshMarkerManager(){
+ const picker=$('markerPicker'),previous=picker.value;
+ const markers=documentMap.objects.filter(o=>o.type==='marker');
+ picker.replaceChildren();
+ for(const marker of markers){
+  const opt=document.createElement('option');
+  opt.value=marker.id;opt.textContent=(marker.name||marker.markerKind||'Marker')+' · '+Math.round(marker.x)+','+Math.round(marker.z);
+  picker.appendChild(opt);
+ }
+ if(!markers.length){
+  const empty=document.createElement('option');empty.value='';empty.textContent='No logic markers';
+  picker.append(empty);
+ }
+ const selected=item();
+ const target=selected?.type==='marker'?selected.id:previous;
+ if(target&&markers.some(o=>o.id===target))picker.value=target;
+ if(!picker.value&&markers.length)picker.selectedIndex=0;
+ $('markerFind').disabled=!markers.length;
+ $('markerDelete').disabled=!markers.length;
+ $('markerDeleteAll').disabled=!markers.length;
+ syncMarkerButtons();
+}
 // A presentation-only switch: the same authored buildings, click targets,
 // collision footprints, interiors and City Draft JSON remain unchanged.
 const buildingGuides=new Map();
@@ -1175,7 +1220,7 @@ function instantiate(o){
   case 'sprite':makeSprite(root,o);break;
   case 'avatar':case 'npc':makeAvatar(root,o);break;
   case 'vehicle':case 'pedestrian':case 'crowd':case 'quest_npc':makeAutomated(root,o);break;
-  case 'marker':makeMarker(root,o);break;
+  case 'marker':makeMarker(root,o);root.visible=markerShown;break;
  }
  assetRoots.add(root);owners.set(o.id,root);
  registerBigOccluder(root,o);
