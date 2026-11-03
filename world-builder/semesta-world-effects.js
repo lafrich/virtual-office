@@ -180,7 +180,7 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
   elapsed+=Math.max(0,dt||0);
   if(!force&&elapsed<.12)return;
   elapsed=0;
-  const key=Math.round(model.night*100)+'/'+Math.round(model.glow*100);
+  const key=model.sky+'/'+Math.round(model.night*100)+'/'+Math.round(model.glow*100);
   if(key!==previousLightKey||force){previousLightKey=key;applyTint(model);}
   collect(model);
   drawNightLights(model);
