@@ -39,7 +39,57 @@ function line(map,start,dx,dz,type){
  for(let i=-min;i<=max;i++)points.push({x:c+.5+dx*i,z:r+.5+dz*i});
  return {points,length:points.length,dx,dz};
 }
+// Connected sidewalk navigator. Follow the right-hand boundary through
+// real 90-degree corners and return continuously to the starting segment.
+// Unlike the former straight-line route there is NO off-screen teleport.
+function sidewalkCircuit(map,x,z,direction='auto'){
+ const t=map?.terrain||{default:'grass',cells:[]},m=index(t);
+ const origin={c:Math.floor(x),r:Math.floor(z)};
+ if(kind(t,origin.c,origin.r,m)!=='sidewalk')return null;
+ const starts=direction==='north'?[D.north]:direction==='south'?[D.south]:
+  direction==='east'?[D.east]:direction==='west'?[D.west]:
+  [D.east,D.south,D.west,D.north];
+ const can=(c,r)=>kind(t,c,r,m)==='sidewalk';
+ const candidates=[];
+ for(const initial of starts){
+  let c=origin.c,r=origin.r,dx=initial[0],dz=initial[1];
+  if(!can(c+dx,r+dz))continue;
+  const points=[{x:c+.5,z:r+.5}],states=new Set();
+  let closed=false;
+  // Each step moves one existing sidewalk tile, never grass, road, or water.
+  // With a fixed right-hand preference directed edges form closed walks.
+  for(let steps=0;steps<8192;steps++){
+   const state=c+','+r+':'+dx+','+dz;
+   if(states.has(state)){closed=state===origin.c+','+origin.r+':'+initial[0]+','+initial[1];break;}
+   states.add(state);
+   c+=dx;r+=dz;
+   if(!can(c,r))break;
+   points.push({x:c+.5,z:r+.5});
+   // Rotate right, go straight, left or make a U-turn at a dead end.
+   const options=[[-dz,dx],[dx,dz],[dz,-dx],[-dx,-dz]];
+   let next=options.find(d=>can(c+d[0],r+d[1]));
+   if(!next)break;
+   dx=next[0];dz=next[1];
+  }
+  if(!closed||points.length<3)continue;
+  const unique=new Set(points.map(p=>p.x+','+p.z)).size;
+  const turns=points.slice(2).filter((p,i)=>{
+   const a=points[i],b=points[i+1];
+   return (b.x-a.x)!==(p.x-b.x)||(b.z-a.z)!==(p.z-b.z);
+  }).length;
+  const area=Math.abs(points.reduce((a,p,i)=>{
+   const q=points[(i+1)%points.length];
+   return a+p.x*q.z-q.x*p.z;
+  },0))/2;
+  // Prefer continuous sidewalk perimeter circuits over short dead-end loops.
+  candidates.push({points,unique,turns,area,length:points.length-1,
+   dx:initial[0],dz:initial[1],closed:true});
+ }
+ candidates.sort((a,b)=>(b.area*3+b.unique)-(a.area*3+a.unique)||b.length-a.length);
+ return candidates[0]||null;
+}
 function choose(map,x,z,mode,direction='auto'){
+ if(mode!=='vehicle')return sidewalkCircuit(map,x,z,direction);
  const k=typeFor(mode);
  const seed={x,z};
  const vectors=(direction==='east'||direction==='west')?[[1,0]]:
@@ -57,6 +107,7 @@ function makeRoute(map,x,z,mode,direction='auto'){
  const corridor=choose(map,x,z,mode,direction);
  if(!corridor)return null;
  const points=corridor.points.slice();
+ const walking=mode!=='vehicle';
  // Vehicles drive forward on their selected straight road corridor.
  // At the end the simulation despawns them and queues a safe respawn at its
  // starting end; it never U-turns or teleports into another occupied lane.
@@ -67,7 +118,8 @@ function makeRoute(map,x,z,mode,direction='auto'){
   if(len>0){edges.push({a,b,length:len,from:length});length+=len;}
  }
 
- return {points,edges,length,wrap,loop:true,stationary:false,kind:mode};
+ return {points,edges,length,wrap,loop:true,stationary:false,kind:mode,
+  continuous:walking&&corridor.closed===true,turns:walking?corridor.turns:0};
 }
 function sample(route,distance){
  if(!route||route.stationary)return route?.points[0]?{...route.points[0],dx:0,dz:0}:null;
@@ -114,6 +166,6 @@ function spawnPosition(map,x,z,mode,radius=5){
  }
  return best;
 }
-g.VLSemestaTraffic=Object.freeze({validModes,D,index,kind,allowed,choose,makeRoute,sample,
+g.VLSemestaTraffic=Object.freeze({validModes,D,index,kind,allowed,choose,sidewalkCircuit,makeRoute,sample,
  nearestDistance,config,spawnPosition});
 })(window);
