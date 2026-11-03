@@ -99,6 +99,41 @@ function move(scene,id,c,r,rotation){
  if(!canPlace(scene,item.assetId,x,z,id,rot))return false;
  Object.assign(item,{c:x,r:z,rotation:rot});return true;
 }
+/* Quick furniture rotation is a one-tap operation. Keep the centre stable
+ * whenever possible; if a 2x1 item turns into 1x2 at a wall, gently nudge it
+ * to the nearest available tile instead of requiring a separate move step.
+ * Existing collision and entrance protection remain authoritative.
+ */
+function rotate(scene,id,steps=1){
+ const item=scene?.items?.find(x=>x.id===id);if(!item||!TYPES[item.assetId])return false;
+ const turn=Number.isFinite(Number(steps))?Math.trunc(Number(steps)):1;
+ const nextRotation=(((item.rotation||0)+turn*90)%360+360)%360;
+ const [beforeW,beforeD]=((item.rotation||0)%180===90)?
+  [TYPES[item.assetId].d,TYPES[item.assetId].w]:
+  [TYPES[item.assetId].w,TYPES[item.assetId].d];
+ const [nextW,nextD]=(nextRotation%180===90)?
+  [TYPES[item.assetId].d,TYPES[item.assetId].w]:
+  [TYPES[item.assetId].w,TYPES[item.assetId].d];
+ const centreC=item.c+beforeW/2,centreR=item.r+beforeD/2;
+ const maxC=scene.width-nextW,maxR=scene.depth-nextD;
+ const candidates=[];
+ for(let c=0;c<=maxC;c++)for(let r=0;r<=maxR;r++){
+  const centreDist=(c+nextW/2-centreC)**2+(r+nextD/2-centreR)**2;
+  const moveDist=(c-item.c)**2+(r-item.r)**2;
+  candidates.push({c,r,centreDist,moveDist});
+ }
+ candidates.sort((a,b)=>a.centreDist-b.centreDist||a.moveDist-b.moveDist||
+  Math.abs(a.c-item.c)+Math.abs(a.r-item.r)-
+  (Math.abs(b.c-item.c)+Math.abs(b.r-item.r))||a.r-b.r||a.c-b.c);
+ // Limit automatic correction to two floor tiles to prevent surprising jumps.
+ for(const candidate of candidates){
+  if(Math.abs(candidate.c-item.c)>2||Math.abs(candidate.r-item.r)>2)continue;
+  if(!canPlace(scene,item.assetId,candidate.c,candidate.r,id,nextRotation))continue;
+  Object.assign(item,{c:candidate.c,r:candidate.r,rotation:nextRotation});
+  return true;
+ }
+ return false;
+}
 function action(scene,id,actionId){
  const item=scene.items.find(x=>x.id===id);if(!item)return false;
  if(!TYPES[item.assetId]?.actions.includes(actionId))return false;
@@ -175,5 +210,5 @@ function slots(scene){
  }));
 }
 g.VLBuildingInterior=Object.freeze({types:TYPES,actions:ACTIONS,templates:TEMPLATES,
- dimensions,create:layout,preset,normalize,canPlace,add,move,action,occupied,slots,clone});
+ dimensions,create:layout,preset,normalize,canPlace,add,move,rotate,action,occupied,slots,clone});
 })(window);
