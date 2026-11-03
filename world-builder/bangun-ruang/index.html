@@ -97,7 +97,16 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <button type="button" id="interiorViewPlan" aria-pressed="false">▦ Plan / Edit</button>
   <span>64×32 · pixel art</span>
  </div>
- <div class="stage"><img id="preview" alt="Pixel art isometric building preview"><canvas id="interiorCanvas" hidden width="360" height="360" aria-label="Isometric interior preview. Tap to select or place furniture." role="img"></canvas></div>
+ <div id="exteriorViewTools" class="exterior-view-tools" aria-label="Building view mode">
+  <button type="button" id="exteriorViewPixel" class="active" aria-pressed="true">▣ Pixel Art</button>
+  <button type="button" id="exteriorViewGuide" aria-pressed="false">⌗ Garis Penanda</button>
+  <span id="guideStatus">PIXEL / ORIGINAL</span>
+ </div>
+ <div class="stage"><img id="preview" alt="Pixel art isometric building preview"><canvas id="buildingGuideCanvas" hidden width="360" height="360" aria-label="Building outline and footprint guideline preview" role="img"></canvas><canvas id="interiorCanvas" hidden width="360" height="360" aria-label="Isometric interior preview. Tap to select or place furniture." role="img"></canvas></div>
+ <div id="interiorQuickTools" class="interior-asset-tray" hidden aria-label="Furniture picker below the interior canvas">
+  <div class="interior-tray-heading"><strong>+ INTERIOR ASSETS</strong><span id="quickPlaceHint">Tap asset → tap floor</span><button id="quickCancel" type="button" hidden>✕ Done</button></div>
+  <div id="interiorQuickBar" class="interior-quick-scroll" role="group" aria-label="Scroll horizontally to choose interior furniture"></div>
+ </div>
  <div class="direction-bar"><strong>VIEW</strong>
  <button class="active" data-dir="sw">SW</button><button data-dir="se">SE</button>
  <button data-dir="ne">NE</button><button data-dir="nw">NW</button>
@@ -207,7 +216,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <b>1.</b> Pilih base asli Semesta, lalu edit eksterior modular.<br>
  <b>2.</b> Pilih Non-interactive untuk bangunan dekoratif, atau Interactive untuk bangunan yang bisa dimasuki.<br>
  <b>3.</b> Interactive: buka INTERIOR untuk memilih room template, menaruh WC/kasur/kursi dan benda lain; buka ACTIONS untuk memeriksa pose Mahluk Hidup.<br>
- <b>4.</b> Interior ditampilkan sebagai pixel isometric 2:1 secara default; gunakan Plan / Edit untuk mengatur posisi secara presisi. Simpan untuk mendaftarkan sprite dan action slots di Semesta.<br>
+ <b>4.</b> Interior pixel isometric 2:1 memiliki bar furniture scroll horizontal di bawah kanvas: pilih WC, kasur, kursi atau aset lain, lalu tap tile untuk menaruhnya. Exterior punya pilihan Pixel Art / Garis Penanda yang tidak ikut tersimpan.<br>
  <b>5.</b> Action/interior hanya authoring & editor preview. Multiplayer game utama tidak dijalankan oleh Bangun Ruang.<br>
  <p><b>Penting:</b> penyimpanan bersifat lokal, bukan commit GitHub atau cloud. Export untuk backup lintas perangkat.</p>
  </section><footer><button id="closeGuide">Close</button></footer></dialog>
@@ -216,7 +225,8 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <script src="./interior-model.js?v=interior-v3"></script>
 <script src="./interior-pixel-art.js?v=interior-v3"></script>
 <script src="./interior-isometric.js?v=interior-v4"></script>
-<script src="./studio-interior-ui.js?v=iso-v4"></script>
+<script src="./building-guides.js?v=outline-v5"></script>
+<script src="./studio-interior-ui.js?v=tray-v5"></script>
 <script>
 (function(){
 'use strict';
@@ -245,6 +255,7 @@ const defaultBase='semesta:small';
 const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
 let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null;
+const exteriorGuides=window.VLBuildingGuides?.mount();
 try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||a));
 const safe=s=>String(s||'').replace(/[<>"'&]/g,'').slice(0,60);
@@ -417,7 +428,9 @@ function viewResult(c,d){
 }
 function render(){
  const c=config(),r=viewResult(c,view);
- $('preview').src=r.url;$('canvasName').textContent=c.name.toUpperCase()+' / '+view.toUpperCase();
+ $('preview').src=r.url;
+ exteriorGuides?.update(r,c,view);
+ $('canvasName').textContent=c.name.toUpperCase()+' / '+view.toUpperCase();
  $('footprintText').textContent=c.w+' × '+c.d+' tiles · '+c.floors+' floor(s)';
  $('sizeText').textContent=r.size.join('×')+' px / '+r.pivot.join(',');
  $('collisionText').textContent=c.collision==='yes'?'SOLID':'PASSABLE';
@@ -645,7 +658,7 @@ $('helpBtn').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
 preset(defaultBase);
 interiorUi=window.VLStudioInteriors?.init({getConfig:config,
- status,exportAsset});
+ status,exportAsset,showExterior:on=>exteriorGuides?.setVisible(on)});
 interiorUi?.reset();
 })();
 </script>
