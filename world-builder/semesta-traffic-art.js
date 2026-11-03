@@ -7,6 +7,47 @@
 const cache=new Map();
 const PX=Math.SQRT2/64, VCOMP=2/Math.sqrt(3);
 const palette=g.VLSemestaCatalog?.palette||{};
+// Mahluk Hidup published street sprites: real transparent PNGs are preferred
+// over Semesta previews, with a safe preview fallback while source deploys.
+const SOURCE=new URL('/virtual-life-asset-pipeline/assets/street_vehicles/',location.origin);
+const originalCache=new Map(),missingOriginals=new Set(),pendingOriginals=new Map();
+const validPath=/^(?:cars|riders)\/[a-z0-9_-]+_(?:se|sw|ne|nw)\.png$/;
+const originalKey=(id,dir)=>id+':'+dir;
+function sourceURL(spec,dir){
+ const path=spec?.views?.[dir];
+ return typeof path==='string'&&validPath.test(path)?new URL(path,SOURCE).href:null;
+}
+function sourcePublished(id){return originalCache.has(originalKey(id,'se'));}
+function originalCount(){return [...new Set([...originalCache.keys()].map(k=>k.split(':')[0]))].length;}
+function retrySources(){missingOriginals.clear();}
+function requestOriginal(THREE,spec,dir){
+ const key=originalKey(spec.id,dir),known=originalCache.get(key);
+ if(known)return Promise.resolve(known);
+ if(missingOriginals.has(key))return Promise.resolve(null);
+ if(pendingOriginals.has(key))return pendingOriginals.get(key);
+ const url=sourceURL(spec,dir);
+ if(!url){missingOriginals.add(key);return Promise.resolve(null);}
+ const task=new Promise(resolve=>{
+   const img=new Image();img.decoding='async';
+   img.onload=()=>{
+     // A wrong image must never silently distort the source sprite pivot.
+     if(img.naturalWidth!==spec.size[0]||img.naturalHeight!==spec.size[1]){
+       missingOriginals.add(key);resolve(null);return;
+     }
+     const tex=new THREE.Texture(img);
+     tex.colorSpace=THREE.SRGBColorSpace;
+     tex.minFilter=tex.magFilter=THREE.NearestFilter;
+     tex.generateMipmaps=false;tex.needsUpdate=true;
+     originalCache.set(key,tex);
+     if(dir==='se'&&typeof g.dispatchEvent==='function'&&typeof CustomEvent!=='undefined')
+       g.dispatchEvent(new CustomEvent('semesta-vehicle-source-loaded',{detail:{id:spec.id}}));
+     resolve(tex);
+   };
+   img.onerror=()=>{missingOriginals.add(key);resolve(null);};
+   img.src=url;
+ }).finally(()=>pendingOriginals.delete(key));
+ pendingOriginals.set(key,task);return task;
+}
 function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 function line(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function poly(c,color,pts){c.fillStyle=color;c.beginPath();c.moveTo(...pts[0]);for(const p of pts.slice(1))c.lineTo(...p);c.closePath();c.fill();}
@@ -81,19 +122,30 @@ function vehicleGraphic(THREE,record){
  const scale=record.scale||1;
  const visualScale=Number(spec.editorArtScale)||1;
  const w=spec.size[0]*PX*visualScale,h=spec.size[1]*PX*VCOMP*visualScale;
- const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:false,
+ const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:true,
   alphaTest:.15,depthWrite:true,side:THREE.DoubleSide});
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
- mesh.position.y=h*(1-spec.pivot[1]/spec.size[1]-.5)*-1;
- // Source pivot defines the exact image pixel at terrain footprint center.
+ // Preserve the source pivot at the road-lane origin, even for 2-grid buses.
  mesh.position.y=h*(spec.pivot[1]/spec.size[1]-.5);
  mesh.userData.semestaVehicle=true;mesh.userData.assetPublished=false;
  mesh.userData.catalogId=spec.id;
- let direction='se';
+ let direction='se',disposed=false;
+ const allowOriginal=!record.assetPath;
+ function show(dir){
+   const key=originalKey(spec.id,dir),ready=allowOriginal&&originalCache.get(key);
+   mat.map=ready||texture(THREE,spec.id,dir);mat.needsUpdate=true;
+   mesh.userData.assetPublished=!!ready;
+   if(!ready&&allowOriginal)requestOriginal(THREE,spec,dir).then(actual=>{
+     if(disposed||direction!==dir||!actual)return;
+     mat.map=actual;mat.needsUpdate=true;mesh.userData.assetPublished=true;
+   });
+ }
+ show('se');
  return {mesh,update(dir,camera,root){
-   if(dir!==direction){direction=dir;mesh.material.map=texture(THREE,spec.id,dir);mesh.material.needsUpdate=true;}
+   if(!spec.views?.[dir])dir='se';
+   if(dir!==direction){direction=dir;show(dir);}
    if(camera)mesh.rotation.y=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y;
- },dispose(){mat.dispose();mesh.geometry.dispose();}};
+ },dispose(){disposed=true;mat.dispose();mesh.geometry.dispose();}};
 }
 const jobColor={
  manusia_silver:['#aeb9c8','#e0e5ec','#8d9aaa','#9e8062'],
@@ -158,5 +210,5 @@ function questGraphic(THREE,record){
    mesh.rotation.y=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y;
  },dispose(){mesh.geometry.dispose();mat.dispose();tex.dispose();}};
 }
-g.VLSemestaArt=Object.freeze({vehicleGraphic,questGraphic,vehicleCanvas});
+g.VLSemestaArt=Object.freeze({sourcePublished,originalCount,retrySources,vehicleGraphic,questGraphic,vehicleCanvas});
 })(window);
