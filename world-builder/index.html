@@ -13,6 +13,8 @@
  <div class="win-controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div>
 </header>
 <nav id="menubar" aria-label="XP Paint menus">
+ <button id="saveDraftMenu" type="button" title="Save named city draft">💾 Save City</button>
+ <button id="openDraftMenu" type="button" title="Open saved city drafts">📁 My Cities</button>
  <button id="export" type="button"><u>F</u>ile / Export</button>
  <button id="import" type="button"><u>E</u>dit / Import</button>
  <button id="reset" type="button"><u>V</u>iew / Reset</button>
@@ -72,6 +74,7 @@
    <span id="terrainLabel" aria-live="polite">GRASS</span><button type="button" id="gridToolbar" class="chrome-button" aria-pressed="true"># Grid ON</button>
    <button id="mobileAssets" type="button">▣ Assets</button>
    <button id="mobileInspector" type="button">☷ Inspector</button>
+   <button id="referenceCity" class="chrome-button" type="button" title="Open editable city layout inspired by reference image">🏙 Reference City</button>
    <button id="newCity" class="chrome-button" type="button" title="Create editable city-block sample">▦ City Sample</button>
    <button id="viewRef" class="chrome-button" type="button">Map Reference</button>
    <button id="refreshAssets" class="chrome-button" type="button">Reload Assets</button>
@@ -136,11 +139,34 @@
  </aside>
 </div>
 <footer id="footer">
- <button id="exportShortcut" type="button">💾 Export Map JSON</button>
+ <button id="saveCityDraft" type="button">💾 Save Draft</button>
+ <button id="manageDrafts" type="button">📁 My Cities</button>
+ <button id="exportShortcut" type="button">Export JSON</button>
  <span>🗺️ Draft only / Game unchanged</span>
  <input id="file" type="file" accept=".json,application/json" hidden>
  <span class="status" id="saveStatus">● Draft</span>
 </footer>
+<div id="draftDialog" class="draft-dialog" role="dialog" aria-modal="true" aria-labelledby="draftDialogTitle" hidden>
+ <div class="draft-window">
+  <div class="draft-header"><strong id="draftDialogTitle">📁 MY CITY DRAFTS</strong><button id="closeDraftDialog" class="sheet-close" type="button" aria-label="Close city drafts">×</button></div>
+  <div class="draft-content">
+   <label class="draft-label">CITY NAME <input id="draftName" maxlength="70" type="text" placeholder="e.g. My First Town"></label>
+   <p class="draft-hint">Save your editable roads, buildings, vegetation, grid placements and logic markers as a named city.</p>
+   <div class="draft-actions">
+    <button id="confirmSaveDraft" type="button">💾 Save City</button>
+    <button id="saveAsNewDraft" type="button">Save as New</button>
+   </div>
+   <div class="draft-divider">SAVED CITIES</div>
+   <select id="draftPicker" size="5" aria-label="Saved cities list"></select>
+   <div id="draftDetails" class="draft-hint">No saved city selected.</div>
+   <div class="draft-actions">
+    <button id="loadDraft" type="button">📂 Open City</button>
+    <button id="deleteDraft" class="danger" type="button">Delete</button>
+   </div>
+   <p class="draft-hint">Drafts are stored in this browser on this device, not in the cloud. Use Export JSON for a backup or to transfer cities to another device.</p>
+  </div>
+ </div>
+</div>
 </div></div>
 <script src="./asset-catalog.js?v=2"></script>
 <script src="./pipeline-catalog.js?v=p4"></script>
@@ -149,5 +175,7 @@
 <script src="./style-rules.js?v=infinite-grid-mobile-fix4"></script>
 <script src="./map-terrain.js?v=infinite-grid-mobile-fix4"></script>
 <script src="./map-schema.js?v=infinite-grid-mobile-fix4"></script>
+<script src="./reference-city.js?v=reference-city-1"></script>
+<script src="./city-drafts.js?v=city-drafts-1"></script>
 <script type="module" src="./builder.js?v=infinite-grid-mobile-fix4"></script>
 </body></html>
