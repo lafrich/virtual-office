@@ -35,8 +35,11 @@ function parseCatalog(json){
    .map(e=>({id:e.id,label:String(e.label||e.id).slice(0,64),
     ...(ASSET.test(e.sheet||'')?{sheet:e.sheet}:{}),
     ...(ASSET.test(e.overlay||'')?{overlay:e.overlay}:{})})): [];
+  // Preserve only canonical native V6B lying row metadata; padded legacy
+  // atlases are not allowed to advertise an unrendered pose.
+  const row_starts=raw.row_starts?.lie===36?{lie:36}:{};
   const entry={id:raw.id,name:String(raw.name||raw.id).slice(0,90),
-   sheet:raw.sheet,motions,expressions,baseId:raw.id,
+   sheet:raw.sheet,motions,expressions,row_starts,baseId:raw.id,
    category:raw.template_category||'npc',template:raw.template===true,
    status:raw.asset_status||'published',custom:false};
   next.set(entry.id,entry);
