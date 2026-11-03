@@ -36,6 +36,18 @@ assert.ok(preview.includes("const rearView=actor.direction==='ne'||actor.directi
 assert.ok(preview.includes('ctx.rect(x,y+56*scale,drawWidth,(FRAME.h-56)*scale)'),
  "Bangun Ruang must mask rear backpack away from head and neck");
 const builder=fs.readFileSync("world-builder/builder.js","utf8");
+assert.ok(world.includes("/virtual-life-asset-pipeline/action-appearance-bridge.js"),
+ "Semesta must use the same character face/presentation module as Mahluk Hidup");
+assert.ok(world.indexOf("action-appearance-bridge.js")<world.indexOf("pipeline-character-rig.js"),
+ "Shared native face composer must load before Semesta rig");
+assert.ok(bangun.includes("/virtual-life-asset-pipeline/action-appearance-bridge.js"),
+ "Bangun Ruang preview should also have the native expression renderer");
+assert.ok(rig.includes("appearance().drawExpression(ctx,face,state.direction,frame"),
+ "Semesta must render each actor's original expression over the saved custom pose");
+assert.ok(rig.includes("mesh.rotation.set(0,yaw,rad)"),
+ "Semesta must rotate the actual billboard and preserve camera orientation");
+assert.ok(rig.includes("Math.max(0,halfVertical-baseY-groundMargin)"),
+ "Lying 90-degree actions must not sink into the ground");
 assert.ok(world.includes("virtual-life-asset-pipeline/action-template-bridge.js"),
  "Semesta must load same-origin saved action template bridge");
 assert.ok(world.indexOf("action-template-bridge.js")<world.indexOf("pipeline-character-rig.js"),
