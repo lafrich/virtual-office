@@ -355,6 +355,8 @@ let viewSize=35;
 // Camera follow tracks the live actor mesh (not the saved JSON coordinates).
 // This ensures Walk Test stays a non-destructive preview.
 let cameraFollowId=null,mapCameraBeforeFollow=null;
+const activeAssetCamera=window.VLActiveAssetCamera;
+let activeAssetAimId=null,activeAssetTracking=false,activeAssetListKey='';
 function resetCamera(){
  if(documentMap.map?.preset==='reference-city-v1'){
   cameraFocus.set(14,0,49);viewSize=140;
@@ -1321,6 +1323,54 @@ function rebuild(){
  renderer.render(scene,camera);
 }
 function item(){return documentMap.objects.find(o=>o.id===selectedId)||null;}
+function syncActiveAssetUI(){
+ const rows=activeAssetCamera?.list(documentMap.objects)||[];
+ const picker=$('activeAssetPicker');
+ const key=rows.map(o=>[o.id,o.name,o.type].join('~')).join('|');
+ if(key!==activeAssetListKey){
+  activeAssetListKey=key;picker.replaceChildren();
+  const empty=document.createElement('option');
+  empty.value='';empty.textContent='— SELECT PLACED ASSET —';picker.append(empty);
+  for(const o of rows){
+   const opt=document.createElement('option');opt.value=o.id;
+   opt.textContent=o.name+' · '+o.type.toUpperCase();picker.append(opt);
+  }
+ }
+ const cur=item(),has=!!cur&&owners.has(cur.id);
+ picker.value=cur?.id||'';
+ $('activeAssetCount').textContent=String(rows.length);
+ $('activeAssetMeta').textContent=cur?cur.type.toUpperCase()+' · '+cur.name:'NO ASSET SELECTED';
+ $('focusActiveAsset').disabled=!has;
+ $('trackActiveAsset').disabled=!has;
+ const tracking=!!cur&&activeAssetTracking&&activeAssetAimId===cur.id;
+ $('trackActiveAsset').setAttribute('aria-pressed',String(tracking));
+ $('trackActiveAsset').textContent=tracking?'◉ TRACKING':'◉ TRACK';
+}
+function cancelActiveAssetAim(){
+ activeAssetAimId=null;activeAssetTracking=false;syncActiveAssetUI();
+}
+function focusPlacedAsset(id,track=false){
+ const obj=documentMap.objects.find(o=>o.id===id);
+ const target=activeAssetCamera?.target(documentMap.objects,owners,id);
+ if(!obj||!target){tell('Select a placed asset first');return false;}
+ if(cameraFollowId)leaveCharacterCamera(false);
+ activeAssetAimId=id;activeAssetTracking=!!track;
+ viewSize=activeAssetCamera.viewSize(viewSize,target);
+ syncActiveAssetUI();
+ tell((track?'◉ Tracking ':'◎ Focus ')+obj.name);
+ return true;
+}
+$('activeAssetPicker').onchange=()=>{
+ const id=$('activeAssetPicker').value;
+ if(id){select(id);focusPlacedAsset(id,false);}
+ else{cancelActiveAssetAim();select(null);}
+};
+$('focusActiveAsset').onclick=()=>{if(item())focusPlacedAsset(item().id,false);};
+$('trackActiveAsset').onclick=()=>{
+ const obj=item();if(!obj)return;
+ if(activeAssetTracking&&activeAssetAimId===obj.id)cancelActiveAssetAim();
+ else focusPlacedAsset(obj.id,true);
+};
 let interiorPreview=null;
 function updateSelection(){
  const cur=item();
