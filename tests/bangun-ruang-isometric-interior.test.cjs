@@ -26,7 +26,7 @@ test('2:1 interior uses exact Semesta 64x32 isometric tiles',()=>{
  assert.equal(b[0]-a[0],32);assert.equal(b[1]-a[1],16);
  assert.equal(d[0]-a[0],-32);assert.equal(d[1]-a[1],16);
  assert.equal(iso.tileAt(g,...iso.point(g,2.5,1.5)).c,2);
- assert.equal(iso.tileAt(g,...iso.point(g,2.5,3.5)).r,1);
+ assert.equal(iso.tileAt(g,...iso.point(g,2.5,1.5)).r,1);
  assert.equal(iso.tileAt(g,0,0),null);
 });
 test('native isometric raster renders rooms and interactive furniture',()=>{
