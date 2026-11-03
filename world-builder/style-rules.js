@@ -108,7 +108,11 @@ function reason(o,objects,map,catalog){
   const t=map?.terrain;
   if(t){
    const tiles=getTerrainIndex(t),tile=tiles.get(Math.floor(Number(o.x))+','+Math.floor(Number(o.z)))||t.default||'grass';
-   if(tile!==allowed)return o.type==='vehicle'?'Kendaraan harus di atas jalan.':'NPC / crowd harus di atas trotoar.';
+   if(o.type==='quest_npc'){
+    if(!['road','sidewalk','plaza'].includes(tile))
+     return 'NPC Quest harus di jalan, trotoar, atau plaza.';
+   }else if(tile!==allowed)return o.type==='vehicle'?
+    'Kendaraan harus di atas jalan.':'NPC / crowd harus di atas trotoar.';
   }
   if(o.type!=='quest_npc'&&!g.VLSemestaTraffic?.choose(map,o.x,o.z,o.type==='vehicle'?'vehicle':'pedestrian',o.motion?.direction||'auto'))
    return 'Butuh jalur lurus minimal tiga tile berurutan.';
