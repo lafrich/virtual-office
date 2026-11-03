@@ -946,6 +946,7 @@ function instantiate(o){
  root.scale.setScalar(actorType(o.type)?1:(o.scale||1));
  switch(o.type){
   case 'building':case 'shop':makeBuilding(root,o);break;
+  case 'virtual_asset':if(o.assetCategory==='building')makeBuilding(root,o);else makePixelProp(root,o.assetCategory==='tree'?'tree':'box',o);break;
   case 'bench':makePixelProp(root,'bench',o);break;
   case 'lamp':makePixelProp(root,'lamp',o);break;
   case 'tree':makePixelProp(root,'tree',o);break;
@@ -957,6 +958,10 @@ function instantiate(o){
  }
  assetRoots.add(root);owners.set(o.id,root);
  registerBigOccluder(root,o);
+ if(['virtual_asset','sprite','building','shop'].includes(o.type)){
+  const path=originalPathFor(o);
+  if(path)showOriginalImage(root,o,path);
+ }
 }
 function clearAll(){
  for(const agent of automatedAgents.values()){
