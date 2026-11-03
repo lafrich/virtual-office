@@ -2543,6 +2543,7 @@ async function refreshMahlukHidup(full=true){
   'Mahluk Hidup synced · '+(mahluk?.list().length||0)+' characters · '+(trafficArt?.originalCount()||0)+' original vehicle types');
 }
 $('refreshAssets').onclick=()=>refreshMahlukHidup(true);
+$('syncBangunObjects').onclick=refreshBangunRuang;
 window.addEventListener('storage',e=>{
  if(['virtual-life-character-storage-v1','virtual-life-accessory-equipment-v1',
      'virtual-life-accessories-v1'].includes(e.key))refreshMahlukHidup(false);
