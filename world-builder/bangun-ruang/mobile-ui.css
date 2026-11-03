@@ -359,7 +359,7 @@ body{background:#0b357e;padding:clamp(12px,2.2vw,32px)}
  background:#b6c9f1;color:#142b59;font-weight:800;padding:5px 10px;
 }
 #app nav .status{font:10px "Courier New",monospace;color:#55514b}
-#app .workspace{grid-template-columns:205px minmax(0,1fr) 284px;background:#b8b6b1;min-width:0}
+#app .workspace{grid-template-columns:55px 205px minmax(0,1fr) 284px;background:#b8b6b1;min-width:0}
 #app .panel{min-width:0;background:var(--chrome);border-right:2px solid #7e7c77}
 #app .panel.right{border-right:0;border-left:2px solid #86837e}
 #app .heading{
@@ -475,4 +475,41 @@ body{background:#0b357e;padding:clamp(12px,2.2vw,32px)}
  #app .studio-tabs{top:52px}
  #app .interior-quick-card{box-shadow:none}
  #app .library button{margin-bottom:4px}
+}
+
+/* Tool rail follows the same layout/interaction density as Mahluk Hidup's
+ * tools-panel and Semesta's toolsPanel, without adding new editing modes. */
+#app .studio-tool-rail{
+ grid-column:1;display:flex;flex-direction:column;gap:5px;
+ padding:8px 5px;background:#c9c8c4;border-right:2px solid #7e7c77;
+ min-width:0;min-height:0;
+}
+#app .studio-tool-rail button{
+ display:grid;place-items:center;width:100%;aspect-ratio:1;
+ min-width:0;min-height:42px;padding:2px;font-size:23px;font-weight:600;
+ border:2px solid;border-color:#fcfcfa #888782 #888782 #fcfcfa;
+ background:#d7d5d0;color:#151515;
+}
+#app .studio-tool-rail button.active{
+ background:#aac2f8;border-color:#4d6bb8;
+ box-shadow:inset 2px 2px #596577;
+}
+#app .studio-tool-rail button:disabled{opacity:.42}
+#app .studio-rail-divider{border-top:2px solid #93918c;border-bottom:1px solid #fff;margin:4px 1px}
+#app .studio-rail-stamp{
+ display:flex;align-items:center;flex-direction:column;justify-content:center;
+ gap:3px;margin-top:auto;background:#eeeae4;border:2px inset #999;
+ color:#1232b0;min-height:95px;padding:8px 3px;
+}
+#app .studio-rail-stamp strong{font-size:31px;transform:rotate(14deg);line-height:1}
+#app .studio-rail-stamp small{font:bold 10px/1.1 "Courier New",monospace;text-align:center;letter-spacing:.1em}
+@media(max-width:1000px){
+ #app .studio-tool-rail{
+  order:0;flex-direction:row;align-items:center;min-height:49px;
+  max-width:100%;overflow-x:auto;gap:4px;padding:5px 9px;
+  border-right:0;border-bottom:2px solid #86837e;flex:none;
+ }
+ #app .studio-tool-rail button{width:39px;min-width:39px;height:37px;min-height:37px;aspect-ratio:auto;font-size:19px}
+ #app .studio-rail-divider{height:30px;width:1px;margin:0 4px;border:0;border-left:2px solid #93918c}
+ #app .studio-rail-stamp{display:none}
 }
