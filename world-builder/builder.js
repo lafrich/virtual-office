@@ -619,6 +619,51 @@ function makeTree(root){
 }
 function makeBox(root,item){cuboid(root,0,.8,0,2,1.6,2,new THREE.Color(item.color||'#d4a86a'));}
 const billboardSprites=[];
+function originalPathFor(item){
+ if(item.assetPath)return item.assetPath;
+ if(item.type==='sprite'){
+  const spec=assetByName.get(item.asset);
+  if(spec?.source==='pipeline-street'||spec?.source==='pipeline-vegetation')
+   return window.VLAssetVault?.automaticMatch(spec.id)||null;
+ }
+ return null;
+}
+function showOriginalImage(root,item,path){
+ const vault=window.VLAssetVault;
+ if(!path||!vault?.allowed(path))return;
+ vault.getImage(path).then(img=>{
+  // Avoid resurrecting a removed/rebuilt object after an asynchronous unlock.
+  if(owners.get(item.id)!==root||root.parent!==assetRoots)return;
+  const width=Math.max(.7,Math.min(26,Number(item.width)||img.naturalWidth*PIXEL_WORLD));
+  const height=Math.max(1,Math.min(33,Number(item.height)||img.naturalHeight*PIXEL_WORLD*VERTICAL_COMP));
+  const texture=new THREE.Texture(img);texture.colorSpace=THREE.SRGBColorSpace;
+  texture.magFilter=texture.minFilter=THREE.NearestFilter;
+  texture.generateMipmaps=false;texture.needsUpdate=true;
+  const mat=new THREE.MeshBasicMaterial({map:texture,alphaTest:.32,
+   transparent:true,side:THREE.DoubleSide,depthWrite:true,depthTest:true});
+  const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
+  const pivot=Number.isFinite(Number(item.pivotY))?Math.max(0,Math.min(1,Number(item.pivotY))):.86;
+  plane.position.y=height*(pivot-.5);
+  plane.userData.billboardPart=true;
+  plane.userData.assetFile='__vault:'+path;
+  plane.userData.aspectFixed=true;
+  plane.userData.authorWidth=width;plane.userData.authorHeight=height;
+  for(let i=billboardSprites.length-1;i>=0;i--)
+   if(billboardSprites[i].root===root)billboardSprites.splice(i,1);
+  for(const child of [...root.children]){
+   root.remove(child);child.traverse(node=>{
+    if(node.geometry)node.geometry.dispose();
+    if(node.material){
+     for(const m of Array.isArray(node.material)?node.material:[node.material])m.dispose();
+    }
+   });
+  }
+  root.add(plane);billboardSprites.push({root,plane});
+  root.userData.originalVirtualLifePath=path;
+  if(physics.bigStructure(item,assetByName,style))registerBigOccluder(root,item);
+  renderer.render(scene,camera);
+ }).catch(err=>console.warn('Original image fallback',item.id,err.message));
+}
 function makePixelProp(root,type,item){
  const kind=style.isPixelProxy(type)?type:'box',art=style.proxyTexture(THREE,kind);
  // Keep fallback pixel art undistorted; published asset sizes stay canonical.
