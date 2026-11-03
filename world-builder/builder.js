@@ -283,7 +283,7 @@ function sanitize(v){
   if(p.type==='sprite'&&/^(?:env|street2)\/[a-z0-9_/-]+\.png$/.test(p.asset||'')&&assetByName.has(p.asset))e.asset=p.asset;
   if(actorType(p.type)){
     e.facing=directions.includes(p.facing)?p.facing:'sw';
-    e.pose=['sit','sleep','bathe','toilet','work'].includes(p.pose)?p.pose:null;
+    e.pose=['sit','sleep','sleep_bed_right','sleep_bed_left','bathe','toilet','work'].includes(p.pose)?p.pose:null;
     e.variant='pipeline-v6b';
     e.profile=(mahluk?.has(p.profile)||window.VLCharacterRig?.profiles?.[p.profile])?p.profile:'ichsan';
   }
@@ -2245,6 +2245,22 @@ function actionChoices(actorId,selectId,selectedAction){
    opt.textContent=action.name||action.id.replace(/_/g,' ').toUpperCase();group.append(opt);
   }
   sel.append(group);
+ }
+ // Each actor receives universal bed poses only if its own native LIE
+ // frames are present. An absent pose must remain unavailable.
+ const shared=window.VLUniversalSleep,character=mahluk?.get(sourceId);
+ if(shared&&character){
+  const available=shared.IDs.filter(id=>shared.resolve(character,id));
+  if(available.length){
+   const group=document.createElement('optgroup');group.label='UNIVERSAL / BED SLEEP';
+   for(const id of available){
+    const opt=document.createElement('option');opt.value=id;
+    opt.textContent=id==='sleep_bed_right'?
+     'SLEEP / BED RIGHT':'SLEEP / BED LEFT';
+    group.append(opt);
+   }
+   sel.append(group);
+  }
  }
  if(templates.length){
   const group=document.createElement('optgroup');group.label='SEMESTA / SAVED CUSTOM ACTIONS';
