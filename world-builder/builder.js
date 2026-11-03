@@ -700,7 +700,7 @@ refreshAutoRoutes=()=>{
  }
 };
 function updateAutomated(dt){
- const blockers=documentMap.objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&!automaticType(o.type));
+ const blockers=documentMap.objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&(!automaticType(o.type)||o.type==='quest_npc'));
  for(const [id,agent] of automatedAgents){
   const record=documentMap.objects.find(o=>o.id===id);
   if(!record)continue;
