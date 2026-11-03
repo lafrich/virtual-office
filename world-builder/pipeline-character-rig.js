@@ -213,7 +213,7 @@ function createRig(THREE,opt={}){
    camera.position.z-(position?.z||0)):mesh.rotation.y||0;
   // Canvas uses downward-positive Y; WebGL uses upward-positive Y.
   // Negate Z tilt so 90° / LIE RIGHT matches the Mahluk Hidup preview.
-  const rad=-state.rotation*Math.PI/180;
+  const rad=state.rotation?-state.rotation*Math.PI/180:0;
   const footCenter=h*(FRAME.pivotY/FRAME.h-.5);
   const halfVertical=Math.abs(Math.cos(rad))*h/2+Math.abs(Math.sin(rad))*w/2;
   const baseY=footCenter*Math.cos(rad);
