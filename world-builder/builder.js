@@ -1065,6 +1065,7 @@ function cameraMapView(){
  else resetCamera();
 }
 $('cameraToCharacter').onclick=enterCharacterCamera;
+$('focusSelectedCharacter').onclick=enterCharacterCamera;
 $('cameraCharacter').onclick=enterCharacterCamera;
 $('cameraMapView').onclick=cameraMapView;
 updateCharacterCameraUI();
