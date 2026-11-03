@@ -56,7 +56,8 @@ rig.step(.05,camera,{x:0,z:0});
 assert.equal(rig.state.rotation,90);
 assert.equal(rig.state.expression,"sleepy");
 assert.equal(rig.state.objectLayer,"behind");
-assert.ok(Math.abs(rig.mesh.rotation.z-Math.PI/2)<1e-5,"Lying action should rotate actual game billboard");
+assert.ok(Math.abs(rig.mesh.rotation.z+Math.PI/2)<1e-5,
+ "90-degree LIE RIGHT must rotate clockwise like the canvas preview (WebGL uses Y-up)");
 assert.ok(Math.abs(rig.mesh.position.x)>0.1,"90-degree action should reanchor at feet");
 assert.ok(rig.mesh.position.y>=0,"Lying sprite must not sink through floor");
 assert.deepEqual(traced[0].slice(0,2),["sleepy","sw"]);
