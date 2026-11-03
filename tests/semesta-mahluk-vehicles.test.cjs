@@ -25,7 +25,7 @@ const THREE={
  Mesh:class {constructor(geo,mat){this.geometry=geo;this.material=mat;
   this.position={y:0};this.rotation={y:0};this.userData={};}}
 };
-const draw={fillRect(){},beginPath(){},ellipse(){},fill(){},moveTo(){},lineTo(){},closePath(){},drawImage(){}};
+const draw={fillRect(){},beginPath(){},ellipse(){},arc(){},fill(){},moveTo(){},lineTo(){},closePath(){},drawImage(){},translate(){},scale(){}};
 const ctx=vm.createContext({
  window:g,location:{origin:'https://lafrich.github.io'},URL,Map,Set,Promise,
  Image:FakeImage,CustomEvent:class{constructor(type){this.type=type}},
