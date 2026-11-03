@@ -68,3 +68,30 @@ test('malformed object data cannot pollute placement catalog',()=>{
  assert.throws(()=>api.save(obj));
  obj.views.ne.url=PNG;obj.footprint=[1,200];assert.equal(api.valid(obj),false);
 });
+
+test('physical world height is independent from source PNG resolution',()=>{
+ const w=runtime(),api=w.VLBangunObjects;
+ const obj=sample('obj-real-tree');
+ obj.category='plant';obj.worldHeight=5.5;
+ api.save(obj);
+ const spec=w.VLAssetCatalog.find(v=>v.file==='object:obj-real-tree');
+ const character=api.characterWorldHeight;
+ assert.ok(Math.abs(character-1.837)<.01,'character uses 72 visible px in Semesta world units');
+ assert.ok(Math.abs(spec.worldHeight-5.5)<.0001);
+ assert.ok(Math.abs(spec.height*(90/96)-5.5)<.0001,'sprite pivot is placed at the ground');
+ assert.ok(Math.abs(spec.width-spec.height*48/96/(2/Math.sqrt(3)))<.0001,'isometric sprite aspect preserved');
+ assert.ok(Math.abs(spec.worldHeight/character-3)<.05,'tree is around three character heights');
+ obj.worldHeight=.1;assert.equal(api.valid(obj),false);
+ obj.worldHeight=25;assert.equal(api.valid(obj),false);
+});
+test('older custom objects keep native world size and built-in tree uses real placement scale',()=>{
+ const w=runtime(),api=w.VLBangunObjects;
+ const legacy=sample('obj-legacy');
+ assert.equal(legacy.worldHeight,undefined);
+ api.save(legacy);
+ const placed=w.VLAssetCatalog.find(v=>v.file==='object:obj-legacy');
+ assert.ok(Math.abs(placed.height-96*Math.SQRT2/64*2/Math.sqrt(3))<.0001);
+ const tree=w.VLAssetCatalog.find(v=>v.file==='object:small-tree');
+ assert.ok(tree,'built-in tree available');
+ assert.ok(Math.abs(tree.worldHeight-5.5)<.0001);
+});
