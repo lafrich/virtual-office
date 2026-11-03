@@ -684,7 +684,7 @@ scaleController=window.VLCharacterScale?.mount({
  getInteriorView:()=>interiorUi?.getInteriorView(),
  getSelectedProp:()=>interiorUi?.getSelectedProp(),
  isInterior:()=>!$('interiorCanvas').hidden,
- openInterior:()=>{interiorUi?.selectTab('interior');interiorUi?.setPreview('interior');},
+ openInterior:()=>{interiorUi?.selectFloor(1);interiorUi?.selectTab('interior');interiorUi?.setPreview('interior');},
  onStatus:status
 });
 scaleController?.sync();
