@@ -713,7 +713,7 @@ function updateAutomated(dt){
    const member=isCrowd?agent.parts[i]:agent.parts[0];
    const oldX=isCrowd?member.child.position.x+agent.root.position.x:agent.root.position.x;
    const oldZ=isCrowd?member.child.position.z+agent.root.position.z:agent.root.position.z;
-   const probe={id:id+(isCrowd?':'+i:''),type:'pedestrian',x:oldX,z:oldZ,scale:1};
+   const probe={id:id+(isCrowd?':'+i:''),type:isCrowd?'pedestrian':record.type,vehicleId:record.vehicleId,motion:record.motion,x:oldX,z:oldZ,scale:1};
    const result=physics.check(probe,{x:p.x,z:p.z},blockers,documentMap.map,assetByName,style,new Map());
    const wrapped=Math.hypot(p.x-oldX,p.z-oldZ)>12;
    if(!result.ok&&!wrapped){
@@ -988,13 +988,28 @@ function makeObject(type,point){
  style.normalize(obj,assetByName);schema.normalize(obj,assetByName,style);
  return obj;
 }
+function snapAutomaticToSurface(o,point){
+ if(!automaticType(o.type)||!point)return false;
+ const mode=o.type==='vehicle'?'vehicle':'pedestrian';
+ const spot=traffic.spawnPosition(documentMap.map,point.x,point.z,mode,5);
+ if(!spot)return false;
+ o.x=spot.x;o.z=spot.z;
+ return true;
+}
 function add(type,point=null){
  const obj=makeObject(type,point);
  if(!obj){tell('Asset/prefab belum tersedia');return false;}
  if(point){
-  const [fw,fd]=style.footprint(obj,assetByName);
-  obj.x=Math.floor(point.x-fw/2)+fw/2;
-  obj.z=Math.floor(point.z-fd/2)+fd/2;
+  if(automaticType(obj.type)){
+   if(!snapAutomaticToSurface(obj,point)){
+    tell(obj.type==='vehicle'?'Tidak ada jalan dekat posisi itu.':'Tidak ada trotoar dekat posisi itu.');
+    return false;
+   }
+  }else{
+   const [fw,fd]=style.footprint(obj,assetByName);
+   obj.x=Math.floor(point.x-fw/2)+fw/2;
+   obj.z=Math.floor(point.z-fd/2)+fd/2;
+  }
   const reason=style.reason(obj,documentMap.objects,documentMap.map,assetByName);
   if(reason){tell(reason);return false;}
  }else if(!style.nearest(obj,documentMap.objects,documentMap.map,assetByName)){
@@ -1045,7 +1060,11 @@ function previewPlace(point){
  if(!placementType||!point){placementPreview.visible=false;return;}
  const test=makeObject(placementType,point);if(!test)return;
  const [fw,fd]=style.footprint(test,assetByName);
- test.x=Math.floor(point.x-fw/2)+fw/2;test.z=Math.floor(point.z-fd/2)+fd/2;
+ if(automaticType(test.type)){
+  if(!snapAutomaticToSurface(test,point)){placementPreview.visible=false;return;}
+ }else{
+  test.x=Math.floor(point.x-fw/2)+fw/2;test.z=Math.floor(point.z-fd/2)+fd/2;
+ }
  const reason=style.reason(test,documentMap.objects,documentMap.map,assetByName);
  placementPreview.position.set(test.x,.065,test.z);placementPreview.scale.set(fw,1,fd);
  placementPreview.material.color.setHex(reason?0xe35f5f:0x50e677);placementPreview.visible=true;
