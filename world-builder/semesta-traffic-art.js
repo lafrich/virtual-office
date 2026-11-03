@@ -12,8 +12,20 @@ const palette=g.VLSemestaCatalog?.palette||{};
 const SOURCE=new URL('/virtual-life-asset-pipeline/assets/street_vehicles/',location.origin);
 const originalCache=new Map(),missingOriginals=new Set(),pendingOriginals=new Map();
 const validPath=/^(?:cars|riders)\/[a-z0-9_-]+_(?:se|sw|ne|nw)\.png$/;
+// These are the true v3 Mahluk Hidup rider dimensions/pivots, not the
+// 80x116 legacy placeholders. Never rescale a 54x92 rider into an 80x116 box.
+const RIDER_V3={
+ gojek:{size:[60,87],pivot:[30,75]},
+ gojek_pax:{size:[54,92],pivot:[27,80]},
+ maxim:{size:[54,87],pivot:[27,75]},
+ maxim_pax:{size:[54,92],pivot:[27,80]},
+ sma_triple:{size:[66,96],pivot:[33,82]}
+};
 const originalKey=(id,dir)=>id+':'+dir;
-function sourceURL(spec,dir){
+function sourceURL(spec,dir,variant='v3'){
+ const v3=RIDER_V3[spec?.id];
+ if(v3&&variant==='v3'&&['se','sw','ne','nw'].includes(dir))
+  return new URL('riders_v3/frames/'+spec.id+'_'+dir+'_f0.png',SOURCE).href;
  const path=spec?.views?.[dir];
  return typeof path==='string'&&validPath.test(path)?new URL(path,SOURCE).href:null;
 }
@@ -25,26 +37,36 @@ function requestOriginal(THREE,spec,dir){
  if(known)return Promise.resolve(known);
  if(missingOriginals.has(key))return Promise.resolve(null);
  if(pendingOriginals.has(key))return pendingOriginals.get(key);
- const url=sourceURL(spec,dir);
- if(!url){missingOriginals.add(key);return Promise.resolve(null);}
+ const v3=RIDER_V3[spec.id];
+ const candidates=v3?[
+  {url:sourceURL(spec,dir,'v3'),size:v3.size,pivot:v3.pivot},
+  {url:sourceURL(spec,dir,'legacy'),size:spec.size,pivot:spec.pivot}
+ ]:[{url:sourceURL(spec,dir,'legacy'),size:spec.size,pivot:spec.pivot}];
  const task=new Promise(resolve=>{
-   const img=new Image();img.decoding='async';
-   img.onload=()=>{
-     // A wrong image must never silently distort the source sprite pivot.
-     if(img.naturalWidth!==spec.size[0]||img.naturalHeight!==spec.size[1]){
-       missingOriginals.add(key);resolve(null);return;
-     }
-     const tex=new THREE.Texture(img);
-     tex.colorSpace=THREE.SRGBColorSpace;
-     tex.minFilter=tex.magFilter=THREE.NearestFilter;
-     tex.generateMipmaps=false;tex.needsUpdate=true;
-     originalCache.set(key,tex);
-     if(dir==='se'&&typeof g.dispatchEvent==='function'&&typeof CustomEvent!=='undefined')
-       g.dispatchEvent(new CustomEvent('semesta-vehicle-source-loaded',{detail:{id:spec.id}}));
-     resolve(tex);
-   };
-   img.onerror=()=>{missingOriginals.add(key);resolve(null);};
-   img.src=url;
+   let index=0;
+   function next(){
+     const source=candidates[index++];
+     if(!source){missingOriginals.add(key);resolve(null);return;}
+     if(!source.url){next();return;}
+     const img=new Image();img.decoding='async';
+     img.onload=()=>{
+       if(img.naturalWidth!==source.size[0]||img.naturalHeight!==source.size[1]){
+         next();return;
+       }
+       const tex=new THREE.Texture(img);
+       tex.userData={pivotRatio:source.pivot[1]/source.size[1]};
+       tex.colorSpace=THREE.SRGBColorSpace;
+       tex.minFilter=tex.magFilter=THREE.NearestFilter;
+       tex.generateMipmaps=false;tex.needsUpdate=true;
+       originalCache.set(key,tex);
+       if(dir==='se'&&typeof g.dispatchEvent==='function'&&typeof CustomEvent!=='undefined')
+         g.dispatchEvent(new CustomEvent('semesta-vehicle-source-loaded',{detail:{id:spec.id}}));
+       resolve(tex);
+     };
+     img.onerror=next;
+     img.src=source.url;
+   }
+   next();
  }).finally(()=>pendingOriginals.delete(key));
  pendingOriginals.set(key,task);return task;
 }
@@ -204,7 +226,8 @@ function vehicleGraphic(THREE,record){
   // the original sprite atlas; the bus still occupies only 2 editor tiles.
   let height=w*(imageHeight/imageWidth)*VCOMP;
   if(spec.group==='motor'&&!original)height=Math.max(1.45,height);
-  const pivot=original===true?sourcePivot:footRatio(image,original==='fitted'?sourcePivot:.935);
+  const pivot=original===true?(mat.map?.userData?.pivotRatio??sourcePivot):
+   footRatio(image,original==='fitted'?sourcePivot:.935);
   if(mesh.geometry)mesh.geometry.dispose();
   mesh.geometry=new THREE.PlaneGeometry(w,height);
   mesh.position.y=height*(pivot-.5)+groundClearance;
