@@ -121,19 +121,53 @@ function vehicleGraphic(THREE,record){
  const spec=g.VLSemestaCatalog.vehicle(record.vehicleId)||g.VLSemestaCatalog.vehicles[0];
  const scale=record.scale||1;
  const visualScale=Number(spec.editorArtScale)||1;
- const w=spec.size[0]*PX*visualScale,h=spec.size[1]*PX*VCOMP*visualScale;
+ const editorFootprint=spec.editorFootprint||spec.footprint||[2.9,1];
+ const w=Math.max(.7,Math.min(spec.size[0]*PX*visualScale,editorFootprint[0]*.95));
  const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:true,
   alphaTest:.15,depthWrite:true,side:THREE.DoubleSide});
- const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
- // The generic 160×108 proxy has a different transparent padding/pivot
- // from the canonical source sheet. Calibrate the visual wheels to the
- // ground separately to prevent cars appearing half-buried in the asphalt.
- const sourcePivot=spec.pivot[1]/spec.size[1],proxyPivot=.915;
- const groundClearance=.085;
+ // IMPORTANT: preview image dimensions are 160×108, while the original
+ // Vehicle Pipeline images are often 146×138 or 272×256. Reusing the source
+ // sheet's plane height for the preview distorted cars and planted their
+ // lower pixels below asphalt. Compute the actual plane from the active art.
+ const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,1),mat);
+ const sourcePivot=spec.pivot[1]/spec.size[1],groundClearance=.115;
+ const groundRows=new WeakMap();
+ function footRatio(image,fallback=.935){
+  if(!image||typeof image.getContext!=='function')return fallback;
+  if(groundRows.has(image))return groundRows.get(image);
+  let ratio=fallback;
+  try{
+   const ctx=image.getContext('2d',{willReadFrequently:true});
+   const iw=image.width||160,ih=image.height||108;
+   const pixels=ctx.getImageData(0,0,iw,ih).data;
+   for(let y=ih-1;y>=0;y--){
+    let solidPixels=0;
+    for(let x=0;x<iw;x++){
+     if(pixels[(y*iw+x)*4+3]>=170)solidPixels++;
+     if(solidPixels>=3)break;
+    }
+    if(solidPixels>=3){ratio=(y+.5)/ih;break;}
+   }
+  }catch{}
+  groundRows.set(image,ratio);
+  return ratio;
+ }
  function setGroundPivot(original=false){
-  mesh.position.y=h*((original?sourcePivot:proxyPivot)-.5)+groundClearance;
+  const image=mat.map?.image;
+  const imageWidth=Number(image?.naturalWidth||image?.width)||160;
+  const imageHeight=Number(image?.naturalHeight||image?.height)||108;
+  // Preserve source pixel aspect rather than stretching the preview to fit
+  // the original sprite atlas; the bus still occupies only 2 editor tiles.
+  let height=w*(imageHeight/imageWidth)*VCOMP;
+  if(spec.group==='motor'&&!original)height=Math.max(1.45,height);
+  const pivot=original===true?sourcePivot:footRatio(image,original==='fitted'?sourcePivot:.935);
+  if(mesh.geometry)mesh.geometry.dispose();
+  mesh.geometry=new THREE.PlaneGeometry(w,height);
+  mesh.position.y=height*(pivot-.5)+groundClearance;
   mesh.userData.groundClearance=groundClearance;
-  mesh.userData.sourcePivotUsed=!!original;
+  mesh.userData.sourcePivotUsed=original===true;
+  mesh.userData.effectiveImageSize=[imageWidth,imageHeight];
+  mesh.userData.groundPivot=pivot;
  }
  setGroundPivot(false);
  mesh.userData.semestaVehicle=true;mesh.userData.assetPublished=false;
