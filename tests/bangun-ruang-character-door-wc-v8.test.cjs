@@ -56,7 +56,7 @@ test('exterior PNG and interior iso canvas maintain equal on-screen pixels per t
  adapter.interior([262,270],'iso');
  assert.equal(adapter.worldPixelScale,scale);
 });
-test('seat docking still matches moved/rotated WC and uses scaled hip-to-foot offset',()=>{
+test('seat docking still matches moved/rotated WC and original no-Y-offset foot pivot',()=>{
  const g=setup(),iso=g.VLInteriorIso;
  for(const rotation of [0,90,180,270]){
   const wc={id:'toilet',assetId:'wc',c:1,r:1,rotation};
@@ -66,7 +66,7 @@ test('seat docking still matches moved/rotated WC and uses scaled hip-to-foot of
   assert.ok(a.c>=1&&a.c<=2&&a.r>=1&&a.r<=2);
  }
 });
-test('Mahluk Hidup actual sheet pixels are rendered at fixed half scale in both rooms',()=>{
+test('Mahluk Hidup actual sheet pixels render at native pixel scale in both rooms',()=>{
  const g=setup(),draws=[];let tick;
  const nodes=new Map();
  function el(id){
