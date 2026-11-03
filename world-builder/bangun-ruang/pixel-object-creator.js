@@ -2,8 +2,9 @@
  * architectural sprite pixels or multiplayer assets. */
 (function(g){
 'use strict';
+if(g.VLPixelCreator?.open)return; // prevent duplicate dialogs during retry
 const bridge=g.VLBangunObjects;
-if(!bridge)return;
+if(!bridge){console.warn('Pixel Creator: object bridge not ready');return;}
 const byId=id=>document.getElementById(id),DIR=['sw','se','ne','nw'],W=96,H=144;
 const palettes=['#344657','#535969','#788197','#A7B2C4','#C7CFDC','#F4EBDA','#D4C8AE','#9B866F','#6B4F3A','#B48455','#F2A066','#C9692F','#86E59A','#4FB36B','#22894A','#1A6A3A','#BFD8E4','#3F7FE0','#F2B530','#EE4D72'];
 let opened=false,objectId=null,view='sw',tool='pencil',pixel='#535969',painting=false,canvas={},undo={},redo={};
@@ -39,11 +40,13 @@ const css=`
 @media(max-width:550px){#objectPixelDialog .opc-layout{display:flex;flex-direction:column}#objectPixelDialog .opc-sidebar{order:3;max-height:200px}#objectPixelDialog .opc-stage{order:1;min-height:410px}#objectPixelDialog .opc-inspector{order:2}#objectPixelDialog #opcCanvas{width:260px;height:390px}}
 `;
 const style=document.createElement('style');style.textContent=css;document.head.append(style);
-const button=document.createElement('button');
-button.id='openObjectPixelCreator';button.type='button';button.textContent='✎ Pixel Creator';
+const button=byId('openObjectPixelCreator')||document.createElement('button');
+if(!button.isConnected){
+ button.id='openObjectPixelCreator';button.type='button';button.textContent='✎ Pixel Creator';
+ const nav=document.querySelector('#app > nav');
+ if(nav)nav.insertBefore(button,byId('exportBtn')||null);
+}
 button.title='Create a new pixel object for placement in Semesta';
-const nav=document.querySelector('#app > nav');
-if(nav){const exportBtn=byId('exportBtn');nav.insertBefore(button,exportBtn||nav.lastChild);}
 const dlg=document.createElement('dialog');dlg.id='objectPixelDialog';
 dlg.innerHTML=`
 <header><strong>✎ PIXEL CREATOR — BANGUN RUANG</strong><span>V6B / 2:1 ISO / 4 VIEWS</span><button type="button" id="opcClose" aria-label="Close pixel creator">×</button></header>
@@ -240,8 +243,12 @@ $('opcPng').onchange=e=>{
  e.target.value='';
 };
 $('opcGoSemesta').onclick=()=>{window.location.href='../';};
-function open(){if(!opened){fresh();library();opened=true;}else{library();show();}dlg.showModal();}
-button.onclick=open;
-if(byId('openObjectCreatorShelf'))byId('openObjectCreatorShelf').onclick=open;
+function open(){
+ if(!opened){fresh();library();opened=true;}else{library();show();}
+ if(!dlg.open)dlg.showModal();
+}
+if(!button.hasAttribute('onclick'))button.addEventListener('click',open);
+const sidebar=byId('openObjectCreatorShelf');
+if(sidebar&&!sidebar.hasAttribute('onclick'))sidebar.addEventListener('click',open);
 g.VLPixelCreator=Object.freeze({open});
 })(window);
