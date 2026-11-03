@@ -10,9 +10,10 @@ const copy=model.clone;
 const names={exterior:['tabExterior','exteriorPane'],interior:['tabInterior','interiorPane'],
  actions:['tabActions','actionPane'],metadata:['tabMetadata','metadataPane']};
 const CELL=28;
+const iso=g.VLInteriorIso;
 function init(api){
  let enabled=false,scenes={},floor=1,selected=null,placing=null,
-   preview='exterior',tab='exterior',cacheCfg=null;
+   preview='exterior',tab='exterior',interiorView='iso',lastIso=null;
  const canvas=$('interiorCanvas'),ctx=canvas.getContext('2d');
  ctx.imageSmoothingEnabled=false;
  const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
@@ -49,6 +50,7 @@ function init(api){
   if(value==='interior'&&!enabled)return;
   preview=value;
   $('preview').hidden=value!=='exterior';canvas.hidden=value!=='interior';
+  $('interiorViewTools').hidden=value!=='interior';
   document.querySelector('.direction-bar').hidden=value==='interior';
   $('showExterior').classList.toggle('active',value==='exterior');
   $('showInterior').classList.toggle('active',value==='interior');
@@ -79,7 +81,27 @@ function init(api){
   if(enabled){normalizeScene(floor);draw();renderObjects();renderActions();}
   renderMetadata();
  }
+ function setInteriorView(mode){
+  interiorView=mode==='plan'||!iso?'plan':'iso';
+  $('interiorViewIso').classList.toggle('active',interiorView==='iso');
+  $('interiorViewPlan').classList.toggle('active',interiorView==='plan');
+  $('interiorViewIso').setAttribute('aria-pressed',String(interiorView==='iso'));
+  $('interiorViewPlan').setAttribute('aria-pressed',String(interiorView==='plan'));
+  draw();
+ }
  function draw(){
+  if(!enabled||preview!=='interior')return;
+  if(interiorView==='iso'&&iso){
+   lastIso=iso.draw(canvas,scene(),{selectedId:selected,grid:true});
+   $('placementHint').textContent=placing?
+    'Tap an empty diamond tile to place '+(model.types[placing]?.label||placing)+'. Door tile stays clear.':
+    selected?'Tap furniture to edit, or tap an empty diamond to move it. Switch to Plan for precise placement.':
+    'Isometric 2:1 · tap furniture to edit its action, or choose Plan to arrange tiles.';
+   return;
+  }
+  lastIso=null;drawPlan();
+ }
+ function drawPlan(){
   if(!enabled||preview!=='interior')return;
   const s=scene(),width=s.width*CELL,height=s.depth*CELL;
   if(canvas.width!==width)canvas.width=width;
@@ -237,14 +259,27 @@ function init(api){
  canvas.addEventListener('pointerdown',e=>{
   if(!enabled||preview!=='interior')return;
   const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
-  const c=Math.floor((e.clientX-r.left)*canvas.width/r.width/CELL);
-  const z=Math.floor((e.clientY-r.top)*canvas.height/r.height/CELL);
+  let c,z,hit=null;
+  if(interiorView==='iso'&&iso){
+   hit=iso.pointer(canvas,e,lastIso,{preferFloor:!!placing});
+   if(!hit)return;
+   ({c,r:z}=hit);
+  }else{
+   c=Math.floor((e.clientX-r.left)*canvas.width/r.width/CELL);
+   z=Math.floor((e.clientY-r.top)*canvas.height/r.height/CELL);
+  }
   if(c<0||z<0||c>=scene().width||z>=scene().depth)return;
-  e.preventDefault();moveSelectedTo(c,z);
+  e.preventDefault();
+  if(hit?.itemId&&!placing){
+   selected=hit.itemId;renderObjects();draw();return;
+  }
+  moveSelectedTo(c,z);
  });
  for(const [key,[button]] of Object.entries(names))$(button).onclick=()=>selectTab(key);
  $('showExterior').onclick=()=>setPreview('exterior');
  $('showInterior').onclick=()=>{setPreview('interior');selectTab('interior');};
+ $('interiorViewIso').onclick=()=>setInteriorView('iso');
+ $('interiorViewPlan').onclick=()=>setInteriorView('plan');
  $('buildingMode').onchange=()=>{setMode($('buildingMode').value==='interactive');onStatus(enabled?'Interactive: floor editor enabled':'Decorative building: interior disabled');};
  $('interiorFloor').onchange=()=>selectFloor($('interiorFloor').value);
  group.onchange=updateCategories;updateCategories();
@@ -305,8 +340,8 @@ function init(api){
   $('savedToggle').setAttribute('aria-expanded',String(active));
   if(active)library.scrollIntoView({behavior:'smooth',block:'nearest'});
  };
- fillFloors();updateCategories();renderMetadata();
- return {load,reset,refresh,serialize,isInteractive:()=>enabled,setPreview,selectTab};
+ fillFloors();updateCategories();renderMetadata();setInteriorView('iso');
+ return {load,reset,refresh,serialize,isInteractive:()=>enabled,setPreview,selectTab,setInteriorView};
 }
 g.VLStudioInteriors=Object.freeze({init});
 })(window);
