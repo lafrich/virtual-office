@@ -204,3 +204,35 @@
  .quick-asset-thumb{width:43px;height:43px}
  .interior-tray-heading span{font-size:9px}
 }
+
+
+/* Native Mahluk Hidup scale comparison and actor simulator. The canvas is
+   image-aligned inside the preview stage; sprite frames remain 64x112. */
+.stage{position:relative}
+#characterScaleCanvas{
+ position:absolute;z-index:3;image-rendering:pixelated;pointer-events:none;
+ width:auto;height:auto;max-width:none;max-height:none;touch-action:manipulation;
+}
+.character-scale-tools{
+ display:grid;gap:7px;padding:8px 12px;background:#edf2f7;
+ border-top:1px solid #beccd9;border-bottom:1px solid #beccd9;
+}
+.character-scale-heading{display:flex;align-items:center;gap:6px;justify-content:space-between}
+.character-scale-heading strong{
+ font:bold 10px/1.4 Tahoma,Verdana,sans-serif;letter-spacing:.5px;color:#245584;
+ white-space:nowrap;
+}
+.character-scale-heading span{font:10px/1.4 Tahoma,Verdana,sans-serif;color:#667b8d;text-align:right}
+.character-scale-row{display:flex;align-items:center;gap:7px;min-width:0}
+.character-scale-row button{flex:0 0 auto;padding:8px 9px;white-space:nowrap;font-size:11px}
+.character-scale-row select{width:100%;min-width:0;padding:8px 7px;font-size:11px}
+.character-scale-row:last-child button{flex:1;min-width:0}
+.character-scale-row button.active{background:#d4e8ff;color:#064a9c;border-color:#155bb9}
+@media(max-width:640px){
+ .character-scale-tools{padding:7px 10px;gap:6px}
+ .character-scale-heading strong{font-size:9px}
+ .character-scale-heading span{font-size:9px;max-width:51%}
+ .character-scale-row{gap:5px}
+ .character-scale-row button{padding:8px 6px;font-size:10px}
+ .character-scale-row select{font-size:10px}
+}
