@@ -505,7 +505,8 @@ function pixelTexture(name,dir='sw'){
  const view=spec?.variants?.[dir]?dir:spec?.variants?.sw?'sw':spec?.variants?.se?'se':dir;
  const id=name+'|'+view;
  if(!spriteTexture.has(id)){
-  const src=spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):
+  const src=spec?.source==='custom-building'?window.VLBuildingBridge?.image(spec.id,view):
+    spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):
     spec?.source==='pipeline-vegetation'?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+spec.relativeFile:'../assets/'+name;
   const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,()=>console.warn('Missing sprite',name));
   t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
@@ -1018,7 +1019,14 @@ function makeObject(type,point){
   name:isCustom?sizeClass.toUpperCase()+' Building · replaceable':isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
   x:round(point?.x??cameraFocus.x),z:round(point?.z??cameraFocus.z),y:0,rotation:0,scale:1};
  if(isCustom){Object.assign(obj,dims);obj.sizeClass=sizeClass;obj.replaceable=true;obj.collision=true;obj.layer='structure';obj.subtype='custom_building';obj.tags=['placeholder','building'];}
- if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;}
+ if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;
+  if(spec.source==='custom-building'){
+   obj.rotation=spec.entranceFacing==='se'?90:0;
+   obj.layer='structure';obj.subtype=spec.id;obj.tags=['bangun-ruang','building'];
+   obj.interactions=spec.interactions||['enter'];obj.entranceFacing=spec.entranceFacing||'';
+   obj.blocking=spec.blocking||'auto';
+  }
+ }
  if(actorType(type)){obj.facing='sw';obj.pose=null;obj.variant='pipeline-v6b';obj.profile=type==='npc'?'noor':'ichsan';obj.collision=true;}
  if(automatic){
   const variation=type.slice(type.indexOf(':')+1);
@@ -1487,7 +1495,8 @@ function renderAssetList(){
       {title:'Character · NPC',tag:'npc',category:'character',label:'V6B / 64×112'}],
   ...assetCatalog.map(spec=>({
    title:spec.label,tag:'sprite:'+spec.file,category:assetCategory(spec),
-   label:spec.source==='gpt-original'?'GPT / ORIGINAL · login':
+   label:spec.source==='custom-building'?'BANGUN RUANG / LOCAL PNG':
+    spec.source==='gpt-original'?'GPT / ORIGINAL · login':
     spec.published?'PIPELINE / PNG':'PIPELINE / MANIFEST ONLY',
    origin:spec.source==='gpt-original'?'original':spec.published?'published':'unpublished'
   }))
