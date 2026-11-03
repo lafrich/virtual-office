@@ -77,7 +77,7 @@ function reason(o,objects,map,catalog){
  if(category(o,catalog)==='marker')return ''; // Editor-only logic anchors are not solid objects.
  const bounds=map?.worldBounds||BOUNDS;
  const [w,d]=footprint(o,catalog),x=Number(o.x),z=Number(o.z);
- if(x-w/2<bounds.minX||x+w/2>bounds.maxX||z-d/2<bounds.minZ||z+d/2>bounds.maxZ)
+ if(!map?.unbounded&&(x-w/2<bounds.minX||x+w/2>bounds.maxX||z-d/2<bounds.minZ||z+d/2>bounds.maxZ))
   return 'Di luar batas map/footprint.';
  const road=map?.road||{z0:ROAD[0],z1:ROAD[1]};
  if(!map?.terrain&&z+d/2>road.z0+.25&&z-d/2<road.z1-.25)
