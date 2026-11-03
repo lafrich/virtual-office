@@ -7,11 +7,17 @@ on:
     paths:
       - "world-builder/**"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/semesta-traffic.test.cjs"
+      - "tests/semesta-vehicle-queue.test.cjs"
+      - "tests/world-builder-v2.test.cjs"
       - ".github/workflows/semesta-mahluk-sync.yml"
   pull_request:
     paths:
       - "world-builder/**"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/semesta-traffic.test.cjs"
+      - "tests/semesta-vehicle-queue.test.cjs"
+      - "tests/world-builder-v2.test.cjs"
       - ".github/workflows/semesta-mahluk-sync.yml"
 
 permissions:
