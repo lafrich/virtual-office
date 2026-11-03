@@ -65,7 +65,7 @@ assert.match(art,/function footRatio\(image,fallback=\.935\)/);
 assert.match(art,/height=w\*\(imageHeight\/imageWidth\)\*VCOMP/);
 assert.match(art,/function setGroundPivot\(original=false\)/);
 assert.match(art,/function setGroundPivot\(original=false\)/);
-assert.match(builder,/gfx\.setGroundPivot\?\.\(false\)/);
+assert.match(builder,/gfx\.setGroundPivot\?\.\('fitted'\)/);
 assert.match(builder,/sidewalkOpen=\(c,r\)=>/);
 assert.match(builder,/agent\.root\.visible=!!agent\.route\|\|\(mode==='pedestrian'&&!!point\)/);
 assert.match(effects,/function isStreetLamp\(/);
