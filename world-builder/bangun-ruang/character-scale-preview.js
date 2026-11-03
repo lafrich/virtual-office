@@ -74,12 +74,27 @@ function image(url){
  }
  return imageCache.get(url);
 }
-function silhouette(ctx,x,y,scale=ACTOR_SCALE){
+function silhouette(ctx,x,y,scale=ACTOR_SCALE,pose='idle'){
  const rect=(rx,ry,w,h,color)=>{
   ctx.fillStyle=color;
   ctx.fillRect(Math.round(x+rx*scale),Math.round(y+ry*scale),
    Math.max(1,Math.round(w*scale)),Math.max(1,Math.round(h*scale)));
  };
+ if(pose==='sleep'||pose==='lie'){
+  // A loading/unavailable sprite must not show a standing silhouette in bed.
+  rect(7,79,17,17,'#8293a8');  // head on pillow
+  rect(24,82,25,14,'#8293a8'); // lying torso
+  rect(48,85,12,6,'#4c617a'); // feet
+  return;
+ }
+ if(pose==='sit'||pose==='toilet'||pose==='work'){
+  rect(21,27,22,19,'#8293a8');
+  rect(17,45,30,29,'#8293a8');
+  rect(19,72,23,10,'#8293a8');
+  rect(35,81,19,8,'#8293a8');
+  rect(44,89,13,5,'#4c617a');
+  return;
+ }
  rect(17,16,30,34,'#8293a8');
  rect(21,6,22,19,'#8293a8');
  rect(11,50,42,24,'#8293a8');
@@ -118,7 +133,7 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
    drawn=true;
   }
  }
- if(!drawn)silhouette(ctx,x,y,scale);
+ if(!drawn)silhouette(ctx,x,y,scale,actor.pose);
  // Hide the scale ruler while sitting so it does not cover the WC/character contact.
  if(options.seated)return drawn;
  // Crosshair marks the actual Mahluk Hidup floor pivot without modifying pixels.
@@ -229,7 +244,7 @@ function mount(api){
     }
    }
    if(actor.actionAnchor){
-    [x,y]=iso.point(geo,actor.actionAnchor.c,actor.actionAnchor.r,0);
+    [x,y]=iso.point(geo,actor.actionAnchor.c,actor.actionAnchor.r,actor.actionAnchor.z||0);
     y+=actor.actionAnchor.pixelOffsetY||0;
    }else [x,y]=iso.point(geo,actor.c+.5,actor.r+.5,0);
   }else{
@@ -239,7 +254,7 @@ function mount(api){
    y=pivot[1]+(actor.c+actor.r)*16;
   }
   const valid=drawActor(ctx,actor,elapsed,x,y,{seated:!!actor.actionAnchor});
-  if(interiorGeometry&&actor.actionAnchor?.kind==='wc'){
+  if(interiorGeometry&&actor.actionAnchor){
    const item=api.getInterior?.()?.items?.find(x=>x.id===actor.actionAnchor.itemId);
    if(item)iso?.drawSeatForeground?.(ctx,interiorGeometry,item);
   }
@@ -330,7 +345,8 @@ function mount(api){
   const path=pathTo(scene,start,[item.c,item.r],{item});
   if(!path.length){status('No free route to '+item.name+' · move blocking furniture');return;}
   const action=model.actions?.[item.actionId],pose=action?.pose;
-  const anchor=pose&&['toilet','sit'].includes(pose)?iso?.actionAnchor?.(item):null;
+  const anchor=pose&&['toilet','sit','sleep','lie','work'].includes(pose)?
+    iso?.actionAnchor?.(item):null;
   const approach=path[path.length-1];
   const finish=()=>{
    if(anchor){
@@ -343,7 +359,7 @@ function mount(api){
    const motion=rig?.resolve(actor.profile,pose,false);
    const supported=pose&&motion?.mode===requested;
    status('Use '+item.name+' → '+item.actionId+' · '+(supported?
-    'Mahluk Hidup pose '+pose+(anchor?' / aligned to seat':''):
+    'Mahluk Hidup pose '+pose+(anchor?' / aligned to furniture':''):
     'No authored rig; metadata action only'));
    updateControls();draw();
   };
