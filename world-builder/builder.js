@@ -1356,6 +1356,8 @@ function focusPlacedAsset(id,track=false){
  if(cameraFollowId)leaveCharacterCamera(false);
  activeAssetAimId=id;activeAssetTracking=!!track;
  viewSize=activeAssetCamera.viewSize(viewSize,target);
+ // Apply zoom immediately even when already centered and no easing is needed.
+ fitCamera();
  syncActiveAssetUI();
  tell((track?'◉ Tracking ':'◎ Focus ')+obj.name);
  return true;
