@@ -784,7 +784,12 @@ function resetAutoRoute(agent,obj){
  }
 }
 function loadVehicleImage(gfx,obj){
- const source=obj.assetPath||window.VLAssetVault?.automaticMatch(obj.vehicleId||obj.questId);
+ // Vehicles have their own canonical Mahluk Hidup sprite loader. The
+ // encrypted archive is historical and its fuzzy filename matches used to
+ // overwrite Gojek/triple art with the wrong image and wrong frame geometry.
+ // Keep user-linked per-instance art opt-in; job NPCs may still use the vault.
+ const source=obj.assetPath||(obj.type==='vehicle'?null:
+   window.VLAssetVault?.automaticMatch(obj.questId));
  if(!source||!window.VLAssetVault?.allowed(source))return;
  window.VLAssetVault.getImage(source).then(img=>{
   // Vehicle sprite is nested in its visual-offset group. Job NPC sprites
