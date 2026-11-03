@@ -57,7 +57,8 @@ function normalize(obj,catalog,style){
   };
   obj.collision=isQuest;
   obj.blocking=isQuest?'auto':'no';
-  obj.scale=1;
+  if(isVehicle)g.VLSemestaVehiclePlacement?.normalize(obj);
+  else obj.scale=1;
  }
  if(obj.blocking==='yes')obj.collision=true;
  if(obj.blocking==='no')obj.collision=false;

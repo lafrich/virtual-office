@@ -34,6 +34,7 @@ const traffic=window.VLSemestaTraffic;
 const trafficFlow=window.VLSemestaTrafficFlow;
 const trafficCatalog=window.VLSemestaCatalog;
 const trafficArt=window.VLSemestaArt;
+const vehiclePlacement=window.VLSemestaVehiclePlacement;
 const schema=window.VLMapSchema;
 const PIXEL_WORLD=Math.SQRT2/64, VERTICAL_COMP=2/Math.sqrt(3);
 const actorType=t=>t==='avatar'||t==='npc';
@@ -290,6 +291,8 @@ function sanitize(v){
    if(p.type==='vehicle'){
     if(!trafficCatalog?.vehicle(p.vehicleId))continue;
     e.vehicleId=p.vehicleId;
+    // Preserve authored visual tuning on import, reload, undo and city drafts.
+    e.visualOffset=vehiclePlacement.offset(p.visualOffset);
    }else if(p.type==='quest_npc'){
     if(!trafficCatalog?.quest(p.questId)&&!mahluk?.has(p.profile))continue;
     e.questId=trafficCatalog?.quest(p.questId)?p.questId:'custom';
@@ -784,7 +787,11 @@ function loadVehicleImage(gfx,obj){
  const source=obj.assetPath||window.VLAssetVault?.automaticMatch(obj.vehicleId||obj.questId);
  if(!source||!window.VLAssetVault?.allowed(source))return;
  window.VLAssetVault.getImage(source).then(img=>{
-  if(gfx.mesh.parent?.parent!==assetRoots)return;
+  // Vehicle sprite is nested in its visual-offset group. Job NPC sprites
+  // are direct root children. Both must still belong to the active scene.
+  let ancestor=gfx.mesh;
+  while(ancestor&&ancestor!==assetRoots)ancestor=ancestor.parent;
+  if(ancestor!==assetRoots)return;
   const isNPC=obj.type==='quest_npc';
   const spec=trafficCatalog.vehicle(obj.vehicleId);
   const cv=document.createElement('canvas');
@@ -816,7 +823,15 @@ function makeAutomated(root,obj){
  const kind=obj.type,settings=traffic.config(obj);
  const agent={id:obj.id,root,kind,route:null,distance:0,settings,parts:[],graphic:null};
  if(kind==='vehicle'){
-  const gfx=trafficArt.vehicleGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;loadVehicleImage(gfx,obj);
+  // Keep the route/collision root on the lane centre. Only the child art
+  // moves when editing its pixel placement (including live moving vehicles).
+  const visual=new THREE.Group();
+  visual.name='Vehicle Visual Placement';visual.userData.visualOnly=true;
+  root.add(visual);
+  const gfx=trafficArt.vehicleGraphic(THREE,obj);
+  visual.add(gfx.mesh);
+  vehiclePlacement.apply(visual,obj);
+  agent.visual=visual;agent.graphic=gfx;loadVehicleImage(gfx,obj);
  }else if(kind==='quest_npc'){
   const profile=mahluk?.has(obj.profile)?obj.profile:mahluk?.questProfile(obj.questId);
   const factory=window.VLCharacterRig;
@@ -1325,6 +1340,21 @@ function updateSelection(){
    actionChoices(cur.profile,'pose',cur.pose||'');
  }
  $('profile').disabled=!actor;
+ const vehicle=cur?.type==='vehicle';
+ $('vehicleControls').hidden=!vehicle;
+ if(vehicle){
+  const scale=vehiclePlacement.scale(cur.scale);
+  const offset=vehiclePlacement.offset(cur.visualOffset);
+  $('scale').min=String(vehiclePlacement.SCALE_MIN);
+  $('scale').max=String(vehiclePlacement.SCALE_MAX);
+  $('vehicleVisualScale').value=String(scale);
+  $('vehicleVisualScaleValue').textContent=scale.toFixed(2)+'×';
+  $('vehicleOffsetX').value=String(offset.x);
+  $('vehicleOffsetY').value=String(offset.y);
+  $('vehicleOffsetZ').value=String(offset.z);
+ }else{
+  $('scale').min='.85';$('scale').max='1.15';
+ }
  const dynamic=cur&&automaticType(cur.type);
  $('motionControls').hidden=!dynamic;
  if(dynamic){
@@ -1383,12 +1413,33 @@ function edit(fn,validatePosition=true){
  if(blocked){Object.assign(item(),before);undoStack.pop();updateSelection();tell(blocked);return;}
  applyItem();saved();
 }
+// Changing the sprite art must not reset traffic to its authored spawn.
+// The adjustment can be made while the selected vehicle is in motion.
+function editVehicleVisual(fn){
+ const o=item();
+ if(o?.type!=='vehicle')return;
+ undoPoint();fn(o);
+ vehiclePlacement.normalize(o);
+ const root=owners.get(o.id);
+ if(root){
+  root.scale.setScalar(o.scale);
+  const agent=automatedAgents.get(o.id);
+  if(agent?.visual)vehiclePlacement.apply(agent.visual,o);
+ }
+ updateSelection();
+ renderer.render(scene,camera);
+ saved();
+}
 function applyItem(){
  const o=item();if(!o)return;
  const r=owners.get(o.id);if(!r)return;
  r.position.set(o.x,o.y,o.z);
  r.rotation.y=actorType(o.type)?0:o.rotation*Math.PI/180;
  r.scale.setScalar(actorType(o.type)?1:o.scale);
+ if(o.type==='vehicle'){
+  const agent=automatedAgents.get(o.id);
+  if(agent?.visual)vehiclePlacement.apply(agent.visual,o);
+ }
  refreshBigOccluder(o.id);
  if(automaticType(o.type)){
   const agent=automatedAgents.get(o.id);
@@ -1644,7 +1695,12 @@ function onDown(e){
  const p=floorPoint(e);
  if(mode==='move'&&hit&&p){
   undoPoint();const o=item();
-  drag={kind:'move',id:e.pointerId,start:p.clone(),x:o.x,z:o.z,changed:false,actor:actorType(o.type)};
+  // For an already-driving car, anchor Move to its LIVE road position,
+  // not its older authored spawn (otherwise the first drag jumps backward).
+  const liveCar=o.type==='vehicle'?owners.get(o.id):null;
+  drag={kind:'move',id:e.pointerId,start:p.clone(),
+   x:liveCar?.position.x??o.x,z:liveCar?.position.z??o.z,
+   rollbackX:o.x,rollbackZ:o.z,changed:false,actor:actorType(o.type)};
  }else{
   drag={kind:'pan',id:e.pointerId,start:p?.clone()||null,focus:cameraFocus.clone(),sx:e.clientX,sy:e.clientY,hit:!!hit,changed:false};
  }
@@ -1728,7 +1784,7 @@ function onUp(e){
    }
    if(drag.changed){
    const o=item(),blocked=o&&style.reason(o,documentMap.objects,documentMap.map,assetByName);
-   if(blocked){o.x=drag.x;o.z=drag.z;applyItem();undoStack.pop();tell(blocked);}
+   if(blocked){o.x=drag.rollbackX;o.z=drag.rollbackZ;applyItem();undoStack.pop();tell(blocked);}
    else saved();
   }else undoStack.pop();
  }
@@ -1904,14 +1960,69 @@ $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');
 $('home').onclick=cameraMapView;
 $('rotateL').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation-90+360)%360;});};
 $('rotateR').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.rotation=(o.rotation+90)%360;});};
-$('scaleDown').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale-.05),.85,1.15);});};
-$('scaleUp').onclick=()=>{if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale+.05),.85,1.15);});};
+$('scaleDown').onclick=()=>{
+ if(item()?.type==='vehicle')editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(o.scale-.05);});
+ else if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale-.05),.85,1.15);});
+};
+$('scaleUp').onclick=()=>{
+ if(item()?.type==='vehicle')editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(o.scale+.05);});
+ else if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale+.05),.85,1.15);});
+};
 $('duplicate').onclick=duplicate;$('delete').onclick=remove;
 for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('change',()=>{
  const v=Number($(prop).value);
  if(!Number.isFinite(v)||!item())return;
  if(actorType(item().type)&&['rotation','scale'].includes(prop)){updateSelection();return;}
+ if(prop==='scale'&&item().type==='vehicle'){
+  editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(v);});return;
+ }
  edit(o=>{o[prop]=prop==='scale'?clamp(v,.85,1.15):prop==='rotation'?((v%360)+360)%360:clamp(v,-1000000,1000000);});
+});
+// Vehicle size and art offsets do not affect road route, footprint, or
+// existing instance motion. Position C/X and R/Z above remains the spawn.
+$('vehicleVisualScale').addEventListener('input',()=>{
+ const v=vehiclePlacement.scale($('vehicleVisualScale').value);
+ $('vehicleVisualScaleValue').textContent=v.toFixed(2)+'×';
+ // A continuous slider gesture should create just one Undo checkpoint.
+ const target=item();if(target?.type!=='vehicle')return;
+ target.scale=v;const root=owners.get(target.id);
+ if(root){
+  root.scale.setScalar(v);
+  const agent=automatedAgents.get(target.id);
+  if(agent?.visual)vehiclePlacement.apply(agent.visual,target);
+  if(highlight?.userData.selected===target.id)highlight.update();
+ }
+ $('scale').value=String(v);renderer.render(scene,camera);
+});
+$('vehicleVisualScale').addEventListener('change',()=>{
+ const target=item();if(target?.type!=='vehicle')return;
+ const next=vehiclePlacement.scale($('vehicleVisualScale').value);
+ const previous=vehicleScaleStart;
+ // Previous value retained when pointerdown/keyboard interaction began.
+ if(Math.abs(previous-next)<.0001){updateSelection();return;}
+ undoPoint();
+ // Capture previous scale in Undo stack while preserving currently animated art.
+ const old=undoStack.pop();if(old){
+  try{const snapshot=JSON.parse(old),found=snapshot.objects.find(o=>o.id===target.id);
+   if(found)found.scale=previous;
+   undoStack.push(JSON.stringify(snapshot));
+  }catch{undoStack.push(old);}
+ }
+ target.scale=next;vehiclePlacement.normalize(target);
+ updateSelection();saved();
+});
+let vehicleScaleStart=1;
+$('vehicleVisualScale').addEventListener('pointerdown',()=>{vehicleScaleStart=vehiclePlacement.scale(item()?.scale);});
+$('vehicleVisualScale').addEventListener('focus',()=>{vehicleScaleStart=vehiclePlacement.scale(item()?.scale);});
+for(const [id,axis] of [['vehicleOffsetX','x'],['vehicleOffsetY','y'],['vehicleOffsetZ','z']]){
+ $(id).addEventListener('change',()=>{
+  const n=Number($(id).value);
+  if(!Number.isFinite(n)||item()?.type!=='vehicle'){updateSelection();return;}
+  editVehicleVisual(o=>{o.visualOffset={...vehiclePlacement.offset(o.visualOffset),[axis]:n};});
+ });
+}
+$('vehicleResetVisual').onclick=()=>editVehicleVisual(o=>{
+ o.scale=1;o.visualOffset={x:0,y:0,z:0};
 });
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};

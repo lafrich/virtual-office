@@ -59,7 +59,8 @@ function footprint(o,catalog){
   let [w,d]=size;
   const direction=o.motion?.direction||'auto';
   if(['north','south'].includes(direction))[w,d]=[d,w];
-  return [w*Number(o.scale||1),d*Number(o.scale||1)];
+  // Visual vehicle sizing never changes occupied road tiles or traffic spacing.
+  return [w,d];
  }
  if(kind==='marker')return [.15,.15];
  if(kind==='building'){
@@ -77,7 +78,12 @@ function footprint(o,catalog){
          Math.max(.5,Number(dims[1]||native[1]))*Number(o.scale||1)];
 }
 function normalize(o,catalog){
- if(['avatar','npc','marker','pedestrian','crowd','quest_npc','vehicle'].includes(o.type)){
+ if(o.type==='vehicle'){
+  o.rotation=0;
+  g.VLSemestaVehiclePlacement?.normalize(o);
+  return o;
+ }
+ if(['avatar','npc','marker','pedestrian','crowd','quest_npc'].includes(o.type)){
   o.rotation=0;o.scale=1;return o;
  }
  const s=o.type==='sprite'?catalog?.get(o.asset):null;
