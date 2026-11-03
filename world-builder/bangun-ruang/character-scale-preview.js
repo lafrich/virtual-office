@@ -105,7 +105,15 @@ function silhouette(ctx,x,y,scale=ACTOR_SCALE,pose='idle'){
 }
 function drawActor(ctx,actor,time,footX,footY,options={}){
  const scale=ACTOR_SCALE;
- const action=({toilet:"toilet",bathe:"bathe",sleep:"sleep"})[actor.pose]||null;
+ const action=typeof actor.pose==="string"&&/^[a-z][a-z0-9_]{0,89}$/.test(actor.pose)?
+  actor.pose:null;
+ const actionFallback={
+  use_toilet:["toilet_sit","toilet"],toilet:["toilet_sit"],
+  pee:["pee_stand","toilet"],poop:["toilet_sit","toilet"],
+  shower:["bathe"],bath:["bathe"],rest:["sleep"],lie:["lie_down","sleep"],
+  work:["office_type"],study:["study_online"],wash:["wash_hands"],cook:["cook_stir"],
+  sit:["sit_idle"],relax:["sit_idle"]
+ };
  const edits=g.VLActionFrames;
  // Pixel offset comes from Mahluk Hidup, never moves fixture/collision data.
  const shift=action?edits?.offset(actor.profile,action):null;
@@ -125,7 +133,9 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
   const pic=sprite.pic;
   if(sx+FRAME.w<=pic.naturalWidth&&sy+FRAME.h<=pic.naturalHeight){
    const saved=action?edits?.get(actor.profile,action,actor.direction,frame):null;
-   const patched=saved?image(saved):null;
+   const matched=saved||(actionFallback[action]||[]).map(id=>
+    edits?.get(actor.profile,id,actor.direction,frame)).find(Boolean)||null;
+   const patched=matched?image(matched):null;
    const worn=bridge?.equipmentFor(actor.profile)||{};
    const urls=['bag','shoes','pants','shirt','helmet'].map(k=>worn[k]?.frames?.[actor.direction]||null);
    const layers=urls.map(image);
