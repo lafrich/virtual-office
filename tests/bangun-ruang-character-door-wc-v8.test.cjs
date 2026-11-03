@@ -15,21 +15,21 @@ test('character, doorway, WC and cutaway wall share believable world proportions
  const g=setup(),iso=g.VLInteriorIso;
  assert.equal(iso.tilePixels.join(','),'64,32');
  assert.equal(iso.ACTO_SCALE,undefined); // guard against a misspelled public contract
- assert.equal(iso.ACTOR_SCALE,.5);
- assert.equal(64*iso.ACTOR_SCALE,32);
- assert.equal(112*iso.ACTOR_SCALE,56);
- assert.equal(iso.WALL,96);
- assert.equal(iso.WC_SEAT_Z,14);
- assert.equal(iso.WC_TANK_Z,26);
- assert.ok(iso.WC_TANK_Z<112*iso.ACTOR_SCALE);
+ assert.equal(iso.ACTOR_SCALE,1);
+ assert.equal(64*iso.ACTOR_SCALE,64);
+ assert.equal(112*iso.ACTOR_SCALE,112);
+ assert.equal(iso.WALL,128);
+ assert.equal(iso.WC_SEAT_Z,15);
+ assert.equal(iso.WC_TANK_Z,38);
+ assert.ok(iso.WC_TANK_Z<72*iso.ACTOR_SCALE);
  assert.ok(iso.WC_SEAT_Z<iso.WC_TANK_Z);
  const html=read('bangun-ruang/index.html');
- assert.ok(html.includes('faceRect(side,-.48,.48,3,61'));
- assert.ok(61-3>=112*iso.ACTOR_SCALE,'Door opening must fit the character');
+ assert.ok(html.includes('faceRect(side,-.48,.48,4,doorTop'));
+ assert.ok(96>=72*iso.ACTOR_SCALE,'Door opening must fit visible body, not transparent frame');
  const actorCode=read('bangun-ruang/character-scale-preview.js');
  assert.ok(actorCode.includes('drawWidth=FRAME.w*scale,drawHeight=FRAME.h*scale'));
- assert.ok(actorCode.includes("resolved.mode==='sit'"));
- assert.ok(actorCode.includes("Number(resolved.frames||1)-1"));
+ assert.ok(actorCode.includes("const frame=rig.frameAt(resolved,time);"));
+ assert.ok(!actorCode.includes("Number(resolved.frames||1)-1"));
 });
 test('exterior PNG and interior iso canvas maintain equal on-screen pixels per tile',()=>{
  const values=new Map();
@@ -61,7 +61,7 @@ test('seat docking still matches moved/rotated WC and uses scaled hip-to-foot of
  for(const rotation of [0,90,180,270]){
   const wc={id:'toilet',assetId:'wc',c:1,r:1,rotation};
   const a=iso.actionAnchor(wc);
-  assert.equal(a.pixelOffsetY,27*iso.ACTOR_SCALE-iso.WC_SEAT_Z);
+  assert.equal(a.pixelOffsetY,0);
   assert.equal(a.itemId,wc.id);
   assert.ok(a.c>=1&&a.c<=2&&a.r>=1&&a.r<=2);
  }
@@ -115,11 +115,11 @@ test('Mahluk Hidup actual sheet pixels are rendered at fixed half scale in both 
   openInterior:()=>{inside=true;el('interiorCanvas').hidden=false;},onStatus(){}
  });
  assert.equal(c.ACTOR_SCALE,undefined);
- assert.equal(g.VLCharacterScale.ACTOR_SCALE,.5);
+ assert.equal(g.VLCharacterScale.ACTOR_SCALE,1);
  el('scaleSpawn').onclick();tick(20);tick(100);
  const ext=draws.filter(a=>a.length===9).at(-1);
  assert.ok(ext,'Expected exterior original sprite draw');
- assert.equal(ext[7],32);assert.equal(ext[8],56);
+ assert.equal(ext[7],64);assert.equal(ext[8],112);
  el('scaleWalkDoor').onclick();
  for(let t=120;t<3800;t+=40)tick(t);
  assert.equal(c.actor.scene,'interior');
@@ -129,6 +129,6 @@ test('Mahluk Hidup actual sheet pixels are rendered at fixed half scale in both 
  for(let t=3800;t<14500;t+=40)tick(t);
  assert.equal(c.actor.pose,'toilet');
  const seat=draws.filter(a=>a.length===9).at(-1);
- assert.equal(seat[1],5*64,'Last completed sit frame must stay fixed');
+ assert.equal(seat[1],0,'Original sit row cycles instead of inventing a final frozen transition');
  assert.equal(seat[7],ext[7]);assert.equal(seat[8],ext[8]);
 });
