@@ -10,7 +10,7 @@ const ITER=600000;
 const IMAGE=/\.(?:png|webp|gif|jpe?g)$/i;
 const PATH=/^(?!\/)(?!.*(?:^|\/)\.\.?\/)[a-zA-Z0-9_.\/-]{1,240}$/;
 const $=id=>document.getElementById(id);
-let manifest=null,key=null,entries=[],selected='',imageURLs=new Map(),images=new Map();
+let manifest=null,key=null,entries=[],selected='',imageURLs=new Map(),images=new Map(),generation=0;
 let matchStats={};
 const enc=new TextEncoder(),dec=new TextDecoder();
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
@@ -63,7 +63,7 @@ async function unlock(password){
   try{
    const raw=await aes(encrypted,candidate),data=JSON.parse(dec.decode(raw));
    const count=buildEntries(data);
-   key=candidate;
+   key=candidate;generation++;
    g.dispatchEvent(new CustomEvent('semesta-vault-unlocked',{detail:{count}}));
    return count;
   }catch(e){last=e;}
@@ -78,10 +78,12 @@ function list(filter=''){
 async function getURL(path){
  if(!allowed(path)||!key)throw Error('Unlock Virtual Life Assets first');
  if(imageURLs.has(path))return imageURLs.get(path);
+ const currentGeneration=generation,currentKey=key;
  const [name,mime]=manifest[path];
  const res=await fetch(new URL('b/'+name,ROOT),{cache:'default',credentials:'same-origin'});
  if(!res.ok)throw Error('Encrypted asset failed to download: '+res.status);
- const plaintext=await aes(await res.arrayBuffer(),key);
+ const plaintext=await aes(await res.arrayBuffer(),currentKey);
+ if(currentGeneration!==generation||!key)throw Error('Asset vault is locked');
  const blob=new Blob([plaintext],{type:mime});
  const url=URL.createObjectURL(blob);
  imageURLs.set(path,url);return url;
@@ -101,6 +103,7 @@ async function getImage(path){
  try{return await promise;}catch(err){images.delete(path);throw err;}
 }
 function lock(){
+ generation++;
  for(const url of imageURLs.values())URL.revokeObjectURL(url);
  imageURLs.clear();images.clear();manifest=null;key=null;entries=[];selected='';matchStats={};
  g.dispatchEvent(new Event('semesta-vault-locked'));
