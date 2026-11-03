@@ -34,8 +34,8 @@ test('cutaway walls match the exterior and the half-scale in-world character',()
  const {VLInteriorIso:iso}=modules();
  assert.equal(iso.WALL,96);
  assert.ok(iso.WALL>=112*iso.ACTOR_SCALE);
- assert.equal(iso.WC_SEAT_Z,19);
- assert.equal(iso.WC_TANK_Z,36);
+ assert.equal(iso.WC_SEAT_Z,14);
+ assert.equal(iso.WC_TANK_Z,26);
  const seat=iso.actionAnchor({id:'wc',assetId:'wc',c:1,r:1,rotation:0});
  assert.equal(seat.pixelOffsetY,27*iso.ACTOR_SCALE-iso.WC_SEAT_Z);
  assert.equal(seat.direction,'ne');
