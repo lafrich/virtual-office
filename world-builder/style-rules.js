@@ -55,7 +55,7 @@ function footprint(o,catalog){
   Math.max(.5,Number(o.d||2)*Number(o.scale||1))
  ];
  if(kind==='vehicle'){
-  const meta=g.VLSemestaCatalog?.vehicle(o.vehicleId),size=meta?.footprint||[2.9,1.05];
+  const meta=g.VLSemestaCatalog?.vehicle(o.vehicleId),size=meta?.editorFootprint||meta?.footprint||[2.9,1.05];
   let [w,d]=size;
   const direction=o.motion?.direction||'auto';
   if(['north','south'].includes(direction))[w,d]=[d,w];
