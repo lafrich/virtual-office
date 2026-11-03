@@ -1374,6 +1374,7 @@ $('trackActiveAsset').onclick=()=>{
 let interiorPreview=null;
 function updateSelection(){
  const cur=item();
+ syncActiveAssetUI();
  $('selectedName').textContent=cur?cur.name:'Belum ada objek dipilih';
  $('selectedType').textContent=cur?cur.type.toUpperCase():'MAP DRAFT';
  $('objectId').value=cur?.id||'';
@@ -1455,8 +1456,14 @@ function updateSelection(){
    }
  }
 }
-function select(id){
- selectedId=id;updateSelection();
+function select(id,options={}){
+ selectedId=id;
+ if(!id&&activeAssetAimId)cancelActiveAssetAim();
+ if(id&&activeAssetTracking&&activeAssetAimId!==id){
+  activeAssetAimId=null;activeAssetTracking=false;
+ }
+ updateSelection();
+ if(id&&options.focus)focusPlacedAsset(id,false);
  if(id)tell(owners.get(id)?.userData?.pendingPipelineImage?'Preview sementara: PNG sumber belum dipublikasikan.':'Selected: '+item()?.name+'. Pilih Move lalu drag.');
  renderer.render(scene,camera);
 }
@@ -1731,6 +1738,7 @@ function onDown(e){
  // Explicit Pan mode must never select or move a clicked object.
  // Unlike Select, dragging over vehicles, buildings or NPCs always pans.
  if(mode==='pan'){
+  if(activeAssetAimId)cancelActiveAssetAim();
   drag={kind:'pan',id:e.pointerId,start:point?.clone()||null,
    focus:cameraFocus.clone(),sx:e.clientX,sy:e.clientY,hit:false,changed:false};
   return;
@@ -1746,7 +1754,7 @@ function onDown(e){
   return;
  }
  const hit=pick(e);
- if(hit&&mode!=='walk')select(hit);
+ if(hit&&mode!=='walk')select(hit,{focus:mode==='select'});
  if(hit&&mode==='walk'){
    const touched=documentMap.objects.find(x=>x.id===hit);
    if(touched&&actorType(touched.type)){
@@ -1824,6 +1832,8 @@ function onMove(e){
   // Deliberate one-finger pan exits Follow, leaving the camera at its current location.
   if(cameraFollowId&&Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>5)
    leaveCharacterCamera(false);
+  if(activeAssetAimId&&Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>5)
+   cancelActiveAssetAim();
   if(cameraFollowId)return;
   // Use camera-aligned world pan; horizontal drag translates on iso ground.
   let sx=e.clientX-drag.sx,sy=e.clientY-drag.sy,r=canvas.getBoundingClientRect(),
@@ -1882,6 +1892,7 @@ function clearWalk(){
 }
 function setMode(m){
  if(mode==='walk'&&m!=='walk')clearWalk();
+ if(m==='pan'&&activeAssetAimId)cancelActiveAssetAim();
  mode=m;
  for(const type of ['select','move','pan','walk','paint','fill']){
   const button=$(type+'Mode');
@@ -1918,6 +1929,7 @@ function findCameraActor(){
  return player||documentMap.objects.find(o=>actorType(o.type)&&owners.has(o.id))||null;
 }
 function enterCharacterCamera(){
+ if(activeAssetAimId)cancelActiveAssetAim();
  const actor=findCameraActor();
  if(!actor){
   tell('Belum ada karakter. Buka Assets → Characters, lalu place Player / NPC.');
@@ -1952,6 +1964,7 @@ function leaveCharacterCamera(restore=true){
  updateCharacterCameraUI();
 }
 function cameraMapView(){
+ if(activeAssetAimId)cancelActiveAssetAim();
  if(cameraFollowId)leaveCharacterCamera(true);
  else resetCamera();
 }
@@ -2846,6 +2859,15 @@ function frame(now){
   }
  }
  updateAutomated(dt);
+ if(activeAssetAimId&&!cameraFollowId){
+  const target=activeAssetCamera?.target(documentMap.objects,owners,activeAssetAimId);
+  if(!target)cancelActiveAssetAim();
+  else{
+   const move=activeAssetCamera.ease(cameraFocus,target,dt);
+   if(move.moved)fitCamera();
+   if(move.arrived&&!activeAssetTracking)activeAssetAimId=null;
+  }
+ }
  if(highlight&&selectedId&&automatedAgents.has(selectedId))highlight.update();
  for(const {rig,root} of rigs.values())rig.step(dt,camera,root.position);
  const actorStates=[...rigs.values()].map(x=>x.rig.state);
