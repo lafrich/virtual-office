@@ -1,4 +1,4 @@
-# Virtual Life — World Map Builder (XP / AI-ready v2)
+# Semesta — Virtual Life City Builder (XP / AI-ready)
 
 **Single supported editor**: https://lafrich.github.io/virtual-office/world-builder/
 
@@ -83,3 +83,22 @@ Use **🎥 Character** in the canvas toolbar, the **◎** camera icon in the lef
 - For visibility, only **large, solid buildings/shops** with footprint area ≥12 map cells and nominal height ≥2.8 units are made semi-transparent when a ray from the current preview character toward the orthographic camera passes through their visual occupancy box. Opacity eases toward **0.23**, then restores to its previous value upon leaving the occlusion corridor. Trees, benches, lamps, small props and logic markers stay visually unchanged.
 - First-time visitors see an XP-styled, **5-step Welcome Wizard** covering map navigation, asset placement, terrain painting, character camera/collision and saving city drafts. Choose **Skip** at any time. Finish or skip is remembered in local browser storage. Reopen it later with **❔ Quick Tutorial** in the top bar.
 - Runtime caveat: the original standalone builder is an **authoring preview**, not a multiplayer game. Collision is footprint-based and the occlusion volume for a complex sprite building is an approximation; integration into a production navigation/physics engine remains a separate task.
+
+## Semesta: automated traffic, pedestrians, crowds, and quest NPCs (2026-11-03)
+
+The map-authoring app is branded **Semesta** (`SEMESTA.EXE`). Both the left-hand tools and the mobile Quick Tutorial / City Draft dialogs are centered vertically.
+
+### Editable ambient movement
+- **Assets → MOBIL / MOTOR:** sedan merah/toska, hatchback, MPV, taxi Bluebird, van, TransJakarta bus, Gojek, Gojek passenger, Maxim, Maxim passenger, and SMA triple rider. The official vehicle IDs, dimensions, pivots, directions and route classes come from `lafrich/virtual-life-asset-pipeline/assets/street_vehicles/manifest.json`.
+- **Assets → NPC / CROWD:** place an individual canonical V6B character or a multi-person crowd. A regular NPC walks **straight along one connected sidewalk corridor**; on reaching the end, it starts the same path again. Crowds stagger several characters along one such path. Use the Inspector to adjust direction, speed and crowd count.
+- **Assets → NPC QUEST / JOB:** Manusia Silver, Pak Ogah, Kang Parkir, Babeh Pemilik Toko Loak, Babeh Jam, Babeh Tas. They remain **stationary** on a sidewalk with a lightweight idle/pose preview. Job IDs and proposed `talk`/`accept_job` interactions are exported but **no actual quest, job payouts or gameplay logic execute here**.
+- **Only approved surfaces:** cars/motorbikes snap to authored **road** tiles; pedestrians and crowds snap to **sidewalk** tiles; job NPCs are stationary on sidewalks. Editing the road/sidewalk recalculates routes; automated agents that lose a valid route are hidden rather than driving onto grass. The movement preview operates continuously while Semesta is open, without requiring Character Camera.
+- **Repetition:** a vehicle on a two-lane road follows a loop along the paired straight lanes. A single-lane road and straight sidewalks loop by starting again at their beginning. This is deterministic map-preview traffic, not production traffic-light or economy AI.
+- **Collision:** actors obey existing authored solid objects; ambient vehicles and walkers also keep their moving footprints separate where possible, and Walk Test includes live traffic/crowd bodies.
+- **Reference City** is seeded with example cars, TransJakarta, Gojek, walking NPCs, a crowd, and four stationary job NPCs. Existing saved drafts are not overwritten automatically. New movement settings, job IDs, and the subtype of every automatic entity are included in named City Drafts and exported JSON.
+
+### Asset availability
+Upstream `assets/street_vehicles/cars/`, `riders_v3/sheets/`, and the job NPC `frames/` directories currently contain only `.gitkeep`: the actual output PNG files have not been committed. Semesta therefore renders explicitly **temporary, original pixel-preview silhouettes** for the vehicle and special quest NPC archetypes; they are **not pixel-identical to the original game assets**. Canonical V6B walking characters use real published sheets. This tool never decrypts/replaces source artwork or updates the multiplayer game.
+
+### Inspector and controls
+Select a traffic object and open **Properties**. The **AUTO LOOP / SIMULATION** section lets you set speed, choose the straight walking direction, pause movement, adjust crowd size, or change a stationary NPC's idle action. **MOBIL / MOTOR**, **NPC / CROWD** and **NPC QUEST / JOB** are available in the Assets category filter. Save with **💾 Save Draft** or Export JSON for AI map handoff.
