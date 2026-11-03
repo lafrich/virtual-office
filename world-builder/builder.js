@@ -663,6 +663,9 @@ function showOriginalImage(root,item,path){
   plane.userData.authorWidth=width;plane.userData.authorHeight=height;
   for(let i=billboardSprites.length-1;i>=0;i--)
    if(billboardSprites[i].root===root)billboardSprites.splice(i,1);
+  // A real original asset may arrive while Outline mode is enabled.
+  // Destroy its previous source/guide and rebuild lines from the new image.
+  removeBuildingGuide(item.id);
   for(const child of [...root.children]){
    root.remove(child);child.traverse(node=>{
     if(node.geometry)node.geometry.dispose();
@@ -672,6 +675,7 @@ function showOriginalImage(root,item,path){
    });
   }
   root.add(plane);billboardSprites.push({root,plane});
+  applyBuildingGuide(root,item);
   root.userData.originalVirtualLifePath=path;
   if(physics.bigStructure(item,assetByName,style))registerBigOccluder(root,item);
   renderer.render(scene,camera);
@@ -1175,12 +1179,15 @@ function instantiate(o){
  }
  assetRoots.add(root);owners.set(o.id,root);
  registerBigOccluder(root,o);
+ applyBuildingGuide(root,o);
  if(['virtual_asset','sprite','building','shop'].includes(o.type)){
   const path=originalPathFor(o);
   if(path)showOriginalImage(root,o,path);
  }
 }
 function clearAll(){
+ // The normal scene disposal below also releases the guide line geometry.
+ buildingGuides.clear();
  for(const agent of automatedAgents.values()){
   agent.graphic?.dispose();
   for(const part of agent.parts)part.rig.dispose();
