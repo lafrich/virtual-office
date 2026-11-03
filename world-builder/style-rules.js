@@ -36,7 +36,7 @@ function category(o,catalog){
   if(/lamp|tiang/.test(id+' '+file))return 'lamp';
   if(/tong_sampah|trash|bin/.test(id+' '+file))return 'trash';
   if(/pohon|tree|vegetation/.test(id+' '+file))return 'tree';
-  if(['jalan','kampung','gang','loak'].includes(spec.group)&&spec.source==='pipeline-street')return 'building';
+  if(['jalan','kampung','gang','loak'].includes(spec.group)&&['pipeline-street','custom-building'].includes(spec.source))return 'building';
   if(['taman','prop','sinyal'].includes(spec.group))return 'prop';
   return 'furniture';
  }
