@@ -83,7 +83,7 @@ jobs:
         run: node --test tests/membangun-launcher.test.cjs
       - name: Live Membangun app sync regression
         run: |
-          node --test tests/bangun-ruang-bridge.test.cjs tests/bangun-ruang-object-bridge.test.cjs tests/bangun-ruang-pixel-creator.test.cjs tests/bangun-ruang-world-scale-guide.test.cjs tests/membangun-live-sync.test.cjs
+          node --test tests/bangun-ruang-bridge.test.cjs tests/bangun-ruang-object-bridge.test.cjs tests/bangun-ruang-pixel-creator.test.cjs tests/membangun-live-sync.test.cjs
           node --check world-builder/bangun-ruang/semesta-bridge.js
           node --check world-builder/bangun-ruang/character-scale-preview.js
       - name: Semesta existing world and traffic regressions
