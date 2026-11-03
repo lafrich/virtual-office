@@ -15,7 +15,9 @@ function mount(opts){
   const item=opts.getSelected(),spec=item?.type==='sprite'?opts.catalog.get(item.asset):null;
   const raw=item?.interior?.format==='virtual-life-interiors-v1'?item.interior:spec?.interior;
   if(!raw||!Array.isArray(raw.floors))return null;
-  return {item,raw};
+  const footprint=spec?.footprint||item?.footprint||raw.floors[0]?.sourceFootprint||[3,3];
+  return {item,raw,cfg:{w:Number(footprint[0])||3,d:Number(footprint[1])||3}};
+
  }
  function changeView(next){
   view=next==='plan'||!iso?'plan':'iso';
@@ -39,7 +41,7 @@ function mount(opts){
  }
  function drawPlan(){
   if(!scene)return;
-  const w=Math.max(4,Math.min(24,scene.width||6)),d=Math.max(4,Math.min(24,scene.depth||6));
+  const w=Math.max(2,Math.min(24,scene.width||3)),d=Math.max(2,Math.min(24,scene.depth||3));
   canvas.width=w*CELL;canvas.height=d*CELL;ctx.imageSmoothingEnabled=false;
   ctx.fillStyle=scene.theme==='aqua'?'#d0e9f0':scene.theme==='blue'?'#cbd9eb':'#e8dbc7';
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -62,7 +64,11 @@ function mount(opts){
   }
  }
  function floorSelected(n){
-  floor=n;scene=active?.raw?.floors.find(x=>Number(x.floor)===n)||null;
+  floor=n;
+  const original=active?.raw?.floors.find(x=>Number(x.floor)===n)||null;
+  // Old saved buildings stored 6×6 interior for a 3×3 exterior.
+  // Normalize the VIEW without mutating the user's persisted city draft.
+  scene=original?model.normalize(original,active.cfg):null;
   selected=null;$('interiorWalkthroughUse').disabled=true;
   $('interiorWalkthroughDetail').textContent='Tap a furniture item to select its action.';
   draw();
