@@ -33,6 +33,7 @@ function category(o,catalog){
  if(o?.type==='marker')return 'marker';
  if(PROP_NAMES.has(o?.type))return o.type==='box'?'prop':o.type;
  if(spec){
+  if(spec.source==='bangun-object')return ({plant:'tree',lamp:'lamp',furniture:'furniture',street:'prop',decor:'prop'})[spec.objectCategory]||'prop';
   if(spec.source==='pipeline-vegetation')return spec.group.includes('trees')?'tree':'ground';
   const id=String(spec.id||'').toLowerCase(),file=String(o.asset||'').toLowerCase();
   if(/bangku|chair|armchair|stool/.test(id+' '+file))return 'bench';
