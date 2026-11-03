@@ -367,3 +367,40 @@
 .vehicle-offsets label{display:flex;flex-direction:column;gap:5px;min-width:0;font:9px/1.3 "Courier New",monospace}
 .vehicle-offsets input{width:100%;min-width:0;background:#fff;border:2px inset #aaa;padding:7px 3px;font:11px Tahoma,Verdana,sans-serif}
 #vehicleResetVisual{display:flex;align-items:center;justify-content:center;margin-top:9px;width:100%;min-height:32px;font-size:11px}
+
+/* Active Asset — always-visible, compact XP selector.  The bar is outside
+ * the WebGL canvas so it cannot intercept pan, drag or map hit-testing. */
+.active-asset-bar{display:flex;align-items:center;gap:7px;min-height:41px;
+ padding:5px 9px;background:#d9d7d1;border-bottom:2px solid #8f8c85;
+ min-width:0;flex:none}
+.active-asset-heading{font:bold 10px "Courier New",monospace;color:#173977;
+ letter-spacing:.02em;white-space:nowrap;display:flex;gap:5px;align-items:center}
+.active-asset-heading strong{background:#bfc8d8;border:1px solid #7f8da2;
+ padding:2px 4px;color:#163971;font:10px "Courier New",monospace}
+#activeAssetPicker{flex:1 1 150px;min-width:70px;max-width:350px;
+ min-height:29px;border:2px inset #96938e;background:#fff;color:#20272c;
+ padding:3px 5px;font:11px Tahoma,Verdana,sans-serif}
+.active-asset-meta{font:10px "Courier New",monospace;color:#565954;
+ text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ min-width:0;flex:1}
+.active-asset-bar button{flex:none;min-height:29px;padding:5px 9px;
+ border:2px solid;border-color:#fff #84817c #84817c #fff;
+ background:#e4e1db;color:#1a2c4b;font:bold 10px Tahoma,Verdana,sans-serif}
+.active-asset-bar button:disabled{opacity:.45}
+#trackActiveAsset[aria-pressed="true"]{background:#b3c9ef;color:#0d3f92;
+ border-color:#70859f #fff #fff #70859f}
+@media(max-width:1000px){
+ .active-asset-heading{font-size:9px}
+ .active-asset-meta{display:none}
+ #activeAssetPicker{max-width:none}
+}
+@media(max-width:780px){
+ .active-asset-bar{gap:4px;min-height:40px;padding:4px 5px;flex-wrap:nowrap}
+ .active-asset-heading{font-size:8px;flex:none}
+ .active-asset-heading strong{display:none}
+ #activeAssetPicker{min-width:0;flex:1 1 0;font-size:10px;min-height:31px}
+ .active-asset-bar button{padding:5px 6px;font-size:9px;min-height:31px}
+}
+@media(max-width:410px){
+ .active-asset-heading{display:none}
+}
