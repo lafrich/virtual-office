@@ -763,7 +763,11 @@ function resetAutoRoute(agent,obj){
  }
  const point=traffic.spawnPosition(documentMap.map,origin.x,origin.z,mode,8,sidewalkOpen);
  agent.route=point?traffic.makeRoute(documentMap.map,point.x,point.z,mode,agent.settings.direction,sidewalkOpen):null;
- agent.root.visible=!!agent.route;
+ // A single isolated sidewalk square is a valid standing place even if
+ // it has no traversable path; do not make the NPC vanish from the map.
+ agent.root.visible=!!agent.route||(mode==='pedestrian'&&!!point);
+ if(!agent.route&&point&&mode==='pedestrian')
+  agent.root.position.set(point.x,obj.y||0,point.z);
  if(agent.route){
   agent.distance=traffic.nearestDistance(agent.route,point);
   const location=traffic.sample(agent.route,agent.distance);
