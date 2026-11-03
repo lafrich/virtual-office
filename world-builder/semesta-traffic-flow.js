@@ -7,7 +7,7 @@
 const GAP=.65;
 function lengthOf(o){
  const spec=g.VLSemestaCatalog?.vehicle(o?.vehicleId);
- return Math.max(.9,Number(spec?.footprint?.[0])||2.9);
+ return Math.max(.9,Number(spec?.editorFootprint?.[0]||spec?.footprint?.[0])||2.9);
 }
 function laneKey(route){
  const p=route?.points;
