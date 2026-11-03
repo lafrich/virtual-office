@@ -69,6 +69,11 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
   }else if(['avatar','npc','pedestrian','crowd','quest_npc'].includes(o.type)||cat==='actor'){
    kind='actor';height=1.75;
   }else height=Math.max(.45,Math.min(7,Number(o.h||s?.height)||1.8));
+  if(kind==='vehicle'){
+   // This is the DISPLAY silhouette, not its physics/queue footprint.
+   const factor=cl(Number(o.scale)||1,.45,2.5);
+   width*=factor;depth*=factor;height*=factor;
+  }
   return {kind,width,depth,height};
  }
  function addShadow(o,at,model,count){
@@ -76,7 +81,11 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
   const p=info(o);
   const near=canvas.width>0; if(!near)return count;
   const maxDistance=180;
-  const x=Number(at.x)||0,z=Number(at.z)||0;
+  // Follow per-car sprite placement so a tuned vehicle doesn't leave its
+  // detached shadow behind at the old lane centre.
+  const vx=p.kind==='vehicle'?Number(o.visualOffset?.x)||0:0;
+  const vz=p.kind==='vehicle'?Number(o.visualOffset?.z)||0:0;
+  const x=(Number(at.x)||0)+vx,z=(Number(at.z)||0)+vz;
   const distance=Math.hypot(x-camera.position.x,z-camera.position.z);
   if(distance>maxDistance)return count;
   let [w,d]=[p.width,p.depth];
@@ -176,11 +185,14 @@ function makeWorldEffects({THREE,scene,camera,canvas,tint,glows,
      if(!dx&&!dz)dx=1;
     }
     const mag=Math.hypot(dx,dz)||1;dx/=mag;dz/=mag;
-    const fp=getFootprint(o),len=Math.max(.8,Math.min(3.5,Number(fp?.[0])||2));
-    const x=root.position.x,z=root.position.z;
-    const body=project(x,.78,z,rect);
-    const front=project(x+dx*len*.45,.46,z+dz*len*.45,rect);
-    const back=project(x-dx*len*.45,.42,z-dz*len*.45,rect);
+    const fp=getFootprint(o),visualScale=cl(Number(o.scale)||1,.45,2.5);
+    const len=Math.max(.8,Math.min(5.5,(Number(fp?.[0])||2)*visualScale));
+    const offX=Number(o.visualOffset?.x)||0,offZ=Number(o.visualOffset?.z)||0,
+     offY=Number(o.visualOffset?.y)||0;
+    const x=root.position.x+offX,z=root.position.z+offZ;
+    const body=project(x,.78*visualScale+offY,z,rect);
+    const front=project(x+dx*len*.45,.46*visualScale+offY,z+dz*len*.45,rect);
+    const back=project(x-dx*len*.45,.42*visualScale+offY,z-dz*len*.45,rect);
     if(body)glowCircle(body.x,body.y,size*1.4,model.glow*.22,'body');
     if(front)glowCircle(front.x,front.y,size*1.3,model.glow*.63,'head');
     if(back)glowCircle(back.x,back.y,size*.72,model.glow*.38,'tail');
