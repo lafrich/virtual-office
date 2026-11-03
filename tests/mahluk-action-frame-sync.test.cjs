@@ -17,7 +17,9 @@ for(const name of ["toilet","bathe","sleep"]){
  assert.ok(rig.includes(name),"Semesta rig missing "+name);
 }
 assert.match(preview,/edits\?\.get\(actor\.profile,action,actor\.direction,frame\)/);
-assert.match(preview,/edits\?\.offset\(actor\.profile,action\)/);
+assert.match(preview,/edits\?\.offset\(storageActor,action\)/);
+assert.ok(preview.includes("rig?.canonical(actor.profile)||actor.profile"),
+ "Bangun Ruang must find template edits and the backpack for rebuilt Theodore");
 assert.match(rig,/g\.VLActionFrames\?\.get\(state\.profile,action,state\.direction,frame\)/);
 assert.match(rig,/ctx\.drawImage\(edited\.pic,0,0,64,112\)/);
 assert.ok(bangun.includes("event.key==='virtual-life-action-frame-edits-v1'"),
