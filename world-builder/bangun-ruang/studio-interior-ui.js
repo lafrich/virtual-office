@@ -196,6 +196,13 @@ function init(api){
    ctx.fillRect(x+3,y+3,w*CELL-6,d*CELL-6);
    if(g.VLInteriorPixels)g.VLInteriorPixels.draw(ctx,item.assetId,x+3,y+3,w*CELL-6,d*CELL-6);
    else{ctx.fillStyle='#263e54';ctx.textAlign='center';ctx.font='14px monospace';ctx.fillText(def.label.slice(0,2),x+w*CELL/2,y+d*CELL/2+5);}
+   // Direction chip stays visible for square props (WC, bed and chairs),
+   // whose footprint does not change when rotated in Plan / Edit mode.
+   const arrow=['↓','→','↑','←'][((Number(item.rotation)||0)/90)%4]||'↓';
+   const ax=x+w*CELL-14,ay=y+3;
+   ctx.fillStyle='#17459c';ctx.fillRect(ax,ay,11,13);
+   ctx.fillStyle='#fff';ctx.font='bold 11px monospace';ctx.textAlign='center';
+   ctx.fillText(arrow,ax+5.5,ay+10);
    if(item.id===selected){
     ctx.strokeStyle='#f7e48f';ctx.lineWidth=2;
     ctx.strokeRect(x+2,y+2,w*CELL-4,d*CELL-4);ctx.lineWidth=1;
