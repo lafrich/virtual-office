@@ -35,10 +35,10 @@ function resolve(id,requested,moving){
  const entry=bridge()?.get(id);
  if(entry){
   const actions=entry.motions;
-  const translation={bathe:'swim',toilet:'sit',work:'sit_type'};
-  const requestedAction=translation[requested]||requested;
-  let motion=actions.find(m=>m.id===requestedAction);
-  if(!motion&&moving)motion=actions.find(m=>m.id==='walk');
+  const possible=({bathe:['swim','bathe','idle'],toilet:['sit','toilet'],
+   sleep:['sleep','sleep_seat','lie'],work:['sit_type','work']}[requested]||[requested]);
+  let motion=possible.map(id=>actions.find(m=>m.id===id&&m.available!==false)).find(Boolean);
+  if(!motion&&moving)motion=actions.find(m=>m.id==='walk'&&m.available!==false);
   if(!motion)motion=actions.find(m=>m.id==='idle')||actions.find(m=>m.id==='walk')||actions[0];
   if(!motion)return null;
   const separate=!!motion.sheet;
@@ -92,8 +92,12 @@ function createRig(THREE,opt={}){
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
   const overlayUrls=['bag','shoes','pants','shirt','helmet'].map(layer);
   const overlays=overlayUrls.map(url=>image(url));
+  const action=({toilet:'toilet',bathe:'bathe',sleep:'sleep'})[state.pose]||null;
+  const editURL=action?g.VLActionFrames?.get(state.profile,action,state.direction,frame):null;
+  const edited=editURL?image(editURL):null;
   const status=overlays.map(o=>o?.ready?'1':'0').join('');
-  const key=[who,spec.url,spec.mode,row,frame,...overlayUrls.map(x=>x?.length||0),status].join(':');
+  const editTag=editURL?editURL.length+':'+editURL.slice(-64):'';
+  const key=[who,spec.url,spec.mode,row,frame,...overlayUrls.map(x=>x?.length||0),status,editTag,edited?.ready].join(':');
   state.loaded=!!sprite?.ready;
   state.failed=!!sprite?.error;
   if(!sprite?.ready||key===previous)return;
@@ -105,7 +109,8 @@ function createRig(THREE,opt={}){
   ctx.clearRect(0,0,64,112);
   // A backpack is BEHIND the skull and torso, even when facing away.
   if(overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
-  ctx.drawImage(pic,sx,sy,64,112,0,0,64,112);
+  if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
+  else ctx.drawImage(pic,sx,sy,64,112,0,0,64,112);
   for(let i=1;i<overlays.length;i++)if(overlays[i]?.ready)
    ctx.drawImage(overlays[i].pic,0,0,64,112);
   texture.needsUpdate=true;previous=key;
