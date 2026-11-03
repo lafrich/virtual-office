@@ -13,6 +13,7 @@ on:
       - "tests/bangun-ruang-*.test.cjs"
       - "tests/semesta-traffic.test.cjs"
       - "tests/semesta-vehicle-queue.test.cjs"
+      - "tests/semesta-vehicle-visuals.test.cjs"
       - "tests/world-builder-v2.test.cjs"
       - ".github/workflows/semesta-mahluk-sync.yml"
   pull_request:
@@ -25,6 +26,7 @@ on:
       - "tests/bangun-ruang-*.test.cjs"
       - "tests/semesta-traffic.test.cjs"
       - "tests/semesta-vehicle-queue.test.cjs"
+      - "tests/semesta-vehicle-visuals.test.cjs"
       - "tests/world-builder-v2.test.cjs"
       - ".github/workflows/semesta-mahluk-sync.yml"
 
@@ -43,6 +45,9 @@ jobs:
           node --check world-builder/pipeline-character-rig.js
           node --check world-builder/style-rules.js
           node --check world-builder/map-schema.js
+          node --check world-builder/semesta-vehicle-placement.js
+          node --check world-builder/semesta-world-effects.js
+          node --check world-builder/semesta-traffic-art.js
           node --input-type=module --check < world-builder/builder.js
       - name: Mahluk Hidup catalog, frames and custom equipment integration
         run: node tests/semesta-mahluk-sync.test.cjs
@@ -61,3 +66,4 @@ jobs:
           node tests/world-builder-v2.test.cjs
           node tests/semesta-traffic.test.cjs
           node tests/semesta-vehicle-queue.test.cjs
+          node tests/semesta-vehicle-visuals.test.cjs
