@@ -308,7 +308,7 @@ function persist(asset){
  try{localStorage.setItem(KEY,JSON.stringify(saved));current=asset;drawLibrary();return true;}
  catch(e){status('⚠ Storage full; use Export Package and delete old drafts.');return false;}
 }
-function saveAsset(){const a=buildAsset();if(persist(a))status('Saved '+a.name+' · available in Semesta on reload');return a;}
+function saveAsset(){const a=buildAsset();if(persist(a)){status('Saved '+a.name+' · available in Semesta on reload');return a;}return null;}
 function publish(){const a=saveAsset();if(!a)return;status('✓ '+a.name+' registered. Open / reload Semesta → BUILDINGS.');}
 function download(name,text,type){
  const blob=new Blob([text],{type:type||'application/json'});
