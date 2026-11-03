@@ -15,7 +15,8 @@ const game={
  },
  VLActionTemplates:{
   get:(actor,action)=>actor==="legacy_theodore"&&action==="clock_in"?
-   {actor,action,ready:true,frames:4,frameMs:210,loop:true,objectLayer:"behind"}:null,
+   {actor,action,ready:true,frames:4,frameMs:210,loop:true,
+    objectLayer:"behind",rotation:90,expression:"sleepy"}:null,
   frame:(actor,action,dir,index)=>actor==="legacy_theodore"&&action==="clock_in"?
    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB":null
  },
@@ -35,6 +36,8 @@ assert.equal(saved.source,"template");
 assert.equal(saved.mode,"clock_in");
 assert.equal(saved.frames,4);
 assert.equal(saved.objectLayer,"behind");
+assert.equal(saved.rotation,90);
+assert.equal(saved.expression,"sleepy");
 assert.deepEqual(Array.from(saved.durations),[210,210,210,210]);
 const pending=rig.resolve("theodore","sell",false);
 assert.equal(pending.source,"unavailable");
