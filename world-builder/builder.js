@@ -664,7 +664,10 @@ function resetAutoRoute(agent,obj){
   agent.root.visible=traffic.allowed(documentMap.map,obj.x,obj.z,'pedestrian');
   return;
  }
- const point=traffic.spawnPosition(documentMap.map,obj.x,obj.z,mode,8);
+ // Preserve the preview's current location when a road/sidewalk is repainted;
+ // only a newly authored or manually repositioned agent starts at obj.x/z.
+ const origin=agent.route?{x:agent.root.position.x,z:agent.root.position.z}:{x:obj.x,z:obj.z};
+ const point=traffic.spawnPosition(documentMap.map,origin.x,origin.z,mode,8);
  agent.route=point?traffic.makeRoute(documentMap.map,point.x,point.z,mode,agent.settings.direction):null;
  agent.root.visible=!!agent.route;
  if(agent.route){
