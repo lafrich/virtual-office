@@ -27,8 +27,14 @@ function parseCatalog(json){
    m&&SAFE_ID.test(m.id)&&m.available===true&&Number.isInteger(m.frames)&&
    m.frames>=1&&m.frames<=40&&(!m.sheet||ASSET.test(m.sheet))&&
    Number.isInteger(m.row)&&m.row>=0&&m.row<=43):[];
+  // Native v6b characters author transparent face overlays, while
+  // legacy Theodore/Gfunk/Yerbies author full-body expression atlases.
+  // Both are same-actor facial sources and must survive catalog filtering.
   const expressions=Array.isArray(raw.expressions)?raw.expressions.filter(e=>
-   e&&SAFE_ID.test(e.id)&&ASSET.test(e.sheet||'')): [];
+   e&&SAFE_ID.test(e.id)&&(ASSET.test(e.overlay||'')||ASSET.test(e.sheet||'')))
+   .map(e=>({id:e.id,label:String(e.label||e.id).slice(0,64),
+    ...(ASSET.test(e.sheet||'')?{sheet:e.sheet}:{}),
+    ...(ASSET.test(e.overlay||'')?{overlay:e.overlay}:{})})): [];
   const entry={id:raw.id,name:String(raw.name||raw.id).slice(0,90),
    sheet:raw.sheet,motions,expressions,baseId:raw.id,
    category:raw.template_category||'npc',template:raw.template===true,
