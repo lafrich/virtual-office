@@ -79,7 +79,8 @@ function texture(THREE,id,dir){
 function vehicleGraphic(THREE,record){
  const spec=g.VLSemestaCatalog.vehicle(record.vehicleId)||g.VLSemestaCatalog.vehicles[0];
  const scale=record.scale||1;
- const w=spec.size[0]*PX,h=spec.size[1]*PX*VCOMP;
+ const visualScale=Number(spec.editorArtScale)||1;
+ const w=spec.size[0]*PX*visualScale,h=spec.size[1]*PX*VCOMP*visualScale;
  const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:false,
   alphaTest:.15,depthWrite:true,side:THREE.DoubleSide});
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
