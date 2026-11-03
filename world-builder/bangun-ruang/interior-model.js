@@ -55,11 +55,19 @@ const TEMPLATES=Object.freeze({
 });
 const clone=x=>JSON.parse(JSON.stringify(x));
 const limit=(v,lo,hi)=>Math.min(hi,Math.max(lo,Math.round(Number(v)||lo)));
-const dimensions=cfg=>[limit(Number(cfg?.w)*2||6,4,24),limit(Number(cfg?.d)*2||6,4,24)];
+// Semesta exterior tiles are native 64x32 isometric. Each INTERIOR tile must
+// represent exactly the same world unit: never multiply by two.
+// Fractional footprints (e.g. 3×3.2) use only COMPLETE walkable tiles;
+// 3 whole interior tiles fit inside 3.2 exterior tiles without stretching.
+const tileCount=(v,fallback=3)=>Math.min(24,Math.max(2,Math.floor(Number(v)>0?Number(v):fallback)));
+const dimensions=cfg=>[tileCount(cfg?.w),tileCount(cfg?.d)];
 function layout(cfg,theme='empty'){
  const [width,depth]=dimensions(cfg);
- return {format:'virtual-life-interior-v1',version:1,width,depth,theme,entrance:{c:Math.floor(width/2),r:depth-1},
-  items:[],floor:1,notes:'Interior action slots are editor metadata; game runtime hookup pending.'};
+ return {format:'virtual-life-interior-v1',version:2,width,depth,theme,
+  tilePixels:[64,32],unit:'semesta-ground-tile',
+  sourceFootprint:[Number(cfg?.w)||width,Number(cfg?.d)||depth],
+  entrance:{c:Math.floor(width/2),r:depth-1},
+  items:[],floor:1,notes:'1 interior tile = 1 exterior Semesta tile (64×32 px).'};
 }
 function occupied(item){const t=TYPES[item?.assetId];if(!t)return [];let w=t.w,d=t.d;if((item.rotation||0)%180===90)[w,d]=[d,w];
  const cells=[];for(let c=0;c<w;c++)for(let r=0;r<d;r++)cells.push((item.c+c)+','+(item.r+r));return cells;
@@ -114,24 +122,50 @@ function normalize(raw,cfg){
  const base=layout(cfg);
  if(!raw||raw.format!=='virtual-life-interior-v1')return base;
  base.theme=typeof raw.theme==='string'&&raw.theme.length<25?raw.theme:'empty';
- if(raw.entrance&&Number.isInteger(raw.entrance.c)&&Number.isInteger(raw.entrance.r))
-  base.entrance={c:limit(raw.entrance.c,0,base.width-1),r:limit(raw.entrance.r,0,base.depth-1)};
- base.items=[];
+ base.floor=limit(raw.floor||1,1,12);
+ const oldWidth=Math.max(1,Number(raw.width)||base.width),oldDepth=Math.max(1,Number(raw.depth)||base.depth);
+ // Old Bangun Ruang doubled the footprint; reproject legacy furniture into
+ // matching exterior coordinates, preserving item IDs, actions and rotation.
+ const oldScale=Number(raw.version||1)<2&&
+  (Math.abs(oldWidth-base.width)>0.5||Math.abs(oldDepth-base.depth)>0.5);
+ const rc=(x,oldD,newD)=>limit(
+  oldScale?Math.floor((Number(x)+.5)*newD/oldD):Number(x),0,newD-1);
+ if(raw.entrance&&Number.isInteger(raw.entrance.c)&&Number.isInteger(raw.entrance.r)){
+  base.entrance={c:rc(raw.entrance.c,oldWidth,base.width),
+   r:rc(raw.entrance.r,oldDepth,base.depth)};
+ }
+ // If source layout used the old doubled footprint, fix its door to the
+ // current front edge; otherwise old entrance could remain in room centre.
+ if(oldScale)base.entrance={c:Math.floor(base.width/2),r:base.depth-1};
  const ids=new Set();
  for(const old of Array.isArray(raw.items)?raw.items.slice(0,100):[]){
-  if(!TYPES[old.assetId]||typeof old.id!=='string'||ids.has(old.id))continue;
-  const c=Number(old.c),r=Number(old.r),rot=[0,90,180,270].includes(old.rotation)?old.rotation:0;
-  if(!Number.isInteger(c)||!Number.isInteger(r)||!canPlace(base,old.assetId,c,r,null,rot))continue;
+  if(!TYPES[old?.assetId]||typeof old.id!=='string'||ids.has(old.id))continue;
+  const rot=[0,90,180,270].includes(old.rotation)?old.rotation:0;
+  const c=rc(old.c,oldWidth,base.width),r=rc(old.r,oldDepth,base.depth);
+  // Repack nearby rather than silently discarding saved furniture when
+  // migrating 6x6 -> 3x3. Collision and the door are still authoritative.
+  let pick=null;
+  const positions=[];
+  for(let zz=0;zz<base.depth;zz++)for(let xx=0;xx<base.width;xx++){
+   positions.push({c:xx,r:zz,dist:Math.abs(xx-c)+Math.abs(zz-r)});
+  }
+  positions.sort((a,b)=>a.dist-b.dist);
+  for(const pos of positions){
+   if(canPlace(base,old.assetId,pos.c,pos.r,null,rot)){pick=pos;break;}
+  }
+  if(!pick)continue;
   ids.add(old.id);
   const obj={id:old.id.slice(0,90),assetId:old.assetId,name:TYPES[old.assetId].label,
-   c,r,rotation:rot,actionId:TYPES[old.assetId].actions[0],
+   c:pick.c,r:pick.r,rotation:rot,actionId:TYPES[old.assetId].actions[0],
    pose:null,capacity:limit(old.capacity||1,1,8),
-   blocking:old.blocking!==false,triggerRadius:Math.max(.4,Math.min(3,Number(old.triggerRadius)||1.15))};
+   blocking:old.blocking!==false,
+   triggerRadius:Math.max(.4,Math.min(3,Number(old.triggerRadius)||1.15))};
   base.items.push(obj);
   action(base,obj.id,old.actionId||obj.actionId);
  }
  return base;
 }
+
 function slots(scene){
  return (scene?.items||[]).map(item=>({
   id:item.id,assetId:item.assetId,grid:{c:item.c,r:item.r},
