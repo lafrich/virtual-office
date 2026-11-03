@@ -72,6 +72,14 @@ function normalize(o,catalog){
  if(s){o.width=Number(s.width||o.width||2);o.height=Number(s.height||o.height||2);}
  return o;
 }
+const terrainCache=new WeakMap();
+function getTerrainIndex(t){
+ const found=terrainCache.get(t);
+ if(found?.cells===t.cells)return found.index;
+ const index=new Map(t.cells.map(cell=>[cell.c+','+cell.r,cell.type]));
+ terrainCache.set(t,{cells:t.cells,index});
+ return index;
+}
 function reason(o,objects,map,catalog){
  if(category(o,catalog)==='actor')return '';
  if(category(o,catalog)==='marker')return ''; // Editor-only logic anchors are not solid objects.
@@ -83,7 +91,7 @@ function reason(o,objects,map,catalog){
  if(!map?.terrain&&z+d/2>road.z0+.25&&z-d/2<road.z1-.25)
   return 'Objek statis tidak boleh menutup badan jalan.';
  if(map?.terrain&&Array.isArray(map.terrain.cells)){
-  const tiles=new Map(map.terrain.cells.map(t=>[t.c+','+t.r,t.type]));
+  const tiles=getTerrainIndex(map.terrain);
   const minC=Math.floor(x-w/2+.08),maxC=Math.ceil(x+w/2-.08);
   const minR=Math.floor(z-d/2+.08),maxR=Math.ceil(z+d/2-.08);
   for(let c=minC;c<maxC;c++)for(let r=minR;r<maxR;r++){
