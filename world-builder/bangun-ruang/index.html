@@ -348,6 +348,7 @@ function importFile(file){
    const a=JSON.parse(r.result);
    if(a.format!=='virtual-life-building-asset-v1'||!a.config||!a.views)throw Error('Invalid building package');
    current=null;apply(a.config);const rebuilt=buildAsset();
+   if(/^br-[a-z0-9-]{1,72}$/.test(a.id||''))rebuilt.id=a.id;
    if(persist(rebuilt))status('Imported '+rebuilt.name+' · ready for Semesta');
   }catch(e){status('⚠ Import failed: '+e.message);}
  };r.readAsText(file);
