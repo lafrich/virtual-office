@@ -121,3 +121,14 @@ Bangun Ruang shares the published Mahluk Hidup catalog, same-origin Character St
 Choose a character, press Place and tap Exterior or Interior to position it at the 2:1 pixel/tile scale. The translucent marker and 112 px ruler reveal size relative to doors, buildings and furniture. In Interactive mode, Enter Door simulates walking to the building threshold and transitions the demo character into the ground-floor isometric preview. Select an interior WC, bed, chair, desk or shower and press Use Selected to test a route around blocking furniture and play the available native character pose. Existing pose aliases are used: toilet maps to sit, bath to swim and work to sit_type. Missing animations are reported as data-only hooks.
 
 The demo actor is editor-only, never exported with the building package and never transferred to the online multiplayer game. If the published Mahluk Hidup sprite is unavailable, the editor shows an explicitly labelled size-only silhouette until an original image loads.
+
+
+## v6 — WC / Mahluk Hidup seated alignment
+
+The character scale tester previously stopped on a free tile **beside** the toilet and immediately switched to the Mahluk Hidup sit pose. That looked like the character was sitting on the floor.
+
+It now uses the shared isometric WC geometry to define a true fixture seat contact point. The character first takes a collision-safe route to a neighboring tile, then makes a brief final seating transition to the bowl center (local c=0.50, r=0.64, seat z=14). Because the native 64×112 character rig uses a 32×100 foot pivot, its preview receives a calibrated 13-pixel Y adjustment when seated, and automatically faces the cistern. All 0°, 90°, 180°, and 270° WC rotations use corresponding visual geometry and interaction anchors. A foreground porcelain rim masks the feet to clarify depth.
+
+The preview hides scale guide lines during seating. Selecting Idle returns the actor to its last free approach tile before restoring the idle pose, so a later path search never starts inside a blocking toilet cell. Changing character profiles and deleting the selected WC also clears seating state.
+
+The calibration applies only to the editor reference character. The source Mahluk Hidup sprites, original building PNGs, saved interior object actions and online gameplay are unchanged.
