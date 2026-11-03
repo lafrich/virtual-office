@@ -25,6 +25,7 @@ const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
 const terrain=window.VLMapTerrain;
+const physics=window.VLWorldPhysics;
 const schema=window.VLMapSchema;
 const PIXEL_WORLD=Math.SQRT2/64, VERTICAL_COMP=2/Math.sqrt(3);
 const actorType=t=>t==='avatar'||t==='npc';
@@ -655,6 +656,58 @@ function makeMarker(root,item){
  root.userData.editorMarker=tag;
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
+const bigOccluders=new Map();
+const occlusionRay=new THREE.Ray(),occlusionHit=new THREE.Vector3();
+function refreshBigOccluder(id){
+ const entry=bigOccluders.get(id),o=documentMap.objects.find(x=>x.id===id);
+ if(!entry||!o)return;
+ const b=physics.bigBox(o,assetByName,style);
+ entry.box.min.set(b.min.x,b.min.y,b.min.z);
+ entry.box.max.set(b.max.x,b.max.y,b.max.z);
+}
+function registerBigOccluder(root,o){
+ if(!physics?.bigStructure(o,assetByName,style))return;
+ const materials=new Map();
+ root.traverse(part=>{
+  if(!part.isMesh||!part.material)return;
+  for(const mat of (Array.isArray(part.material)?part.material:[part.material])){
+   if(!materials.has(mat))materials.set(mat,{
+    opacity:mat.opacity??1,transparent:!!mat.transparent,depthWrite:!!mat.depthWrite
+   });
+  }
+ });
+ if(!materials.size)return;
+ bigOccluders.set(o.id,{root,box:new THREE.Box3(),materials,alpha:1});
+ refreshBigOccluder(o.id);
+}
+function updateLargeOcclusion(dt){
+ const id=cameraFollowId||(mode==='walk'?walkActorId:null)||
+  (selectedId&&actorType(item()?.type)?selectedId:null);
+ const actor=owners.get(id);
+ if(actor){
+  occlusionRay.origin.set(actor.position.x,actor.position.y+1.25,actor.position.z);
+  // Orthographic camera is positioned along +direction from its ground focus.
+  occlusionRay.direction.copy(direction);
+ }
+ for(const [oid,entry] of bigOccluders){
+  const point=actor?occlusionRay.intersectBox(entry.box,occlusionHit):null;
+  const blocked=!!point&&point.distanceTo(occlusionRay.origin)>.15&&
+   point.distanceTo(occlusionRay.origin)<115;
+  const target=blocked?.23:1;
+  const alpha=1-Math.exp(-dt*12);
+  entry.alpha+=(target-entry.alpha)*alpha;
+  if(Math.abs(target-entry.alpha)<.002)entry.alpha=target;
+  const isFaded=entry.alpha<.995;
+  for(const [mat,original] of entry.materials){
+   const transparent=isFaded||original.transparent;
+   const depthWrite=isFaded?false:original.depthWrite;
+   if(mat.transparent!==transparent||mat.depthWrite!==depthWrite){
+    mat.transparent=transparent;mat.depthWrite=depthWrite;mat.needsUpdate=true;
+   }
+   mat.opacity=original.opacity*entry.alpha;
+  }
+ }
+}
 let highlight=null;
 function instantiate(o){
  const root=new THREE.Group();root.name=o.name;root.userData.itemId=o.id;
@@ -671,8 +724,10 @@ function instantiate(o){
   case 'marker':makeMarker(root,o);break;
  }
  assetRoots.add(root);owners.set(o.id,root);
+ registerBigOccluder(root,o);
 }
 function clearAll(){
+ bigOccluders.clear();
  for(const {rig} of rigs.values())rig.dispose();
  rigs.clear();billboardSprites.length=0;
  while(assetRoots.children.length){
@@ -754,6 +809,7 @@ function applyItem(){
  r.position.set(o.x,o.y,o.z);
  r.rotation.y=actorType(o.type)?0:o.rotation*Math.PI/180;
  r.scale.setScalar(actorType(o.type)?1:o.scale);
+ refreshBigOccluder(o.id);
  const holder=rigs.get(o.id);
  if(holder){
    if(holder.rig.state.direction!==o.facing)holder.rig.setDirection(o.facing||'sw');
