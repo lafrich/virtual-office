@@ -84,7 +84,7 @@ function silhouette(ctx,x,y){
  ctx.fillRect(Math.round(x)+34,Math.round(y)+99,13,2);
  ctx.fillStyle='#1c436c';ctx.font='8px monospace';ctx.fillText('64x112',Math.round(x)+11,Math.round(y)+8);
 }
-function drawActor(ctx,actor,time,footX,footY){
+function drawActor(ctx,actor,time,footX,footY,options={}){
  const x=Math.round(footX-FRAME.pivotX),y=Math.round(footY-FRAME.pivotY);
  const resolved=rig?.resolve(actor.profile,actor.pose,actor.moving);
  const sprite=resolved?.url?image(resolved.url):null;
@@ -110,6 +110,8 @@ function drawActor(ctx,actor,time,footX,footY){
   }
  }
  if(!drawn)silhouette(ctx,x,y);
+ // Hide the scale ruler while sitting so it does not cover the WC/character contact.
+ if(options.seated)return drawn;
  // Crosshair marks the actual Mahluk Hidup floor pivot without modifying pixels.
  ctx.fillStyle='#d64745';
  ctx.fillRect(Math.round(footX)-3,Math.round(footY),7,1);
@@ -129,6 +131,7 @@ function mount(api){
  if(!canvas||!stage||!ctx||!model)return null;
  const actor={active:false,profile:'ichsan',scene:'exterior',c:0,r:0,floor:1,
   pose:'idle',direction:'sw',moving:false,armed:false,segments:[],current:null,
+  actionAnchor:null,
   walkProgress:0,then:null};
  let elapsed=0,lastFrame=0,lastDraw=0,activeSource=null;
  function cfg(){return api.getConfig();}
@@ -185,7 +188,7 @@ function mount(api){
   const src=target();if(!positionOverlay(src)){canvas.hidden=true;return;}
   canvas.hidden=false;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  let x,y;
+  let x,y,interiorGeometry=null;
   if(inside()){
    const s=api.getInterior?.();if(!s)return;
    if(api.getInteriorView?.()==='plan'){
@@ -198,20 +201,34 @@ function mount(api){
    }
    const geo=iso?.bounds(s);
    if(!geo)return;
-   [x,y]=iso.point(geo,actor.c+.5,actor.r+.5,0);
+   interiorGeometry=geo;
+   if(actor.actionAnchor){
+    [x,y]=iso.point(geo,actor.actionAnchor.c,actor.actionAnchor.r,0);
+    y+=actor.actionAnchor.pixelOffsetY||0;
+   }else [x,y]=iso.point(geo,actor.c+.5,actor.r+.5,0);
   }else{
    const v=api.getExterior(),pivot=v?.pivot;
    if(!pivot)return;
    x=pivot[0]+(actor.c-actor.r)*32;
    y=pivot[1]+(actor.c+actor.r)*16;
   }
-  const valid=drawActor(ctx,actor,elapsed,x,y);
+  const valid=drawActor(ctx,actor,elapsed,x,y,{seated:!!actor.actionAnchor});
+  if(interiorGeometry&&actor.actionAnchor?.kind==='wc'){
+   const item=api.getInterior?.()?.items?.find(x=>x.id===actor.actionAnchor.itemId);
+   if(item)iso?.drawSeatForeground?.(ctx,interiorGeometry,item);
+  }
   if(!valid&&bridge?.ready&&!actor.reported){
    actor.reported=true;$('scaleStatus').textContent='Scale fallback · source sprite may be loading';
   }
  }
  function stop(){
   actor.segments=[];actor.current=null;actor.walkProgress=0;actor.moving=false;actor.then=null;
+ }
+ function leaveAction(){
+  // Restore a freely walkable approach tile when standing up.
+  if(actor.actionAnchor?.approach)
+   [actor.c,actor.r]=actor.actionAnchor.approach;
+  actor.actionAnchor=null;actor.pose='idle';
  }
  function placeDefault(){
   const p=spawnPoint();actor.c=p[0];actor.r=p[1];actor.floor=1;actor.scene='exterior';
@@ -221,7 +238,7 @@ function mount(api){
    actor.active=true;actor.profile=choose.value||'ichsan';
    placeDefault();actor.direction=spriteDir();actor.pose='idle';
   }
-  stop();actor.armed=!actor.armed;
+  leaveAction();stop();actor.armed=!actor.armed;
   status(actor.armed?'Tap on the exterior or interior canvas to place character':'Character placement ready');
   updateControls();draw();
  }
@@ -236,7 +253,7 @@ function mount(api){
    actor.c=clamp(c,-24,24);actor.r=clamp(r,-24,24);
    actor.scene='exterior';
   }
-  actor.pose='idle';actor.armed=false;stop();updateControls();draw();
+  actor.actionAnchor=null;actor.pose='idle';actor.armed=false;stop();updateControls();draw();
   status('Mahluk Hidup: '+actor.profile+' placed at C '+actor.c+', R '+actor.r);
   return true;
  }
@@ -265,7 +282,7 @@ function mount(api){
   if(!actor.active||actor.scene!=='exterior'||cfg().interactive!==true){
    status('Enable Interactive Building and place a character first');return;
   }
-  actor.armed=false;const start=[actor.c,actor.r],dest=doorPoint();
+  leaveAction();actor.armed=false;const start=[actor.c,actor.r],dest=doorPoint();
   const arrived=()=>{
    const s=api.getInterior?.();
    // Ensure the floor shown is ground floor, then place on the entrance tile.
@@ -282,19 +299,35 @@ function mount(api){
   const item=api.getSelectedProp?.(),scene=api.getInterior?.();
   if(!item||!scene){status('Select WC, bed, chair or another interior prop first');return;}
   if(actor.floor!==scene.floor){status('Place the character on this floor before testing the action');return;}
-  actor.armed=false;
+  actor.armed=false;leaveAction();
   const start=[Math.round(actor.c),Math.round(actor.r)];
   const path=pathTo(scene,start,[item.c,item.r],{item});
   if(!path.length){status('No free route to '+item.name+' · move blocking furniture');return;}
   const action=model.actions?.[item.actionId],pose=action?.pose;
-  const done=()=>{
+  const anchor=pose&&['toilet','sit'].includes(pose)?iso?.actionAnchor?.(item):null;
+  const approach=path[path.length-1];
+  const finish=()=>{
+   if(anchor){
+    actor.c=anchor.c-.5;actor.r=anchor.r-.5;
+    actor.actionAnchor={...anchor,approach:[...approach]};
+    actor.direction=anchor.direction;
+   }
    actor.pose=pose||'idle';actor.moving=false;
    const requested=pose?({toilet:'sit',bathe:'swim',work:'sit_type'}[pose]||pose):'idle';
    const motion=rig?.resolve(actor.profile,pose,false);
    const supported=pose&&motion?.mode===requested;
    status('Use '+item.name+' → '+item.actionId+' · '+(supported?
-    'Mahluk Hidup pose '+pose:'No authored rig; metadata action only'));
+    'Mahluk Hidup pose '+pose+(anchor?' / aligned to seat':''):
+    'No authored rig; metadata action only'));
    updateControls();draw();
+  };
+  const done=()=>{
+   if(anchor){
+    // Last step moves from the free approach tile ONTO the fixture seat.
+    // This movement is separate from the collision-safe floor path.
+    status('Aligning character with '+item.name+' seat...');
+    walk([[actor.c,actor.r],[anchor.c-.5,anchor.r-.5]],finish);
+   }else finish();
   };
   status('Character walking to '+item.name+'...');
   if(path.length<2)done();else walk(path,done);
@@ -317,12 +350,12 @@ function mount(api){
   status('Selected Mahluk Hidup · '+choose.selectedOptions?.[0]?.textContent||actor.profile);};
  $('scaleSpawn').onclick=spawn;
  $('scaleRemove').onclick=()=>{
-  actor.active=false;actor.armed=false;stop();canvas.hidden=true;
+  actor.active=false;actor.armed=false;actor.actionAnchor=null;stop();canvas.hidden=true;
   updateControls();status('Character reference removed · building unchanged');
  };
  $('scaleWalkDoor').onclick=enterDoor;
  $('scaleUse').onclick=useSelected;
- $('scaleIdle').onclick=()=>{actor.pose='idle';stop();status('Idle / Mahluk Hidup');};
+ $('scaleIdle').onclick=()=>{leaveAction();stop();updateControls();draw();status('Idle / Mahluk Hidup');};
  canvas.addEventListener('pointerdown',e=>{
   if(!actor.armed||!showCharacter())return;
   const b=canvas.getBoundingClientRect();
