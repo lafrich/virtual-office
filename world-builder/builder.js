@@ -830,8 +830,9 @@ refreshAutoRoutes=()=>{
 };
 function trafficArea(record,position,dx=1,dz=0){
  const motor=record.type==='vehicle',source=motor?trafficCatalog.vehicle(record.vehicleId):null;
- let w=motor?Math.max(.95,Number(source?.editorFootprint?.[0]||source?.footprint?.[0]||2.9)):.53;
- let depth=motor?.85:.53;
+ const specFootprint=source?.editorFootprint||source?.footprint||[2.9,.85];
+ let w=motor?Math.max(.95,Number(specFootprint[0])):.53;
+ let depth=motor?Math.max(.6,Number(specFootprint[1])):.53;
  if(Math.abs(dz)>Math.abs(dx))[w,depth]=[depth,w];
  return {minX:position.x-w/2,maxX:position.x+w/2,minZ:position.z-depth/2,maxZ:position.z+depth/2};
 }
