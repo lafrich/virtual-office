@@ -41,26 +41,25 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .desc{font:11px/1.55 Tahoma,Verdana,sans-serif;color:#494945;margin:16px 0 16px;min-height:36px}
 .inspector .chrome-button{width:100%;margin-top:auto}
 .foot{min-height:35px;border-top:2px solid #85827c;display:flex;align-items:center;gap:14px;padding:5px 14px;background:#d7d4ce;font:11px "Courier New",monospace}.foot .right{margin-left:auto}
-.boot{position:fixed;z-index:20;inset:0;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,#0b1c57 0%,#113781 46%,#0e2e71 100%);color:#fff;transition:opacity .3s ease,visibility .3s ease}
-.boot:before,.boot:after{content:"";position:absolute;left:0;right:0;height:2px;background:#648acc;box-shadow:0 1px 0 #001c4b}
-.boot:before{top:15%}.boot:after{bottom:15%}
-.boot.done{opacity:0;visibility:hidden;pointer-events:none}
-.boot-inner{width:min(420px,86vw);text-align:center;transform:translateY(-2%);position:relative}
-.boot-brand{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:25px}
-.boot-xp-mark{width:56px;height:56px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;transform:perspective(100px) rotateY(-9deg) skewY(-7deg);filter:drop-shadow(2px 3px 2px #071c52)}
-.boot-xp-mark i:nth-child(1){background:linear-gradient(140deg,#ffb25c,#e75235)}
-.boot-xp-mark i:nth-child(2){background:linear-gradient(140deg,#a8dc69,#47a83c)}
-.boot-xp-mark i:nth-child(3){background:linear-gradient(140deg,#80cafa,#166cce)}
-.boot-xp-mark i:nth-child(4){background:linear-gradient(140deg,#ffe78f,#efb82f)}
-.boot-name{text-align:left;line-height:1}
-.boot-name h2{margin:0;font:700 clamp(28px,7vw,43px)/1 Tahoma,Verdana,Arial,sans-serif;letter-spacing:-.045em;text-shadow:1px 2px #041b50}
-.boot-name small{display:block;text-align:right;margin-top:6px;font:11px Tahoma,Verdana,sans-serif;letter-spacing:.3em;color:#c5d6ff}
-.boot-loader{width:226px;max-width:74vw;height:20px;border:1px solid #a6bce8;border-radius:4px;margin:0 auto;padding:3px;background:#091f53;box-shadow:inset 1px 2px 3px #06102a}
-.boot-loader-track{width:100%;height:12px;overflow:hidden;position:relative;background:#0a1e4f}
-.boot-loader-bar{position:absolute;left:-38%;top:0;width:38%;height:12px;background:repeating-linear-gradient(90deg,#3fb23c 0 13px,#82e474 13px 16px,#2359a9 16px 19px);border-radius:2px;animation:xpLoad 1.22s linear infinite}
-.boot-caption{margin-top:15px;color:#c0d4fa;font:11px Tahoma,Verdana,sans-serif;letter-spacing:.04em}
-.skip{display:block;margin:29px auto 0;color:#b9cdef;background:transparent;border:0;text-decoration:underline;text-underline-offset:3px;font:11px Tahoma,Verdana,sans-serif}.skip:hover{color:#fff}
-@keyframes xpLoad{from{left:-38%}to{left:100%}}
+/* Membangun startup: classic Windows 95/98 dialog, matched to supplied reference. */
+.boot{position:fixed;z-index:20;inset:0;background:#58a6a8;color:#111;display:grid;place-items:center;padding:18px;opacity:1;transition:opacity .12s linear}
+.boot.done{opacity:0;pointer-events:none}
+.boot-dialog{width:min(565px,100%);background:#c5cbcc;border-style:solid;border-width:2px;border-color:#f8ffff #343a40 #343a40 #f8ffff;box-shadow:inset 1px 1px #e8eeef,inset -1px -1px #6f7679,1px 2px 0 #334849; padding:3px}
+.boot-titlebar{height:26px;background:#08039e;color:#fff;display:flex;align-items:center;padding:0 5px 0 9px;font:bold 14px/1 "MS Sans Serif",Tahoma,Arial,sans-serif;letter-spacing:0}
+.boot-titlebar strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boot-window-controls{display:flex;gap:3px;margin-left:auto}
+.boot-window-controls span{display:grid;place-items:center;width:18px;height:18px;background:#c5cbcc;color:#12181b;border-style:solid;border-width:2px;border-color:#f9ffff #32383a #32383a #f9ffff;font:bold 13px/1 Arial,sans-serif;box-shadow:inset -1px -1px #7c8184}
+.boot-dialog-body{padding:26px 25px 19px}
+.boot-caption{font:17px/1.4 "MS Sans Serif",Tahoma,Verdana,sans-serif;margin:0 0 29px;color:#161a1d}
+.boot-controls{display:grid;grid-template-columns:minmax(0,1fr) 111px;align-items:center;gap:26px}
+.boot-progress{height:34px;display:block;padding:4px;border-style:solid;border-width:2px;border-color:#858c8e #eff5f5 #eff5f5 #858c8e;box-shadow:inset 1px 1px #6c7377;background:#c6cccd;overflow:hidden}
+.boot-progress-fill{display:block;height:100%;width:100%;background:repeating-linear-gradient(90deg,#0701a3 0 19px,transparent 19px 24px);transform:scaleX(0);transform-origin:left center;animation:bootProgress 2s steps(17,end) forwards}
+.boot-cancel{height:34px;padding:0 12px;background:#c5cbcc;color:#1a1b1d;border-style:solid;border-width:2px;border-color:#faffff #3f4648 #3f4648 #faffff;box-shadow:inset -1px -1px #858c8e;font:15px/1 "MS Sans Serif",Tahoma,Verdana,sans-serif}
+.boot-cancel:hover{background:#d6dbdc}
+.boot-cancel:active{border-color:#4b5153 #fbffff #fbffff #4b5153;box-shadow:inset 1px 1px #888}
+@keyframes bootProgress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(max-width:520px){.boot-titlebar{height:24px;font-size:12px}.boot-dialog-body{padding:22px 17px 19px}.boot-caption{font-size:15px;margin-bottom:23px}.boot-controls{grid-template-columns:minmax(0,1fr) 84px;gap:13px}.boot-progress{height:29px}.boot-cancel{height:30px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){.boot-progress-fill{animation-duration:.1s}}
 .modal-cover{position:fixed;inset:0;z-index:15;background:#102350a1;display:grid;place-items:center;padding:14px}
 .modal{width:min(460px,100%);background:var(--chrome);border:2px solid #fafafa;outline:2px solid #292929;box-shadow:6px 10px #0005}.modal .titlebar{height:39px}.modal .window-title{font-size:15px}.modal-body{padding:16px;background:#e5e3df}.modal-body label{font:bold 11px "Courier New",monospace;display:block;margin-bottom:12px}.modal-body input{display:block;background:#fff;width:100%;padding:9px;border:2px inset #a8a8a8;margin-top:5px;outline-offset:1px}.modal-buttons{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.modal-error{color:#9e2a21;min-height:14px;font:11px Tahoma,sans-serif}
 @media(max-width:800px){.workspace{grid-template-columns:190px minmax(0,1fr) 205px}.prop-inner{padding:9px}.inspector h1{font-size:20px}.file-name{font-size:10px}}
@@ -176,13 +175,20 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <footer class="foot"><span id="status">READY</span><span class="right">MEMBANGUN / CREATIVE STUDIO</span></footer>
 </main>
 </div>
-<div class="boot" id="boot" role="dialog" aria-label="Membangun starting up">
-<div class="boot-inner">
-  <div class="boot-brand"><div class="boot-xp-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="boot-name"><h2>Membangun</h2><small>STUDIO</small></div></div>
-  <div class="boot-loader" aria-hidden="true"><div class="boot-loader-track"><div class="boot-loader-bar"></div></div></div>
-  <div class="boot-caption">Starting up...</div>
-  <button id="skip" class="skip" type="button">Skip</button>
-</div>
+<div class="boot" id="boot" role="dialog" aria-label="Membangun initializing">
+  <div class="boot-dialog">
+    <div class="boot-titlebar">
+      <strong>Membangun</strong>
+      <div class="boot-window-controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div>
+    </div>
+    <div class="boot-dialog-body">
+      <p class="boot-caption">Initializing...</p>
+      <div class="boot-controls">
+        <div class="boot-progress" role="progressbar" aria-label="Loading Membangun"><span class="boot-progress-fill"></span></div>
+        <button class="boot-cancel" type="button" id="skip">Cancel</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="modal-cover" id="modal" hidden role="dialog" aria-modal="true" aria-label="Set app URLs">
 <div class="modal">
@@ -235,7 +241,7 @@ $('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').hidd
 $('linkForm').addEventListener('submit',e=>{e.preventDefault();let updated={};for(let id of ids){let v=$('url-'+id).value.trim();if(!okUrl(v)){$('urlError').textContent='Invalid link: '+data[id].name;return}updated[id]=v}try{ids.forEach(id=>localStorage.setItem('membangun-link-'+id,updated[id]))}catch(e){$('urlError').textContent='Browser blocked local storage';return}$('modal').hidden=true;render()});
 function dismiss(){$('boot').classList.add('done');setTimeout(()=>$('boot').hidden=true,260)}
 $('skip').addEventListener('click',dismiss);$('boot').addEventListener('click',dismiss);
-setTimeout(dismiss,window.matchMedia('(prefers-reduced-motion: reduce)').matches?120:1450);
+if(!new URLSearchParams(location.search).has('splash'))setTimeout(dismiss,window.matchMedia('(prefers-reduced-motion: reduce)').matches?120:2050);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=true;dismiss()}if(e.key==='Enter'&&!$('boot').hidden)dismiss()});
 render();
 })();
