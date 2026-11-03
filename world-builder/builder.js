@@ -531,7 +531,8 @@ function pixelTexture(name,dir='sw'){
  const view=spec?.variants?.[dir]?dir:spec?.variants?.sw?'sw':spec?.variants?.se?'se':dir;
  const id=name+'|'+view;
  if(!spriteTexture.has(id)){
-  const src=spec?.source==='custom-building'?window.VLBuildingBridge?.image(spec.id,view):
+  const src=spec?.source==='bangun-object'?window.VLBangunObjects?.image(spec.id,view):
+     spec?.source==='custom-building'?window.VLBuildingBridge?.image(spec.id,view):
     spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):
     spec?.source==='pipeline-vegetation'?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+spec.relativeFile:'../assets/'+name;
   const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,()=>console.warn('Missing sprite',name));
@@ -1563,6 +1564,12 @@ function makeObject(type,point){
  }
  if(isCustom){Object.assign(obj,dims);obj.sizeClass=sizeClass;obj.replaceable=true;obj.collision=true;obj.layer='structure';obj.subtype='custom_building';obj.tags=['placeholder','building'];}
  if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;
+  if(spec.source==='bangun-object'){
+   obj.layer=spec.layer||'prop';obj.subtype=spec.objectCategory||'decor';
+   obj.tags=['bangun-ruang','pixel-object',spec.objectCategory||'decor'];
+   obj.interactions=Array.isArray(spec.interactions)?[...spec.interactions]:[];
+   obj.blocking=spec.blocking||'auto';
+  }
   if(spec.source==='custom-building'){
    obj.rotation=spec.entranceFacing==='se'?90:0;
    obj.layer='structure';obj.subtype=spec.id;obj.tags=['bangun-ruang','building'];
@@ -2181,6 +2188,8 @@ $('motionEnabled').onchange=()=>changeMotion('enabled',$('motionEnabled').checke
 
 function assetCategory(spec){
  if(!spec)return 'street';
+ if(spec.source==='bangun-object')return spec.objectCategory==='plant'?'vegetation':
+  spec.objectCategory==='furniture'?'interior':'street';
  const kind=style.category({type:'sprite',asset:spec.file},assetByName);
  if(spec.source==='pipeline-vegetation'||kind==='tree'||kind==='ground')return 'vegetation';
  if(spec.group==='Office'||spec.group==='Interior')return 'interior';
@@ -2310,7 +2319,9 @@ function renderAssetList(){
       {title:'Character · NPC',tag:'npc',category:'character',label:'V6B / 64×112'}],
   ...assetCatalog.map(spec=>({
    title:spec.label,tag:'sprite:'+spec.file,category:assetCategory(spec),
-   label:spec.source==='custom-building'?
+   label:spec.source==='bangun-object'?
+    (spec.builtIn?'BANGUN RUANG / BUILT-IN PIXEL':'BANGUN RUANG / CUSTOM PIXEL'):
+    spec.source==='custom-building'?
     (spec.enterable?'BANGUN RUANG / ENTERABLE':'BANGUN RUANG / DECORATIVE'):
     spec.source==='gpt-original'?'GPT / ORIGINAL · login':
     spec.published?'PIPELINE / PNG':'PIPELINE / MANIFEST ONLY',
@@ -2491,14 +2502,16 @@ function refreshBangunRuang(){
  if(!bridge)return;
  const oldByName=new Map(assetByName);
  const summary=bridge.refresh();
+ const objects=window.VLBangunObjects?.refresh();
  assetCatalog=window.VLAssetCatalog||[];
  assetByName.clear();
  for(const spec of assetCatalog)assetByName.set(spec.file,spec);
  let updated=0,missing=0;
- const fields=['width','height','collision','interactive','enterable',
+ const fields=['width','height','collision','layer','blocking','interactive','enterable',
   'entrance','interior','actionSlots','interactions','entranceFacing'];
  for(const obj of documentMap.objects){
-  if(obj.type!=='sprite'||!String(obj.asset||'').startsWith('studio:'))continue;
+  if(obj.type!=='sprite'||!
+   (String(obj.asset||'').startsWith('studio:')||String(obj.asset||'').startsWith('object:')))continue;
   const next=assetByName.get(obj.asset),old=oldByName.get(obj.asset);
   if(!next){missing++;continue;}
   // A city instance can override actions/entry settings independently.
@@ -2515,7 +2528,7 @@ function refreshBangunRuang(){
  for(const texture of spriteTexture.values())texture.dispose();
  spriteTexture.clear();
  rebuild();updateSelection();renderAssetList();saved();
- tell('Bangun Ruang synced · '+summary.count+' assets · '+updated+
+ tell('Bangun Ruang synced · '+summary.count+' buildings / '+(objects?.count||0)+' objects · '+updated+
   ' placed updated'+(missing?' · '+missing+' missing in studio':''));
 }
 async function refreshMahlukHidup(full=true){
@@ -2538,16 +2551,20 @@ window.addEventListener('storage',e=>{
   for(const holder of rigs.values())holder.rig?.refresh?.();
   updateSelection();
  }
- if(e.key===window.VLBuildingBridge?.key)refreshBangunRuang();
+ if(e.key===window.VLBuildingBridge?.key||e.key===window.VLBangunObjects?.key)refreshBangunRuang();
 });
 // Backgrounded mobile tabs can miss a StorageEvent while suspended.
 // Reconciling on focus also covers a same-tab visit back from Bangun Ruang.
-let lastBuildingPayload=null;
-try{lastBuildingPayload=localStorage.getItem(window.VLBuildingBridge?.key||'virtual-life-bangun-ruang-v1');}catch{}
+let lastBuildingPayload=null,lastObjectPayload=null;
+try{lastBuildingPayload=localStorage.getItem(window.VLBuildingBridge?.key||'virtual-life-bangun-ruang-v1');
+ lastObjectPayload=localStorage.getItem(window.VLBangunObjects?.key||'virtual-life-bangun-objects-v1');}catch{}
 window.addEventListener('focus',()=>{
  let next;
  try{next=localStorage.getItem(window.VLBuildingBridge?.key||'virtual-life-bangun-ruang-v1');}catch{return;}
- if(next!==lastBuildingPayload){lastBuildingPayload=next;refreshBangunRuang();}
+ let nextObjects;
+ try{nextObjects=localStorage.getItem(window.VLBangunObjects?.key||'virtual-life-bangun-objects-v1');}catch{}
+ if(next!==lastBuildingPayload||nextObjects!==lastObjectPayload){
+  lastBuildingPayload=next;lastObjectPayload=nextObjects;refreshBangunRuang();}
  window.VLActionTemplates?.invalidate();window.VLActionFrames?.invalidate();
  updateSelection();
 });
