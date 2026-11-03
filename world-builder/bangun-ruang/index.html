@@ -112,6 +112,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <div class="character-scale-row">
    <select id="scaleCharacter" aria-label="Choose original Mahluk Hidup character"><option value="ichsan">Loading Mahluk Hidup…</option></select>
    <button id="scaleSpawn" type="button">＋ Place</button>
+   <button id="scaleSync" type="button" title="Refresh Mahluk Hidup characters and animations">↻ Sync</button>
    <button id="scaleRemove" type="button" disabled>✕</button>
   </div>
   <div class="character-scale-row">
@@ -489,8 +490,8 @@ function persist(asset){
  try{localStorage.setItem(KEY,JSON.stringify(saved));current=asset;drawLibrary();return true;}
  catch(e){status('⚠ Storage full; use Export Package and delete old drafts.');return false;}
 }
-function saveAsset(){const a=buildAsset();if(persist(a)){status('Saved '+a.name+' · available in Semesta on reload');return a;}return null;}
-function publish(){const a=saveAsset();if(!a)return;status('✓ '+a.name+' registered. Open / reload Semesta → BUILDINGS.');}
+function saveAsset(){const a=buildAsset();if(persist(a)){status('Saved '+a.name+' · synced with open Semesta tabs');return a;}return null;}
+function publish(){const a=saveAsset();if(!a)return;status('✓ '+a.name+' published locally · Semesta → BUILDINGS');}
 function download(name,text,type){
  const blob=new Blob([text],{type:type||'application/json'});
  const url=URL.createObjectURL(blob),link=document.createElement('a');
@@ -549,7 +550,7 @@ function remove(){
  if(!current){status('Select a saved asset first');return;}
  if(!confirm('Delete "'+current.name+'" from this browser? Export backup first.'))return;
  saved=saved.filter(x=>x.id!==current.id);localStorage.setItem(KEY,JSON.stringify(saved));
- current=null;preset('rumah');status('Deleted saved asset; reload Semesta to update catalog');
+ current=null;preset('rumah');status('Deleted local asset · Semesta catalog will refresh');
 }
 
 /* Native pixel edits follow the Mahluk Hidup model: a separate editable RGBA
@@ -700,6 +701,24 @@ scaleController=window.VLCharacterScale?.mount({
  onStatus:status
 });
 scaleController?.sync();
+$('scaleSync').onclick=()=>scaleController?.refreshProfiles?.(true);
+window.addEventListener('storage',event=>{
+ if(['virtual-life-character-storage-v1','virtual-life-accessory-equipment-v1',
+     'virtual-life-accessories-v1'].includes(event.key)){
+  scaleController?.refreshProfiles?.(false);
+ }
+ if(event.key===KEY){
+  // Keep the current editing canvas untouched; only refresh saved versions.
+  try{
+   const incoming=JSON.parse(localStorage.getItem(KEY)||'[]');
+   if(Array.isArray(incoming)){
+    saved=incoming.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);
+    drawLibrary();status('Bangun Ruang library synced from another tab');
+   }
+  }catch{status('Unable to read external building update');}
+ }
+});
+window.addEventListener('focus',()=>scaleController?.refreshProfiles?.(false));
 })();
 </script>
 </body></html>
