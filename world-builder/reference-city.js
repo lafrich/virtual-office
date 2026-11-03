@@ -218,6 +218,43 @@ function create(base,catalog,style,schema){
   layer:'character',subtype:'player',tags:['reference-city','camera-preview','player'],
   interactions:[],notes:'Editable character spawn for camera-follow and Walk Test. No multiplayer player entity.'
  });
+ // Editable ambient traffic: all movement uses the authored surfaces.
+ const ambient=[
+  ['vehicle','sedan_red',-2.5,43.5,4],
+  ['vehicle','sedan_teal',34.5,73.5,4],
+  ['vehicle','bus_transjakarta',9.5,18.5,2.7],
+  ['vehicle','gojek',34.5,99.5,4.8],
+  ['vehicle','taxi_bluebird',58.5,43.5,3.5],
+  ['pedestrian','ichsan',-3.5,41.5,1.4],
+  ['pedestrian','noor',35.5,41.5,1.5],
+  ['pedestrian','nadia',-3.5,76.5,1.3],
+  ['crowd','mixed',31.5,76.5,1.25],
+  ['quest_npc','manusia_silver',-5.5,41.5,0],
+  ['quest_npc','pak_ogah',27.5,46.5,0],
+  ['quest_npc','kang_parkir',-27.5,41.5,0],
+  ['quest_npc','babeh_pemilik',54.5,76.5,0]
+ ];
+ for(let i=0;i<ambient.length;i++){
+  const [kind,variant,x,z,speed]=ambient[i];
+  const o={
+   id:'ref-ambient-'+i,type:kind,name:kind==='vehicle'?
+    (g.VLSemestaCatalog?.vehicle(variant)?.label||variant):
+    kind==='quest_npc'?(g.VLSemestaCatalog?.quest(variant)?.label||variant):
+    kind==='crowd'?'Crowd / Town Center':'Walker / '+variant,
+   x,z,y:0,rotation:0,scale:1,
+   vehicleId:kind==='vehicle'?variant:undefined,
+   questId:kind==='quest_npc'?variant:undefined,
+   profile:kind==='pedestrian'?variant:'ichsan',
+   collision:kind==='quest_npc',
+   blocking:kind==='quest_npc'?'auto':'no',
+   motion:{mode:kind==='vehicle'?'road':kind==='quest_npc'?'idle':'sidewalk',
+    speed:speed||1.5,direction:'auto',count:5,enabled:true,
+    idleAction:kind==='quest_npc'?(g.VLSemestaCatalog?.quest(variant)?.defaultAction||'idle'):'idle'},
+   tags:['semesta','reference-city','loop-preview'],
+   notes:'Automated preview only; no game AI/network behavior.'
+  };
+  place(o);
+ }
  city.objects=objects;
  city.map.presetObjectCount=objects.length;
  city.map.presetWarnings=errors.length;
