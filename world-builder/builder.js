@@ -1985,7 +1985,8 @@ function renderAssetList(){
     {title:'Crowd · 8 people',tag:'crowd:8',category:'people',label:'V6B / SIDEWALK LOOP'},
     ...trafficCatalog.vehicles.map(v=>({
      title:v.label,tag:'vehicle:'+v.id,category:'vehicles',
-     label:'OFFICIAL SOURCE ID / PIXEL PREVIEW',origin:'unpublished'
+     label:trafficArt?.sourcePublished(v.id)?'MAHLUK HIDUP / ORIGINAL PNG':'MAHLUK HIDUP / PIXEL PREVIEW',
+      origin:trafficArt?.sourcePublished(v.id)?'published':'unpublished'
     })),
     ...trafficCatalog.questNPCs.map(v=>({
      title:v.label,tag:'quest:'+v.id,category:'quest',
@@ -2025,7 +2026,7 @@ function renderAssetList(){
   }))
  ];
  const list=assets.filter(a=>(cat==='all'||a.category===cat)&&
-  (a.title+' '+a.tag).toLowerCase().includes(q));
+  (a.title+' '+a.tag+' '+a.label).toLowerCase().includes(q));
  $('assetCount').textContent=String(list.length).padStart(2,'0');
  const holder=$('assetList');holder.replaceChildren();
  for(const a of list){
@@ -2187,16 +2188,18 @@ $('replaceAsset').onclick=()=>{
 };
 $('exportShortcut').onclick=()=>$('export').click();
 renderAssetList();
+window.addEventListener('semesta-vehicle-source-loaded',()=>renderAssetList());
 
 async function refreshMahlukHidup(full=true){
  const stat=full?await mahluk?.load():mahluk?.localSync();
+ if(full)trafficArt?.retrySources();
  refreshCharacterOptions();renderAssetList();
  window.VLCharacterRig?.retry();
  for(const tex of spriteTexture.values())tex.dispose();
  spriteTexture.clear();
  rebuild();updateSelection();
  tell(stat?.loaded===false?'Mahluk Hidup catalog unavailable; older game sprites retained':
-  'Mahluk Hidup synced · '+(mahluk?.list().length||0)+' characters, outfits and customs');
+  'Mahluk Hidup synced · '+(mahluk?.list().length||0)+' characters · '+(trafficArt?.originalCount()||0)+' original vehicle types');
 }
 $('refreshAssets').onclick=()=>refreshMahlukHidup(true);
 window.addEventListener('storage',e=>{
