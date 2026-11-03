@@ -37,8 +37,8 @@ function mount(opts){
    ctx.fillRect(x+1,y+1,iw*CELL-2,id*CELL-2);
    ctx.fillStyle=def.category==='Bathroom'?'#a3d3e8':def.category==='Bedroom'?'#ebc1aa':'#b7d0b9';
    ctx.fillRect(x+3,y+3,iw*CELL-6,id*CELL-6);
-   ctx.font='18px sans-serif';ctx.fillStyle='#1f3148';ctx.textAlign='center';
-   ctx.fillText(def.glyph,x+iw*CELL/2,y+id*CELL/2+6);
+   if(g.VLInteriorPixels)g.VLInteriorPixels.draw(ctx,obj.assetId,x+3,y+3,iw*CELL-6,id*CELL-6);
+   else{ctx.font='14px monospace';ctx.fillStyle='#1f3148';ctx.textAlign='center';ctx.fillText(def.label.slice(0,2),x+iw*CELL/2,y+id*CELL/2+6);}
   }
  }
  function floorSelected(n){
