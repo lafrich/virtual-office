@@ -851,6 +851,7 @@ function makeObject(type,point){
  if(isCustom){Object.assign(obj,dims);obj.sizeClass=sizeClass;obj.replaceable=true;obj.collision=true;obj.layer='structure';obj.subtype='custom_building';obj.tags=['placeholder','building'];}
  if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;
   if(spec.source==='custom-building'){
+   obj.rotation=spec.entranceFacing==='se'?90:0;
    obj.layer='structure';obj.subtype=spec.id;obj.tags=['bangun-ruang','building'];
    obj.interactions=spec.interactions||['enter'];obj.entranceFacing=spec.entranceFacing||'';
    obj.blocking=spec.blocking||'auto';
