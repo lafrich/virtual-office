@@ -26,9 +26,13 @@ const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
 const terrain=window.VLMapTerrain;
 const physics=window.VLWorldPhysics;
+const traffic=window.VLSemestaTraffic;
+const trafficCatalog=window.VLSemestaCatalog;
+const trafficArt=window.VLSemestaArt;
 const schema=window.VLMapSchema;
 const PIXEL_WORLD=Math.SQRT2/64, VERTICAL_COMP=2/Math.sqrt(3);
 const actorType=t=>t==='avatar'||t==='npc';
+const automaticType=t=>['vehicle','pedestrian','crowd','quest_npc'].includes(t);
 const directions=['sw','se','nw','ne'];
 // Actual catalog artwork is 2D. These objects are independent world nodes;
 // only authored meshes have complete depth geometry.
@@ -245,7 +249,7 @@ function sanitize(v){
  let ids=new Set(),out=clone(seed);out.objects=[];
  for(const p of v.objects){
   if(!p||typeof p.id!=='string'||p.id.length>100||ids.has(p.id))continue;
-  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc','marker'].includes(p.type))continue;
+  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc','marker','vehicle','pedestrian','crowd','quest_npc'].includes(p.type))continue;
   ids.add(p.id);
   let e={
    id:p.id,name:String(p.name||p.type).slice(0,90),type:p.type,
@@ -264,6 +268,17 @@ function sanitize(v){
     e.pose=['sit','sleep','bathe','toilet','work'].includes(p.pose)?p.pose:null;
     e.variant='pipeline-v6b';
     e.profile=window.VLCharacterRig?.profiles?.[p.profile]?p.profile:'ichsan';
+  }
+  if(automaticType(p.type)){
+   if(p.type==='vehicle'){
+    if(!trafficCatalog?.vehicle(p.vehicleId))continue;
+    e.vehicleId=p.vehicleId;
+   }else if(p.type==='quest_npc'){
+    if(!trafficCatalog?.quest(p.questId))continue;
+    e.questId=p.questId;
+   }else e.profile=window.VLCharacterRig?.profiles?.[p.profile]?p.profile:'ichsan';
+   if(p.motion&&typeof p.motion==='object')e.motion=clone(p.motion);
+   e.facing=directions.includes(p.facing)?p.facing:'sw';
   }
   // Keep unknown action metadata as data only. No gameplay execution.
   if(p.action&&typeof p.action==='object')e.action=clone(p.action);
@@ -822,16 +837,39 @@ function applyItem(){
 function id(type){return type+'-'+Math.random().toString(36).slice(2,8);}
 function makeObject(type,point){
  const preset=style.presets[type],chosen=preset?'sprite:'+preset:type;
+ const automatic=type.startsWith('vehicle:')?'vehicle':
+  type.startsWith('pedestrian:')?'pedestrian':type.startsWith('crowd:')?'crowd':
+  type.startsWith('quest:')?'quest_npc':null;
  const isCustom=type.startsWith('building:'),sizeClass=type.split(':')[1];
  const isMarker=type.startsWith('marker:'),isSprite=chosen.startsWith('sprite:'),asset=isSprite?chosen.slice(7):undefined;
  const spec=assetByName.get(asset),dims=BUILD_SIZES[sizeClass]||BUILD_SIZES.small;
- const obj={id:id(isCustom?'building':isMarker?'marker':isSprite?'sprite':type),
-  type:isCustom?'building':isMarker?'marker':isSprite?'sprite':type,
+ const obj={id:id(automatic|| (isCustom?'building':isMarker?'marker':isSprite?'sprite':type)),
+  type:automatic|| (isCustom?'building':isMarker?'marker':isSprite?'sprite':type),
   name:isCustom?sizeClass.toUpperCase()+' Building · replaceable':isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
   x:round(point?.x??cameraFocus.x),z:round(point?.z??cameraFocus.z),y:0,rotation:0,scale:1};
  if(isCustom){Object.assign(obj,dims);obj.sizeClass=sizeClass;obj.replaceable=true;obj.collision=true;obj.layer='structure';obj.subtype='custom_building';obj.tags=['placeholder','building'];}
  if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;}
  if(actorType(type)){obj.facing='sw';obj.pose=null;obj.variant='pipeline-v6b';obj.profile=type==='npc'?'noor':'ichsan';obj.collision=true;}
+ if(automatic){
+  const variation=type.slice(type.indexOf(':')+1);
+  obj.facing='sw';
+  obj.vehicleId=automatic==='vehicle'?variation:undefined;
+  obj.questId=automatic==='quest_npc'?variation:undefined;
+  obj.profile=['pedestrian','crowd'].includes(automatic)?variation:'ichsan';
+  if(automatic==='crowd')obj.profile='ichsan';
+  obj.name=automatic==='vehicle'?trafficCatalog?.vehicle(variation)?.label||variation:
+   automatic==='quest_npc'?trafficCatalog?.quest(variation)?.label||variation:
+   automatic==='crowd'?'Crowd · 5 pedestrians':'Pedestrian · '+variation;
+  obj.motion={mode:automatic==='vehicle'?'road':automatic==='quest_npc'?'idle':'sidewalk',
+   speed:automatic==='vehicle'?(variation.includes('bus')?2.7:4):1.5,
+   direction:'auto',count:5,enabled:true,
+   idleAction:automatic==='quest_npc'?(trafficCatalog?.quest(variation)?.defaultAction||'idle'):'idle'};
+  obj.layer=automatic==='vehicle'?'prop':'character';
+  obj.collision=automatic==='quest_npc';
+  obj.blocking=automatic==='quest_npc'?'auto':'no';
+  obj.tags=['semesta','loop-preview',automatic];
+  obj.notes=automatic==='quest_npc'?'Idle job NPC preview. Source art not yet published.':'Auto-loop on painted '+obj.motion.mode+' cells. Non-production preview.';
+ }
  if(isMarker){obj.markerKind=type.split(':')[1]||'interaction';obj.name=obj.markerKind+' marker';obj.collision=false;}
  if(type==='tree')obj.collision=true;
  if((type==='building'||type==='shop')&&!isSprite)return null;
