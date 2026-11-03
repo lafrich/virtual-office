@@ -21,6 +21,10 @@ const STORE='virtual-life-gpt-world-builder-pipeline-v3';
 const ACTIVE_DRAFT_KEY='virtual-life-active-city-draft';
 let activeDraftId=null,draftDirty=true;
 try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
+// Read the published Mahluk Hidup catalog and local Character Storage
+// before loading any saved city, so custom profiles survive import.
+const mahluk=window.VLMahlukHidup;
+const characterSync=mahluk?await mahluk.load():{loaded:false,total:0,custom:0};
 const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
@@ -275,16 +279,18 @@ function sanitize(v){
     e.facing=directions.includes(p.facing)?p.facing:'sw';
     e.pose=['sit','sleep','bathe','toilet','work'].includes(p.pose)?p.pose:null;
     e.variant='pipeline-v6b';
-    e.profile=window.VLCharacterRig?.profiles?.[p.profile]?p.profile:'ichsan';
+    e.profile=(mahluk?.has(p.profile)||window.VLCharacterRig?.profiles?.[p.profile])?p.profile:'ichsan';
   }
   if(automaticType(p.type)){
    if(p.type==='vehicle'){
     if(!trafficCatalog?.vehicle(p.vehicleId))continue;
     e.vehicleId=p.vehicleId;
    }else if(p.type==='quest_npc'){
-    if(!trafficCatalog?.quest(p.questId))continue;
-    e.questId=p.questId;
-   }else e.profile=window.VLCharacterRig?.profiles?.[p.profile]?p.profile:'ichsan';
+    if(!trafficCatalog?.quest(p.questId)&&!mahluk?.has(p.profile))continue;
+    e.questId=trafficCatalog?.quest(p.questId)?p.questId:'custom';
+    e.profile=mahluk?.has(p.profile)?p.profile:
+      mahluk?.questProfile(p.questId)||'ichsan';
+   }else e.profile=(mahluk?.has(p.profile)||window.VLCharacterRig?.profiles?.[p.profile])?p.profile:'ichsan';
    if(p.motion&&typeof p.motion==='object')e.motion=clone(p.motion);
    e.facing=directions.includes(p.facing)?p.facing:'sw';
   }
@@ -779,7 +785,21 @@ function makeAutomated(root,obj){
  if(kind==='vehicle'){
   const gfx=trafficArt.vehicleGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;loadVehicleImage(gfx,obj);
  }else if(kind==='quest_npc'){
-  const gfx=trafficArt.questGraphic(THREE,obj);root.add(gfx.mesh);agent.graphic=gfx;loadVehicleImage(gfx,obj);
+  const profile=mahluk?.has(obj.profile)?obj.profile:mahluk?.questProfile(obj.questId);
+  const factory=window.VLCharacterRig;
+  if(profile&&factory){
+   const rig=factory.createRig(THREE,{profile,direction:obj.facing||'sw',
+    pose:settings.idleAction||'idle'});
+   root.add(rig.mesh);
+   agent.graphic={step(dt,cam,pos,action){
+    if(rig.state.direction!==(obj.facing||'sw'))rig.setDirection(obj.facing||'sw');
+    rig.setPose(action||'idle');
+    rig.step(dt,cam,pos?.position||pos);
+   },dispose(){rig.dispose();}};
+  }else{
+   const gfx=trafficArt.questGraphic(THREE,obj);
+   root.add(gfx.mesh);agent.graphic=gfx;loadVehicleImage(gfx,obj);
+  }
  }else{
   const factory=window.VLCharacterRig;
   if(factory){
@@ -1224,16 +1244,18 @@ function applyItem(){
 }
 function id(type){return type+'-'+Math.random().toString(36).slice(2,8);}
 function makeObject(type,point){
+ const customActor=type.startsWith('character:')?type.slice(10):null;
+ const customQuest=type.startsWith('quest-character:')?type.slice(16):null;
  const isVault=type.startsWith('vault:');
  const preset=style.presets[type],chosen=preset?'sprite:'+preset:type;
  const automatic=type.startsWith('vehicle:')?'vehicle':
   type.startsWith('pedestrian:')?'pedestrian':type.startsWith('crowd:')?'crowd':
-  type.startsWith('quest:')?'quest_npc':null;
+  (type.startsWith('quest:')||customQuest)?'quest_npc':null;
  const isCustom=type.startsWith('building:'),sizeClass=type.split(':')[1];
  const isMarker=type.startsWith('marker:'),isSprite=chosen.startsWith('sprite:'),asset=isSprite?chosen.slice(7):undefined;
  const spec=assetByName.get(asset),dims=BUILD_SIZES[sizeClass]||BUILD_SIZES.small;
- const obj={id:id(isVault?'virtual_asset':automatic|| (isCustom?'building':isMarker?'marker':isSprite?'sprite':type)),
-  type:isVault?'virtual_asset':automatic|| (isCustom?'building':isMarker?'marker':isSprite?'sprite':type),
+ const obj={id:id(isVault?'virtual_asset':automatic|| (customActor?'npc':isCustom?'building':isMarker?'marker':isSprite?'sprite':type)),
+  type:isVault?'virtual_asset':automatic|| (customActor?'npc':isCustom?'building':isMarker?'marker':isSprite?'sprite':type),
   name:isCustom?sizeClass.toUpperCase()+' Building · replaceable':isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
   x:round(point?.x??cameraFocus.x),z:round(point?.z??cameraFocus.z),y:0,rotation:0,scale:1};
  if(isVault){
@@ -1264,21 +1286,34 @@ function makeObject(type,point){
    obj.actionSlots=spec.actionSlots?clone(spec.actionSlots):[];
   }
  }
- if(actorType(type)){obj.facing='sw';obj.pose=null;obj.variant='pipeline-v6b';obj.profile=type==='npc'?'noor':'ichsan';obj.collision=true;}
+ if(actorType(type)||customActor){
+  if(customActor&&!mahluk?.has(customActor))return null;
+  obj.type=customActor?'npc':type;obj.facing='sw';obj.pose=null;
+  obj.variant='pipeline-v6b';obj.profile=customActor|| (type==='npc'?'noor':'ichsan');
+  obj.name=customActor?mahluk.get(customActor).name:obj.name;
+  obj.collision=true;obj.layer='character';
+}
  if(automatic){
-  const variation=type.slice(type.indexOf(':')+1);
+  const variation=customQuest||type.slice(type.indexOf(':')+1);
+  if(customQuest&&!mahluk?.has(customQuest))return null;
   obj.facing='sw';
   obj.vehicleId=automatic==='vehicle'?variation:undefined;
-  obj.questId=automatic==='quest_npc'?variation:undefined;
-  obj.profile=['pedestrian','crowd'].includes(automatic)?variation:'ichsan';
+  obj.questId=automatic==='quest_npc'?(customQuest?'custom':variation):undefined;
+  obj.profile=['pedestrian','crowd'].includes(automatic)?variation:
+   automatic==='quest_npc'?(customQuest||mahluk?.questProfile(variation)||'ichsan'):'ichsan';
   if(automatic==='crowd')obj.profile='ichsan';
   obj.name=automatic==='vehicle'?trafficCatalog?.vehicle(variation)?.label||variation:
-   automatic==='quest_npc'?trafficCatalog?.quest(variation)?.label||variation:
+   automatic==='quest_npc'?mahluk?.get(obj.profile)?.name||
+     trafficCatalog?.quest(variation)?.label||variation:
    automatic==='crowd'?'Crowd · 5 pedestrians':'Pedestrian · '+variation;
   obj.motion={mode:automatic==='vehicle'?'road':automatic==='quest_npc'?'idle':'sidewalk',
    speed:automatic==='vehicle'?(variation.includes('bus')?2.7:4):1.5,
    direction:'auto',count:automatic==='crowd'?Math.max(2,Math.min(12,Number(variation)||5)):5,enabled:true,
-   idleAction:automatic==='quest_npc'?(trafficCatalog?.quest(variation)?.defaultAction||'idle'):'idle'};
+   idleAction:automatic==='quest_npc'?
+    (mahluk?.available(obj.profile,trafficCatalog?.quest(variation)?.defaultAction||'idle')?
+      trafficCatalog.quest(variation).defaultAction:
+      (mahluk?.available(obj.profile,'idle')?'idle':
+       mahluk?.motions(obj.profile)?.[0]?.id||'idle')):'idle'};
   obj.layer=automatic==='vehicle'?'prop':'character';
   obj.collision=automatic==='quest_npc';
   obj.blocking=automatic==='quest_npc'?'auto':'no';
@@ -1295,7 +1330,9 @@ function makeObject(type,point){
     babeh_tas:'secondhand_bag_vendor'
    }[variation]||'community_job';
   }
-  obj.notes=automatic==='quest_npc'?'Idle job NPC preview. Source art not yet published.':'Auto-loop on painted '+obj.motion.mode+' cells. Non-production preview.';
+  obj.notes=automatic==='quest_npc'?
+   'Stationary Mahluk Hidup NPC with authored actions. Preview only; no live quest payout.':
+   'Auto-loop on painted '+obj.motion.mode+' cells. Non-production preview.';
  }
  if(isMarker){obj.markerKind=type.split(':')[1]||'interaction';obj.name=obj.markerKind+' marker';obj.collision=false;}
  if(type==='tree')obj.collision=true;
