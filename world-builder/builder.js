@@ -622,11 +622,16 @@ function makeBox(root,item){cuboid(root,0,.8,0,2,1.6,2,new THREE.Color(item.colo
 const billboardSprites=[];
 function originalPathFor(item){
  if(item.assetPath)return item.assetPath;
+ const vault=window.VLAssetVault;
+ if(!vault?.status().unlocked)return null;
  if(item.type==='sprite'){
   const spec=assetByName.get(item.asset);
+  if(vault.allowed(item.asset))return item.asset;
   if(spec?.source==='pipeline-street'||spec?.source==='pipeline-vegetation')
-   return window.VLAssetVault?.automaticMatch(spec.id)||null;
+   return vault.automaticMatch(spec.id)||null;
  }
+ if((item.type==='building'||item.type==='shop')&&item.subtype)
+  return vault.automaticMatch(item.subtype)||null;
  return null;
 }
 function showOriginalImage(root,item,path){
