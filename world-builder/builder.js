@@ -1695,7 +1695,12 @@ function onDown(e){
  const p=floorPoint(e);
  if(mode==='move'&&hit&&p){
   undoPoint();const o=item();
-  drag={kind:'move',id:e.pointerId,start:p.clone(),x:o.x,z:o.z,changed:false,actor:actorType(o.type)};
+  // For an already-driving car, anchor Move to its LIVE road position,
+  // not its older authored spawn (otherwise the first drag jumps backward).
+  const liveCar=o.type==='vehicle'?owners.get(o.id):null;
+  drag={kind:'move',id:e.pointerId,start:p.clone(),
+   x:liveCar?.position.x??o.x,z:liveCar?.position.z??o.z,
+   rollbackX:o.x,rollbackZ:o.z,changed:false,actor:actorType(o.type)};
  }else{
   drag={kind:'pan',id:e.pointerId,start:p?.clone()||null,focus:cameraFocus.clone(),sx:e.clientX,sy:e.clientY,hit:!!hit,changed:false};
  }
@@ -1779,7 +1784,7 @@ function onUp(e){
    }
    if(drag.changed){
    const o=item(),blocked=o&&style.reason(o,documentMap.objects,documentMap.map,assetByName);
-   if(blocked){o.x=drag.x;o.z=drag.z;applyItem();undoStack.pop();tell(blocked);}
+   if(blocked){o.x=drag.rollbackX;o.z=drag.rollbackZ;applyItem();undoStack.pop();tell(blocked);}
    else saved();
   }else undoStack.pop();
  }
