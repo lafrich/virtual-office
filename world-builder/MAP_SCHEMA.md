@@ -118,3 +118,26 @@ A flood fill on the default infinite terrain is mathematically unbounded, so the
 The browser's **Save City Draft** dialog stores the editable authoring document in IndexedDB database `virtual-life-city-drafts`, store `cities`, keyed by a stable local ID. Each record has `{id, name, createdAt, updatedAt, document, format:"vl-city-draft-1"}`. The document is the same editable map JSON structure used for Export and Import. A separate working-copy autosave remains in localStorage.
 
 The names, dates and draft IDs are editor-only metadata; they do **not** create multiplayer city IDs, shared assets, remote snapshots or game save slots. For an AI handoff, use Export JSON with `schema:"virtual-life-ai-map-v3"`. Drafts reside only in that browser profile and may disappear if site data is cleared.
+
+## Semesta v3: vehicle, pedestrian, crowd and job-NPC authoring records
+
+Semesta adds four authoring-only entity types to `objects[]`: `vehicle`, `pedestrian`, `crowd`, and `quest_npc`. They remain ordinary JSON objects that can be moved, duplicated, deleted, named, and restored from a City Draft. The client reads their `motion` field to simulate loops for preview.
+
+| Field | Semantics |
+|---|---|
+| `vehicleId` | One of 12 official source-spec IDs from the Virtual Life street-vehicles manifest, e.g. `bus_transjakarta`, `gojek`, `taxi_bluebird` |
+| `questId` | One of `manusia_silver`, `pak_ogah`, `kang_parkir`, `babeh_pemilik`, `babeh_jam`, `babeh_tas` |
+| `jobId` | Future integration key, e.g. `parking_attendant`, `traffic_assistant`; no actual job rewards are implemented |
+| `profile` | Existing V6B character sheet ID for ordinary pedestrians / crowd members |
+| `motion.mode` | `road` for vehicles, `sidewalk` for walkers/crowd, `idle` for stationary job NPCs |
+| `motion.direction` | `auto`, `east`, `west`, `north`, `south` — straight-line corridor preference |
+| `motion.speed` | Preview movement speed in authoring tile units per second |
+| `motion.count` | 2–12 visible pedestrians for a crowd group |
+| `motion.enabled` | Toggle preview movement (not global game time) |
+| `motion.idleAction` | Preview-only idle behavior for a job NPC |
+| `assetSource` | `virtual-life-pipeline-preview-metadata` for vehicles and job NPCs; `virtual-life-v6b` for walkers |
+| `assetPublished` | `false` for unpublished vehicle and job NPC render outputs. Their proxy artwork must **not** be treated as final canonical game art |
+
+Route points are **recomputed from painted terrain** when editing roads/trotoars, rather than persisted as stale world paths. This ensures vehicles never choose sidewalk cells and pedestrians never choose road cells. A route without enough contiguous matching tiles does not run. Vehicles use paired parallel road lanes for a return loop where available; otherwise they reappear at the beginning of the same contiguous corridor. Pedestrians always follow a *straight* sidewalk segment and restart at its beginning. NPC quest positions never advance.
+
+`interactions: ["talk","accept_job"]` and the exported `interactionHooks` records for job NPCs are **disabled proposals**, not executable quest events, payment mechanisms, or multiplayer synchronization.
