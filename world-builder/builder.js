@@ -656,8 +656,20 @@ function resetAutoRoute(agent,obj){
  const mode=obj.type==='vehicle'?'vehicle':'pedestrian';
  agent.settings=traffic.config(obj);
  agent.distance=0;
- agent.route=obj.type==='quest_npc'?null:traffic.makeRoute(documentMap.map,obj.x,obj.z,mode,agent.settings.direction);
- if(agent.route)agent.distance=traffic.nearestDistance(agent.route,{x:obj.x,z:obj.z});
+ if(obj.type==='quest_npc'){
+  agent.route=null;
+  // A stationary job NPC still requires the same pedestrian surface.
+  agent.root.visible=traffic.allowed(documentMap.map,obj.x,obj.z,'pedestrian');
+  return;
+ }
+ const point=traffic.spawnPosition(documentMap.map,obj.x,obj.z,mode,8);
+ agent.route=point?traffic.makeRoute(documentMap.map,point.x,point.z,mode,agent.settings.direction):null;
+ agent.root.visible=!!agent.route;
+ if(agent.route){
+  agent.distance=traffic.nearestDistance(agent.route,point);
+  const location=traffic.sample(agent.route,agent.distance);
+  if(location)agent.root.position.set(location.x,obj.y||0,location.z);
+ }
 }
 function makeAutomated(root,obj){
  const kind=obj.type,settings=traffic.config(obj);
@@ -974,7 +986,7 @@ function makeObject(type,point){
    automatic==='crowd'?'Crowd · 5 pedestrians':'Pedestrian · '+variation;
   obj.motion={mode:automatic==='vehicle'?'road':automatic==='quest_npc'?'idle':'sidewalk',
    speed:automatic==='vehicle'?(variation.includes('bus')?2.7:4):1.5,
-   direction:'auto',count:5,enabled:true,
+   direction:'auto',count:automatic==='crowd'?Math.max(2,Math.min(12,Number(variation)||5)):5,enabled:true,
    idleAction:automatic==='quest_npc'?(trafficCatalog?.quest(variation)?.defaultAction||'idle'):'idle'};
   obj.layer=automatic==='vehicle'?'prop':'character';
   obj.collision=automatic==='quest_npc';
