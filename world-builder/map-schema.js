@@ -49,10 +49,10 @@ function enrich(map,catalog,style){
  doc.schema='virtual-life-ai-map-v3';
  doc.map={...doc.map,projection:{type:'iso-2:1',tilePixels:[64,32],characterFramePixels:[64,112],characterPivotPixels:[32,100],
   groundCoordinates:'c/r',heightAxis:'y',directions:['sw','se','ne','nw']},
-  logicStatus:'authoring-only',
+  unbounded:true,terrainRendering:'camera-windowed',logicStatus:'authoring-only',
   exportsInclude:['terrain','roadTopology','sidewalk','water','buildings','props','vegetation','actors','markers','interactions','entrances','footprints']};
  if(g.VLMapTerrain){
-  const t=g.VLMapTerrain.normalize(doc.map.terrain||g.VLMapTerrain.seeded(doc.map.worldBounds,doc.map.road),doc.map.worldBounds);
+  const t=g.VLMapTerrain.normalize(doc.map.terrain||g.VLMapTerrain.seeded(doc.map.worldBounds,doc.map.road),doc.map.unbounded?null:doc.map.worldBounds);
   t.cells=g.VLMapTerrain.exported(t).map(cell=>({
    ...cell,walkable:!['water','road'].includes(cell.type),driveable:cell.type==='road',
    buildable:['grass','soil','plaza'].includes(cell.type)
