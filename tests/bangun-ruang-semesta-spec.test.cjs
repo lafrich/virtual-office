@@ -31,7 +31,7 @@ test('Semesta Sprite Renderer handles custom-building rotations',()=>{
  const src=fs.readFileSync(path.join(root,'builder.js'),'utf8');
  assert.ok(src.includes("['pipeline-street','custom-building'].includes(spec.source)"));
  assert.ok(src.includes("plane.userData.pivotY=native.pivot[1]/native.size[1]"));
- assert.ok(src.includes("spec.source==='custom-building'?window.VLBuildingBridge?.image(spec.id,view)"));
+ assert.ok(src.includes("spec?.source==='custom-building'?window.VLBuildingBridge?.image(spec.id,view)"));
 });
 
 test('Building Studio references shared Semesta specs and edits pixels without game writes',()=>{
