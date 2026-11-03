@@ -7,12 +7,16 @@
  */
 (function(g){
 'use strict';
-// Preserve a 1:1 exterior/interior ground tile (64x32). Semesta's one-floor
-// building renderer has 96px walls. A 64x112 source character is displayed
-// at 0.5x (56px) in BOTH views so it can actually fit through its ~58px door.
-const ACTOR_SCALE=0.5;
-const TILE_W=64,TILE_H=32,HALF_W=32,HALF_H=16,WALL=96,SLAB=8,PAD=35;
-const WC_SEAT_Z=14,WC_TANK_Z=26;
+// Virtual Life's canonical 64x32 tile is ALREADY the 2x art coordinate
+// version of its 32x16 world projection (PPU=2). Never halve a 64x112 sprite
+// a second time. Dimensions match the user's original Cove 40-high wall,
+// 30-high door and 4.6-high toilet seat (all times HS=1.6, PPU=2).
+const GAME=g.VLGameProportions;
+const ACTOR_SCALE=GAME?.character.scale??1;
+const TILE_W=64,TILE_H=32,HALF_W=32,HALF_H=16,
+ WALL=GAME?.building.wallHeight||128,SLAB=8,PAD=35;
+const WC_SEAT_Z=GAME?.toilet.seatHeight||15;
+const WC_TANK_Z=GAME?.toilet.tankHeight||38;
 const TYPES=g.VLBuildingInterior?.types||{};
 const PALETTES={
  cream:{floor:['#E8DEC6','#D4C8AE','#C3AD8D'],wall:['#F4EBDA','#E8DEC6','#C3AD8D'],skirt:'#9B866F'},
@@ -130,9 +134,11 @@ function actionAnchor(item){
  let seat=null,hip=0;
  switch(item.assetId){
   case 'wc':
-   // Mahluk Hidup uses the original 64x112 sheet at ACTOR_SCALE, including
-   // its approximately 27px hip-to-pivot sit offset. The bowl is 14px tall.
-   seat=[.50,.64];hip=27*ACTOR_SCALE-WC_SEAT_Z;break;
+   // The original v6b game does NOT offset the sprite vertically to sit:
+   // its dedicated per-WC seat point places the feet pivot over the bowl,
+   // and its direction is SW so the kneecap bend is actually visible.
+   seat=GAME?.toilet.seatedPoint||[.61,.69];
+   hip=GAME?.toilet.footOffsetY??0;break;
   case 'chair':
   case 'office_chair':
    seat=[.50,.55];hip=8;break;
@@ -141,7 +147,10 @@ function actionAnchor(item){
   default:return null;
  }
  const p=fixturePoint(item,...seat);
- const direction=['ne','se','sw','nw'][fixtureRotation(item)];
+ // In the source game wcUse forces SW, including Cove. NE/NW sit sheets
+ // look upright from behind and caused the editor's "standing on WC" bug.
+ const direction=item.assetId==='wc'?(GAME?.toilet.sitFacing||'sw'):
+  ['ne','se','sw','nw'][fixtureRotation(item)];
  return {c:p.c,r:p.r,z:0,pixelOffsetY:hip,direction,
   itemId:item.id,kind:item.assetId,
   localSeat:seat};
@@ -173,12 +182,27 @@ function furniture(ctx,geo,item,selected=false){
  const place=()=>{
  switch(type){
  case 'wc':
-  // Compact WC proportional to a ~56px-tall in-world character. Keep the
-  // 1x1 collision tile unchanged; only the porcelain geometry gets smaller.
-  B(.21,.31,w-.42,d-.41,2,WC_SEAT_Z-4,'white');
-  B(.24,.10,w-.48,.25,3,WC_TANK_Z,'white');
-  B(.30,.44,w-.60,d-.57,WC_SEAT_Z-3,WC_SEAT_Z,'glass');
-  B(.25,.40,w-.50,d-.51,WC_SEAT_Z-2,WC_SEAT_Z+1,'white');
+  // User-supplied original game source: indoor p_indoor.py / Cove p_cove.py.
+  // Tank sits against the back wall (c.18-.82, r.03-.30).
+  // Bowl is narrower and lower (c.25-.75, r.28-.92); seat top=15 px.
+  B(.17,.03,w-.34,.27,0,WC_TANK_Z,'white');
+  B(.15,.03,w-.30,.27,WC_TANK_Z,WC_TANK_Z+2,'cream');
+  B(.25,.28,w-.50,d-.36,0,WC_SEAT_Z,'white');
+  // Like the original game, the ring/opening sits on the top of the bowl.
+  // Three nested flattened iso ellipses avoid an oversized white podium.
+  for(const [rx,ry,z,material] of [
+   [.21,.26,WC_SEAT_Z+.25,'dark'],
+   [.145,.19,WC_SEAT_Z+.5,'white'],
+   [.09,.12,WC_SEAT_Z+.75,'glass']
+  ]){
+   const points=[];
+   for(let n=0;n<24;n++){
+    const angle=n/24*Math.PI*2;
+    const uv=fixturePoint(item,.5+Math.cos(angle)*rx,.61+Math.sin(angle)*ry);
+    points.push(point(geo,uv.c,uv.r,z));
+   }
+   polygon(ctx,points,(MAT[material]||MAT.white)[0]);
+  }
   break;
  case 'shower':
   B(.07,.07,w-.14,d-.14,1,5,'white');
@@ -275,7 +299,7 @@ function furniture(ctx,geo,item,selected=false){
 function drawSeatForeground(ctx,geometry,item){
  if(!item||item.assetId!=='wc')return;
  const {c,r}=item,rot=fixtureRotation(item);
- const coords={x:.27,y:.72,w:.46,d:.14};
+ const coords={x:.30,y:.77,w:.40,d:.11};
  let {x,y,w,d}=coords;
  if(rot===1){[x,y,w,d]=[1-(y+d),x,d,w];}
  else if(rot===2){[x,y]=[1-(x+w),1-(y+d)];}
@@ -362,7 +386,7 @@ function pointer(canvas,event,geometry,opts={}){
  const y=(event.clientY-box.top)*canvas.height/box.height;
  return pick(geometry,x,y,opts);
 }
-g.VLInteriorIso=Object.freeze({version:'v8',tilePixels:Object.freeze([64,32]),
+g.VLInteriorIso=Object.freeze({version:'v9-source',tilePixels:Object.freeze([64,32]),
  bounds,point,pick,pointer,draw,tileAt,itemFootprint,
  fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground,insidePolygon,
  ACTOR_SCALE,WC_SEAT_Z,WC_TANK_Z,WALL});
