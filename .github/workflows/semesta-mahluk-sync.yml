@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "world-builder/**"
+      - "membangun/**"
+      - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
       - "tests/membangun-live-sync.test.cjs"
       - "tests/bangun-ruang-*.test.cjs"
@@ -16,6 +18,8 @@ on:
   pull_request:
     paths:
       - "world-builder/**"
+      - "membangun/**"
+      - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
       - "tests/membangun-live-sync.test.cjs"
       - "tests/bangun-ruang-*.test.cjs"
@@ -45,6 +49,8 @@ jobs:
       - name: Bangun Ruang exterior/interior scale and WC regressions
         run: |
           node --test tests/bangun-ruang-shared-scale-v7.test.cjs tests/bangun-ruang-isometric-interior.test.cjs tests/bangun-ruang-toilet-seat-alignment.test.cjs tests/bangun-ruang-character-door-wc-v8.test.cjs tests/bangun-ruang-source-game-v9.test.cjs
+      - name: Launcher desktop and navigation validation
+        run: node --test tests/membangun-launcher.test.cjs
       - name: Live Membangun app sync regression
         run: |
           node --test tests/bangun-ruang-bridge.test.cjs tests/membangun-live-sync.test.cjs
