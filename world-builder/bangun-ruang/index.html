@@ -168,31 +168,47 @@ const PXFONT={
  A:['010','101','111','101','101'],B:['110','101','110','101','110'],C:['011','100','100','100','011'],D:['110','101','101','101','110'],E:['111','100','110','100','111'],F:['111','100','110','100','100'],G:['011','100','101','101','011'],H:['101','101','111','101','101'],I:['111','010','010','010','111'],J:['001','001','001','101','010'],K:['101','101','110','101','101'],L:['100','100','100','100','111'],M:['101','111','111','101','101'],N:['101','111','111','111','101'],O:['010','101','101','101','010'],P:['110','101','110','100','100'],Q:['010','101','101','111','011'],R:['110','101','110','101','101'],S:['011','100','010','001','110'],T:['111','010','010','010','010'],U:['101','101','101','101','111'],V:['101','101','101','101','010'],W:['101','101','111','111','101'],X:['101','101','010','101','101'],Y:['101','101','010','010','010'],Z:['111','001','010','100','111'],
  '0':['111','101','101','101','111'],'1':['010','110','010','010','111'],'2':['110','001','010','100','111'],'3':['110','001','010','001','110'],'4':['101','101','111','001','001'],'5':['111','100','110','001','110'],'6':['011','100','110','101','010'],'7':['111','001','010','010','010'],'8':['010','101','010','101','010'],'9':['010','101','011','001','110'],' ':['000','000','000','000','000']
 };
-const presets={
- rumah:{name:'Rumah Kampung 01',w:4,d:4,floors:1,windows:2,wall:'cream',roof:'terracotta',roofShape:'gable',detail:'simple',sign:'',front:'sw',actions:'enter'},
- ruko:{name:'Ruko Fotokopi',w:3,d:5,floors:3,windows:2,wall:'concrete',roof:'slate',roofShape:'flat',detail:'storefront',sign:'FOTOKOPI',front:'sw',actions:'enter,buy'},
- warung:{name:'Warung Madura',w:3,d:3,floors:1,windows:1,wall:'green',roof:'navy',roofShape:'gable',detail:'awning',sign:'WARUNG',front:'sw',actions:'enter,buy'},
- kost:{name:'Kost Bandung',w:6,d:4,floors:2,windows:3,wall:'cream',roof:'slate',roofShape:'gable',detail:'simple',sign:'KOST',front:'sw',actions:'enter,rent'},
- kantor:{name:'Gedung Kantor',w:7,d:6,floors:4,windows:4,wall:'blue',roof:'navy',roofShape:'flat',detail:'storefront',sign:'KANTOR',front:'sw',actions:'enter,work'}
-};
-const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision'];
+const semesta=window.VLSemestaBuildingSpecs;
+const sources=semesta?.all||[];
+const defaultBase='semesta:small';
+const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
-let current=null,view='sw',saved=[];
+let current=null,view='sw',saved=[],manualOverrides={},manualSignature='';
 try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||a));
 const safe=s=>String(s||'').replace(/[<>"'&]/g,'').slice(0,60);
 const config=()=>{
  const c={};for(const k of ids)c[k]=$(k).value;
- c.w=clamp(Math.round(c.w),2,12);c.d=clamp(Math.round(c.d),2,12);
- c.floors=clamp(Math.round(c.floors),1,7);c.windows=clamp(Math.round(c.windows),0,6);
+ c.baseId=$('baseSelect').value||defaultBase;
+ c.w=Math.round(clamp(c.w,2,24)*10)/10;c.d=Math.round(clamp(c.d,2,24)*10)/10;
+ c.floors=clamp(Math.round(c.floors),1,12);c.windows=clamp(Math.round(c.windows),0,6);
  c.name=safe(c.name||'Untitled Building');c.sign=safe(c.sign||'').toUpperCase().slice(0,14);
  c.actions=safe(c.actions||'enter');return c;
 };
-function apply(c){
- for(const k of ids)if(Object.hasOwn(c,k))$(k).value=c[k];
- render();
+const artFingerprint=c=>JSON.stringify(['baseId','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','doorStyle','windowStyle','balcony'].map(k=>c[k]));
+function updateBaseSummary(c){
+ const spec=semesta?.byId(c.baseId),size=spec?.footprint||[c.w,c.d];
+ $('sourceId').value=c.baseId||'Custom';
+ $('baseHint').textContent=spec?spec.label+' · '+size.join(' × ')+' tile · source: '+spec.group:'Select a Semesta source';
+ $('specSummary').textContent=spec?'SEMESTA / '+spec.label+' · FOOTPRINT '+size.join('×')+' · SOURCE HEIGHT '+spec.height+' · '+(spec.source||'native placeholder'):'No linked source';
 }
-function preset(kind){const c={...presets[kind],kind,collision:'yes'};current=null;apply(c);status('New '+kind+' · unsaved');drawLibrary();}
+function apply(c){
+ $('baseSelect').value=c.baseId||defaultBase;
+ for(const k of ids)if(Object.hasOwn(c,k))$(k).value=c[k];
+ updateBaseSummary(config());render();
+}
+function preset(baseId=defaultBase){
+ const spec=semesta?.byId(baseId)||semesta?.byId(defaultBase);
+ if(!spec){status('Semesta spec failed to load');return;}
+ const kind=spec.kind,cc={name:spec.label,baseId:spec.id,kind,
+  w:spec.footprint[0],d:spec.footprint[1],floors:spec.floors,
+  windows:kind==='kantor'?4:kind==='rumah'?2:1,wall:spec.wall,roof:spec.roof,
+  roofShape:spec.roofShape,detail:spec.detail,sign:'',
+  doorStyle:spec.detail==='storefront'?'glass':'wood',windowStyle:kind==='kantor'?'wide':'square',
+  balcony:'no',front:'sw',actions:['warung','ruko'].includes(kind)?'enter,buy':'enter',collision:'yes'};
+ current=null;manualOverrides={};manualSignature=artFingerprint(cc);
+ apply(cc);status('Generated from Semesta: '+spec.label);drawLibrary();
+}
 function status(message){$('status').textContent='● '+message;}
 function shape(ctx,pts,color){
  if(pts.length<3)return;
@@ -207,11 +223,18 @@ function shape(ctx,pts,color){
  }
 }
 function makeView(c,dir){
- const W=c.w,D=c.d,H=c.floors*70+10;
- const width=Math.ceil((W+D)*32+104),height=Math.ceil(H+(W+D)*16+100);
+ const turn=dir==='se'||dir==='nw';
+ const W=turn?c.d:c.w,D=turn?c.w:c.d,H=c.floors*88+8;
+ const spec=semesta?.byId(c.baseId);
+ const native=spec?.variants?.[dir]||spec?.variants?.[dir==='nw'?'se':'sw']||null;
+ let width=Math.max(Math.ceil((W+D)*32+32),native?.size?.[0]||0);
+ let height=Math.max(Math.ceil(H+(W+D)*16+44),native?.size?.[1]||0);
+ const ox=native?Math.max(Math.round((W+D)*16+4),native.pivot[0]):Math.round(width/2);
+ const oy=native?Math.max(Math.round(H+(W+D)*8+30),native.pivot[1]):height-Math.round((W+D)*8+30);
+ width=Math.max(width,Math.ceil(ox+(W+D)*16+8));
+ height=Math.max(height,Math.ceil(oy+(W+D)*8+18));
  const can=document.createElement('canvas');can.width=width;can.height=height;
  const ctx=can.getContext('2d',{alpha:true});ctx.imageSmoothingEnabled=false;
- const ox=Math.round(width/2),oy=height-Math.round((W+D)*8+40);
  const P=(x,z,y)=>[ox+Math.round((x-z)*32),oy+Math.round((x+z)*16-y)];
  const wall=palette[c.wall]||palette.cream,roof=palette[c.roof]||palette.terracotta;
  const shade=wall[4],glass=['#c4e8f4','#89b9cf','#567f99','#37556c'];
@@ -235,8 +258,9 @@ function makeView(c,dir){
   shape(ctx,pts,col);
  }
  function window(side,axis,y){
-  faceRect(side,axis-.31,axis+.31,y,y+29,wall[4]);
-  faceRect(side,axis-.25,axis+.25,y+3,y+26,glass[1]);
+  const windowWidth=c.windowStyle==='wide'?.46:c.windowStyle==='narrow'?.18:.31;
+  faceRect(side,axis-windowWidth,axis+windowWidth,y,y+29,wall[4]);
+  faceRect(side,axis-windowWidth+.06,axis+windowWidth-.06,y+3,y+26,glass[1]);
   faceRect(side,axis-.25,axis-.02,y+15,y+25,glass[0]);
   faceRect(side,axis+.02,axis+.25,y+3,y+14,glass[2]);
   faceRect(side,axis-.02,axis+.02,y+3,y+26,wall[3]);
@@ -245,7 +269,7 @@ function makeView(c,dir){
  function frontage(side,axisLen,isFront){
   const visible=isFront;const windowCount=Math.min(c.windows,Math.max(1,Math.floor(axisLen/1.0)));
   for(let floor=0;floor<c.floors;floor++){
-   const yy=24+floor*70;
+   const yy=24+floor*88;
    for(let i=0;i<windowCount;i++){
     let u=-axisLen/2+axisLen*(i+.5)/windowCount;
     if(visible&&floor===0&&Math.abs(u)<.65)continue;
@@ -254,6 +278,8 @@ function makeView(c,dir){
    }
    if(floor>0){
     faceRect(side,-axisLen/2+.12,axisLen/2-.12,yy-11,yy-8,wall[1]);
+    if(c.balcony==='yes'&&floor===1)for(let p=-axisLen/2+.25;p<axisLen/2-.2;p+=.5)
+      faceRect(side,p,p+.05,yy-6,yy+13,shade);
    }
   }
   if(!visible)return;
@@ -264,7 +290,8 @@ function makeView(c,dir){
    faceRect(side,-.06,.06,14,52,shade);
   }
   faceRect(side,-.48,.48,1,55,shade);
-  faceRect(side,-.40,.40,3,52,frontIsShop?glass[2]:roof[3]);
+  faceRect(side,-.40,.40,3,52,c.doorStyle==='glass'?glass[2]:c.doorStyle==='metal'?wall[4]:roof[3]);
+  if(c.doorStyle==='metal')for(let j=8;j<52;j+=8)faceRect(side,-.39,.39,j,j+1,wall[2]);
   faceRect(side,.26,.31,20,23,roof[0]);
   if(c.detail!=='simple'||c.kind==='warung'){
    // Awnings are polygon planes in native iso, never a rotated bitmap.
@@ -311,8 +338,12 @@ function makeView(c,dir){
  }
  return {url:can.toDataURL('image/png'),size:[width,height],pivot:[ox,oy]};
 }
+function viewResult(c,d){
+ const base=makeView(c,d),patch=manualOverrides[d];
+ return patch&&patch.url&&patch.size?.join(',')===base.size.join(',')?{...base,url:patch.url}:base;
+}
 function render(){
- const c=config(),r=makeView(c,view);
+ const c=config(),r=viewResult(c,view);
  $('preview').src=r.url;$('canvasName').textContent=c.name.toUpperCase()+' / '+view.toUpperCase();
  $('footprintText').textContent=c.w+' × '+c.d+' tiles · '+c.floors+' floor(s)';
  $('sizeText').textContent=r.size.join('×')+' px / '+r.pivot.join(',');
@@ -321,8 +352,11 @@ function render(){
 }
 function buildAsset(){
  const c=config(),id=current?.id||'br-'+c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24)+'-'+Date.now().toString(36);
- const views={};for(const d of dirs)views[d]=makeView(c,d);
- return {id,name:c.name,config:c,views,format:'virtual-life-building-asset-v1',
+ const views={};for(const d of dirs)views[d]=viewResult(c,d);
+ const base=semesta?.byId(c.baseId);
+ return {id,name:c.name,config:c,views,editedViews:{...manualOverrides},
+  semestaBase:c.baseId,semestaNativeSize:base?.variants||null,
+  baseHeight:base?.height||null,format:'virtual-life-building-asset-v1',
   projection:{type:'iso-2:1',tilePixels:[64,32],groundCoordinates:'c/r',directions:dirs},
   footprint:[c.w,c.d],entranceFacing:c.front,
   blocking:c.collision,interactions:c.actions.split(',').map(x=>x.trim()).filter(Boolean).slice(0,20),
@@ -344,7 +378,7 @@ function download(name,text,type){
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function downloadPNG(){
- const c=config(),r=makeView(c,view),link=document.createElement('a');
+ const c=config(),r=viewResult(c,view),link=document.createElement('a');
  link.href=r.url;link.download=(current?.id||'building')+'_'+view+'.png';
  document.body.appendChild(link);link.click();link.remove();
 }
@@ -363,7 +397,8 @@ function drawLibrary(){
   const t=document.createElement('span');const b=document.createElement('b'),s=document.createElement('small');
   b.textContent=a.name;s.textContent=(a.footprint||[]).join('×')+' tile · '+a.config.floors+'F';
   t.append(b,s);btn.append(pic,t);
-  btn.onclick=()=>{current=a;apply(a.config);drawLibrary();status('Editing '+a.name);};
+  btn.onclick=()=>{current=a;manualOverrides={...(a.editedViews||{})};
+   manualSignature=artFingerprint(a.config);apply(a.config);drawLibrary();status('Editing '+a.name);};
   lib.appendChild(btn);
  }
  if(!lib.children.length){const p=document.createElement('p');p.style.cssText='padding:12px;color:#6f8293';p.textContent='No saved buildings. Choose a template above.';lib.append(p);}
@@ -374,8 +409,10 @@ function importFile(file){
   try{
    const a=JSON.parse(r.result);
    if(a.format!=='virtual-life-building-asset-v1'||!a.config||!a.views)throw Error('Invalid building package');
-   current=null;apply(a.config);const rebuilt=buildAsset();
-   if(/^br-[a-z0-9-]{1,72}$/.test(a.id||''))rebuilt.id=a.id;
+   if(!dirs.every(d=>/^data:image\/png;base64,/.test(a.views[d]?.url||'')))throw Error('Missing four PNG sprite views');
+   current=null;apply(a.config);manualOverrides={...(a.editedViews||{})};
+   manualSignature=artFingerprint(a.config);
+   const rebuilt={...buildAsset(),views:a.views,id:/^br-[a-z0-9-]{1,72}$/.test(a.id||'')?a.id:buildAsset().id};
    if(persist(rebuilt))status('Imported '+rebuilt.name+' · ready for Semesta');
   }catch(e){status('⚠ Import failed: '+e.message);}
  };r.readAsText(file);
@@ -386,19 +423,32 @@ function remove(){
  saved=saved.filter(x=>x.id!==current.id);localStorage.setItem(KEY,JSON.stringify(saved));
  current=null;preset('rumah');status('Deleted saved asset; reload Semesta to update catalog');
 }
-for(const id of ids)$(id).addEventListener('input',render);
+for(const id of ids)$(id).addEventListener('input',()=>{
+ if(Object.keys(manualOverrides).length&&artFingerprint(config())!==manualSignature){
+   manualOverrides={};status('Regenerated from Semesta source: manual pixel edits cleared');
+ }
+ render();
+});
 for(const btn of document.querySelectorAll('[data-dir]'))btn.onclick=()=>{
  view=btn.dataset.dir;document.querySelectorAll('[data-dir]').forEach(b=>b.classList.toggle('active',b===btn));render();
 };
-for(const btn of document.querySelectorAll('[data-preset]'))btn.onclick=()=>preset(btn.dataset.preset);
-$('newBtn').onclick=()=>preset('rumah');$('saveBtn').onclick=saveAsset;$('publishBtn').onclick=publish;
+for(const source of sources){
+ const opt=document.createElement('option');opt.value=source.id;
+ opt.textContent=source.label+' · '+source.footprint.join('×')+' tiles';
+ $('baseSelect').append(opt);
+}
+$('baseSelect').onchange=()=>updateBaseSummary({...config(),baseId:$('baseSelect').value});
+$('applyBase').onclick=()=>preset($('baseSelect').value);
+$('resetBase').onclick=()=>preset($('baseSelect').value);
+$('generateBtn').onclick=()=>{manualOverrides={};render();status('Re-generated four-direction pixels from Semesta geometry');};
+$('newBtn').onclick=()=>preset(defaultBase);$('saveBtn').onclick=saveAsset;$('publishBtn').onclick=publish;
 $('exportBtn').onclick=exportAsset;$('pngBtn').onclick=downloadPNG;
 $('search').oninput=drawLibrary;$('deleteBtn').onclick=remove;
 $('importBtn').onclick=()=>$('upload').click();
 $('upload').onchange=e=>{importFile(e.target.files[0]);e.target.value='';};
 $('helpBtn').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
-preset('rumah');
+preset(defaultBase);
 })();
 </script>
 </body></html>
