@@ -15,6 +15,7 @@ const legacyIds=Object.fromEntries(
  [...(g.VLPipelineAssets?.characters||[]).map(x=>x.id),...Object.keys(ALIAS)]
  .map(id=>[id,ALIAS[id]||id]));
 const bridge=()=>g.VLMahlukHidup;
+const sleep=()=>g.VLUniversalSleep;
 const canonical=id=>bridge()?.has(id)?id:
  bridge()?.has('legacy_'+id)?'legacy_'+id:
  (legacyIds[id]||'ichsan');
@@ -46,8 +47,21 @@ function resolve(id,requested,moving){
   objectLayer:template.objectLayer,rotation:normalizeRotation(template.rotation),
   expression:template.expression||'neutral'};
  const entry=bridge()?.get(sourceId);
+ // Reuse the selected character's true horizontal LIE frames.
+ // Sleep presets are native game actions, not stored per-actor template pixels.
+ const sleepId=requested==="sleep"?"sleep_bed_right":requested;
+ const nativeSleep=entry&&sleep()?.resolve(entry,sleepId);
+ if(nativeSleep){
+  const url=bridge().url(nativeSleep.sheet);
+  if(url)return {url,mode:sleepId,frames:nativeSleep.frames,
+   row:nativeSleep.row,durations:nativeSleep.frame_ms,
+   loop:true,separate:nativeSleep.separate,source:"universal-sleep",
+   objectLayer:"behind",rotation:0};
+ }
  if(entry){
   const actions=entry.motions;
+  if(sleep()?.isSleep(requested))return {source:"unavailable",
+   mode:requested,frames:1,unavailable:true,loop:false,url:null};
   const possible=({bathe:['swim','bathe'],shower:['swim','bathe'],
    toilet:['sit','toilet'],toilet_sit:['sit','toilet'],
    sleep:['sleep','sleep_seat','lie'],rest:['lie','sleep','sleep_seat'],
@@ -124,7 +138,10 @@ function createRig(THREE,opt={}){
   const motionKey=state.pose||spec.mode;
   if(lastAction!==motionKey){time=0;previous='';lastAction=motionKey;}
   const count=Math.max(1,Math.min(40,spec.frames)),frame=Math.min(frameAt(spec,time),count-1);
-  const dir=DIR.indexOf(state.direction),row=spec.row+dir;
+  const sleepPose=spec.source==="universal-sleep";
+  const actualDir=sleepPose?sleep().directionFor(spec.mode,state.direction):
+   state.direction;
+  const dir=DIR.indexOf(actualDir),row=spec.row+dir;
   const sprite=spec.source==='template'?null:image(spec.url),asset=bridge()?.get(who);
   const face=spec.source==='template'&&spec.expression!=='neutral'?
    (asset?.expressions||[]).find(f=>f.id===spec.expression):null;
@@ -132,7 +149,11 @@ function createRig(THREE,opt={}){
   const faceImage=facePath?image(bridge()?.url(facePath)):null;
   const equipped=asset?bridge().equipmentFor(who):{};
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
-  const overlayUrls=['bag','shoes','pants','shirt','helmet'].map(layer);
+  // Standing equipment layers have the wrong anchors on horizontal bodies.
+  // The native lie frame already includes the actor's own base clothing.
+  const overlayUrls=(spec.source==="universal-sleep"?
+   [null,null,null,null,null]:
+   ['bag','shoes','pants','shirt','helmet'].map(layer));
   const overlays=overlayUrls.map(url=>image(url));
   // Edited canonical activities follow the exact gameplay pose ID when
   // available; legacy furniture aliases preserve old WC/shower/sleep edits.
@@ -174,7 +195,8 @@ function createRig(THREE,opt={}){
   // pack on the BACK torso surface. Keep rear head/neck above the bag.
   if(!rearView&&overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
   if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
-  else if(!templated)ctx.drawImage(pic,sx,sy,64,112,0,0,64,112);
+  else if(!templated)ctx.drawImage(pic,sx,sy,64,112,
+    0,sleepPose?sleep().breathing(frame):0,64,112);
   for(let i=1;i<4;i++)if(overlays[i]?.ready)
    ctx.drawImage(overlays[i].pic,0,0,64,112);
   if(rearView&&overlays[0]?.ready){
