@@ -237,13 +237,14 @@ const sources=semesta?.all||[];
 const defaultBase='semesta:small';
 const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
-let current=null,view='sw',saved=[],manualOverrides={},manualSignature='';
+let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null;
 try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||a));
 const safe=s=>String(s||'').replace(/[<>"'&]/g,'').slice(0,60);
 const config=()=>{
  const c={};for(const k of ids)c[k]=$(k).value;
  c.baseId=$('baseSelect').value||defaultBase;
+ c.interactive=$('buildingMode').value==='interactive';
  c.w=Math.round(clamp(c.w,2,24)*10)/10;c.d=Math.round(clamp(c.d,2,24)*10)/10;
  c.floors=clamp(Math.round(c.floors),1,12);c.windows=clamp(Math.round(c.windows),0,6);
  c.name=safe(c.name||'Untitled Building');c.sign=safe(c.sign||'').toUpperCase().slice(0,14);
@@ -259,6 +260,7 @@ function updateBaseSummary(c){
 function apply(c){
  $('baseSelect').value=c.baseId||defaultBase;
  for(const k of ids)if(Object.hasOwn(c,k))$(k).value=c[k];
+ $('buildingMode').value=c.interactive===true?'interactive':'decorative';
  updateBaseSummary(config());render();
 }
 function preset(baseId=defaultBase){
@@ -271,7 +273,7 @@ function preset(baseId=defaultBase){
   doorStyle:spec.detail==='storefront'?'glass':'wood',windowStyle:kind==='kantor'?'wide':'square',
   balcony:'no',front:'sw',actions:['warung','ruko'].includes(kind)?'enter,buy':'enter',collision:'yes'};
  current=null;manualOverrides={};manualSignature=artFingerprint(cc);
- apply(cc);status('Generated from Semesta: '+spec.label);drawLibrary();
+ apply(cc);interiorUi?.reset();status('Generated from Semesta: '+spec.label);drawLibrary();
 }
 function status(message){$('status').textContent='● '+message;}
 function shape(ctx,pts,color){
@@ -418,12 +420,17 @@ function buildAsset(){
  const c=config(),id=current?.id||'br-'+c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24)+'-'+Date.now().toString(36);
  const views={};for(const d of dirs)views[d]=viewResult(c,d);
  const base=semesta?.byId(c.baseId);
+ const inter=interiorUi?.serialize()||{interactive:false,enterable:false,interior:null,actionSlots:[],entrance:null,interactions:[]};
+ const exteriorActions=c.actions.split(',').map(x=>x.trim()).filter(Boolean).slice(0,20);
+ const combined=inter.interactive?[...new Set([...exteriorActions,...inter.interactions])]:exteriorActions.filter(x=>x!=='enter');
  return {id,name:c.name,config:c,views,editedViews:{...manualOverrides},
   semestaBase:c.baseId,semestaNativeSize:base?.variants||null,
   baseHeight:base?.height||null,format:'virtual-life-building-asset-v1',
   projection:{type:'iso-2:1',tilePixels:[64,32],groundCoordinates:'c/r',directions:dirs},
-  footprint:[c.w,c.d],entranceFacing:c.front,
-  blocking:c.collision,interactions:c.actions.split(',').map(x=>x.trim()).filter(Boolean).slice(0,20),
+  footprint:[c.w,c.d],entranceFacing:inter.interactive?c.front:null,
+  blocking:c.collision,interactions:combined.slice(0,20),
+  interactive:inter.interactive,enterable:inter.enterable,
+  entrance:inter.entrance,interior:inter.interior,actionSlots:inter.actionSlots,
   updatedAt:new Date().toISOString()};
 }
 function persist(asset){
@@ -462,7 +469,8 @@ function drawLibrary(){
   b.textContent=a.name;s.textContent=(a.footprint||[]).join('×')+' tile · '+a.config.floors+'F';
   t.append(b,s);btn.append(pic,t);
   btn.onclick=()=>{current=a;manualOverrides={...(a.editedViews||{})};
-   manualSignature=artFingerprint(a.config);apply(a.config);drawLibrary();status('Editing '+a.name);};
+   manualSignature=artFingerprint(a.config);apply(a.config);
+   interiorUi?.load(a);drawLibrary();status('Editing '+a.name);};
   lib.appendChild(btn);
  }
  if(!lib.children.length){const p=document.createElement('p');p.style.cssText='padding:12px;color:#6f8293';p.textContent='No saved buildings. Choose a template above.';lib.append(p);}
@@ -475,8 +483,9 @@ function importFile(file){
    if(a.format!=='virtual-life-building-asset-v1'||!a.config||!a.views)throw Error('Invalid building package');
    if(!dirs.every(d=>/^data:image\/png;base64,/.test(a.views[d]?.url||'')))throw Error('Missing four PNG sprite views');
    current=null;apply(a.config);manualOverrides={...(a.editedViews||{})};
-   manualSignature=artFingerprint(a.config);
-   const rebuilt={...buildAsset(),views:a.views,id:/^br-[a-z0-9-]{1,72}$/.test(a.id||'')?a.id:buildAsset().id};
+   manualSignature=artFingerprint(a.config);interiorUi?.load(a);
+   const draft=buildAsset();
+   const rebuilt={...draft,views:a.views,id:/^br-[a-z0-9-]{1,72}$/.test(a.id||'')?a.id:draft.id};
    if(persist(rebuilt))status('Imported '+rebuilt.name+' · ready for Semesta');
   }catch(e){status('⚠ Import failed: '+e.message);}
  };r.readAsText(file);
@@ -599,7 +608,7 @@ for(const id of ids)$(id).addEventListener('input',()=>{
  if(Object.keys(manualOverrides).length&&artFingerprint(config())!==manualSignature){
    manualOverrides={};status('Regenerated from Semesta source: manual pixel edits cleared');
  }
- render();
+ render();interiorUi?.refresh();
 });
 for(const btn of document.querySelectorAll('[data-dir]'))btn.onclick=()=>{
  view=btn.dataset.dir;document.querySelectorAll('[data-dir]').forEach(b=>b.classList.toggle('active',b===btn));render();
@@ -612,7 +621,8 @@ for(const source of sources){
 $('baseSelect').onchange=()=>updateBaseSummary({...config(),baseId:$('baseSelect').value});
 $('applyBase').onclick=()=>preset($('baseSelect').value);
 $('resetBase').onclick=()=>preset($('baseSelect').value);
-$('generateBtn').onclick=()=>{manualOverrides={};render();status('Re-generated four-direction pixels from Semesta geometry');};
+$('generateBtn').onclick=()=>{manualOverrides={};render();interiorUi?.refresh();
+ status('Re-generated four-direction pixels from Semesta geometry');};
 $('newBtn').onclick=()=>preset(defaultBase);$('saveBtn').onclick=saveAsset;$('publishBtn').onclick=publish;
 $('exportBtn').onclick=exportAsset;$('pngBtn').onclick=downloadPNG;
 $('search').oninput=drawLibrary;$('deleteBtn').onclick=remove;
@@ -621,6 +631,9 @@ $('upload').onchange=e=>{importFile(e.target.files[0]);e.target.value='';};
 $('helpBtn').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
 preset(defaultBase);
+interiorUi=window.VLStudioInteriors?.init({getConfig:config,
+ status,exportAsset});
+interiorUi?.reset();
 })();
 </script>
 </body></html>
