@@ -1017,6 +1017,11 @@ function updateAutomated(dt){
    continue;
   }
   const isCrowd=record.type==='crowd',n=isCrowd?agent.parts.length:1;
+  // Walking people are small, non-solid decorative actors. Formerly every
+  // opposing walker/crowd treated the other as a blocking vehicle and
+  // all characters could freeze forever at sidewalk junctions.
+  // Keep solid-world collision (large buildings, benches, trees and water),
+  // but allow walkers to pass each other on opposite sides of the pavement.
   for(let i=0;i<n;i++){
    const member=isCrowd?agent.parts[i]:agent.parts[0];
    const oldX=isCrowd?member.child.position.x+agent.root.position.x:agent.root.position.x;
@@ -1025,34 +1030,33 @@ function updateAutomated(dt){
    const target=(previous+(cfg.enabled?cfg.speed*dt:0))%route.length;
    const p=traffic.sample(route,target);
    if(!p)continue;
-   const probe={id:id+(isCrowd?':'+i:''),type:isCrowd?'pedestrian':record.type,
-    vehicleId:record.vehicleId,motion:record.motion,x:oldX,z:oldZ,scale:1};
-   const blocked=physics.check(probe,{x:p.x,z:p.z},blockers,
-    documentMap.map,assetByName,style,live);
-   const collides=cfg.enabled&&movingOverlap(probe,{x:p.x,z:p.z},p.dx,p.dz,id);
-   if(!blocked.ok||collides){
-    if(member){
-     member.rig.setMoving(0,0,false);
-     member.rig.step(dt,camera,{x:oldX,z:oldZ});
-    }else if(agent.graphic){
-     agent.graphic.update(window.VLCharacterRig?.directionFromWorld(agent.lastDx||1,agent.lastDz||0,'se')||'se',camera,agent.root);
-    }
+   const side=.14+(isCrowd?(i%3)*.035:0);
+   // With right-of-travel offset, opposite-direction pedestrians naturally
+   // take opposite sides rather than overlapping in the middle.
+   const shifted={x:p.x-p.dz*side,z:p.z+p.dx*side};
+   const probe={id:id+(isCrowd?':'+i:''),type:'pedestrian',
+    motion:record.motion,x:oldX,z:oldZ,scale:1};
+   const candidate=traffic.allowed(documentMap.map,shifted.x,shifted.z,'pedestrian')&&
+    physics.check(probe,shifted,blockers,documentMap.map,assetByName,style,live).ok?
+    shifted:{x:p.x,z:p.z};
+   const clear=physics.check(probe,candidate,blockers,
+    documentMap.map,assetByName,style,live).ok;
+   if(!clear){
+    member.rig.setMoving(0,0,false);
+    member.rig.step(dt,camera,{x:oldX,z:oldZ});
     continue;
    }
    if(isCrowd){
     member.distance=target;
-    member.child.position.set(p.x-agent.root.position.x,0,p.z-agent.root.position.z);
+    member.child.position.set(candidate.x-agent.root.position.x,0,
+     candidate.z-agent.root.position.z);
    }else{
     agent.distance=target;
-    agent.root.position.set(p.x,record.y||0,p.z);
+    agent.root.position.set(candidate.x,record.y||0,candidate.z);
    }
    agent.lastDx=p.dx;agent.lastDz=p.dz;
-   if(member){
-    member.rig.setMoving(p.dx,p.dz,cfg.enabled);
-    member.rig.step(dt,camera,{x:p.x,z:p.z});
-   }else if(agent.graphic){
-    agent.graphic.update(window.VLCharacterRig?.directionFromWorld(p.dx,p.dz,'se')||'se',camera,agent.root);
-   }
+   member.rig.setMoving(p.dx,p.dz,cfg.enabled);
+   member.rig.step(dt,camera,candidate);
   }
  }
 }
