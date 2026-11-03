@@ -71,7 +71,8 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <header class="titlebar"><div class="mark" aria-hidden="true">✳</div><div class="window-title"><strong>BANGUN RUANG</strong><span class="title-extra">.PNT — Building Studio</span></div><div class="win" aria-hidden="true"><span>_</span><span>□</span><span class="close-mark">×</span></div></header>
 <nav>
  <button id="newBtn">▤ New</button><button id="saveBtn" class="primary">💾 Save Asset</button><button id="mobileMenuBtn" type="button" aria-expanded="false">☰ Menu</button>
- <button id="exportBtn">↓ Export Package</button><button id="importBtn">↑ Import</button>
+ <button id="openObjectPixelCreator" type="button" class="primary" onclick="window.openBangunPixelCreator(event)">✎ Pixel Creator</button>
+  <button id="exportBtn">↓ Export Package</button><button id="importBtn">↑ Import</button>
  <a class="button" href="../../membangun/?app=bangun" title="Back to Membangun launcher">⌂ Membangun</a>
  <a class="button" href="../../membangun/?app=semesta" title="Select Semesta through Membangun">◈ Semesta</a>
  <span class="spacer"></span><span class="status">VIRTUAL LIFE · V6B PIXEL ART</span>
@@ -99,7 +100,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <div class="library" id="library"></div>
  <div class="preset" id="pixelObjectEntry">
   <h4>OBJECT LIBRARY / SEMESTA</h4>
-  <button id="openObjectCreatorShelf" type="button" class="primary" style="width:100%;padding:10px">✎ PIXEL CREATOR</button>
+  <button id="openObjectCreatorShelf" type="button" class="primary" style="width:100%;padding:10px" onclick="window.openBangunPixelCreator(event)">✎ PIXEL CREATOR</button>
   <p style="font:11px/1.5 Tahoma;color:#597083;margin:7px 0 0">24 built-in objek (WC, kursi, lampu, tanaman, dll.) + custom pixel art. Pilih kategori lalu Save to Semesta untuk placement.</p>
  </div>
  <div class="heading"><span>LOCAL ASSET STORAGE</span><span>V1</span></div>
@@ -256,14 +257,40 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <b>5.</b> Action/interior hanya authoring & editor preview. Multiplayer game utama tidak dijalankan oleh Bangun Ruang.<br>
  <p><b>Penting:</b> penyimpanan bersifat lokal, bukan commit GitHub atau cloud. Export untuk backup lintas perangkat.</p>
  </section><footer><button id="closeGuide">Close</button></footer></dialog>
+<script>
+/* Direct, resilient entry point: toolbar and sidebar remain clickable even if
+ * a module is late or cached. Never silently ignore a Pixel Creator click. */
+window.openBangunPixelCreator=async function(event){
+ if(event){event.preventDefault();event.stopPropagation();}
+ const open=()=>{if(!window.VLPixelCreator?.open)return false;window.VLPixelCreator.open();return true;};
+ try{
+  if(open())return;
+  const base='./';
+  const load=(file)=>new Promise((resolve,reject)=>{
+   const sc=document.createElement('script');
+   sc.src=base+file+'?reload='+Date.now();sc.onload=resolve;sc.onerror=()=>reject(Error('Tidak bisa memuat '+file));
+   document.head.appendChild(sc);
+  });
+  if(!window.VLBangunObjects)await load('object-bridge.js');
+  if(!window.VLPixelCreator)await load('pixel-object-creator.js');
+  if(!open())throw Error('Modul Pixel Creator belum siap. Reload halaman Bangun Ruang.');
+ }catch(err){
+  console.error('Pixel Creator launch failed:',err);
+  const message='Pixel Creator gagal dibuka: '+(err?.message||String(err));
+  const status=document.getElementById('status');
+  if(status)status.textContent=message;
+  window.alert(message);
+ }
+};
+</script>
 <script src="../pipeline-catalog.js?v=bangun-ruang-v2"></script>
 <script src="../semesta-building-spec.js?v=bangun-ruang-v2"></script>
 <script src="./interior-model.js?v=rotate-v12"></script>
 <script src="./interior-pixel-art.js?v=interior-v3"></script>
 <script src="./game-proportions.js?v=source-v9"></script>
 <script src="./interior-isometric.js?v=furniture-v10"></script>
-<script src="./object-bridge.js?v=object-library-1"></script>
-<script src="./pixel-object-creator.js?v=creator-1"></script>
+<script src="./object-bridge.js?v=object-library-fix2"></script>
+<script src="./pixel-object-creator.js?v=creator-fix2"></script>
 <script src="./building-guides.js?v=outline-v5"></script>
 <script src="../mahluk-hidup-bridge.js?v=scale-v5&amp;native-faces-v2"></script>
 <script src="/virtual-life-asset-pipeline/action-frame-bridge.js?v=action-v1"></script>
