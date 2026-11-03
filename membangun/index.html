@@ -251,12 +251,14 @@ const $=id=>document.getElementById(id);
   sprite.src='https://lafrich.github.io/virtual-life-asset-pipeline/media/ichsan-sheet.png';
 })();
 const ids=['mahluk','bangun','semesta'];
+// Deep links only select a program; opening it remains a deliberate user action.
+const requestedApp=new URLSearchParams(location.search).get('app');
 const data={
 mahluk:{name:'MAHLUK HIDUP',type:'CHARACTER',desc:'Buat karakter dan NPC pixel.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/'},
 bangun:{name:'BANGUN RUANG',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
 semesta:{name:'SEMESTA',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'}
 };
-let selected='mahluk';
+let selected=ids.includes(requestedApp)?requestedApp:'mahluk';
 function getUrl(id){try{const x=localStorage.getItem('membangun-link-'+id);return x?x:data[id].url;}catch(e){return data[id].url}}
 function okUrl(raw){if(!raw)return true;try{let u=new URL(raw);return (u.protocol==='https:'||u.protocol==='http:')&&u.hostname!==''}catch(e){return false}}
 function render(){
@@ -268,11 +270,23 @@ $('appName').textContent=d.name;$('appType').textContent=d.type;$('appDesc').tex
 $('appStatus').textContent=url?'READY':'NO LINK';
 $('launch').textContent=url?'▶ OPEN':'⚙ SET LINK';
 $('launch').href=url||'#settings';
-$('status').textContent=url?'READY — '+d.name:'SET LINK — '+d.name;
+$('status').textContent=url?'MEMBANGUN / READY — '+d.name:'SET LINK — '+d.name;
 }
-function pick(id){if(!ids.includes(id))return;selected=id;render()}
+function pick(id){
+ if(!ids.includes(id))return;
+ selected=id;
+ // Preserve app selection when returning here from an editor.
+ try{const url=new URL(location.href);url.searchParams.set('app',selected);history.replaceState(null,'',url);}catch{}
+ render();
+}
 function settings(){ids.forEach(id=>$('url-'+id).value=getUrl(id));$('urlError').textContent='';$('modal').hidden=false;let key=getUrl(selected)?'mahluk':selected;$('url-'+key).focus()}
-function open(){const url=getUrl(selected);if(!url){settings();return}if(!okUrl(url)){$('urlError').textContent='Invalid URL';settings();return}window.open(url,'_blank','noopener,noreferrer')}
+function open(){
+ const url=getUrl(selected);
+ if(!url){settings();return;}
+ if(!okUrl(url)){$('urlError').textContent='Invalid URL';settings();return;}
+ // Keep the launcher tab available as the home for all three tools.
+ window.open(url,'_blank','noopener,noreferrer');
+}
 document.querySelectorAll('.file').forEach(el=>{el.addEventListener('click',()=>pick(el.dataset.app));el.addEventListener('dblclick',()=>{pick(el.dataset.app);open()})});
 $('prev').addEventListener('click',()=>pick(ids[(ids.indexOf(selected)+2)%3]));
 $('next').addEventListener('click',()=>pick(ids[(ids.indexOf(selected)+1)%3]));
@@ -296,7 +310,12 @@ progressTimer=setInterval(()=>{
 },105);
 function dismiss(){clearInterval(progressTimer);$('boot').classList.add('done');setTimeout(()=>$('boot').hidden=true,260)}
 $('skip').addEventListener('click',dismiss);$('boot').addEventListener('click',dismiss);
-if(!new URLSearchParams(location.search).has('splash'))setTimeout(dismiss,window.matchMedia('(prefers-reduced-motion: reduce)').matches?120:2050);
+// Skip repeated boot animation for returning users navigating from an editor.
+if(new URLSearchParams(location.search).has('app')&&!new URLSearchParams(location.search).has('splash')){
+ dismiss();
+}else if(!new URLSearchParams(location.search).has('splash')){
+ setTimeout(dismiss,window.matchMedia('(prefers-reduced-motion: reduce)').matches?120:2050);
+}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=true;dismiss()}if(e.key==='Enter'&&!$('boot').hidden)dismiss()});
 render();
 })();
