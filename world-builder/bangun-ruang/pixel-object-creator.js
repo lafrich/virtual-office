@@ -7,7 +7,7 @@ const bridge=g.VLBangunObjects;
 if(!bridge){console.warn('Pixel Creator: object bridge not ready');return;}
 const byId=id=>document.getElementById(id),DIR=['sw','se','ne','nw'],W=96,H=144;
 const palettes=['#344657','#535969','#788197','#A7B2C4','#C7CFDC','#F4EBDA','#D4C8AE','#9B866F','#6B4F3A','#B48455','#F2A066','#C9692F','#86E59A','#4FB36B','#22894A','#1A6A3A','#BFD8E4','#3F7FE0','#F2B530','#EE4D72'];
-let opened=false,objectId=null,view='sw',tool='pencil',pixel='#535969',painting=false,canvas={},undo={},redo={};
+let opened=false,objectId=null,preservedWorldHeight=null,view='sw',tool='pencil',pixel='#535969',painting=false,canvas={},undo={},redo={};
 const GRID_STORAGE='virtual-life-pixel-creator-guide-v1';
 let gridEnabled=true,gridStep=8,referenceEnabled=true,referenceProfile='ichsan';
 try{
@@ -144,11 +144,11 @@ dlg.innerHTML=`
    </div><span class="opc-ref-caption">OBJECT · 96×144 px</span></div>
    <div id="opcReferencePanel" class="opc-reference-column">
     <div class="opc-character-frame"><canvas id="opcCharacterCanvas" width="64" height="${H}" aria-label="Mahluk Hidup character proportion reference"></canvas>
-    <div class="opc-ground-guide" aria-hidden="true"></div></div>
-    <span class="opc-ref-caption">MAHLUK HIDUP · 64×112 px frame</span>
+    </div></div>
+    <span class="opc-ref-caption">KARAKTER · REFERENSI VISUAL</span>
    </div>
   </div>
-  <p id="opcReferenceInfo" class="opc-ref-info">1:1 native pixels · shared floor pivot</p>
+  <p id="opcReferenceInfo" class="opc-ref-info">Referensi tampilan saja · bukan patokan ukuran placement</p>
  </div>
  <div class="opc-buttons"><button type="button" id="opcUndo">↶ Undo</button><button type="button" id="opcRedo">↷ Redo</button><button type="button" id="opcMirror">⇋ Flip current</button><button type="button" id="opcCopyViews">▣ Copy to 4 views</button><button type="button" id="opcClear">✕ Clear view</button></div>
  <div id="opcStatus" class="opc-status" role="status"></div>
@@ -164,7 +164,7 @@ dlg.innerHTML=`
   <label for="opcCollision">COLLISION</label><select id="opcCollision"><option value="false">Walk-through / no collision</option><option value="true">Solid / blocks walking</option></select>
   <label for="opcColor">PIXEL COLOR</label><div class="opc-buttons"><input id="opcColor" type="color" value="#535969" style="width:55px;height:33px;padding:2px"><span id="opcColorText" class="opc-meta" style="align-self:center">#535969</span></div>
   <div id="opcPalette" class="opc-palette"></div>
-  <p class="opc-meta"><b>GUIDE SCALE:</b> Native isometric 2:1 (64×32 px per tile). Work on transparent PNG, with solid flat-shaded colors and 1-pixel edges. Sprite ground pivot: bottom center of the canvas. Draw SW, SE, NE, NW separately—not runtime-rotated.</p>
+  <p class="opc-meta"><b>PIXEL ART GUIDE:</b> Grid hanya untuk menggambar. Karakter di samping adalah referensi tampilan, bukan pengukur rasio atau ukuran placement. Gambar SW, SE, NE, NW secara terpisah; footprint untuk collision.</p>
   <label for="opcPng">IMPORT PNG TO CURRENT VIEW</label><input id="opcPng" type="file" accept="image/png">
   <div class="opc-buttons" style="margin-top:12px"><button type="button" id="opcExportPng">↓ PNG View</button><button type="button" id="opcExport">↓ Export JSON</button><button type="button" id="opcImport">↑ Import JSON</button><input type="file" id="opcImportFile" accept="application/json,.json" hidden></div>
   <div class="opc-buttons" style="margin-top:10px"><button type="button" id="opcSave" class="primary">💾 SAVE TO SEMESTA</button><button type="button" id="opcGoSemesta">◈ Open Semesta</button><button type="button" id="opcDelete">✕ Delete</button></div>
@@ -175,9 +175,9 @@ const $=id=>byId(id),status=s=>{$('opcStatus').textContent=s;};
 const blank=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;return c;};
 function fresh(){
  canvas=Object.fromEntries(DIR.map(d=>[d,blank()]));undo=Object.fromEntries(DIR.map(d=>[d,[]]));redo=Object.fromEntries(DIR.map(d=>[d,[]]));
- objectId=null;view='sw';tool='pencil';
+ objectId=null;preservedWorldHeight=null;view='sw';tool='pencil';
  $('opcName').value='Untitled Object';$('opcCategory').value='decor';
- categoryChanged();show();g.VLPixelCreatorScale?.reset($('opcCategory').value);status('New object · draw all four directions, then Save to Semesta.');
+ categoryChanged();show();status('New object · draw all four directions, then Save to Semesta.');
 }
 function show(){
  const cv=$('opcCanvas'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,W,H);
@@ -185,7 +185,7 @@ function show(){
  $('opcViews').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
  $('opcTools').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));
  updateGuides(false);
- g.VLPixelCreatorScale?.render();
+
 }
 function rememberGuides(){
  try{localStorage.setItem(GRID_STORAGE,JSON.stringify({grid:gridEnabled,step:gridStep,reference:referenceEnabled,profile:referenceProfile}));}catch{}
@@ -236,10 +236,10 @@ function renderCharacter(){
   if(!referenceEnabled||referenceProfile!==entry.profile||view!==entry.view)return;
   ctx.clearRect(0,0,64,H);ctx.imageSmoothingEnabled=false;
   try{ctx.drawImage(entry.image,0,row*112,64,112,0,y,64,112);
-   info.textContent='Native 1:1 · body ≈72px · floor aligned · '+referenceProfile.toUpperCase();
-  }catch{drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Character guide · image frame unavailable';}
+   info.textContent='Preview '+referenceProfile.toUpperCase()+' · bukan ukuran placement';
+  }catch{drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Referensi karakter · gambar tidak tersedia';}
  };
- if(!url){drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Character guide · original sprite offline';return;}
+ if(!url){drawCharacterPlaceholder(ctx,referenceProfile);info.textContent='Referensi karakter · sumber belum tersedia';return;}
  let entry=characterCache.get(url);
  if(!entry){
   const image=new Image();if(!url.startsWith('data:'))image.crossOrigin='anonymous';
@@ -253,7 +253,7 @@ function renderCharacter(){
   draw({...entry,profile:referenceProfile,view});
  }else{
   drawCharacterPlaceholder(ctx,referenceProfile);
-  info.textContent=entry.error?'Character guide · original not reachable':'Loading Mahluk Hidup reference…';
+  info.textContent=entry.error?'Referensi karakter · sumber tidak tersedia':'Memuat referensi karakter…';
  }
 }
 function snapshot(){
@@ -278,7 +278,9 @@ function payload(){
  return {id:objectId||'obj-'+Math.random().toString(36).slice(2,12),
   name:$('opcName').value.trim().slice(0,80),category:$('opcCategory').value,
   footprint:[Number($('opcWidth').value),Number($('opcDepth').value)],
-  collision:$('opcCollision').value==='true',worldHeight:g.VLPixelCreatorScale?.height(),views:Object.fromEntries(DIR.map(d=>[d,trim(canvas[d])])),version:2
+  collision:$('opcCollision').value==='true',
+  ...(preservedWorldHeight!==null?{worldHeight:preservedWorldHeight}:{}),
+  views:Object.fromEntries(DIR.map(d=>[d,trim(canvas[d])])),version:2
  };
 }
 function categoryChanged(){
@@ -286,7 +288,7 @@ function categoryChanged(){
  $('opcGuide').replaceChildren();const strong=document.createElement('strong');strong.textContent=cat.label+' / '+cat.group;
  const p=document.createElement('span');p.textContent=cat.guide;$('opcGuide').append(strong,p);
  if(!objectId){$('opcWidth').value=cat.defaultFootprint[0];$('opcDepth').value=cat.defaultFootprint[1];$('opcCollision').value=String(cat.collision);
-   g.VLPixelCreatorScale?.reset($('opcCategory').value);}
+  }
 }
 function loadImg(url,target,callback){
  const img=new Image();img.onload=()=>{
@@ -300,11 +302,13 @@ function loadImg(url,target,callback){
 }
 function editRow(row,isBuiltin=false){
  fresh();objectId=isBuiltin?null:row.id;
+ const native=(g.VLAssetCatalog||[]).find(spec=>spec.source==='bangun-object'&&spec.id===row.id);
+ const h=Number(row.worldHeight??native?.worldHeight);
+ preservedWorldHeight=Number.isFinite(h)&&h>=.3&&h<=24?h:null;
  $('opcName').value=isBuiltin?row.name+' Custom':row.name;
  $('opcCategory').value=row.category;
  categoryChanged();
  $('opcWidth').value=row.footprint[0];$('opcDepth').value=row.footprint[1];$('opcCollision').value=String(row.collision!==false);
- g.VLPixelCreatorScale?.load(row,isBuiltin);
  for(const d of DIR){
   const url=isBuiltin?bridge.image(row.id,d):row.views[d]?.url;
   if(url)loadImg(url,canvas[d],show);
@@ -411,7 +415,7 @@ $('opcGoSemesta').onclick=()=>{window.location.href='../';};
 function open(){
  if(!opened){fresh();library();opened=true;}else{library();show();}
  if(!dlg.open)dlg.showModal();
- updateGuides();g.VLPixelCreatorScale?.render();
+ updateGuides();
 }
 if(!button.hasAttribute('onclick'))button.addEventListener('click',open);
 const sidebar=byId('openObjectCreatorShelf');
