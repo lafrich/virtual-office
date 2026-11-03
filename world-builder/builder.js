@@ -1949,11 +1949,17 @@ function frame(now){
  for(const entry of billboardSprites){
    const {root,plane}=entry;
    const key=plane.userData.assetFile,spec=assetByName.get(key);
-   if(spec?.source==='pipeline-street'){
+   if(spec&&['pipeline-street','custom-building'].includes(spec.source)){
      const dir=spriteDirection(root.rotation.y*180/Math.PI);
      if(dir!==plane.userData.displayFacing){
-       plane.material.map=pixelTexture(key,dir);plane.material.needsUpdate=true;
+       plane.material.map=pixelTexture(key,dir);
+       plane.material.needsUpdate=true;
        plane.userData.displayFacing=dir;plane.userData.aspectFixed=false;
+       const native=spec.variants?.[dir]||spec.variants?.sw||spec.variants?.se;
+       if(native?.size&&native?.pivot){
+         plane.userData.pivotY=native.pivot[1]/native.size[1];
+         plane.userData.pivotX=(native.size[0]/2-native.pivot[0])/native.size[0];
+       }
      }
    }
    const tex=plane.material.map,img=tex?.image;
