@@ -144,6 +144,22 @@ function nearestDistance(route,point){
  }
  return distance;
 }
+// Turn a vehicle around along the SAME painted road corridor.
+ // 'Auto' previously always drove east/south; derive its current live heading
+ // before choosing the opposite direction, so Flip works on horizontal and
+ // vertical streets and stays deterministic after the draft is reloaded.
+const opposite=Object.freeze({east:'west',west:'east',south:'north',north:'south'});
+function routeHeading(route,distance=0){
+ if(!route?.length)return null;
+ const position=sample(route,Math.max(0,Math.min(route.length-.0001,Number(distance)||0)));
+ if(!position)return null;
+ return Math.abs(position.dx)>=Math.abs(position.dz)?
+  (position.dx>=0?'east':'west'):(position.dz>=0?'south':'north');
+}
+function flipDirection(direction='auto',route=null,distance=0){
+ const current=opposite[direction]?direction:routeHeading(route,distance);
+ return opposite[current]||null;
+}
 function config(o){
  const kind=o.type==='vehicle'?'vehicle':o.type==='crowd'?'crowd':o.type==='quest_npc'?'quest_npc':'pedestrian';
  const mode=o.motion?.mode||typeFor(kind);
@@ -167,5 +183,5 @@ function spawnPosition(map,x,z,mode,radius=5,walkable=null){
  return best;
 }
 g.VLSemestaTraffic=Object.freeze({validModes,D,index,kind,allowed,choose,sidewalkCircuit,makeRoute,sample,
- nearestDistance,config,spawnPosition});
+ nearestDistance,config,spawnPosition,routeHeading,flipDirection});
 })(window);
