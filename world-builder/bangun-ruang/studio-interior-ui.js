@@ -62,7 +62,7 @@ function init(api){
    }
    asset.value=placing;
   }
-  setPreview('interior');draw();renderObjects();updateTray();
+  setPreview('interior');draw();renderObjects();updateTray();updateRotateBar();
   onStatus(placing?'Tap floor to place '+model.types[placing].label:'Placement cancelled');
  }
  function updateTray(){
@@ -87,6 +87,28 @@ function init(api){
   }
   updateTray();
  }
+ function updateRotateBar(){
+  const item=enabled&&preview==='interior'&&!placing?
+   scene().items.find(x=>x.id===selected):null;
+  const bar=$('interiorRotateBar');
+  bar.hidden=!item;
+  if(!item)return;
+  const facing=['↙ SW','↘ SE','↗ NE','↖ NW'][((item.rotation||0)/90)%4];
+  $('rotateSelection').textContent=(model.types[item.assetId]?.glyph||'□')+' '+item.name;
+  $('rotateHint').textContent=facing+' · '+(item.rotation||0)+'° · R shortcut';
+ }
+ function rotateSelected(steps){
+  if(!enabled||preview!=='interior'||placing||!selected)return false;
+  const current=scene(),item=current.items.find(x=>x.id===selected);
+  if(!item)return false;
+  if(!model.rotate(current,item.id,steps)){
+   onStatus('Cannot rotate '+item.name+' here · blocked by another object or doorway');
+   return false;
+  }
+  renderObjects();renderActions();draw();updateRotateBar();
+  onStatus('Rotated '+item.name+' to '+item.rotation+'° · Save Asset to keep changes');
+  return true;
+ }
  function setPreview(value){
   if(value==='interior'&&!enabled)return;
   preview=value;
@@ -98,6 +120,7 @@ function init(api){
   $('showExterior').classList.toggle('active',value==='exterior');
   $('showInterior').classList.toggle('active',value==='interior');
   if(value==='interior')draw();
+  updateRotateBar();
  }
  function selectTab(which){
   if(!names[which]||(which==='interior'||which==='actions')&&!enabled)return;
@@ -123,6 +146,7 @@ function init(api){
   if(!enabled){placing=null;selected=null;selectTab('exterior');setPreview('exterior');}
   if(enabled){normalizeScene(floor);draw();renderObjects();renderActions();}
   updateTray();
+  updateRotateBar();
   renderMetadata();
  }
  function setInteriorView(mode){
@@ -207,6 +231,7 @@ function init(api){
  function showItem(){
   const item=scene().items.find(x=>x.id===selected);
   $('interiorItemEditor').hidden=!item;
+  updateRotateBar();
   if(!item)return;
   $('interiorItemName').textContent=(model.types[item.assetId]?.glyph||'□')+' '+item.name;
   $('interiorItemC').value=item.c;$('interiorItemR').value=item.r;
@@ -285,6 +310,7 @@ function init(api){
   fillFloors();if(enabled)normalizeScene(floor);
   if(preview==='interior'&&enabled)draw();
   if(enabled)renderObjects();
+  else updateRotateBar();
   renderActions();renderMetadata();
  }
  function moveSelectedTo(c,r){
@@ -341,8 +367,21 @@ function init(api){
   scenes[floor]=model.create(cfg());scenes[floor].floor=floor;selected=null;placing=null;refresh();
  };
  $('addInteriorItem').onclick=()=>armPlacement(asset.value);
- $('cancelInteriorPlacement').onclick=()=>{placing=null;draw();updateTray();};
- $('quickCancel').onclick=()=>{placing=null;draw();updateTray();};
+ $('cancelInteriorPlacement').onclick=()=>{placing=null;draw();updateTray();updateRotateBar();};
+ $('quickCancel').onclick=()=>{placing=null;draw();updateTray();updateRotateBar();};
+ $('rotateLeft').onclick=()=>rotateSelected(-1);
+ $('rotateRight').onclick=()=>rotateSelected(1);
+ // Desktop shortcut: R clockwise, Shift+R counter-clockwise. Never steal
+ // keystrokes while editing a text input or using a dropdown.
+ document.addEventListener('keydown',e=>{
+  if(!enabled||preview!=='interior'||placing||!selected||
+     e.repeat||e.altKey||e.ctrlKey||e.metaKey||String(e.key).toLowerCase()!=='r')return;
+  const focus=document.activeElement;
+  if(focus&&(['INPUT','TEXTAREA','SELECT'].includes(focus.tagName)||
+    focus.isContentEditable))return;
+  e.preventDefault();
+  rotateSelected(e.shiftKey?-1:1);
+ });
  $('updateInteriorItem').onclick=()=>{
   const s=scene(),item=s.items.find(x=>x.id===selected);if(!item)return;
   const moved=model.move(s,item.id,Number($('interiorItemC').value),Number($('interiorItemR').value),Number($('interiorItemFacing').value));
