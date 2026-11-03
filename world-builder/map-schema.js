@@ -23,7 +23,7 @@ function defaults(item,catalog,style){
   item.type==='pedestrian'?'walker':
   item.type==='marker'?(item.markerKind||'interaction'):
   spec?.id||spec?.label||kind;
- const interactions=kind==='bench'?['sit']:kind==='trash'?['dispose']:
+ const interactions=item.type==='quest_npc'?['talk','accept_job']:kind==='bench'?['sit']:kind==='trash'?['dispose']:
   kind==='building'?['enter']:item.type==='marker'?['activate']:[];
  return {layer,subtype:String(subtype).slice(0,60),tags:[],interactions,
   capacity:kind==='bench'?2:1,entranceFacing:'', // Only manually confirmed doors become entrance anchors.
