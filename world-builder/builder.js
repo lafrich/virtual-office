@@ -290,6 +290,7 @@ function saved(){
 function undoPoint(){undoStack.push(JSON.stringify(documentMap));if(undoStack.length>60)undoStack.shift();redoStack=[];}
 function restoreStack(from,to){
  if(!from.length)return;
+ if(cameraFollowId)leaveCharacterCamera(true);
  to.push(JSON.stringify(documentMap));
  documentMap=sanitize(JSON.parse(from.pop()));selectedId=null;rebuild();rebuildTerrain();saved();
 }
@@ -1375,6 +1376,7 @@ $('loadDraft').onclick=async()=>{
   const record=await window.VLCityDrafts.load(id);
   const errors=schema.validate(record.document,assetByName,style);
   if(errors.length)throw Error(errors.join('; '));
+  if(cameraFollowId)leaveCharacterCamera(false);
   undoPoint();documentMap=sanitize(record.document);
   selectedId=null;activeDraftId=record.id;draftDirty=false;
   try{localStorage.setItem(ACTIVE_DRAFT_KEY,record.id);}catch{}
@@ -1409,6 +1411,7 @@ function loadReferencePreset(){
  if(!confirm('Load Reference City layout? Current canvas will be replaced. Save your City Draft first if needed.'))return;
  try{
   const reference=window.VLReferenceCity.create(defaultSeed,assetByName,style,schema);
+  if(cameraFollowId)leaveCharacterCamera(false);
   undoPoint();documentMap=sanitize(reference);selectedId=null;
   activeDraftId=null;draftDirty=true;
   try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
@@ -1469,6 +1472,7 @@ function makeCityExample(){
 }
 $('newCity').onclick=()=>{
  if(!confirm('Start City Sample? Map draft saat ini akan diganti. Export JSON dulu jika ingin menyimpan layout lama.'))return;
+ if(cameraFollowId)leaveCharacterCamera(false);
  undoPoint();documentMap=makeCityExample();selectedId=null;
  activeDraftId=null;draftDirty=true;
  try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
@@ -1477,6 +1481,7 @@ $('newCity').onclick=()=>{
 };
 $('reset').onclick=()=>{
  if(!confirm('Reset seluruh map draft 3D ke default?'))return;
+ if(cameraFollowId)leaveCharacterCamera(false);
  undoPoint();documentMap=clone(defaultSeed);selectedId=null;
  activeDraftId=null;draftDirty=true;
  try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
@@ -1495,7 +1500,9 @@ $('file').onchange=async e=>{
  let f=e.target.files?.[0];if(!f)return;
  try{
   const payload=JSON.parse(await f.text());const errors=schema.validate(payload,assetByName,style);if(errors.length)throw Error(errors[0]);
-  const d=sanitize(payload);undoPoint();documentMap=d;selectedId=null;
+  const d=sanitize(payload);
+   if(cameraFollowId)leaveCharacterCamera(false);
+   undoPoint();documentMap=d;selectedId=null;
    activeDraftId=null;draftDirty=true;
    try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
    rebuild();rebuildTerrain();resetCamera();saved();tell('Map imported as working copy');
