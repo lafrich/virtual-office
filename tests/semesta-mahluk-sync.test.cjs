@@ -14,7 +14,10 @@ const actors=[
    {id:'idle',name:'IDLE',row:4,frames:4,frame_ms:[270,270,270,270],loop:true,available:true},
    {id:'wave_flag',name:'WAVE FLAG',row:0,frames:4,frame_ms:[210,210,210,210],
     loop:true,available:true,sheet:'media/legacy_pak_ogah-action-wave_flag.png'}],
-  expressions:[]},
+  expressions:[
+   {id:'sleepy',label:'Sleepy',overlay:'media/pak-face-layer-sleepy.png'},
+   {id:'happy',label:'Happy',sheet:'media/legacy_pak_ogah-face-happy-4dir.png'},
+   {id:'untrusted',overlay:'https://evil.invalid/face.png'}]},
  {id:'astrofrich_base',name:'Astrofrich Base',sheet:'media/astrofrich-base-sheet.png',
   template:true,template_category:'astrofrich',
   motions:[{id:'idle',row:4,frames:4,available:true,frame_ms:[250,250,250,250],loop:true},
@@ -72,6 +75,10 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
  assert.equal(bridge.has('legacy_otis'),false);
  assert.equal(bridge.questProfile('pak_ogah'),'legacy_pak_ogah');
  assert.equal(bridge.available('legacy_pak_ogah','wave_flag').frames,4);
+ const faces=bridge.get('legacy_pak_ogah').expressions;
+ assert.equal(faces.length,2,"Accept native transparent overlays and legacy full face atlases, reject remote assets");
+ assert.equal(faces.find(f=>f.id==='sleepy').overlay,'media/pak-face-layer-sleepy.png');
+ assert.equal(faces.find(f=>f.id==='happy').sheet,'media/legacy_pak_ogah-face-happy-4dir.png');
  assert.match(bridge.url('media/legacy_pak_ogah-sheet.png'),/build=abc789/);
  assert.equal(bridge.url('https://evil.invalid/foo.png'),null);
  const named=bridge.get('custom_astro_abc');
