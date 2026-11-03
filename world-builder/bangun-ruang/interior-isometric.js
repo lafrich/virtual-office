@@ -154,16 +154,21 @@ function furniture(ctx,geo,item,selected=false){
  // Physical shadow is pixel geometry projected at ground level.
  polygon(ctx,polyPoint(geo,[[c+.1,r+.08,1],[c+w+.1,r+.08,1],
   [c+w+.1,r+d+.08,1],[c+.1,r+d+.08,1]]),'#9B866F');
+ const hitPolygons=[];
  const B=(x,y,cw,rd,low,top,material,outline=false)=>{
+  let part;
   if(type!=='wc'||fixtureRotation(item)===0)
-   return box(ctx,geo,c+x,r+y,cw,rd,low,top,material,outline);
-  const rot=fixtureRotation(item),W=w,D=d;
-  let X=x,Y=y,CW=cw,RD=rd;
-  // The WC must rotate visually together with its tank/seat and anchor.
-  if(rot===1){X=W-(y+rd);Y=x;CW=rd;RD=cw;}
-  else if(rot===2){X=W-(x+cw);Y=D-(y+rd);}
-  else if(rot===3){X=y;Y=D-(x+cw);CW=rd;RD=cw;}
-  return box(ctx,geo,c+X,r+Y,CW,RD,low,top,material,outline);
+   part=box(ctx,geo,c+x,r+y,cw,rd,low,top,material,outline);
+  else {
+   const rot=fixtureRotation(item),W=w,D=d;
+   let X=x,Y=y,CW=cw,RD=rd;
+   if(rot===1){X=W-(y+rd);Y=x;CW=rd;RD=cw;}
+   else if(rot===2){X=W-(x+cw);Y=D-(y+rd);}
+   else if(rot===3){X=y;Y=D-(x+cw);CW=rd;RD=cw;}
+   part=box(ctx,geo,c+X,r+Y,CW,RD,low,top,material,outline);
+  }
+  hitPolygons.push(part.top,part.sw,part.se);
+  return part;
  };
  const place=()=>{
  switch(type){
@@ -265,7 +270,7 @@ function furniture(ctx,geo,item,selected=false){
  return {id:item.id, c:item.c,r:item.r,
   minX:Math.min(...all.map(p=>p[0]))-2,maxX:Math.max(...all.map(p=>p[0]))+2,
   minY:Math.min(...all.map(p=>p[1]))-2,maxY:Math.max(...all.map(p=>p[1]))+2,
-  depth:c+r+w+d};
+  depth:c+r+w+d,polygons:hitPolygons};
 }
 function drawSeatForeground(ctx,geometry,item){
  if(!item||item.assetId!=='wc')return;
@@ -326,12 +331,24 @@ function tileAt(geo,x,y){
  const c=Math.floor((u+v)/2),r=Math.floor((v-u)/2);
  return c>=0&&r>=0&&c<geo.w&&r<geo.d?{c,r}:null;
 }
+function insidePolygon(points,x,y){
+ let inside=false;
+ for(let i=0,j=points.length-1;i<points.length;j=i++){
+  const a=points[i],b=points[j];
+  if((a[1]>y)!==(b[1]>y)&&x<((b[0]-a[0])*(y-a[1]))/(b[1]-a[1])+a[0])
+   inside=!inside;
+ }
+ return inside;
+}
 function pick(geometry,x,y,{preferFloor=false}={}){
  if(!geometry)return null;
  if(!preferFloor){
+  // Bounding boxes of a 112px actor and 70px WC overlap several tiles.
+  // Hit-test the actual drawn furniture polygons, not their giant bounds.
   for(let i=geometry.hits.length-1;i>=0;i--){
    const h=geometry.hits[i];
-   if(x>=h.minX&&x<=h.maxX&&y>=h.minY&&y<=h.maxY)
+   if(x<h.minX||x>h.maxX||y<h.minY||y>h.maxY)continue;
+   if(h.polygons?.some(poly=>insidePolygon(poly,x,y)))
     return {c:h.c,r:h.r,itemId:h.id};
   }
  }
@@ -347,5 +364,5 @@ function pointer(canvas,event,geometry,opts={}){
 }
 g.VLInteriorIso=Object.freeze({version:'v7',tilePixels:Object.freeze([64,32]),
  bounds,point,pick,pointer,draw,tileAt,itemFootprint,
- fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground,WC_SEAT_Z,WC_TANK_Z,WALL});
+ fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground,insidePolygon,WC_SEAT_Z,WC_TANK_Z,WALL});
 })(window);
