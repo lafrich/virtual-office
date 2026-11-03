@@ -949,6 +949,8 @@ function updateSelection(){
   $('crowdCount').closest('label').hidden=cur.type!=='crowd';
   $('questAction').value=cfg.idleAction;
   $('questAction').closest('label').hidden=cur.type!=='quest_npc';
+  $('jobRoleLabel').hidden=cur.type!=='quest_npc';
+  $('jobRole').value=cur.jobId||'community_job';
   $('motionEnabled').checked=cfg.enabled;
   $('motionHint').textContent=cur.type==='vehicle'?
    'Mobil dan motor hanya di jalan · otomatis loop.':
