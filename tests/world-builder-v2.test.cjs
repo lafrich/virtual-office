@@ -29,6 +29,20 @@ assert.equal(original.scale,1.15);assert.equal(original.rotation,0);
 assert.notEqual(style.reason(original,[],data.map,catalog),'');
 assert.equal(style.nearest(original,[],data.map,catalog),true);
 assert.equal(style.reason(original,[],data.map,catalog),'');
+// Unbounded map must preserve far-away terrain and allow distant buildings.
+const far={...data.map,unbounded:true,terrain:{default:'grass',cells:[]}};
+const farBuilding={id:'far-away',type:'building',name:'Remote Office',w:3,d:3,h:5,x:52000,z:-32000,rotation:0,scale:1,collision:true};
+assert.equal(style.reason(farBuilding,[],far,catalog),'');
+const unlimited={default:'grass',cells:[]};
+terrainTestPlaceholder();
+function terrainTestPlaceholder(){
+ const t=w.VLMapTerrain;
+ assert.equal(t.paint(unlimited,52000,-32000,'water',2,{bounds:null}),4);
+ assert.equal(t.read(unlimited,52001,-31999,t.dict(unlimited)),'water');
+ const imported=t.normalize(unlimited,null);
+ assert.equal(imported.cells.length,4);
+ assert.equal(t.fill(imported,52002,-32000,'plaza',{bounds:null,fillBounds:{minX:52000,maxX:52005,minZ:-32002,maxZ:-31997}})>0,true);
+}
 const out=schema.enrich(data,catalog,style);
 assert.equal(schema.validate(out,catalog,style).length,0);
 assert.equal(out.schema,'virtual-life-ai-map-v3');
@@ -49,6 +63,9 @@ assert.ok(out.objects.every(o=>o.interactionHooks.every(h=>h.enabled===false)));
 assert.ok(out.objects.find(o=>o.asset==='pipeline:kantor_a').footprint.w>0);
 const html=fs.readFileSync(path.join(root,'world-builder/index.html'),'utf8');
 assert.ok(html.includes('xp.css'));assert.ok(html.includes('logicPane'));
+assert.ok(html.includes('id="closeInspector"'));
+assert.ok(html.includes('id="closeAssets"'));
+assert.ok(html.includes('id="floatingInspector"'));
 assert.ok(!html.includes('id="zoomIn"'));assert.ok(!html.includes('id="zoomOut"'));
 assert.ok(!fs.existsSync(path.join(root,'world-builder/gpt/index.html')),'retired secondary builder must be removed');
 const rig=fs.readFileSync(path.join(root,'world-builder/pipeline-character-rig.js'),'utf8');
