@@ -41,8 +41,26 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .desc{font:11px/1.55 Tahoma,Verdana,sans-serif;color:#494945;margin:16px 0 16px;min-height:36px}
 .inspector .chrome-button{width:100%;margin-top:auto}
 .foot{min-height:35px;border-top:2px solid #85827c;display:flex;align-items:center;gap:14px;padding:5px 14px;background:#d7d4ce;font:11px "Courier New",monospace}.foot .right{margin-left:auto}
-.boot{position:fixed;z-index:20;inset:0;background:linear-gradient(140deg,#092057,#0a357a 52%,#0c2256);color:white;display:grid;place-items:center;transition:opacity .25s ease}.boot.done{opacity:0;pointer-events:none}.boot-inner{text-align:center;width:min(310px,80vw)}.boot-logo{display:block;margin:0 auto 18px;width:55px;height:55px;box-shadow:2px 3px #021b4c;display:grid;place-items:center;color:#092d75;border:3px solid #fff;background:linear-gradient(135deg,#e4ec68 0 40%,#e85f40 42% 60%,#36b7c5 64%);font-size:37px;font-weight:bold}.boot h2{font:900 32px "Arial Black",Impact,Tahoma,sans-serif;letter-spacing:-.055em;margin:0 0 17px}.bar{height:16px;border:2px solid #9dbff1;background:#122252;padding:2px;margin:0 auto 14px;width:220px;max-width:100%}.bar div{height:8px;width:0;background:repeating-linear-gradient(90deg,#58bdf6 0 15px,#0e63d4 15px 19px);animation:load 1.35s forwards}.boot small{font:10px "Courier New",monospace;color:#a9c3e2}.skip{display:block;margin:20px auto 0;color:#dfebff;background:none;border:0;font:11px Tahoma,sans-serif;text-decoration:underline}
-@keyframes load{to{width:100%}}
+.boot{position:fixed;z-index:20;inset:0;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,#0b1c57 0%,#113781 46%,#0e2e71 100%);color:#fff;transition:opacity .3s ease,visibility .3s ease}
+.boot:before,.boot:after{content:"";position:absolute;left:0;right:0;height:2px;background:#648acc;box-shadow:0 1px 0 #001c4b}
+.boot:before{top:15%}.boot:after{bottom:15%}
+.boot.done{opacity:0;visibility:hidden;pointer-events:none}
+.boot-inner{width:min(420px,86vw);text-align:center;transform:translateY(-2%);position:relative}
+.boot-brand{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:25px}
+.boot-xp-mark{width:56px;height:56px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;transform:perspective(100px) rotateY(-9deg) skewY(-7deg);filter:drop-shadow(2px 3px 2px #071c52)}
+.boot-xp-mark i:nth-child(1){background:linear-gradient(140deg,#ffb25c,#e75235)}
+.boot-xp-mark i:nth-child(2){background:linear-gradient(140deg,#a8dc69,#47a83c)}
+.boot-xp-mark i:nth-child(3){background:linear-gradient(140deg,#80cafa,#166cce)}
+.boot-xp-mark i:nth-child(4){background:linear-gradient(140deg,#ffe78f,#efb82f)}
+.boot-name{text-align:left;line-height:1}
+.boot-name h2{margin:0;font:700 clamp(28px,7vw,43px)/1 Tahoma,Verdana,Arial,sans-serif;letter-spacing:-.045em;text-shadow:1px 2px #041b50}
+.boot-name small{display:block;text-align:right;margin-top:6px;font:11px Tahoma,Verdana,sans-serif;letter-spacing:.3em;color:#c5d6ff}
+.boot-loader{width:226px;max-width:74vw;height:20px;border:1px solid #a6bce8;border-radius:4px;margin:0 auto;padding:3px;background:#091f53;box-shadow:inset 1px 2px 3px #06102a}
+.boot-loader-track{width:100%;height:12px;overflow:hidden;position:relative;background:#0a1e4f}
+.boot-loader-bar{position:absolute;left:-38%;top:0;width:38%;height:12px;background:repeating-linear-gradient(90deg,#3fb23c 0 13px,#82e474 13px 16px,#2359a9 16px 19px);border-radius:2px;animation:xpLoad 1.22s linear infinite}
+.boot-caption{margin-top:15px;color:#c0d4fa;font:11px Tahoma,Verdana,sans-serif;letter-spacing:.04em}
+.skip{display:block;margin:29px auto 0;color:#b9cdef;background:transparent;border:0;text-decoration:underline;text-underline-offset:3px;font:11px Tahoma,Verdana,sans-serif}.skip:hover{color:#fff}
+@keyframes xpLoad{from{left:-38%}to{left:100%}}
 .modal-cover{position:fixed;inset:0;z-index:15;background:#102350a1;display:grid;place-items:center;padding:14px}
 .modal{width:min(460px,100%);background:var(--chrome);border:2px solid #fafafa;outline:2px solid #292929;box-shadow:6px 10px #0005}.modal .titlebar{height:39px}.modal .window-title{font-size:15px}.modal-body{padding:16px;background:#e5e3df}.modal-body label{font:bold 11px "Courier New",monospace;display:block;margin-bottom:12px}.modal-body input{display:block;background:#fff;width:100%;padding:9px;border:2px inset #a8a8a8;margin-top:5px;outline-offset:1px}.modal-buttons{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.modal-error{color:#9e2a21;min-height:14px;font:11px Tahoma,sans-serif}
 @media(max-width:800px){.workspace{grid-template-columns:190px minmax(0,1fr) 205px}.prop-inner{padding:9px}.inspector h1{font-size:20px}.file-name{font-size:10px}}
@@ -158,8 +176,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <footer class="foot"><span id="status">READY</span><span class="right">MEMBANGUN / CREATIVE STUDIO</span></footer>
 </main>
 </div>
-<div class="boot" id="boot" role="dialog" aria-label="Launching Membangun">
-<div class="boot-inner"><span class="boot-logo">✳</span><h2>MEMBANGUN</h2><div class="bar"><div></div></div><small>LOADING PROGRAMS...</small><button id="skip" class="skip" type="button">Skip intro</button></div>
+<div class="boot" id="boot" role="dialog" aria-label="Membangun starting up">
+<div class="boot-inner">
+  <div class="boot-brand"><div class="boot-xp-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="boot-name"><h2>Membangun</h2><small>STUDIO</small></div></div>
+  <div class="boot-loader" aria-hidden="true"><div class="boot-loader-track"><div class="boot-loader-bar"></div></div></div>
+  <div class="boot-caption">Starting up...</div>
+  <button id="skip" class="skip" type="button">Skip</button>
+</div>
 </div>
 <div class="modal-cover" id="modal" hidden role="dialog" aria-modal="true" aria-label="Set app URLs">
 <div class="modal">
