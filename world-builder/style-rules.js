@@ -24,7 +24,8 @@ const PIXELS={
 };
 function category(o,catalog){
  const spec=o?.type==='sprite'?catalog?.get(o.asset):null;
- if(o?.type==='avatar'||o?.type==='npc')return 'actor';
+ if(['avatar','npc','pedestrian','crowd','quest_npc'].includes(o?.type))return 'actor';
+ if(o?.type==='vehicle')return 'vehicle';
  if(o?.type==='marker')return 'marker';
  if(PROP_NAMES.has(o?.type))return o.type==='box'?'prop':o.type;
  if(spec){
@@ -44,7 +45,14 @@ function category(o,catalog){
 function footprint(o,catalog){
  const s=o?.type==='sprite'?catalog?.get(o.asset):null;
  const kind=category(o,catalog);
- if(kind==='actor')return [0.65,0.65];
+ if(kind==='actor')return o.type==='crowd'?[.75,.75]:[.65,.65];
+ if(kind==='vehicle'){
+  const meta=g.VLSemestaCatalog?.vehicle(o.vehicleId),size=meta?.footprint||[2.9,1.05];
+  let [w,d]=size;
+  const direction=o.motion?.direction||'auto';
+  if(['north','south'].includes(direction))[w,d]=[d,w];
+  return [w*Number(o.scale||1),d*Number(o.scale||1)];
+ }
  if(kind==='marker')return [.15,.15];
  if(kind==='building'){
   let width=Math.max(.5,Number(s?.footprint?.[0]||o.w||6));
@@ -61,7 +69,9 @@ function footprint(o,catalog){
          Math.max(.5,Number(dims[1]||native[1]))*Number(o.scale||1)];
 }
 function normalize(o,catalog){
- if(o.type==='avatar'||o.type==='npc'||o.type==='marker'){o.rotation=0;o.scale=1;return o;}
+ if(['avatar','npc','marker','pedestrian','crowd','quest_npc','vehicle'].includes(o.type)){
+  o.rotation=0;o.scale=1;return o;
+ }
  const s=o.type==='sprite'?catalog?.get(o.asset):null;
  const hasViews=s?.variants&&Object.keys(s.variants).length>1;
  const lockRotation=o.type==='sprite'&&!hasViews;
@@ -83,7 +93,18 @@ function getTerrainIndex(t){
 function reason(o,objects,map,catalog){
  const itemKind=category(o,catalog);
  if(itemKind==='marker')return ''; // Editor-only logic anchors are not physical.
- const isActor=itemKind==='actor';
+ const isMobile=['vehicle','pedestrian','crowd','quest_npc'].includes(o.type);
+ const isActor=itemKind==='actor'||itemKind==='vehicle';
+ if(isMobile){
+  const allowed=o.type==='vehicle'?'road':'sidewalk';
+  const t=map?.terrain;
+  if(t){
+   const tiles=getTerrainIndex(t),tile=tiles.get(Math.floor(Number(o.x))+','+Math.floor(Number(o.z)))||t.default||'grass';
+   if(tile!==allowed)return o.type==='vehicle'?'Kendaraan harus di atas jalan.':'NPC / crowd harus di atas trotoar.';
+  }
+  if(o.type!=='quest_npc'&&!g.VLSemestaTraffic?.choose(map,o.x,o.z,o.type==='vehicle'?'vehicle':'pedestrian',o.motion?.direction||'auto'))
+   return 'Butuh jalur lurus minimal tiga tile berurutan.';
+ }
  const bounds=map?.worldBounds||BOUNDS;
  const [w,d]=footprint(o,catalog),x=Number(o.x),z=Number(o.z);
  if(!map?.unbounded&&(x-w/2<bounds.minX||x+w/2>bounds.maxX||z-d/2<bounds.minZ||z+d/2>bounds.maxZ))
@@ -97,7 +118,7 @@ function reason(o,objects,map,catalog){
   const minR=Math.floor(z-d/2+.08),maxR=Math.ceil(z+d/2-.08);
   for(let c=minC;c<maxC;c++)for(let r=minR;r<maxR;r++){
    const kind=tiles.get(c+','+r)||map.terrain.default||'grass';
-   if(kind==='water')return 'Objek tidak boleh menutupi air.';
+   if(kind==='water'&&!isMobile)return 'Objek tidak boleh menutupi air.';
    if(kind==='road'&&!isActor)return 'Bangunan/prop tidak boleh menutupi jalan.';
   }
  }
