@@ -314,6 +314,7 @@ function init(api){
   }
   if(c<0||z<0||c>=scene().width||z>=scene().depth)return;
   e.preventDefault();
+  if(api.onFloorClick?.(c,z,hit)===true)return;
   if(hit?.itemId&&!placing){
    selected=hit.itemId;renderObjects();draw();return;
   }
@@ -383,7 +384,10 @@ function init(api){
   if(active)library.scrollIntoView({behavior:'smooth',block:'nearest'});
  };
  fillFloors();buildTray();updateCategories();renderMetadata();setInteriorView('iso');
- return {load,reset,refresh,serialize,isInteractive:()=>enabled,setPreview,selectTab,setInteriorView};
+ return {load,reset,refresh,serialize,isInteractive:()=>enabled,
+  setPreview,selectTab,setInteriorView,selectFloor,
+  getScene:()=>enabled?scene():null,getSelectedProp:()=>scene().items.find(x=>x.id===selected)||null,
+  getInteriorView:()=>interiorView};
 }
 g.VLStudioInteriors=Object.freeze({init});
 })(window);
