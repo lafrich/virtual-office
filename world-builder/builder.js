@@ -249,7 +249,7 @@ function sanitize(v){
  let ids=new Set(),out=clone(seed);out.objects=[];
  for(const p of v.objects){
   if(!p||typeof p.id!=='string'||p.id.length>100||ids.has(p.id))continue;
-  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc','marker','vehicle','pedestrian','crowd','quest_npc'].includes(p.type))continue;
+  if(!['building','shop','bench','lamp','tree','box','sprite','avatar','npc','marker','vehicle','pedestrian','crowd','quest_npc','virtual_asset'].includes(p.type))continue;
   ids.add(p.id);
   let e={
    id:p.id,name:String(p.name||p.type).slice(0,90),type:p.type,
@@ -261,6 +261,12 @@ function sanitize(v){
   };
   for(const k of ['w','d','h','width','height'])if(Number.isFinite(Number(p[k])))e[k]=clamp(Number(p[k]),.2,80);
   if(typeof p.color==='string'&&/^#[0-9a-fA-F]{6}$/.test(p.color))e.color=p.color;
+  if(typeof p.assetPath==='string'&&p.assetPath.length<=240&&!p.assetPath.includes('..')&&
+    !p.assetPath.startsWith('/')&&/\.(png|webp|jpe?g|gif)$/i.test(p.assetPath))e.assetPath=p.assetPath;
+  if(p.type==='virtual_asset'){
+   if(!e.assetPath)continue;
+   e.assetCategory=['building','prop','tree'].includes(p.assetCategory)?p.assetCategory:'prop';
+  }
   if(p.type==='sprite'){if(typeof p.asset!=='string'||!assetByName.has(p.asset))continue;e.asset=p.asset;}
   if(p.type==='sprite'&&/^(?:env|street2)\/[a-z0-9_/-]+\.png$/.test(p.asset||'')&&assetByName.has(p.asset))e.asset=p.asset;
   if(actorType(p.type)){
