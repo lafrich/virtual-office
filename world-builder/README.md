@@ -116,3 +116,14 @@ Semesta includes **🔐 Virtual Life Assets** to browse the original game image 
 - **Security:** do not paste your login password in GitHub issues, comments, source code or JSON exports. Unlock only via the official game or the local Semesta password field.
 
 The bridge has source/DOM/syntax checks, but cannot verify live user credentials without a real browser session. Browser verification is required before claiming a particular locked source image is available.
+
+## Building View: Solid / Outline (Semesta)
+
+Use **BUILDING VIEW → ◇ Outline** on the canvas toolbar or the **◇** icon in the left-hand tools to switch all buildings from their solid pixel/mesh appearance into selectable architectural reference lines. **■ Solid** returns to the normal visuals.
+
+- Each outline follows the **actual authored mesh edges** (walls, roof details, doors, windows, landmarks) when those meshes exist.
+- Guide lines add a clearly defined **ground footprint**, facade floor levels, entrance reference and vertical building corners. A single-billboard original source image still gets a structural footprint/height guide rather than an empty frame.
+- An invisible, non-rendering pick proxy allows **tap, select, move, rotate, resize, and Properties** in Outline mode. Physics/collision, vehicle traffic, NPCs and interior action data are unchanged.
+- Both controls use the same toggle state. The view setting is saved in this browser's localStorage only; it never modifies the City Draft or JSON world file.
+- Original Virtual Life images unlocked after a view switch rebuild their matching guide geometry; locking restores their preview geometry. Outline meshes are disposed when buildings or maps are replaced.
+- This is a **visual inspection aid**, not a mesh-editing CAD application. Complex sprites use a bounding and footprint reference in place of unavailable physical 3D surface geometry.
