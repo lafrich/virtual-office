@@ -14,7 +14,7 @@ test('Pixel Creator buttons are persistent and directly wired in source HTML',()
   assert.match(html,new RegExp('id="'+id+'"[^>]*onclick="window\\.openBangunPixelCreator\\(event\\)"'));
  }
  assert.match(html,/window\.openBangunPixelCreator=async function/);
- assert.match(html,/pixel-object-creator\.js\?v=creator-fix2/);
+ assert.match(html,/pixel-object-creator\.js\?v=creator-(?:grid-xp-v1|fix2)/);
 });
 test('object bridge registers all built-in metadata without blocking on canvas rasterization',()=>{
  const window={VLAssetCatalog:[{file:'pipeline:source',source:'pipeline-street'}],VLBuildingInterior:{types:{wc:{label:'WC',w:1,d:1,actions:['use_toilet']}}}};
@@ -30,17 +30,18 @@ test('Pixel Creator initializes and opens a modal with either static-button entr
  class El{
   constructor(tag,id=''){this.tagName=tag;this.id=id;this.children=[];this.style={};
    this.classList={toggle(){},add(){}};this.value='';this.width=96;this.height=144;
-   this.isConnected=true;this.open=false;}
+   this.isConnected=true;this.open=false;this.attrs={};this.disabled=false;this.hidden=false;}
   set innerHTML(markup){for(const match of markup.matchAll(/<([a-z]+)[^>]*?\bid="([^"]+)"[^>]*>/g))
    els.set(match[2],new El(match[1],match[2]));}
   append(...children){this.children.push(...children);for(const child of children)if(child.id)els.set(child.id,child);}
   appendChild(child){this.append(child);return child;}
   replaceChildren(){this.children=[];}
   addEventListener(){}
+  setAttribute(name,value){this.attrs[name]=value;}
   querySelectorAll(){return [];}
   hasAttribute(attr){return attr==='onclick'&&['openObjectPixelCreator','openObjectCreatorShelf'].includes(this.id);}
   showModal(){this.open=true;}
-  getContext(){return {clearRect(){},drawImage(){},fillRect(){},
+  getContext(){return {clearRect(){},drawImage(){},fillRect(){},fillText(){},
    getImageData:()=>({data:new Uint8Array(this.width*this.height*4)})};}
   toDataURL(){return PNG;}
  }
@@ -52,11 +53,28 @@ test('Pixel Creator initializes and opens a modal with either static-button entr
   guide:'2:1 scale',defaultFootprint:[1,1],collision:false}},
   builtins:[{id:'park-lamp',name:'Lamp',category:'decor',footprint:[1,1],collision:false}],
   image:()=>PNG,read:()=>[],valid:()=>true}};
- vm.runInNewContext(creator,{window,document,Image:El,console});
+ const persisted=new Map();const localStorage={getItem:key=>persisted.get(key)||null,setItem:(k,v)=>persisted.set(k,v)};
+ vm.runInNewContext(creator,{window,document,localStorage,Image:El,console});
  assert.equal(typeof window.VLPixelCreator?.open,'function');
  assert.equal(els.get('openObjectPixelCreator').id,'openObjectPixelCreator');
  window.VLPixelCreator.open();
  assert.equal(els.get('objectPixelDialog').open,true);
  assert.match(els.get('opcStatus').textContent,/New object/);
+ assert.match(els.get('opcGridToggle').textContent,/Grid ON/);
+ assert.match(els.get('opcRefToggle').textContent,/Character ON/);
+ assert.equal(els.get('opcGridOverlay').style.display,'block');
+ els.get('opcGridToggle').onclick();
+ assert.match(els.get('opcGridToggle').textContent,/Grid OFF/);
+ assert.equal(els.get('opcGridOverlay').style.display,'none');
+ els.get('opcGridToggle').onclick();
+ els.get('opcGridSize').value='16';els.get('opcGridSize').onchange();
+ assert.match(els.get('opcGridOverlay').style.backgroundSize,/16\.666/);
+ els.get('opcRefToggle').onclick();
+ assert.match(els.get('opcRefToggle').textContent,/Character OFF/);
+ assert.equal(els.get('opcReferencePanel').style.display,'none');
+ els.get('opcRefToggle').onclick();
+ assert.equal(els.get('opcReferencePanel').style.display,'block');
+ assert.ok(els.get('opcCharacterCanvas'),'native 64x112 reference frame is mounted');
+ assert.match(creator,/linear-gradient\(90deg,#042777/,'Windows XP titlebar is shared');
  assert.doesNotThrow(()=>window.VLPixelCreator.open());
 });
