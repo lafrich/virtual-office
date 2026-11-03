@@ -876,7 +876,10 @@ function onDown(e){
  if(hit&&mode!=='walk')select(hit);
  if(hit&&mode==='walk'){
    const touched=documentMap.objects.find(x=>x.id===hit);
-   if(touched&&actorType(touched.type)){walkActorId=hit;select(hit);}
+   if(touched&&actorType(touched.type)){
+    walkActorId=hit;select(hit);
+    if(cameraFollowId){cameraFollowId=hit;updateCharacterCameraUI();}
+   }
  }
  const p=floorPoint(e);
  if(mode==='move'&&hit&&p){
@@ -896,6 +899,12 @@ function onMove(e){
   const pts=[...pointers.values()],len=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
   const mid={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
   viewSize=clamp(pinch.view*pinch.dist/Math.max(10,len),8,180);
+  if(cameraFollowId){
+   // In follow mode a pinch changes zoom, but does not pull the camera away.
+   const actor=owners.get(cameraFollowId);
+   if(actor)cameraFocus.set(actor.position.x,0,actor.position.z);
+   fitCamera();return;
+  }
   cameraFocus.copy(pinch.focus);fitCamera();
   const groundUnderFingers=floorPoint({clientX:mid.x,clientY:mid.y});
   if(groundUnderFingers&&pinch.ground){
@@ -924,6 +933,10 @@ function onMove(e){
   drag.changed=true;applyItem();
   if(drag.actor)rigs.get(o.id)?.rig.setMoving(o.x-oldX,o.z-oldZ,true);
  }else if(drag.kind==='pan'&&!drag.hit){
+  // Deliberate one-finger pan exits Follow, leaving the camera at its current location.
+  if(cameraFollowId&&Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>5)
+   leaveCharacterCamera(false);
+  if(cameraFollowId)return;
   // Use camera-aligned world pan; horizontal drag translates on iso ground.
   let sx=e.clientX-drag.sx,sy=e.clientY-drag.sy,r=canvas.getBoundingClientRect(),
       pixel=viewSize/Math.max(1,r.height);
@@ -1004,7 +1017,7 @@ function updateCharacterCameraUI(){
  const actor=following?documentMap.objects.find(o=>o.id===cameraFollowId):null;
  $('cameraFollowLabel').hidden=!following;
  $('cameraFollowLabel').textContent=actor?'🎥 FOLLOW · '+actor.name:'🎥 FOLLOW';
- $('cameraMapView').disabled=!following&&documentMap.map?.preset!=='reference-city-v1'?false:false;
+ $('cameraMapView').disabled=false;
 }
 function findCameraActor(){
  const selected=item();
@@ -1518,6 +1531,22 @@ function frame(now){
      holder.root.position.z+=dz*speed*dt;
      holder.rig.setMoving(dx,dz,true);
    }else holder.rig.setMoving(0,0,false);
+ }
+ // Follow the live, unsaved Walk Test character position with frame-rate
+ // independent easing. Orthographic projection prevents character scale changes.
+ if(cameraFollowId){
+  const actor=owners.get(cameraFollowId);
+  if(!actor){leaveCharacterCamera(false);}
+  else{
+   const alpha=1-Math.exp(-dt*10);
+   const x=actor.position.x,z=actor.position.z;
+   const remaining=Math.hypot(x-cameraFocus.x,z-cameraFocus.z);
+   if(remaining>0.003){
+    cameraFocus.x+=(x-cameraFocus.x)*alpha;
+    cameraFocus.z+=(z-cameraFocus.z)*alpha;
+    fitCamera();
+   }
+  }
  }
  for(const {rig,root} of rigs.values())rig.step(dt,camera,root.position);
  const actorStates=[...rigs.values()].map(x=>x.rig.state);
