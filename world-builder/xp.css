@@ -304,3 +304,53 @@
  #markerVisibility{min-height:34px}
  #markerManager .marker-manager-actions button{min-height:43px}
 }
+
+/* Semesta 24h sun/shadow/weather-facing color grade — UI stays undimmed. */
+#dayNightTint,#nightGlow{position:absolute;inset:0;width:100%;height:100%;
+ pointer-events:none;user-select:none}
+#dayNightTint{z-index:1;background:#142747;opacity:0;will-change:opacity,background-color}
+#nightGlow{z-index:2;display:block;image-rendering:auto}
+#hint,#status,#toast,#empty,#walkPad,#cameraFollowLabel,#floatingInspector{z-index:4}
+.semesta-clock{position:absolute;z-index:8;right:8px;top:43px;
+ color:#1a2b46;font-family:Tahoma,Verdana,sans-serif;
+ min-width:146px;max-width:min(330px,calc(100% - 16px))}
+.clock-face{width:100%;display:flex;align-items:center;gap:6px;
+ min-height:41px;border:2px solid;border-color:#fff #747c86 #747c86 #fff;
+ background:linear-gradient(180deg,#f9f8f2f5,#e0e7eafa);
+ color:#193b65;padding:5px 7px;box-shadow:2px 3px 0 #101c3260;
+ cursor:pointer;text-align:left}
+#timeIcon{font-size:19px;width:23px;flex:none;text-align:center}
+.clock-numbers{display:flex;flex-direction:column;gap:1px;min-width:59px}
+.clock-numbers strong{font:bold 17px/1 Tahoma;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.clock-numbers small{color:#5d6570;font:bold 8px Tahoma;white-space:nowrap;letter-spacing:.04em}
+#timePhase{margin-left:auto;color:#225d8f;font:bold 9px Tahoma;white-space:nowrap}
+.clock-chevron{font:bold 16px Tahoma;color:#71798a}
+.clock-panel{position:absolute;right:0;top:calc(100% + 5px);width:282px;
+ max-width:calc(100vw - 62px);z-index:9;border:2px solid #f7f7ee;
+ outline:1px solid #134e9a;background:#e0ddd3;
+ color:#1a2b46;box-shadow:3px 6px 0 #111a324f;
+ padding:10px;display:flex;flex-direction:column;gap:9px}
+.clock-panel[hidden]{display:none!important}
+.clock-panel-heading{background:linear-gradient(90deg,#0c3e96,#3786ca);color:white;
+ padding:7px 8px;font:bold 10px Tahoma;letter-spacing:.04em;margin:-10px -10px 2px}
+.clock-panel label{display:flex;align-items:center;justify-content:space-between;gap:7px;
+ font:bold 10px "Courier New",monospace;color:#36435d}
+#timeScrub{width:100%;accent-color:#216bb6;touch-action:pan-x;margin:0;min-height:20px}
+.clock-time-marks{display:flex;justify-content:space-between;color:#697079;
+ font:8px "Courier New",monospace;margin-top:-6px}
+.clock-actions{display:flex;align-items:stretch;gap:6px}
+.clock-actions button,.clock-actions select{min-height:34px;border:2px solid;
+ border-color:white #888781 #888781 white;background:#e9eef0;color:#25334a;
+ font:bold 10px Tahoma;padding:5px}
+.clock-actions #timePause{flex:1}
+.clock-actions #timePause[aria-pressed="true"]{background:#b4d0f1;color:#0c438c}
+.clock-actions label{display:flex;flex-direction:column;align-items:center;gap:2px}
+.clock-actions select{min-width:50px;min-height:27px;padding:2px;background:white}
+.clock-panel p{margin:2px 0 0;color:#56554e;font:10px/1.5 Tahoma}
+@media(max-width:780px){
+ .semesta-clock{top:42px;right:5px;min-width:136px}
+ .clock-face{padding:5px 6px;gap:4px}
+ #timeIcon{font-size:17px;width:19px}
+ .clock-numbers strong{font-size:16px}
+ .clock-panel{max-width:min(280px,calc(100vw - 61px))}
+}
