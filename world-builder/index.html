@@ -264,8 +264,12 @@
  </div>
  <div style="padding:12px;background:#f4f4eb;display:grid;gap:10px">
   <label style="font-size:12px">Floor <select id="interiorWalkthroughFloor" style="font-size:12px;padding:7px"></select></label>
+  <div class="semesta-interior-view" style="display:flex;gap:7px;align-items:center">
+   <button id="interiorWalkthroughIso" type="button" aria-pressed="true" style="flex:1;background:#125fbb;color:#fff">◈ Isometric</button>
+   <button id="interiorWalkthroughPlan" type="button" aria-pressed="false" style="flex:1">▦ Plan View</button>
+  </div>
   <div style="display:grid;place-items:center;background:repeating-conic-gradient(#dde6ee 0 25%,#f7f9fb 0 50%) 50%/16px 16px;padding:8px;min-height:230px;overflow:hidden">
-   <canvas id="interiorWalkthroughCanvas" width="320" height="320" style="image-rendering:pixelated;max-height:55dvh;max-width:100%;touch-action:manipulation"></canvas>
+   <canvas id="interiorWalkthroughCanvas" width="320" height="320" aria-label="Isometric interior view, tap furniture to select action" style="image-rendering:pixelated;max-height:55dvh;max-width:100%;touch-action:manipulation"></canvas>
   </div>
   <p id="interiorWalkthroughDetail" style="font:12px/1.5 Tahoma;margin:0;color:#34536c">Select an interior object to inspect its action.</p>
   <button id="interiorWalkthroughUse" type="button" disabled>▶ Use Selected Object</button>
@@ -278,7 +282,8 @@
 <script src="./semesta-building-spec.js?v=1"></script>
 <script src="./bangun-ruang/interior-model.js?v=3"></script>
 <script src="./bangun-ruang/interior-pixel-art.js?v=3"></script>
-<script src="./bangun-ruang/semesta-interior-preview.js?v=3"></script>
+<script src="./bangun-ruang/interior-isometric.js?v=4"></script>
+<script src="./bangun-ruang/semesta-interior-preview.js?v=4"></script>
 <script src="./bangun-ruang/semesta-bridge.js?v=3"></script>
 <script src="./vegetation-catalog.js?v=builder-v3"></script>
 <script src="./mahluk-hidup-bridge.js?v=sync-mahluk-1"></script>

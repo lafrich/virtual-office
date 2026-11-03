@@ -64,7 +64,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 @media(max-width:1000px){body{padding:0}#app{border-radius:0;min-height:100dvh}.workspace{grid-template-columns:190px minmax(260px,1fr)}.panel.right{grid-column:1/-1;border-top:1px solid #b8c6d4;border-left:0}.properties{display:grid;grid-template-columns:repeat(3,1fr);gap:7px 12px}.properties>*{min-width:0}.properties label{margin:5px 0}.properties .note,.properties .controls{grid-column:1/-1}}
 @media(max-width:640px){.workspace{display:flex;flex-direction:column}.panel{border-right:0}.panel.left{max-height:210px}.preset{padding:6px 10px}.preset-grid{grid-template-columns:repeat(5,1fr)}.preset-grid button{padding:5px 2px;font-size:10px}.library{max-height:100px}.stage{min-height:340px}.properties{grid-template-columns:1fr 1fr}.titlebar small{display:none}nav{gap:5px}nav button,nav a.button{padding:6px;font-size:10px}.canvas-head{font-size:10px}}
 </style>
-<link rel="stylesheet" href="./mobile-ui.css?v=interior-v3">
+<link rel="stylesheet" href="./mobile-ui.css?v=iso-v4">
 </head>
 <body>
 <div id="app">
@@ -92,7 +92,12 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <div id="mobileBase" class="mobile-base mobile-only" hidden></div>
  <div class="canvas-head"><span id="canvasName">UNTITLED BUILDING</span><span class="muted">ISO 2:1 · 64×32 TILE · 1X PIXELS</span></div>
  <div class="preview-toggle" aria-label="Preview mode"><button type="button" id="showExterior" class="active">▤ Exterior</button><button type="button" id="showInterior" disabled>▦ Interior</button></div>
- <div class="stage"><img id="preview" alt="Pixel art isometric building preview"><canvas id="interiorCanvas" hidden width="360" height="360" aria-label="Interactive interior tile layout. Tap to place or move furniture." role="img"></canvas></div>
+ <div id="interiorViewTools" class="interior-view-tools" hidden aria-label="Interior perspective">
+  <button type="button" id="interiorViewIso" class="active" aria-pressed="true">◈ Isometric</button>
+  <button type="button" id="interiorViewPlan" aria-pressed="false">▦ Plan / Edit</button>
+  <span>64×32 · pixel art</span>
+ </div>
+ <div class="stage"><img id="preview" alt="Pixel art isometric building preview"><canvas id="interiorCanvas" hidden width="360" height="360" aria-label="Isometric interior preview. Tap to select or place furniture." role="img"></canvas></div>
  <div class="direction-bar"><strong>VIEW</strong>
  <button class="active" data-dir="sw">SW</button><button data-dir="se">SE</button>
  <button data-dir="ne">NE</button><button data-dir="nw">NW</button>
@@ -202,7 +207,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <b>1.</b> Pilih base asli Semesta, lalu edit eksterior modular.<br>
  <b>2.</b> Pilih Non-interactive untuk bangunan dekoratif, atau Interactive untuk bangunan yang bisa dimasuki.<br>
  <b>3.</b> Interactive: buka INTERIOR untuk memilih room template, menaruh WC/kasur/kursi dan benda lain; buka ACTIONS untuk memeriksa pose Mahluk Hidup.<br>
- <b>4.</b> Lihat Exterior/Interior di preview. Simpan dari Save Asset untuk mendaftarkan 4 PNG, footprint, entrance dan action slots di Semesta.<br>
+ <b>4.</b> Interior ditampilkan sebagai pixel isometric 2:1 secara default; gunakan Plan / Edit untuk mengatur posisi secara presisi. Simpan untuk mendaftarkan sprite dan action slots di Semesta.<br>
  <b>5.</b> Action/interior hanya authoring & editor preview. Multiplayer game utama tidak dijalankan oleh Bangun Ruang.<br>
  <p><b>Penting:</b> penyimpanan bersifat lokal, bukan commit GitHub atau cloud. Export untuk backup lintas perangkat.</p>
  </section><footer><button id="closeGuide">Close</button></footer></dialog>
@@ -210,7 +215,8 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <script src="../semesta-building-spec.js?v=bangun-ruang-v2"></script>
 <script src="./interior-model.js?v=interior-v3"></script>
 <script src="./interior-pixel-art.js?v=interior-v3"></script>
-<script src="./studio-interior-ui.js?v=interior-v3"></script>
+<script src="./interior-isometric.js?v=interior-v4"></script>
+<script src="./studio-interior-ui.js?v=iso-v4"></script>
 <script>
 (function(){
 'use strict';
