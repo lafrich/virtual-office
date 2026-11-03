@@ -12,7 +12,7 @@
 // at 0.5x (56px) in BOTH views so it can actually fit through its ~58px door.
 const ACTOR_SCALE=0.5;
 const TILE_W=64,TILE_H=32,HALF_W=32,HALF_H=16,WALL=96,SLAB=8,PAD=35;
-const WC_SEAT_Z=19,WC_TANK_Z=36;
+const WC_SEAT_Z=14,WC_TANK_Z=26;
 const TYPES=g.VLBuildingInterior?.types||{};
 const PALETTES={
  cream:{floor:['#E8DEC6','#D4C8AE','#C3AD8D'],wall:['#F4EBDA','#E8DEC6','#C3AD8D'],skirt:'#9B866F'},
@@ -131,7 +131,7 @@ function actionAnchor(item){
  switch(item.assetId){
   case 'wc':
    // Mahluk Hidup uses the original 64x112 sheet at ACTOR_SCALE, including
-   // its approximately 27px hip-to-pivot sit offset. The bowl is 19px tall.
+   // its approximately 27px hip-to-pivot sit offset. The bowl is 14px tall.
    seat=[.50,.64];hip=27*ACTOR_SCALE-WC_SEAT_Z;break;
   case 'chair':
   case 'office_chair':
