@@ -19,8 +19,9 @@ const walker=t.makeRoute(map,3.5,5.5,'pedestrian');
 assert.equal(g.VLSemestaCatalog.vehicles.length,12);
 assert.equal(g.VLSemestaCatalog.questNPCs.length,6);
 assert.equal(g.VLSemestaCatalog.vehicle('bus_transjakarta').published,false);
-assert.ok(car&&!car.wrap&&car.length>20,'cars loop on parallel road lanes');
+assert.ok(car&&car.wrap&&car.length===19,'cars travel straight to road end and respawn at the starting end');
 assert.ok(walker&&walker.wrap,'sidewalk NPC loops only along the straight corridor');
+assert.ok(car.points.every(p=>p.z===1.5),'vehicle stays on one road lane with no U-turn');
 for(let d=0;d<car.length*2;d+=.3){
  const p=t.sample(car,d);
  assert.equal(t.allowed(map,p.x,p.z,'vehicle'),true,'vehicle must remain on road');
