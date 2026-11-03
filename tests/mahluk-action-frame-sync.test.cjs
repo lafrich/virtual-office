@@ -33,4 +33,23 @@ assert.ok(preview.includes("const rearView=actor.direction==='ne'||actor.directi
  "Bangun Ruang must preserve the same back-facing bag orientation");
 assert.ok(preview.includes('ctx.rect(x,y+56*scale,drawWidth,(FRAME.h-56)*scale)'),
  "Bangun Ruang must mask rear backpack away from head and neck");
+const builder=fs.readFileSync("world-builder/builder.js","utf8");
+assert.ok(world.includes("virtual-life-asset-pipeline/action-template-bridge.js"),
+ "Semesta must load same-origin saved action template bridge");
+assert.ok(world.indexOf("action-template-bridge.js")<world.indexOf("pipeline-character-rig.js"),
+ "Template registry must initialize before character rig");
+assert.ok(builder.includes("window.VLActionTemplates?.list(actorId)"),
+ "Semesta player Pose menu must list custom templates for the chosen actor");
+assert.ok(builder.includes("opt.disabled=!action.ready"),
+ "Drafts must never be playable in Semesta's Pose menu");
+assert.ok(rig.includes("g.VLActionTemplates?.get(id,requested)"),
+ "Saved template motion must be resolved before native fallback");
+assert.ok(rig.includes("g.VLActionTemplates?.frame(who,action,state.direction,frame)"),
+ "Semesta must draw authored frames for each direction and animation frame");
+assert.ok(rig.includes("source:'unavailable'"),
+ "Missing gameplay actions cannot falsely render native idle");
+assert.ok(rig.includes("if(spec.unavailable)"),
+ "Missing gameplay actions need visible UNAUTHORED display");
+assert.ok(builder.includes("virtual-life-action-templates-v1")||builder.includes("window.VLActionTemplates?.frameKey"),
+ "Semesta builder must observe action frame updates across tabs");
 console.log("PASS Mahluk Hidup action edits consume same-origin storage in Bangun and Semesta without moving furniture");
