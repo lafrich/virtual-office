@@ -1046,6 +1046,63 @@ function makeMarker(root,item){
  root.userData.editorMarker=tag;
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
+// A presentation-only switch: the same authored buildings, click targets,
+// collision footprints, interiors and City Draft JSON remain unchanged.
+const buildingGuides=new Map();
+const BUILDING_VIEW_KEY='semesta-building-view-v1';
+let buildingViewMode='solid';
+try{if(localStorage.getItem(BUILDING_VIEW_KEY)==='outline')buildingViewMode='outline';}catch{}
+function buildingGuideTarget(o){
+ return !!o&&style.category(o,assetByName)==='building';
+}
+function removeBuildingGuide(id){
+ const existing=buildingGuides.get(id);if(!existing)return;
+ buildingGuides.delete(id);
+ const root=owners.get(id);
+ if(root){
+  root.remove(existing.group);
+  for(const part of existing.sources)if(part.parent===root)part.visible=true;
+ }
+ existing.dispose();
+}
+function applyBuildingGuide(root,o){
+ removeBuildingGuide(o.id);
+ if(buildingViewMode!=='outline'||!buildingGuideTarget(o)||!root)return;
+ const painter=window.VLSemestaBuildingOutline;
+ if(!painter?.build)return;
+ const sources=[...root.children];
+ const created=painter.build(THREE,root,o,assetByName);
+ if(!created)return;
+ for(const node of sources)node.visible=false;
+ root.add(created.group);
+ buildingGuides.set(o.id,{...created,sources});
+}
+function syncBuildingViewControls(){
+ const outline=buildingViewMode==='outline';
+ $('buildingViewMode').value=buildingViewMode;
+ $('buildingOutlineTool').classList.toggle('active',outline);
+ $('buildingOutlineTool').setAttribute('aria-pressed',String(outline));
+ $('buildingOutlineTool').title=outline?'Building View: Outline ON — switch to Solid':'Building View: Solid — switch to Outline';
+}
+function setBuildingView(next){
+ const requested=next==='outline'?'outline':'solid';
+ if(buildingViewMode!==requested){
+  buildingViewMode=requested;
+  for(const o of documentMap.objects){
+   if(!buildingGuideTarget(o))continue;
+   const root=owners.get(o.id);
+   if(root)applyBuildingGuide(root,o);
+  }
+ }
+ syncBuildingViewControls();
+ try{localStorage.setItem(BUILDING_VIEW_KEY,buildingViewMode);}catch{}
+ if(highlight)highlight.update();
+ renderer.render(scene,camera);
+ tell(buildingViewMode==='outline'?
+  '◇ Building Outline ON · garis bentuk gedung, atap, jendela, pintu & tapak':
+  '■ Building Solid ON · tampilan gedung normal');
+}
+
 const bigOccluders=new Map();
 const occlusionRay=new THREE.Ray(),occlusionHit=new THREE.Vector3();
 function refreshBigOccluder(id){
