@@ -81,14 +81,15 @@ function getTerrainIndex(t){
  return index;
 }
 function reason(o,objects,map,catalog){
- if(category(o,catalog)==='actor')return '';
- if(category(o,catalog)==='marker')return ''; // Editor-only logic anchors are not solid objects.
+ const itemKind=category(o,catalog);
+ if(itemKind==='marker')return ''; // Editor-only logic anchors are not physical.
+ const isActor=itemKind==='actor';
  const bounds=map?.worldBounds||BOUNDS;
  const [w,d]=footprint(o,catalog),x=Number(o.x),z=Number(o.z);
  if(!map?.unbounded&&(x-w/2<bounds.minX||x+w/2>bounds.maxX||z-d/2<bounds.minZ||z+d/2>bounds.maxZ))
   return 'Di luar batas map/footprint.';
  const road=map?.road||{z0:ROAD[0],z1:ROAD[1]};
- if(!map?.terrain&&z+d/2>road.z0+.25&&z-d/2<road.z1-.25)
+ if(!isActor&&!map?.terrain&&z+d/2>road.z0+.25&&z-d/2<road.z1-.25)
   return 'Objek statis tidak boleh menutup badan jalan.';
  if(map?.terrain&&Array.isArray(map.terrain.cells)){
   const tiles=getTerrainIndex(map.terrain);
@@ -96,7 +97,8 @@ function reason(o,objects,map,catalog){
   const minR=Math.floor(z-d/2+.08),maxR=Math.ceil(z+d/2-.08);
   for(let c=minC;c<maxC;c++)for(let r=minR;r<maxR;r++){
    const kind=tiles.get(c+','+r)||map.terrain.default||'grass';
-   if(kind==='road'||kind==='water')return kind==='road'?'Bangunan/prop tidak boleh menutupi jalan.':'Bangunan/prop tidak boleh menutupi air.';
+   if(kind==='water')return 'Objek tidak boleh menutupi air.';
+   if(kind==='road'&&!isActor)return 'Bangunan/prop tidak boleh menutupi jalan.';
   }
  }
  const k=category(o,catalog);
@@ -105,7 +107,8 @@ function reason(o,objects,map,catalog){
   // do not mandate a fixed side because the map contains plazas and interiors.
  }
  for(const other of objects||[]){
-  if(other.id===o.id||category(other,catalog)==='actor'||other.collision===false)continue;
+  if(other.id===o.id||category(other,catalog)==='marker'||
+     other.collision===false||other.blocking==='no')continue;
   const [ow,od]=footprint(other,catalog),pad=(k==='building'||category(other,catalog)==='building')?0.2:0.12;
   if(Math.abs(x-other.x)<(w+ow)/2+pad&&Math.abs(z-other.z)<(d+od)/2+pad)
    return 'Footprint bertabrakan dengan '+(other.name||other.id)+'.';
