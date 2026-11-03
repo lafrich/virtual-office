@@ -46,8 +46,8 @@ for(const a of list){
   entranceFacing:enterable&&['sw','se'].includes(a.entranceFacing)?a.entranceFacing:'',
   interactive:enterable,enterable,
   entrance,interior,actionSlots,
-  interactions:Array.isArray(a.interactions)?
-   a.interactions.filter(x=>typeof x==='string'&&(enterable||x!=='enter')).slice(0,20):(enterable?['enter']:[]),
+  interactions:enterable&&Array.isArray(a.interactions)?
+   a.interactions.filter(x=>typeof x==='string').slice(0,20):(enterable?['enter']:[]),
   blocking:a.config.collision==='no'?'no':'yes',
   variants:Object.freeze(variants)
  });
