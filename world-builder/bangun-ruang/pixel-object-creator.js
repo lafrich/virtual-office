@@ -353,7 +353,7 @@ $('opcCanvas').addEventListener('pointerdown',e=>{
 });
 $('opcCanvas').addEventListener('pointermove',e=>{if(!painting||tool==='fill'||tool==='picker')return;paintAt(e);});
 for(const ev of ['pointerup','pointercancel','lostpointercapture'])$('opcCanvas').addEventListener(ev,()=>painting=false);
-$('opcViews').onclick=e=>{const b=e.target.closest('button[data-view]');if(b){view=b.dataset.view;show();}};
+$('opcViews').onclick=e=>{const b=e.target.closest('button[data-view]');if(b){view=b.dataset.view;show();renderCharacter();}};
 $('opcGridToggle').onclick=()=>{gridEnabled=!gridEnabled;rememberGuides();updateGuides();};
 $('opcGridSize').onchange=()=>{const n=Number($('opcGridSize').value);if(![1,4,8,16].includes(n))return;gridStep=n;rememberGuides();updateGuides(false);};
 $('opcRefToggle').onclick=()=>{referenceEnabled=!referenceEnabled;rememberGuides();updateGuides();};
