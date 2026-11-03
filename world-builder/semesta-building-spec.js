@@ -41,8 +41,11 @@ const pipeline=upstream.filter(x=>Object.hasOwn(descriptions,x.id)).map(x=>{
  });
 });
 const all=Object.freeze([...nativeSizes.map(x=>Object.freeze(x)),...pipeline]);
+const nativeDefaults=Object.freeze(Object.fromEntries(nativeSizes.map(x=>[x.id.split(':')[1],
+ Object.freeze({w:x.footprint[0],d:x.footprint[1],h:x.height,
+ color:x.id==='semesta:small'?'#d2a883':x.id==='semesta:medium'?'#90a9ba':'#b9b9ae'})])));
 g.VLSemestaBuildingSpecs=Object.freeze({
- all,byId(id){return all.find(x=>x.id===id)||null;},
+ all,nativeDefaults,byId(id){return all.find(x=>x.id===id)||null;},
  native:Object.freeze(nativeSizes.map(x=>x.id)),
  tilePixels:Object.freeze([64,32]),
  coordinates:'c/r',
