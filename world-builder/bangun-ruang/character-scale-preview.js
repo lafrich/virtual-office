@@ -202,6 +202,8 @@ function mount(api){
    const geo=iso?.bounds(s);
    if(!geo)return;
    interiorGeometry=geo;
+   if(actor.actionAnchor&&!s.items?.some(item=>item.id===actor.actionAnchor.itemId))
+    leaveAction();
    if(actor.actionAnchor){
     [x,y]=iso.point(geo,actor.actionAnchor.c,actor.actionAnchor.r,0);
     y+=actor.actionAnchor.pixelOffsetY||0;
@@ -346,7 +348,7 @@ function mount(api){
   actor.profile=choose.value;
   if(!entries.length)$('scaleStatus').textContent='Catalog not loaded · 64×112 scale stand-in if offline';
  }
- choose.onchange=()=>{actor.profile=choose.value;actor.pose='idle';actor.reported=false;
+ choose.onchange=()=>{leaveAction();stop();actor.profile=choose.value;actor.pose='idle';actor.reported=false;
   status('Selected Mahluk Hidup · '+choose.selectedOptions?.[0]?.textContent||actor.profile);};
  $('scaleSpawn').onclick=spawn;
  $('scaleRemove').onclick=()=>{
