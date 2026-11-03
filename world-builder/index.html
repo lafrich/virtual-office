@@ -4,7 +4,7 @@
 <meta name="theme-color" content="#073a9d"><meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="only light">
 <title>Semesta — City Builder</title>
-<link rel="stylesheet" href="./xp.css?v=active-asset-focus-v1">
+<link rel="stylesheet" href="./xp.css?v=active-asset-focus-v1&amp;transport-flip-v1">
 </head>
 <body><div id="desktop"><div id="app">
 <header id="titlebar">
@@ -150,7 +150,7 @@
      <label>C / X <input id="x" type="number" step=".5"></label>
      <label>R / Z <input id="z" type="number" step=".5"></label>
      <label>H / Y <input id="y" type="number" step=".1"></label>
-     <label>Rotation ° <input id="rotation" type="number" step="90"></label>
+     <label id="rotationField">Rotation ° <input id="rotation" type="number" step="90"></label>
      <label>Scale <input id="scale" type="number" step=".05" min=".85" max="1.15"></label>
      <label>Object ID <input id="objectId" type="text" readonly></label>
     </div>
@@ -160,6 +160,12 @@
       <button id="replaceAsset" type="button">⇄ Replace with asset...</button>
     </div>
     <div id="vehicleControls" hidden>
+     <div class="section-label">KENDARAAN / DIRECTION</div>
+     <div class="vehicle-flip-row">
+      <button id="vehicleFlipDirection" type="button" title="Reverse this transport's travel route and sprite direction">⇄ FLIP ARAH</button>
+      <output id="vehicleHeadingLabel" aria-live="polite">AUTO / →</output>
+     </div>
+     <p class="vehicle-flip-note">Membalik arah jalan + orientasi sprite. Tidak memutar gambar 90° dan tidak mengubah posisi kendaraan.</p>
      <div class="section-label">KENDARAAN / VISUAL PLACEMENT</div>
      <label class="vehicle-scale-label" for="vehicleVisualScale">Visual size <output id="vehicleVisualScaleValue" for="vehicleVisualScale">1.00×</output></label>
      <input id="vehicleVisualScale" type="range" min=".45" max="2.5" step=".05" value="1">
@@ -359,7 +365,7 @@
 <script src="./reference-city.js?v=traffic-queue-v2"></script>
 <script src="./city-drafts.js?v=reference-city-drafts1"></script>
 <script src="./semesta-traffic-catalog.js?v=bus2-markers-v1"></script>
-<script src="./semesta-traffic.js?v=npc-flow-vehicle-ground-v2"></script>
+<script src="./semesta-traffic.js?v=npc-flow-vehicle-ground-v2&amp;transport-flip-v1"></script>
 <script src="./semesta-traffic-flow.js?v=bus2-markers-v1"></script>
 <script src="./virtual-life-vault.js?v=vl-vault-v1"></script>
 <script src="./building-outline.js?v=building-outline-v2"></script>
@@ -369,5 +375,5 @@
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
 <script src="./active-asset-camera.js?v=active-asset-camera-v1"></script>
-<script type="module" src="./builder.js?v=pan-camera-v1&amp;active-asset-focus-v1"></script>
+<script type="module" src="./builder.js?v=pan-camera-v1&amp;transport-flip-v1"></script>
 </body></html>
