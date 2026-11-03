@@ -88,3 +88,17 @@ Building package format remains virtual-life-building-asset-v1 and adds: interac
 Select a placed interactive building in Semesta, then choose Enter Building to open the floor-plan preview. Select furniture and Use to trigger its supported VLCharacterRig preview pose on a local editor character. A game-ready multiplayer interior transition, physics and job/economy integration are still separate implementation work.
 
 Data is stored locally in the browser origin; it does not automatically sync to GitHub or the game backend. Virtual Life main game and Mahluk Hidup repositories are unchanged.
+
+
+## v4 — Isometric interiors
+
+Interior preview now opens in **native 2:1 isometric mode by default**, matching Semesta ground tiles (64×32 px). The same renderer is shared by Bangun Ruang and Semesta Enter Building, so the floor geometry, camera, furniture locations and tap-to-select behavior remain consistent.
+
+- **Isometric:** cutaway rear walls, floor tile diamond grid, pixel-art furnished rooms, green entry threshold, selection highlighting. Generated assets remain semantically linked to the saved interior action slots.
+- **Plan / Edit:** previous top-down grid remains available for precise touch placement, editing, collision checks and furniture rotation.
+- The view changes do **not** modify world/game coordinates: furniture stays in canonical c/r tile coordinates and works with all existing 8 room presets, multi-floor layouts and saved building packages.
+- Isometric renderer draws authored RGBA pixel primitives without gradients or smoothing. Furniture drawings are procedural previews, not imported original Virtual Life art.
+- Semesta → select an interactive authored building → **Enter Building** opens **Isometric** by default; **Plan View** remains available for selecting action objects.
+
+### Runtime boundary
+This is an editor preview, not an online player teleport, 3D walkable interior physics or server-side action execution. Existing Mahluk Hidup rig poses are previewable through Semesta where available, and unknown actions remain data-only.
