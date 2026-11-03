@@ -50,7 +50,7 @@ function parse(a){
   footprint:[w,d],size:canonical.size,pivot:canonical.pivot,
   width:canonical.size[0]/50,height:canonical.size[1]/50,
   collision:a.config.collision!=='no',
-  entranceFacing:enterable&&['sw','se'].includes(a.entranceFacing)?a.entranceFacing:'',
+  entranceFacing:['sw','se'].includes(a.entranceFacing)?a.entranceFacing:'',
   interactive:enterable,enterable,entrance,interior,actionSlots,
   interactions:Array.isArray(a.interactions)?
    a.interactions.filter(x=>typeof x==='string').slice(0,20):(enterable?['enter']:[]),
