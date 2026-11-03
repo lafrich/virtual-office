@@ -359,7 +359,7 @@ function mount(api){
    const motion=rig?.resolve(actor.profile,pose,false);
    const supported=pose&&motion?.mode===requested;
    status('Use '+item.name+' → '+item.actionId+' · '+(supported?
-    'Mahluk Hidup pose '+pose+(anchor?' / aligned to furniture':''):
+    'Mahluk Hidup pose '+pose+(anchor?(item.assetId==='bed'?' / aligned to mattress':' / aligned to seat'):''):
     'No authored rig; metadata action only'));
    updateControls();draw();
   };
