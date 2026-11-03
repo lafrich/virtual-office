@@ -4,7 +4,7 @@
 <meta name="theme-color" content="#073a9d"><meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="only light">
 <title>Semesta — City Builder</title>
-<link rel="stylesheet" href="./xp.css?v=pan-camera-v1">
+<link rel="stylesheet" href="./xp.css?v=active-asset-focus-v1">
 </head>
 <body><div id="desktop"><div id="app">
 <header id="titlebar">
@@ -64,6 +64,13 @@
  </aside>
  <section id="canvasPanel" aria-label="World canvas">
   <div class="canvas-head"><span class="canvas-title">SEMESTA / OPEN WORLD</span><span class="right">UNBOUNDED GRID · PINCH TO ZOOM</span></div>
+  <div class="active-asset-bar" role="group" aria-label="Active placed asset and camera controls">
+   <span class="active-asset-heading">ACTIVE ASSET <strong id="activeAssetCount">0</strong></span>
+   <select id="activeAssetPicker" aria-label="Select a placed asset to focus camera"><option value="">— NO ASSET SELECTED —</option></select>
+   <span id="activeAssetMeta" class="active-asset-meta" role="status">NO SELECTION</span>
+   <button id="focusActiveAsset" type="button" disabled title="Center camera on selected asset without changing the map">◎ FOCUS</button>
+   <button id="trackActiveAsset" type="button" disabled aria-pressed="false" title="Follow selected asset, including live moving vehicles or NPCs">◉ TRACK</button>
+  </div>
   <main id="canvas-wrap">
    <canvas id="world" aria-label="Interactive Virtual Life isometric map canvas"></canvas>
    <div id="dayNightTint" aria-hidden="true"></div>
@@ -361,5 +368,6 @@
 <script src="./semesta-traffic-art.js?v=no-vehicle-shadow-v1&amp;mahluk-riders=20261103"></script>
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
-<script type="module" src="./builder.js?v=pan-camera-v1&amp;semesta-templates-v2"></script>
+<script src="./active-asset-camera.js?v=active-asset-camera-v1"></script>
+<script type="module" src="./builder.js?v=active-asset-focus-v1&amp;pan-camera-v1"></script>
 </body></html>
