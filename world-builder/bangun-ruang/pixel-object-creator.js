@@ -242,5 +242,6 @@ $('opcPng').onchange=e=>{
 $('opcGoSemesta').onclick=()=>{window.location.href='../';};
 function open(){if(!opened){fresh();library();opened=true;}else{library();show();}dlg.showModal();}
 button.onclick=open;
+if(byId('openObjectCreatorShelf'))byId('openObjectCreatorShelf').onclick=open;
 g.VLPixelCreator=Object.freeze({open});
 })(window);
