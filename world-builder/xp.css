@@ -112,3 +112,32 @@
 #replaceAsset{width:100%;margin-top:8px;text-align:center}
 #canvas-wrap{user-select:none;-webkit-user-select:none}
 @media(max-width:780px){.canvas-toolbar{gap:5px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}#brushSettings,#roadSettings,.canvas-toolbar .toggle,#terrainLabel,#gridToolbar{flex:none}}
+
+/* City drafts: XP file dialog, sized for narrow Android screens. */
+#menubar{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+#menubar button{flex:none;white-space:nowrap}
+#footer{overflow-x:auto;scrollbar-width:thin}
+#footer button{flex:none}
+#saveCityDraft{background:#c6dbd1!important}
+.draft-dialog{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:14px;background:#10223baf}
+.draft-window{width:min(480px,100%);max-height:min(84dvh,760px);overflow:hidden;display:flex;flex-direction:column;background:#d4d2ca;border:3px solid #fff;outline:2px solid #132e77;box-shadow:5px 8px 0 #0007}
+.draft-header{height:42px;flex:none;background:linear-gradient(90deg,#064099,#1675d1);color:white;display:flex;align-items:center;gap:12px;padding:6px 9px;font:bold 13px Tahoma}
+.draft-header .sheet-close{display:inline-flex;margin-left:auto;color:#292929}
+.draft-content{padding:14px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.draft-label{display:flex;flex-direction:column;gap:6px;font:bold 11px "Courier New",monospace}
+#draftName{border:2px inset #a9a7a0;background:white;color:#191919;padding:10px;font:13px Tahoma;width:100%;border-radius:0}
+.draft-hint{font:11px/1.5 Tahoma;color:#514d47;margin:0}
+.draft-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.draft-actions button{min-height:39px;flex:1;padding:9px;border:2px solid;border-color:white #807e79 #807e79 white;background:#e7e4dd;color:#131313;font:bold 11px Tahoma}
+.draft-actions button:disabled{opacity:.5}
+#confirmSaveDraft{background:#b9d6bf}
+#draftPicker{width:100%;min-height:130px;border:2px inset #ada9a0;background:white;padding:3px;font:12px Tahoma;color:#161616;overflow:auto}
+#draftPicker option{padding:6px}
+.draft-divider{font:bold 11px "Courier New";border-bottom:1px solid #8d8980;padding:7px 0 4px}
+#draftDetails{min-height:20px}
+@media(max-width:780px){.draft-dialog{align-items:flex-end;padding:0 0 env(safe-area-inset-bottom,0)}
+ .draft-window{width:100%;max-height:83dvh;border-width:2px;outline:0}
+ .draft-content{padding:12px;gap:9px}
+ #menubar .version{display:none}
+ #footer .status{margin-left:0}
+}
