@@ -14,7 +14,7 @@ test('Pixel Creator buttons are persistent and directly wired in source HTML',()
   assert.match(html,new RegExp('id="'+id+'"[^>]*onclick="window\\.openBangunPixelCreator\\(event\\)"'));
  }
  assert.match(html,/window\.openBangunPixelCreator=async function/);
- assert.match(html,/pixel-object-creator\.js\?v=creator-(?:placement-v2|grid-xp-v1|fix2)/);
+ assert.match(html,/pixel-object-creator\.js\?v=creator-(?:simple-grid-v3|placement-v2|grid-xp-v1|fix2)/);
 });
 test('object bridge registers all built-in metadata without blocking on canvas rasterization',()=>{
  const window={VLAssetCatalog:[{file:'pipeline:source',source:'pipeline-street'}],VLBuildingInterior:{types:{wc:{label:'WC',w:1,d:1,actions:['use_toilet']}}}};
@@ -74,7 +74,10 @@ test('Pixel Creator initializes and opens a modal with either static-button entr
  assert.equal(els.get('opcReferencePanel').style.display,'none');
  els.get('opcRefToggle').onclick();
  assert.equal(els.get('opcReferencePanel').style.display,'block');
- assert.ok(els.get('opcCharacterCanvas'),'native 64x112 reference frame is mounted');
+ assert.ok(els.get('opcCharacterCanvas'),'character visual reference remains available');
+ assert.doesNotMatch(creator,/VLPixelCreatorScale|worldHeight:g\.VLPixelCreatorScale/,'ratio addon must not run');
+ assert.doesNotMatch(html,/world-scale-guide\.js/,'size comparison must not be loaded');
+ assert.match(els.get('opcReferenceInfo').textContent,/bukan patokan ukuran placement/);
  assert.match(creator,/linear-gradient\(90deg,#042777/,'Windows XP titlebar is shared');
  assert.doesNotThrow(()=>window.VLPixelCreator.open());
 });
