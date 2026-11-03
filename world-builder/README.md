@@ -135,3 +135,16 @@ Use **BUILDING VIEW → ◇ Outline** on the canvas toolbar or the **◇** icon 
 - Marker pins have a larger invisible touch target and a 20–27 screen-pixel tap-selection radius. Select one with a tap, open **Properties → Delete**, or use the **Logic** tab's **Yellow Logic Markers** selector with **Find / Delete / Remove All**. Removal is undoable. **Remove All** requires confirmation and affects only actual `type:"marker"` records.
 - Use **⚑ Markers ON/OFF** in the canvas toolbar or ⚑ in the left tool strip to hide/show the pins without editing or deleting the City Draft. Marker visibility is remembered locally on this browser.
 - **Golden building footprint/door lines** are purely the *Building Outline* guide geometry. These are not separate assets to select/delete. Set **BUILDING VIEW → ■ Solid** or use ◇ to turn the guides off; the real building stays editable.
+
+## Day/night, mobile shadows and a 24-hour virtual clock (2026-11-03)
+
+Semesta includes a continuous **24-hour clock** in the top-right of the city canvas. Like a short Harvest Moon day, **1× = 1 real second per in-game minute**, i.e. **24 real minutes per full in-game day**. **2× = 12 minutes/day** and **4× = 6 minutes/day**. Pausing stops only clock progression; editor camera, NPC previews, Walk Test and traffic simulation remain usable. Tap the clock to expand its exact-time scrubber, pause/play button and speed picker; **☀ Morning** jumps to 07:00. The simulated weekday cycles MON–SUN and the day number increases at 00:00.
+
+The solar cycle has dawn, morning, midday, afternoon, sunset and night phases. A procedural sun direction changes the length/orientation of projected **soft ground shadows**:
+- **Actors** (including the live moved player, regular NPCs, each crowd member and idle job NPCs) get contact and directional foot shadows.
+- **Vehicles** follow their live moving or queuing positions; cars, motorcycles and buses receive contact/cast shadows with sizes based on their **Semesta editor footprints**.
+- **Trees, lamps, small props and buildings** receive category-appropriate shadows. Long casts are drawn from the sun direction; shadows become shorter at midday and fade in darkness. In Building Outline mode the building casts are suppressed to keep road/vehicle visibility clean.
+- At night the pixel-art scene is shaded using a non-interactive color-grade layer; warm light pools from street lamps and buildings are rendered separately on top. These approximate ambient/directional light for unlit MeshBasicMaterial sprites without expensive GPU shadow maps or altering source game sprites.
+- Shadows and night light drawings are **shared InstancedMesh / 2D glow layers** and update approximately eight times per second to reduce mobile GPU cost; the normal scene retains its frame rate. Neither layer intercepts taps.
+
+The running clock is persisted in the current working copy periodically and written to `map.environmentClock` when saving an authored City Draft or JSON file. Opening another City Draft restores its own time; new/reference/sample city resets to 07:00 unless the imported map contains a saved clock. The visual state does **not** automatically change the real-world time, production Virtual Life multiplayer schedules, jobs or salaries.
