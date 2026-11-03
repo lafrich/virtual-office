@@ -97,7 +97,12 @@ function choose(map,x,z,mode,direction='auto',walkable=null){
  const candidates=vectors.map(([dx,dz])=>line(map,seed,dx,dz,k)).filter(Boolean);
  if(!candidates.length)return null;
  candidates.sort((a,b)=>b.length-a.length);
- const best=candidates[0],backwards=direction==='west'||direction==='north';
+ const best=candidates[0];
+ // Auto alternates travel directions along parallel painted road tiles.
+ // A single-tile road remains one-way; wider roads show opposing traffic.
+ const lane=Math.floor(Math.abs(best.dx)>0?z:x);
+ const laneReverse=direction==='auto'&&Math.abs(lane)%2===0;
+ const backwards=direction==='west'||direction==='north'||laneReverse;
  if(backwards)best.points.reverse();
  return best;
 }
