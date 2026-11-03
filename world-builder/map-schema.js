@@ -76,7 +76,7 @@ function enrich(map,catalog,style){
 function validate(map,catalog,style){
  const errors=[];
  if(!Array.isArray(map?.objects)){errors.push('Missing objects array');return errors;}
- if(map.map?.terrain&&(!Array.isArray(map.map.terrain.cells)||map.map.terrain.cells.length>12000))errors.push('Invalid terrain tiles');
+ if(map.map?.terrain&&(!Array.isArray(map.map.terrain.cells)||map.map.terrain.cells.length>250000))errors.push('Invalid terrain tiles');
  const seen=new Set();
  for(const o of map.objects){
   if(!o.id||seen.has(o.id))errors.push('Duplicate/missing ID '+o.id);
