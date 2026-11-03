@@ -731,6 +731,25 @@ function movingOverlap(record,candidate,dx,dz,ignore){
  }
  return false;
 }
+function simulationObstacles(){
+ const obstacles=documentMap.objects.filter(o=>!automaticType(o.type)||o.type==='quest_npc');
+ for(const [id,agent] of automatedAgents){
+  if(agent.kind==='quest_npc'||!agent.root.visible)continue;
+  const source=documentMap.objects.find(o=>o.id===id);
+  if(!source)continue;
+  if(agent.kind==='crowd'){
+   agent.parts.forEach((part,i)=>obstacles.push({
+    id:id+':person-'+i,type:'npc',collision:true,blocking:'auto',scale:1,
+    x:agent.root.position.x+part.child.position.x,
+    z:agent.root.position.z+part.child.position.z
+   }));
+  }else obstacles.push({
+   ...source,x:agent.root.position.x,z:agent.root.position.z,
+   collision:true,blocking:'auto'
+  });
+ }
+ return obstacles;
+}
 function updateAutomated(dt){
  const blockers=documentMap.objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&
   (!automaticType(o.type)||o.type==='quest_npc'));
@@ -1885,7 +1904,7 @@ function frame(now){
       const live=new Map([...rigs].map(([id,rec])=>[id,rec.root.position]));
       const start={x:holder.root.position.x,z:holder.root.position.z};
       const next=physics.move(actor,start,dx*speed*dt,dz*speed*dt,
-       documentMap.objects,documentMap.map,assetByName,style,live);
+       simulationObstacles(),documentMap.map,assetByName,style,live);
       holder.root.position.x=next.x;
       holder.root.position.z=next.z;
       holder.rig.setMoving(next.x-start.x,next.z-start.z,next.moved);
