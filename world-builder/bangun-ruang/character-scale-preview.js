@@ -143,11 +143,20 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
     if(entry?.ready&&entry.pic.naturalWidth>=FRAME.w&&entry.pic.naturalHeight>=FRAME.h)
      ctx.drawImage(entry.pic,0,0,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
    };
-   drawPart(layers[0]);
+   const rearView=actor.direction==='ne'||actor.direction==='nw';
+   if(!rearView)drawPart(layers[0]);
    if(patched?.ready)
     ctx.drawImage(patched.pic,0,0,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
    else ctx.drawImage(pic,sx,sy,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
-   for(let i=1;i<layers.length;i++)drawPart(layers[i]);
+   for(let i=1;i<4;i++)drawPart(layers[i]);
+   // Back-view backpack is ON the back torso, never over the head/neck.
+   if(rearView&&layers[0]?.ready){
+    ctx.save();ctx.beginPath();
+    ctx.rect(x,y+56*scale,drawWidth,(FRAME.h-56)*scale);ctx.clip();
+    drawPart(layers[0]);
+    ctx.restore();
+   }
+   drawPart(layers[4]);
    drawn=true;
   }
  }
