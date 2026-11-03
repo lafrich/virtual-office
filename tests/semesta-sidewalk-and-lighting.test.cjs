@@ -71,7 +71,7 @@ assert.match(builder,/agent\.root\.visible=!!agent\.route\|\|\(mode==='pedestria
 assert.match(effects,/function isStreetLamp\(/);
 assert.match(effects,/function drawLampPixels\(/);
 assert.match(effects,/function collectCharacterShadows\(/);
-assert.match(effects,/const moving=/);
+assert.match(effects,/getAgent\(o\.id\)/);
 assert.ok(!effects.includes('createRadialGradient'),'no blurred vehicle lights');
 assert.ok(!effects.includes('elapsed<.12'),'glow cannot be throttled 120 ms behind camera');
 const script=html.match(/<script[^>]+src="([^"]+)"/g).join('\n');
