@@ -1589,11 +1589,19 @@ function frame(now){
    if(len>.1){
      dx/=len;dz/=len;
      const speed=4.1;
-     // Only editor preview movement, bounded to authored map envelope.
-     let bounds=documentMap.map.worldBounds||{minX:-30,maxX:40,minZ:20,maxZ:55};
-     holder.root.position.x+=dx*speed*dt;
-     holder.root.position.z+=dz*speed*dt;
-     holder.rig.setMoving(dx,dz,true);
+     // Physics is checked on the unsaved live actor position, not the
+     // initial JSON spawn. Swept substeps prevent tunneling; blocked diagonal
+     // movement slides along the X or Z wall instead of freezing.
+     const actor=documentMap.objects.find(o=>o.id===walkActorId);
+     if(actor){
+      const live=new Map([...rigs].map(([id,rec])=>[id,rec.root.position]));
+      const start={x:holder.root.position.x,z:holder.root.position.z};
+      const next=physics.move(actor,start,dx*speed*dt,dz*speed*dt,
+       documentMap.objects,documentMap.map,assetByName,style,live);
+      holder.root.position.x=next.x;
+      holder.root.position.z=next.z;
+      holder.rig.setMoving(next.x-start.x,next.z-start.z,next.moved);
+     }
    }else holder.rig.setMoving(0,0,false);
  }
  // Follow the live, unsaved Walk Test character position with frame-rate
@@ -1652,6 +1660,7 @@ function frame(now){
    const yaw=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z);
    plane.rotation.y=yaw-root.rotation.y;
  }
+ updateLargeOcclusion(dt);
  renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);
