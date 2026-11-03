@@ -103,9 +103,8 @@ function init(api){
    ctx.fillRect(x+1,y+1,w*CELL-2,d*CELL-2);
    ctx.fillStyle=colors[def.category]||'#c7ccd3';
    ctx.fillRect(x+3,y+3,w*CELL-6,d*CELL-6);
-   ctx.fillStyle='#263e54';ctx.textAlign='center';
-   ctx.font='bold '+(Math.min(w,d)>1?20:16)+'px sans-serif';
-   ctx.fillText(def.glyph,x+w*CELL/2,y+d*CELL/2+6);
+   if(g.VLInteriorPixels)g.VLInteriorPixels.draw(ctx,item.assetId,x+3,y+3,w*CELL-6,d*CELL-6);
+   else{ctx.fillStyle='#263e54';ctx.textAlign='center';ctx.font='14px monospace';ctx.fillText(def.label.slice(0,2),x+w*CELL/2,y+d*CELL/2+5);}
    if(item.id===selected){
     ctx.strokeStyle='#f7e48f';ctx.lineWidth=2;
     ctx.strokeRect(x+2,y+2,w*CELL-4,d*CELL-4);ctx.lineWidth=1;
