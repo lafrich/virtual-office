@@ -18,6 +18,7 @@
  <button id="export" type="button"><u>F</u>ile / Export</button>
  <button id="import" type="button"><u>E</u>dit / Import</button>
  <button id="reset" type="button"><u>V</u>iew / Reset</button>
+ <button id="openVirtualAssets" type="button" title="Browse original encrypted Virtual Life asset files securely">🔐 Virtual Life Assets</button>
  <button id="openTutorial" type="button" title="Open the quick start guide">❔ Quick Tutorial</button>
  <button id="buildingStudio" type="button" onclick="location.href='./bangun-ruang/'" title="Open pixel building asset editor">▤ Building Studio</button>
  <button id="openGame" type="button"><u>H</u>elp / Game</button>
@@ -217,6 +218,43 @@
   </footer>
  </section>
 </div>
+<div id="virtualAssetDialog" class="vault-dialog" role="dialog" aria-modal="true" aria-labelledby="vaultDialogTitle" hidden>
+ <section class="vault-window">
+  <header class="vault-header"><strong id="vaultDialogTitle">🔐 VIRTUAL LIFE / ORIGINAL ASSETS</strong>
+   <button type="button" id="closeVirtualAssetDialog" aria-label="Close asset vault">×</button>
+  </header>
+  <div class="vault-main">
+   <p class="vault-note">Sumber asset terenkripsi asli Virtual Life. Password hanya dipakai untuk decrypt di perangkat ini; tidak dikirim ke Semesta, GitHub, atau server lain.</p>
+   <div class="vault-unlock">
+    <label for="virtualAssetPassword">VIRTUAL LIFE PASSWORD</label>
+    <input id="virtualAssetPassword" type="password" autocomplete="off" placeholder="Kosongkan jika login Virtual Life sudah aktif">
+    <button type="button" id="virtualAssetUnlock">🔓 Unlock Assets</button>
+    <button type="button" id="virtualAssetLock">🔒 Lock</button>
+   </div>
+   <p id="virtualAssetStatus" role="status" aria-live="polite">Locked · buka sesi Virtual Life atau masukkan password akun.</p>
+   <div class="vault-line">
+    <label for="virtualAssetSearch">FIND ORIGINAL PNG</label>
+    <input id="virtualAssetSearch" type="search" autocomplete="off" placeholder="motor, gojek, npc, gedung, kendaraan...">
+   </div>
+   <div id="virtualAssetCount">Locked</div>
+   <div class="vault-columns">
+    <div id="virtualAssetList" class="vault-file-list" role="group" aria-label="Original images"></div>
+    <div id="virtualAssetPreview" class="vault-preview">Select an original image</div>
+   </div>
+   <div class="vault-line">
+    <label for="virtualAssetCategory">PLACE AS</label>
+    <select id="virtualAssetCategory"><option value="building">Building</option><option value="prop">Prop / Street</option><option value="tree">Tree / Vegetation</option></select>
+   </div>
+   <div class="vault-actions">
+    <button type="button" id="virtualAssetApply">⇄ Replace selected</button>
+    <button type="button" id="virtualAssetPlace">＋ Place on map</button>
+    <button type="button" id="virtualAssetAutoMatch">Auto-match traffic / NPC</button>
+    <button type="button" id="virtualAssetCancel">Close</button>
+   </div>
+   <p class="vault-note">Asset hanya dibuka untuk sesi browser saat ini. City Draft menyimpan referensi path, bukan data dekripsi; unlock lagi untuk melihat sprite setelah reload.</p>
+  </div>
+ </section>
+</div>
 </div></div>
 <script src="./asset-catalog.js?v=2"></script>
 <script src="./pipeline-catalog.js?v=p4"></script>
@@ -231,6 +269,7 @@
 <script src="./city-drafts.js?v=reference-city-drafts1"></script>
 <script src="./semesta-traffic-catalog.js?v=semesta-v2-final"></script>
 <script src="./semesta-traffic.js?v=semesta-v2-final"></script>
+<script src="./virtual-life-vault.js?v=vl-vault-v1"></script>
 <script src="./semesta-traffic-art.js?v=semesta-v2-final"></script>
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
