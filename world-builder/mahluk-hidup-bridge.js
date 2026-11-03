@@ -8,6 +8,7 @@ const BASE=new URL('/virtual-life-asset-pipeline/',location.origin);
 const CHAR_KEY='virtual-life-character-storage-v1';
 const EQUIP_KEY='virtual-life-accessory-equipment-v1';
 const ART_KEY='virtual-life-accessories-v1';
+const AI_RIG_KEY='mahluk-hidup-rig-assets-v1';
 const DIR=['se','sw','ne','nw'];
 const BASES=['astrofrich_base','human_male_base','human_female_base'];
 const SAFE_ID=/^[a-z0-9_-]{1,90}$/;
@@ -86,6 +87,21 @@ function localSync(){
    if(Object.keys(picked).length)nextEquip[actor]=picked;
   }
  }
+ // Browser-local AI characters: only fully tested humanoid rigs can be
+ // placed in Semesta. All other states stay in Mahluk Hidup for editing.
+ const localRig=g.VLUniversalRig,gen=g.MahlukCharacterDraft;
+ if(localRig&&gen)for(const row of localRig.list()){
+  if(row.status!=='rig_ready'||!SAFE_ID.test(row.id))continue;
+  try{
+   const sheet=localRig.sourceSheet(row,gen);
+   if(!sheet||!DATA.test(sheet)||sheet.length>1500000)continue;
+   const actions=[{id:'walk',name:'WALK',available:true,row:0,frames:6,loop:true},
+    {id:'idle',name:'IDLE',available:true,row:4,frames:4,loop:true}];
+   nextCustoms.set(row.id,{id:row.id,name:row.name,sheet,motions:actions,
+    expressions:[],baseId:row.id,category:row.rig.category,
+    status:'local_rig_ready',custom:true,template:false});
+  }catch(e){lastError='LOCAL RIG '+row.id+': '+e.message}
+ }
  customs=nextCustoms;accessories=nextAccessories;equipment=nextEquip;
  lastSync=Date.now();
  return {characters:customs.size,accessories:accessories.size};
@@ -107,7 +123,8 @@ async function load(){
 }
 function get(id){return customs.get(id)||entries.get(id)||null}
 function list(){return [...entries.values(),...customs.values()]}
-function url(path){if(!ASSET.test(path))return null;
+function url(path){if(typeof path==='string'&&path.length<1500000&&DATA.test(path))return path;
+ if(!ASSET.test(path))return null;
  const link=new URL(path,BASE);if(build)link.searchParams.set('build',build);
  return link.href;
 }
