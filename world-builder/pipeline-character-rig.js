@@ -8,6 +8,8 @@
 const DIR=['se','sw','ne','nw'];
 const ROW={walk:0,idle:4,talk:8,sit:12,sit_type:16,sleep:20,tired:24,swim:28,float:32,lie:36,perch:40};
 const FRAME={w:64,h:112,pivotX:32,pivotY:100};
+const appearance=()=>g.VLActionAppearance;
+const normalizeRotation=n=>((Math.round((Number(n)||0)/90)*90)%360+360)%360;
 const ALIAS={grok:'grok_bot',warteg:'bu_warteg',barista:'fm_barista',kasir:'fm_kasir'};
 const legacyIds=Object.fromEntries(
  [...(g.VLPipelineAssets?.characters||[]).map(x=>x.id),...Object.keys(ALIAS)]
@@ -40,7 +42,9 @@ function resolve(id,requested,moving){
  const template=requested&&g.VLActionTemplates?.get(sourceId,requested);
  if(template?.ready)return {url:null,mode:requested,frames:template.frames,
   row:0,durations:Array(template.frames).fill(template.frameMs),
-  loop:template.loop,separate:true,source:'template',objectLayer:template.objectLayer};
+  loop:template.loop,separate:true,source:'template',
+  objectLayer:template.objectLayer,rotation:normalizeRotation(template.rotation),
+  expression:template.expression||'neutral'};
  const entry=bridge()?.get(sourceId);
  if(entry){
   const actions=entry.motions;
@@ -95,12 +99,15 @@ function createRig(THREE,opt={}){
  mesh.userData.characterBillboard=true;mesh.userData.characterSource='mahluk-hidup';
  mesh.userData.nativeFrame=FRAME;mesh.userData.tilePixels=[64,32];mesh.userData.pixelWorld=pixelWorld;
  const state={direction:normalize(opt.direction),moving:false,walk:0,pose:opt.pose||null,
-  profile:opt.profile||opt.characterId||'ichsan',characterId:who,loaded:false,failed:false};
+  profile:opt.profile||opt.characterId||'ichsan',characterId:who,loaded:false,failed:false,
+  rotation:0,expression:'neutral',objectLayer:'front'};
  let previous='',time=0,lastAction='';
  function render(){
   const spec=resolve(who,state.pose,state.moving);
   if(!spec){state.loaded=false;state.failed=true;return;}
   state.objectLayer=spec.objectLayer||'front';
+  state.rotation=spec.source==='template'?normalizeRotation(spec.rotation):0;
+  state.expression=spec.source==='template'?spec.expression||'neutral':'neutral';
   if(spec.unavailable){
    // A missing gameplay action must NEVER silently become the idle animation.
    const key='UNAUTHORED:'+who+':'+state.pose;
@@ -119,6 +126,10 @@ function createRig(THREE,opt={}){
   const count=Math.max(1,Math.min(40,spec.frames)),frame=Math.min(frameAt(spec,time),count-1);
   const dir=DIR.indexOf(state.direction),row=spec.row+dir;
   const sprite=spec.source==='template'?null:image(spec.url),asset=bridge()?.get(who);
+  const face=spec.source==='template'&&spec.expression!=='neutral'?
+   (asset?.expressions||[]).find(f=>f.id===spec.expression):null;
+  const facePath=face?.overlay||face?.sheet||null;
+  const faceImage=facePath?image(bridge()?.url(facePath)):null;
   const equipped=asset?bridge().equipmentFor(who):{};
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
   const overlayUrls=['bag','shoes','pants','shirt','helmet'].map(layer);
@@ -146,7 +157,9 @@ function createRig(THREE,opt={}){
   // Full content fingerprint prevents two same-length pixel edits from sharing
   // a stale cached GPU texture while the same action frame is displayed.
   const editTag=editURL||'';
-  const key=[who,spec.url,spec.mode,row,frame,...overlayUrls.map(x=>x?.length||0),status,editTag,edited?.ready].join(':');
+  const key=[who,spec.url,spec.mode,row,frame,...overlayUrls.map(x=>x?.length||0),
+   status,editTag,edited?.ready,facePath,faceImage?.ready,
+   state.expression,state.rotation].join(':');
   const templated=spec.source==='template';
   state.loaded=templated?!!edited?.ready:!!sprite?.ready;
   state.failed=!templated&&!!sprite?.error;
@@ -169,6 +182,10 @@ function createRig(THREE,opt={}){
    ctx.drawImage(overlays[0].pic,0,0,64,112);
    ctx.restore();
   }
+  // Apply the SAME authentic face crop as Mahluk Hidup Action Editor.
+  // Do not turn full-body legacy expression sheets into body replacements.
+  if(face&&appearance())appearance().drawExpression(ctx,face,state.direction,frame,
+   path=>image(bridge()?.url(path)));
   if(overlays[4]?.ready)ctx.drawImage(overlays[4].pic,0,0,64,112);
   texture.needsUpdate=true;previous=key;
  }
@@ -188,11 +205,27 @@ function createRig(THREE,opt={}){
  }
  function step(dt,camera,position){
   time+=Math.min(.1,Math.max(0,dt));
-  if(camera){
-   const p=position||{x:0,z:0};
-   mesh.rotation.set(0,Math.atan2(camera.position.x-p.x,camera.position.z-p.z),0);
-  }
   render();
+  // Presentation rotation is independent of gameplay direction. It rotates
+  // the actual pixel billboard, not the source art, and retains its ground
+  // contact when the body lies on its side (90/270 degrees).
+  const yaw=camera?Math.atan2(camera.position.x-(position?.x||0),
+   camera.position.z-(position?.z||0)):mesh.rotation.y||0;
+  const rad=state.rotation*Math.PI/180;
+  const footCenter=h*(FRAME.pivotY/FRAME.h-.5);
+  const halfVertical=Math.abs(Math.cos(rad))*h/2+Math.abs(Math.sin(rad))*w/2;
+  const baseY=footCenter*Math.cos(rad);
+  const groundMargin=(FRAME.h-FRAME.pivotY)*(h/FRAME.h);
+  const lift=Math.max(0,halfVertical-baseY-groundMargin);
+  const meta=state.pose&&g.VLActionTemplates?.get(who,state.pose);
+  const stored=meta?.ready?g.VLActionFrames?.offset(who,state.pose):null;
+  const offsetX=(Number(stored?.x)||0)*pixelWorld;
+  const offsetY=(Number(stored?.y)||0)*(h/FRAME.h);
+  const localX=-footCenter*Math.sin(rad)+offsetX;
+  mesh.position.x=Math.cos(yaw)*localX;
+  mesh.position.z=-Math.sin(yaw)*localX;
+  mesh.position.y=baseY+lift-offsetY;
+  mesh.rotation.set(0,yaw,rad);
  }
  function dispose(){mesh.geometry.dispose();mat.dispose();texture.dispose();}
  image(resolve(who,null,false)?.url);
