@@ -272,3 +272,17 @@
  .vault-unlock input{grid-column:1/-1}
  .vault-actions button{min-width:calc(50% - 5px)}
 }
+
+/* Building display modes — structural guide lines, never changes city data. */
+.building-view-setting{display:flex;align-items:center;gap:6px;flex:none;white-space:nowrap;
+ font:bold 10px "Courier New",monospace;color:#273652;padding:0 3px}
+#buildingViewMode{min-height:31px;min-width:110px;border:2px solid;
+ border-color:#888782 #fdfcf9 #fdfcf9 #888782;border-radius:0;
+ background:#f7f6ef;color:#17385f;padding:4px 5px;font:bold 11px Tahoma,sans-serif}
+#buildingViewMode:focus-visible,#buildingOutlineTool:focus-visible{outline:2px solid #1557b4;outline-offset:2px}
+#buildingOutlineTool[aria-pressed="true"]{background:#b5d3f2;color:#14518b;
+ border-color:#527aac;font-weight:bold}
+@media(max-width:780px){
+ .building-view-setting{min-width:max-content;padding:0 2px}
+ #buildingViewMode{min-width:96px;height:33px}
+}
