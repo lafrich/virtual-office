@@ -87,6 +87,20 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
  assert.equal(Object.keys(bridge.equipmentFor(named.id)).length,2);
  assert.deepEqual(Object.keys(bridge.equipmentFor(named.id)).sort(),['bag','helmet']);
  assert.ok(bridge.list().some(x=>x.id==='custom_astro_abc'));
+ // Locally generated AI rigs must be accepted only after core rig testing.
+ w.VLMahlukHidup;
+ w.MahlukCharacterDraft={};
+ w.VLUniversalRig={
+  list:()=>[{id:'ai_maya_001',name:'Maya',status:'rig_ready',rig:{category:'human_standard'}}],
+  sourceSheet:()=>img
+ };
+ bridge.localSync();
+ assert.ok(bridge.has('ai_maya_001'),"A tested local AI rig should appear in Semesta");
+ assert.equal(bridge.get('ai_maya_001').status,'local_rig_ready');
+ assert.equal(bridge.available('ai_maya_001','walk').frames,6);
+ assert.equal(bridge.available('ai_maya_001','sit'),null,"Uncreated actions stay unavailable");
+ assert.equal(bridge.url(img),img,"Local PNG frame data must resolve without a remote URL");
+
  const THREE={
   SRGBColorSpace:'srgb',NearestFilter:1,DoubleSide:2,
   CanvasTexture:class{dispose(){}},
@@ -100,6 +114,9 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
  const factory=w.VLCharacterRig;
  assert.equal(factory.profiles.custom_astro_abc,'custom_astro_abc');
  assert.equal(factory.resolve('legacy_pak_ogah','wave_flag',false).row,0);
+ assert.equal(factory.resolve('ai_maya_001','walk',true).url,img,
+  "Semesta rig must resolve the locally generated character sheet");
+
  assert.equal(factory.resolve('legacy_pak_ogah','wave_flag',false).separate,true);
  const rig=factory.createRig(THREE,{profile:'legacy_pak_ogah',direction:'nw',pose:'wave_flag'});
  rig.step(.21,null,null);
