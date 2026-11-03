@@ -36,7 +36,7 @@ for(const id of ['vehicleControls','vehicleVisualScale','vehicleVisualScaleValue
  'vehicleOffsetY','vehicleOffsetZ','vehicleResetVisual'])
  assert.ok(ui.includes('id="'+id+'"'),'missing vehicle inspector '+id);
 assert.ok(ui.includes('semesta-vehicle-placement.js?v=vehicle-edit-v1'));
-assert.ok(ui.includes('semesta-world-effects.js?v=vehicle-hard-shadow-v1'));
+assert.ok(ui.includes('semesta-world-effects.js?v=character-contact-circle-v1'));
 assert.ok(ui.includes('builder.js?v=vehicle-edit-v1'));
 assert.match(builder,/e\.visualOffset=vehiclePlacement\.offset\(p\.visualOffset\)/,
  'visual offset must survive city draft reload and import');
@@ -44,9 +44,8 @@ assert.match(builder,/function editVehicleVisual\(/);
 assert.match(builder,/visual\.add\(gfx\.mesh\)/);
 assert.match(builder,/vehiclePlacement\.apply\(visual,obj\)/);
 assert.match(builder,/function editVehicleVisual[\s\S]*?updateSelection\(\);[\s\S]*?saved\(\);/);
-const shadow=effects.slice(effects.indexOf('function blockTexture'),effects.indexOf('function makeWorldEffects'));
-assert.ok(!shadow.includes('createRadialGradient'),'world shadows must not blur');
-assert.ok(shadow.includes('NearestFilter'),'shadow mask must use nearest-pixel sampling');
-assert.ok(shadow.includes('ctx.fillRect'),'shadows are flat translucent pixels');
-assert.match(art,/Pixel-block translucent ground contact, no blurry ellipse edges/);
-console.log('PASS Vehicle visual scale/offset, persistent data, fixed road footprint and crisp translucent shadow');
+assert.match(effects,/new THREE\.CircleGeometry\(1,24\)/,'actor contact shadows are solid circles');
+assert.ok(!effects.includes('createRadialGradient'),'shadow and lamp pixels must not blur');
+assert.ok(!effects.includes('sun.height'),'no time-of-day shadow direction');
+assert.ok(!art.includes('shadowHalf'),'vehicle art no longer draws own shadow');
+console.log('PASS Vehicle visual scale/offset, persistent data, fixed road footprint and constant character shadow');
