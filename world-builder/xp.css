@@ -33,6 +33,8 @@
 .canvas-head .right{margin-left:auto;color:#595348;font-size:10px}
 #canvas-wrap{position:relative;flex:1;min-height:0;background:#bec6c0;overflow:hidden;touch-action:none}
 #world{display:block;width:100%;height:100%;touch-action:none;outline:0;image-rendering:auto;cursor:crosshair}
+#world.pan-tool-active{cursor:grab}
+#world.pan-tool-active:active{cursor:grabbing}
 #hint{position:absolute;left:8px;top:8px;pointer-events:none;background:#faf6e9dd;border:1px solid #8b8a7b;max-width:300px;padding:5px 7px;font-size:10px}
 #status{position:absolute;right:8px;top:8px;pointer-events:none;background:#eae6d4e9;border:1px solid #817f73;font:10px "Courier New";padding:5px 7px;max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #toast{display:none;position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:#17459c;color:white;padding:7px 11px;border:2px solid #fff;max-width:88%;z-index:20;box-shadow:2px 3px #0006;font-size:11px}

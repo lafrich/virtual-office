@@ -1678,6 +1678,13 @@ function onDown(e){
   drag=null;placementPreview.visible=false;return;
  }
  const point=floorPoint(e);
+ // Explicit Pan mode must never select or move a clicked object.
+ // Unlike Select, dragging over vehicles, buildings or NPCs always pans.
+ if(mode==='pan'){
+  drag={kind:'pan',id:e.pointerId,start:point?.clone()||null,
+   focus:cameraFocus.clone(),sx:e.clientX,sy:e.clientY,hit:false,changed:false};
+  return;
+ }
  if(mode==='place'&&placementType){add(placementType,point);previewPlace(point);return;}
  if(mode==='paint'||mode==='fill'){
   if(!point)return;
@@ -1826,8 +1833,12 @@ function clearWalk(){
 function setMode(m){
  if(mode==='walk'&&m!=='walk')clearWalk();
  mode=m;
- for(const type of ['select','move','walk','paint','fill'])
-  $(type+'Mode')?.classList.toggle('active',m===type);
+ for(const type of ['select','move','pan','walk','paint','fill']){
+  const button=$(type+'Mode');
+  button?.classList.toggle('active',m===type);
+  if(button)button.setAttribute('aria-pressed',String(m===type));
+ }
+ canvas.classList.toggle('pan-tool-active',m==='pan');
  if(m!=='place')placementType=null;
  if(placementPreview)placementPreview.visible=m==='place';
  $('walkPad').classList.toggle('active',m==='walk');
@@ -1901,6 +1912,10 @@ $('cameraMapView').onclick=cameraMapView;
 updateCharacterCameraUI();
 $('selectMode').onclick=()=>setMode('select');
 $('moveMode').onclick=()=>setMode('move');
+$('panMode').onclick=()=>{
+ setMode('pan');
+ tell('✋ Pan · drag dari mana saja di map untuk menggeser kamera. Objek tidak ikut berpindah.');
+};
 $('paintMode').onclick=()=>setMode('paint');
 $('fillMode').onclick=()=>setMode('fill');
 function toggleGrid(){
@@ -2625,11 +2640,13 @@ $('file').onchange=async e=>{
  e.target.value='';
 };
 window.addEventListener('keydown',e=>{
- if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;
+ if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||
+  e.target instanceof HTMLTextAreaElement||e.target?.isContentEditable)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();restoreStack(undoStack,redoStack);}
   else if(e.key.toLowerCase()==='h'){toggleGrid();}
  else if(e.key==='Delete'&&item())remove();
  else if(e.key.toLowerCase()==='g')setMode('move');
+ else if(e.key.toLowerCase()==='p')setMode('pan');
  else if(e.key==='Escape')select(null);
 });
 window.addEventListener('error',e=>{console.error('World Builder runtime',e.error);});
