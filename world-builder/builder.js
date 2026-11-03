@@ -669,6 +669,12 @@ function resetAutoRoute(agent,obj){
   agent.distance=traffic.nearestDistance(agent.route,point);
   const location=traffic.sample(agent.route,agent.distance);
   if(location)agent.root.position.set(location.x,obj.y||0,location.z);
+  for(const part of agent.parts){
+   const count=agent.parts.length;
+   part.distance=agent.distance+(part.part||0)*agent.route.length/Math.max(1,count);
+   const p=traffic.sample(agent.route,part.distance);
+   if(p)part.child.position.set(p.x-agent.root.position.x,0,p.z-agent.root.position.z);
+  }
  }
 }
 function makeAutomated(root,obj){
@@ -699,47 +705,87 @@ refreshAutoRoutes=()=>{
   if(o)resetAutoRoute(agent,o);
  }
 };
+function trafficArea(record,position,dx=1,dz=0){
+ const motor=record.type==='vehicle',source=motor?trafficCatalog.vehicle(record.vehicleId):null;
+ let w=motor?Math.max(.95,Number(source?.footprint?.[0]||2.9)):.53;
+ let depth=motor?.85:.53;
+ if(Math.abs(dz)>Math.abs(dx))[w,depth]=[depth,w];
+ return {minX:position.x-w/2,maxX:position.x+w/2,minZ:position.z-depth/2,maxZ:position.z+depth/2};
+}
+function movingOverlap(record,candidate,dx,dz,ignore){
+ const area=trafficArea(record,candidate,dx,dz);
+ for(const [id,agent] of automatedAgents){
+  if(id===ignore||agent.kind==='quest_npc'||!agent.root.visible)continue;
+  const other=documentMap.objects.find(o=>o.id===id);
+  if(!other)continue;
+  const parts=agent.kind==='crowd'?agent.parts.map(part=>({
+   x:part.child.position.x+agent.root.position.x,
+   z:part.child.position.z+agent.root.position.z
+  })):[agent.root.position];
+  for(const pt of parts){
+   const box=trafficArea(other,pt,agent.lastDx||1,agent.lastDz||0);
+   if(physics.intersect(area,box))return true;
+  }
+ }
+ return false;
+}
 function updateAutomated(dt){
- const blockers=documentMap.objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&(!automaticType(o.type)||o.type==='quest_npc'));
+ const blockers=documentMap.objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&
+  (!automaticType(o.type)||o.type==='quest_npc'));
+ const live=new Map([...rigs].map(([id,rec])=>[id,rec.root.position]));
  for(const [id,agent] of automatedAgents){
   const record=documentMap.objects.find(o=>o.id===id);
   if(!record)continue;
   const cfg=traffic.config(record);
   if(record.type==='quest_npc'){
-   agent.graphic?.step(dt,camera,agent.root,cfg.idleAction);continue;
+   agent.graphic?.step(dt,camera,agent.root,cfg.idleAction);
+   continue;
   }
   const route=agent.route;
-  if(!route||!route.length){
-   if(agent.graphic)agent.graphic.update('se',camera,agent.root);
+  if(!route||!route.length||!agent.root.visible){
+   agent.graphic?.update('se',camera,agent.root);
    for(const part of agent.parts){
-    part.rig.setMoving(0,0,false);part.rig.step(dt,camera,agent.root.position);
+    part.rig.setMoving(0,0,false);
+    part.rig.step(dt,camera,agent.root.position);
    }
    continue;
   }
-  if(cfg.enabled)agent.distance=(agent.distance+cfg.speed*dt)%route.length;
   const isCrowd=record.type==='crowd',n=isCrowd?agent.parts.length:1;
   for(let i=0;i<n;i++){
-   const offset=isCrowd?i*route.length/n:0;
-   const p=traffic.sample(route,agent.distance+offset);
-   if(!p)continue;
    const member=isCrowd?agent.parts[i]:agent.parts[0];
    const oldX=isCrowd?member.child.position.x+agent.root.position.x:agent.root.position.x;
    const oldZ=isCrowd?member.child.position.z+agent.root.position.z:agent.root.position.z;
-   const probe={id:id+(isCrowd?':'+i:''),type:isCrowd?'pedestrian':record.type,vehicleId:record.vehicleId,motion:record.motion,x:oldX,z:oldZ,scale:1};
-   const result=physics.check(probe,{x:p.x,z:p.z},blockers,documentMap.map,assetByName,style,new Map());
-   const wrapped=Math.hypot(p.x-oldX,p.z-oldZ)>12;
-   if(!result.ok&&!wrapped){
-    if(member){member.rig.setMoving(0,0,false);member.rig.step(dt,camera,{x:oldX,z:oldZ});}
+   const previous=isCrowd?(member.distance??(agent.distance+i*route.length/n)):agent.distance;
+   const target=(previous+(cfg.enabled?cfg.speed*dt:0))%route.length;
+   const p=traffic.sample(route,target);
+   if(!p)continue;
+   const probe={id:id+(isCrowd?':'+i:''),type:isCrowd?'pedestrian':record.type,
+    vehicleId:record.vehicleId,motion:record.motion,x:oldX,z:oldZ,scale:1};
+   const blocked=physics.check(probe,{x:p.x,z:p.z},blockers,
+    documentMap.map,assetByName,style,live);
+   const collides=cfg.enabled&&movingOverlap(probe,{x:p.x,z:p.z},p.dx,p.dz,id);
+   if(!blocked.ok||collides){
+    if(member){
+     member.rig.setMoving(0,0,false);
+     member.rig.step(dt,camera,{x:oldX,z:oldZ});
+    }else if(agent.graphic){
+     agent.graphic.update(window.VLCharacterRig?.directionFromWorld(agent.lastDx||1,agent.lastDz||0,'se')||'se',camera,agent.root);
+    }
     continue;
    }
-   if(isCrowd)member.child.position.set(p.x-agent.root.position.x,0,p.z-agent.root.position.z);
-   else agent.root.position.set(p.x,record.y||0,p.z);
+   if(isCrowd){
+    member.distance=target;
+    member.child.position.set(p.x-agent.root.position.x,0,p.z-agent.root.position.z);
+   }else{
+    agent.distance=target;
+    agent.root.position.set(p.x,record.y||0,p.z);
+   }
+   agent.lastDx=p.dx;agent.lastDz=p.dz;
    if(member){
     member.rig.setMoving(p.dx,p.dz,cfg.enabled);
     member.rig.step(dt,camera,{x:p.x,z:p.z});
    }else if(agent.graphic){
-    const dir=window.VLCharacterRig?.directionFromWorld(p.dx,p.dz,'se')||'se';
-    agent.graphic.update(dir,camera,agent.root);
+    agent.graphic.update(window.VLCharacterRig?.directionFromWorld(p.dx,p.dz,'se')||'se',camera,agent.root);
    }
   }
  }
