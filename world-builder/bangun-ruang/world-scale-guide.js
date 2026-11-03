@@ -31,6 +31,8 @@ const preview=document.createElement('canvas');
 preview.id='opcWorldScaleCanvas';preview.width=300;preview.height=336;
 preview.setAttribute('aria-label','Real Semesta scale comparison of your placed object and Mahluk Hidup character');
 reference.querySelector('.opc-character-frame')?.append(preview);
+const label=reference.querySelector('.opc-ref-caption');
+if(label)label.textContent='PLACEMENT PREVIEW / WORLD SCALE';
 const sub=document.createElement('div');
 sub.id='opcWorldScaleInfo';reference.append(sub);
 const nativeHeight=Number(bridge.characterWorldHeight)||72*Math.SQRT2/64*2/Math.sqrt(3);
