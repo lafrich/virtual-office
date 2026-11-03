@@ -1,0 +1,312 @@
+/* Bangun Ruang UI controller: mobile-first inspector and interactive tile interior.
+ * Non-destructive: edits only user-selected building asset JSON in browser.
+ */
+(function(g){
+'use strict';
+const $=id=>document.getElementById(id);
+const model=g.VLBuildingInterior;
+if(!model)return;
+const copy=model.clone;
+const names={exterior:['tabExterior','exteriorPane'],interior:['tabInterior','interiorPane'],
+ actions:['tabActions','actionPane'],metadata:['tabMetadata','metadataPane']};
+const CELL=28;
+function init(api){
+ let enabled=false,scenes={},floor=1,selected=null,placing=null,
+   preview='exterior',tab='exterior',cacheCfg=null;
+ const canvas=$('interiorCanvas'),ctx=canvas.getContext('2d');
+ ctx.imageSmoothingEnabled=false;
+ const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
+ const group=$('interiorCategory'),asset=$('interiorAsset');
+ for(const key of categories){const option=document.createElement('option');option.value=key;option.textContent=key;group.append(option);}
+ for(const [key,t] of Object.entries(model.templates)){const o=document.createElement('option');o.value=key;o.textContent=t.label;$('interiorTemplate').append(o);}
+ function cfg(){return api.getConfig();}
+ function numFloors(){return Math.max(1,Math.min(12,Number(cfg().floors)||1));}
+ function onStatus(message){api.status(message);}
+ function normalizeScene(n){
+  const raw=scenes[n];
+  scenes[n]=model.normalize(raw,cfg());
+  scenes[n].floor=n;
+  return scenes[n];
+ }
+ function scene(){return normalizeScene(floor);}
+ function selectFloor(n){
+  floor=Math.max(1,Math.min(numFloors(),Math.round(Number(n)||1)));
+  $('interiorFloor').value=String(floor);selected=null;placing=null;refresh();
+ }
+ function fillFloors(){
+  const count=numFloors(),control=$('interiorFloor'),previous=String(floor);
+  control.replaceChildren();
+  for(let n=1;n<=count;n++){const o=document.createElement('option');o.value=String(n);o.textContent=n===1?'Ground Floor / 1':'Floor '+n;control.append(o);}
+  if(floor>count)floor=count;
+  control.value=String(floor);
+ }
+ function updateCategories(){
+  asset.replaceChildren();
+  const matches=Object.entries(model.types).filter(([key,t])=>t.category===group.value);
+  for(const [key,t] of matches){const o=document.createElement('option');o.value=key;o.textContent=t.glyph+' '+t.label;asset.append(o);}
+ }
+ function setPreview(value){
+  if(value==='interior'&&!enabled)return;
+  preview=value;
+  $('preview').hidden=value!=='exterior';canvas.hidden=value!=='interior';
+  document.querySelector('.direction-bar').hidden=value==='interior';
+  $('showExterior').classList.toggle('active',value==='exterior');
+  $('showInterior').classList.toggle('active',value==='interior');
+  if(value==='interior')draw();
+ }
+ function selectTab(which){
+  if(!names[which]||(which==='interior'||which==='actions')&&!enabled)return;
+  tab=which;
+  for(const [key,[button,pane]] of Object.entries(names)){
+   const active=key===which;$(button).classList.toggle('active',active);
+   $(button).setAttribute('aria-selected',String(active));$(pane).hidden=!active;
+  }
+  if(which==='interior')setPreview('interior');
+  if(which==='exterior')setPreview('exterior');
+  if(which==='actions'){renderActions();if(enabled)setPreview('interior');}
+  if(which==='metadata')renderMetadata();
+ }
+ function setMode(active){
+  enabled=!!active;
+  $('buildingMode').value=enabled?'interactive':'decorative';
+  $('buildingModeHint').textContent=enabled?
+   'Enterable: doorway opens an interior floor plan with interactive props and character action slots.':
+   'Non-interactive: exterior and collision only; no enter action or interior.';
+  $('showInterior').disabled=!enabled;
+  $('tabInterior').disabled=!enabled;$('tabActions').disabled=!enabled;
+  if(!enabled){placing=null;selected=null;selectTab('exterior');setPreview('exterior');}
+  if(enabled){normalizeScene(floor);draw();renderObjects();renderActions();}
+  renderMetadata();
+ }
+ function draw(){
+  if(!enabled||preview!=='interior')return;
+  const s=scene(),width=s.width*CELL,height=s.depth*CELL;
+  if(canvas.width!==width)canvas.width=width;
+  if(canvas.height!==height)canvas.height=height;
+  ctx.imageSmoothingEnabled=false;
+  const theme=({'warm':'#e1d3bc','aqua':'#b9dfe5','blue':'#bdd1e6','cream':'#e9e2d2'})[s.theme]||'#e6e2d5';
+  ctx.fillStyle=theme;ctx.fillRect(0,0,width,height);
+  ctx.strokeStyle='#adb6ad';ctx.lineWidth=1;
+  for(let c=0;c<=s.width;c++){ctx.beginPath();ctx.moveTo(c*CELL+.5,0);ctx.lineTo(c*CELL+.5,height);ctx.stroke();}
+  for(let r=0;r<=s.depth;r++){ctx.beginPath();ctx.moveTo(0,r*CELL+.5);ctx.lineTo(width,r*CELL+.5);ctx.stroke();}
+  ctx.fillStyle='#157a52';
+  ctx.fillRect(s.entrance.c*CELL+3,s.entrance.r*CELL+CELL-8,CELL-6,6);
+  ctx.fillStyle='#ffffff';ctx.font='bold 9px monospace';ctx.textAlign='center';
+  ctx.fillText('DOOR',s.entrance.c*CELL+CELL/2,s.entrance.r*CELL+10);
+  const colors={Bathroom:'#92bfd6',Bedroom:'#e1aa8a',Living:'#9dacdb',Work:'#b7a8d6',Kitchen:'#e7c48c',Shop:'#a2c5ac'};
+  for(const item of s.items){
+   const def=model.types[item.assetId];if(!def)continue;
+   let w=def.w,d=def.d;if(item.rotation%180===90)[w,d]=[d,w];
+   const x=item.c*CELL,y=item.r*CELL;
+   ctx.fillStyle=item.id===selected?'#2459b9':'#6b8193';
+   ctx.fillRect(x+1,y+1,w*CELL-2,d*CELL-2);
+   ctx.fillStyle=colors[def.category]||'#c7ccd3';
+   ctx.fillRect(x+3,y+3,w*CELL-6,d*CELL-6);
+   ctx.fillStyle='#263e54';ctx.textAlign='center';
+   ctx.font='bold '+(Math.min(w,d)>1?20:16)+'px sans-serif';
+   ctx.fillText(def.glyph,x+w*CELL/2,y+d*CELL/2+6);
+   if(item.id===selected){
+    ctx.strokeStyle='#f7e48f';ctx.lineWidth=2;
+    ctx.strokeRect(x+2,y+2,w*CELL-4,d*CELL-4);ctx.lineWidth=1;
+   }
+  }
+  $('placementHint').textContent=placing?
+   'Tap an empty tile to place '+(model.types[placing]?.label||placing)+'. Entrance is kept clear.':
+   selected?'Tap a free tile to move the selected object. Tap another object to select it.':
+   'Tap an interior object to edit its trigger, animation and position.';
+ }
+ function hitItem(c,r){
+  return [...scene().items].reverse().find(item=>model.occupied(item).includes(c+','+r));
+ }
+ function renderObjects(){
+  const holder=$('interiorItemList');holder.replaceChildren();
+  const items=scene().items;
+  if(!items.length){const p=document.createElement('div');p.className='interior-empty';
+    p.textContent='No furniture yet. Pick an asset above, tap “Place On Grid”, then tap the floor plan.';holder.append(p);}
+  for(const item of items){
+   const info=model.types[item.assetId],button=document.createElement('button');
+   button.type='button';button.classList.toggle('active',item.id===selected);
+   const a=document.createElement('span'),b=document.createElement('strong'),small=document.createElement('small');
+   b.textContent=(info?.glyph||'□')+' '+item.name;
+   small.textContent='Tile '+item.c+','+item.r+' · '+model.actions[item.actionId]?.label;
+   a.append(b,small);const edit=document.createElement('span');edit.textContent=item.id===selected?'●':'Edit';
+   button.append(a,edit);
+   button.onclick=()=>{selected=item.id;placing=null;showItem();setPreview('interior');draw();renderObjects();};
+   holder.append(button);
+  }
+  showItem();
+ }
+ function showItem(){
+  const item=scene().items.find(x=>x.id===selected);
+  $('interiorItemEditor').hidden=!item;
+  if(!item)return;
+  $('interiorItemName').textContent=(model.types[item.assetId]?.glyph||'□')+' '+item.name;
+  $('interiorItemC').value=item.c;$('interiorItemR').value=item.r;
+  $('interiorItemFacing').value=String(item.rotation);$('interiorCapacity').value=String(item.capacity);
+  $('interiorItemRadius').value=String(item.triggerRadius);
+  const choices=$('interiorItemAction');choices.replaceChildren();
+  for(const name of model.types[item.assetId].actions){
+   const opt=document.createElement('option');opt.value=name;opt.textContent=model.actions[name].label;
+   choices.append(opt);
+  }
+  choices.value=item.actionId;
+  $('interiorActorHint').textContent=model.actions[item.actionId]?.description||'Proposed action';
+ }
+ function renderActions(){
+  const summary=$('actionBuildingSummary');
+  if(!enabled){summary.textContent='Decorative building: no interior entrance and no interactive actions.';return;}
+  const count=Object.values(scenes).reduce((sum,s)=>sum+(s.items?.length||0),0);
+  summary.textContent='ENTERABLE / Door facing '+String(cfg().front||'sw').toUpperCase()+
+   ' / '+numFloors()+' floor(s) / '+count+' action objects. Entry is a proposed map trigger; online game integration pending.';
+  const list=$('actionSlotList');list.replaceChildren();
+  let any=false;
+  for(let n=1;n<=numFloors();n++){
+   const s=scenes[n];if(!s)continue;
+   for(const item of s.items){any=true;
+    const row=document.createElement('div');row.className='action-row';
+    const glyph=document.createElement('span');glyph.className='glyph';glyph.textContent=model.types[item.assetId]?.glyph||'▣';
+    const text=document.createElement('div');const label=document.createElement('strong');
+    label.textContent='F'+n+' · '+item.name+' → '+(model.actions[item.actionId]?.label||item.actionId);
+    const desc=document.createElement('div');desc.className='actor-action';
+    desc.textContent=item.pose?'Mahluk Hidup pose: '+item.pose:'Action hook only · no dedicated character rig';
+    text.append(label,desc);row.append(glyph,text);list.append(row);
+   }
+  }
+  if(!any){const msg=document.createElement('p');msg.className='interior-empty';msg.textContent='No action spots. Place WC, bed, chair or other props in Interior.';list.append(msg);}
+ }
+ function renderMetadata(){
+  const c=cfg(),total=enabled?Object.values(scenes).reduce((sum,s)=>sum+(s.items?.length||0),0):0;
+  $('metadataPreview').textContent=JSON.stringify({
+   source:c.baseId,footprint:[c.w,c.d],projection:'iso-2:1',tilePixels:[64,32],
+   directions:['sw','se','ne','nw'],mode:enabled?'interactive':'decorative',
+   enterable:enabled,entranceFacing:enabled?c.front:null,
+   interiorFloorCount:enabled?numFloors():0,actionObjects:total,storage:'local browser / Semesta same origin'
+  },null,2);
+ }
+ function serialize(){
+  const c=cfg();if(!enabled)return {interactive:false,enterable:false,entrance:null,interior:null,actionSlots:[],interactions:[]};
+  const floors=[],slots=[];
+  for(let n=1;n<=numFloors();n++){
+   const s=normalizeScene(n);floors.push(copy(s));
+   for(const item of model.slots(s))slots.push({...item,floor:n});
+  }
+  return {interactive:true,enterable:true,
+   entrance:{facing:c.front,groundFloor:1,entry:{...floors[0].entrance},exit:{...floors[0].entrance}},
+   interior:{format:'virtual-life-interiors-v1',version:1,activeFloor:floor,floors},
+   actionSlots:slots,
+   interactions:[...new Set(['enter',...slots.map(slot=>slot.interaction)])]};
+ }
+ function load(pack){
+  const c=cfg();scenes={};floor=1;selected=null;placing=null;
+  const interior=pack?.interior;
+  if(interior?.format==='virtual-life-interiors-v1'&&Array.isArray(interior.floors)){
+   for(const s of interior.floors.slice(0,12)){
+    const n=Math.max(1,Math.min(numFloors(),Number(s.floor)||1));
+    scenes[n]=model.normalize(s,c);scenes[n].floor=n;
+   }
+   floor=Math.max(1,Math.min(numFloors(),Number(interior.activeFloor)||1));
+  }
+  fillFloors();setMode(pack?.interactive===true||c.interactive===true);
+  setPreview('exterior');selectTab('exterior');refresh();
+ }
+ function reset(){
+  scenes={};floor=1;selected=null;placing=null;fillFloors();
+  setMode(false);setPreview('exterior');selectTab('exterior');refresh();
+ }
+ function refresh(){
+  fillFloors();if(enabled)normalizeScene(floor);
+  if(preview==='interior'&&enabled)draw();
+  if(enabled)renderObjects();
+  renderActions();renderMetadata();
+ }
+ function moveSelectedTo(c,r){
+  const s=scene();
+  if(placing){
+   const obj=model.add(s,placing,c,r);
+   if(obj){selected=obj.id;placing=null;renderObjects();renderActions();draw();onStatus('Placed '+obj.name+' · action '+obj.actionId);}
+   else onStatus('Invalid tile: collides or blocks entrance');
+   return;
+  }
+  const hit=hitItem(c,r);
+  if(hit){selected=hit.id;renderObjects();draw();return;}
+  if(selected){
+   if(model.move(s,selected,c,r,undefined)){renderObjects();draw();onStatus('Moved interior prop to '+c+','+r);}
+   else onStatus('Cannot move: occupied or outside floor plan');
+  }
+ }
+ canvas.addEventListener('pointerdown',e=>{
+  if(!enabled||preview!=='interior')return;
+  const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
+  const c=Math.floor((e.clientX-r.left)*canvas.width/r.width/CELL);
+  const z=Math.floor((e.clientY-r.top)*canvas.height/r.height/CELL);
+  if(c<0||z<0||c>=scene().width||z>=scene().depth)return;
+  e.preventDefault();moveSelectedTo(c,z);
+ });
+ for(const [key,[button]] of Object.entries(names))$(button).onclick=()=>selectTab(key);
+ $('showExterior').onclick=()=>setPreview('exterior');
+ $('showInterior').onclick=()=>{setPreview('interior');selectTab('interior');};
+ $('buildingMode').onchange=()=>{setMode($('buildingMode').value==='interactive');onStatus(enabled?'Interactive: floor editor enabled':'Decorative building: interior disabled');};
+ $('interiorFloor').onchange=()=>selectFloor($('interiorFloor').value);
+ group.onchange=updateCategories;updateCategories();
+ $('applyInteriorTemplate').onclick=()=>{
+  const current=scene(),template=$('interiorTemplate').value;
+  if(current.items.length&&!confirm('Replace this floor\'s furniture with '+model.templates[template].label+' template?'))return;
+  const next=model.preset(cfg(),template);next.floor=floor;scenes[floor]=next;
+  selected=null;placing=null;refresh();setPreview('interior');onStatus('Floor '+floor+' template: '+model.templates[template].label);
+ };
+ $('clearInteriorRoom').onclick=()=>{
+  if(scene().items.length&&!confirm('Remove all furniture on this floor?'))return;
+  scenes[floor]=model.create(cfg());scenes[floor].floor=floor;selected=null;placing=null;refresh();
+ };
+ $('addInteriorItem').onclick=()=>{
+  placing=asset.value;selected=null;setPreview('interior');selectTab('interior');draw();renderObjects();
+  onStatus('Tap interior grid to place '+(model.types[placing]?.label||'object'));
+ };
+ $('cancelInteriorPlacement').onclick=()=>{placing=null;draw();};
+ $('updateInteriorItem').onclick=()=>{
+  const s=scene(),item=s.items.find(x=>x.id===selected);if(!item)return;
+  const moved=model.move(s,item.id,Number($('interiorItemC').value),Number($('interiorItemR').value),Number($('interiorItemFacing').value));
+  if(!moved){onStatus('Cannot save placement: collision or outside');return;}
+  model.action(s,item.id,$('interiorItemAction').value);
+  item.capacity=Math.max(1,Math.min(8,Number($('interiorCapacity').value)||1));
+  item.triggerRadius=Math.max(.4,Math.min(3,Number($('interiorItemRadius').value)||1));
+  refresh();onStatus('Saved '+item.name+' → '+item.actionId);
+ };
+ $('removeInteriorItem').onclick=()=>{
+  const s=scene();s.items=s.items.filter(x=>x.id!==selected);selected=null;refresh();onStatus('Removed interior prop');
+ };
+ $('duplicateInteriorItem').onclick=()=>{
+  const s=scene(),old=s.items.find(x=>x.id===selected);if(!old)return;
+  const attempts=[[old.c+1,old.r],[old.c,old.r+1],[old.c+2,old.r+1],[old.c+1,old.r+2]];
+  let obj=null;
+  for(const [c,r] of attempts){obj=model.add(s,old.assetId,c,r);if(obj)break;}
+  if(!obj){onStatus('No free adjacent tile to duplicate');return;}
+  model.action(s,obj.id,old.actionId);selected=obj.id;refresh();onStatus('Duplicated '+obj.name);
+ };
+ $('metadataExport').onclick=api.exportAsset;
+ // No hard-coded fixed height; use a mobile-only Base header and collapsible storage.
+ const base=document.querySelector('.panel.left .preset'),library=document.querySelector('.panel.left');
+ const parent=base.parentNode,mark=document.createComment('Semesta base editor anchor');
+ parent.insertBefore(mark,base);
+ const mobileBase=$('mobileBase');
+ function relocate(){
+  const mobile=matchMedia('(max-width:640px)').matches;
+  if(mobile){mobileBase.append(base);mobileBase.hidden=false;}
+  else {mark.parentNode?.insertBefore(base,mark.nextSibling);mobileBase.hidden=true;}
+ }
+ relocate();g.addEventListener('resize',relocate);
+ $('mobileMenuBtn').onclick=()=>{
+  const nav=document.querySelector('nav'),state=nav.classList.toggle('menu-open');
+  $('mobileMenuBtn').setAttribute('aria-expanded',String(state));
+ };
+ $('savedToggle').onclick=()=>{
+  const active=$('app').classList.toggle('show-library');
+  $('savedToggle').textContent=active?'▣ Hide Saved Buildings':'▣ Show Saved Buildings';
+  $('savedToggle').setAttribute('aria-expanded',String(active));
+  if(active)library.scrollIntoView({behavior:'smooth',block:'nearest'});
+ };
+ fillFloors();updateCategories();renderMetadata();
+ return {load,reset,refresh,serialize,isInteractive:()=>enabled,setPreview,selectTab};
+}
+g.VLStudioInteriors=Object.freeze({init});
+})(window);
