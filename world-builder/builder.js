@@ -739,7 +739,19 @@ function loadVehicleImage(gfx,obj){
  if(!source||!window.VLAssetVault?.allowed(source))return;
  window.VLAssetVault.getImage(source).then(img=>{
   if(!gfx.mesh.parent)return;
-  const tex=new THREE.Texture(img);tex.colorSpace=THREE.SRGBColorSpace;
+  const isNPC=obj.type==='quest_npc';
+  const spec=trafficCatalog.vehicle(obj.vehicleId);
+  const cv=document.createElement('canvas');
+  cv.width=isNPC?64:(spec?.size[0]||160);
+  cv.height=isNPC?112:(spec?.size[1]||108);
+  const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+  let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
+  if(isNPC&&sw>=128&&sh>=448&&sw%64===0&&sh%112===0){
+   sw=64;sh=112;sy=448; // First idle frame in a V6B-compatible sheet.
+  }
+  const scale=Math.min(cv.width/sw,cv.height/sh),dw=sw*scale,dh=sh*scale;
+  ctx.drawImage(img,sx,sy,sw,sh,(cv.width-dw)/2,cv.height-dh,dw,dh);
+  const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
   tex.minFilter=tex.magFilter=THREE.NearestFilter;tex.needsUpdate=true;
   const originalUpdate=gfx.update;
   if(originalUpdate)gfx.update=(dir,cam,root)=>{
