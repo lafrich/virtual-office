@@ -111,6 +111,10 @@ function validate(map,catalog,style){
   if(!Number.isFinite(o.x)||!Number.isFinite(o.z))errors.push('Invalid position '+o.id);
   if(o.type==='sprite'&&!catalog.has(o.asset))errors.push('Unknown asset '+o.id);
   if(o.type==='marker'&&!TYPES.includes(o.markerKind))errors.push('Unknown marker '+o.id);
+  if(o.assetPath&&(typeof o.assetPath!=='string'||o.assetPath.includes('..')||
+     o.assetPath.startsWith('/')||!/[.]((png)|(webp)|(jpg)|(jpeg)|(gif))$/i.test(o.assetPath)))
+    errors.push('Invalid imported image reference '+o.id);
+  if(o.type==='virtual_asset'&&!o.assetPath)errors.push('Missing image reference '+o.id);
   if(o.type==='vehicle'&&!g.VLSemestaCatalog?.vehicle(o.vehicleId))errors.push('Unknown vehicle '+o.id);
   if(o.type==='quest_npc'&&!g.VLSemestaCatalog?.quest(o.questId))errors.push('Unknown job NPC '+o.id);
  }
