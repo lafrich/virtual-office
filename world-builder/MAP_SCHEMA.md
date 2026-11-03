@@ -112,3 +112,9 @@ The terrain grid is authored on whole tiles and rendered as actual square ground
 Current maps export `map.unbounded: true`. The legacy `map.worldBounds` coordinates are retained as metadata for the initial Street2 sample; they no longer restrict terrain painting or object placement. The grid and default grass floor are rendered in camera-centered windows. Terrain is saved as sparse integer c/r overrides and persisted regardless of whether the tile is currently visible.
 
 A flood fill on the default infinite terrain is mathematically unbounded, so the editor restricts **Fill** to the current viewport, while **Paint** can move outside any finite region. This changes editor rendering and authoring bounds only: it does not change online-game collision, saving, navigation or world streaming.
+
+## Named city draft persistence
+
+The browser's **Save City Draft** dialog stores the editable authoring document in IndexedDB database `virtual-life-city-drafts`, store `cities`, keyed by a stable local ID. Each record has `{id, name, createdAt, updatedAt, document, format:"vl-city-draft-1"}`. The document is the same editable map JSON structure used for Export and Import. A separate working-copy autosave remains in localStorage.
+
+The names, dates and draft IDs are editor-only metadata; they do **not** create multiplayer city IDs, shared assets, remote snapshots or game save slots. For an AI handoff, use Export JSON with `schema:"virtual-life-ai-map-v3"`. Drafts reside only in that browser profile and may disappear if site data is cleared.
