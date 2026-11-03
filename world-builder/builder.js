@@ -52,6 +52,7 @@ if(assetGroup){
 }
 const clone=x=>JSON.parse(JSON.stringify(x));
 const BUILD_SIZES=window.VLSemestaBuildingSpecs?.nativeDefaults||Object.freeze({small:{w:3,d:3,h:3.8,color:'#d2a883'},medium:{w:5,d:4,h:6.2,color:'#90a9ba'},large:{w:8,d:6,h:10.5,color:'#b9b9ae'}});
+let pendingVaultCategory='prop',pendingVaultImageSize=null;
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const round=v=>Math.round(v*100)/100;
 const seed={
@@ -1088,6 +1089,7 @@ function applyItem(){
 }
 function id(type){return type+'-'+Math.random().toString(36).slice(2,8);}
 function makeObject(type,point){
+ const isVault=type.startsWith('vault:');
  const preset=style.presets[type],chosen=preset?'sprite:'+preset:type;
  const automatic=type.startsWith('vehicle:')?'vehicle':
   type.startsWith('pedestrian:')?'pedestrian':type.startsWith('crowd:')?'crowd':
@@ -1095,10 +1097,25 @@ function makeObject(type,point){
  const isCustom=type.startsWith('building:'),sizeClass=type.split(':')[1];
  const isMarker=type.startsWith('marker:'),isSprite=chosen.startsWith('sprite:'),asset=isSprite?chosen.slice(7):undefined;
  const spec=assetByName.get(asset),dims=BUILD_SIZES[sizeClass]||BUILD_SIZES.small;
- const obj={id:id(automatic|| (isCustom?'building':isMarker?'marker':isSprite?'sprite':type)),
-  type:automatic|| (isCustom?'building':isMarker?'marker':isSprite?'sprite':type),
+ const obj={id:id(isVault?'virtual_asset':automatic|| (isCustom?'building':isMarker?'marker':isSprite?'sprite':type)),
+  type:isVault?'virtual_asset':automatic|| (isCustom?'building':isMarker?'marker':isSprite?'sprite':type),
   name:isCustom?sizeClass.toUpperCase()+' Building · replaceable':isSprite?(spec?.label||type):actorType(type)?'Virtual Life Character':type,
   x:round(point?.x??cameraFocus.x),z:round(point?.z??cameraFocus.z),y:0,rotation:0,scale:1};
+ if(isVault){
+  let path='';
+  try{path=decodeURIComponent(type.slice(6));}catch{return null;}
+  if(!window.VLAssetVault?.allowed(path))return null;
+  const meta=pendingVaultImageSize,category=pendingVaultCategory;
+  obj.assetPath=path;obj.assetCategory=category;
+  obj.name=path.split('/').pop()||'Original Asset';
+  obj.replaceable=true;obj.collision=true;
+  obj.w=category==='building'?Math.max(2,Math.min(14,Math.ceil((meta?.width||200)/55))):category==='tree'?1.4:1.3;
+  obj.d=category==='building'?Math.max(2,Math.min(11,Math.ceil(obj.w*.7))):category==='tree'?1.4:1.3;
+  obj.h=Math.max(2,Math.min(23,(meta?.height||170)*PIXEL_WORLD*VERTICAL_COMP));
+  obj.layer=category==='building'?'structure':category==='tree'?'vegetation':'prop';
+  obj.tags=['virtual-life','original-asset-reference'];
+  obj.notes='Original game image reference. Unlock Virtual Life vault to display.';
+ }
  if(isCustom){Object.assign(obj,dims);obj.sizeClass=sizeClass;obj.replaceable=true;obj.collision=true;obj.layer='structure';obj.subtype='custom_building';obj.tags=['placeholder','building'];}
  if(isSprite){if(!spec)return null;obj.asset=asset;obj.width=spec.width;obj.height=spec.height;obj.collision=spec.collision!==false;
   if(spec.source==='custom-building'){
