@@ -875,6 +875,26 @@ function updateSelection(){
    $('profile').value=cur.profile||'ichsan';
  }
  $('profile').disabled=!actor;
+ const dynamic=cur&&automaticType(cur.type);
+ $('motionControls').hidden=!dynamic;
+ if(dynamic){
+  const cfg=traffic.config(cur);
+  $('motionMode').value=cfg.mode;
+  $('motionMode').disabled=true;
+  $('motionSpeed').value=cfg.speed;
+  $('motionSpeed').disabled=cur.type==='quest_npc';
+  $('motionDirection').value=cfg.direction;
+  $('motionDirection').disabled=cur.type==='quest_npc';
+  $('crowdCount').value=cfg.count;
+  $('crowdCount').closest('label').hidden=cur.type!=='crowd';
+  $('questAction').value=cfg.idleAction;
+  $('questAction').closest('label').hidden=cur.type!=='quest_npc';
+  $('motionEnabled').checked=cfg.enabled;
+  $('motionHint').textContent=cur.type==='vehicle'?
+   'Mobil dan motor hanya di jalan · otomatis loop.':
+   cur.type==='quest_npc'?'NPC quest idle/aksi di tempat.':
+   'NPC mengikuti trotoar lurus lalu mengulang rute.';
+ }
  const editableBuilding=cur?.type==='building'||cur?.type==='shop';
  $('buildingControls').hidden=!editableBuilding;
  for(const [key,field] of [['buildingW','w'],['buildingD','d'],['buildingH','h']]){
@@ -914,6 +934,10 @@ function applyItem(){
  r.rotation.y=actorType(o.type)?0:o.rotation*Math.PI/180;
  r.scale.setScalar(actorType(o.type)?1:o.scale);
  refreshBigOccluder(o.id);
+ if(automaticType(o.type)){
+  const agent=automatedAgents.get(o.id);
+  if(agent)resetAutoRoute(agent,o);
+ }
  const holder=rigs.get(o.id);
  if(holder){
    if(holder.rig.state.direction!==o.facing)holder.rig.setDirection(o.facing||'sw');
@@ -1310,6 +1334,17 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
 $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$('facing').value;o.pose=null;});};
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
 $('profile').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.profile=$('profile').value;});};
+function changeMotion(field,value,rebuildCrowd=false){
+ const selected=item();if(!selected||!automaticType(selected.type))return;
+ edit(o=>{o.motion={...o.motion,[field]:value};},false);
+ if(rebuildCrowd)rebuild();
+}
+$('motionSpeed').onchange=()=>changeMotion('speed',Number($('motionSpeed').value));
+$('motionDirection').onchange=()=>changeMotion('direction',$('motionDirection').value);
+$('crowdCount').onchange=()=>changeMotion('count',Number($('crowdCount').value),true);
+$('questAction').onchange=()=>changeMotion('idleAction',$('questAction').value);
+$('motionEnabled').onchange=()=>changeMotion('enabled',$('motionEnabled').checked);
+
 
 function assetCategory(spec){
  if(!spec)return 'street';
