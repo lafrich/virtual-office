@@ -7,18 +7,18 @@
 const MINUTES=1440,DEFAULT_MINUTE=7*60,DAY_REAL_SECONDS=24*60;
 const WEEK=['SEN','SEL','RAB','KAM','JUM','SAB','MIN'];
 const stops=[
- {t:0,night:.78,glow:1,cast:.025,contact:.22,rgb:[11,27,56],sky:'#1a304c'},
- {t:300,night:.71,glow:.95,cast:.05,contact:.20,rgb:[28,38,67],sky:'#304969'},
- {t:360,night:.33,glow:.52,cast:.28,contact:.22,rgb:[95,68,71],sky:'#94a1a0'},
+ {t:0,night:.78,glow:1,cast:.025,contact:.22,rgb:[11,27,56],sky:'#71869b'},
+ {t:300,night:.71,glow:.95,cast:.05,contact:.20,rgb:[28,38,67],sky:'#8296a8'},
+ {t:360,night:.33,glow:.52,cast:.28,contact:.22,rgb:[95,68,71],sky:'#a5b4b9'},
  {t:420,night:.11,glow:0,cast:.35,contact:.25,rgb:[162,120,90],sky:'#bfd2d2'},
  {t:540,night:.015,glow:0,cast:.31,contact:.25,rgb:[230,211,181],sky:'#c2dce4'},
  {t:720,night:0,glow:0,cast:.24,contact:.27,rgb:[255,245,226],sky:'#b9d5e2'},
  {t:900,night:.025,glow:0,cast:.28,contact:.26,rgb:[216,197,165],sky:'#d5d5d1'},
  {t:1035,night:.12,glow:.04,cast:.32,contact:.24,rgb:[180,105,70],sky:'#d1b9a1'},
- {t:1080,night:.25,glow:.35,cast:.22,contact:.21,rgb:[125,77,90],sky:'#8b8699'},
- {t:1140,night:.57,glow:.85,cast:.07,contact:.18,rgb:[25,39,70],sky:'#3d4e70'},
- {t:1200,night:.72,glow:1,cast:.02,contact:.20,rgb:[14,29,61],sky:'#253b5d'},
- {t:1440,night:.78,glow:1,cast:.025,contact:.22,rgb:[11,27,56],sky:'#1a304c'}
+ {t:1080,night:.25,glow:.35,cast:.22,contact:.21,rgb:[125,77,90],sky:'#a4a6b3'},
+ {t:1140,night:.57,glow:.85,cast:.07,contact:.18,rgb:[25,39,70],sky:'#8298aa'},
+ {t:1200,night:.72,glow:1,cast:.02,contact:.20,rgb:[14,29,61],sky:'#768da4'},
+ {t:1440,night:.78,glow:1,cast:.025,contact:.22,rgb:[11,27,56],sky:'#71869b'}
 ];
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function normalize(snapshot){
@@ -55,7 +55,7 @@ function model(minute){
  const skyA=hexToRgb(a.sky),skyB=hexToRgb(b.sky);
  const sky='#'+skyA.map((v,i)=>Math.round(mix(v,skyB[i],u)).toString(16).padStart(2,'0')).join('');
  const daylight=clamp(Math.sin(Math.PI*(t-330)/(18.5*60-330)),0,1);
- // Shadow travels west during the morning and east in late afternoon.
+ // Retain solar metadata for the 24-hour clock; sprite shadows ignore it.
  const angle=(t-720)/360*Math.PI*.67;
  const sun={x:Math.cos(angle),z:Math.sin(angle),height:daylight};
  const phase=t<300||t>=1140?'MALAM':t<420?'FAJAR':t<660?'PAGI':
