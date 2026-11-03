@@ -64,12 +64,13 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 @media(max-width:1000px){body{padding:0}#app{border-radius:0;min-height:100dvh}.workspace{grid-template-columns:190px minmax(260px,1fr)}.panel.right{grid-column:1/-1;border-top:1px solid #b8c6d4;border-left:0}.properties{display:grid;grid-template-columns:repeat(3,1fr);gap:7px 12px}.properties>*{min-width:0}.properties label{margin:5px 0}.properties .note,.properties .controls{grid-column:1/-1}}
 @media(max-width:640px){.workspace{display:flex;flex-direction:column}.panel{border-right:0}.panel.left{max-height:210px}.preset{padding:6px 10px}.preset-grid{grid-template-columns:repeat(5,1fr)}.preset-grid button{padding:5px 2px;font-size:10px}.library{max-height:100px}.stage{min-height:340px}.properties{grid-template-columns:1fr 1fr}.titlebar small{display:none}nav{gap:5px}nav button,nav a.button{padding:6px;font-size:10px}.canvas-head{font-size:10px}}
 </style>
+<link rel="stylesheet" href="./mobile-ui.css?v=interior-v3">
 </head>
 <body>
 <div id="app">
 <header class="titlebar"><div class="mark">▤</div><div><strong>BANGUN RUANG</strong><small>.PNT — Building Studio</small></div><div class="win">_ □ ×</div></header>
 <nav>
- <button id="newBtn">▤ New</button><button id="saveBtn" class="primary">💾 Save Asset</button>
+ <button id="newBtn">▤ New</button><button id="saveBtn" class="primary">💾 Save Asset</button><button id="mobileMenuBtn" type="button" aria-expanded="false">☰ Menu</button>
  <button id="exportBtn">↓ Export Package</button><button id="importBtn">↑ Import</button>
  <a class="button" href="../" title="Open Semesta City Builder">◈ Open Semesta</a>
  <span class="spacer"></span><span class="status">VIRTUAL LIFE · V6B PIXEL ART</span>
@@ -88,19 +89,37 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <div class="heading"><span>LOCAL ASSET STORAGE</span><span>V1</span></div>
 </aside>
 <section class="center">
+ <div id="mobileBase" class="mobile-base mobile-only" hidden></div>
  <div class="canvas-head"><span id="canvasName">UNTITLED BUILDING</span><span class="muted">ISO 2:1 · 64×32 TILE · 1X PIXELS</span></div>
- <div class="stage"><img id="preview" alt="Pixel art isometric building preview"></div>
+ <div class="preview-toggle" aria-label="Preview mode"><button type="button" id="showExterior" class="active">▤ Exterior</button><button type="button" id="showInterior" disabled>▦ Interior</button></div>
+ <div class="stage"><img id="preview" alt="Pixel art isometric building preview"><canvas id="interiorCanvas" hidden width="360" height="360" aria-label="Interactive interior tile layout. Tap to place or move furniture." role="img"></canvas></div>
  <div class="direction-bar"><strong>VIEW</strong>
  <button class="active" data-dir="sw">SW</button><button data-dir="se">SE</button>
  <button data-dir="ne">NE</button><button data-dir="nw">NW</button>
  <span>4 NATIVE SPRITE VIEWS</span></div>
+ <button type="button" id="savedToggle" aria-expanded="false">▣ Show Saved Buildings</button>
  <div class="info"><div><b>FOOTPRINT</b><br><span id="footprintText">4 × 4 tiles</span></div>
  <div><b>SPRITE / PIVOT</b><br><span id="sizeText">—</span></div>
  <div><b>COLLISION</b><br><span id="collisionText">SOLID</span></div></div>
 </section>
 <aside class="panel right">
- <div class="heading"><strong>PROPERTIES / ASSET</strong><span>✕</span></div>
+ <div class="heading"><strong>PROPERTIES / ASSET</strong><span>EDIT</span></div>
+ <div class="studio-tabs" role="tablist" aria-label="Building editor">
+  <button id="tabExterior" type="button" class="active" aria-selected="true">EXTERIOR</button>
+  <button id="tabInterior" type="button" aria-selected="false" disabled>INTERIOR</button>
+  <button id="tabActions" type="button" aria-selected="false" disabled>ACTIONS</button>
+  <button id="tabMetadata" type="button" aria-selected="false">DATA</button>
+ </div>
  <div class="properties">
+ <section id="exteriorPane" class="studio-section" role="tabpanel">
+ <div class="mode-panel">
+  <label for="buildingMode">BUILDING INTERACTIVITY</label>
+  <select id="buildingMode" aria-label="Building type">
+   <option value="decorative">Non-interactive · Exterior only</option>
+   <option value="interactive">Interactive · Enterable + Interior</option>
+  </select>
+  <p id="buildingModeHint">Decorative building: occupies space in Semesta but has no enter action or interior.</p>
+ </div>
  <label>SEMESTA SOURCE<input id="sourceId" readonly value="semesta:small" aria-label="Source Semesta building ID"></label>
  <label>BUILDING NAME<input id="name" maxlength="50" value="Small Building"></label>
  <label>BUILDING TYPE<select id="kind"><option value="rumah">Rumah</option><option value="ruko">Ruko</option><option value="warung">Warung</option><option value="kost">Kost</option><option value="kantor">Kantor</option></select></label>
@@ -119,6 +138,46 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <div class="note" id="specSummary"><b>Semesta source contract</b><br>Building footprint and metadata are inherited from the selected Semesta source.</div>
  <div class="note"><b>Virtual Life art contract</b><br>Shading 4–5 tones · light top-left · no black outline · nearest-neighbor · ground pivot · four directions. PNG uses transparent background. Interactions are proposed metadata, not playable actions.</div>
  <div class="controls"><button id="pixelBtn">✎ Edit Native Pixels</button><button id="generateBtn">↻ Regenerate</button><button id="pngBtn">↓ PNG Current View</button><button id="publishBtn" class="primary">✳ Save to Semesta</button><button id="deleteBtn" class="danger">Delete Saved Asset</button><button id="helpBtn">? Guide</button></div>
+ </section>
+ <section id="interiorPane" class="studio-section" role="tabpanel" hidden>
+  <div class="interior-header">ROOM BUILDER</div>
+  <p class="interactive-note">Interior is stored inside this building asset. Select a room template, then tap tiles in Interior Preview to place furniture. Entry/exit uses the building door.</p>
+  <div class="interior-floor-bar"><label for="interiorFloor">FLOOR</label><select id="interiorFloor" aria-label="Choose building floor"></select></div>
+  <label for="interiorTemplate">ROOM TEMPLATE</label><select id="interiorTemplate"></select>
+  <div class="studio-buttonrow"><button type="button" id="applyInteriorTemplate">↻ Apply Room Template</button><button type="button" id="clearInteriorRoom">Empty Floor</button></div>
+  <div class="interior-header">FURNITURE / ACTION OBJECTS</div>
+  <label for="interiorCategory">CATEGORY</label><select id="interiorCategory"></select>
+  <label for="interiorAsset">ASSET</label><select id="interiorAsset" class="item-catalog"></select>
+  <div class="studio-buttonrow"><button type="button" id="addInteriorItem" class="primary">+ Place On Grid</button><button type="button" id="cancelInteriorPlacement">Cancel</button></div>
+  <p id="placementHint" style="font-size:11px;color:#617b92;line-height:1.5">Select an asset and tap the floor plan to place.</p>
+  <div class="interior-header">PLACED ITEMS</div><div id="interiorItemList" class="interior-item-list"></div>
+  <div id="interiorItemEditor" class="interior-item-editor" hidden>
+   <strong id="interiorItemName">Selected Object</strong>
+   <div class="studio-grid">
+    <label>X / C <input id="interiorItemC" type="number" min="0" step="1"></label>
+    <label>Y / R <input id="interiorItemR" type="number" min="0" step="1"></label>
+    <label>FACING <select id="interiorItemFacing"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>
+    <label>CAPACITY <input id="interiorCapacity" type="number" min="1" max="8" step="1"></label>
+   </div>
+   <label for="interiorItemAction">TRIGGERED ACTION</label><select id="interiorItemAction"></select>
+   <label for="interiorItemRadius">TRIGGER RADIUS (tiles)</label><input id="interiorItemRadius" type="number" min=".4" max="3" step=".1">
+   <div class="studio-buttonrow"><button type="button" id="updateInteriorItem" class="primary">Save Placement</button><button type="button" id="duplicateInteriorItem">Duplicate</button><button type="button" id="removeInteriorItem" class="danger">Delete</button></div>
+   <p id="interiorActorHint" class="muted" style="font-size:11px"></p>
+  </div>
+ </section>
+ <section id="actionPane" class="studio-section" role="tabpanel" hidden>
+  <div class="interior-header">BUILDING INTERACTION</div>
+  <div id="actionBuildingSummary" class="interactive-note">Enable Interactive in Exterior to use a door and interior action slots.</div>
+  <div class="interior-header">ACTION TRIGGERS</div>
+  <div id="actionSlotList"></div>
+  <p class="note">Mahluk Hidup sprite poses are previews only. WC uses the canonical toilet/sit pose; bed sleep; chair sit; shower bathe/swim; work desk work/sit_type. Buy, wash and cook hooks are saved as metadata if no dedicated rig exists.</p>
+ </section>
+ <section id="metadataPane" class="studio-section" role="tabpanel" hidden>
+  <div class="interior-header">SEMESTA ASSET CONTRACT</div>
+  <p class="interactive-note">Four pixel sprites, native 64×32 tile projection, source footprint, pixel pivot, and structured interior/action metadata.</p>
+  <pre id="metadataPreview" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#fff;padding:10px;border:1px solid #c3d0dc;font:10px/1.6 monospace">Select base / Save to view.</pre>
+  <button type="button" id="metadataExport">↓ Export Asset JSON</button>
+ </section>
  </div>
 </aside>
 </div>
@@ -140,15 +199,17 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <footer style="display:flex;gap:8px;justify-content:end"><button id="cancelPixel" type="button">Cancel</button><button id="savePixel" type="button" class="primary">Save Pixel Edits</button></footer>
  </dialog>
 <dialog id="guide"><header>✳ BANGUN RUANG — QUICK GUIDE</header><section>
- <b>1.</b> Pilih template bangunan dan atur footprint, lantai, material, serta detail di Properties.<br>
- <b>2.</b> Cek SW, SE, NE, NW. Setiap arah dirender ulang di grid pixel art, bukan diputar dengan anti-aliasing.<br>
- <b>3.</b> Save Asset menyimpan draft di browser ini. Save to Semesta mendaftarkan aset agar muncul di Semesta → BUILDINGS, di browser dan origin yang sama.<br>
- <b>4.</b> Export Package mengunduh JSON lengkap dengan empat PNG embedded. PNG Current View mengunduh satu gambar transparan.<br>
- <b>5.</b> Pintu, collision, dan interaksi masih metadata authoring; tidak langsung mengaktifkan gameplay atau multiplayer.<br>
+ <b>1.</b> Pilih base asli Semesta, lalu edit eksterior modular.<br>
+ <b>2.</b> Pilih Non-interactive untuk bangunan dekoratif, atau Interactive untuk bangunan yang bisa dimasuki.<br>
+ <b>3.</b> Interactive: buka INTERIOR untuk memilih room template, menaruh WC/kasur/kursi dan benda lain; buka ACTIONS untuk memeriksa pose Mahluk Hidup.<br>
+ <b>4.</b> Lihat Exterior/Interior di preview. Simpan dari Save Asset untuk mendaftarkan 4 PNG, footprint, entrance dan action slots di Semesta.<br>
+ <b>5.</b> Action/interior hanya authoring & editor preview. Multiplayer game utama tidak dijalankan oleh Bangun Ruang.<br>
  <p><b>Penting:</b> penyimpanan bersifat lokal, bukan commit GitHub atau cloud. Export untuk backup lintas perangkat.</p>
  </section><footer><button id="closeGuide">Close</button></footer></dialog>
 <script src="../pipeline-catalog.js?v=bangun-ruang-v2"></script>
 <script src="../semesta-building-spec.js?v=bangun-ruang-v2"></script>
+<script src="./interior-model.js?v=interior-v3"></script>
+<script src="./studio-interior-ui.js?v=interior-v3"></script>
 <script>
 (function(){
 'use strict';
