@@ -286,3 +286,21 @@
  .building-view-setting{min-width:max-content;padding:0 2px}
  #buildingViewMode{min-width:96px;height:33px}
 }
+
+/* Yellow logic markers: visible/hideable, with accessible one-tap deletion. */
+#markerVisibility{flex:none;white-space:nowrap;min-height:31px;font:11px Tahoma}
+#markerVisibility[aria-pressed="false"]{background:#ece5cf;color:#6b5741}
+#markerVisibilityTool[aria-pressed="true"]{background:#f8e2a0;color:#6e5317;border-color:#b89537}
+#markerVisibilityTool[aria-pressed="false"]{background:#d7d5d0;color:#666}
+#markerManager{margin:7px 0;padding:8px;background:#ece9de;border:1px solid #aba69d}
+#markerManager .section-label{margin-top:1px}
+#markerManager label{display:flex;flex-direction:column;gap:5px}
+#markerPicker{width:100%;padding:7px;border:2px inset #9d9d9b;background:white;color:#1e273c;font:11px Tahoma}
+.marker-manager-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0}
+#markerManager .marker-manager-actions button{min-height:38px;padding:5px 3px;font:bold 10px Tahoma}
+#markerDelete,#markerDeleteAll{background:#e3d5c9;border-color:#fff #9c7a70 #9c7a70 #fff}
+#markerManager .help{margin:5px 0;color:#5a5344}
+@media(max-width:780px){
+ #markerVisibility{min-height:34px}
+ #markerManager .marker-manager-actions button{min-height:43px}
+}
