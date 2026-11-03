@@ -28,7 +28,7 @@ Native contract:
 
 **Save Asset** or **Save to Semesta** stores the building package (including all four embedded PNGs) in the browser's localStorage key **virtual-life-bangun-ruang-v1**.
 
-Semesta loads bangun-ruang/semesta-bridge.js before initializing its World Builder catalog. This makes saved assets available in FILES / ASSETS → BUILDINGS under the reference studio:asset-id. The bridge feeds actual PNG data URLs to the normal Three.js sprite loader, and style-rules.js recognizes custom-building sources as structures. Use Open Semesta or reload an existing Semesta tab to refresh the catalog.
+Semesta loads bangun-ruang/semesta-bridge.js before initializing its World Builder catalog. This makes saved assets available in FILES / ASSETS → BUILDINGS under the reference studio:asset-id. The bridge feeds actual PNG data URLs to the normal Three.js sprite loader, and style-rules.js recognizes custom-building sources as structures. If Semesta is open in another tab on the same browser origin, saving or deleting a building refreshes its catalog, preview sprites and matching placed instances without a page reload. Semesta preserves world positions and explicit instance-level overrides. Opening Semesta after saving also loads the latest assets normally.
 
 The local integration works only in the **same browser profile and GitHub Pages origin**; it does not commit files to GitHub or sync across devices. Export a building package for backup. When importing a city JSON on another device, first import the matching Bangun Ruang asset package (the importer preserves its stable ID), then import the city JSON in Semesta. Both files must use the same browser profile.
 
