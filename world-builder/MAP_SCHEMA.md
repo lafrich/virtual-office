@@ -106,3 +106,9 @@ Example:
 ```
 
 The terrain grid is authored on whole tiles and rendered as actual square ground planes in the 3D scene; the 2:1 orthographic camera makes each appear as an isometric diamond. The visible editor grid may be hidden without affecting exported coordinate accuracy. These flags are suggested design semantics, **not connected runtime pathfinding/physics**.
+
+## Unbounded terrain and dynamic grid
+
+Current maps export `map.unbounded: true`. The legacy `map.worldBounds` coordinates are retained as metadata for the initial Street2 sample; they no longer restrict terrain painting or object placement. The grid and default grass floor are rendered in camera-centered windows. Terrain is saved as sparse integer c/r overrides and persisted regardless of whether the tile is currently visible.
+
+A flood fill on the default infinite terrain is mathematically unbounded, so the editor restricts **Fill** to the current viewport, while **Paint** can move outside any finite region. This changes editor rendering and authoring bounds only: it does not change online-game collision, saving, navigation or world streaming.
