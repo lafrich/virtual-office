@@ -11,6 +11,7 @@ on:
       - "tests/semesta-mahluk-sync.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
       - "tests/mahluk-template-runtime.test.cjs"
+      - "tests/mahluk-appearance-runtime.test.cjs"
       - "tests/membangun-live-sync.test.cjs"
       - "tests/bangun-ruang-*.test.cjs"
       - "tests/semesta-traffic.test.cjs"
@@ -30,6 +31,7 @@ on:
       - "tests/semesta-mahluk-sync.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
       - "tests/mahluk-template-runtime.test.cjs"
+      - "tests/mahluk-appearance-runtime.test.cjs"
       - "tests/membangun-live-sync.test.cjs"
       - "tests/bangun-ruang-*.test.cjs"
       - "tests/semesta-traffic.test.cjs"
@@ -66,6 +68,7 @@ jobs:
           node tests/semesta-mahluk-sync.test.cjs
           node tests/mahluk-action-frame-sync.test.cjs
           node tests/mahluk-template-runtime.test.cjs
+          node tests/mahluk-appearance-runtime.test.cjs
       - name: Bangun Ruang exterior/interior scale and WC regressions
         run: |
           node --test tests/bangun-ruang-shared-scale-v7.test.cjs tests/bangun-ruang-isometric-interior.test.cjs tests/bangun-ruang-toilet-seat-alignment.test.cjs tests/bangun-ruang-character-door-wc-v8.test.cjs tests/bangun-ruang-source-game-v9.test.cjs
