@@ -18,6 +18,9 @@ if(!THREE){
   throw Error('THREE_MODULE_NOT_AVAILABLE');
 }
 const STORE='virtual-life-gpt-world-builder-pipeline-v3';
+const ACTIVE_DRAFT_KEY='virtual-life-active-city-draft';
+let activeDraftId=null,draftDirty=true;
+try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
 const assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
@@ -269,7 +272,13 @@ function sanitize(v){
  out.map.terrain=terrain.normalize(v.map?.terrain||terrain.seeded(out.map.worldBounds,out.map.road),null);
  return out;
 }
-function saved(){try{localStorage.setItem(STORE,JSON.stringify(documentMap));$('saveStatus').textContent='● Saved locally';}catch(e){$('saveStatus').textContent='⚠ Storage full';}}
+function saved(){
+ draftDirty=true;
+ try{
+  localStorage.setItem(STORE,JSON.stringify(documentMap));
+  $('saveStatus').textContent=activeDraftId?'● Edited · Save City':'● Working draft';
+ }catch(e){$('saveStatus').textContent='⚠ Storage full · Export JSON';}
+}
 function undoPoint(){undoStack.push(JSON.stringify(documentMap));if(undoStack.length>60)undoStack.shift();redoStack=[];}
 function restoreStack(from,to){
  if(!from.length)return;
@@ -294,7 +303,14 @@ const cameraFocus=new THREE.Vector3(4,0,35);
 // True 2:1 pixel-isometric ground (30° elevation), orthographic = no perspective resizing.
 const direction=new THREE.Vector3(1,Math.sqrt(2/3),1).normalize();
 let viewSize=35;
-function resetCamera(){cameraFocus.set(4,0,34.8);viewSize=35;fitCamera();}
+function resetCamera(){
+ if(documentMap.map?.preset==='reference-city-v1'){
+  cameraFocus.set(14,0,49);viewSize=140;
+ }else if(documentMap.map?.name?.includes('City Sample')){
+  cameraFocus.set(4,0,37);viewSize=78;
+ }else{cameraFocus.set(4,0,34.8);viewSize=35;}
+ fitCamera();
+}
 function fitCamera(){
  const b=canvas.getBoundingClientRect();
  const aspect=Math.max(.3,b.width/Math.max(1,b.height));
@@ -826,7 +842,7 @@ function onMove(e){
  if(pointers.size>=2&&pinch){
   const pts=[...pointers.values()],len=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
   const mid={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
-  viewSize=clamp(pinch.view*pinch.dist/Math.max(10,len),8,110);
+  viewSize=clamp(pinch.view*pinch.dist/Math.max(10,len),8,180);
   cameraFocus.copy(pinch.focus);fitCamera();
   const groundUnderFingers=floorPoint({clientX:mid.x,clientY:mid.y});
   if(groundUnderFingers&&pinch.ground){
@@ -889,7 +905,7 @@ canvas.addEventListener('pointercancel',onUp);
 // Desktop precision wheel stays as a non-UI fallback. Mobile uses pinch.
 canvas.addEventListener('wheel',e=>{
  if(e.ctrlKey||e.pointerType==='mouse'||e.deltaMode===0){
-  e.preventDefault();viewSize=clamp(viewSize*(e.deltaY>0?1.12:.89),8,110);fitCamera();
+  e.preventDefault();viewSize=clamp(viewSize*(e.deltaY>0?1.12:.89),8,180);fitCamera();
  }
 },{passive:false});
 // Walk Test previews canonical movement and 3D occlusion without mutating
@@ -1212,7 +1228,7 @@ $('export').onclick=()=>{
  const errors=schema.validate(ready,assetByName,style);
  if(errors.length){tell('Map validation: '+errors.slice(0,2).join('; '));return;}
  let json=JSON.stringify(ready,null,2),blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob);
- let a=document.createElement('a');a.href=url;a.download='virtual-life-ai-world-map-v2.json';a.click();
+ let a=document.createElement('a');a.href=url;a.download='virtual-life-ai-world-map-v3.json';a.click();
  setTimeout(()=>URL.revokeObjectURL(url),1000);tell('Map JSON exported');
 };
 $('import').onclick=()=>$('file').click();
