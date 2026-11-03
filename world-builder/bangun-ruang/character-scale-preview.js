@@ -412,7 +412,9 @@ function mount(api){
    ['shower','bathtub'].includes(prop?.assetId)?'bathe':
    prop?.assetId==='bed'?'sleep':
    ['toilet','bathe','sleep'].includes(actor.pose)?actor.pose:'toilet';
-  const target=new URL('/virtual-life-asset-pipeline/action-editor.html',location.origin);
+  // Open the native Mahluk Hidup Actions workspace, not the old standalone page.
+  const target=new URL('/virtual-life-asset-pipeline/',location.origin);
+  target.hash='actions';
   target.searchParams.set('actor',choose.value||actor.profile);
   target.searchParams.set('action',action);
   const buildingId=api.getBuildingId?.();
