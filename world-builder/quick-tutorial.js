@@ -6,8 +6,8 @@
 const $=id=>document.getElementById(id);
 const KEY='virtual-life-city-builder-welcome-v1';
 const steps=[
- {icon:'🗺️',title:'Welcome to City Builder!',
-  text:'Susun kotamu sendiri di map isometric. Semua gedung dan props bisa dipilih, dipindahkan, atau diganti kapan saja.',
+ {icon:'🗺️',title:'Welcome to Semesta!',
+  text:'Selamat datang di Semesta. Rancang kota isometric sendiri, letakkan gedung dan props, lalu simpan sebagai City Draft.',
   tip:'Mulai dengan Reference City, atau buat map baru tanpa menghapus draft yang sudah disimpan.'},
  {icon:'✋',title:'Geser map dan lihat grid',
   text:'Geser area kosong untuk pan. Gunakan dua jari untuk pinch zoom; di komputer bisa pakai scroll. Tombol # menampilkan atau menyembunyikan grid.',
@@ -19,7 +19,7 @@ const steps=[
   text:'Di Assets → Terrain pilih Road, Grass, Sidewalk, Water, atau Plaza. Geser jari memakai Paint; gunakan Fill untuk satu area.',
   tip:'Karakter tidak bisa menembus objek solid atau berjalan di air. Gedung besar akan transparan saat menutupi karakter.'},
  {icon:'💾',title:'Test, save, and continue',
-  text:'Tekan 🎥 Character untuk mengikuti karakter dengan D-pad / WASD. Kembali lewat 🗺 Map. Simpan kotamu lewat 💾 Save Draft.',
+  text:'🎥 Character untuk ikuti pemain. Mobil dan ojol loop di jalan, NPC dan crowd loop di trotoar; NPC quest idle di tempat. Simpan lewat 💾 Save Draft.',
   tip:'My Cities membuka draft yang tersimpan di browser ini. Export JSON untuk backup atau diteruskan ke AI developer.'}
 ];
 let idx=0,oldFocus=null;
