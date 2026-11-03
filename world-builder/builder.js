@@ -222,6 +222,14 @@ try{
  const r=await fetch('./world.json?v=p3',{cache:'no-store'});
  if(r.ok){defaultSeed=sanitize(await r.json());documentMap=clone(defaultSeed);}
 }catch(err){console.warn('Using built-in map if world.json is unavailable',err);}
+// Fresh installations start on the editable reference city; existing local
+// editing sessions are restored below without overwriting their work.
+try{
+ if(window.VLReferenceCity){
+  defaultSeed=sanitize(window.VLReferenceCity.create(defaultSeed,assetByName,style,schema));
+  documentMap=clone(defaultSeed);
+ }
+}catch(error){console.warn('Could not seed Reference City; original map remains',error);}
 try{
  const saved=JSON.parse(localStorage.getItem(STORE)||'null');
  if(saved&&saved.format===seed.format&&Array.isArray(saved.objects))documentMap=sanitize(saved);
@@ -1164,6 +1172,135 @@ $('closeRef').onclick=()=>{$('assetReference').hidden=true;};
 $('undo').onclick=()=>restoreStack(undoStack,redoStack);
 $('redo').onclick=()=>restoreStack(redoStack,undoStack);
 $('snap').onclick=()=>{snap=!snap;$('snap').title='Snap: '+(snap?'ON':'OFF');$('snap').classList.toggle('active',snap);};
+async function refreshDraftPicker(selectId){
+ const picker=$('draftPicker');
+ picker.replaceChildren();
+ let records=[];
+ try{records=await window.VLCityDrafts.list();}
+ catch(error){tell('Daftar draft gagal: '+error.message);return;}
+ if(!records.length){
+  const option=document.createElement('option');
+  option.textContent='No saved cities yet';option.disabled=true;picker.appendChild(option);
+  $('draftDetails').textContent='Save the current city to create your first named draft.';
+  return;
+ }
+ for(const d of records){
+  const o=document.createElement('option');o.value=d.id;
+  o.textContent=d.name+' · '+d.objectCount+' objects';
+  picker.appendChild(o);
+ }
+ picker.value=selectId||activeDraftId||records[0].id;
+ if(!picker.value)picker.selectedIndex=0;
+ updateDraftDetails(records);
+}
+function updateDraftDetails(records){
+ const id=$('draftPicker').value,record=(records||[]).find(d=>d.id===id);
+ if(!record){$('draftDetails').textContent='Choose a city to open.';return;}
+ $('draftDetails').textContent=record.objectCount+' objects · '+record.tileCount+' terrain tiles · saved '+
+  new Date(record.updatedAt).toLocaleString('id-ID');
+}
+async function openDraftDialog(){
+ closeMobileSheets();
+ $('draftDialog').hidden=false;
+ $('draftName').value=documentMap.map?.name||'Untitled City';
+ await refreshDraftPicker();
+}
+function closeDraftDialog(){$('draftDialog').hidden=true;}
+async function saveNamedCity(asNew=false){
+ const drafts=window.VLCityDrafts;
+ if(!drafts)throw Error('Draft storage is not available');
+ const name=drafts.cleanName($('draftName').value||documentMap.map?.name);
+ const previousName=documentMap.map.name;
+ documentMap.map.name=name;
+ // Update the recovered working copy before writing the named snapshot.
+ saved();
+ try{
+  const result=await drafts.save({
+   id:asNew?null:activeDraftId,name,document:documentMap
+  });
+  activeDraftId=result.id;draftDirty=false;
+  try{localStorage.setItem(ACTIVE_DRAFT_KEY,result.id);}catch{}
+  $('saveStatus').textContent='● City Draft saved';
+  $('draftName').value=name;
+  await refreshDraftPicker(result.id);
+  tell('City Draft saved: '+name);
+  return result;
+ }catch(error){
+  documentMap.map.name=previousName;
+  throw error;
+ }
+}
+$('saveDraftMenu').onclick=()=>$('saveCityDraft').click();
+$('openDraftMenu').onclick=openDraftDialog;
+$('manageDrafts').onclick=openDraftDialog;
+$('saveCityDraft').onclick=async()=>{
+ if(activeDraftId){
+  try{await saveNamedCity();}catch(e){tell('Save gagal: '+e.message);await openDraftDialog();}
+ }else await openDraftDialog();
+};
+$('confirmSaveDraft').onclick=async()=>{
+ try{await saveNamedCity(false);closeDraftDialog();}
+ catch(error){tell('Save gagal: '+error.message);}
+};
+$('saveAsNewDraft').onclick=async()=>{
+ try{await saveNamedCity(true);closeDraftDialog();}
+ catch(error){tell('Save gagal: '+error.message);}
+};
+$('draftPicker').onchange=async()=>{
+ try{updateDraftDetails(await window.VLCityDrafts.list());}
+ catch(error){tell(error.message);}
+};
+$('loadDraft').onclick=async()=>{
+ const id=$('draftPicker').value;
+ if(!id)return;
+ if(!confirm('Open selected City Draft? Current unsaved edits will be replaced. Save first if needed.'))return;
+ try{
+  const record=await window.VLCityDrafts.load(id);
+  const errors=schema.validate(record.document,assetByName,style);
+  if(errors.length)throw Error(errors.join('; '));
+  undoPoint();documentMap=sanitize(record.document);
+  selectedId=null;activeDraftId=record.id;draftDirty=false;
+  try{localStorage.setItem(ACTIVE_DRAFT_KEY,record.id);}catch{}
+  rebuild();rebuildTerrain();resetCamera();saved();draftDirty=false;
+  $('saveStatus').textContent='● City Draft opened';
+  closeDraftDialog();
+  tell('Opened: '+record.name);
+ }catch(error){tell('Open draft gagal: '+error.message);}
+};
+$('deleteDraft').onclick=async()=>{
+ const id=$('draftPicker').value;if(!id)return;
+ if(!confirm('Delete selected City Draft from this browser? This cannot be undone.'))return;
+ try{
+  await window.VLCityDrafts.remove(id);
+  if(activeDraftId===id){
+   activeDraftId=null;draftDirty=true;
+   try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
+   $('saveStatus').textContent='● Working copy (draft deleted)';
+  }
+  await refreshDraftPicker();
+  tell('Draft deleted; currently open canvas remains unchanged');
+ }catch(error){tell('Delete gagal: '+error.message);}
+};
+$('closeDraftDialog').onclick=closeDraftDialog;
+$('draftDialog').addEventListener('click',e=>{
+ if(e.target===$('draftDialog'))closeDraftDialog();
+});
+window.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!$('draftDialog').hidden)closeDraftDialog();
+});
+function loadReferencePreset(){
+ if(!confirm('Load Reference City layout? Current canvas will be replaced. Save your City Draft first if needed.'))return;
+ try{
+  const reference=window.VLReferenceCity.create(defaultSeed,assetByName,style,schema);
+  undoPoint();documentMap=sanitize(reference);selectedId=null;
+  activeDraftId=null;draftDirty=true;
+  try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
+  closeMobileSheets();setMode('select');
+  rebuild();rebuildTerrain();resetCamera();saved();
+  tell('Reference City ready · tap Save Draft to keep a named copy');
+ }catch(error){tell('Reference City gagal: '+error.message);}
+}
+$('referenceCity').onclick=loadReferencePreset;
 function makeCityExample(){
  const city=clone(defaultSeed);
  city.objects=[];
