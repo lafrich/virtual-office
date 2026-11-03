@@ -693,7 +693,8 @@ function updateLargeOcclusion(dt){
   const point=actor?occlusionRay.intersectBox(entry.box,occlusionHit):null;
   const blocked=!!point&&point.distanceTo(occlusionRay.origin)>.15&&
    point.distanceTo(occlusionRay.origin)<115;
-  const target=blocked?.23:1;
+  const target=blocked?0.23:1;
+  if(target===1&&entry.alpha===1)continue;
   const alpha=1-Math.exp(-dt*12);
   entry.alpha+=(target-entry.alpha)*alpha;
   if(Math.abs(target-entry.alpha)<.002)entry.alpha=target;
@@ -983,12 +984,22 @@ function onMove(e){
   const oldX=o.x,oldZ=o.z;
   o.x=snap?Math.round((drag.x+dx)*2)/2:round(drag.x+dx);
   o.z=snap?Math.round((drag.z+dz)*2)/2:round(drag.z+dz);
-  if(drag.actor&&(o.x!==oldX||o.z!==oldZ)){
+  // Reject a move before rendering it, rather than letting a building,
+  // player or prop pass through another solid object while dragging.
+  const blocked=style.reason(o,documentMap.objects,documentMap.map,assetByName);
+  if(blocked){
+   o.x=oldX;o.z=oldZ;
+   if(drag.actor)rigs.get(o.id)?.rig.setMoving(0,0,false);
+   return;
+  }
+  const moved=o.x!==oldX||o.z!==oldZ;
+  if(drag.actor&&moved){
     o.facing=window.VLCharacterRig?.directionFromWorld(o.x-oldX,o.z-oldZ,o.facing||'sw')||o.facing;
     o.pose=null;
   }
-  drag.changed=true;applyItem();
-  if(drag.actor)rigs.get(o.id)?.rig.setMoving(o.x-oldX,o.z-oldZ,true);
+  drag.changed=drag.changed||moved;
+  if(moved)applyItem();
+  if(drag.actor)rigs.get(o.id)?.rig.setMoving(o.x-oldX,o.z-oldZ,moved);
  }else if(drag.kind==='pan'&&!drag.hit){
   // Deliberate one-finger pan exits Follow, leaving the camera at its current location.
   if(cameraFollowId&&Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>5)
