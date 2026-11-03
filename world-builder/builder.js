@@ -27,6 +27,7 @@ const style=window.VLWorldStyle;
 const terrain=window.VLMapTerrain;
 const physics=window.VLWorldPhysics;
 const traffic=window.VLSemestaTraffic;
+const trafficFlow=window.VLSemestaTrafficFlow;
 const trafficCatalog=window.VLSemestaCatalog;
 const trafficArt=window.VLSemestaArt;
 const schema=window.VLMapSchema;
@@ -714,7 +715,11 @@ const rigs=new Map(),automatedAgents=new Map();
 function resetAutoRoute(agent,obj){
  const mode=obj.type==='vehicle'?'vehicle':'pedestrian';
  agent.settings=traffic.config(obj);
+ agent.record=obj;
  agent.distance=0;
+ agent.awaitingRespawn=false;
+ agent.spawnNeedsCheck=obj.type==='vehicle';
+ agent.stalledSeconds=0;
  if(obj.type==='quest_npc'){
   agent.route=null;
   // A stationary job NPC still requires the same pedestrian surface.
@@ -839,16 +844,109 @@ function simulationObstacles(){
  }
  return obstacles;
 }
+// When another car fills the start of the same straight road,
+ // wait off-map rather than teleporting on top of it.
+function recycleVehicle(agent){
+ agent.awaitingRespawn=true;
+ agent.root.visible=false;
+ agent.distance=0;
+ agent.stalledSeconds=0;
+}
+function vehicleProbe(obj,position){
+ return {...obj,x:position.x,z:position.z,collision:true,blocking:'auto'};
+}
+function stopVehicle(agent,cfg,dt,heading){
+ if(cfg.enabled){
+  agent.stalledSeconds=(agent.stalledSeconds||0)+dt;
+  // A permanently blocked authored road must not accumulate a static
+  // pile of vehicles. Requeue this car off-map and retry from the start.
+  if(agent.stalledSeconds>6){recycleVehicle(agent);return;}
+ }
+ agent.graphic?.update(heading||'se',camera,agent.root);
+}
+function attemptVehicleRespawn(agent,obj,cfg,blockers,live,cars){
+ if(!cfg.enabled)return;
+ const p=traffic.sample(agent.route,0);
+ if(!p||!traffic.allowed(documentMap.map,p.x,p.z,'vehicle'))return;
+ if(!trafficFlow.spawnClear(agent,cars))return;
+ const probe=vehicleProbe(obj,p);
+ if(!physics.check(probe,p,blockers,documentMap.map,assetByName,style,live).ok)return;
+ if(movingOverlap(probe,p,p.dx,p.dz,obj.id))return;
+ agent.awaitingRespawn=false;
+ agent.root.visible=true;
+ agent.root.position.set(p.x,obj.y||0,p.z);
+ agent.distance=0;agent.stalledSeconds=0;
+ agent.lastDx=p.dx;agent.lastDz=p.dz;
+ agent.graphic?.update(window.VLCharacterRig?.directionFromWorld(p.dx,p.dz,'se')||'se',camera,agent.root);
+}
+function updateVehicle(agent,obj,cfg,dt,blockers,live,cars){
+ const route=agent.route;
+ if(!route?.length)return;
+ if(agent.awaitingRespawn){
+  attemptVehicleRespawn(agent,obj,cfg,blockers,live,cars);
+  return;
+ }
+ if(!agent.root.visible)return;
+ const current=traffic.sample(route,Math.min(agent.distance,route.length-.0001));
+ const dir=current?window.VLCharacterRig?.directionFromWorld(current.dx,current.dz,'se')||'se':'se';
+ if(!cfg.enabled){agent.graphic?.update(dir,camera,agent.root);return;}
+ const remaining=route.length-agent.distance;
+ const desired=trafficFlow.pace(agent,cars,cfg.speed,dt);
+ // Cars do not attempt a modulo wrap while still physically on the road.
+ // Upon reaching the last road tile, they leave the world and enter FIFO
+ // re-entry. No collision check is run on a teleport across the map.
+ if(remaining<=.001||desired>=remaining-.0001&&desired>0){
+  recycleVehicle(agent);return;
+ }
+ if(desired<=.00001){stopVehicle(agent,cfg,dt,dir);return;}
+ const destination=traffic.sample(route,agent.distance+desired);
+ if(!destination||!traffic.allowed(documentMap.map,destination.x,destination.z,'vehicle')){
+  stopVehicle(agent,cfg,dt,dir);return;
+ }
+ const probe=vehicleProbe(obj,{x:agent.root.position.x,z:agent.root.position.z});
+ const valid=physics.check(probe,destination,blockers,documentMap.map,assetByName,style,live).ok;
+ const busy=movingOverlap(probe,destination,destination.dx,destination.dz,obj.id);
+ if(!valid||busy){stopVehicle(agent,cfg,dt,dir);return;}
+ agent.distance+=desired;
+ agent.root.position.set(destination.x,obj.y||0,destination.z);
+ agent.lastDx=destination.dx;agent.lastDz=destination.dz;
+ agent.stalledSeconds=0;
+ agent.graphic?.update(window.VLCharacterRig?.directionFromWorld(destination.dx,destination.dz,'se')||'se',camera,agent.root);
+}
+function reconcileVehicleSpawns(cars){
+ // A previously saved draft can start multiple cars on the same point.
+ // Keep the foremost car and place overlapping followers into the spawn
+ // queue immediately, instead of letting all of them remain motionless.
+ const active=cars.filter(c=>c.route?.length&&c.root.visible&&!c.awaitingRespawn)
+  .sort((a,b)=>b.distance-a.distance||a.id.localeCompare(b.id));
+ const kept=[];
+ for(const agent of active){
+  if(!agent.spawnNeedsCheck){kept.push(agent);continue;}
+  agent.spawnNeedsCheck=false;
+  const overlapping=kept.some(other=>trafficFlow.sameLane(agent,other)&&
+   Math.abs(other.distance-agent.distance)<
+   (trafficFlow.lengthOf(agent.record)+trafficFlow.lengthOf(other.record))/2+trafficFlow.GAP);
+  if(overlapping)recycleVehicle(agent);
+  else kept.push(agent);
+ }
+}
 function updateAutomated(dt){
  const blockers=documentMap.objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&
   (!automaticType(o.type)||o.type==='quest_npc'));
  const live=new Map([...rigs].map(([id,rec])=>[id,rec.root.position]));
+ const cars=[...automatedAgents.entries()]
+  .filter(([,a])=>a.kind==='vehicle').map(([id,a])=>a);
+ reconcileVehicleSpawns(cars);
  for(const [id,agent] of automatedAgents){
   const record=documentMap.objects.find(o=>o.id===id);
   if(!record)continue;
   const cfg=traffic.config(record);
   if(record.type==='quest_npc'){
    agent.graphic?.step(dt,camera,agent.root,cfg.idleAction);
+   continue;
+  }
+  if(record.type==='vehicle'){
+   updateVehicle(agent,record,cfg,dt,blockers,live,cars);
    continue;
   }
   const route=agent.route;
