@@ -74,7 +74,7 @@
 @media(max-width:1000px){#workspace{grid-template-columns:52px 164px minmax(0,1fr) 245px}#assetList button{min-height:42px}#hint{max-width:180px}}
 @media(max-width:780px){
  .sheet-close{display:inline-flex}
- #assetsPanel,#inspector{max-height:min(57dvh,490px);overscroll-behavior:contain}
+ #assetsPanel,#inspector{max-height:min(49dvh,450px);overscroll-behavior:contain}
  #assetsPanel.mobile-open,#inspector.mobile-open{display:flex}
  .inspector-head,.panel-heading{position:sticky;top:0;z-index:4;min-height:44px;height:44px}
  .inspector-head strong{flex:1}
