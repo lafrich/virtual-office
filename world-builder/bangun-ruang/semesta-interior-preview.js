@@ -4,20 +4,40 @@
  */
 (function(g){
 'use strict';
-const $=id=>document.getElementById(id),CELL=30,model=g.VLBuildingInterior;
+const $=id=>document.getElementById(id),CELL=30,model=g.VLBuildingInterior,iso=g.VLInteriorIso;
 function mount(opts){
  if(!model)return;
  const enter=$('enterBuilding'),dialog=$('interiorWalkthrough'),canvas=$('interiorWalkthroughCanvas');
  if(!enter||!dialog||!canvas)return;
  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
- let active=null,scene=null,selected=null,floor=1;
+ let active=null,scene=null,selected=null,floor=1,view='iso',lastIso=null;
  function getInteriors(){
   const item=opts.getSelected(),spec=item?.type==='sprite'?opts.catalog.get(item.asset):null;
   const raw=item?.interior?.format==='virtual-life-interiors-v1'?item.interior:spec?.interior;
   if(!raw||!Array.isArray(raw.floors))return null;
   return {item,raw};
  }
+ function changeView(next){
+  view=next==='plan'||!iso?'plan':'iso';
+  const isIso=view==='iso';
+  const isoButton=$('interiorWalkthroughIso'),planButton=$('interiorWalkthroughPlan');
+  isoButton.setAttribute('aria-pressed',String(isIso));
+  planButton.setAttribute('aria-pressed',String(!isIso));
+  isoButton.style.background=isIso?'#125fbb':'#f5f6f7';
+  isoButton.style.color=isIso?'#fff':'#243c54';
+  planButton.style.background=!isIso?'#125fbb':'#f5f6f7';
+  planButton.style.color=!isIso?'#fff':'#243c54';
+  draw();
+ }
  function draw(){
+  if(!scene)return;
+  if(view==='iso'&&iso){
+   lastIso=iso.draw(canvas,scene,{selectedId:selected?.id,grid:true});
+   return;
+  }
+  lastIso=null;drawPlan();
+ }
+ function drawPlan(){
   if(!scene)return;
   const w=Math.max(4,Math.min(24,scene.width||6)),d=Math.max(4,Math.min(24,scene.depth||6));
   canvas.width=w*CELL;canvas.height=d*CELL;ctx.imageSmoothingEnabled=false;
@@ -58,17 +78,29 @@ function mount(opts){
   }
   const first=Number(active.raw.activeFloor)||Number(active.raw.floors[0]?.floor)||1;
   select.value=String(first);floorSelected(first);
+  changeView('iso');
   dialog.showModal();
  }
  function close(){dialog.close();active=null;scene=null;selected=null;}
  enter.onclick=open;$('interiorWalkthroughClose').onclick=close;
  $('interiorWalkthroughFloor').onchange=()=>floorSelected(Number($('interiorWalkthroughFloor').value)||1);
+ $('interiorWalkthroughIso').onclick=()=>changeView('iso');
+ $('interiorWalkthroughPlan').onclick=()=>changeView('plan');
  canvas.addEventListener('pointerdown',e=>{
   if(!scene)return;
-  const rect=canvas.getBoundingClientRect();
-  const c=Math.floor((e.clientX-rect.left)*canvas.width/rect.width/CELL);
-  const r=Math.floor((e.clientY-rect.top)*canvas.height/rect.height/CELL);
-  selected=(scene.items||[]).find(obj=>model.occupied(obj).includes(c+','+r))||null;
+  const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
+  let c,r,hit=null;
+  if(view==='iso'&&iso){
+   hit=iso.pointer(canvas,e,lastIso);
+   if(!hit)return;
+   c=hit.c;r=hit.r;
+  }else{
+   c=Math.floor((e.clientX-rect.left)*canvas.width/rect.width/CELL);
+   r=Math.floor((e.clientY-rect.top)*canvas.height/rect.height/CELL);
+  }
+  selected=hit?.itemId?
+   (scene.items||[]).find(obj=>obj.id===hit.itemId)||null:
+   (scene.items||[]).find(obj=>model.occupied(obj).includes(c+','+r))||null;
   if(selected){
    const a=model.actions[selected.actionId],def=model.types[selected.assetId];
    $('interiorWalkthroughDetail').textContent=(def?.label||selected.assetId)+' / '+(a?.label||selected.actionId)+
