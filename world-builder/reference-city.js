@@ -229,7 +229,7 @@ function create(base,catalog,style,schema){
   ['pedestrian','noor',35.5,41.5,1.5],
   ['pedestrian','nadia',-3.5,76.5,1.3],
   ['crowd','mixed',31.5,76.5,1.25],
-  ['quest_npc','manusia_silver',-5.5,41.5,0],
+  ['quest_npc','manusia_silver',-5.5,46.5,0],
   ['quest_npc','pak_ogah',27.5,46.5,0],
   ['quest_npc','kang_parkir',-27.5,41.5,0],
   ['quest_npc','babeh_pemilik',54.5,76.5,0]
