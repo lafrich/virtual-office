@@ -46,13 +46,17 @@ test('one-tap rotate controls and matching XP chrome load for Bangun Ruang',()=>
  const html=source('index.html'),css=source('mobile-ui.css'),ui=source('studio-interior-ui.js');
  for(const id of ['interiorRotateBar','rotateLeft','rotateRight','rotateSelection','rotateHint'])
   assert.ok(html.includes('id="'+id+'"'),'UI missing '+id);
- assert.ok(html.includes('interior-model.js?v=rotate-v11'));
- assert.ok(html.includes('studio-interior-ui.js?v=rotate-v11'));
- assert.ok(html.includes('mobile-ui.css?v=rotate-v11'));
+ assert.ok(html.includes('interior-model.js?v=rotate-v12'));
+ assert.ok(html.includes('studio-interior-ui.js?v=rotate-v12'));
+ assert.ok(html.includes('mobile-ui.css?v=xp-unified-v12'));
  assert.ok(ui.includes("model.rotate(current,item.id,steps)"));
  assert.ok(ui.includes("String(e.key).toLowerCase()!=='r'"));
  assert.ok(ui.includes("['↓','→','↑','←']"));
  assert.ok(css.includes('/* Shared XP Paint chrome'));
  assert.ok(css.includes('--chrome:#c9c8c4'));
+ for(const id of ['toolExterior','toolInterior','toolIso','toolPlan','toolRotateLeft','toolRotateRight'])
+  assert.ok(html.includes('id="'+id+'"'),'Tool rail missing '+id);
+ assert.ok(ui.includes("$('toolRotateRight').onclick=()=>rotateSelected(1)"));
+ assert.ok(css.includes('grid-template-columns:55px 205px'));
  assert.ok(html.includes('class="close-mark"'));
 });
