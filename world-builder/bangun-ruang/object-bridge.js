@@ -13,6 +13,39 @@ const CATEGORY={
  decor:{label:'Dekorasi',group:'Decorations',layer:'prop',defaultFootprint:[1,1],collision:false,guide:'Dekorasi: pastikan area transparan di luar siluet. Hindari outline hitam, gradient, smoothing, dan bayangan blur.'}
 };
 const cache=new Map();
+const BUILTIN_DIMENSIONS=Object.freeze({
+ "furniture-wc":"69,77,34,56|69,66,34,45|69,66,34,45|69,77,34,56",
+ "furniture-shower":"69,84,34,63|69,84,34,63|69,72,34,51|69,83,34,62",
+ "furniture-bathtub":"101,78,50,49|101,74,50,45|101,74,50,45|101,74,50,45",
+ "furniture-sink":"69,69,34,48|69,64,34,43|69,64,34,43|69,68,34,47",
+ "furniture-bed":"133,103,66,66|133,89,66,52|133,89,66,52|133,103,66,66",
+ "furniture-wardrobe":"101,107,50,78",
+ "furniture-chair":"69,76,34,55|69,67,34,46|69,67,34,46|69,76,34,55",
+ "furniture-sofa":"101,93,50,64|101,83,50,54|101,83,50,54|101,93,50,64",
+ "furniture-table":"101,83,50,54",
+ "furniture-desk":"101,94,50,65|101,88,50,59|101,83,50,54|101,83,50,54",
+ "furniture-office_chair":"69,76,34,55|69,67,34,46|69,67,34,46|69,76,34,55",
+ "furniture-computer":"69,79,34,58|69,69,34,48|69,69,34,48|69,79,34,58",
+ "furniture-stove":"69,67,34,46",
+ "furniture-fridge":"69,93,34,72",
+ "furniture-kitchen_sink":"69,69,34,48|69,64,34,43|69,64,34,43|69,68,34,47",
+ "furniture-cashier":"101,83,50,54|101,83,50,54|101,87,50,58|101,90,50,61",
+ "furniture-shelf":"101,102,50,73|101,103,50,74|101,103,50,74|101,102,50,73",
+ "furniture-counter":"101,85,50,56|101,83,50,54|101,83,50,54|101,85,50,56",
+ "park-bench":"104,74,52,70",
+ "park-lamp":"34,139,17,135",
+ "park-table":"108,47,54,43",
+ "trash-bin":"50,53,25,49",
+ "potted-plant":"64,79,32,75",
+ "small-tree":"71,119,34,115|68,119,34,115|71,119,34,115|68,119,34,115"
+});
+function dimensions(id,dir){
+ const vals=BUILTIN_DIMENSIONS[id];if(!vals)return {size:[64,96],pivot:[32,88]};
+ const parts=vals.split('|'),n=parts[Math.max(0,DIR.indexOf(dir))]||parts[0];
+ const [w,h,x,y]=n.split(',').map(Number);
+ return {size:[w,h],pivot:[x,y]};
+}
+
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||a));
 function canvas(w,h){const cv=document.createElement('canvas');cv.width=w;cv.height=h;const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;return [cv,ctx];}
 function cut(cv,pivot){
@@ -125,7 +158,7 @@ function specs(){
 }
 function makeSpec(row,isBuiltIn){
  const id=isBuiltIn?row.id:row.id;
- const view=isBuiltIn?imageForBuiltin(id,'sw'):row.views.sw;
+ const view=isBuiltIn?dimensions(id,'sw'):row.views.sw;
  const dim=view?.size||[64,96],pivot=view?.pivot||[32,90],category=CATEGORY[row.category];
  return Object.freeze({
  id,file:'object:'+id,label:row.name,group:category.group,source:'bangun-object',
@@ -133,8 +166,8 @@ function makeSpec(row,isBuiltIn){
  collision:row.collision!==false,footprint:row.footprint.slice(),size:dim,pivot,
  width:dim[0]*Math.SQRT2/64,height:dim[1]*Math.SQRT2/64*2/Math.sqrt(3),
  interactions:row.interactions||[],blocking:row.collision===false?'no':'yes',
- variants:Object.fromEntries(DIR.map(d=>[d,{size:(isBuiltIn?imageForBuiltin(id,d):row.views[d])?.size||dim,
-  pivot:(isBuiltIn?imageForBuiltin(id,d):row.views[d])?.pivot||pivot}]))
+ variants:Object.fromEntries(DIR.map(d=>[d,{size:(isBuiltIn?dimensions(id,d):row.views[d])?.size||dim,
+  pivot:(isBuiltIn?dimensions(id,d):row.views[d])?.pivot||pivot}]))
  });
 }
 function image(id,dir='sw'){
