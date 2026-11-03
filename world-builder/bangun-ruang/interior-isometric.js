@@ -129,53 +129,54 @@ function fixturePoint(item,x,y){
   default:return {c:c+x,r:r+y};
  }
 }
+// All furniture parts and actor docking anchors share exactly the same
+// local-to-world rotation, including 2x2 beds and rotated rectangular sofas.
+function fixtureBox(item,x,y,w,d){
+ const p=fixturePoint(item,x,y),q=fixturePoint(item,x+w,y+d);
+ return {c:Math.min(p.c,q.c),r:Math.min(p.r,q.r),
+  w:Math.abs(q.c-p.c),d:Math.abs(q.r-p.r)};
+}
 function actionAnchor(item){
  if(!item||!TYPES[item.assetId])return null;
- let seat=null,hip=0;
+ let seat=null,z=0,offset=0;
  switch(item.assetId){
   case 'wc':
-   // The original v6b game does NOT offset the sprite vertically to sit:
-   // its dedicated per-WC seat point places the feet pivot over the bowl,
-   // and its direction is SW so the kneecap bend is actually visible.
+   // Preserve the source-grounded V6B toilet docking calibration.
    seat=GAME?.toilet.seatedPoint||[.61,.69];
-   hip=GAME?.toilet.footOffsetY??0;break;
+   offset=GAME?.toilet.footOffsetY??0;break;
   case 'chair':
   case 'office_chair':
-   seat=[.50,.55];hip=8;break;
+   // The seat, rather than the adjacent floor tile, is the sit target.
+   seat=[.50,.55];break;
   case 'sofa':
-   seat=[TYPES[item.assetId].w/2,.60];hip=2;break;
+   seat=[TYPES.sofa.w/2,.60];break;
+  case 'bed':
+   // Feet toward the duvet, head toward the pillow/headboard.
+   // Lift the sprite foot pivot onto the 21px-high mattress.
+   seat=[TYPES.bed.w/2,TYPES.bed.d*.69];z=21;break;
   default:return null;
  }
  const p=fixturePoint(item,...seat);
- // In the source game wcUse forces SW, including Cove. NE/NW sit sheets
- // look upright from behind and caused the editor's "standing on WC" bug.
+ // A zero-rotation chair/bed faces out from its backrest at local r=0.
+ // The original WC pose is deliberately always SW regardless of rotation.
  const direction=item.assetId==='wc'?(GAME?.toilet.sitFacing||'sw'):
-  ['ne','se','sw','nw'][fixtureRotation(item)];
- return {c:p.c,r:p.r,z:0,pixelOffsetY:hip,direction,
-  itemId:item.id,kind:item.assetId,
-  localSeat:seat};
+  ['sw','se','ne','nw'][fixtureRotation(item)];
+ return {c:p.c,r:p.r,z,pixelOffsetY:offset,direction,
+  itemId:item.id,kind:item.assetId,localSeat:seat};
 }
 function furniture(ctx,geo,item,selected=false){
- const [w,d]=itemFootprint(item);
  const c=Number(item.c),r=Number(item.r),type=item.assetId;
+ const [fw,fd]=itemFootprint(item);
+ const {w,d}=TYPES[type]; // unrotated local dimensions for art geometry
  if(!Number.isFinite(c)||!Number.isFinite(r))return null;
  const inset=.08;
  // Physical shadow is pixel geometry projected at ground level.
- polygon(ctx,polyPoint(geo,[[c+.1,r+.08,1],[c+w+.1,r+.08,1],
-  [c+w+.1,r+d+.08,1],[c+.1,r+d+.08,1]]),'#9B866F');
+ polygon(ctx,polyPoint(geo,[[c+.1,r+.08,1],[c+fw+.1,r+.08,1],
+  [c+fw+.1,r+fd+.08,1],[c+.1,r+fd+.08,1]]),'#9B866F');
  const hitPolygons=[];
  const B=(x,y,cw,rd,low,top,material,outline=false)=>{
-  let part;
-  if(type!=='wc'||fixtureRotation(item)===0)
-   part=box(ctx,geo,c+x,r+y,cw,rd,low,top,material,outline);
-  else {
-   const rot=fixtureRotation(item),W=w,D=d;
-   let X=x,Y=y,CW=cw,RD=rd;
-   if(rot===1){X=W-(y+rd);Y=x;CW=rd;RD=cw;}
-   else if(rot===2){X=W-(x+cw);Y=D-(y+rd);}
-   else if(rot===3){X=y;Y=D-(x+cw);CW=rd;RD=cw;}
-   part=box(ctx,geo,c+X,r+Y,CW,RD,low,top,material,outline);
-  }
+  const p=fixtureBox(item,x,y,cw,rd);
+  const part=box(ctx,geo,p.c,p.r,p.w,p.d,low,top,material,outline);
   hitPolygons.push(part.top,part.sw,part.se);
   return part;
  };
@@ -285,28 +286,37 @@ function furniture(ctx,geo,item,selected=false){
  place();
  // Selected footprint is a native pixel outline, drawn after the object.
  if(selected){
-  const corners=polyPoint(geo,[[c,r,2],[c+w,r,2],[c+w,r+d,2],[c,r+d,2]]);
+  const corners=polyPoint(geo,[[c,r,2],[c+fw,r,2],[c+fw,r+fd,2],[c,r+fd,2]]);
   for(let i=0;i<corners.length;i++)line(ctx,...corners[i],...corners[(i+1)%corners.length],'#F2B530');
  }
- const ground=polyPoint(geo,[[c,r,0],[c+w,r,0],[c+w,r+d,0],[c,r+d,0]]);
- const top=polyPoint(geo,[[c,r,58],[c+w,r,58],[c+w,r+d,58],[c,r+d,58]]);
+ const ground=polyPoint(geo,[[c,r,0],[c+fw,r,0],[c+fw,r+fd,0],[c,r+fd,0]]);
+ const top=polyPoint(geo,[[c,r,58],[c+fw,r,58],[c+fw,r+fd,58],[c,r+fd,58]]);
  const all=[...ground,...top];
  return {id:item.id, c:item.c,r:item.r,
   minX:Math.min(...all.map(p=>p[0]))-2,maxX:Math.max(...all.map(p=>p[0]))+2,
   minY:Math.min(...all.map(p=>p[1]))-2,maxY:Math.max(...all.map(p=>p[1]))+2,
-  depth:c+r+w+d,polygons:hitPolygons};
+  depth:c+r+fw+fd,polygons:hitPolygons};
 }
+// Final near-side furniture fragments are drawn AFTER the actor sprite.
+// This gives occlusion: knees tuck behind a chair cushion, and a lying
+// character's lower body goes under the duvet instead of floating above it.
 function drawSeatForeground(ctx,geometry,item){
- if(!item||item.assetId!=='wc')return;
- const {c,r}=item,rot=fixtureRotation(item);
- const coords={x:.30,y:.77,w:.40,d:.11};
- let {x,y,w,d}=coords;
- if(rot===1){[x,y,w,d]=[1-(y+d),x,d,w];}
- else if(rot===2){[x,y]=[1-(x+w),1-(y+d)];}
- else if(rot===3){[x,y,w,d]=[y,1-(x+w),d,w];}
- // The bowl front masks the sitting character's feet, making the body
- // visibly sit BEHIND the rim instead of float on top of the fixture.
- box(ctx,geometry,c+x,r+y,w,d,2,WC_SEAT_Z-2,'white');
+ if(!item)return;
+ const part=(x,y,w,d,low,top,material)=>{
+  const p=fixtureBox(item,x,y,w,d);
+  box(ctx,geometry,p.c,p.r,p.w,p.d,low,top,material);
+ };
+ switch(item.assetId){
+  case 'wc':
+   part(.30,.77,.40,.11,2,WC_SEAT_Z-2,'white');break;
+  case 'chair':
+  case 'office_chair':
+   part(.18,.63,.64,.11,10,18,item.assetId==='chair'?'cream':'dark');break;
+  case 'sofa':
+   part(.12,.70,TYPES.sofa.w-.24,.12,14,24,'cream');break;
+  case 'bed':
+   part(.13,1.05,TYPES.bed.w-.26,.77,21,23,'pink');break;
+ }
 }
 function draw(canvas,scene,opts={}){
  const ctx=canvas.getContext('2d');
@@ -386,7 +396,7 @@ function pointer(canvas,event,geometry,opts={}){
  const y=(event.clientY-box.top)*canvas.height/box.height;
  return pick(geometry,x,y,opts);
 }
-g.VLInteriorIso=Object.freeze({version:'v9-source',tilePixels:Object.freeze([64,32]),
+g.VLInteriorIso=Object.freeze({version:'v10-furniture-docking',tilePixels:Object.freeze([64,32]),
  bounds,point,pick,pointer,draw,tileAt,itemFootprint,
  fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground,insidePolygon,
  ACTOR_SCALE,WC_SEAT_Z,WC_TANK_Z,WALL});
