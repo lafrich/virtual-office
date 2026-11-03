@@ -64,6 +64,27 @@
   <div class="canvas-head"><span class="canvas-title">SEMESTA / OPEN WORLD</span><span class="right">UNBOUNDED GRID · PINCH TO ZOOM</span></div>
   <main id="canvas-wrap">
    <canvas id="world" aria-label="Interactive Virtual Life isometric map canvas"></canvas>
+   <div id="dayNightTint" aria-hidden="true"></div>
+   <canvas id="nightGlow" aria-hidden="true"></canvas>
+   <section id="worldClockHud" class="semesta-clock" aria-label="Semesta 24-hour day and night controls">
+    <button id="timeToggle" class="clock-face" type="button" aria-expanded="false" aria-controls="timePanel" title="Set time, day/night and time speed">
+     <span id="timeIcon" aria-hidden="true">☀</span>
+     <span class="clock-numbers"><strong id="timeDisplay">07:00</strong><small id="timeDay">SEN · DAY 01</small></span>
+     <span id="timePhase">PAGI</span><span class="clock-chevron" aria-hidden="true">⌄</span>
+    </button>
+    <div id="timePanel" class="clock-panel" hidden>
+     <div class="clock-panel-heading">☀ SEMESTA · 24-HOUR CLOCK</div>
+     <label for="timeScrub">SET TIME <span id="timeScrubLabel">07:00</span></label>
+     <input id="timeScrub" type="range" min="0" max="1439" step="1" value="420" aria-label="Set in-game time">
+     <div class="clock-time-marks"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+     <div class="clock-actions">
+      <button id="timePause" type="button" aria-pressed="false">Ⅱ Pause</button>
+      <label for="timeSpeed">SPEED <select id="timeSpeed" aria-label="Time speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+      <button id="timeMorning" type="button" title="Jump to 07:00">☀ Morning</button>
+     </div>
+     <p>1×: 24 menit nyata / hari · 2×: 12 menit · 4×: 6 menit. Jam tidak mengubah posisi NPC atau kendaraan.</p>
+    </div>
+   </section>
    <div id="hint">Semesta · Tap select · Paint & drag terrain · Pinch zoom/pan · Grid continues anywhere</div><button id="floatingInspector" class="floating-inspector" type="button" aria-label="Open properties inspector">☷ Properties</button>
    <div id="status">LOADING MAP...</div><div id="toast"></div><div id="empty" role="alert"></div>
    <div id="cameraFollowLabel" role="status" aria-live="polite" hidden>🎥 FOLLOW · CHARACTER</div>
@@ -316,6 +337,8 @@
 <script src="./semesta-traffic-flow.js?v=bus2-markers-v1"></script>
 <script src="./virtual-life-vault.js?v=vl-vault-v1"></script>
 <script src="./building-outline.js?v=building-outline-v2"></script>
+<script src="./semesta-daynight.js?v=daynight-v1"></script>
+<script src="./semesta-world-effects.js?v=daynight-v1"></script>
 <script src="./semesta-traffic-art.js?v=mahluk-vehicles-1"></script>
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
