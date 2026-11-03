@@ -290,3 +290,189 @@
  .interior-rotate-info span{font-size:9px}
  .interior-rotate-bar .rotate-action{min-width:67px;min-height:43px;padding:7px}
 }
+
+/* Shared XP Paint chrome (Mahluk Hidup / Semesta / Bangun Ruang).
+ * These overrides intentionally keep the interior editor's existing DOM,
+ * mobile panel flow, hit testing and native pixel scaling unchanged. */
+:root{
+ --chrome:#c9c8c4;--chrome-light:#f8f7f3;--chrome-shadow:#74716f;
+ --blue:#073a9d;--ink:#151515;--canvas:#f8f6f0;--field:#e5e3df;
+ font-family:Tahoma,"MS Sans Serif",Verdana,sans-serif;color:var(--ink);
+}
+body{background:#0b357e;padding:clamp(12px,2.2vw,32px)}
+#app{
+ max-width:1510px;background:var(--chrome);border:2px solid #fafafa;
+ outline:2px solid #292929;border-radius:0;
+ box-shadow:3px 5px 0 #0008,12px 16px 0 #07174555;
+}
+.titlebar{
+ min-height:48px;height:48px;flex:none;padding:0 9px 0 14px;gap:10px;
+ background:linear-gradient(90deg,#042777 0%,#0755b5 64%,#2c88dd 100%);
+ border-bottom:2px solid #0c2267;letter-spacing:normal;text-shadow:none;
+}
+.titlebar .mark{
+ flex:0 0 25px;width:25px;height:25px;border:2px solid white;
+ background:linear-gradient(135deg,#e4ec68 0 40%,#e85f40 42% 60%,#36b7c5 64%);
+ color:#082e8b;text-shadow:1px 1px white;box-shadow:1px 2px #141414;
+ font-size:19px;line-height:1;
+}
+.titlebar .window-title{
+ min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ font-size:clamp(13px,1.55vw,20px);letter-spacing:-.045em;text-shadow:1px 2px #001f64;
+}
+.titlebar .window-title strong{font-size:inherit;letter-spacing:inherit;font-weight:800}
+.titlebar .title-extra{font-weight:400;margin-left:6px}
+.titlebar .win{margin-left:auto;display:flex;gap:6px;letter-spacing:0;flex:none;text-shadow:none}
+.titlebar .win span{
+ display:grid;place-items:center;width:31px;height:29px;
+ background:#c4c4c3;border:2px solid #ececec;
+ box-shadow:2px 2px #242424,inset -2px -2px #777;
+ color:#090909;font-size:21px;font-weight:bold;line-height:1;
+}
+.titlebar .win .close-mark{background:#db4d35;color:white;text-shadow:1px 2px #761f16}
+#app button,#app a.button{
+ border:2px solid;border-color:#fff #888782 #888782 #fff;
+ background:#d7d5d0;color:#141414;border-radius:0;
+ box-shadow:none;font-weight:700;
+}
+#app button:hover,#app a.button:hover{background:#b7cef9}
+#app button:active,#app button.active,
+#app .preview-toggle button.active,#app .studio-tabs button.active{
+ background:#aac2f8;border-color:#737270 #f1f1f1 #f1f1f1 #737270;
+}
+#app button.primary{background:#b6c9f1;border-color:#fff #6177a8 #6177a8 #fff;color:#142b59}
+#app button.primary:hover{background:#9fbdf8}
+#app button.danger{color:#8c1c13}
+#app button:focus-visible,#app a:focus-visible,#app select:focus-visible,
+#app input:focus-visible{outline:2px dotted #151515;outline-offset:2px}
+#app nav{
+ min-height:40px;flex:none;gap:1px;padding:4px 10px;
+ background:#d4d2ce;border-bottom:2px solid #85827e;align-items:center;
+}
+#app nav button,#app nav a.button{
+ flex:none;min-width:0;border:0;padding:7px 10px;
+ background:transparent;font-weight:500;font-size:12px;
+}
+#app nav button:hover,#app nav a.button:hover{background:#0b429f;color:white}
+#app nav #saveBtn{
+ border:2px solid #fff;border-right-color:#6177a8;border-bottom-color:#6177a8;
+ background:#b6c9f1;color:#142b59;font-weight:800;padding:5px 10px;
+}
+#app nav .status{font:10px "Courier New",monospace;color:#55514b}
+#app .workspace{grid-template-columns:205px minmax(0,1fr) 284px;background:#b8b6b1;min-width:0}
+#app .panel{min-width:0;background:var(--chrome);border-right:2px solid #7e7c77}
+#app .panel.right{border-right:0;border-left:2px solid #86837e}
+#app .heading{
+ height:38px;min-height:38px;padding:0 12px;
+ background:#d2d0cb;border-top:1px solid #fafafa;border-bottom:2px solid #87847e;
+ color:#151515;letter-spacing:.035em;font:bold 11px "Courier New",monospace;
+}
+#app .heading span{font-weight:400}
+#app .search{margin:8px}
+#app input,#app select,#app textarea{
+ border:2px inset #aaa;border-radius:0;background:white;color:#161616;
+ padding:7px;min-width:0;box-shadow:none;
+}
+#app input:focus,#app select:focus,#app textarea:focus{border-color:#406ab8;outline:1px solid #406ab8}
+#app .library{background:#dbd9d4;border:2px inset #a7a49d;margin:0 6px;min-height:0}
+#app .library button{
+ background:#e8e5ec;border:2px solid #98989c;margin:5px 4px;
+ padding:7px;width:calc(100% - 8px);border-radius:0;text-align:left;
+ box-shadow:inset 1px 1px #fff,2px 2px 0 #a6a2a4;
+}
+#app .library button.selected{background:#b5c8fc;border-color:#143c9c}
+#app .library button:hover{background:#c7d8f7}
+#app .preset{border-bottom:2px solid #8f8c86;background:#cac8c3;padding:9px}
+#app .preset h4,#app .section,
+#app .interior-header{color:#37332e;font:bold 11px "Courier New",monospace;letter-spacing:.035em}
+#app .center{background:#b8b6b1;border-right:2px solid #797771;min-width:0}
+#app .canvas-head{
+ min-height:38px;height:38px;padding:0 12px;align-items:center;
+ background:#dedbd6;border-bottom:2px solid #96938c;
+ font:bold 11px "Courier New",monospace;letter-spacing:.04em;
+}
+#app .canvas-head .muted{font:10px "Courier New",monospace;color:#595348;text-align:right}
+#app .stage{
+ margin:9px 10px;border:2px inset #8b8883;background-color:var(--canvas);
+ background-image:linear-gradient(#8881 1px,transparent 1px),linear-gradient(90deg,#8881 1px,transparent 1px);
+ background-size:14px 14px;box-shadow:none;min-width:0;
+}
+#app #preview{filter:none}
+#app .preview-toggle,#app .interior-view-tools,#app .exterior-view-tools{
+ background:#cdcbc6;border-bottom:2px solid #8e8c87;border-top:0;
+}
+#app .preview-toggle button,#app .interior-view-tools button,
+#app .exterior-view-tools button{
+ color:#161616;font:bold 11px "Courier New",monospace;
+ min-height:32px;text-align:center;
+}
+#app .interior-rotate-bar,#app .character-scale-tools{
+ background:#cdcbc6;border-top:2px solid #f0efeb;border-bottom:2px solid #85827c;
+}
+#app .interior-rotate-info strong{color:#151515;font:bold 11px "Courier New",monospace}
+#app .interior-rotate-info span{color:#585550;font:10px "Courier New",monospace}
+#app .interior-rotate-bar .rotate-action{
+ background:#d7d5d0;color:#151515;border-radius:0;
+ border-color:#fff #777 #777 #fff;min-height:41px;
+}
+#app .interior-asset-tray{background:#c9c7c2;border-top:2px solid #f0efeb;border-bottom:2px solid #85827c}
+#app .interior-quick-card{
+ background:#e8e5ec;border:2px solid #98989c;border-radius:0;
+ box-shadow:inset 1px 1px #fff,2px 2px 0 #a6a2a4;
+}
+#app .interior-quick-card.active{background:#b5c8fc;border-color:#143c9c}
+#app .direction-bar,#app .info{background:#cdcbc6;border-color:#87847e}
+#app .studio-tabs{
+ background:#bfbcb6;padding:5px 8px 0;gap:4px;
+ border-bottom:2px solid #7b7872;position:sticky;
+}
+#app .studio-tabs button{
+ min-height:32px;padding:7px 4px;
+ background:#b4b1ab;border:2px solid;border-color:#eae8e2 #77746e #77746e #eae8e2;
+ border-bottom:0;font:bold 10px "Courier New",monospace;
+}
+#app .studio-tabs button.active{
+ background:#e5e3df!important;border-color:#fff #82817a #e5e3df #fff!important;
+ color:#063a9d!important;
+}
+#app .properties{background:#c9c8c4}
+#app .properties label{color:#42403d;font-size:10px}
+#app .note,#app .interactive-note{background:#e5e3df;color:#45423d;border-color:#8e8b85}
+#app .interior-item-editor{background:#dddcd7;border:2px inset #a29f99}
+#app .interior-item-list button{background:#e8e5ec;min-height:43px;text-align:left}
+#app .interior-item-list button.active{background:#b5c8fc;border-color:#143c9c}
+#app .bottom{background:#d7d4ce;border-top:2px solid #85827c;border-bottom:0;font:11px "Courier New",monospace}
+#app dialog{border-radius:0}
+@media(min-width:1001px){
+ body{padding:clamp(12px,2.2vw,32px)}
+ #app{height:calc(100dvh - clamp(24px,4.4vw,64px));min-height:680px;max-height:none;overflow:hidden}
+ #app .workspace{height:auto;min-height:0;max-height:none;flex:1}
+ #app .stage{min-height:220px}
+ #app .panel.left,#app .panel.right,#app .center{min-height:0}
+ #app .panel.right .properties{overflow:auto!important}
+ #app .studio-tabs{top:0}
+}
+@media(max-width:1000px){
+ body{padding:0}
+ #app{width:100%;min-height:100dvh;outline:none;border:0;box-shadow:none}
+ #app .workspace{display:flex;min-height:0}
+ #app .panel.right{border-left:0;border-top:2px solid #87847e}
+ #app .center{border-right:0}
+ #app .stage{margin:7px 9px;min-height:0;max-height:350px;height:340px}
+ #app .studio-tabs{top:0}
+}
+@media(max-width:640px){
+ #app .titlebar{height:43px;min-height:43px;padding:0 8px}
+ #app .titlebar .window-title{font-size:14px}
+ #app .titlebar .title-extra{display:none}
+ #app .titlebar .win span{width:24px;height:23px;font-size:16px}
+ #app nav{padding:5px 7px;min-height:42px}
+ #app nav button,#app nav a.button{padding:6px 7px;font-size:10px}
+ #app nav #saveBtn{padding:5px 9px}
+ #app .canvas-head{padding:0 9px;min-height:31px;height:31px}
+ #app .stage{height:294px;min-height:294px;max-height:294px;margin:6px}
+ #app .properties{padding:10px 11px}
+ #app .studio-tabs{top:52px}
+ #app .interior-quick-card{box-shadow:none}
+ #app .library button{margin-bottom:4px}
+}
