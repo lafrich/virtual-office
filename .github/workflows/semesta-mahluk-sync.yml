@@ -40,7 +40,7 @@ jobs:
         run: node tests/semesta-mahluk-sync.test.cjs
       - name: Bangun Ruang exterior/interior scale and WC regressions
         run: |
-          node --test tests/bangun-ruang-shared-scale-v7.test.cjs tests/bangun-ruang-isometric-interior.test.cjs tests/bangun-ruang-toilet-seat-alignment.test.cjs
+          node --test tests/bangun-ruang-shared-scale-v7.test.cjs tests/bangun-ruang-isometric-interior.test.cjs tests/bangun-ruang-toilet-seat-alignment.test.cjs tests/bangun-ruang-character-door-wc-v8.test.cjs
       - name: Semesta existing world and traffic regressions
         run: |
           node tests/world-builder-v2.test.cjs
