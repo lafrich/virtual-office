@@ -20,7 +20,7 @@ assert.equal(g.VLSemestaCatalog.vehicles.length,12);
 assert.equal(g.VLSemestaCatalog.questNPCs.length,6);
 assert.equal(g.VLSemestaCatalog.vehicle('bus_transjakarta').published,false);
 assert.ok(car&&car.wrap&&car.length===19,'cars travel straight to road end and respawn at the starting end');
-assert.ok(walker&&walker.wrap,'sidewalk NPC loops only along the straight corridor');
+assert.ok(walker&&walker.continuous,'sidewalk NPC walks back through actual connected tiles without disappearing');
 assert.ok(car.points.every(p=>p.z===1.5),'vehicle stays on one road lane with no U-turn');
 for(let d=0;d<car.length*2;d+=.3){
  const p=t.sample(car,d);
@@ -29,7 +29,7 @@ for(let d=0;d<car.length*2;d+=.3){
 for(let d=0;d<walker.length*2;d+=.35){
  const p=t.sample(walker,d);
  assert.equal(t.allowed(map,p.x,p.z,'pedestrian'),true,'walker must stay on sidewalk');
- assert.equal(p.z,5.5,'walker remains on straight sidewalk, never turns');
+ assert.equal(p.z,5.5,'an isolated straight sidewalk turns around at its far end');
 }
 assert.equal(t.spawnPosition(map,6,6,'vehicle',2),null);
 assert.ok(t.spawnPosition(map,6,6,'pedestrian',2));
