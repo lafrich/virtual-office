@@ -2635,7 +2635,8 @@ $('file').onchange=async e=>{
  e.target.value='';
 };
 window.addEventListener('keydown',e=>{
- if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement)return;
+ if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||
+  e.target instanceof HTMLTextAreaElement||e.target?.isContentEditable)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();restoreStack(undoStack,redoStack);}
   else if(e.key.toLowerCase()==='h'){toggleGrid();}
  else if(e.key==='Delete'&&item())remove();
