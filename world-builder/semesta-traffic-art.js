@@ -125,8 +125,17 @@ function vehicleGraphic(THREE,record){
  const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:true,
   alphaTest:.15,depthWrite:true,side:THREE.DoubleSide});
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
- // Preserve the source pivot at the road-lane origin, even for 2-grid buses.
- mesh.position.y=h*(spec.pivot[1]/spec.size[1]-.5);
+ // The generic 160×108 proxy has a different transparent padding/pivot
+ // from the canonical source sheet. Calibrate the visual wheels to the
+ // ground separately to prevent cars appearing half-buried in the asphalt.
+ const sourcePivot=spec.pivot[1]/spec.size[1],proxyPivot=.915;
+ const groundClearance=.085;
+ function setGroundPivot(original=false){
+  mesh.position.y=h*((original?sourcePivot:proxyPivot)-.5)+groundClearance;
+  mesh.userData.groundClearance=groundClearance;
+  mesh.userData.sourcePivotUsed=!!original;
+ }
+ setGroundPivot(false);
  mesh.userData.semestaVehicle=true;mesh.userData.assetPublished=false;
  mesh.userData.catalogId=spec.id;
  let direction='se',disposed=false;
@@ -134,14 +143,16 @@ function vehicleGraphic(THREE,record){
  function show(dir){
    const key=originalKey(spec.id,dir),ready=allowOriginal&&originalCache.get(key);
    mat.map=ready||texture(THREE,spec.id,dir);mat.needsUpdate=true;
+   setGroundPivot(!!ready);
    mesh.userData.assetPublished=!!ready;
    if(!ready&&allowOriginal)requestOriginal(THREE,spec,dir).then(actual=>{
      if(disposed||direction!==dir||!actual)return;
      mat.map=actual;mat.needsUpdate=true;mesh.userData.assetPublished=true;
+     setGroundPivot(true);
    });
  }
  show('se');
- return {mesh,update(dir,camera,root){
+ return {mesh,setGroundPivot,update(dir,camera,root){
    if(!spec.views?.[dir])dir='se';
    if(dir!==direction){direction=dir;show(dir);}
    if(camera)mesh.rotation.y=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y;
