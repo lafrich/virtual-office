@@ -1010,6 +1010,7 @@ function clearAll(){
  while(assetRoots.children.length){
   const ch=assetRoots.children[0];assetRoots.remove(ch);
   ch.traverse(o=>{if(o.geometry)o.geometry.dispose();
+   if(o.userData?.assetFile?.startsWith('__vault:')&&o.material?.map)o.material.map.dispose();
    // Shared cached SVG and generated textures remain reusable.
    if(o.material&&Array.isArray(o.material))o.material.forEach(m=>m.dispose());
    else if(o.material)o.material.dispose();});
