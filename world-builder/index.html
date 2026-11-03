@@ -28,6 +28,7 @@
   <button class="chrome-tool" id="paintMode" title="Paint terrain with one finger">▧</button>
   <button class="chrome-tool" id="fillMode" title="Fill connected terrain">▰</button>
   <button class="chrome-tool" id="walkMode" title="Character walk preview">▶</button>
+  <button class="chrome-tool" id="cameraCharacter" title="Focus and follow selected player / NPC" aria-pressed="false">◎</button>
   <button class="chrome-tool" id="home" title="Fit map view">⌂</button>
   <button class="chrome-tool" id="undo" title="Undo">↶</button>
   <button class="chrome-tool" id="redo" title="Redo">↷</button>
@@ -57,6 +58,7 @@
    <canvas id="world" aria-label="Interactive Virtual Life isometric map canvas"></canvas>
    <div id="hint">Tap select · Paint & drag terrain · Pinch zoom/pan · Grid continues anywhere</div><button id="floatingInspector" class="floating-inspector" type="button" aria-label="Open properties inspector">☷ Properties</button>
    <div id="status">LOADING MAP...</div><div id="toast"></div><div id="empty" role="alert"></div>
+   <div id="cameraFollowLabel" role="status" aria-live="polite" hidden>🎥 FOLLOW · CHARACTER</div>
    <div id="walkPad" aria-label="Four directional movement">
     <button data-walk="up" aria-label="Up">↑</button><button data-walk="left" aria-label="Left">←</button><button data-walk="down" aria-label="Down">↓</button><button data-walk="right" aria-label="Right">→</button>
    </div>
@@ -74,6 +76,8 @@
    <span id="terrainLabel" aria-live="polite">GRASS</span><button type="button" id="gridToolbar" class="chrome-button" aria-pressed="true"># Grid ON</button>
    <button id="mobileAssets" type="button">▣ Assets</button>
    <button id="mobileInspector" type="button">☷ Inspector</button>
+   <button id="cameraToCharacter" type="button" title="Jump to selected character and follow during Walk Test" aria-pressed="false">🎥 Character</button>
+   <button id="cameraMapView" type="button" title="Leave character camera and restore world view">🗺 Map</button>
    <button id="referenceCity" class="chrome-button" type="button" title="Open editable city layout inspired by reference image">🏙 Reference City</button>
    <button id="newCity" class="chrome-button" type="button" title="Create editable city-block sample">▦ City Sample</button>
    <button id="viewRef" class="chrome-button" type="button">Map Reference</button>
