@@ -74,6 +74,7 @@ function init(api){
    'Non-interactive: exterior and collision only; no enter action or interior.';
   $('showInterior').disabled=!enabled;
   $('tabInterior').disabled=!enabled;$('tabActions').disabled=!enabled;
+  $('actions').closest('label').hidden=!enabled;
   if(!enabled){placing=null;selected=null;selectTab('exterior');setPreview('exterior');}
   if(enabled){normalizeScene(floor);draw();renderObjects();renderActions();}
   renderMetadata();
