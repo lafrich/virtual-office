@@ -1,7 +1,7 @@
-/* Character puppet for Virtual Life World Builder.
- * ONLY official pixel art from lafrich/virtual-life-asset-pipeline.
- * 6 columns x 44 rows; frames 64x112; pivot 32,100.
- * Rows are action start + se/sw/ne/nw, exact upstream v6b ROWMAP.
+/* Semesta 4-way Mahluk Hidup character rig.
+ * Published sprite catalog supplies true action sheets and frame timings;
+ * local Character Storage supplies separately authored transparent equipment.
+ * Legacy 44-row v6b sheets remain supported for existing world drafts.
  */
 (function(g){
 'use strict';
@@ -9,85 +9,137 @@ const DIR=['se','sw','ne','nw'];
 const ROW={walk:0,idle:4,talk:8,sit:12,sit_type:16,sleep:20,tired:24,swim:28,float:32,lie:36,perch:40};
 const FRAME={w:64,h:112,pivotX:32,pivotY:100};
 const ALIAS={grok:'grok_bot',warteg:'bu_warteg',barista:'fm_barista',kasir:'fm_kasir'};
-const profiles=Object.fromEntries(
+const legacyIds=Object.fromEntries(
  [...(g.VLPipelineAssets?.characters||[]).map(x=>x.id),...Object.keys(ALIAS)]
- .map(id=>[id,ALIAS[id]||id])
-);
-const canonical=id=>profiles[id]||'ichsan';
-const cache=new Map();
-function source(id){
-  const url=g.VLPipelineAssets?.character(id);
-  if(!url)return null;
-  if(!cache.has(url)){
-    const pic=new Image();pic.crossOrigin='anonymous';
-    const state={pic,ready:false,error:false};
-    pic.onload=()=>{state.ready=pic.naturalWidth>=FRAME.w*6&&pic.naturalHeight>=FRAME.h*44};
-    pic.onerror=()=>{state.error=true;console.warn('Pipeline character not accessible',url)};
-    pic.src=url;cache.set(url,state);
-  }
-  return cache.get(url);
+ .map(id=>[id,ALIAS[id]||id]));
+const bridge=()=>g.VLMahlukHidup;
+const canonical=id=>bridge()?.has(id)?id:(legacyIds[id]||'ichsan');
+const imgCache=new Map();
+function image(url){
+ if(!url)return null;
+ if(!imgCache.has(url)){
+  const pic=new Image();if(!url.startsWith('data:'))pic.crossOrigin='anonymous';
+  const entry={pic,ready:false,error:false};
+  pic.onload=()=>{entry.ready=pic.naturalWidth>=64&&pic.naturalHeight>=112};
+  pic.onerror=()=>{entry.error=true;};
+  pic.src=url;imgCache.set(url,entry);
+ }
+ return imgCache.get(url);
 }
-function normalize(d){return DIR.includes(d)?d:'sw'}
+function normalize(dir){return DIR.includes(dir)?dir:'sw'}
 function directionFromWorld(dx,dz,last='sw'){
-  if(!Number.isFinite(dx)||!Number.isFinite(dz)||Math.hypot(dx,dz)<.00001)return normalize(last);
-  return Math.abs(dx)>=Math.abs(dz)?dx>0?'se':'nw':dz>0?'sw':'ne';
+ if(!Number.isFinite(dx)||!Number.isFinite(dz)||Math.hypot(dx,dz)<.00001)return normalize(last);
+ return Math.abs(dx)>=Math.abs(dz)?dx>0?'se':'nw':dz>0?'sw':'ne';
+}
+function resolve(id,requested,moving){
+ const entry=bridge()?.get(id);
+ if(entry){
+  const actions=entry.motions;
+  const translation={bathe:'swim',toilet:'sit',work:'sit_type'};
+  const requestedAction=translation[requested]||requested;
+  let motion=actions.find(m=>m.id===requestedAction);
+  if(!motion&&moving)motion=actions.find(m=>m.id==='walk');
+  if(!motion)motion=actions.find(m=>m.id==='idle')||actions.find(m=>m.id==='walk')||actions[0];
+  if(!motion)return null;
+  const separate=!!motion.sheet;
+  const url=bridge().url(motion.sheet||entry.sheet);
+  return {url,mode:motion.id,frames:motion.frames,row:separate?0:motion.row,
+   durations:motion.frame_ms||[],loop:motion.loop!==false,separate,source:'mahluk-hidup'};
+ }
+ const url=g.VLPipelineAssets?.character(id);
+ if(!url)return null;
+ const act=({bathe:'swim',toilet:'sit',work:'sit_type'}[requested]||requested);
+ const mode=Object.hasOwn(ROW,act)?act:moving?'walk':'idle';
+ return {url,mode,frames:mode==='walk'?6:mode==='idle'?4:6,
+  row:ROW[mode],durations:[],loop:true,separate:false,source:'pipeline-v6b'};
+}
+function frameAt(spec,time){
+ if(!spec||spec.frames<1)return 0;
+ const durations=Array.from({length:spec.frames},(_,i)=>{
+  const ms=Number(spec.durations[i]);
+  return Math.max(40,Math.min(2000,Number.isFinite(ms)&&ms>0?ms:(spec.mode==='walk'?145:240)));
+ });
+ const total=durations.reduce((a,b)=>a+b,0);
+ let t=spec.loop?((time*1000)%total):Math.min(total-.001,time*1000);
+ for(let i=0;i<durations.length;i++){if(t<durations[i])return i;t-=durations[i];}
+ return spec.frames-1;
 }
 function createRig(THREE,opt={}){
-  let who=canonical(opt.profile||opt.characterId||'ichsan');
-  const cv=document.createElement('canvas');cv.width=64;cv.height=112;
-  const ctx=cv.getContext('2d',{alpha:true});ctx.imageSmoothingEnabled=false;
-  const texture=new THREE.CanvasTexture(cv);texture.colorSpace=THREE.SRGBColorSpace;
-  texture.magFilter=texture.minFilter=THREE.NearestFilter;texture.generateMipmaps=false;
-  const mat=new THREE.MeshBasicMaterial({map:texture,transparent:false,alphaTest:.45,
-    depthTest:true,depthWrite:true,side:THREE.DoubleSide});
-  // 64×32 source tile must project to a 2:1 diamond.
-// A horizontal world tile projects to sqrt(2) units. At 30° elevation,
-// vertical planes shorten by cos(30°); compensate that projection exactly.
+ let who=canonical(opt.profile||opt.characterId||'ichsan');
+ const cv=document.createElement('canvas');cv.width=64;cv.height=112;
+ const ctx=cv.getContext('2d',{alpha:true});ctx.imageSmoothingEnabled=false;
+ const texture=new THREE.CanvasTexture(cv);texture.colorSpace=THREE.SRGBColorSpace;
+ texture.magFilter=texture.minFilter=THREE.NearestFilter;texture.generateMipmaps=false;
+ const mat=new THREE.MeshBasicMaterial({map:texture,transparent:false,alphaTest:.45,
+  depthTest:true,depthWrite:true,side:THREE.DoubleSide});
  const pixelWorld=Math.SQRT2/64;
  const h=FRAME.h*pixelWorld/(Math.sqrt(3)/2),w=FRAME.w*pixelWorld;
-  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
-  mesh.position.y=h*(FRAME.pivotY/FRAME.h-.5);
-  mesh.userData.characterBillboard=true;mesh.userData.characterSource='pipeline-v6b';
-  mesh.userData.nativeFrame=FRAME;mesh.userData.tilePixels=[64,32];mesh.userData.pixelWorld=pixelWorld;
-  const state={direction:normalize(opt.direction),moving:false,walk:0,pose:opt.pose||null,profile:opt.profile||opt.characterId||'ichsan',characterId:who,loaded:false,failed:false};
-  let previous='',time=0;
-  function draw(){
-    const anim=({bathe:'swim',toilet:'sit',work:'sit_type'}[state.pose]||state.pose); const mode=ROW[anim]!==undefined?anim:state.moving?'walk':'idle';
-    const frames=mode==='walk'?6:mode==='idle'?4:6;
-    const frame=Math.floor(time/(mode==='walk'?.145:.24))%frames;
-    const row=ROW[mode]+DIR.indexOf(state.direction);
-    const key=who+':'+mode+':'+row+':'+frame;
-    const sheet=source(who);
-    state.loaded=!!sheet?.ready;state.failed=!!sheet?.error;
-    if(!sheet?.ready||key===previous)return;
-    ctx.clearRect(0,0,64,112);
-    ctx.drawImage(sheet.pic,frame*64,row*112,64,112,0,0,64,112);
-    texture.needsUpdate=true;previous=key;
+ const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
+ mesh.position.y=h*(FRAME.pivotY/FRAME.h-.5);
+ mesh.userData.characterBillboard=true;mesh.userData.characterSource='mahluk-hidup';
+ mesh.userData.nativeFrame=FRAME;mesh.userData.tilePixels=[64,32];mesh.userData.pixelWorld=pixelWorld;
+ const state={direction:normalize(opt.direction),moving:false,walk:0,pose:opt.pose||null,
+  profile:opt.profile||opt.characterId||'ichsan',characterId:who,loaded:false,failed:false};
+ let previous='',time=0,lastAction='';
+ function render(){
+  const spec=resolve(who,state.pose,state.moving);
+  if(!spec){state.loaded=false;state.failed=true;return;}
+  if(lastAction!==spec.mode){time=0;previous='';lastAction=spec.mode;}
+  const count=Math.max(1,Math.min(40,spec.frames)),frame=Math.min(frameAt(spec,time),count-1);
+  const dir=DIR.indexOf(state.direction),row=spec.row+dir;
+  const sprite=image(spec.url),asset=bridge()?.get(who);
+  const equipped=asset?bridge().equipmentFor(who):{};
+  const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
+  const overlayUrls=['bag','shoes','pants','shirt','helmet'].map(layer);
+  const overlays=overlayUrls.map(url=>image(url));
+  const status=overlays.map(o=>o?.ready?'1':'0').join('');
+  const key=[who,spec.url,spec.mode,row,frame,...overlayUrls.map(x=>x?.length||0),status].join(':');
+  state.loaded=!!sprite?.ready;
+  state.failed=!!sprite?.error;
+  if(!sprite?.ready||key===previous)return;
+  const pic=sprite.pic;
+  const sx=frame*64,sy=row*112;
+  if(sx+64>pic.naturalWidth||sy+112>pic.naturalHeight){
+   state.failed=true;state.loaded=false;return;
   }
-  function setMoving(dx,dz,active){
-    const was=state.moving;state.moving=!!active;
-    if(state.moving){state.direction=directionFromWorld(dx,dz,state.direction);state.pose=null;}
-    if(was!==state.moving)previous='';
-  }
-  function setPose(p){state.pose=Object.hasOwn(ROW,p)||['bathe','toilet','work'].includes(p)?p:null;state.moving=false;previous=''}
-  function setDirection(d){state.direction=normalize(d);state.moving=false;previous=''}
-  function setCharacter(id){const name=canonical(id);if(g.VLPipelineAssets?.character(name)){who=name;state.profile=id;state.characterId=name;state.loaded=false;state.failed=false;previous='';source(who);}}
-  function step(dt,camera,position){
-    time+=Math.min(.1,Math.max(0,dt));
-    if(camera){
-      const p=position||{x:0,z:0};
-      mesh.rotation.set(0,Math.atan2(camera.position.x-p.x,camera.position.z-p.z),0);
-    }
-    draw();
-  }
-  function dispose(){mesh.geometry.dispose();mat.dispose();texture.dispose()}
-  source(who);
-  return {mesh,state,setMoving,setPose,setDirection,setCharacter,setProfile:setCharacter,step,dispose};
-}
-function retry(){
- for(const [url,state] of cache){
-  if(state.error||!state.ready)cache.delete(url);
+  ctx.clearRect(0,0,64,112);
+  // A backpack is BEHIND the skull and torso, even when facing away.
+  if(overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
+  ctx.drawImage(pic,sx,sy,64,112,0,0,64,112);
+  for(let i=1;i<overlays.length;i++)if(overlays[i]?.ready)
+   ctx.drawImage(overlays[i].pic,0,0,64,112);
+  texture.needsUpdate=true;previous=key;
  }
+ function setMoving(dx,dz,active){
+  const old=state.moving;state.moving=!!active;
+  if(state.moving){state.direction=directionFromWorld(dx,dz,state.direction);state.pose=null;}
+  if(old!==state.moving){previous='';lastAction='';time=0;}
+ }
+ function setPose(p){if(state.pose!==p){state.pose=p||null;state.moving=false;previous='';lastAction='';time=0;}}
+ function setDirection(d){state.direction=normalize(d);state.moving=false;previous='';}
+ function setCharacter(id){
+  const next=canonical(id);
+  if(bridge()?.has(next)||g.VLPipelineAssets?.character(next)){
+   who=next;state.profile=id;state.characterId=next;
+   state.loaded=false;state.failed=false;time=0;previous='';lastAction='';
+  }
+ }
+ function step(dt,camera,position){
+  time+=Math.min(.1,Math.max(0,dt));
+  if(camera){
+   const p=position||{x:0,z:0};
+   mesh.rotation.set(0,Math.atan2(camera.position.x-p.x,camera.position.z-p.z),0);
+  }
+  render();
+ }
+ function dispose(){mesh.geometry.dispose();mat.dispose();texture.dispose();}
+ image(resolve(who,null,false)?.url);
+ return {mesh,state,setMoving,setPose,setDirection,setCharacter,setProfile:setCharacter,step,dispose,
+  refresh(){previous='';lastAction='';}};
 }
-g.VLCharacterRig=Object.freeze({createRig,retry,DIR,ROW,FRAME,directionFromWorld,profiles});
+function retry(){imgCache.clear();}
+g.VLCharacterRig=Object.freeze({
+ createRig,retry,DIR,ROW,FRAME,directionFromWorld,canonical,resolve,frameAt,
+ get profiles(){return {...legacyIds,...Object.fromEntries((bridge()?.list()||[]).map(c=>[c.id,c.id]))};}
+});
 })(window);
