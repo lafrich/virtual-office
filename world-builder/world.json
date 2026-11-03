@@ -19,7 +19,7 @@
       "z0": 32.75,
       "z1": 36.3
     },
-    "notes": "Draft layout for AI mechanics authoring; placement markers are candidate locations, not verified against exact encrypted production map. Original game and multiplayer unaffected. Door and interaction coordinates are placeholders until validated against original authenticated game source. City Builder v3 provides editable road/sidewalk/grass/water terrain and 1-tile grid alignment.",
+    "notes": "Draft layout for AI mechanics authoring; placement markers are candidate locations, not verified against exact encrypted production map. Original game and multiplayer unaffected. Door and interaction coordinates are placeholders until validated against original authenticated game source. City Builder v3 provides editable road/sidewalk/grass/water terrain and 1-tile grid alignment. Infinite world authoring: outside original starter region the ground defaults to grass and can be painted at any tile coordinate.",
     "source": "GPT Version renderer using original Virtual Life encrypted asset manifest",
     "nativeReference": {
       "street2": "assets/street2/base.png",
@@ -2720,7 +2720,9 @@
           "type": "sidewalk"
         }
       ]
-    }
+    },
+    "unbounded": true,
+    "worldBoundsNote": "Starter Street2 sample bounds only; camera, grid, terrain, and placed objects are not restricted to this rectangle."
   },
   "objects": [
     {
