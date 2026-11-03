@@ -57,7 +57,9 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 const limit=(v,lo,hi)=>Math.min(hi,Math.max(lo,Math.round(Number(v)||lo)));
 // Semesta exterior tiles are native 64x32 isometric. Each INTERIOR tile must
 // represent exactly the same world unit: never multiply by two.
-const tileCount=(v,fallback=3)=>Math.min(24,Math.max(2,Math.ceil(Number(v)>0?Number(v):fallback)));
+// Fractional footprints (e.g. 3×3.2) use only COMPLETE walkable tiles;
+// 3 whole interior tiles fit inside 3.2 exterior tiles without stretching.
+const tileCount=(v,fallback=3)=>Math.min(24,Math.max(2,Math.floor(Number(v)>0?Number(v):fallback)));
 const dimensions=cfg=>[tileCount(cfg?.w),tileCount(cfg?.d)];
 function layout(cfg,theme='empty'){
  const [width,depth]=dimensions(cfg);
