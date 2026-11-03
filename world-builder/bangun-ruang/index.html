@@ -54,6 +54,10 @@ input:focus,select:focus,textarea:focus{border-color:#2d6dca;box-shadow:0 0 0 2p
 .note b{color:#1c4a86}textarea{resize:vertical;min-height:52px}
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:13px}
 .status{font-size:11px;color:#4c667c}
+.editor-tools{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.editor-tools button{padding:6px 9px;font-size:11px}
+#baseSelect{font-size:11px;background:#fff;border:2px inset #b4b6b5}
+#sourceId{color:#1b4c96;background:#ecf1f9;font:11px "Courier New",monospace}
 .bottom{border-top:1px solid #bdc8cd;border-bottom:0}
 dialog{border:1px solid #34619e;border-radius:5px;max-width:480px;width:calc(100% - 30px);box-shadow:0 15px 60px #001a4590;padding:0;background:#f8f7ed}
 dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#fff;padding:12px 15px;font-weight:bold}dialog section{padding:15px;line-height:1.7}dialog footer{padding:12px;text-align:right}
@@ -73,10 +77,12 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <div class="workspace">
 <aside class="panel left">
  <div class="heading"><strong>FILES / BUILDINGS</strong><span id="count">00</span></div>
- <div class="preset"><h4>NEW FROM TEMPLATE</h4><div class="preset-grid">
- <button data-preset="rumah">Rumah</button><button data-preset="ruko">Ruko</button>
- <button data-preset="warung">Warung</button><button data-preset="kost">Kost</button><button data-preset="kantor">Kantor</button>
- </div></div>
+ <div class="preset"><h4>BASE / SEMESTA SOURCE</h4>
+ <label for="baseSelect" style="font-size:10px;color:#58697e;display:block;margin-bottom:5px">Choose existing Semesta prefab</label>
+ <select id="baseSelect" aria-label="Existing Semesta building source"></select>
+ <div style="display:flex;gap:5px;margin-top:7px"><button id="applyBase" class="primary" style="flex:1">✳ Generate From Base</button><button id="resetBase" title="Reset current building to selected Semesta source">↺</button></div>
+ <p id="baseHint" style="font:10px/1.55 Tahoma;margin:8px 0;color:#637892">Footprint and original dimensions sourced from Semesta.</p>
+ </div>
  <div class="search"><input id="search" type="search" placeholder="⌕ Find building..."></div>
  <div class="library" id="library"></div>
  <div class="heading"><span>LOCAL ASSET STORAGE</span><span>V1</span></div>
@@ -95,25 +101,44 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <aside class="panel right">
  <div class="heading"><strong>PROPERTIES / ASSET</strong><span>✕</span></div>
  <div class="properties">
- <label>BUILDING NAME<input id="name" maxlength="50" value="Rumah Kampung 01"></label>
+ <label>SEMESTA SOURCE<input id="sourceId" readonly value="semesta:small" aria-label="Source Semesta building ID"></label>
+ <label>BUILDING NAME<input id="name" maxlength="50" value="Small Building"></label>
  <label>BUILDING TYPE<select id="kind"><option value="rumah">Rumah</option><option value="ruko">Ruko</option><option value="warung">Warung</option><option value="kost">Kost</option><option value="kantor">Kantor</option></select></label>
- <div class="dual"><label>WIDTH / C<input id="w" type="number" min="2" max="12" step="1" value="4"></label><label>DEPTH / R<input id="d" type="number" min="2" max="12" step="1" value="4"></label></div>
- <div class="dual"><label>FLOORS<input id="floors" type="number" min="1" max="7" step="1" value="1"></label><label>WINDOWS / FLOOR<input id="windows" type="number" min="0" max="6" step="1" value="2"></label></div>
+ <div class="dual"><label>WIDTH / C<input id="w" type="number" min="2" max="24" step=".1" value="3"></label><label>DEPTH / R<input id="d" type="number" min="2" max="24" step=".1" value="3"></label></div>
+ <div class="dual"><label>FLOORS<input id="floors" type="number" min="1" max="12" step="1" value="1"></label><label>WINDOWS / FLOOR<input id="windows" type="number" min="0" max="6" step="1" value="2"></label></div>
  <div class="colors"><div><label>WALL PALETTE<select id="wall"><option value="cream">Cream</option><option value="concrete">Concrete</option><option value="blue">Sky Blue</option><option value="green">Mint Green</option><option value="pink">Warm Pink</option></select></label></div><div><label>ROOF PALETTE<select id="roof"><option value="terracotta">Terracotta</option><option value="slate">Slate</option><option value="navy">Navy</option><option value="green">Green</option></select></label></div></div>
  <label>ROOF SHAPE<select id="roofShape"><option value="gable">Gable / Atap Pelana</option><option value="flat">Flat / Dak</option></select></label>
  <label>FACADE DETAILS<select id="detail"><option value="simple">Simple</option><option value="awning">Awning / Kanopi</option><option value="storefront">Glass Storefront</option></select></label>
+ <div class="section" style="margin-top:12px">MODULAR PARTS / LIKE MAHLUK HIDUP</div>
+ <div class="dual"><label>DOOR<select id="doorStyle"><option value="wood">Solid Wood</option><option value="glass">Glass Panel</option><option value="metal">Rolling Door</option></select></label><label>WINDOW<select id="windowStyle"><option value="square">Classic</option><option value="wide">Wide Shop</option><option value="narrow">Narrow Vertical</option></select></label></div>
+ <label>BALCONY / SECOND FLOOR<select id="balcony"><option value="no">No Balcony</option><option value="yes">Add Balcony Rail</option></select></label>
  <label>SIGN TEXT (PIXEL FONT)<input id="sign" maxlength="14" placeholder="WARUNG / KOST"></label>
  <label>ENTRANCE FACING<select id="front"><option value="sw">SW / kiri depan</option><option value="se">SE / kanan depan</option></select></label>
  <label>INTERACTIONS (COMMA-SEPARATED)<input id="actions" value="enter" placeholder="enter,buy,work"></label>
  <label>COLLISION<select id="collision"><option value="yes">Solid / Block character</option><option value="no">Passable / No collision</option></select></label>
+ <div class="note" id="specSummary"><b>Semesta source contract</b><br>Building footprint and metadata are inherited from the selected Semesta source.</div>
  <div class="note"><b>Virtual Life art contract</b><br>Shading 4–5 tones · light top-left · no black outline · nearest-neighbor · ground pivot · four directions. PNG uses transparent background. Interactions are proposed metadata, not playable actions.</div>
- <div class="controls"><button id="pngBtn">↓ PNG Current View</button><button id="publishBtn" class="primary">✳ Save to Semesta</button><button id="deleteBtn" class="danger">Delete Saved Asset</button><button id="helpBtn">? Guide</button></div>
+ <div class="controls"><button id="pixelBtn">✎ Edit Native Pixels</button><button id="generateBtn">↻ Regenerate</button><button id="pngBtn">↓ PNG Current View</button><button id="publishBtn" class="primary">✳ Save to Semesta</button><button id="deleteBtn" class="danger">Delete Saved Asset</button><button id="helpBtn">? Guide</button></div>
  </div>
 </aside>
 </div>
 <footer class="bottom"><span id="status">● Ready — unsaved new building</span><span class="spacer"></span><span>Bangun Ruang / Virtual Life Building Asset Pipeline</span></footer>
 </div>
 <input type="file" id="upload" accept=".json,application/json" hidden>
+<dialog id="pixelDialog" style="max-width:min(98vw,980px);width:95vw">
+ <header>✎ BANGUN RUANG — NATIVE PIXEL EDITOR / <span id="pixelDir">SW</span></header>
+ <section style="padding:9px">
+  <div class="editor-tools"><button id="pxPencil" class="active" type="button">✎ Pencil</button><button id="pxEraser" type="button">⌫ Eraser</button><button id="pxPick" type="button">◉ Pick Color</button><button id="pxUndo" type="button">↶ Undo</button><button id="pxRedo" type="button">↷ Redo</button>
+   <input type="color" id="pxColor" value="#e8dec6" aria-label="Pixel color" style="width:42px;height:35px;padding:2px">
+   <select id="pxBrush" aria-label="Pixel brush" style="width:74px"><option value="1">1 px</option><option value="2">2 px</option><option value="4">4 px</option></select>
+   <select id="pxZoom" aria-label="Zoom" style="width:74px"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option><option value="4">4×</option></select>
+  </div>
+  <div id="pixelViewport" style="overflow:auto;max-height:min(64vh,650px);max-width:100%;border:2px inset #999;background:repeating-conic-gradient(#e5e5e5 0 25%,#fafafa 0 50%) 50%/16px 16px;touch-action:pan-x pan-y">
+   <canvas id="pixelCanvas" style="display:block;max-width:none;image-rendering:pixelated;touch-action:none"></canvas>
+  </div><p style="color:#526c81;font-size:10px;margin:7px 0">Pixel edits stay in this direction. Regenerating after changing structural properties resets manual corrections.</p>
+ </section>
+ <footer style="display:flex;gap:8px;justify-content:end"><button id="cancelPixel" type="button">Cancel</button><button id="savePixel" type="button" class="primary">Save Pixel Edits</button></footer>
+ </dialog>
 <dialog id="guide"><header>✳ BANGUN RUANG — QUICK GUIDE</header><section>
  <b>1.</b> Pilih template bangunan dan atur footprint, lantai, material, serta detail di Properties.<br>
  <b>2.</b> Cek SW, SE, NE, NW. Setiap arah dirender ulang di grid pixel art, bukan diputar dengan anti-aliasing.<br>
@@ -122,6 +147,8 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <b>5.</b> Pintu, collision, dan interaksi masih metadata authoring; tidak langsung mengaktifkan gameplay atau multiplayer.<br>
  <p><b>Penting:</b> penyimpanan bersifat lokal, bukan commit GitHub atau cloud. Export untuk backup lintas perangkat.</p>
  </section><footer><button id="closeGuide">Close</button></footer></dialog>
+<script src="../pipeline-catalog.js?v=bangun-ruang-v2"></script>
+<script src="../semesta-building-spec.js?v=bangun-ruang-v2"></script>
 <script>
 (function(){
 'use strict';
