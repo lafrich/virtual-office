@@ -102,3 +102,22 @@ Interior preview now opens in **native 2:1 isometric mode by default**, matching
 
 ### Runtime boundary
 This is an editor preview, not an online player teleport, 3D walkable interior physics or server-side action execution. Existing Mahluk Hidup rig poses are previewable through Semesta where available, and unknown actions remain data-only.
+
+
+## v5 — Building outlines, horizontal furniture shelf, Mahluk Hidup scale test
+
+### Pixel / Garis Penanda exterior
+
+Garis Penanda visualizes the current building sprite as a non-destructive outline. It derives visible edges from the actual current PNG, including manual pixel edits, in each of SW/SE/NE/NW. The overlay also includes the 2:1 tile footprint and ground pivot (orange perimeter, light blue divisions, red pivot). The Pixel Art option restores the original appearance. Neither mode affects exported PNGs or building data.
+
+### Interior furniture tray below canvas
+
+A single-row horizontally scrolling shelf of all 18 supported interior assets appears directly below the Interior canvas. Every entry has a pixel-art thumbnail and label. Tap WC, bed, chair, table or another prop; then tap a free isometric tile or Plan/Edit tile to place it. The selected asset is highlighted. Cancel or tap it again to stop placing. The regular inspector still edits actions, capacity, position and rotation.
+
+### Mahluk Hidup character scale and access simulation
+
+Bangun Ruang shares the published Mahluk Hidup catalog, same-origin Character Storage and the Semesta Mahluk Hidup bridge / VLCharacterRig. This gives the exact original 64x112 px frame, 32x100 foot pivot, four sprite directions, timing and transparent equipment rendering (bag behind the body).
+
+Choose a character, press Place and tap Exterior or Interior to position it at the 2:1 pixel/tile scale. The translucent marker and 112 px ruler reveal size relative to doors, buildings and furniture. In Interactive mode, Enter Door simulates walking to the building threshold and transitions the demo character into the ground-floor isometric preview. Select an interior WC, bed, chair, desk or shower and press Use Selected to test a route around blocking furniture and play the available native character pose. Existing pose aliases are used: toilet maps to sit, bath to swim and work to sit_type. Missing animations are reported as data-only hooks.
+
+The demo actor is editor-only, never exported with the building package and never transferred to the online multiplayer game. If the published Mahluk Hidup sprite is unavailable, the editor shows an explicitly labelled size-only silhouette until an original image loads.
