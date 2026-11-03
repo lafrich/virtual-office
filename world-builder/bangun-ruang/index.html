@@ -102,10 +102,23 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <button type="button" id="exteriorViewGuide" aria-pressed="false">⌗ Garis Penanda</button>
   <span id="guideStatus">PIXEL / ORIGINAL</span>
  </div>
- <div class="stage"><img id="preview" alt="Pixel art isometric building preview"><canvas id="buildingGuideCanvas" hidden width="360" height="360" aria-label="Building outline and footprint guideline preview" role="img"></canvas><canvas id="interiorCanvas" hidden width="360" height="360" aria-label="Isometric interior preview. Tap to select or place furniture." role="img"></canvas></div>
+ <div class="stage" id="previewStage"><img id="preview" alt="Pixel art isometric building preview"><canvas id="buildingGuideCanvas" hidden width="360" height="360" aria-label="Building outline and footprint guideline preview" role="img"></canvas><canvas id="interiorCanvas" hidden width="360" height="360" aria-label="Isometric interior preview. Tap to select or place furniture." role="img"></canvas><canvas id="characterScaleCanvas" hidden width="360" height="360" aria-label="Mahluk Hidup character scale and interaction simulation overlay" role="img"></canvas></div>
  <div id="interiorQuickTools" class="interior-asset-tray" hidden aria-label="Furniture picker below the interior canvas">
   <div class="interior-tray-heading"><strong>+ INTERIOR ASSETS</strong><span id="quickPlaceHint">Tap asset → tap floor</span><button id="quickCancel" type="button" hidden>✕ Done</button></div>
   <div id="interiorQuickBar" class="interior-quick-scroll" role="group" aria-label="Scroll horizontally to choose interior furniture"></div>
+ </div>
+ <div id="characterScaleTools" class="character-scale-tools" aria-label="Mahluk Hidup character placement and action test">
+  <div class="character-scale-heading"><strong>MAHLUK HIDUP / SCALE TEST</strong><span id="scaleStatus">64×112 px · pivot 32,100 · read-only preview</span></div>
+  <div class="character-scale-row">
+   <select id="scaleCharacter" aria-label="Choose original Mahluk Hidup character"><option value="ichsan">Loading Mahluk Hidup…</option></select>
+   <button id="scaleSpawn" type="button">＋ Place</button>
+   <button id="scaleRemove" type="button" disabled>✕</button>
+  </div>
+  <div class="character-scale-row">
+   <button id="scaleWalkDoor" type="button" disabled>▶ Enter Door</button>
+   <button id="scaleUse" type="button" disabled>▶ Use Selected</button>
+   <button id="scaleIdle" type="button" disabled>◉ Idle</button>
+  </div>
  </div>
  <div class="direction-bar"><strong>VIEW</strong>
  <button class="active" data-dir="sw">SW</button><button data-dir="se">SE</button>
@@ -226,6 +239,9 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <script src="./interior-pixel-art.js?v=interior-v3"></script>
 <script src="./interior-isometric.js?v=interior-v4"></script>
 <script src="./building-guides.js?v=outline-v5"></script>
+<script src="../mahluk-hidup-bridge.js?v=scale-v5"></script>
+<script src="../pipeline-character-rig.js?v=scale-v5"></script>
+<script src="./character-scale-preview.js?v=scale-v5"></script>
 <script src="./studio-interior-ui.js?v=tray-v5"></script>
 <script>
 (function(){
@@ -254,7 +270,7 @@ const sources=semesta?.all||[];
 const defaultBase='semesta:small';
 const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
-let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null;
+let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null;
 const exteriorGuides=window.VLBuildingGuides?.mount();
 try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||a));
@@ -430,6 +446,7 @@ function render(){
  const c=config(),r=viewResult(c,view);
  $('preview').src=r.url;
  exteriorGuides?.update(r,c,view);
+ scaleController?.sync();
  $('canvasName').textContent=c.name.toUpperCase()+' / '+view.toUpperCase();
  $('footprintText').textContent=c.w+' × '+c.d+' tiles · '+c.floors+' floor(s)';
  $('sizeText').textContent=r.size.join('×')+' px / '+r.pivot.join(',');
@@ -658,8 +675,19 @@ $('helpBtn').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
 preset(defaultBase);
 interiorUi=window.VLStudioInteriors?.init({getConfig:config,
- status,exportAsset,showExterior:on=>exteriorGuides?.setVisible(on)});
+ status,exportAsset,showExterior:on=>exteriorGuides?.setVisible(on),
+ onFloorClick:(c,r,hit)=>scaleController?.placeAt(c,r,'interior')||false});
 interiorUi?.reset();
+scaleController=window.VLCharacterScale?.mount({
+ getConfig:config,getExterior:()=>viewResult(config(),view),
+ getFacing:()=>view,getInterior:()=>interiorUi?.getScene(),
+ getInteriorView:()=>interiorUi?.getInteriorView(),
+ getSelectedProp:()=>interiorUi?.getSelectedProp(),
+ isInterior:()=>!$('interiorCanvas').hidden,
+ openInterior:()=>{interiorUi?.selectTab('interior');interiorUi?.setPreview('interior');},
+ onStatus:status
+});
+scaleController?.sync();
 })();
 </script>
 </body></html>
