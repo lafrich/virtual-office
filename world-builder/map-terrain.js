@@ -2,8 +2,8 @@
 (function(g){
 'use strict';
 const types=['grass','road','sidewalk','water','plaza','soil'];
-const bounds=b=>b||{minX:-30,maxX:40,minZ:20,maxZ:55};
-const valid=(c,r,b)=>c>=b.minX&&c<b.maxX&&r>=b.minZ&&r<b.maxZ;
+const bounds=b=>b===null?null:(b||{minX:-30,maxX:40,minZ:20,maxZ:55});
+const valid=(c,r,b)=>!b||(c>=b.minX&&c<b.maxX&&r>=b.minZ&&r<b.maxZ);
 const key=(c,r)=>c+','+r;
 const dict=t=>new Map((t.cells||[]).map(x=>[key(x.c,x.r),x]));
 const store=(t,d)=>{t.cells=[...d.values()].sort((a,b)=>a.r-b.r||a.c-b.c);};
@@ -55,7 +55,8 @@ function paint(t,c,r,type,size=1,options={}){
  store(t,d);return changes.length;
 }
 function fill(t,c,r,type,options={}){
- const d=dict(t),b=bounds(options.bounds),start=[Math.floor(c),Math.floor(r)];
+ // On an unbounded world, flood-fill is restricted to the current visible viewport.
+ const d=dict(t),b=bounds(options.fillBounds||options.bounds),start=[Math.floor(c),Math.floor(r)];
  if(!valid(...start,b))return 0;
  const old=read(t,...start,d);if(old===type)return 0;
  const todo=[start],seen=new Set(),found=[];
