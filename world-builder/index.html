@@ -3,13 +3,13 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073a9d"><meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="only light">
-<title>WORLD_MAP.PNT — Virtual Life Builder</title>
+<title>Semesta — City Builder</title>
 <link rel="stylesheet" href="./xp.css?v=solid-world-tour-v1">
 </head>
 <body><div id="desktop"><div id="app">
 <header id="titlebar">
  <span class="window-icon" aria-hidden="true">✳</span>
- <div class="titletext"><strong>WORLD_MAP</strong><span>.PNT — Virtual Life Builder</span></div>
+ <div class="titletext"><strong>SEMESTA</strong><span>.EXE — City Builder</span></div>
  <div class="win-controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div>
 </header>
 <nav id="menubar" aria-label="XP Paint menus">
@@ -20,7 +20,7 @@
  <button id="reset" type="button"><u>V</u>iew / Reset</button>
  <button id="openTutorial" type="button" title="Open the quick start guide">❔ Quick Tutorial</button>
  <button id="openGame" type="button"><u>H</u>elp / Game</button>
- <span class="version">VIRTUAL LIFE / REFERENCE CITY + DRAFTS</span>
+ <span class="version">SEMESTA / CITY DESIGN STUDIO</span>
 </nav>
 <div id="workspace">
  <aside id="toolsPanel" aria-label="Tools">
@@ -45,7 +45,10 @@
     <option value="all">ALL ASSETS</option><option value="terrain">TERRAIN / ROADS</option><option value="custom">CUSTOM BUILDINGS</option>
     <option value="building">BUILDINGS</option><option value="street">STREET</option>
     <option value="vegetation">VEGETATION</option><option value="interior">INTERIOR</option>
-    <option value="character">CHARACTERS</option><option value="logic">LOGIC MARKERS</option>
+    <option value="character">CHARACTERS</option>
+    <option value="vehicles">MOBIL / MOTOR</option>
+    <option value="people">NPC / CROWD</option>
+    <option value="quest">NPC QUEST / JOB</option><option value="logic">LOGIC MARKERS</option>
    </select>
   </div>
   <div id="assetList" role="list" aria-label="Available original and pipeline assets"></div>
@@ -54,7 +57,7 @@
   </select>
  </aside>
  <section id="canvasPanel" aria-label="World canvas">
-  <div class="canvas-head"><span class="canvas-title">WORLD / OPEN GRID</span><span class="right">UNBOUNDED GRID · PINCH TO ZOOM</span></div>
+  <div class="canvas-head"><span class="canvas-title">SEMESTA / OPEN WORLD</span><span class="right">UNBOUNDED GRID · PINCH TO ZOOM</span></div>
   <main id="canvas-wrap">
    <canvas id="world" aria-label="Interactive Virtual Life isometric map canvas"></canvas>
    <div id="hint">Tap select · Paint & drag terrain · Pinch zoom/pan · Grid continues anywhere</div><button id="floatingInspector" class="floating-inspector" type="button" aria-label="Open properties inspector">☷ Properties</button>
@@ -114,6 +117,24 @@
       <div class="section-label">BUILDING FOOTPRINT · PLACEHOLDER</div>
       <div class="building-dims"><label>Width / C <input id="buildingW" type="number" min="2" max="20" step="1"></label><label>Depth / R <input id="buildingD" type="number" min="2" max="20" step="1"></label><label>Height <input id="buildingH" type="number" min="2" max="20" step="1"></label></div>
       <button id="replaceAsset" type="button">⇄ Replace with asset...</button>
+    </div>
+    <div id="motionControls" hidden>
+     <div class="section-label">AUTO LOOP / SIMULATION</div>
+     <label>Mode<select id="motionMode"><option value="road">Vehicle · Road only</option><option value="sidewalk">Walker · Sidewalk only</option><option value="idle">Quest NPC · Stationary</option></select></label>
+     <label>Speed <input type="number" id="motionSpeed" min=".2" max="10" step=".2" value="2"></label>
+     <label>Direction<select id="motionDirection">
+       <option value="auto">Auto · longest straight</option>
+       <option value="east">East →</option><option value="west">West ←</option>
+       <option value="south">South ↓</option><option value="north">North ↑</option>
+     </select></label>
+     <label>People in crowd <input id="crowdCount" type="number" min="2" max="12" step="1" value="5"></label>
+     <label>Idle action<select id="questAction">
+       <option value="idle">Idle / breathing</option><option value="wave">Wave / direct</option>
+       <option value="whistle">Whistle / signal</option><option value="offer">Offer / collect</option>
+       <option value="statue">Statue pose</option>
+     </select></label>
+     <label class="toggle"><input type="checkbox" id="motionEnabled" checked> Auto simulation ON</label>
+     <p class="help" id="motionHint">Movement is a preview only. Route and action settings are stored in City Draft / JSON.</p>
     </div>
     <div id="actorControls">
      <div class="section-label">CHARACTER</div>
@@ -204,6 +225,8 @@
 <script src="./map-schema.js?v=infinite-grid-mobile-fix4"></script>
 <script src="./reference-city.js?v=camera-character-v1"></script>
 <script src="./city-drafts.js?v=reference-city-drafts1"></script>
+<script src="./semesta-traffic-catalog.js?v=semesta-v1"></script>
+<script src="./semesta-traffic.js?v=semesta-v1"></script>
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=solid-world-tour-v1"></script>
 <script type="module" src="./builder.js?v=solid-world-tour-v1"></script>
