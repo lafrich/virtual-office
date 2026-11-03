@@ -7,7 +7,11 @@
  */
 (function(g){
 'use strict';
-const TILE_W=64,TILE_H=32,HALF_W=32,HALF_H=16,WALL=64,SLAB=8,PAD=35;
+// One interior 64x32 tile is exactly one Semesta exterior tile.
+ // A one-floor cutaway wall must be taller than the 112px Mahluk Hidup actor:
+ // former WALL=64 made characters taller than the whole room.
+const TILE_W=64,TILE_H=32,HALF_W=32,HALF_H=16,WALL=128,SLAB=8,PAD=35;
+const WC_SEAT_Z=36,WC_TANK_Z=70;
 const TYPES=g.VLBuildingInterior?.types||{};
 const PALETTES={
  cream:{floor:['#E8DEC6','#D4C8AE','#C3AD8D'],wall:['#F4EBDA','#E8DEC6','#C3AD8D'],skirt:'#9B866F'},
@@ -125,11 +129,10 @@ function actionAnchor(item){
  let seat=null,hip=0;
  switch(item.assetId){
   case 'wc':
-   // WC bowl is painted at local c=.29..71 / r=.40..88, z=14.
-   // The 64x112 Mahluk Hidup sit pose pivots on the FEET, not hips.
-   // Sit pelvis approx 27 px above pivot, so place sprite foot 13 px
-   // BELOW floor-space bowl center to align hips to the 14px-high rim.
-   seat=[.50,.64];hip=13;break;
+   // Mahluk Hidup feet pivot is y=100; a rigged sit sprite's pelvis is
+   // approximately 27 px above that pivot. Align it with the porcelain
+   // seat at 36 px above the floor (rather than the former 14 px stool).
+   seat=[.50,.64];hip=27-WC_SEAT_Z;break;
   case 'chair':
   case 'office_chair':
    seat=[.50,.55];hip=8;break;
@@ -165,9 +168,12 @@ function furniture(ctx,geo,item,selected=false){
  const place=()=>{
  switch(type){
  case 'wc':
-  B(.16,.30,w-.32,d-.37,2,12,'white');
-  B(.18,.06,w-.36,.32,5,34,'white');
-  B(.29,.40,w-.58,d-.52,13,14,'glass');
+  // Full-size WC, scaled to the native 64x112 Mahluk Hidup actor. The
+  // bowl reaches the seated character's hips; the tank is behind the back.
+  B(.13,.29,w-.26,d-.36,3,WC_SEAT_Z-4,'white');
+  B(.13,.06,w-.26,.30,5,WC_TANK_Z,'white');
+  B(.22,.39,w-.44,d-.47,WC_SEAT_Z-3,WC_SEAT_Z,'glass');
+  B(.18,.36,w-.36,d-.43,WC_SEAT_Z-2,WC_SEAT_Z+1,'white');
   break;
  case 'shower':
   B(.07,.07,w-.14,d-.14,1,5,'white');
@@ -271,7 +277,7 @@ function drawSeatForeground(ctx,geometry,item){
  else if(rot===3){[x,y,w,d]=[y,1-(x+w),d,w];}
  // The bowl front masks the sitting character's feet, making the body
  // visibly sit BEHIND the rim instead of float on top of the fixture.
- box(ctx,geometry,c+x,r+y,w,d,2,12,'white');
+ box(ctx,geometry,c+x,r+y,w,d,2,WC_SEAT_Z-2,'white');
 }
 function draw(canvas,scene,opts={}){
  const ctx=canvas.getContext('2d');
@@ -339,7 +345,7 @@ function pointer(canvas,event,geometry,opts={}){
  const y=(event.clientY-box.top)*canvas.height/box.height;
  return pick(geometry,x,y,opts);
 }
-g.VLInteriorIso=Object.freeze({version:'v6',tilePixels:Object.freeze([64,32]),
+g.VLInteriorIso=Object.freeze({version:'v7',tilePixels:Object.freeze([64,32]),
  bounds,point,pick,pointer,draw,tileAt,itemFootprint,
- fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground});
+ fixtureRotation,fixturePoint,actionAnchor,drawSeatForeground,WC_SEAT_Z,WC_TANK_Z,WALL});
 })(window);
