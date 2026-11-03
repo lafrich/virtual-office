@@ -115,7 +115,7 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
   sit:["sit_idle"],relax:["sit_idle"]
  };
  const edits=g.VLActionFrames;
- const storageActor=rig?.canonical(actor.profile)||actor.profile;
+ const storageActor=rig?.canonical?.(actor.profile)||actor.profile;
  // Pixel offset comes from Mahluk Hidup, never moves fixture/collision data.
  const shift=action?edits?.offset(storageActor,action):null;
  const x=Math.round(footX-FRAME.pivotX*scale+(shift?.x||0));
