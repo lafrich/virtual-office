@@ -42,14 +42,14 @@ function line(map,start,dx,dz,type){
 // Connected sidewalk navigator. Follow the right-hand boundary through
 // real 90-degree corners and return continuously to the starting segment.
 // Unlike the former straight-line route there is NO off-screen teleport.
-function sidewalkCircuit(map,x,z,direction='auto'){
+function sidewalkCircuit(map,x,z,direction='auto',walkable=null){
  const t=map?.terrain||{default:'grass',cells:[]},m=index(t);
  const origin={c:Math.floor(x),r:Math.floor(z)};
- if(kind(t,origin.c,origin.r,m)!=='sidewalk')return null;
+ if(kind(t,origin.c,origin.r,m)!=='sidewalk'||(walkable&&!walkable(origin.c,origin.r)))return null;
  const starts=direction==='north'?[D.north]:direction==='south'?[D.south]:
   direction==='east'?[D.east]:direction==='west'?[D.west]:
   [D.east,D.south,D.west,D.north];
- const can=(c,r)=>kind(t,c,r,m)==='sidewalk';
+ const can=(c,r)=>kind(t,c,r,m)==='sidewalk'&&(!walkable||walkable(c,r));
  const candidates=[];
  for(const initial of starts){
   let c=origin.c,r=origin.r,dx=initial[0],dz=initial[1];
@@ -88,8 +88,8 @@ function sidewalkCircuit(map,x,z,direction='auto'){
  candidates.sort((a,b)=>(b.area*3+b.unique)-(a.area*3+a.unique)||b.length-a.length);
  return candidates[0]||null;
 }
-function choose(map,x,z,mode,direction='auto'){
- if(mode!=='vehicle')return sidewalkCircuit(map,x,z,direction);
+function choose(map,x,z,mode,direction='auto',walkable=null){
+ if(mode!=='vehicle')return sidewalkCircuit(map,x,z,direction,walkable);
  const k=typeFor(mode);
  const seed={x,z};
  const vectors=(direction==='east'||direction==='west')?[[1,0]]:
@@ -101,10 +101,10 @@ function choose(map,x,z,mode,direction='auto'){
  if(backwards)best.points.reverse();
  return best;
 }
-function makeRoute(map,x,z,mode,direction='auto'){
+function makeRoute(map,x,z,mode,direction='auto',walkable=null){
  if(!allowed(map,x,z,mode))return null;
  if(mode==='quest_npc')return {points:[{x,z}],edges:[],length:0,loop:true,stationary:true};
- const corridor=choose(map,x,z,mode,direction);
+ const corridor=choose(map,x,z,mode,direction,walkable);
  if(!corridor)return null;
  const points=corridor.points.slice();
  const walking=mode!=='vehicle';
@@ -154,13 +154,13 @@ function config(o){
   count:Math.min(12,Math.max(2,Math.round(Number(o.motion?.count)||5))),
   idleAction:o.motion?.idleAction||'idle'};
 }
-function spawnPosition(map,x,z,mode,radius=5){
+function spawnPosition(map,x,z,mode,radius=5,walkable=null){
  const t=map.terrain||{default:'grass',cells:[]},m=index(t),required=typeFor(mode);
  const c=Math.floor(x),r=Math.floor(z);
- if(kind(t,c,r,m)===required)return {x:c+.5,z:r+.5};
+ if(kind(t,c,r,m)===required&&(!walkable||walkable(c,r)))return {x:c+.5,z:r+.5};
  let best=null,dist=Infinity;
  for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++){
-  if(kind(t,c+dx,r+dz,m)!==required)continue;
+  if(kind(t,c+dx,r+dz,m)!==required||(walkable&&!walkable(c+dx,r+dz)))continue;
   const d=Math.hypot(dx,dz);
   if(d<dist){dist=d;best={x:c+dx+.5,z:r+dz+.5};}
  }
