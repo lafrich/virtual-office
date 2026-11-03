@@ -45,7 +45,10 @@ for(const o of [vehicle,pedestrian,quest]){
 }
 assert.match(style.reason({...vehicle,z:5.5},[],map,catalog),/jalan/);
 assert.match(style.reason({...pedestrian,z:1.5},[],map,catalog),/trotoar/);
-assert.match(style.reason({...quest,z:1.5},[],map,catalog),/trotoar/);
+assert.equal(style.reason({...quest,z:1.5},[],map,catalog),'',
+ 'Stationary quest NPC Pak Ogah may be positioned on the road');
+assert.match(style.reason({...quest,z:8.5},[],map,catalog),/jalan.*trotoar.*plaza/,
+ 'Quest NPC may not stand on unprepared grass terrain');
 const document={format:'virtual-life-world-builder-v1',map,objects:[vehicle,pedestrian,quest]};
 const exported=schema.enrich(document,catalog,style);
 assert.equal(schema.validate(exported,catalog,style).length,0);
