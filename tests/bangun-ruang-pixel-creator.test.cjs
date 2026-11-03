@@ -58,7 +58,7 @@ test('Pixel Creator initializes and opens a modal with either static-button entr
  assert.equal(typeof window.VLPixelCreator?.open,'function');
  assert.equal(els.get('openObjectPixelCreator').id,'openObjectPixelCreator');
  window.VLPixelCreator.open();
- assert.equal(els.get('objectPixelDialog').open,true);
+ assert.equal(document.body.children.find(node=>node.id==='objectPixelDialog')?.open,true);
  assert.match(els.get('opcStatus').textContent,/New object/);
  assert.match(els.get('opcGridToggle').textContent,/Grid ON/);
  assert.match(els.get('opcRefToggle').textContent,/Character ON/);
