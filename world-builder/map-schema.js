@@ -83,10 +83,12 @@ function enrich(map,catalog,style){
  doc.objects=doc.objects.map(o=>{
   normalize(o,catalog,style);
   const spec=o.type==='sprite'?catalog.get(o.asset):null;
-  o.assetSource=['vehicle','quest_npc'].includes(o.type)?'virtual-life-pipeline-preview-metadata':
+  o.assetSource=(o.type==='virtual_asset'||o.assetPath)?'virtual-life-session-asset':
+   ['vehicle','quest_npc'].includes(o.type)?'virtual-life-pipeline-preview-metadata':
    ['pedestrian','crowd'].includes(o.type)?'virtual-life-v6b':
    o.type==='sprite'?(spec?.source||'unknown'):o.type==='marker'?'editor-marker':o.type==='building'||o.type==='shop'?'builder-placeholder':o.type==='avatar'||o.type==='npc'?'virtual-life-v6b':'editor-tool';
-  o.assetPublished=['vehicle','quest_npc'].includes(o.type)?false:
+  o.assetPublished=(o.type==='virtual_asset'||o.assetPath)?false:
+   ['vehicle','quest_npc'].includes(o.type)?false:
    ['pedestrian','crowd'].includes(o.type)?true:
    o.type==='sprite'?spec?.source==='gpt-original'||spec?.published===true:o.type==='building'||o.type==='shop'?false:!['tree','bench','lamp','box'].includes(o.type);
   const fp=style.footprint(o,catalog);
