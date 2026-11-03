@@ -158,3 +158,49 @@
  .interior-view-tools span{display:none}
  #interiorCanvas{max-height:294px;max-width:100%;width:auto;height:auto}
 }
+
+
+/* v5 · Non-destructive outline preview and touch-friendly horizontal assets */
+.exterior-view-tools{
+ display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 10px;
+ background:#e9edf2;border-top:1px solid #b9cadb;border-bottom:1px solid #b9cadb;
+}
+.exterior-view-tools button{padding:8px 10px;font-size:11px;font-weight:700;min-width:0;flex:1}
+.exterior-view-tools button.active{background:#145bb0;border-color:#13478a;color:white}
+.exterior-view-tools span{font:10px Tahoma,Verdana,sans-serif;color:#6b7b87;white-space:nowrap}
+#buildingGuideCanvas{display:block;max-width:100%;max-height:620px;image-rendering:pixelated;object-fit:contain}
+.interior-asset-tray{background:#f1f3f1;border-top:1px solid #bfccd6;border-bottom:1px solid #bfccd6;padding:7px 10px 10px;min-width:0}
+.interior-tray-heading{display:flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.4px;padding:2px 0 6px}
+.interior-tray-heading strong{white-space:nowrap;color:#164a85}
+.interior-tray-heading span{margin-left:auto;color:#567186;font-size:10px;text-align:right}
+.interior-tray-heading button{padding:4px 6px;font-size:10px}
+.interior-quick-scroll{
+ display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;
+ padding:2px 2px 8px;max-width:100%;min-width:0;
+ scroll-snap-type:x proximity;overscroll-behavior-inline:contain;
+ -webkit-overflow-scrolling:touch;scrollbar-width:thin;
+}
+.interior-quick-card{
+ flex:0 0 86px;width:86px;min-width:86px;
+ display:flex;flex-direction:column;justify-content:space-between;align-items:center;
+ gap:5px;padding:7px 5px 6px;text-align:center;background:#fff;border:1px solid #b9c7d7;
+ border-radius:3px;scroll-snap-align:start;min-height:91px;
+}
+.interior-quick-card span{font:10px/1.2 Tahoma,Verdana,sans-serif;color:#395370}
+.interior-quick-card.active{background:#d5e9ff;border:2px solid #1259bb;padding:6px 4px 5px}
+.quick-asset-thumb{width:49px;height:49px;image-rendering:pixelated;object-fit:contain}
+#interiorQuickTools[hidden],#exteriorViewTools[hidden]{display:none!important}
+@media(max-width:1000px){
+ #buildingGuideCanvas{max-height:340px}
+}
+@media(max-width:640px){
+ #buildingGuideCanvas{max-height:294px;width:auto;height:auto}
+ .exterior-view-tools{padding:5px 10px}
+ .exterior-view-tools button{padding:8px 6px;font-size:10px}
+ .exterior-view-tools span{display:none}
+ .interior-asset-tray{padding:7px 8px 9px}
+ .interior-quick-scroll{gap:7px;scroll-padding-inline:4px}
+ .interior-quick-card{flex-basis:78px;width:78px;min-width:78px;min-height:86px}
+ .quick-asset-thumb{width:43px;height:43px}
+ .interior-tray-heading span{font-size:9px}
+}
