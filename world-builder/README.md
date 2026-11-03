@@ -62,3 +62,15 @@ This is a map editing system; it does **not** stream an infinite prepopulated to
 - Draft snapshots are stored **locally in IndexedDB**, with a localStorage fallback when IndexedDB is unavailable. Working edits continue to autosave separately. **These are not GitHub, online server, multiplayer or cloud saves** and are not shared between devices or browsers. Users should **Export JSON** for transferable backups.
 - Creating a new preset, resetting or importing JSON detaches the previously active named draft, to avoid accidentally overwriting the prior saved city. A confirmation precedes destructive canvas replacements.
 - Preset geometry, terrain and named drafts share the same editable `virtual-life-ai-map-v3` schema. Opening a draft restores its objects and terrain; all markers are design annotations only.
+
+## Camera to Character (follow / Walk Test)
+
+Use **🎥 Character** in the canvas toolbar, the **◎** camera icon in the left tool strip, or **🎥 Camera to this Character** in the selected-character inspector.
+
+- Focuses the orthographic isometric camera directly onto the selected character, or onto the player preview (avatar) / first NPC if no character is selected.
+- Switches into **Walk Test** automatically. Move using touch D-pad on mobile or WASD / arrow keys on desktop. Camera tracks the live preview actor with frame-rate independent easing.
+- **Two-finger pinch** adjusts zoom while following; **one-finger pan** on empty terrain detaches follow to allow map browsing.
+- Use **🗺 Map** (or the Home button) to exit follow, reset unsaved preview movement and restore the exact camera focus and zoom held before entering follow. This does not update map geometry or saved city drafts.
+- Switching to a different city, reset, import, undo, or deleting the followed character safely ends the character-camera session.
+- New Reference City layouts contain an editable **Player · Camera Preview** avatar near the spawn marker. Older drafts without an avatar can add one from **Assets → Characters**.
+- Camera following does not introduce third-person perspective distortion or write character positions to the multiplayer game; it remains a rendering/authoring preview.
