@@ -53,13 +53,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .boot-caption{font:17px/1.4 "MS Sans Serif",Tahoma,Verdana,sans-serif;margin:0 0 29px;color:#161a1d}
 .boot-controls{display:grid;grid-template-columns:minmax(0,1fr) 111px;align-items:center;gap:26px}
 .boot-progress{height:34px;display:block;padding:4px;border-style:solid;border-width:2px;border-color:#858c8e #eff5f5 #eff5f5 #858c8e;box-shadow:inset 1px 1px #6c7377;background:#c6cccd;overflow:hidden}
-.boot-progress-fill{display:block;height:100%;width:100%;background:repeating-linear-gradient(90deg,#0701a3 0 19px,transparent 19px 24px);transform:scaleX(0);transform-origin:left center;animation:bootProgress 2s steps(17,end) forwards}
+.boot-progress-fill{display:flex;align-items:stretch;width:100%;height:100%;gap:3px}.boot-progress-block{display:block;flex:0 0 calc((100% - 48px)/17);min-width:0;background:#0701a3;box-shadow:inset 1px 0 #3633ce}
 .boot-cancel{height:34px;padding:0 12px;background:#c5cbcc;color:#1a1b1d;border-style:solid;border-width:2px;border-color:#faffff #3f4648 #3f4648 #faffff;box-shadow:inset -1px -1px #858c8e;font:15px/1 "MS Sans Serif",Tahoma,Verdana,sans-serif}
 .boot-cancel:hover{background:#d6dbdc}
 .boot-cancel:active{border-color:#4b5153 #fbffff #fbffff #4b5153;box-shadow:inset 1px 1px #888}
-@keyframes bootProgress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @media(max-width:520px){.boot-titlebar{height:24px;font-size:12px}.boot-dialog-body{padding:22px 17px 19px}.boot-caption{font-size:15px;margin-bottom:23px}.boot-controls{grid-template-columns:minmax(0,1fr) 84px;gap:13px}.boot-progress{height:29px}.boot-cancel{height:30px;font-size:12px}}
-@media(prefers-reduced-motion:reduce){.boot-progress-fill{animation-duration:.1s}}
 .modal-cover{position:fixed;inset:0;z-index:15;background:#102350a1;display:grid;place-items:center;padding:14px}
 .modal{width:min(460px,100%);background:var(--chrome);border:2px solid #fafafa;outline:2px solid #292929;box-shadow:6px 10px #0005}.modal .titlebar{height:39px}.modal .window-title{font-size:15px}.modal-body{padding:16px;background:#e5e3df}.modal-body label{font:bold 11px "Courier New",monospace;display:block;margin-bottom:12px}.modal-body input{display:block;background:#fff;width:100%;padding:9px;border:2px inset #a8a8a8;margin-top:5px;outline-offset:1px}.modal-buttons{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.modal-error{color:#9e2a21;min-height:14px;font:11px Tahoma,sans-serif}
 @media(max-width:800px){.workspace{grid-template-columns:190px minmax(0,1fr) 205px}.prop-inner{padding:9px}.inspector h1{font-size:20px}.file-name{font-size:10px}}
@@ -184,7 +182,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
     <div class="boot-dialog-body">
       <p class="boot-caption">Initializing...</p>
       <div class="boot-controls">
-        <div class="boot-progress" role="progressbar" aria-label="Loading Membangun"><span class="boot-progress-fill"></span></div>
+        <div class="boot-progress" role="progressbar" aria-label="Loading Membangun" aria-valuemin="0" aria-valuemax="17" aria-valuenow="0" id="bootProgress"><span class="boot-progress-fill" id="bootProgressFill"></span></div>
         <button class="boot-cancel" type="button" id="skip">Cancel</button>
       </div>
     </div>
@@ -209,11 +207,11 @@ const $=id=>document.getElementById(id);
 const ids=['mahluk','bangun','semesta'];
 const data={
 mahluk:{name:'MAHLUK HIDUP',type:'CHARACTER',desc:'Buat karakter dan NPC pixel.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/'},
-bangun:{name:'BANGUN RUANG',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:''},
+bangun:{name:'BANGUN RUANG',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
 semesta:{name:'SEMESTA',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'}
 };
 let selected='mahluk';
-function getUrl(id){try{const x=localStorage.getItem('membangun-link-'+id);return x===null?data[id].url:x;}catch(e){return data[id].url}}
+function getUrl(id){try{const x=localStorage.getItem('membangun-link-'+id);return x?x:data[id].url;}catch(e){return data[id].url}}
 function okUrl(raw){if(!raw)return true;try{let u=new URL(raw);return (u.protocol==='https:'||u.protocol==='http:')&&u.hostname!==''}catch(e){return false}}
 function render(){
 const i=ids.indexOf(selected),d=data[selected],url=getUrl(selected);
@@ -239,7 +237,18 @@ $('helpMenu').addEventListener('click',()=>{$('status').textContent='SELECT PROG
 $('cancel').addEventListener('click',()=>$('modal').hidden=true);
 $('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').hidden=true});
 $('linkForm').addEventListener('submit',e=>{e.preventDefault();let updated={};for(let id of ids){let v=$('url-'+id).value.trim();if(!okUrl(v)){$('urlError').textContent='Invalid link: '+data[id].name;return}updated[id]=v}try{ids.forEach(id=>localStorage.setItem('membangun-link-'+id,updated[id]))}catch(e){$('urlError').textContent='Browser blocked local storage';return}$('modal').hidden=true;render()});
-function dismiss(){$('boot').classList.add('done');setTimeout(()=>$('boot').hidden=true,260)}
+const progressFill=$('bootProgressFill'),progressHost=$('bootProgress');
+let progressTimer=null,blocksAdded=0;
+progressTimer=setInterval(()=>{
+ if($('boot').classList.contains('done')||blocksAdded>=17){clearInterval(progressTimer);return;}
+ const block=document.createElement('span');
+ block.className='boot-progress-block';
+ progressFill.appendChild(block);
+ blocksAdded++;
+ progressHost.setAttribute('aria-valuenow',String(blocksAdded));
+ if(blocksAdded>=17)clearInterval(progressTimer);
+},105);
+function dismiss(){clearInterval(progressTimer);$('boot').classList.add('done');setTimeout(()=>$('boot').hidden=true,260)}
 $('skip').addEventListener('click',dismiss);$('boot').addEventListener('click',dismiss);
 if(!new URLSearchParams(location.search).has('splash'))setTimeout(dismiss,window.matchMedia('(prefers-reduced-motion: reduce)').matches?120:2050);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=true;dismiss()}if(e.key==='Enter'&&!$('boot').hidden)dismiss()});
