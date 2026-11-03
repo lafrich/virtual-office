@@ -1047,6 +1047,15 @@ function makeMarker(root,item){
  body.position.y=.5;root.add(body);
  const pole=new THREE.Mesh(new THREE.BoxGeometry(.045,.43,.045),mat);
  pole.position.y=.23;root.add(pole);
+ // Larger invisible touch target. The visible pin stays small, but a thumb
+ // can select it reliably without a precision tap on the tiny diamond.
+ const pickMat=new THREE.MeshBasicMaterial({
+  color:0xffffff,transparent:true,opacity:0,depthWrite:false,
+  colorWrite:false,depthTest:false,side:THREE.DoubleSide
+ });
+ const hit=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,1.4,8),pickMat);
+ hit.position.y=.73;hit.userData.logicMarkerPick=true;
+ root.add(hit);
  root.userData.editorMarker=tag;
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
@@ -1521,6 +1530,22 @@ function floorPoint(e){
 }
 function pick(e){
  mouseRay(e);
+ // Mobile-first screen-space selection for the small yellow logic pins.
+ // Markers get a 24 px hit radius independent of camera zoom and mesh size.
+ if(markerShown&&mode!=='paint'&&mode!=='fill'){
+  const rect=canvas.getBoundingClientRect(),isTouch=e.pointerType!=='mouse';
+  const radius=isTouch?27:20;
+  let closest=null,nearest=radius*radius;
+  for(const o of documentMap.objects){
+   if(o.type!=='marker'||owners.get(o.id)?.visible===false)continue;
+   const pos=new THREE.Vector3(o.x,(o.y||0)+.55,o.z).project(camera);
+   const sx=rect.left+(pos.x+1)*rect.width/2;
+   const sy=rect.top+(1-pos.y)*rect.height/2;
+   const distance=(e.clientX-sx)**2+(e.clientY-sy)**2;
+   if(distance<nearest){closest=o.id;nearest=distance;}
+  }
+  if(closest)return closest;
+ }
  const hits=ray.intersectObjects(assetRoots.children,true);
  for(const h of hits){
   let o=h.object;
@@ -1867,6 +1892,7 @@ function updateLogicUI(){
  };
  for(const [id,v] of Object.entries(fields)){$(id).value=v;$(id).disabled=!cur;}
  $('logicMarkerKind').disabled=!cur||cur.type!=='marker';
+ refreshMarkerManager();
 }
 function refreshCharacterOptions(){
  const current=$('profile').value;
