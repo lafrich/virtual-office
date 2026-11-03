@@ -151,7 +151,7 @@ function mount(api){
   $('scaleRemove').disabled=!active;
   $('scaleIdle').disabled=!active;
   $('scaleWalkDoor').disabled=!active||interior||cfg().interactive!==true||actor.scene!=='exterior';
-  $('scaleUse').disabled=!active||!interior||actor.scene!=='interior'||!api.getSelectedProp?.();
+  $('scaleUse').disabled=!active||!interior||actor.scene!=='interior'||actor.floor!==api.getInterior?.()?.floor||!api.getSelectedProp?.();
   $('scaleSpawn').classList.toggle('active',actor.armed);
   $('scaleSpawn').textContent=actor.armed?'⌖ Tap Canvas':'＋ Place';
  }
@@ -281,6 +281,7 @@ function mount(api){
   if(!actor.active||actor.scene!=='interior'){status('Place character inside the interior first');return;}
   const item=api.getSelectedProp?.(),scene=api.getInterior?.();
   if(!item||!scene){status('Select WC, bed, chair or another interior prop first');return;}
+  if(actor.floor!==scene.floor){status('Place the character on this floor before testing the action');return;}
   actor.armed=false;
   const start=[Math.round(actor.c),Math.round(actor.r)];
   const path=pathTo(scene,start,[item.c,item.r],{item});
