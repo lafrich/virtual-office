@@ -18,6 +18,8 @@ function init(api){
  ctx.imageSmoothingEnabled=false;
  const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
  const group=$('interiorCategory'),asset=$('interiorAsset');
+ const tray=$('interiorQuickBar'),trayContainer=$('interiorQuickTools');
+ const tiles=new Map();
  for(const key of categories){const option=document.createElement('option');option.value=key;option.textContent=key;group.append(option);}
  for(const [key,t] of Object.entries(model.templates)){const o=document.createElement('option');o.value=key;o.textContent=t.label;$('interiorTemplate').append(o);}
  function cfg(){return api.getConfig();}
@@ -45,12 +47,53 @@ function init(api){
   asset.replaceChildren();
   const matches=Object.entries(model.types).filter(([key,t])=>t.category===group.value);
   for(const [key,t] of matches){const o=document.createElement('option');o.value=key;o.textContent=t.glyph+' '+t.label;asset.append(o);}
+  if(placing&&model.types[placing]?.category!==group.value)placing=null;
+  updateTray();
+ }
+ function armPlacement(type){
+  if(!enabled||!model.types[type])return;
+  placing=placing===type?null:type;selected=null;
+  if(placing){
+   group.value=model.types[placing].category;
+   // Keep classic inspector dropdown compatible with the quick picker.
+   asset.replaceChildren();
+   for(const [key,t] of Object.entries(model.types).filter(([key,t])=>t.category===group.value)){
+    const opt=document.createElement('option');opt.value=key;opt.textContent=t.label;asset.append(opt);
+   }
+   asset.value=placing;
+  }
+  setPreview('interior');draw();renderObjects();updateTray();
+  onStatus(placing?'Tap floor to place '+model.types[placing].label:'Placement cancelled');
+ }
+ function updateTray(){
+  for(const [key,button] of tiles){button.classList.toggle('active',key===placing);button.setAttribute('aria-pressed',String(key===placing));}
+  $('quickCancel').hidden=!placing;
+  $('quickPlaceHint').textContent=placing?'PLACE '+model.types[placing].label.toUpperCase()+' · TAP FLOOR':'Tap asset → tap floor';
+ }
+ function buildTray(){
+  tray.replaceChildren();tiles.clear();
+  for(const [key,def] of Object.entries(model.types)){
+   const button=document.createElement('button');button.type='button';
+   button.className='interior-quick-card';button.dataset.interiorAsset=key;
+   button.setAttribute('aria-label','Place '+def.label);
+   button.setAttribute('aria-pressed','false');
+   const thumb=document.createElement('canvas');
+   thumb.className='quick-asset-thumb';thumb.width=48;thumb.height=48;
+   const tctx=thumb.getContext('2d');tctx.imageSmoothingEnabled=false;
+   if(g.VLInteriorPixels)g.VLInteriorPixels.draw(tctx,key,2,2,44,44);
+   const title=document.createElement('span');title.textContent=def.label;
+   button.append(thumb,title);button.onclick=()=>armPlacement(key);
+   tray.append(button);tiles.set(key,button);
+  }
+  updateTray();
  }
  function setPreview(value){
   if(value==='interior'&&!enabled)return;
   preview=value;
   $('preview').hidden=value!=='exterior';canvas.hidden=value!=='interior';
   $('interiorViewTools').hidden=value!=='interior';
+  trayContainer.hidden=value!=='interior';
+  api.showExterior?.(value==='exterior');
   document.querySelector('.direction-bar').hidden=value==='interior';
   $('showExterior').classList.toggle('active',value==='exterior');
   $('showInterior').classList.toggle('active',value==='interior');
@@ -79,6 +122,7 @@ function init(api){
   $('actions').closest('label').hidden=!enabled;
   if(!enabled){placing=null;selected=null;selectTab('exterior');setPreview('exterior');}
   if(enabled){normalizeScene(floor);draw();renderObjects();renderActions();}
+  updateTray();
   renderMetadata();
  }
  function setInteriorView(mode){
@@ -245,7 +289,7 @@ function init(api){
   const s=scene();
   if(placing){
    const obj=model.add(s,placing,c,r);
-   if(obj){selected=obj.id;placing=null;renderObjects();renderActions();draw();onStatus('Placed '+obj.name+' · action '+obj.actionId);}
+   if(obj){selected=obj.id;placing=null;renderObjects();renderActions();draw();updateTray();onStatus('Placed '+obj.name+' · action '+obj.actionId);}
    else onStatus('Invalid tile: collides or blocks entrance');
    return;
   }
@@ -293,11 +337,9 @@ function init(api){
   if(scene().items.length&&!confirm('Remove all furniture on this floor?'))return;
   scenes[floor]=model.create(cfg());scenes[floor].floor=floor;selected=null;placing=null;refresh();
  };
- $('addInteriorItem').onclick=()=>{
-  placing=asset.value;selected=null;setPreview('interior');selectTab('interior');draw();renderObjects();
-  onStatus('Tap interior grid to place '+(model.types[placing]?.label||'object'));
- };
- $('cancelInteriorPlacement').onclick=()=>{placing=null;draw();};
+ $('addInteriorItem').onclick=()=>armPlacement(asset.value);
+ $('cancelInteriorPlacement').onclick=()=>{placing=null;draw();updateTray();};
+ $('quickCancel').onclick=()=>{placing=null;draw();updateTray();};
  $('updateInteriorItem').onclick=()=>{
   const s=scene(),item=s.items.find(x=>x.id===selected);if(!item)return;
   const moved=model.move(s,item.id,Number($('interiorItemC').value),Number($('interiorItemR').value),Number($('interiorItemFacing').value));
@@ -340,7 +382,7 @@ function init(api){
   $('savedToggle').setAttribute('aria-expanded',String(active));
   if(active)library.scrollIntoView({behavior:'smooth',block:'nearest'});
  };
- fillFloors();updateCategories();renderMetadata();setInteriorView('iso');
+ fillFloors();buildTray();updateCategories();renderMetadata();setInteriorView('iso');
  return {load,reset,refresh,serialize,isInteractive:()=>enabled,setPreview,selectTab,setInteriorView};
 }
 g.VLStudioInteriors=Object.freeze({init});
