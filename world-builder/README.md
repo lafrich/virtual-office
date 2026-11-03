@@ -153,7 +153,19 @@ The running clock is persisted in the current working copy periodically and writ
 
 - **No disappearing sidewalk NPCs:** Walking NPCs and crowds follow adjacent sidewalk tiles through corners. The graph is walked using a stable right-hand turn preference, producing closed perimeter loops when available; dead ends cause physical U-turns and retracing instead of jumping from the end of a route to its beginning. The client prefers longer enclosing sidewalk circuits when more than one possible turn exists. Walk routes remain on actual sidewalk tiles and can exclude cells occupied by solid authored scenery.
 - **Even very short sidewalks remain visible:** An isolated sidewalk square has no route, so its walker simply idles. Vehicles continue using the separate, deliberately off-map road-end respawn system; this is unchanged.
-- **Grounded vehicle sprites:** Semesta's authored placeholder 160×108 vehicle texture has different transparent padding from original Virtual Life sprites. The visual mesh now uses a calibrated preview foot pivot (~91.5% of image height), the canonical source pivot for real sheets, and a small clearance above the asphalt to prevent wheels/body being rendered below terrain. Collision and vehicle shadow remain on the ground.
+- **Grounded vehicle sprites:** Semesta's preview sheet is 160×108 but original Vehicle Pipeline PNGs vary substantially (e.g., 146×138 and 272×256). The renderer now recalculates the billboard geometry from the **active image's actual width/height ratio**, rather than distorting a preview to match atlas dimensions. For transparent preview/vault canvases, it detects the lowest opaque pixels to locate the actual wheel/contact baseline. Canonical source files use their own metadata pivots. Both align the feet/wheels at a consistent 0.115 world-unit display clearance; collision and shadows stay on the road.
 - **Responsive nocturnal lighting:** Night glows track the camera instead of waiting for a 120ms visual throttle. Running traffic is prioritized for lighting: headlights glow pale white, taillights glow red, and a soft cool body highlight is composited above the night color grade, without changing daylight art or world geometry.
 
 All these changes are in Semesta's local preview rendering and route planning; they do not modify multiplayer Virtual Life behavior. The browser must refresh the versioned URL to see updated code.
+
+## Live NPC jam + vehicle image grounding regression
+
+Previous Semesta revisions allowed preview NPCs to be treated as moving blockers during every pedestrian step. On shared sidewalks—especially opposite-direction walkers, crowd members and job-NPC intersections—that produced a permanent deadlock and apparently static crowd clusters.
+
+The walking simulation now:
+- Preserves a collision-tested closed path over connected sidewalk tiles, including avoidance of large/static authored obstacles;
+- Assigns a small **right-of-travel lateral offset** (0.14–0.21 tile) to regular walkers and staggered crowd members so opposite directions visually use opposite sides;
+- Doesn't apply the road-vehicle-style moving-body overlap freeze between non-solid walking NPCs. They remain individually animated and continue through congested sidewalk junctions. World-scale buildings, props and water remain solid, and player Walk Test still uses actual occupied character positions.
+- Has a deterministic 1,200-frame-per-character/crowd-member regression over Reference City sidewalks; a stuck frame indicates broken route/physics behavior.
+
+The vehicle display uses the correct sprite art aspect ratio plus transparent-pixel-based contact pivot. The car/bus/motorbike representative mocked mesh test verifies the visual wheel contact at 0.115 world units for both preview and original source sheets, with unchanged vehicle traffic footprint and queue calculations.
