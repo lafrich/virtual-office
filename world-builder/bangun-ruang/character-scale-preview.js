@@ -406,6 +406,22 @@ function mount(api){
  $('scaleWalkDoor').onclick=enterDoor;
  $('scaleUse').onclick=useSelected;
  $('scaleIdle').onclick=()=>{leaveAction();stop();updateControls();draw();status('Idle / Mahluk Hidup');};
+ $('scaleEditAction').onclick=()=>{
+  const prop=api.getSelectedProp?.();
+  const action=prop?.assetId==='wc'?'toilet':
+   ['shower','bathtub'].includes(prop?.assetId)?'bathe':
+   prop?.assetId==='bed'?'sleep':
+   ['toilet','bathe','sleep'].includes(actor.pose)?actor.pose:'toilet';
+  const target=new URL('/virtual-life-asset-pipeline/action-editor.html',location.origin);
+  target.searchParams.set('actor',choose.value||actor.profile);
+  target.searchParams.set('action',action);
+  const buildingId=api.getBuildingId?.();
+  if(buildingId)target.searchParams.set('building',buildingId);
+  const scene=api.getInterior?.();
+  if(scene?.floor)target.searchParams.set('floor',String(scene.floor));
+  if(prop?.id)target.searchParams.set('fixture',prop.id);
+  window.open(target.href,'_blank','noopener');
+ };
  canvas.addEventListener('pointerdown',e=>{
   if(!actor.armed||!showCharacter())return;
   const b=canvas.getBoundingClientRect();
