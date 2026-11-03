@@ -14,7 +14,7 @@ test('Pixel Creator buttons are persistent and directly wired in source HTML',()
   assert.match(html,new RegExp('id="'+id+'"[^>]*onclick="window\\.openBangunPixelCreator\\(event\\)"'));
  }
  assert.match(html,/window\.openBangunPixelCreator=async function/);
- assert.match(html,/pixel-object-creator\.js\?v=creator-(?:grid-xp-v1|fix2)/);
+ assert.match(html,/pixel-object-creator\.js\?v=creator-(?:placement-v2|grid-xp-v1|fix2)/);
 });
 test('object bridge registers all built-in metadata without blocking on canvas rasterization',()=>{
  const window={VLAssetCatalog:[{file:'pipeline:source',source:'pipeline-street'}],VLBuildingInterior:{types:{wc:{label:'WC',w:1,d:1,actions:['use_toilet']}}}};
