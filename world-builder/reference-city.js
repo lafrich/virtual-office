@@ -245,6 +245,10 @@ function create(base,catalog,style,schema){
    vehicleId:kind==='vehicle'?variant:undefined,
    questId:kind==='quest_npc'?variant:undefined,
    profile:kind==='pedestrian'?variant:'ichsan',
+   jobId:kind==='quest_npc'?({
+    manusia_silver:'street_performer',pak_ogah:'traffic_assistant',
+    kang_parkir:'parking_attendant',babeh_pemilik:'flea_market_trade'
+   }[variant]||'community_job'):undefined,
    collision:kind==='quest_npc',
    blocking:kind==='quest_npc'?'auto':'no',
    motion:{mode:kind==='vehicle'?'road':kind==='quest_npc'?'idle':'sidewalk',
