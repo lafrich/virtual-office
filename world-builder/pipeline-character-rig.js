@@ -211,7 +211,9 @@ function createRig(THREE,opt={}){
   // contact when the body lies on its side (90/270 degrees).
   const yaw=camera?Math.atan2(camera.position.x-(position?.x||0),
    camera.position.z-(position?.z||0)):mesh.rotation.y||0;
-  const rad=state.rotation*Math.PI/180;
+  // Canvas uses downward-positive Y; WebGL uses upward-positive Y.
+  // Negate Z tilt so 90° / LIE RIGHT matches the Mahluk Hidup preview.
+  const rad=-state.rotation*Math.PI/180;
   const footCenter=h*(FRAME.pivotY/FRAME.h-.5);
   const halfVertical=Math.abs(Math.cos(rad))*h/2+Math.abs(Math.sin(rad))*w/2;
   const baseY=footCenter*Math.cos(rad);
