@@ -414,3 +414,68 @@
 #vehicleHeadingLabel{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;
  white-space:nowrap;font:bold 11px "Courier New",monospace;color:#224d72}
 .vehicle-flip-note{font:10px/1.4 Tahoma,Verdana,sans-serif;color:#575951;margin:1px 0 8px}
+
+/* Semesta asset thumbnails — compact XP layout, uses native pixel sprite PNGs. */
+.asset-view-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.asset-view-switch button{min-height:25px;border:2px outset #fafafa;background:#dfddd8;
+ color:#324353;cursor:pointer;font:bold 10px Tahoma,Verdana,sans-serif}
+.asset-view-switch button.active{border-style:inset;background:#b7d0ee;color:#123e77}
+.asset-preview{margin:0 7px 5px;padding:6px;display:flex;align-items:center;gap:8px;
+ min-height:68px;max-height:84px;box-sizing:border-box;border:1px solid #a2a6aa;
+ background:linear-gradient(145deg,#fbfbf8,#dfe8f4);overflow:hidden;flex-shrink:0}
+.asset-preview-thumb{flex:0 0 67px;height:64px;display:flex;align-items:center;justify-content:center;
+ position:relative;background:linear-gradient(135deg,#ededeb,#d5d8d9);border:1px solid #a0adb7;
+ overflow:hidden}
+.asset-preview-thumb img{display:block;width:100%;height:100%;object-fit:contain;
+ image-rendering:pixelated}
+.asset-preview-thumb img[hidden]{display:none}
+.asset-preview-icon,.asset-thumb-fallback{display:flex;align-items:center;justify-content:center;
+ font:26px Georgia,serif;color:#486884}
+.asset-preview-icon[hidden],.asset-thumb-fallback[hidden]{display:none}
+.asset-preview-copy{min-width:0;display:flex;flex-direction:column;gap:5px}
+.asset-preview-copy strong{font:bold 11px/1.25 Tahoma,Verdana,sans-serif;color:#164673;
+ white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.asset-preview-copy span{font:10px/1.35 "Courier New",monospace;color:#62686b}
+#assetList{min-height:0}
+#assetList button.asset-card{display:flex;flex-direction:row;align-items:center;min-height:69px;
+ padding:5px;gap:7px;overflow:hidden;cursor:pointer}
+#assetList button.asset-card:focus-visible{outline:2px solid #1156a0;outline-offset:-3px}
+#assetList button.asset-card:hover,#assetList button.asset-card:focus-visible{background:#c2d8f5}
+#assetList .asset-thumb{position:relative;display:flex;align-items:center;justify-content:center;
+ flex:0 0 60px;width:60px;height:55px;overflow:hidden;box-sizing:border-box;
+ background:linear-gradient(145deg,#e4e8e6,#cfdbd8);border:1px solid #a4afb0}
+#assetList .asset-thumb img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;
+ display:block}
+#assetList .asset-thumb img[hidden]{display:none}
+#assetList .asset-thumb-fallback{width:100%;height:100%;font-size:23px}
+#assetList .asset-card-info{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+#assetList .asset-title{font:bold 11px/1.2 Tahoma,Verdana,sans-serif}
+#assetList .asset-card-meta{font:9px/1.35 "Courier New",monospace;color:#565f66;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#assetList .asset-origin{font:9px/1.2 "Courier New",monospace;overflow:hidden;
+ text-overflow:ellipsis;white-space:nowrap}
+#assetList[data-view="grid"]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ align-content:start;gap:5px;padding:5px}
+#assetList[data-view="grid"] button.asset-card{display:flex;flex-direction:column;align-items:stretch;
+ justify-content:flex-start;min-width:0;min-height:120px;padding:5px;margin:0;gap:4px}
+#assetList[data-view="grid"] .asset-thumb{flex:0 0 69px;width:100%;height:69px}
+#assetList[data-view="grid"] .asset-card-info{width:100%;gap:2px}
+#assetList[data-view="grid"] .asset-title{font-size:10px;line-height:1.2;
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#assetList[data-view="grid"] .asset-origin{display:none}
+#assetList[data-view="grid"] .asset-card-meta{font-size:9px}
+@media(max-width:1000px){
+ #assetList[data-view="grid"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #assetList .asset-thumb{flex-basis:50px;width:50px;height:49px}
+ #assetList button.asset-card{min-height:60px}
+ .asset-preview{min-height:62px;max-height:72px}
+ .asset-preview-thumb{flex-basis:56px;height:54px}
+}
+@media(max-width:780px){
+ #assetSearch{flex-direction:column}
+ .asset-view-switch{display:flex;justify-content:flex-end}
+ .asset-view-switch button{flex:1}
+ #assetList[data-view="grid"]{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+ .asset-preview{min-height:66px}
+ #assetList button.asset-card{min-height:66px}
+}
