@@ -155,6 +155,7 @@ dlg.innerHTML=`
  </section>
  <aside class="opc-inspector">
   <label for="opcName">OBJECT NAME</label><input id="opcName" maxlength="80" placeholder="e.g. Lampu Taman Biru" value="Untitled Object">
+  <label for="opcDescription">DESCRIPTION</label><textarea id="opcDescription" maxlength="600" rows="3" placeholder="Keterangan aset / fungsi di kota..." style="width:100%;resize:vertical;padding:7px;border:1px solid #9badbd"></textarea>
   <label for="opcCategory">CATEGORY</label><select id="opcCategory">
     <option value="plant">🌱 Tanaman / Vegetation</option><option value="lamp">💡 Lampu / Lighting</option>
     <option value="furniture">▣ Furnitur / Interior</option><option value="street">▤ Street Object</option><option value="decor">✳ Dekorasi</option>
@@ -176,7 +177,7 @@ const blank=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;r
 function fresh(){
  canvas=Object.fromEntries(DIR.map(d=>[d,blank()]));undo=Object.fromEntries(DIR.map(d=>[d,[]]));redo=Object.fromEntries(DIR.map(d=>[d,[]]));
  objectId=null;preservedWorldHeight=null;view='sw';tool='pencil';
- $('opcName').value='Untitled Object';$('opcCategory').value='decor';
+ $('opcName').value='Untitled Object';$('opcDescription').value='';$('opcCategory').value='decor';
  categoryChanged();show();status('New object · draw all four directions, then Save to Semesta.');
 }
 function show(){
@@ -276,7 +277,7 @@ function trim(cv){
 }
 function payload(){
  return {id:objectId||'obj-'+Math.random().toString(36).slice(2,12),
-  name:$('opcName').value.trim().slice(0,80),category:$('opcCategory').value,
+  name:$('opcName').value.trim().slice(0,80),description:$('opcDescription').value.trim().slice(0,600),category:$('opcCategory').value,
   footprint:[Number($('opcWidth').value),Number($('opcDepth').value)],
   collision:$('opcCollision').value==='true',
   ...(preservedWorldHeight!==null?{worldHeight:preservedWorldHeight}:{}),
@@ -291,7 +292,7 @@ function categoryChanged(){
   }
 }
 function loadImg(url,target,callback){
- const img=new Image();img.onload=()=>{
+ const img=new Image();if(/^https:\/\//.test(url))img.crossOrigin='anonymous';img.onload=()=>{
   const c=target.getContext('2d');c.clearRect(0,0,W,H);
   // Source stays pixel-exact unless wider than the editable canvas.
   const factor=Math.min(1,W/img.width,(H-8)/img.height);
@@ -306,6 +307,7 @@ function editRow(row,isBuiltin=false){
  const h=Number(row.worldHeight??native?.worldHeight);
  preservedWorldHeight=Number.isFinite(h)&&h>=.3&&h<=24?h:null;
  $('opcName').value=isBuiltin?row.name+' Custom':row.name;
+ $('opcDescription').value=row.description||'';
  $('opcCategory').value=row.category;
  categoryChanged();
  $('opcWidth').value=row.footprint[0];$('opcDepth').value=row.footprint[1];$('opcCollision').value=String(row.collision!==false);
