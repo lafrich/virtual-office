@@ -7,7 +7,7 @@
 const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/';
 const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json'];
 let cached=null;
-const IMAGE_REV='quality-v3-20261105';
+const IMAGE_REV='quality-v4-20261105';
 function cacheBust(spec,url){
  if(!url)return url;
  if(spec?.pack!=='indonesia-200-v1')return url;
