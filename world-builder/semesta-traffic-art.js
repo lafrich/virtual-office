@@ -7,6 +7,7 @@
 const cache=new Map();
 const PX=Math.SQRT2/64, VCOMP=2/Math.sqrt(3);
 const palette=g.VLSemestaCatalog?.palette||{};
+const wheelGround=g.VLSemestaWheelGround;
 // Mahluk Hidup published street sprites: real transparent PNGs are preferred
 // over Semesta previews, with a safe preview fallback while source deploys.
 const SOURCE=new URL('/virtual-life-asset-pipeline/assets/street_vehicles/',location.origin);
@@ -190,52 +191,40 @@ function vehicleGraphic(THREE,record){
  const visualScale=Number(spec.editorArtScale)||1;
  const editorFootprint=spec.editorFootprint||spec.footprint||[2.9,1];
  const w=Math.max(.7,Math.min(spec.size[0]*PX*visualScale,editorFootprint[0]*.95));
- const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:true,
-  alphaTest:.15,depthWrite:true,side:THREE.DoubleSide});
+ // Alpha-56 artwork shadow must never write depth or sink into road.
+ // Native tyres stay opaque and depth-test against actual 3D objects.
+ const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:false,
+  alphaTest:.55,depthTest:true,depthWrite:true,side:THREE.DoubleSide});
  // IMPORTANT: preview image dimensions are 160×108, while the original
  // Vehicle Pipeline images are often 146×138 or 272×256. Reusing the source
  // sheet's plane height for the preview distorted cars and planted their
  // lower pixels below asphalt. Compute the actual plane from the active art.
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,1),mat);
- const sourcePivot=spec.pivot[1]/spec.size[1],groundClearance=.115;
- const groundRows=new WeakMap();
- function footRatio(image,fallback=.935){
-  if(!image||typeof image.getContext!=='function')return fallback;
-  if(groundRows.has(image))return groundRows.get(image);
-  let ratio=fallback;
-  try{
-   const ctx=image.getContext('2d',{willReadFrequently:true});
-   const iw=image.width||160,ih=image.height||108;
-   const pixels=ctx.getImageData(0,0,iw,ih).data;
-   for(let y=ih-1;y>=0;y--){
-    let solidPixels=0;
-    for(let x=0;x<iw;x++){
-     if(pixels[(y*iw+x)*4+3]>=170)solidPixels++;
-     if(solidPixels>=3)break;
-    }
-    if(solidPixels>=3){ratio=(y+.5)/ih;break;}
-   }
-  }catch{}
-  groundRows.set(image,ratio);
-  return ratio;
- }
+ const sourcePivot=spec.pivot[1]/spec.size[1];
  function setGroundPivot(original=false){
   const image=mat.map?.image;
   const imageWidth=Number(image?.naturalWidth||image?.width)||160;
   const imageHeight=Number(image?.naturalHeight||image?.height)||108;
-  // Preserve source pixel aspect rather than stretching the preview to fit
-  // the original sprite atlas; the bus still occupies only 2 editor tiles.
+  // Frame proportions follow the ACTUAL image, not the unrelated source
+  // atlas dimensions. Footprint/traffic/route scale remain untouched.
   let height=w*(imageHeight/imageWidth)*VCOMP;
   if(spec.group==='motor'&&!original)height=Math.max(1.45,height);
-  const pivot=original===true?(mat.map?.userData?.pivotRatio??sourcePivot):
-   footRatio(image,original==='fitted'?sourcePivot:.935);
+  // Pipeline pivot is the FLOOR FOOTPRINT CENTRE and may have visible
+  // near-side wheels beneath it. Ground the true opaque tyre silhouette,
+  // for BOTH canvas previews and loaded HTMLImageElements.
+  const fallback=original===true?(mat.map?.userData?.pivotRatio??sourcePivot):
+   (original==='fitted'?sourcePivot:.935);
+  const contact=wheelGround?.contact(image,fallback)||
+   {ratio:fallback,row:null,source:'authored-fallback'};
   if(mesh.geometry)mesh.geometry.dispose();
   mesh.geometry=new THREE.PlaneGeometry(w,height);
-  mesh.position.y=height*(pivot-.5)+groundClearance;
-  mesh.userData.groundClearance=groundClearance;
+  mesh.position.y=wheelGround?.pivotHeight(height,contact.ratio)??height*(contact.ratio-.5)+.027;
+  mesh.userData.groundClearance=wheelGround?.GROUND_CLEARANCE??.027;
   mesh.userData.sourcePivotUsed=original===true;
   mesh.userData.effectiveImageSize=[imageWidth,imageHeight];
-  mesh.userData.groundPivot=pivot;
+  mesh.userData.groundPivot=contact.ratio;
+  mesh.userData.groundContactSource=contact.source;
+  mesh.userData.groundContactRow=contact.row;
  }
  setGroundPivot(false);
  mesh.userData.semestaVehicle=true;mesh.userData.assetPublished=false;
