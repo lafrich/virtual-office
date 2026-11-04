@@ -2902,14 +2902,16 @@ $('loadDraft').onclick=async()=>{
   const record=await window.VLCityDrafts.load(id);
   const errors=schema.validate(record.document,assetByName,style);
   if(errors.length)throw Error(errors.join('; '));
+  const migrated=window.VLKebonSirihStyle?.upgrade(record.document,assetCatalog);
   if(cameraFollowId)leaveCharacterCamera(false);
-  undoPoint();documentMap=sanitize(record.document);restoreCityClock();
-  selectedId=null;activeDraftId=record.id;draftDirty=false;
+  undoPoint();documentMap=sanitize(migrated?.map||record.document);restoreCityClock();
+  selectedId=null;activeDraftId=record.id;draftDirty=!!migrated?.changed;
   try{localStorage.setItem(ACTIVE_DRAFT_KEY,record.id);}catch{}
-  rebuild();rebuildTerrain();resetCamera();saved();draftDirty=false;
-  $('saveStatus').textContent='● City Draft opened';
+  rebuild();rebuildTerrain();resetCamera();saved();draftDirty=!!migrated?.changed;
+  $('saveStatus').textContent=migrated?.changed?
+   '● Kebon Sirih upgrade · Save City to keep':'● City Draft opened';
   closeDraftDialog();
-  tell('Opened: '+record.name);
+  tell('Opened: '+record.name+(migrated?.changed?' · '+migrated.changed+' placeholder diperbarui, Save City untuk menyimpan':''));
  }catch(error){tell('Open draft gagal: '+error.message);}
 };
 $('deleteDraft').onclick=async()=>{
