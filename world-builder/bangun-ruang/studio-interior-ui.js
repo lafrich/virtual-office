@@ -4,7 +4,7 @@
 (function(g){
 'use strict';
 const $=id=>document.getElementById(id);
-const model=g.VLBuildingInterior,adjust=g.VLInteractionAdjust;
+const model=g.VLBuildingInterior,adjust=g.VLInteractionAdjust,gizmo=g.VLActionGizmo;
 if(!model)return;
 const copy=model.clone;
 const names={exterior:['tabExterior','exteriorPane'],interior:['tabInterior','interiorPane'],
@@ -307,6 +307,12 @@ function init(api){
   $('actionAdjustY').value=String(adjustmentDraft.y);
   $('actionAdjustDirection').value=adjustmentDraft.direction;
   $('actionAdjustLayer').value=adjustmentDraft.layer;
+  const item=adjustmentItem();
+  const base=item?g.VLInteriorIso?.actionAnchor?.(item,{raw:true,generic:true})?.direction:'sw';
+  const facing=gizmo?.facing(adjustmentDraft.direction,base)||'sw';
+  const degrees=gizmo?.degrees(adjustmentDraft.direction,base)||0;
+  $('actionTurnValue').textContent=degrees+'° / '+facing.toUpperCase()+
+   (adjustmentDraft.direction==='auto'?' (AUTO)':'');
   $('actionAdjustStatus').textContent='X '+adjustmentDraft.x+'px, Y '+adjustmentDraft.y+
    'px / Facing '+adjustmentDraft.direction.toUpperCase()+' / '+adjustmentDraft.layer.toUpperCase()+
    ' · Save Adjustment to keep changes';
@@ -327,12 +333,26 @@ function init(api){
   }
   fillAdjustment();
  }
+ function setTransformMode(mode){
+  const effective=mode==='rotate'?'rotate':'move';
+  for(const [id,isActive] of [['actionModeMove',effective==='move'],
+     ['actionModeRotate',effective==='rotate']]){
+   $(id).classList.toggle('active',isActive);
+   $(id).setAttribute('aria-pressed',String(isActive));
+  }
+  api.getScaleController?.()?.setTransformMode?.(effective);
+ }
  function previewAdjustment(){
   const item=adjustmentItem();
   if(!item)return onStatus('Select a furniture item to adjust its action');
   setPreview('interior');setInteriorView('iso');showAdjustment();
-  api.getScaleController?.()?.beginAdjustment?.(adjustmentDraft);
-  $('actionAdjustStatus').textContent='DRAG CHARACTER over the preview or nudge / edit X/Y. Save when aligned.';
+  const controller=api.getScaleController?.();
+  controller?.setTransformSnap?.($('actionTransformSnap').value);
+  controller?.beginAdjustment?.(adjustmentDraft);
+  const mode=$('actionModeRotate').getAttribute('aria-pressed')==='true'?
+   'rotate':'move';
+  setTransformMode(mode);
+  $('actionAdjustStatus').textContent='GIZMO READY: drag RED X / GREEN Y / CENTER to move, RING to rotate. Save Adjustment to keep.';
  }
  function changeAdjustment(next){
   const item=adjustmentItem();if(!item||!adjust)return;
@@ -341,7 +361,7 @@ function init(api){
   fillAdjustment();
   const scale=api.getScaleController?.();
   if(scale?.isAdjusting?.(item.id,item.actionId))scale.previewAdjustment(adjustmentDraft);
-  else scale?.beginAdjustment?.(adjustmentDraft);
+  else previewAdjustment();
  }
  function openSelectedAdjustment(){
   if(!adjustmentItem()){onStatus('Select an interior object first');return;}
@@ -458,17 +478,48 @@ function init(api){
  $('toolPlan').onclick=()=>{selectTab('interior');setInteriorView('plan');};
  $('toolRotateLeft').onclick=()=>rotateSelected(-1);
  $('toolRotateRight').onclick=()=>rotateSelected(1);
- // Desktop shortcut: R clockwise, Shift+R counter-clockwise. Never steal
- // keystrokes while editing a text input or using a dropdown.
+ // E / R switch ACTOR gizmo, arrow keys nudge. Furniture-R still
+ // rotates the object when actor adjustment is not active.
  document.addEventListener('keydown',e=>{
   if(!enabled||preview!=='interior'||placing||!selected||
-     e.repeat||e.altKey||e.ctrlKey||e.metaKey||String(e.key).toLowerCase()!=='r')return;
+     e.repeat||e.altKey||e.ctrlKey||e.metaKey)return;
   const focus=document.activeElement;
   if(focus&&(['INPUT','TEXTAREA','SELECT'].includes(focus.tagName)||
     focus.isContentEditable))return;
-  e.preventDefault();
-  rotateSelected(e.shiftKey?-1:1);
+  const key=String(e.key).toLowerCase();
+  const ctl=api.getScaleController?.(),item=adjustmentItem();
+  const active=!!item&&ctl?.isAdjusting?.(item.id,item.actionId);
+  if(active){
+   if(key==='e'||key==='r'){
+    e.preventDefault();setTransformMode(key==='r'?'rotate':'move');return;
+   }
+   const steps={arrowleft:[-1,0],arrowright:[1,0],
+    arrowup:[0,-1],arrowdown:[0,1]};
+   if(steps[key]){
+    e.preventDefault();
+    const grid=Number($('actionTransformSnap').value)||1;
+    const pace=e.shiftKey?Math.max(grid,8):grid;
+    changeAdjustment({x:(adjustmentDraft?.x||0)+steps[key][0]*pace,
+     y:(adjustmentDraft?.y||0)+steps[key][1]*pace});
+    return;
+   }
+  }
+  if(key==='r'){
+   e.preventDefault();rotateSelected(e.shiftKey?-1:1);
+  }
  });
+ $('actionModeMove').onclick=()=>setTransformMode('move');
+ $('actionModeRotate').onclick=()=>setTransformMode('rotate');
+ $('actionTransformSnap').onchange=()=>api.getScaleController?.()
+  ?.setTransformSnap?.($('actionTransformSnap').value);
+ function stepFacing(delta){
+  const item=adjustmentItem();if(!item||!adjust||!gizmo)return;
+  if(adjustmentId(item)!==adjustmentKey)showAdjustment();
+  const base=g.VLInteriorIso?.actionAnchor?.(item,{raw:true,generic:true})?.direction||'sw';
+  changeAdjustment({direction:gizmo.rotate(adjustmentDraft.direction,base,delta)});
+ }
+ $('actionTurnLeft').onclick=()=>stepFacing(-1);
+ $('actionTurnRight').onclick=()=>stepFacing(1);
  $('actionAdjustAction').onchange=()=>{
   const item=adjustmentItem();if(!item)return;
   if(!model.action(scene(),item.id,$('actionAdjustAction').value))return;
@@ -480,8 +531,11 @@ function init(api){
  }
  for(const [id,dx,dy] of [['actionNudgeLeft',-1,0],['actionNudgeUp',0,-1],
   ['actionNudgeDown',0,1],['actionNudgeRight',1,0]]){
-  $(id).onclick=()=>changeAdjustment({x:(adjustmentDraft?.x||0)+dx,
-   y:(adjustmentDraft?.y||0)+dy});
+  $(id).onclick=()=>{
+   const grid=Number($('actionTransformSnap').value)||1;
+   changeAdjustment({x:(adjustmentDraft?.x||0)+dx*grid,
+    y:(adjustmentDraft?.y||0)+dy*grid});
+  };
  }
  $('actionAdjustPreview').onclick=previewAdjustment;
  $('actionAdjustSave').onclick=()=>{
