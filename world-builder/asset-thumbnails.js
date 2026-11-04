@@ -43,15 +43,10 @@ function sourceFor(spec,env=g){
  return null;
 }
 function vehicleUrl(id,env=g){
- const cacheKey=String(id||'');
- if(cachedVehicles.has(cacheKey))return cachedVehicles.get(cacheKey);
- let url=null;
- try{
-  const canvas=env.VLSemestaArt?.vehicleCanvas(id,'se');
-  if(canvas?.toDataURL)url=validUrl(canvas.toDataURL('image/png'));
- }catch{}
- if(url)cachedVehicles.set(cacheKey,url);
- return url;
+ // Same image and orientation as vehicleGraphic uses in the actual scene.
+ // Do not memoize old previews: a live native PNG can replace a fallback
+ // after the underlying placement texture finishes loading.
+ try{return validUrl(env.VLSemestaArt?.vehiclePreview?.(id,'se'))||null;}catch{return null;}
 }
 function footprint(spec){
  if(!spec)return '';
@@ -74,10 +69,14 @@ function describe(entry,byName,env=g){
   const id=tag.slice(8);
   spec=env.VLSemestaCatalog?.vehicle(id)||null;
   src=vehicleUrl(id,env);
- }else if(tag.startsWith('character:')){
-  const id=tag.slice(10);
-  const published=env.VLPipelineAssets?.character?.(id);
-  src=validUrl(published);
+ }else if(tag.startsWith('character:')||tag.startsWith('pedestrian:')||
+  tag.startsWith('quest-character:')){
+  const id=tag.split(':').slice(1).join(':');
+  src=env.VLCharacterRig?.characterPreview?.(id,'sw')||null;
+ }else if(tag.startsWith('quest:')){
+  src=validUrl(env.VLSemestaArt?.questPreview?.(tag.slice(6)))||null;
+ }else if(tag==='avatar'||tag==='npc'){
+  src=env.VLCharacterRig?.characterPreview?.(tag==='avatar'?'ichsan':'noor','sw')||null;
  }
  const fp=footprint(spec),kind=labels[category]||category.toUpperCase();
  const unavailable=spec?.published===false;
