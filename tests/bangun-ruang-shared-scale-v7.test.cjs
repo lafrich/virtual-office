@@ -64,7 +64,7 @@ test('Semesta also normalizes old interior floors without rewriting map data',()
  assert.ok(code.includes('model.normalize(original,active.cfg)'));
  assert.ok(code.includes('spec?.footprint||item?.footprint'));
  const studio=read('bangun-ruang/index.html');
- assert.ok(studio.includes('interior-model.js?v=type-action-default-20261104'));
- assert.ok(studio.includes('interior-isometric.js?v=action-alignment-v1'));
- assert.ok(studio.includes('character-scale-preview.js?v=transform-gizmo-v1'));
+ assert.ok(studio.includes('interior-model.js?v=hygiene-action-v1'));
+ assert.ok(studio.includes('interior-isometric.js?v=hygiene-fixture-anchor-v1'));
+ assert.ok(studio.includes('character-scale-preview.js?v=hygiene-body-render-v1'));
 });
