@@ -2364,7 +2364,7 @@ $('motionEnabled').onchange=()=>changeMotion('enabled',$('motionEnabled').checke
 
 function assetCategory(spec){
  if(!spec)return 'street';
- if(spec.pack==='indonesia-v1')return 'indonesia';
+ if(spec.pack==='indonesia-v1'||spec.pack==='indonesia-200-v1')return 'indonesia';
  if(spec.source==='bangun-object')return spec.objectCategory==='plant'?'vegetation':
   spec.objectCategory==='furniture'?'interior':'street';
  const kind=style.category({type:'sprite',asset:spec.file},assetByName);
