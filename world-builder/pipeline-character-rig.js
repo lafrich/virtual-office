@@ -90,14 +90,18 @@ function resolve(id,requested,moving){
   const actions=entry.motions;
   if(sleep()?.isSleep(requested))return {source:"unavailable",
    mode:requested,frames:1,unavailable:true,loop:false,url:null};
-  const possible=({bathtub_bathe:['lie','sleep_seat','sit'],
+  const possible=({walk:['walk','move'],
+   bathtub_bathe:['lie','sleep_seat','sit'],
    bathe:['swim','bathe'],shower:['swim','bathe'],
    toilet:['sit','toilet'],toilet_sit:['sit','toilet'],
    sleep:['sleep','sleep_seat','lie'],rest:['lie','sleep','sleep_seat'],
    sit:['sit'],work:['sit_type','work'],office_type:['sit_type']
    }[requested]||[requested]);
   let motion=possible.map(id=>actions.find(m=>m.id===id&&m.available!==false)).find(Boolean);
-  if(!motion&&moving)motion=actions.find(m=>m.id==='walk'&&m.available!==false);
+  // Floating NPCs such as Yerbies/Gfunk author MOVE rather than WALK.
+  // Use their genuine four-direction motion; never substitute a human walk.
+  if(!motion&&moving)motion=actions.find(m=>
+   (m.id==='walk'||m.id==='move')&&m.available!==false);
   if(!motion&&!requested)motion=actions.find(m=>m.id==='idle'&&m.available!==false);
   if(!motion&&requested==='idle')motion=actions.find(m=>m.id==='idle'&&m.available!==false);
   if(!motion)return {source:'unavailable',mode:requested||'idle',frames:1,
