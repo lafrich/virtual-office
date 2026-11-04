@@ -346,6 +346,16 @@ function questDraw(ctx,role,phase,action){
    line(ctx,'#c5d3df',22,14+bob,19,6);
  }
 }
+const questPreviewCache=new Map();
+function questPreview(role){
+ if(questPreviewCache.has(role))return questPreviewCache.get(role);
+ const c=canvas(64,112),ctx=c.getContext('2d');
+ questDraw(ctx,role,0,'idle');
+ const url=trimPreview(c);
+ if(url)questPreviewCache.set(role,url);
+ return url;
+}
+
 function questGraphic(THREE,record){
  const role=g.VLSemestaCatalog.quest(record.questId)?.id||'pak_ogah';
  const c=canvas(64,112),ctx=c.getContext('2d');
@@ -363,5 +373,5 @@ function questGraphic(THREE,record){
    mesh.rotation.y=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y;
  },dispose(){mesh.geometry.dispose();mat.dispose();tex.dispose();}};
 }
-g.VLSemestaArt=Object.freeze({sourcePublished,originalCount,retrySources,vehicleGraphic,questGraphic,vehicleCanvas,vehiclePreview});
+g.VLSemestaArt=Object.freeze({sourcePublished,originalCount,retrySources,vehicleGraphic,questGraphic,vehicleCanvas,vehiclePreview,questPreview});
 })(window);
