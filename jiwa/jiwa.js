@@ -269,8 +269,19 @@ function runAction(){
  if(!r.enabled)return logTest('BLOCKED · '+r.label+' is disabled');
  const fail=(r.conditions||[]).find(x=>!passes(x,state.test));
  if(fail)return logTest('BLOCKED · '+r.label+' · condition '+fail.kind+' ('+fail.value+')');
- const s=state.test,changes=[];
- for(const effect of r.effects||[]){
+ const s=state.test,changes=[],effects=r.effects||[];
+ // Legacy object-rule sandbox uses the same economy and inventory invariants as Context v2.
+ // Preflight before applying ANY effect to avoid half-paid / half-granted transactions.
+ const totalCost=effects.filter(x=>x.kind==='wallet_delta'&&Number(x.value)<0).reduce((n,x)=>n+Number(x.value),0);
+ if(s.wallet+totalCost<0)return logTest('BLOCKED · Insufficient wallet for atomic purchase');
+ const adds=effects.filter(x=>x.kind==='inventory_add').map(x=>String(x.value||'')).filter(Boolean);
+ const maxBag=state.project.foundation?.settings?.bagSlots||8;
+ if(s.inventory.length+adds.length>maxBag||adds.some(id=>s.inventory.includes(id)))
+  return logTest('BLOCKED · Bag full or duplicate inventory item');
+ const wage=r.trigger==='job_complete'?effects.filter(x=>x.kind==='wallet_delta'&&Number(x.value)>0).reduce((n,x)=>n+Number(x.value),0):0;
+ if(wage>0&&(s.dailyWages||0)+wage>(state.project.foundation?.settings?.dailyWageCap||6000))
+  return logTest('BLOCKED · Daily wage quota reached');
+ for(const effect of effects){
   const n=Number(effect.value);
   if(effect.kind==='wallet_delta'){s.wallet=Math.max(0,s.wallet+safeNum(n,-1e8,1e8));changes.push('wallet '+n);}
   else if(effect.kind.startsWith('stat_')){const field=effect.kind.slice(5);if(STAT.includes(field)){s[field]=clamp(s[field]+safeNum(n,-100,100));changes.push(field+' '+n);}}
@@ -280,6 +291,7 @@ function runAction(){
   else if(effect.kind==='message')changes.push(effect.value);
   else if(effect.kind==='animation')changes.push('animation '+effect.value+' (preview log)');
  }
+ if(wage>0)s.dailyWages=(s.dailyWages||0)+wage;
  if(r.animation)changes.unshift('animation '+r.animation+' (preview log)');
  logTest('OK · '+objectName(o)+' / '+r.label+' → '+(changes.join(' · ')||'No effects'));
  tab('test');
