@@ -102,6 +102,9 @@ jobs:
           node --check world-builder/warteg-3d.js
           node --check world-builder/bangun-ruang/semesta-interior-preview.js
           node --check world-builder/bangun-ruang/studio-interior-ui.js
+          node --check world-builder/city-building-link.js
+          node --check world-builder/bangun-ruang/city-browser.js
+          node --test tests/bangun-ruang-city-sync.test.cjs
           node --check world-builder/bangun-ruang/action-adjustment.js
       - name: Launcher desktop and navigation validation
         run: node --test tests/membangun-launcher.test.cjs
