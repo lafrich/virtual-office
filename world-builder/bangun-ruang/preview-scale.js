@@ -36,7 +36,7 @@ function sync(){
  if(interiorSize){
   if(interiorMode==='iso'){
    applySize(inside,interiorSize,lastScale*actionZoom);
-   if(actionZoom!==1){inside.style.setProperty('max-width','none','important');inside.style.setProperty('max-height','none','important');}
+   inside.style.setProperty('max-width','none','important');inside.style.setProperty('max-height','none','important');
   }
   else{
    // Plan / Edit is a tool-only zoomed grid, not the physical 1:1 preview.
