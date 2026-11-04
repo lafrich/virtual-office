@@ -1,0 +1,88 @@
+name: Semesta Asset Library — Browser Smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "world-builder/asset-library.js"
+      - "world-builder/asset-library.css"
+      - "world-builder/bangun-ruang/asset-library-intake.js"
+      - "world-builder/bangun-ruang/index.html"
+      - ".github/workflows/semesta-asset-library-browser.yml"
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install headless Chrome controller
+        run: npm install --no-save playwright@1.56.1
+      - name: Serve checked-out applications together, same origin
+        run: |
+          python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/asset-library-server.log 2>&1 &
+      - name: Open gallery, edit copy, save and check Semesta reload
+        run: |
+          node <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,channel:'chrome',
+              args:['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--ignore-gpu-blocklist']});
+            const context=await browser.newContext({viewport:{width:1400,height:900}});
+            const page=await context.newPage();
+            const faults=[];page.on('pageerror',err=>faults.push(err.message));
+            await page.goto('http://127.0.0.1:8091/virtual-office/world-builder/',{waitUntil:'domcontentloaded',timeout:90000});
+            await page.waitForFunction(()=>typeof document.getElementById('openAssetLibrary')?.onclick==='function',null,{timeout:90000});
+            const skip=page.getByRole('button',{name:'Skip'});
+            if(await skip.count())await skip.first().click().catch(()=>{});
+            await page.locator('#openAssetLibrary').click();
+            await page.locator('#semestaAssetLibrary[open]').waitFor();
+            const cards=await page.locator('#salGallery .sal-card').count();
+            if(cards<20)throw Error('Too few assets in gallery: '+cards);
+            await page.locator('#salGallery [data-file="pipeline:ruko_a"]').click();
+            const views=await page.locator('#salViews button').count();
+            if(views<2)throw Error('Native building views not shown');
+            const detail=await page.locator('#salName').textContent();
+            if(!(await page.locator('#salEdit').isEnabled()))throw Error('Edit copy not enabled for ruko');
+            fs.mkdirSync('screenshots',{recursive:true});
+            await page.screenshot({path:'screenshots/semesta-asset-gallery.png',fullPage:false});
+            const [bangun]=await Promise.all([
+              context.waitForEvent('page',{timeout:25000}),
+              page.locator('#salEdit').click()
+            ]);
+            bangun.on('pageerror',err=>faults.push('bangun '+err.message));
+            await bangun.waitForLoadState('domcontentloaded');
+            await bangun.waitForFunction(()=>document.querySelector('#name')?.value?.includes('Custom'),null,{timeout:60000});
+            const desc=await bangun.locator('#assetDescription').inputValue();
+            if(!desc)throw Error('Source description missing in Bangun Ruang');
+            await bangun.locator('#saveBtn').click();
+            await bangun.waitForFunction(()=>document.querySelector('#status')?.textContent?.includes('Saved'),null,{timeout:30000});
+            await bangun.screenshot({path:'screenshots/bangun-ruang-asset-edit-copy.png',fullPage:false});
+            await page.bringToFront();
+            await page.locator('#salCategory').selectOption('custom');
+            await page.waitForFunction(()=>[...document.querySelectorAll('#salGallery .sal-card')].some(x=>x.textContent.includes('Custom')),null,{timeout:30000});
+            const customs=await page.locator('#salGallery .sal-card').count();
+            await page.screenshot({path:'screenshots/semesta-custom-asset-library.png',fullPage:false});
+            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
+            await browser.close();
+            if(faults.some(x=>/SyntaxError|Cannot read properties|is not defined/i.test(x)))
+              throw Error('Browser JS crash: '+faults.join('; '));
+          })().catch(err=>{console.error(err);process.exit(1)});
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: asset-library-browser-preview
+          path: screenshots/
+          if-no-files-found: ignore
