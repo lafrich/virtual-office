@@ -60,7 +60,7 @@ test('same iso module is loaded before both Bangun Ruang and Semesta UI',()=>{
  const semesta=source('index.html');
  // Cache-bust query parameters are free to change when a script changes.
  // Validate the actual script filenames and their load order instead.
- const scriptPaths=html=>[...html.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)]
+ const scriptPaths=html=>[...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
    .map(match=>match[1].split('?')[0]);
  for(const [html,a,b] of [
   [editor,'./interior-isometric.js','./studio-interior-ui.js'],
