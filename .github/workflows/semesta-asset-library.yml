@@ -6,6 +6,7 @@ on:
       - "world-builder/asset-library.js"
       - "world-builder/indonesia-assets.js"
       - "tests/semesta-indonesia-200.test.cjs"
+      - "tests/semesta-indonesia-pack.test.cjs"
       - "world-builder/asset-library.css"
       - "world-builder/index.html"
       - "world-builder/builder.js"
