@@ -139,9 +139,8 @@
   ctx.strokeStyle='#1a3b60';ctx.lineWidth=2;ctx.stroke();
   for(const [key,label] of [['flipX','H'],['flipY','V']]){
    const p=h[key],on=options[key]===true;
-   ctx.beginPath();ctx.roundRect(p.x-15,p.y-15,30,30,5);
-   ctx.fillStyle=on?'#e3ad43':'#385b85';ctx.fill();
-   ctx.lineWidth=2;ctx.strokeStyle='#e9f2ff';ctx.stroke();
+   ctx.fillStyle=on?'#e3ad43':'#385b85';ctx.fillRect(p.x-15,p.y-15,30,30);
+   ctx.lineWidth=2;ctx.strokeStyle='#e9f2ff';ctx.strokeRect(p.x-15,p.y-15,30,30);
    ctx.fillStyle='#fff';ctx.font='bold 13px monospace';
    ctx.textAlign='center';ctx.fillText(label,p.x,p.y+5);
   }
