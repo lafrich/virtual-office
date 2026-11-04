@@ -14,7 +14,7 @@ function normalize(t,b){
   const c=Math.floor(Number(tile.c)),r=Math.floor(Number(tile.r));
   if(!Number.isFinite(c)||!Number.isFinite(r)||!valid(c,r,bounds(b)))continue;
   const type=types.includes(tile.type)?tile.type:'grass';
-  m.set(key(c,r),{c,r,type,...(type==='road'?{roadClass:tile.roadClass||'two_lane'}:{})});
+  m.set(key(c,r),{c,r,type,...(type==='road'?{roadClass:tile.roadClass||'two_lane',...(tile.surface==='concrete'?{surface:'concrete'}:{})}:{})});
  }
  store(result,m);return result;
 }
