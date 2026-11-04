@@ -25,6 +25,7 @@ try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
 // before loading any saved city, so custom profiles survive import.
 const mahluk=window.VLMahlukHidup;
 const characterSync=mahluk?await mahluk.load():{loaded:false,total:0,custom:0};
+const indonesiaSync=await window.VLIndonesiaAssets?.load();
 let assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
@@ -2363,6 +2364,7 @@ $('motionEnabled').onchange=()=>changeMotion('enabled',$('motionEnabled').checke
 
 function assetCategory(spec){
  if(!spec)return 'street';
+ if(spec.pack==='indonesia-v1')return 'indonesia';
  if(spec.source==='bangun-object')return spec.objectCategory==='plant'?'vegetation':
   spec.objectCategory==='furniture'?'interior':'street';
  const kind=style.category({type:'sprite',asset:spec.file},assetByName);
