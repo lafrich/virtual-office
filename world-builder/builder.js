@@ -30,6 +30,7 @@ const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
 const terrain=window.VLMapTerrain;
 const physics=window.VLWorldPhysics;
+const studioSprites=window.VLSemestaStudioSprite;
 const traffic=window.VLSemestaTraffic;
 const trafficFlow=window.VLSemestaTrafficFlow;
 const trafficCatalog=window.VLSemestaCatalog;
@@ -723,9 +724,21 @@ function makeSprite(root,item){
  const width=item.width||spec.width||4,height=item.height||spec.height||4;
  const py=pivot&&size?pivot[1]/size[1]:spec.pivotY??.8;
  const px=pivot&&size?(size[0]/2-pivot[0])/size[0]*width:0;
+ // Native isometric art spans the ground plane on BOTH sides of its
+ // central footprint pivot. Compositing a studio sprite with the normal 3D
+ // depth test causes grass to erase the front wall and entrance.
+ const studio=studioSprites?.isStudio(spec)===true;
  for(const part of [{file:item.asset,off:0},...(spec.front?[{file:spec.front,off:.025}]:[])]){
-  const mat=new THREE.MeshBasicMaterial({map:pixelTexture(part.file,view),transparent:false,alphaTest:.5,depthWrite:true,depthTest:true,side:THREE.DoubleSide});
+  const flags=studio?studioSprites.spriteMaterial():
+   {transparent:false,depthTest:true,depthWrite:true,alphaTest:.5};
+  const mat=new THREE.MeshBasicMaterial({map:pixelTexture(part.file,view),...flags,side:THREE.DoubleSide});
   const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
+  if(studio){
+   // Render after terrain and ordinary opaque meshes. Custom studio buildings
+   // are 2D isometric compositing layers, not full 3D opaque volumes.
+   plane.renderOrder=2;
+   plane.userData.studioGroundComposite=true;
+  }
   plane.position.set(px,height*(py-.5),part.off);
   plane.userData.billboardPart=true;plane.userData.assetFile=part.file;
   plane.userData.displayFacing=view;plane.userData.pivotY=py;plane.userData.pivotX=pivot&&size?(size[0]/2-pivot[0])/size[0]:0;plane.userData.authorWidth=width;
@@ -1375,6 +1388,26 @@ $('trackActiveAsset').onclick=()=>{
  else focusPlacedAsset(obj.id,true);
 };
 let interiorPreview=null;
+function selectionGuide(cur){
+ const spec=cur?.type==='sprite'?assetByName.get(cur.asset):null;
+ if(!studioSprites?.isStudio(spec))return new THREE.BoxHelper(owners.get(cur.id),0xf5df42);
+ // BoxHelper on the bitmap uses PNG bounds, which include a large below-
+ // pivot apron. The editable building occupies a ground footprint and only
+ // the authored HEIGHT ABOVE the pivot, not a subterranean sprite quad.
+ const bounds=new THREE.Box3();
+ const guide=new THREE.Box3Helper(bounds,0xf5df42);
+ guide.update=()=>{
+  const obj=documentMap.objects.find(o=>o.id===cur.id)||cur;
+  const [w,d]=style.footprint(obj,assetByName);
+  const h=studioSprites.metrics(spec,obj.rotation,obj.scale).height;
+  const x=Number(obj.x)||0,z=Number(obj.z)||0,y=Number(obj.y)||0;
+  bounds.min.set(x-w/2,y+.02,z-d/2);
+  bounds.max.set(x+w/2,y+Math.max(1,h),z+d/2);
+  guide.updateMatrixWorld(true);
+ };
+ guide.update();
+ return guide;
+}
 function updateSelection(){
  const cur=item();
  syncActiveAssetUI();
@@ -1465,7 +1498,7 @@ function updateSelection(){
  }else{
    if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
    if(cur&&owners.has(cur.id)){
-     highlight=new THREE.BoxHelper(owners.get(cur.id),0xf5df42);
+     highlight=selectionGuide(cur);
      highlight.userData.selected=cur.id;
      highlight.material.depthTest=false;highlight.material.transparent=true;
      highlight.renderOrder=100;scene.add(highlight);
