@@ -704,7 +704,7 @@ function init(api){
   if(event.clientX<rect.left||event.clientX>rect.right||
      event.clientY<rect.top||event.clientY>rect.bottom)return;
   event.preventDefault();
-  setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)*Math.exp(-event.deltaY*.008),event.clientX,event.clientY);
+  setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)*Math.exp(-Math.max(-60,Math.min(60,event.deltaY))*.004),event.clientX,event.clientY);
  },{passive:false});
  const touches=new Map();
  stage.addEventListener('pointerdown',e=>{
