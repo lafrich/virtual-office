@@ -210,21 +210,14 @@ function createRig(THREE,opt={}){
    state.failed=true;state.loaded=false;return;
   }
   ctx.clearRect(0,0,64,112);
-  const rearView=state.direction==='ne'||state.direction==='nw';
-  // A front-facing bag is behind the avatar, while rear views expose the
-  // pack on the BACK torso surface. Keep rear head/neck above the bag.
-  if(!rearView&&overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
+  // Bags sit behind every body/head layer in all four camera directions.
+  if(overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
   if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
   else if(!templated)ctx.drawImage(pic,sx,sy,64,112,
     0,sleepPose?sleep().breathing(frame):0,64,112);
   if(asset&&hygiene?.kind!=="bath")body()?.tintBase?.(ctx,asset);
   for(let i=1;i<4;i++)if(overlays[i]?.ready)
    ctx.drawImage(overlays[i].pic,0,0,64,112);
-  if(rearView&&overlays[0]?.ready){
-   ctx.save();ctx.beginPath();ctx.rect(0,56,64,56);ctx.clip();
-   ctx.drawImage(overlays[0].pic,0,0,64,112);
-   ctx.restore();
-  }
   // Apply the SAME authentic face crop as Mahluk Hidup Action Editor.
   // Do not turn full-body legacy expression sheets into body replacements.
   if(face&&appearance())appearance().drawExpression(ctx,face,state.direction,frame,
