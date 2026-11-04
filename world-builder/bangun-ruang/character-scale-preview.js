@@ -252,10 +252,12 @@ function mount(api){
   const stageRect=stage.getBoundingClientRect(),rect=src.getBoundingClientRect();
   const naturalWidth=src.naturalWidth||src.width,naturalHeight=src.naturalHeight||src.height;
   if(!stageRect.width||!rect.width||!naturalWidth||!naturalHeight)return false;
-  const scale=Math.min(rect.width/naturalWidth,rect.height/naturalHeight);
-  const width=naturalWidth*scale,height=naturalHeight*scale;
-  const left=rect.left-stageRect.left+(rect.width-width)/2;
-  const top=rect.top-stageRect.top+(rect.height-height)/2;
+  // Match the *actual* CSS image box independently on each axis.
+  // Scaling with a single min() left gizmo hit coordinates offset when
+  // the editor CSS constrained one axis differently from the other.
+  const width=rect.width,height=rect.height;
+  const left=rect.left-stageRect.left+stage.scrollLeft;
+  const top=rect.top-stageRect.top+stage.scrollTop;
   if(canvas.width!==naturalWidth)canvas.width=naturalWidth;
   if(canvas.height!==naturalHeight)canvas.height=naturalHeight;
   canvas.style.left=left+'px';canvas.style.top=top+'px';
