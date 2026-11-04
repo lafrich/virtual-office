@@ -49,6 +49,9 @@ function legacy(o,catalog,category){
  if(o.type==='virtual_asset')return o.replaceable===true||o.tags?.includes('placeholder');
  if(o.type==='sprite'){
   const e=(catalog||[]).find(spec=>spec.file===o.asset);
+  // City Sample sprites remain user-replaceable template slots even after
+  // their original pipeline PNG has been published.
+  if(o.replaceable===true&&Array.isArray(o.tags)&&o.tags.includes('city-sample'))return true;
   return !!e&&e.published!==true&&['pipeline-street','pipeline-vegetation','custom-building'].includes(e.source);
  }
  return false;
