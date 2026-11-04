@@ -48,7 +48,10 @@ function parse(a){
   id:a.id,file:'studio:'+a.id,label:String(a.name||'Building').slice(0,80),
   group:'kampung',source:'custom-building',published:true,
   footprint:[w,d],size:canonical.size,pivot:canonical.pivot,
-  width:canonical.size[0]/50,height:canonical.size[1]/50,
+  // height is the visible structure ABOVE its central ground pivot.
+  // PNG bottom includes foreground sidewalk, not underground geometry.
+  width:canonical.size[0]/50,
+  height:Math.max(1,canonical.pivot[1]*Math.SQRT2/64*2/Math.sqrt(3)),
   collision:a.config.collision!=='no',
   entranceFacing:['sw','se'].includes(a.entranceFacing)?a.entranceFacing:'',
   interactive:enterable,enterable,entrance,interior,actionSlots,
