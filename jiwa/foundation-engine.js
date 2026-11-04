@@ -51,8 +51,16 @@
   };
   const byId=new Map(base.contexts.map(v=>[v.id,v]));
   for(const item of entries.slice(0,100)){
-   if(!item||typeof item.id!=='string'||!byId.has(item.id))continue;
+   if(!item||typeof item.id!=='string')continue;
+   if(!byId.has(item.id)){
+    if(!/^custom_[a-z0-9_]{1,40}$/.test(item.id)||byId.size>=80)continue;
+    const added={id:item.id,label:'Custom Context',group:'Survival',trigger:'CUSTOM_EVENT',
+     target:'world_object',description:'Custom context rule',enabled:true,conditions:[],effects:[],objectId:''};
+    byId.set(item.id,added);base.contexts.push(added);
+   }
    const current=byId.get(item.id);
+   current.group=GROUPS.includes(item.group)?item.group:current.group;
+   current.trigger=txt(item.trigger||current.trigger,80);
    const cleanRows=(rows,allow)=>Array.isArray(rows)?rows.slice(0,20).filter(v=>v&&allow.includes(v.kind)).map(v=>({kind:v.kind,value:txt(v.value,120)})):[];
    current.label=txt(item.label||current.label,70);
    current.description=txt(item.description||current.description,300);
