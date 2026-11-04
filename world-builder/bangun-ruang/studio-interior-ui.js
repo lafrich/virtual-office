@@ -342,14 +342,20 @@ function init(api){
   fillAdjustment();
  }
  function setTransformMode(mode){
-  const effective=mode==='rotate'?'rotate':'move';
-  for(const [id,isActive] of [['actionModeMove',effective==='move'],
-     ['actionModeRotate',effective==='rotate']]){
-   $(id).classList.toggle('active',isActive);
-   $(id).setAttribute('aria-pressed',String(isActive));
+  const effective=['select','move','rotate'].includes(mode)?mode:'move';
+  for(const [id,isActive] of [['actionModeSelect',effective==='select'],
+     ['actionModeMove',effective==='move'],['actionModeRotate',effective==='rotate']]){
+   $(id)?.classList.toggle('active',isActive);
+   $(id)?.setAttribute('aria-pressed',String(isActive));
   }
   api.getScaleController?.()?.setTransformMode?.(effective);
  }
+ function setActionZoom(value){
+  const zoom=g.VLBuildingPreviewScale?.setActionZoom?.(value)||1;
+  $('actionZoomValue').textContent=Math.round(zoom*100)+'%';
+  api.getScaleController?.()?.sync?.();
+ }
+ api.onTransformModeChange=mode=>setTransformMode(mode);
  function previewAdjustment(){
   const item=adjustmentItem();
   if(!item)return onStatus('Select a furniture item to adjust its action');
@@ -357,8 +363,8 @@ function init(api){
   const controller=api.getScaleController?.();
   controller?.setTransformSnap?.($('actionTransformSnap').value);
   controller?.beginAdjustment?.(adjustmentDraft);
-  const mode=$('actionModeRotate').getAttribute('aria-pressed')==='true'?
-   'rotate':'move';
+  const mode=$('actionModeSelect').getAttribute('aria-pressed')==='true'?'select':
+   $('actionModeRotate').getAttribute('aria-pressed')==='true'?'rotate':'move';
   setTransformMode(mode);
   $('actionAdjustStatus').textContent='GIZMO READY: drag RED X / GREEN Y / CENTER to move, RING to rotate. Save Adjustment to keep.';
  }
@@ -535,6 +541,14 @@ function init(api){
    e.preventDefault();rotateSelected(e.shiftKey?-1:1);
   }
  });
+ $('actionModeSelect').onclick=()=>setTransformMode('select');
+ $('actionZoomIn').onclick=()=>setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)*1.25);
+ $('actionZoomOut').onclick=()=>setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)/1.25);
+ $('actionZoomReset').onclick=()=>setActionZoom(1);
+ canvas.addEventListener('wheel',event=>{
+  if(!api.getScaleController?.()?.actor?.adjusting||!event.ctrlKey)return;
+  event.preventDefault();setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)*(event.deltaY<0?1.15:1/1.15));
+ },{passive:false});
  $('actionModeMove').onclick=()=>setTransformMode('move');
  $('actionModeRotate').onclick=()=>setTransformMode('rotate');
  $('actionTransformSnap').onchange=()=>api.getScaleController?.()
