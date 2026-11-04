@@ -31,7 +31,7 @@ function sourceFor(spec,env=g){
  const id=String(spec.id||'');
  if(spec.source==='pipeline-street'){
   const view=spec.variants?.sw||spec.variants?.se||spec.variants?.ne||spec.variants?.nw;
-  return validUrl(view?.file?raw+'assets/street_buildings/'+view.file:null);
+  return validUrl(view?.file?env.VLIndonesiaAssets?.cacheBust?.(spec,raw+'assets/street_buildings/'+view.file)||raw+'assets/street_buildings/'+view.file:null);
  }
  if(spec.source==='pipeline-vegetation'){
   return validUrl(spec.relativeFile?raw+'assets/vegetation_kebonsirih/'+spec.relativeFile:null);
