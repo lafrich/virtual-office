@@ -718,6 +718,24 @@ function makeSprite(root,item){
   root.userData.pendingPipelineImage=spec.id;return;
  }
 
+ // Warteg is a depth-tested 3D building: the authored 1× art is
+ // mapped onto reconstructed roof, walls and serving-front surfaces.
+ // All four rotations retain their own original sprite texture.
+ if(window.VLWarteg3D?.supported(spec)){
+  const views=new Map();
+  for(const dir of ['sw','se','ne','nw']){
+   const layer=new THREE.Group();
+   const ok=window.VLWarteg3D.attach(THREE,layer,spec,dir,pixelTexture(item.asset,dir));
+   if(!ok)continue;
+   layer.visible=dir===spriteDirection(item.rotation);
+   root.add(layer);views.set(dir,layer);
+  }
+  if(views.size){
+   root.userData.warteg3DVariants=views;
+   root.userData.wartegTrueDepth=true;
+   return;
+  }
+ }
  const view=spriteDirection(item.rotation);
  const data=spec.variants?.[view]||spec.variants?.sw||spec.variants?.se;
  const size=data?.size||spec.size,pivot=data?.pivot||spec.pivot;
@@ -1547,6 +1565,10 @@ function applyItem(){
  r.position.set(o.x,o.y,o.z);
  r.rotation.y=actorType(o.type)?0:o.rotation*Math.PI/180;
  r.scale.setScalar(actorType(o.type)?1:o.scale);
+ if(r.userData.warteg3DVariants){
+  const display=spriteDirection(o.rotation);
+  for(const [dir,group] of r.userData.warteg3DVariants)group.visible=dir===display;
+ }
  if(o.type==='vehicle'){
   const agent=automatedAgents.get(o.id);
   if(agent?.visual)vehiclePlacement.apply(agent.visual,o);
