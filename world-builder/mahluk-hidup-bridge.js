@@ -134,7 +134,7 @@ function questProfile(id){
  return null;
 }
 g.VLMahlukHidup=Object.freeze({
- load,localSync,get,list,url,motions,available,equipmentFor,questProfile,has,
+ load,localSync,get,list,url,motions,available,equipmentFor,actionSceneFor,questProfile,has,
  get buildVersion(){return build},get ready(){return loaded},
  get error(){return lastError},get baseUrl(){return BASE.href},
  DIR,FRAME:Object.freeze({w:64,h:112,pivotX:32,pivotY:100})
