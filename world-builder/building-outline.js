@@ -43,7 +43,7 @@ function build(THREE,root,item,catalog){
  const meta=item.type==='sprite'?catalog?.get(item.asset):null;
  const w=Math.max(.65,Number(meta?.footprint?.[0]||item.w||4));
  const d=Math.max(.65,Number(meta?.footprint?.[1]||item.d||4));
- const h=Math.max(1.3,Number(item.h||item.height||meta?.height||5));
+ const h=Math.max(1.3,Number(meta?.source==='custom-building'?(meta.height||item.height||5):(item.h||item.height||meta?.height||5)));
  const hw=w/2,hd=d/2;
  function rect(y,x0=-hw,x1=hw,z0=-hd,z1=hd,color=footprintColor){
   segment({x:x0,y,z:z0},{x:x1,y,z:z0},color);
