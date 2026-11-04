@@ -101,8 +101,8 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
     frame_ms:[380,430,470,430]}:null;
   },
   directionFor(id,dir){
-   const back=['ne','nw'].includes(dir);
-   return id==='sleep_bed_right'?(back?'ne':'se'):(back?'nw':'sw');
+   if(id==='sleep_bed_right')return dir;
+   return ({se:'sw',sw:'se',ne:'nw',nw:'ne'})[dir]||'sw';
   },
   breathing:f=>[0,-1,0,1][f%4]
  };
@@ -132,10 +132,10 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
  sleeper.step(.21,null,null);
  let sleepingDraw=w.lastCanvas.record.draws;
  assert.match(sleepingDraw[0][0].src,/astrofrich-base-action-lie\.png/);
- assert.equal(sleepingDraw[0][2],0,'Bed right uses the original SE lie pose');
+ assert.equal(sleepingDraw[0][2],112,'Bed right uses the original SW lie pose (all 4 views distinct)');
  sleeper.setPose('sleep_bed_left');sleeper.step(.21,null,null);
  sleepingDraw=w.lastCanvas.record.draws;
- assert.equal(sleepingDraw[0][2],112,'Bed left uses the SW native lie pose');
+ assert.equal(sleepingDraw[0][2],0,'Bed left mirrors the SW actor to the SE native lie row');
  sleeper.dispose();
 
  const rig=factory.createRig(THREE,{profile:'legacy_pak_ogah',direction:'nw',pose:'wave_flag'});
