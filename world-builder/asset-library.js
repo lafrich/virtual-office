@@ -49,9 +49,11 @@ function validGeometry(meta){
   w>0&&h>0&&w<=8192&&h<=8192&&px>=0&&py>=0&&px<=w&&py<=h;
 }
 function checkImage(url,geometry=null){
- if(typeof url!=='string'||!url||
-    !/^(?:https:\/\/|data:image\/(?:png|webp|jpeg|gif);base64,|blob:https?:\/\/)/i.test(url))
-  return Promise.resolve(false);
+ const https=typeof url==='string'&&/^https:\/\//i.test(url);
+ const localHttp=typeof url==='string'&&/^http:\/\//i.test(url)&&
+  typeof location!=='undefined'&&(()=>{try{return new URL(url).origin===location.origin}catch{return false}})();
+ const inline=typeof url==='string'&&/^(?:data:image\/(?:png|webp|jpeg|gif);base64,|blob:https?:\/\/)/i.test(url);
+ if(!url||!(https||localHttp||inline))return Promise.resolve(false);
  const key=url+(geometry?'|'+geometry.size.join('x'):'');
  if(imageChecks.has(key))return imageChecks.get(key);
  const done=new Promise(resolve=>{
