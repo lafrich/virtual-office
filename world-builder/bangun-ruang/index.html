@@ -107,6 +107,11 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <div style="display:flex;gap:5px;margin-top:7px"><button id="applyBase" class="primary" style="flex:1">✳ Generate From Base</button><button id="resetBase" title="Reset current building to selected Semesta source">↺</button></div>
  <p id="baseHint" style="font:10px/1.55 Tahoma;margin:8px 0;color:#637892">Footprint and original dimensions sourced from Semesta.</p>
  </div>
+ <div class="preset" id="locationTemplateShelf">
+  <h4>READY-MADE LOCATION</h4>
+  <button id="presetWartegKharisma" type="button" class="primary" style="width:100%;padding:10px;text-align:left">▣ Warteg Kharisma Bahari</button>
+  <p style="font:10px/1.55 Tahoma;margin:7px 0 0;color:#637892">8 × 6 tile · exterior 4 arah · etalase, meja makan, kasir & dapur. Editable; Save to Semesta.</p>
+ </div>
  <div class="search"><input id="search" type="search" placeholder="⌕ Find building..."></div>
  <div class="library" id="library"></div>
  <div class="preset" id="pixelObjectEntry">
@@ -333,6 +338,7 @@ window.openBangunPixelCreator=async function(event){
 </script>
 <script src="../pipeline-catalog.js?v=bangun-ruang-v2"></script>
 <script src="../semesta-building-spec.js?v=bangun-ruang-v2"></script>
+<script src="./warteg-kharisma-template.js?v=warteg-kharisma-v1"></script>
 <script src="./action-adjustment.js?v=type-action-default-20261104"></script>
 <script src="./interior-model.js?v=bathtub-soak-v1"></script>
 <script src="./interior-pixel-art.js?v=interior-v3"></script>
@@ -812,6 +818,18 @@ for(const source of sources){
  opt.textContent=source.label+' · '+source.footprint.join('×')+' tiles';
  $('baseSelect').append(opt);
 }
+$('presetWartegKharisma').onclick=()=>{
+ try{
+  const pack=window.VLWartegKharismaTemplate?.create(window.VLBuildingInterior);
+  if(!pack?.views?.sw||!pack.interior?.floors?.length)throw Error('Template belum siap');
+  current=pack;manualOverrides={};manualSignature=artFingerprint(pack.config);
+  apply(pack.config);interiorUi?.load(pack);render();drawLibrary();
+  status('Warteg Kharisma Bahari template loaded · edit interior / exterior, then Save to Semesta');
+ }catch(e){
+  console.error('Warteg template failed',e);
+  status('⚠ Warteg template gagal dimuat: '+(e?.message||e));
+ }
+};
 $('baseSelect').onchange=()=>updateBaseSummary({...config(),baseId:$('baseSelect').value});
 $('applyBase').onclick=()=>preset($('baseSelect').value);
 $('resetBase').onclick=()=>preset($('baseSelect').value);
