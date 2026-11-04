@@ -24,7 +24,7 @@ jobs:
       - name: Install headless browser
         run: |
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium
+          which google-chrome || which google-chrome-stable
       - name: Serve the exact checked-out Semesta and native asset pipeline
         run: |
           python3 -m http.server 8080 --bind 127.0.0.1 >/tmp/semesta-depth-server.log 2>&1 &
@@ -36,7 +36,7 @@ jobs:
           const fs=require('fs');
           (async()=>{
            const browser=await chromium.launch({
-            headless:true,
+            headless:true,channel:'chrome',
             args:['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--ignore-gpu-blocklist']
            });
            const page=await browser.newPage({viewport:{width:1280,height:800},deviceScaleFactor:1});
