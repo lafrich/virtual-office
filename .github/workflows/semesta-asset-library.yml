@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - "world-builder/asset-library.js"
+      - "world-builder/indonesia-assets.js"
+      - "tests/semesta-indonesia-200.test.cjs"
       - "world-builder/asset-library.css"
       - "world-builder/index.html"
       - "world-builder/builder.js"
@@ -39,4 +41,4 @@ jobs:
           node --check world-builder/bangun-ruang/asset-library-intake.js
           node --check world-builder/bangun-ruang/pixel-object-creator.js
       - name: Gallery, cross-app edit copy, saved catalog and existing Semesta regressions
-        run: node --test tests/semesta-preview-parity.test.cjs tests/semesta-asset-library.test.cjs tests/semesta-indonesia-pack.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/bangun-ruang-bridge.test.cjs tests/bangun-ruang-object-bridge.test.cjs
+        run: node --test tests/semesta-preview-parity.test.cjs tests/semesta-asset-library.test.cjs tests/semesta-indonesia-pack.test.cjs tests/semesta-indonesia-200.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/bangun-ruang-bridge.test.cjs tests/bangun-ruang-object-bridge.test.cjs
