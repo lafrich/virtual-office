@@ -6,7 +6,7 @@ const mocks={
  VLBuildingBridge:{image:(id,dir)=>id==='studio-1'?'data:image/png;base64,AA==':null},
  VLBangunObjects:{image:(id,dir)=>id==='lampu-1'?'data:image/png;base64,AQ==':null},
  VLAssetThumbnails:undefined,
- VLSemestaArt:{vehiclePreview(id,dir){return 'data:image/png;base64,Ag=='},vehicleCanvas(id,dir){return {toDataURL(){return 'data:image/png;base64,Ag=='}};}},
+ VLSemestaArt:{vehiclePreviewAsync(id,dir){return Promise.resolve('data:image/png;base64,Ag==')},vehicleCanvas(id,dir){return {toDataURL(){return 'data:image/png;base64,Ag=='}};}},
  VLSemestaCatalog:{vehicle(id){return {id,footprint:[2.5,1]}}},
  VLKebonSirihStyle:{tileUrl(k){return 'https://example.com/terrain/'+k+'.png'}}
 };
@@ -43,11 +43,11 @@ test('Bangun Ruang custom building and pixel prop use their own registered image
  assert.equal(api.describe({tag:'sprite:studio:studio-1',category:'building'},byName).url,'data:image/png;base64,AA==');
  assert.equal(api.describe({tag:'sprite:object:lampu-1',category:'street'},byName).url,'data:image/png;base64,AQ==');
 });
-test('roads, pavements and vehicles have preview art and sizing',()=>{
+test('roads, pavements and vehicles have preview art and sizing',async()=>{
  const road=api.describe({tag:'terrain:road',category:'terrain'},byName);
  assert.equal(road.url,'https://example.com/terrain/road_asphalt.png');
  const car=api.describe({tag:'vehicle:sedan_red',category:'vehicles'},byName);
- assert.equal(car.url,'data:image/png;base64,Ag==');
+ assert.equal(await car.url,'data:image/png;base64,Ag==');
  assert.equal(car.footprint,'2.5×1 tiles');
 });
 test('UI keeps existing click-to-place and replace control; thumbnails lazy-load',()=>{
