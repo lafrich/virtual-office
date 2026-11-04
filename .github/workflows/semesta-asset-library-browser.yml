@@ -76,6 +76,35 @@ jobs:
             if(modularNPC.count!==10||modularNPC.failures.length)
               throw Error('Missing real modular Mahluk NPC seats '+JSON.stringify(modularNPC));
 
+            // Place an actual becak from gallery, then make sure its
+            // published Mahluk Hidup driver slots appear in the live editor.
+            await page.locator('#salGallery [data-file="pipeline:id200_transport_becak_kampung"]').click();
+            await page.locator('#salPlace').click();
+            let becakPlaced=false;
+            const world=page.locator('#world');
+            const sizes=await world.boundingBox();
+            if(!sizes)throw Error('No Semesta world canvas for NPC test');
+            for(const [ax,ay] of [[.42,.48],[.62,.55],[.30,.55],[.73,.35],
+                                  [.18,.72],[.81,.68],[.47,.79],[.18,.3]]){
+              await world.click({position:{x:Math.round(sizes.width*ax),
+                y:Math.round(sizes.height*ay)}});
+              becakPlaced=await page.evaluate(()=>{
+                const data=JSON.parse(localStorage.getItem('virtual-life-gpt-world-builder-pipeline-v3')||'{}');
+                return data.objects?.some(o=>o.asset==='pipeline:id200_transport_becak_kampung');
+              });
+              if(becakPlaced)break;
+            }
+            if(!becakPlaced)throw Error('Becak NPC asset could not be placed in a live Semesta city');
+            const npcInspector=await page.locator('#transportNPCControls').isVisible();
+            if(!npcInspector)throw Error('Modular NPC settings missing after placing becak');
+            if(!(await page.locator('#transportNPCDriver').count()))
+              throw Error('Mahluk NPC driver selector not available');
+            fs.mkdirSync('screenshots',{recursive:true});
+            await page.screenshot({path:'screenshots/semesta-becak-npc-live-inspector.png'});
+            await page.locator('#openAssetLibrary').click();
+            await page.locator('#semestaAssetLibrary[open]').waitFor();
+            await page.waitForFunction(()=>document.querySelector('#salCount')?.textContent?.includes('VALID'),null,{timeout:120000});
+
             await page.locator('#salGallery [data-file="pipeline:id200_transport_angkot_kota"]').click();
             await page.waitForFunction(()=>document.querySelector('#salHero img')?.naturalWidth>20,null,{timeout:15000});
             await page.screenshot({path:'screenshots/semesta-indonesia-200-gallery.png',fullPage:false});
