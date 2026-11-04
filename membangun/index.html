@@ -103,7 +103,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .titlebar{height:43px;flex:none}.window-title{font-size:16px}.window-controls span{width:27px;height:26px}
 .menubar{height:39px;flex:none}.menubar button{font-size:15px;padding:6px 10px}
 .workspace{display:flex;flex-direction:column;flex:1;min-height:0;height:auto}
-.file-panel{border-right:0;border-bottom:2px solid #85827f}.file-panel .panel-heading{height:28px}.file-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:7px}
+.file-panel{border-right:0;border-bottom:2px solid #85827f}.file-panel .panel-heading{height:28px}.file-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:7px}
 .file{min-width:0;min-height:82px;flex-direction:column;justify-content:center;text-align:center;gap:5px;padding:5px 2px}
 .file-thumb{width:40px;height:39px}.file-thumb svg{width:31px;height:31px}.file-thumb .mahluk-sprite,.file-thumb .mahluk-static{height:31px;max-width:31px;max-height:31px}.file-name{font-size:9px;line-height:1.15}.file-kind,.file-hint{display:none}
 .canvas-panel{flex:1;min-height:200px}.canvas-header{height:29px}.canvas-space{min-height:150px;margin:6px 8px}.art svg{width:min(48%,200px);height:min(90%,200px)}.art .mahluk-sprite,.art .mahluk-static{height:min(90%,200px);max-width:min(48%,200px)}.canvas-toolbar{height:42px;padding:5px 8px}.canvas-toolbar .chrome-button{padding:6px 10px}
@@ -114,7 +114,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .desc{grid-column:1;grid-row:4;min-height:0;margin:5px 0 2px;font-size:11px}.inspector .chrome-button{grid-column:2;grid-row:1/5;width:auto;min-width:93px;align-self:center;margin:0}
 .foot{min-height:30px;font-size:10px;flex:none}
 }
-@media(max-width:400px){.prop-inner{column-gap:6px;padding:7px 8px}.desc{font-size:10px}.file-name{font-size:9px}.inspector .chrome-button{min-width:82px;padding:8px 6px}.window-title span{display:none}}
+@media(max-width:400px){.file-name{font-size:8px!important}.file-list{gap:3px;padding:4px}.file{padding:3px 1px}.file-thumb{width:35px;height:36px}.prop-inner{column-gap:6px;padding:7px 8px}.desc{font-size:10px}.file-name{font-size:9px}.inspector .chrome-button{min-width:82px;padding:8px 6px}.window-title span{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -167,28 +167,28 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <path fill="#35c46a" d="M22 51 30 46l9 5-9 6z"/>
 <path fill="#207f50" d="M30 57v19l-5-3V56z"/>
 </symbol>
-</defs>
+<symbol id="icon-jiwa" viewBox="0 0 120 120"><path fill="#7896b7" d="M17 17h86v86H17z"/><path fill="#e9f6fa" d="M22 22h76v76H22z"/><path fill="#1856ac" d="M22 22h76v15H22z"/><path fill="#89bfe1" d="M29 44h28v17H29zM63 44h28v17H63zM46 71h30v17H46z"/><path fill="#36628b" d="M56 51h8v4h-8zM59 55h4v14h-4zM59 69h-8v4h8zM74 69h8v4h-8z"/><path fill="#f5ca6e" d="M33 48h20v9H33zM67 48h20v9H67zM50 75h22v9H50z"/></symbol></defs>
 </svg>
 <div class="desktop">
 <main class="window" aria-label="Membangun Launcher">
 <header class="titlebar"><div class="window-icon" aria-hidden="true">✳</div><div class="window-title"><strong>MEMBANGUN</strong><span> .EXE — Launcher</span></div><div class="window-controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
-<nav class="menubar" aria-label="Menu"><button id="fileMenu"><u>F</u>ile</button><button id="viewMenu"><u>V</u>iew</button><button id="helpMenu"><u>H</u>elp</button><span class="version">V1.0 / 03 PROGRAMS</span></nav>
+<nav class="menubar" aria-label="Menu"><button id="fileMenu"><u>F</u>ile</button><button id="viewMenu"><u>V</u>iew</button><button id="helpMenu"><u>H</u>elp</button><span class="version">V1.1 / 04 PROGRAMS</span></nav>
 <section class="workspace">
 <aside class="file-panel">
-<div class="panel-heading"><strong>FILES</strong><small>03</small></div>
+<div class="panel-heading"><strong>FILES</strong><small>04</small></div>
 <div class="file-list" role="group" aria-label="Pilih aplikasi">
-<button class="file active" data-app="mahluk" aria-pressed="true"><span class="file-thumb"><canvas class="mahluk-sprite" width="64" height="112" aria-hidden="true" hidden></canvas><img class="mahluk-static" src="https://lafrich.github.io/virtual-life-asset-pipeline/media/ichsan-thumb.png" alt="" loading="eager" decoding="async"><svg class="mahluk-fallback" aria-hidden="true" hidden><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP</span><span class="file-kind">CHARACTER STUDIO</span></span></button>
-<button class="file" data-app="bangun" aria-pressed="false"><span class="file-thumb"><img class="warteg-thumb" alt="Warteg Kharisma Bahari" hidden></span><span class="file-txt"><span class="file-name">BANGUN RUANG</span><span class="file-kind">BUILDING STUDIO</span></span></button>
-<button class="file" data-app="semesta" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-semesta"/></svg></span><span class="file-txt"><span class="file-name">SEMESTA</span><span class="file-kind">WORLD BUILDER</span></span></button>
+<button class="file active" data-app="mahluk" aria-pressed="true"><span class="file-thumb"><canvas class="mahluk-sprite" width="64" height="112" aria-hidden="true" hidden></canvas><img class="mahluk-static" src="https://lafrich.github.io/virtual-life-asset-pipeline/media/ichsan-thumb.png" alt="" loading="eager" decoding="async"><svg class="mahluk-fallback" aria-hidden="true" hidden><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP.EXE</span><span class="file-kind">CHARACTER STUDIO</span></span></button>
+<button class="file" data-app="bangun" aria-pressed="false"><span class="file-thumb"><img class="warteg-thumb" alt="Warteg Kharisma Bahari" hidden></span><span class="file-txt"><span class="file-name">BANGUN RUANG.EXE</span><span class="file-kind">BUILDING STUDIO</span></span></button>
+<button class="file" data-app="semesta" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-semesta"/></svg></span><span class="file-txt"><span class="file-name">SEMESTA.EXE</span><span class="file-kind">WORLD BUILDER</span></span></button><button class="file" data-app="jiwa" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-jiwa"/></svg></span><span class="file-txt"><span class="file-name">JIWA.EXE</span><span class="file-kind">MECHANICS STUDIO</span></span></button>
 </div>
 <div class="file-hint">DOUBLE CLICK TO OPEN</div>
 </aside>
 <section class="canvas-panel" aria-label="Preview">
-<div class="canvas-header"><strong>PREVIEW</strong><span>1 / 3</span></div>
+<div class="canvas-header"><strong>PREVIEW</strong><span>1 / 4</span></div>
 <div class="canvas-space" id="canvas">
 <div class="art active" data-art="mahluk"><canvas class="mahluk-sprite" width="64" height="112" role="img" aria-label="Animasi berjalan karakter Ichsan dengan background transparan" hidden></canvas><img class="mahluk-static" src="https://lafrich.github.io/virtual-life-asset-pipeline/media/ichsan-thumb.png" alt="Karakter Ichsan transparan dari Mahluk Hidup" loading="eager" decoding="async"><svg class="mahluk-fallback" aria-label="Karakter pixel" role="img" hidden><use href="#icon-mahluk"/></svg></div>
 <div class="art" data-art="bangun"><img class="warteg-thumb" role="img" alt="Warteg Kharisma Bahari — aset bangunan isometrik dari Bangun Ruang" hidden></div>
-<div class="art" data-art="semesta"><svg role="img" aria-label="Pixel art isometric world"><use href="#icon-semesta"/></svg></div>
+<div class="art" data-art="semesta"><svg role="img" aria-label="Pixel art isometric world"><use href="#icon-semesta"/></svg></div><div class="art" data-art="jiwa"><svg role="img" aria-label="Pixel-art node based mechanics editor"><use href="#icon-jiwa"/></svg></div>
 <div class="canvas-corner">MEMBANGUN® / STUDIO</div>
 </div>
 <div class="canvas-toolbar"><button class="chrome-button" id="prev">← PREV</button><span class="canvas-scale">PIXEL / V6B</span><button class="chrome-button" id="next">NEXT →</button></div>
@@ -196,7 +196,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <aside class="inspector" aria-label="Properties">
 <div class="panel-heading"><strong>PROPERTIES</strong><small>✳</small></div>
 <div class="prop-inner">
-<div class="property-label">SELECTED PROGRAM</div><h1 id="appName">MAHLUK HIDUP</h1>
+<div class="property-label">SELECTED PROGRAM</div><h1 id="appName">MAHLUK HIDUP.EXE</h1>
 <div class="prop-table">
 <div class="prop-row"><span>TYPE</span><strong id="appType">CHARACTER</strong></div>
 <div class="prop-row"><span>STATUS</span><strong id="appStatus">READY</strong></div>
@@ -231,7 +231,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <form class="modal-body" id="linkForm">
 <label>MAHLUK HIDUP<input id="url-mahluk" type="url" placeholder="https://..."></label>
 <label>BANGUN RUANG<input id="url-bangun" type="url" placeholder="https://..."></label>
-<label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label>
+<label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label><label>JIWA<input id="url-jiwa" type="url" placeholder="https://..."></label>
 <div class="modal-error" id="urlError" role="alert"></div>
 <div class="modal-buttons"><button type="button" class="chrome-button" id="cancel">CANCEL</button><button type="submit" class="chrome-button main">SAVE</button></div>
 </form>
@@ -299,13 +299,13 @@ const $=id=>document.getElementById(id);
   sprite.onerror=showStatic;
   sprite.src='https://lafrich.github.io/virtual-life-asset-pipeline/media/ichsan-sheet.png';
 })();
-const ids=['mahluk','bangun','semesta'];
+const ids=['mahluk','bangun','semesta','jiwa'];
 // Deep links only select a program; opening it remains a deliberate user action.
 const requestedApp=new URLSearchParams(location.search).get('app');
 const data={
-mahluk:{name:'MAHLUK HIDUP',type:'CHARACTER',desc:'Buat karakter dan NPC pixel.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/'},
-bangun:{name:'BANGUN RUANG',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
-semesta:{name:'SEMESTA',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'}
+mahluk:{name:'MAHLUK HIDUP.EXE',type:'CHARACTER',desc:'Buat karakter dan NPC pixel.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/'},
+bangun:{name:'BANGUN RUANG.EXE',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
+semesta:{name:'SEMESTA.EXE',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'},jiwa:{name:'JIWA.EXE',type:'MECHANICS',desc:'Atur rules dan Play Test dari kota Semesta.',url:'https://lafrich.github.io/virtual-office/jiwa/'}
 };
 let selected=ids.includes(requestedApp)?requestedApp:'mahluk';
 function getUrl(id){try{const x=localStorage.getItem('membangun-link-'+id);return x?x:data[id].url;}catch(e){return data[id].url}}
@@ -314,7 +314,7 @@ function render(){
 const i=ids.indexOf(selected),d=data[selected],url=getUrl(selected);
 document.querySelectorAll('.file').forEach(b=>{let on=b.dataset.app===selected;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
 document.querySelectorAll('.art').forEach(x=>x.classList.toggle('active',x.dataset.art===selected));
-document.querySelector('.canvas-header span:last-child').textContent=(i+1)+' / 3';
+document.querySelector('.canvas-header span:last-child').textContent=(i+1)+' / '+ids.length;
 $('appName').textContent=d.name;$('appType').textContent=d.type;$('appDesc').textContent=d.desc;
 $('appStatus').textContent=url?'READY':'NO LINK';
 $('launch').textContent=url?'▶ OPEN':'⚙ SET LINK';
@@ -333,15 +333,15 @@ function open(){
  const url=getUrl(selected);
  if(!url){settings();return;}
  if(!okUrl(url)){$('urlError').textContent='Invalid URL';settings();return;}
- // Keep the launcher tab available as the home for all three tools.
+ // Keep the launcher tab available as the home for all four tools.
  window.open(url,'_blank','noopener,noreferrer');
 }
 document.querySelectorAll('.file').forEach(el=>{el.addEventListener('click',()=>pick(el.dataset.app));el.addEventListener('dblclick',()=>{pick(el.dataset.app);open()})});
-$('prev').addEventListener('click',()=>pick(ids[(ids.indexOf(selected)+2)%3]));
-$('next').addEventListener('click',()=>pick(ids[(ids.indexOf(selected)+1)%3]));
+$('prev').addEventListener('click',()=>pick(ids[(ids.indexOf(selected)+ids.length-1)%ids.length]));
+$('next').addEventListener('click',()=>pick(ids[(ids.indexOf(selected)+1)%ids.length]));
 $('launch').addEventListener('click',e=>{if(!getUrl(selected)){e.preventDefault();settings()}});
 $('fileMenu').addEventListener('click',settings);
-$('viewMenu').addEventListener('click',()=>pick(ids[(ids.indexOf(selected)+1)%3]));
+$('viewMenu').addEventListener('click',()=>pick(ids[(ids.indexOf(selected)+1)%ids.length]));
 $('helpMenu').addEventListener('click',()=>{$('status').textContent='SELECT PROGRAM → OPEN';});
 $('cancel').addEventListener('click',()=>$('modal').hidden=true);
 $('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').hidden=true});

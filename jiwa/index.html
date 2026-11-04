@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0742a3"><meta name="color-scheme" content="only light">
+<title>JIWA.EXE — Mechanics Studio</title>
+<style>
+:root{font-family:Tahoma,"MS Sans Serif",Arial,sans-serif;font-size:12px;color:#18212b;--xp:#d4d0c8;--line:#7e8992;--blue:#08449d;--paper:#f7f7f5}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(140deg,#134d9e,#0b2d72);min-height:100dvh}
+button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ed9d31;outline-offset:2px}
+[hidden]{display:none!important}button,.button{border:1px solid #7892a5;border-top-color:white;border-left-color:white;border-right-color:#656f79;border-bottom-color:#656f79;background:linear-gradient(#fff,#e5e5e1);padding:6px 10px;color:#162a3c;text-decoration:none;text-align:center}
+button:hover,.button:hover{background:linear-gradient(#fff,#d5e9ff)}button:active{background:#c8d5e5;border-color:#4e6684}
+button.primary,.button.primary{background:linear-gradient(#e7f5ff,#9ecaf8);border:1px solid #245b9d;font-weight:bold}
+input,select,textarea{width:100%;min-width:0;background:#fff;border:1px solid #8c9aaa;padding:6px;color:#172735;border-radius:0}
+label{display:block;font-size:11px;font-weight:bold;color:#465a6d;margin-bottom:5px}
+label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0 6px 0 0}
+.window{width:min(1640px,calc(100vw - 30px));height:min(94dvh,950px);min-height:570px;margin:3dvh auto;border:2px solid #fff;outline:2px solid #183864;display:flex;flex-direction:column;background:var(--xp);box-shadow:8px 11px 0 #0004}
+.titlebar{height:41px;flex:none;display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#092b88,#0968dc 73%,#459fea);color:white;padding:0 12px;text-shadow:1px 1px #163975}
+.appicon{display:grid;place-items:center;background:linear-gradient(135deg,#82cbe5,#f8fa92);border:1px solid #fff;width:24px;height:24px;color:#124f82;text-shadow:none;font-size:20px}
+.titlebar strong{font-size:15px}.wincontrol{margin-left:auto;display:flex;gap:5px}.wincontrol span{background:#d0d2d5;color:#24394b;text-shadow:none;border:1px solid white;box-shadow:1px 1px #59636f;width:25px;height:22px;text-align:center;font-size:16px;font-weight:bold}
+.menubar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px 9px;background:#e4e3de;border-bottom:2px solid #919ba5}.menubar select{max-width:265px;font-weight:bold}.menubar a{white-space:nowrap}.right{margin-left:auto}.mini{font:10px "Courier New",monospace;color:#58718a}
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(200px,248px) minmax(320px,1fr) minmax(270px,360px)}
+.panel{min-width:0;min-height:0;display:flex;flex-direction:column;border-right:2px solid #9099a0;background:#e9e9e5}.panel:last-child{border-right:none;border-left:1px solid #fefefe}
+.panel-head{display:flex;align-items:center;justify-content:space-between;height:36px;min-height:36px;padding:0 10px;border-bottom:2px solid #8897a4;background:linear-gradient(#f7f7f4,#d3d7d9);letter-spacing:.03em;font:700 11px "Courier New",monospace}
+.tree{padding:8px;overflow:auto;flex:1}.tree details{border-bottom:1px solid #c5cdd1}.tree summary{cursor:pointer;padding:8px 4px;font-weight:bold;color:#32445a}.tree .object{width:100%;border:0;background:transparent;text-align:left;padding:8px 8px 8px 16px;display:block;box-shadow:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tree .object:hover{background:#d5e9ff}.tree .object.active{background:#1558ae;color:#fff}.empty{padding:13px;color:#657788;font-size:11px;line-height:1.5}
+.tree-tools{padding:9px;border-bottom:1px solid #adb8bf}.system-links{border-top:2px solid #a5b3ba;padding:8px;display:grid;gap:6px}.system-links button{text-align:left}
+.middle{min-width:0;min-height:0;display:flex;flex-direction:column;background:#dbe4ea}.tabs{display:flex;gap:2px;padding:6px 7px 0;background:#d5d8d8;border-bottom:1px solid #9ca7b0}.tabs button{border:1px solid #93a2ae;border-radius:4px 4px 0 0;min-width:84px}.tabs button.active{background:#fff;border-bottom-color:#fff;font-weight:bold}
+.view{min-height:0;flex:1;position:relative;display:flex;flex-direction:column}.view[hidden]{display:none}.map-tools{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:7px;background:#f0f3f4;border-bottom:1px solid #a1b1bd}.map-tools button{padding:4px 10px}
+#map{display:block;width:100%;height:100%;touch-action:none;background:#e4eff0;cursor:grab}#map:active{cursor:grabbing}.map-wrap{position:relative;min-height:200px;flex:1;overflow:hidden}
+.map-note{position:absolute;bottom:10px;left:10px;background:#fffdf0e8;border:1px solid #aebac5;padding:7px 10px;font-size:10px;pointer-events:none;max-width:300px}
+.viewport-scroll{padding:16px;overflow:auto;flex:1;background:#f4f6f7}.card{border:1px solid #adbbc6;background:white;padding:13px;margin-bottom:12px;box-shadow:1px 1px #d0d8dc}.card h3{font-size:14px;margin:0 0 10px;color:#0e477d}
+.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat{background:#f0f5f8;border:1px solid #bac9d4;padding:9px}.stat strong{display:block;margin-bottom:5px}.bar{height:10px;border:1px solid #a5b4c0;background:white}.fill{height:100%;background:#3c91ce}.subtle{font-size:10px;color:#65798c;font-weight:normal}
+.inside{min-height:0;overflow:auto;padding:12px;background:#e8e9e6;flex:1}
+.objmeta{background:white;border:1px solid #b7c3cc;padding:10px;margin-bottom:12px}.objmeta strong{display:block;margin-bottom:4px;font-size:13px}.objmeta small{display:block;color:#62778a;overflow-wrap:anywhere}
+.group{margin-bottom:13px;padding-bottom:10px;border-bottom:1px solid #a9b6c1}.group-title{font:700 11px "Courier New",monospace;margin-bottom:8px;color:#325978}
+.action-list{display:grid;gap:4px}.action-list button{text-align:left;font-weight:normal}.action-list button.active{background:#b6d7fb;border:1px solid #3a6b9e;font-weight:bold}
+.field{margin-bottom:10px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:7px}.rule-row{background:white;border:1px solid #b7c3cf;padding:7px;margin-bottom:6px}.rule-row .row{display:flex;gap:6px;align-items:center}.rule-row select{flex:1}.rule-row input{margin-top:5px}.rule-row button{padding:5px 8px}.checkrow{display:flex;align-items:center;margin-bottom:10px;font-size:11px;font-weight:bold}.controls{display:flex;flex-wrap:wrap;gap:6px}.controls button{flex:1;white-space:nowrap}
+#testLog{background:#1f3040;color:#cbe8ca;padding:12px;height:170px;overflow:auto;white-space:pre-wrap;font:11px/1.6 Consolas,"Courier New",monospace}
+.footer{height:30px;flex:none;border-top:2px solid white;padding:6px 10px;display:flex;align-items:center;gap:10px;font:10px "Courier New",monospace;color:#35556b;background:#d3d6d5}
+#notice{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+@media(max-width:1050px){.workspace{grid-template-columns:195px minmax(270px,1fr) 292px}.menubar select{max-width:190px}}
+@media(max-width:760px){.window{margin:0;width:100%;height:100dvh;min-height:0;outline:0;border:0}.titlebar{height:38px}.workspace{display:flex;flex-direction:column;overflow:auto}.panel{border:0;border-bottom:2px solid #9ca7af;flex:none}.panel.tree-panel{max-height:175px;overflow:auto}.tree{min-height:90px}.system-links{display:none}.middle{min-height:320px;height:42dvh;flex:none}.panel.inspector{min-height:240px}.inside{max-height:none}.menubar{gap:4px}.menubar select{max-width:150px}.menubar .mini{display:none}.map-note{font-size:9px}}
+</style></head><body>
+<div class="window">
+ <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
+ <nav class="menubar">
+  <label style="margin:0">CITY <select id="cityPicker" aria-label="Saved Semesta city"><option value="">Loading cities...</option></select></label>
+  <button id="refresh">↻ REFRESH</button>
+  <button id="save" class="primary">💾 SAVE RULES</button>
+  <button id="export">EXPORT</button><button id="import">IMPORT</button><input type="file" id="importFile" accept=".json,application/json" hidden>
+  <span class="right"></span><a class="button" id="openSemesta" target="_blank" rel="noopener" href="../world-builder/">◈ SEMESTA</a><a class="button" href="../membangun/?app=jiwa">⌂ MEMBANGUN</a>
+ </nav>
+ <div class="workspace">
+  <aside class="panel tree-panel">
+   <div class="panel-head">CITY OBJECTS <span id="objCount">0</span></div>
+   <div class="tree-tools"><input id="objectSearch" type="search" placeholder="⌕ Search objects..." aria-label="Search city objects"></div>
+   <div id="tree" class="tree"></div>
+   <div class="system-links"><button id="toSystems">⚙ GAME SYSTEMS</button><button id="toTest">▶ PLAY TEST</button></div>
+  </aside>
+  <section class="middle">
+   <div class="tabs"><button class="active" data-tab="map">◈ WORLD</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button></div>
+   <div id="mapView" class="view"><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
+   <div id="systemsView" class="view" hidden><div class="viewport-scroll">
+    <div class="card"><h3>WORLD SYSTEMS</h3><p class="subtle">Nilai awal untuk Play Test JIWA. Tidak mengubah game online atau City Draft.</p><div class="pair"><label>Start Wallet (Rp)<input id="sys-wallet" type="number" min="0" step="1000"></label><label>Start Time (HH:MM)<input id="sys-time" type="time"></label></div><div class="pair"><label>Fullness<input id="sys-fullness" type="number" min="0" max="100"></label><label>Energy<input id="sys-energy" type="number" min="0" max="100"></label><label>Hygiene<input id="sys-hygiene" type="number" min="0" max="100"></label><label>Bladder<input id="sys-bladder" type="number" min="0" max="100"></label></div></div>
+    <div class="card"><h3>MECHANICS REGISTRY</h3><p>Rules menggunakan <b>WHEN → IF → THEN</b>. Template reusable dipakai sebagai default, sementara setiap objek Semesta bisa mempunyai override masing-masing.</p><div id="registryInfo" class="subtle"></div></div>
+   </div></div>
+   <div id="testView" class="view" hidden><div class="viewport-scroll">
+    <div class="card"><h3>PLAY TEST — ISOLATED SANDBOX</h3><p class="subtle">Menguji conditions, ekonomi, inventory, dan needs. Tidak mengubah akun/multiplayer.</p><div class="stats-grid" id="testStats"></div><div class="controls" style="margin-top:10px"><button id="runSelected" class="primary">▶ RUN SELECTED ACTION</button><button id="resetTest">↻ RESET TEST</button></div></div>
+    <div class="card"><h3>EVENT LOG</h3><div id="testLog" role="log" aria-live="polite">Play Test ready.</div></div>
+   </div></div>
+  </section>
+  <aside class="panel inspector">
+   <div class="panel-head">MECHANICS INSPECTOR <span id="inspectorState">READY</span></div>
+   <div class="inside">
+    <div id="noSelection" class="empty">Pilih kota dan klik objek di peta atau daftar untuk mengatur mekaniknya.</div>
+    <section id="objectInspector" hidden>
+      <div class="objmeta"><strong id="selectedName"></strong><small id="selectedMeta"></small></div>
+      <div class="group"><div class="group-title">BEHAVIOR TEMPLATE</div><label>Preset mekanik<select id="template"></select></label><span class="subtle">Default otomatis sesuai kategori objek. Pilih template lain untuk menggantinya.</span></div>
+      <div class="group"><div class="group-title">AVAILABLE ACTIONS</div><div id="actions" class="action-list"></div><div class="controls" style="margin-top:6px"><button id="addRule">＋ ACTION</button><button id="resetBinding">↶ DEFAULT</button><button id="saveTemplate">▧ SAVE TEMPLATE</button></div></div>
+      <div id="ruleEditor" hidden>
+       <div class="group-title">RULE EDITOR / WHEN → IF → THEN</div>
+       <div class="checkrow"><input id="enabled" type="checkbox"><label for="enabled" style="display:inline;margin:0">Enabled</label></div>
+       <div class="field"><label>Action label<input id="ruleLabel" maxlength="70"></label></div>
+       <div class="pair"><div class="field"><label>WHEN / Trigger<select id="trigger"><option value="interact">Interact</option><option value="enter">Enter</option><option value="proximity">Proximity</option><option value="job_complete">Job Complete</option><option value="time">Time</option></select></label></div><div class="field"><label>Animation ID<input id="animation" maxlength="80" placeholder="sit / eat / bath"></label></div></div>
+       <div class="group"><div class="group-title">IF / CONDITIONS</div><div id="conditions"></div><button id="addCondition">＋ CONDITION</button></div>
+       <div class="group"><div class="group-title">THEN / EFFECTS</div><div id="effects"></div><button id="addEffect">＋ EFFECT</button></div>
+       <div class="controls"><button id="deleteRule">🗑 DELETE ACTION</button><button id="testThis" class="primary">▶ TEST ACTION</button></div>
+      </div>
+    </section>
+   </div>
+  </aside>
+ </div>
+ <footer class="footer"><span id="notice">JIWA / NO CHANGES TO SEMESTA</span><span id="dirtyState">SAVED</span><span>LOCAL MECHANICS V1</span></footer>
+</div>
+<script src="../world-builder/city-drafts.js"></script>
+<script src="./jiwa.js"></script>
+</body></html>
