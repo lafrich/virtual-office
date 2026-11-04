@@ -382,7 +382,13 @@ function mount(api){
     draft||ADJUST.get(item,item.actionId))||{x:0,y:0,direction:'auto',layer:'behind'};
   const base=iso?.actionAnchor?.(item,{raw:true,generic:true});
   if(!base){status('Cannot calculate an interaction anchor for '+item.name);return false;}
-  actor.actionAnchor={...base,approach:null};
+  // Retain a collision-free exit tile. Adjustment must never leave the
+  // actor trapped on the WC/bed footprint after pressing Idle.
+  const oldApproach=actor.actionAnchor?.approach;
+  const free=actor.scene==='interior'&&available(room,Math.round(actor.c),Math.round(actor.r))?
+   [Math.round(actor.c),Math.round(actor.r)]:null;
+  const exitTile=oldApproach||free||[room.entrance?.c||0,room.entrance?.r||0];
+  actor.actionAnchor={...base,approach:exitTile};
   actor.pose=model.actions?.[item.actionId]?.pose||'idle';
   actor.c=base.c-.5;actor.r=base.r-.5;
   actor.direction=actor.adjustmentDraft.direction==='auto'?base.direction:actor.adjustmentDraft.direction;
