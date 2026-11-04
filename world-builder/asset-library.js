@@ -156,7 +156,7 @@ function mount(options={}){
   if(s.kind==='character')return options.characterImage?.(s.id,side)||null;
   if(s.source==='pipeline-street'){
    const v=s.variants?.[side]||s.variants?.sw||s.variants?.se;
-   return v?.file?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+v.file:null;
+   return v?.file?g.VLIndonesiaAssets?.cacheBust?.(s,'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+v.file)||'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+v.file:null;
   }
   if(s.source==='pipeline-vegetation')
    return s.relativeFile?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+s.relativeFile:null;
