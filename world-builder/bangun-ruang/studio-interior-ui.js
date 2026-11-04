@@ -286,10 +286,11 @@ function init(api){
     const text=document.createElement('div');const label=document.createElement('strong');
     label.textContent='F'+n+' · '+item.name+' → '+(model.actions[item.actionId]?.label||item.actionId);
     const desc=document.createElement('div');desc.className='actor-action';
-    const preset=item.actionAdjustments?.[item.actionId];
-    const placement=preset?adjust.normalize(preset):null;
+    const shared=adjust?.getDefault(item.assetId,item.actionId);
+    const instance=item.actionAdjustments?.[item.actionId];
+    const placement=shared|| (instance?adjust.normalize(instance):null);
     desc.textContent=(item.pose?'Mahluk Hidup pose: '+item.pose:'Action hook only · no dedicated character rig')+
-      (placement?' · ✓ SAVED POSITION ('+placement.x+', '+placement.y+
+      (placement?' · ✓ '+(shared?'TYPE DEFAULT':'LEGACY POSITION')+' ('+placement.x+', '+placement.y+
        ', '+(placement.direction==='auto'?'AUTO':placement.direction.toUpperCase())+')':' · default placement');
     const edit=document.createElement('button');edit.type='button';
     edit.textContent='✥ Adjust';
@@ -319,12 +320,15 @@ function init(api){
    (adjustmentDraft.direction==='auto'?' (AUTO)':'');
   $('actionAdjustStatus').textContent='X '+adjustmentDraft.x+'px, Y '+adjustmentDraft.y+
    'px / Facing '+adjustmentDraft.direction.toUpperCase()+' / '+adjustmentDraft.layer.toUpperCase()+
-   ' · Save Adjustment to keep changes';
+   ' · Save as default for ALL '+(model.types[item?.assetId]?.label||'similar objects')+
+   ' using '+(model.actions[item?.actionId]?.label||'this action');
  }
  function showAdjustment(){
   const item=adjustmentItem(),panel=$('actionAdjustmentEditor');panel.hidden=!item;
   if(!item){adjustmentKey='';adjustmentDraft=null;return;}
-  $('actionAdjustObject').textContent=(model.types[item.assetId]?.glyph||'▣')+' '+item.name+' · F'+floor;
+  $('actionAdjustObject').textContent=(model.types[item.assetId]?.glyph||'▣')+' '+item.name+
+   ' · '+(model.types[item.assetId]?.label||item.assetId)+
+   ' / '+(model.actions[item.actionId]?.label||item.actionId)+' · TYPE DEFAULT';
   const selector=$('actionAdjustAction');selector.replaceChildren();
   for(const id of model.types[item.assetId].actions){
    const opt=document.createElement('option');opt.value=id;opt.textContent=model.actions[id]?.label||id;
@@ -578,27 +582,42 @@ function init(api){
    onStatus('⚠ Save failed: normalized building lost the adjustment');
    return;
   }
-  const saved=api.saveAsset?.();
-  if(!saved){
+  // A shared WC / USE_TOILET preset must outlive this specific fixture,
+  // building, or room. This tiny key is stored separately from large PNG
+  // building assets, so newly placed copies inherit it immediately.
+  if(!adjust.setDefault(item.assetId,item.actionId,expected,
+     model.types[item.assetId].actions)){
    const live=adjustmentItem()||item;
    adjust.set(live,item.actionId,original,model.types[live.assetId].actions);
    lastAdjusted=oldLast;
-   $('actionAdjustStatus').textContent='⚠ SAVE FAILED — storage may be full; export the building JSON as backup.';
+   $('actionAdjustStatus').textContent='⚠ TYPE DEFAULT NOT SAVED — browser storage blocked the update.';
+   onStatus('⚠ Could not save default for all '+item.name+' objects');
+   return;
+  }
+  const saved=api.saveAsset?.();
+  if(!saved){
+   $('actionAdjustStatus').textContent='⚠ Object TYPE DEFAULT saved, but building save failed. Export building JSON.';
+   onStatus('⚠ Global action default saved; building was not saved');
    return;
   }
   const confirmed=saved.actionSlots?.find(x=>x.floor===floor&&x.id===item.id)
     ?.actionAdjustments?.[item.actionId];
-  if(!confirmed||JSON.stringify(adjust.normalize(confirmed))!==JSON.stringify(expected)){
-   onStatus('⚠ Saved building is missing this adjustment — please export a backup');
+  const shared=adjust.getDefault(item.assetId,item.actionId);
+  if(!confirmed||!shared||
+   JSON.stringify(adjust.normalize(confirmed))!==JSON.stringify(expected)||
+   JSON.stringify(shared)!==JSON.stringify(expected)){
+   onStatus('⚠ Default saved, but building export needs refreshing');
    return;
   }
   api.getScaleController?.()?.previewAdjustment?.(expected);
   adjustmentDraft=expected;
   refresh();
-  $('actionAdjustStatus').textContent='✓ SAVED & VERIFIED / '+item.name+' / '+item.actionId+
-    ' / X '+expected.x+' Y '+expected.y+' / '+expected.direction.toUpperCase();
-  onStatus('✓ Adjustment saved for '+item.name+' / '+item.actionId+
-    ' · reopening will restore this placement');
+  $('actionAdjustStatus').textContent='✓ SAVED TYPE DEFAULT / '+model.types[item.assetId].label+
+   ' / '+item.actionId+' / X '+expected.x+' Y '+expected.y+
+   ' / '+expected.direction.toUpperCase()+' · ALL MATCHING OBJECTS';
+  onStatus('✓ '+model.types[item.assetId].label+' / '+item.actionId+
+    ' saved as a reusable default for every matching object');
+  renderActions();
  };
  $('actionAdjustReset').onclick=()=>changeAdjustment({x:0,y:0,direction:'auto',layer:'behind'});
  $('actionAdjustExit').onclick=()=>{
