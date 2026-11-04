@@ -25,7 +25,7 @@ test('TransJakarta and other vehicles have a renderable single-object thumbnail'
  function canvasFactory(){
   const canvas={width:0,height:0};
   const ctx={
-   fillRect(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){},
+   fillRect(){},clearRect(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){},
    arc(){},ellipse(){},translate(){},scale(){},drawImage(){},
    getImageData(){
     const d=new Uint8ClampedArray(canvas.width*canvas.height*4);
