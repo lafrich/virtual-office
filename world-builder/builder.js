@@ -2843,7 +2843,7 @@ const assetLibrary=window.VLSemestaAssetLibrary?.mount({
  vehicles:()=>trafficCatalog?.vehicles||[],
  characters:()=>mahluk?.list?.()||[],
  thumbnail:spec=>assetThumbnails?.sourceFor?.(spec)||null,
- vehicleImage:(id,dir)=>trafficArt?.vehiclePreview?.(id,dir)||null,
+ vehicleImage:(id,dir)=>trafficArt?.vehiclePreviewAsync?.(id,dir)||null,
  characterImage:(id,dir)=>window.VLCharacterRig?.characterPreview?.(id,dir)||null,
  place:spec=>{
   if(!assetByName.has(spec.file)||spec.published===false)return false;
