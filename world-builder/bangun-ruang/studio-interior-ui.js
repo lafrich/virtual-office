@@ -53,6 +53,10 @@ function init(api){
  }
  function armPlacement(type){
   if(!enabled||!model.types[type])return;
+  // Placement takes priority over the action actor overlay.
+  // Otherwise its pointer layer swallows taps intended for a new fixture.
+  api.getScaleController?.()?.endAdjustment?.();
+  actionTapTarget=null;
   placing=placing===type?null:type;selected=null;
   if(placing){
    group.value=model.types[placing].category;
