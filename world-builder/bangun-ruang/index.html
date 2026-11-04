@@ -141,6 +141,12 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <div class="interior-rotate-info"><strong id="rotateSelection">Selected furniture</strong><span id="rotateHint">Tap to rotate · R on desktop</span></div>
   <button type="button" id="rotateLeft" class="rotate-action" aria-label="Rotate selected furniture left 90 degrees" title="Rotate left 90° (Shift+R)">↶ <span>90°</span></button>
   <button type="button" id="rotateRight" class="rotate-action" aria-label="Rotate selected furniture right 90 degrees" title="Rotate right 90° (R)">↷ <span>90°</span></button>
+  <div role="group" aria-label="Move selected furniture one tile" style="display:grid;grid-template-columns:repeat(3,29px);grid-template-rows:repeat(2,29px);gap:3px;margin-left:6px;align-items:center">
+   <button type="button" id="moveSelectedUp" style="grid-column:2;padding:0" title="Move up one tile" aria-label="Move furniture up">↑</button>
+   <button type="button" id="moveSelectedLeft" style="grid-column:1;grid-row:2;padding:0" title="Move left one tile" aria-label="Move furniture left">←</button>
+   <button type="button" id="moveSelectedDown" style="grid-column:2;grid-row:2;padding:0" title="Move down one tile" aria-label="Move furniture down">↓</button>
+   <button type="button" id="moveSelectedRight" style="grid-column:3;grid-row:2;padding:0" title="Move right one tile" aria-label="Move furniture right">→</button>
+  </div>
  </div>
  <div id="interiorQuickTools" class="interior-asset-tray" hidden aria-label="Furniture picker below the interior canvas">
   <div class="interior-tray-heading"><strong>+ INTERIOR ASSETS</strong><span id="quickPlaceHint">Tap asset → tap floor</span><button id="quickCancel" type="button" hidden>✕ Done</button></div>
