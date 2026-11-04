@@ -114,7 +114,8 @@ function mount(api){
    // independent of other instances using the same studio asset.
    const own=fromSaved.cityBinding?.cityId===record.id&&fromSaved.cityBinding?.objectId===obj.id;
    const asset=JSON.parse(JSON.stringify(fromSaved));
-   if(!own)asset.id=uid();
+   if(!own){asset.id=uid();asset.name=String(obj.name||asset.name).slice(0,60);
+    asset.config={...asset.config,name:asset.name};}
    asset.cityBinding={cityId:record.id,objectId:obj.id};
    api.openAsset(asset);
   }else{
@@ -178,7 +179,11 @@ function mount(api){
   panel.scrollIntoView({behavior:'smooth',block:'nearest'});
  };
  g.addEventListener('focus',()=>{if(tab==='cities')void refresh();});
- return {afterSave,activeTarget:()=>target,setTab,refresh};
+ function clearTarget(){
+  target=null;$('brCitySave').disabled=true;$('brCityTarget').hidden=true;
+  if(record)draw();
+ }
+ return {afterSave,activeTarget:()=>target,clearTarget,setTab,refresh};
 }
 g.VLBangunCityBrowser=Object.freeze({mount});
 })(window);
