@@ -50,11 +50,16 @@ function resolve(id,requested,moving){
  const entry=bridge()?.get(sourceId);
  const hygiene=entry&&body()?.resolve(entry,requested);
  if(hygiene?.kind==="bath"){
+  // Use the genuinely authored four-frame bath source for Human bases.
+  // Other adults retain their own idle head/face, composited over the
+  // male/female 4-frame bath body — never substitute another actor's head.
+  const bath=entry.motions.find(m=>m.id==="bathe"&&m.available!==false&&m.frames>=4);
   const idle=entry.motions.find(m=>m.id==="idle"&&m.available!==false);
-  if(idle){
-   const url=bridge().url(idle.sheet||entry.sheet);
-   if(url)return {url,mode:"bathe",frames:4,row:idle.sheet?0:idle.row,
-    durations:[...hygiene.frameMs],loop:true,separate:!!idle.sheet,
+  const source=bath||idle;
+  if(source){
+   const url=bridge().url(source.sheet||entry.sheet);
+   if(url)return {url,mode:"bathe",frames:4,row:source.sheet?0:source.row,
+    durations:[...hygiene.frameMs],loop:true,separate:!!source.sheet,
     source:"universal-hygiene",bodyRule:hygiene};
   }
  }
@@ -164,7 +169,7 @@ function createRig(THREE,opt={}){
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
   // Standing equipment layers have the wrong anchors on horizontal bodies.
   // The native lie frame already includes the actor's own base clothing.
-  const overlayUrls=(spec.source==="universal-sleep"?
+  const overlayUrls=(spec.source==="universal-sleep"||hygiene?.kind==="bath"?
    [null,null,null,null,null]:
    ['bag','shoes','pants','shirt','helmet'].map(layer));
   const overlays=overlayUrls.map(url=>image(url));
@@ -227,7 +232,8 @@ function createRig(THREE,opt={}){
     body().apply(ctx,{actor:asset,action:hygiene.actionId,
      direction:state.direction,frame,bodyImage:bareAtlas.pic});
    }else{
-    ctx.clearRect(0,56,64,56);state.loaded=false;
+    // Never show an accidentally clothed body while bath sprites load.
+    ctx.clearRect(0,53,64,59);state.loaded=false;
    }
   }
   texture.needsUpdate=true;previous=key;
