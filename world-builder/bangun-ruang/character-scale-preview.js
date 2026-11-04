@@ -12,7 +12,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const bridge=g.VLMahlukHidup,rig=g.VLCharacterRig,model=g.VLBuildingInterior,iso=g.VLInteriorIso,
- ADJUST=g.VLInteractionAdjust,GIZMO=g.VLActionGizmo;
+ ADJUST=g.VLInteractionAdjust,GIZMO=g.VLActionGizmo,BODY=g.VLUniversalBodyActions;
 const FRAME=rig?.FRAME||{w:64,h:112,pivotX:32,pivotY:100};
  // Native 64×32 art tile already includes Virtual Life's PPU=2.
  // Original V6B 64×112 image frame is drawn at 1x in both editor views.
@@ -124,8 +124,11 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
  const drawWidth=FRAME.w*scale,drawHeight=FRAME.h*scale;
  const resolved=rig?.resolve(actor.profile,actor.pose,actor.moving);
  const sprite=resolved?.url?image(resolved.url):null;
+ const actorProfile=bridge?.get(storageActor);
+ const bodyRule=BODY?.resolve(actorProfile,actor.actionId||actor.pose);
+ const bareAtlas=bodyRule?image(bridge?.url(bodyRule.sheet)):null;
  let drawn=false;
- if(sprite?.ready&&resolved){
+ if(sprite?.ready&&resolved&&(!bodyRule||bareAtlas?.ready)){
   const direct=DIR.indexOf(actor.direction);
   const effectiveDir=resolved.source==='universal-sleep'?
     (g.VLUniversalSleep?.directionFor(resolved.mode,actor.direction)||actor.direction):
@@ -148,24 +151,38 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
    const urls=(resolved.source==='universal-sleep'?[null,null,null,null,null]:
      ['bag','shoes','pants','shirt','helmet'].map(k=>worn[k]?.frames?.[actor.direction]||null));
    const layers=urls.map(image);
+   // Render isolated actor pixels before modifying the outfit. The main
+   // scene canvas contains furniture and must never be color-sampled.
+   const composite=bodyRule?document.createElement('canvas'):null;
+   if(composite){composite.width=64;composite.height=112;}
+   const paint=composite?composite.getContext('2d',{willReadFrequently:true}):ctx;
+   paint.imageSmoothingEnabled=false;
+   const dx=composite?0:x,dy=composite?0:y;
+   const dw=composite?64:drawWidth,dh=composite?112:drawHeight;
    const drawPart=entry=>{
     if(entry?.ready&&entry.pic.naturalWidth>=FRAME.w&&entry.pic.naturalHeight>=FRAME.h)
-     ctx.drawImage(entry.pic,0,0,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
+     paint.drawImage(entry.pic,0,0,FRAME.w,FRAME.h,dx,dy,dw,dh);
    };
    const rearView=actor.direction==='ne'||actor.direction==='nw';
    if(!rearView)drawPart(layers[0]);
    if(patched?.ready)
-    ctx.drawImage(patched.pic,0,0,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
-   else ctx.drawImage(pic,sx,sy,FRAME.w,FRAME.h,x,y,drawWidth,drawHeight);
+    paint.drawImage(patched.pic,0,0,FRAME.w,FRAME.h,dx,dy,dw,dh);
+   else paint.drawImage(pic,sx,sy,FRAME.w,FRAME.h,dx,dy,dw,dh);
    for(let i=1;i<4;i++)drawPart(layers[i]);
    // Back-view backpack is ON the back torso, never over the head/neck.
    if(rearView&&layers[0]?.ready){
-    ctx.save();ctx.beginPath();
-    ctx.rect(x,y+56*scale,drawWidth,(FRAME.h-56)*scale);ctx.clip();
+    paint.save();paint.beginPath();
+    paint.rect(dx,dy+56*(composite?1:scale),dw,(FRAME.h-56)*(composite?1:scale));paint.clip();
     drawPart(layers[0]);
-    ctx.restore();
+    paint.restore();
    }
    drawPart(layers[4]);
+   if(composite){
+    if(BODY.apply(paint,{actor:actorProfile,action:actor.actionId||actor.pose,
+      direction:actor.direction,frame,bodyImage:bareAtlas.pic}))
+     ctx.drawImage(composite,x,y,drawWidth,drawHeight);
+    else silhouette(ctx,x,y,scale,actor.pose);
+   }
    drawn=true;
   }
  }
@@ -192,7 +209,7 @@ function mount(api){
  const ctx=canvas?.getContext('2d',{alpha:true});
  if(!canvas||!stage||!ctx||!model)return null;
  const actor={active:false,profile:'ichsan',scene:'exterior',c:0,r:0,floor:1,
-  pose:'idle',direction:'sw',moving:false,armed:false,segments:[],current:null,
+  pose:'idle',actionId:null,direction:'sw',moving:false,armed:false,segments:[],current:null,
   actionAnchor:null,adjusting:false,adjustmentDraft:null,drag:null,
    transformMode:'move',transformSnap:1,gizmoOrigin:null,
   walkProgress:0,then:null};
@@ -324,7 +341,7 @@ function mount(api){
   // Restore a freely walkable approach tile when standing up.
   if(actor.actionAnchor?.approach)
    [actor.c,actor.r]=actor.actionAnchor.approach;
-  actor.actionAnchor=null;actor.pose='idle';actor.adjusting=false;
+  actor.actionAnchor=null;actor.pose='idle';actor.actionId=null;actor.adjusting=false;
   actor.adjustmentDraft=null;actor.drag=null;actor.gizmoOrigin=null;
  }
  function placeDefault(){
@@ -407,7 +424,7 @@ function mount(api){
    [Math.round(actor.c),Math.round(actor.r)]:null;
   const exitTile=oldApproach||free||[room.entrance?.c||0,room.entrance?.r||0];
   actor.actionAnchor={...base,approach:exitTile};
-  actor.pose=model.actions?.[item.actionId]?.pose||'idle';
+  actor.pose=model.actions?.[item.actionId]?.pose||'idle';actor.actionId=item.actionId;
   actor.c=base.c-.5;actor.r=base.r-.5;
   actor.direction=actor.adjustmentDraft.direction==='auto'?base.direction:actor.adjustmentDraft.direction;
   actor.reported=false;updateControls();draw();
@@ -450,7 +467,7 @@ function mount(api){
   const path=pathTo(scene,start,[item.c,item.r],{item});
   if(!path.length){status('No free route to '+item.name+' · move blocking furniture');return;}
   const action=model.actions?.[item.actionId],pose=action?.pose;
-  const anchor=pose&&['toilet','sit','sleep','lie','work'].includes(pose)?
+  const anchor=pose&&['toilet','sit','sleep','lie','work','bathe'].includes(pose)?
     iso?.actionAnchor?.(item):null;
   const approach=path[path.length-1];
   const finish=()=>{
@@ -459,7 +476,7 @@ function mount(api){
     actor.actionAnchor={...anchor,approach:[...approach]};
     actor.direction=anchor.direction;
    }
-   actor.pose=pose||'idle';actor.moving=false;
+   actor.pose=pose||'idle';actor.actionId=item.actionId;actor.moving=false;
    const requested=pose?({toilet:'sit',bathe:'swim',work:'sit_type'}[pose]||pose):'idle';
    const motion=rig?.resolve(actor.profile,pose,false);
    const supported=pose&&motion?.mode===requested;
