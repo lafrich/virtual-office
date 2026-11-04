@@ -403,6 +403,12 @@ function mount(api){
   actor.adjustmentDraft=ADJUST?.normalize(draft)||actor.adjustmentDraft;
   draw();return true;
  }
+ function endAdjustment(){
+  if(!actor.adjusting)return false;
+  leaveAction();stop();updateControls();draw();
+  status('Action placement closed / unsaved changes discarded');
+  return true;
+ }
  function isAdjusting(id,action){
   const item=api.getSelectedProp?.();
   return Boolean(actor.adjusting&&actor.actionAnchor?.itemId===id&&item?.actionId===action);
@@ -532,7 +538,7 @@ function mount(api){
  }
  requestAnimationFrame(tick);
  updateControls();
- return Object.freeze({placeAt,refreshProfiles,beginAdjustment,previewAdjustment,isAdjusting,
+ return Object.freeze({placeAt,refreshProfiles,beginAdjustment,previewAdjustment,endAdjustment,isAdjusting,
   sync(){updateControls();draw();},reset(){
   actor.active=false;actor.armed=false;stop();canvas.hidden=true;updateControls();
  },get actor(){return {...actor};},pathTo});
