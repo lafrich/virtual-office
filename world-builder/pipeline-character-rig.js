@@ -16,6 +16,7 @@ const legacyIds=Object.fromEntries(
  .map(id=>[id,ALIAS[id]||id]));
 const bridge=()=>g.VLMahlukHidup;
 const sleep=()=>g.VLUniversalSleep;
+const body=()=>g.VLUniversalBodyActions;
 const canonical=id=>bridge()?.has(id)?id:
  bridge()?.has('legacy_'+id)?'legacy_'+id:
  (legacyIds[id]||'ichsan');
@@ -47,6 +48,16 @@ function resolve(id,requested,moving){
   objectLayer:template.objectLayer,rotation:normalizeRotation(template.rotation),
   expression:template.expression||'neutral'};
  const entry=bridge()?.get(sourceId);
+ const hygiene=entry&&body()?.resolve(entry,requested);
+ if(hygiene?.kind==="bath"){
+  const idle=entry.motions.find(m=>m.id==="idle"&&m.available!==false);
+  if(idle){
+   const url=bridge().url(idle.sheet||entry.sheet);
+   if(url)return {url,mode:"bathe",frames:4,row:idle.sheet?0:idle.row,
+    durations:[...hygiene.frameMs],loop:true,separate:!!idle.sheet,
+    source:"universal-hygiene",bodyRule:hygiene};
+  }
+ }
  // Reuse the selected character's true horizontal LIE frames.
  // Sleep presets are native game actions, not stored per-actor template pixels.
  const sleepId=requested==="sleep"?"sleep_bed_right":requested;
@@ -147,6 +158,8 @@ function createRig(THREE,opt={}){
    (asset?.expressions||[]).find(f=>f.id===spec.expression):null;
   const facePath=face?.overlay||face?.sheet||null;
   const faceImage=facePath?image(bridge()?.url(facePath)):null;
+  const hygiene=asset&&body()?.resolve(asset,state.pose||spec.mode);
+  const bareAtlas=hygiene?image(bridge()?.url(hygiene.sheet)):null;
   const equipped=asset?bridge().equipmentFor(who):{};
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
   // Standing equipment layers have the wrong anchors on horizontal bodies.
@@ -178,7 +191,7 @@ function createRig(THREE,opt={}){
   // Full content fingerprint prevents two same-length pixel edits from sharing
   // a stale cached GPU texture while the same action frame is displayed.
   const editTag=editURL||'';
-  const key=[who,spec.url,spec.mode,row,frame,...overlayUrls.map(x=>x?.length||0),
+  const key=[who,spec.url,spec.mode,row,frame,hygiene?.sheet,bareAtlas?.ready,...overlayUrls.map(x=>x?.length||0),
    status,editTag,edited?.ready,facePath,faceImage?.ready,
    state.expression,state.rotation].join(':');
   const templated=spec.source==='template';
@@ -209,6 +222,14 @@ function createRig(THREE,opt={}){
   if(face&&appearance())appearance().drawExpression(ctx,face,state.direction,frame,
    path=>image(bridge()?.url(path)));
   if(overlays[4]?.ready)ctx.drawImage(overlays[4].pic,0,0,64,112);
+  if(hygiene){
+   if(bareAtlas?.ready){
+    body().apply(ctx,{actor:asset,action:hygiene.actionId,
+     direction:state.direction,frame,bodyImage:bareAtlas.pic});
+   }else{
+    ctx.clearRect(0,56,64,56);state.loaded=false;
+   }
+  }
   texture.needsUpdate=true;previous=key;
  }
  function setMoving(dx,dz,active){
