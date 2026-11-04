@@ -350,10 +350,18 @@ function init(api){
   }
   api.getScaleController?.()?.setTransformMode?.(effective);
  }
- function setActionZoom(value){
+ function setActionZoom(value,clientX,clientY){
+  const stage=$('previewStage'),box=stage.getBoundingClientRect();
+  const oldZoom=g.VLBuildingPreviewScale?.actionZoom||1;
+  const x=Number.isFinite(clientX)?clientX-box.left:box.width/2;
+  const y=Number.isFinite(clientY)?clientY-box.top:box.height/2;
+  const beforeX=stage.scrollLeft+x,beforeY=stage.scrollTop+y;
   const zoom=g.VLBuildingPreviewScale?.setActionZoom?.(value)||1;
-  $('actionZoomValue').textContent=Math.round(zoom*100)+'%';
-  $('previewStage').classList.toggle('action-adjust-viewport',zoom!==1);
+  stage.classList.toggle('action-adjust-viewport',zoom!==1);
+  // Keep the point under the touchpad cursor in place while zooming.
+  const ratio=zoom/oldZoom;
+  stage.scrollLeft=beforeX*ratio-x;
+  stage.scrollTop=beforeY*ratio-y;
   api.getScaleController?.()?.sync?.();
  }
  api.onTransformModeChange=mode=>setTransformMode(mode);
@@ -368,7 +376,7 @@ function init(api){
   const mode=$('actionModeSelect').getAttribute('aria-pressed')==='true'?'select':
    $('actionModeRotate').getAttribute('aria-pressed')==='true'?'rotate':'move';
   setTransformMode(mode);
-  $('actionAdjustStatus').textContent='GIZMO READY: drag RED X / GREEN Y / CENTER to move, RING to rotate. Save Adjustment to keep.';
+  $('actionAdjustStatus').textContent='Drag X / Y / center to move or the ring to rotate. Tap another object to change target.';
  }
  function changeAdjustment(next){
   const item=adjustmentItem();if(!item||!adjust)return;
@@ -379,13 +387,37 @@ function init(api){
   if(scale?.isAdjusting?.(item.id,item.actionId))scale.previewAdjustment(adjustmentDraft);
   else previewAdjustment();
  }
- function openSelectedAdjustment(){
+ function openSelectedAdjustment({scroll=true}={}){
   if(!adjustmentItem()){onStatus('Select an interior object first');return;}
   // A new adjustment session must load the SAVED preset, not a stale draft.
   adjustmentKey='';adjustmentDraft=null;
   selectTab('actions');showAdjustment();previewAdjustment();
-  $('actionAdjustmentEditor').scrollIntoView?.({block:'nearest',behavior:'smooth'});
+  if(scroll)$('actionAdjustmentEditor').scrollIntoView?.({block:'nearest',behavior:'smooth'});
  }
+ // In the Actions tab: first tap selects a fixture, second tap opens its gizmo.
+ // Another fixture always becomes the new target, never moves the old fixture.
+ function tapActionObject(event){
+  if(!enabled||tab!=='actions'||placing||preview!=='interior')return false;
+  const target=iso?.pointer?.(canvas,event,lastIso,{preferFloor:false});
+  const id=target?.itemId||null,controller=api.getScaleController?.();
+  if(!id){
+   controller?.setTransformMode?.('select');
+   return true;
+  }
+  const same=id===selected;
+  if(!same){
+   if(controller?.actor?.adjusting)controller.endAdjustment();
+   selected=id;adjustmentKey='';adjustmentDraft=null;
+   renderObjects();renderActions();draw();
+   onStatus('Selected '+(scene().items.find(x=>x.id===id)?.name||'object')+' · tap again to adjust');
+  }else if(!controller?.isAdjusting?.(id,adjustmentItem()?.actionId)){
+   openSelectedAdjustment({scroll:false});
+  }else if(controller?.actor?.transformMode==='select'){
+   controller.setTransformMode('move');
+  }
+  return true;
+ }
+ api.onActionCanvasTap=tapActionObject;
  function resumeSavedAdjustment(){
   if(!enabled||!lastAdjusted)return false;
   const n=Math.max(1,Math.min(numFloors(),Number(lastAdjusted.floor)||1));
@@ -478,6 +510,7 @@ function init(api){
   }
   if(c<0||z<0||c>=scene().width||z>=scene().depth)return;
   e.preventDefault();
+  if(tab==='actions'&&!placing){tapActionObject(e);return;}
   if(api.onFloorClick?.(c,z,hit)===true)return;
   if(hit?.itemId&&!placing){
    selected=hit.itemId;renderObjects();renderActions();draw();return;
@@ -546,14 +579,37 @@ function init(api){
    e.preventDefault();rotateSelected(e.shiftKey?-1:1);
   }
  });
- $('actionModeSelect').onclick=()=>setTransformMode('select');
- $('actionZoomIn').onclick=()=>setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)*1.25);
- $('actionZoomOut').onclick=()=>setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)/1.25);
- $('actionZoomReset').onclick=()=>setActionZoom(1);
- canvas.addEventListener('wheel',event=>{
-  if(!api.getScaleController?.()?.actor?.adjusting||!event.ctrlKey)return;
-  event.preventDefault();setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)*(event.deltaY<0?1.15:1/1.15));
+ // Trackpad pinch emits a ctrl+wheel gesture in Chromium.
+ // Do not hijack ordinary scrolling or page-wide browser zoom.
+ const stage=$('previewStage');
+ stage.addEventListener('wheel',event=>{
+  if(!enabled||preview!=='interior'||!event.ctrlKey)return;
+  const rect=canvas.getBoundingClientRect();
+  if(event.clientX<rect.left||event.clientX>rect.right||
+     event.clientY<rect.top||event.clientY>rect.bottom)return;
+  event.preventDefault();
+  setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)*Math.exp(-event.deltaY*.008),event.clientX,event.clientY);
  },{passive:false});
+ const touches=new Map();
+ stage.addEventListener('pointerdown',e=>{
+  if(e.pointerType!=='touch'||!enabled||preview!=='interior')return;
+  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ },true);
+ stage.addEventListener('pointermove',e=>{
+  if(!touches.has(e.pointerId))return;
+  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(touches.size!==2)return;
+  const [a,b]=[...touches.values()];
+  const dist=Math.hypot(a.x-b.x,a.y-b.y);
+  if(stage._pinchDistance){
+   setActionZoom((g.VLBuildingPreviewScale?.actionZoom||1)*dist/stage._pinchDistance,
+    (a.x+b.x)/2,(a.y+b.y)/2);
+  }
+  stage._pinchDistance=dist;
+  e.preventDefault();
+ },{passive:false,capture:true});
+ for(const name of ['pointerup','pointercancel'])
+  stage.addEventListener(name,e=>{touches.delete(e.pointerId);stage._pinchDistance=0;},true);
  $('actionModeMove').onclick=()=>setTransformMode('move');
  $('actionModeRotate').onclick=()=>setTransformMode('rotate');
  $('actionTransformSnap').onchange=()=>api.getScaleController?.()
