@@ -211,7 +211,7 @@ function mount(api){
  const actor={active:false,profile:'ichsan',scene:'exterior',c:0,r:0,floor:1,
   pose:'idle',actionId:null,direction:'sw',moving:false,armed:false,segments:[],current:null,
   actionAnchor:null,adjusting:false,adjustmentDraft:null,drag:null,
-   transformMode:'move',transformSnap:1,gizmoOrigin:null,
+   transformMode:'move',transformSelected:true,transformSnap:1,gizmoOrigin:null,
   walkProgress:0,then:null};
  let elapsed=0,lastFrame=0,lastDraw=0,activeSource=null;
  function cfg(){return api.getConfig();}
@@ -261,7 +261,7 @@ function mount(api){
   canvas.style.left=left+'px';canvas.style.top=top+'px';
   canvas.style.width=width+'px';canvas.style.height=height+'px';
   canvas.style.pointerEvents=(actor.armed||actor.adjusting)?'auto':'none';
-  canvas.style.cursor=actor.adjusting?(actor.transformMode==='rotate'?'crosshair':'grab'):actor.armed?'crosshair':'default';
+  canvas.style.cursor=actor.adjusting?(actor.transformMode==='rotate'?'crosshair':actor.transformMode==='select'?'default':'grab'):actor.armed?'crosshair':'default';
   canvas.style.touchAction=actor.adjusting?'none':'auto';
   ctx.imageSmoothingEnabled=false;return true;
  }
@@ -321,7 +321,7 @@ function mount(api){
   }
   // Always draw the on-screen gizmo LAST, above furniture and actor.
   // It is editor-only and is never saved as artwork or exported to Semesta.
-  if(actor.adjusting&&GIZMO){
+  if(actor.adjusting&&actor.transformSelected&&GIZMO){
    actor.gizmoOrigin=GIZMO.center({x,y},actor.pose);
    const selected=api.getSelectedProp?.();
    const native=selected?iso?.actionAnchor?.(selected,{raw:true,generic:true}):null;
@@ -413,7 +413,7 @@ function mount(api){
   if(!item||!room){status('Select furniture in the interior first');return false;}
   actor.active=true;actor.profile=choose.value||actor.profile;
   actor.armed=false;actor.scene='interior';actor.floor=room.floor;stop();
-  actor.adjusting=true;actor.gizmoOrigin=null;actor.adjustmentDraft=ADJUST?.normalize(
+  actor.adjusting=true;actor.gizmoOrigin=null;actor.transformSelected=true;actor.adjustmentDraft=ADJUST?.normalize(
     draft||ADJUST.get(item,item.actionId))||{x:0,y:0,direction:'auto',layer:'behind'};
   const base=iso?.actionAnchor?.(item,{raw:true,generic:true});
   if(!base){status('Cannot calculate an interaction anchor for '+item.name);return false;}
@@ -432,7 +432,8 @@ function mount(api){
   return true;
  }
  function setTransformMode(mode){
-  actor.transformMode=mode==='rotate'?'rotate':'move';
+  actor.transformMode=['select','move','rotate'].includes(mode)?mode:'move';
+  actor.transformSelected=mode!=='select';
   if(actor.adjusting)draw();
   return actor.transformMode;
  }
@@ -526,8 +527,21 @@ function mount(api){
    const box=canvas.getBoundingClientRect();if(!box.width||!box.height)return;
    const p={x:(e.clientX-box.left)*canvas.width/box.width,
     y:(e.clientY-box.top)*canvas.height/box.height};
-   const handle=GIZMO?.hit(actor.gizmoOrigin,p,actor.transformMode);
-   if(!handle)return; // Do not accidentally move the actor from empty space.
+   const handle=actor.transformSelected&&actor.transformMode!=='select'?
+    GIZMO?.hit(actor.gizmoOrigin,p,actor.transformMode):null;
+   if(!handle){
+    // Empty-space click deselects the transform gizmo, like a DCC viewport.
+    // Clicking the actor again selects it without moving its saved position.
+    const origin=actor.gizmoOrigin;
+    if(!actor.transformSelected&&actor.actionAnchor){
+     const foot=iso?.point(iso.bounds(api.getInterior?.()),actor.actionAnchor.c,actor.actionAnchor.r,actor.actionAnchor.z||0);
+     if(foot){const x=foot[0]+(actor.actionAnchor.pixelOffsetX||0),y=foot[1]+(actor.actionAnchor.pixelOffsetY||0);
+      if(p.x>=x-36&&p.x<=x+36&&p.y>=y-110&&p.y<=y+16){actor.transformSelected=true;actor.transformMode='move';api.onTransformModeChange?.('move');draw();e.preventDefault();return;}
+     }
+    }
+    if(actor.transformSelected){actor.transformSelected=false;actor.transformMode='select';api.onTransformModeChange?.('select');draw();}
+    e.preventDefault();return;
+   }
    const item=api.getSelectedProp?.();
    const native=item?iso?.actionAnchor?.(item,{raw:true,generic:true}):null;
    actor.drag={id:e.pointerId,handle,start:p,base:{...actor.adjustmentDraft},
