@@ -2451,6 +2451,49 @@ function actionChoices(actorId,selectId,selectedAction){
  else if(selectId==='pose')sel.value='';
  else sel.value=actions.find(m=>m.id==='idle')?.id||'';
 }
+// Pixel thumbnails are read from the same catalog entries used by placement.
+// Browsing never writes to the map. Every asset row retains the original click action.
+const assetThumbnails=window.VLAssetThumbnails;
+let assetViewMode='list',assetPreviewRevision=0;
+function assignAssetImage(img,fallback,url,lazy=true){
+ if(!url){img.hidden=true;fallback.hidden=false;return;}
+ img.hidden=false;img.style.opacity='0';fallback.hidden=false;
+ img.alt='';img.decoding='async';img.loading=lazy?'lazy':'eager';
+ img.onload=()=>{img.style.opacity='1';fallback.hidden=true;};
+ img.onerror=()=>{img.hidden=true;fallback.hidden=false;img.removeAttribute('src');};
+ img.src=url;
+}
+function previewAssetCard(a,info){
+ if(!info||!a)return;
+ const img=$('assetPreviewImage'),icon=$('assetPreviewIcon');
+ $('assetPreviewName').textContent=a.title;
+ $('assetPreviewDetail').textContent=info.category+
+  (info.footprint?' · '+info.footprint:'')+' · '+info.source;
+ icon.textContent=info.fallback;
+ const revision=++assetPreviewRevision;
+ if(!info.url){img.hidden=true;icon.hidden=false;img.removeAttribute('src');return;}
+ icon.hidden=false;img.hidden=false;img.style.opacity='0';img.decoding='async';
+ img.onload=()=>{
+  if(revision!==assetPreviewRevision)return;
+  img.style.opacity='1';icon.hidden=true;
+ };
+ img.onerror=()=>{
+  if(revision!==assetPreviewRevision)return;
+  img.hidden=true;icon.hidden=false;img.removeAttribute('src');
+ };
+ img.src=info.url;
+}
+function setAssetViewMode(view){
+ assetViewMode=view==='grid'?'grid':'list';
+ $('assetList').dataset.view=assetViewMode;
+ for(const [id,v] of [['assetViewList','list'],['assetViewGrid','grid']]){
+  $(id).classList.toggle('active',v===assetViewMode);
+  $(id).setAttribute('aria-pressed',String(v===assetViewMode));
+ }
+}
+$('assetViewList').onclick=()=>setAssetViewMode('list');
+$('assetViewGrid').onclick=()=>setAssetViewMode('grid');
+setAssetViewMode('list');
 function renderAssetList(){
  const q=$('searchAsset').value.trim().toLowerCase(),cat=$('assetCategory').value;
  const assets=[
@@ -2525,10 +2568,29 @@ function renderAssetList(){
  const holder=$('assetList');holder.replaceChildren();
  for(const a of list){
   const btn=document.createElement('button');btn.type='button';
+  btn.className='asset-card';btn.setAttribute('role','listitem');
+  btn.title='Click to place · '+a.title;
+  const meta=assetThumbnails?.describe(a,assetByName)||{
+   fallback:'◇',category:a.category.toUpperCase(),source:a.label,footprint:'',url:null
+  };
+  const thumb=document.createElement('span');thumb.className='asset-thumb';
+  thumb.setAttribute('aria-hidden','true');
+  const picture=document.createElement('img');
+  const noPicture=document.createElement('span');noPicture.className='asset-thumb-fallback';
+  noPicture.textContent=meta.fallback;
+  thumb.append(noPicture,picture);
+  assignAssetImage(picture,noPicture,meta.url,true);
+  const info=document.createElement('span');info.className='asset-card-info';
   const name=document.createElement('span');name.className='asset-title';name.textContent=a.title;
+  const detail=document.createElement('span');detail.className='asset-card-meta';
+  detail.textContent=meta.category+(meta.footprint?' · '+meta.footprint:'');
   const origin=document.createElement('span');origin.className='asset-origin '+(a.origin||'');origin.textContent=a.label;
-  btn.append(name,origin);
+  info.append(name,detail,origin);
+  btn.append(thumb,info);
+  btn.addEventListener('pointerenter',()=>previewAssetCard(a,meta));
+  btn.addEventListener('focus',()=>previewAssetCard(a,meta));
   btn.onclick=()=>{
+   previewAssetCard(a,meta);
    if(a.tag.startsWith('terrain:')){
     activeTerrain=a.tag.slice(8);
     $('terrainLabel').textContent=activeTerrain.toUpperCase();
