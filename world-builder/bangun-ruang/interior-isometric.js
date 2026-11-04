@@ -13,6 +13,7 @@
 // 30-high door and 4.6-high toilet seat (all times HS=1.6, PPU=2).
 const GAME=g.VLGameProportions;
 const ACTOR_SCALE=GAME?.character.scale??1;
+const ACTION_ADJUST=g.VLInteractionAdjust;
 const TILE_W=64,TILE_H=32,HALF_W=32,HALF_H=16,
  WALL=GAME?.building.wallHeight||128,SLAB=8,PAD=35;
 const WC_SEAT_Z=GAME?.toilet.seatHeight||15;
@@ -136,7 +137,7 @@ function fixtureBox(item,x,y,w,d){
  return {c:Math.min(p.c,q.c),r:Math.min(p.r,q.r),
   w:Math.abs(q.c-p.c),d:Math.abs(q.r-p.r)};
 }
-function actionAnchor(item){
+function actionAnchor(item,opts={}){
  if(!item||!TYPES[item.assetId])return null;
  let seat=null,z=0,offset=0;
  switch(item.assetId){
@@ -154,15 +155,18 @@ function actionAnchor(item){
    // Feet toward the duvet, head toward the pillow/headboard.
    // Lift the sprite foot pivot onto the 21px-high mattress.
    seat=[TYPES.bed.w/2,TYPES.bed.d*.69];z=21;break;
-  default:return null;
+  default:
+   if(!opts.generic)return null;
+   seat=[TYPES[item.assetId].w/2,TYPES[item.assetId].d/2];break;
  }
  const p=fixturePoint(item,...seat);
  // A zero-rotation chair/bed faces out from its backrest at local r=0.
  // The original WC pose is deliberately always SW regardless of rotation.
  const direction=item.assetId==='wc'?(GAME?.toilet.sitFacing||'sw'):
   ['sw','se','ne','nw'][fixtureRotation(item)];
- return {c:p.c,r:p.r,z,pixelOffsetY:offset,direction,
+ const anchor={c:p.c,r:p.r,z,pixelOffsetY:offset,direction,
   itemId:item.id,kind:item.assetId,localSeat:seat};
+ return opts.raw?anchor:ACTION_ADJUST?.apply(anchor,item,item.actionId)||anchor;
 }
 function furniture(ctx,geo,item,selected=false){
  const c=Number(item.c),r=Number(item.r),type=item.assetId;
