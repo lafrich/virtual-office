@@ -7,6 +7,7 @@ const base=path.resolve(__dirname,'../world-builder');
 const read=name=>fs.readFileSync(path.join(base,name),'utf8');
 function modules(){
  const w={};
+ vm.runInNewContext(read('bangun-ruang/action-adjustment.js'),{window:w});
  vm.runInNewContext(read('bangun-ruang/interior-model.js'),{window:w});
  vm.runInNewContext(read('bangun-ruang/interior-isometric.js'),{window:w});
  return w;
@@ -34,6 +35,7 @@ test('Mahluk Hidup walking → WC sit pose docks onto WC, then Idle moves back t
  const wc=room.items.find(i=>i.assetId==='wc');
  assert.ok(wc);
  const events=[];
+ let adjustedByDrag=null;
  let callback;
  const nodes=new Map();
  function element(id){
@@ -83,7 +85,8 @@ test('Mahluk Hidup walking → WC sit pose docks onto WC, then Idle moves back t
   isInterior:()=>inside,getInterior:()=>room,getInteriorView:()=> 'iso',
   getSelectedProp:()=>wc,
   openInterior:()=>{inside=true;element('interiorCanvas').hidden=false;},
-  onStatus:msg=>events.push(msg)
+  onStatus:msg=>events.push(msg),
+  onAdjustmentChange:v=>adjustedByDrag=v
  });
  element('scaleSpawn').onclick();
  element('scaleWalkDoor').onclick();
@@ -98,6 +101,19 @@ test('Mahluk Hidup walking → WC sit pose docks onto WC, then Idle moves back t
  assert.ok(Math.abs(seated.c+.5-(wc.c+.61))<.001);
  assert.ok(Math.abs(seated.r+.5-(wc.r+.69))<.001);
  assert.ok(events.some(s=>s.includes('aligned to seat')));
+ assert.equal(player.beginAdjustment({x:5,y:-3,direction:'se',layer:'front'}),true);
+ assert.equal(player.actor.adjusting,true);
+ assert.equal(player.actor.actionAnchor.pixelOffsetX,5);
+ assert.equal(player.actor.actionAnchor.objectLayer,'front');
+ assert.equal(player.actor.direction,'se');
+ const overlay=element('characterScaleCanvas');
+ overlay.onpointerdown({pointerId:7,clientX:80,clientY:55,preventDefault(){}});
+ overlay.onpointermove({pointerId:7,clientX:100,clientY:68,preventDefault(){}});
+ overlay.onpointerup({pointerId:7,preventDefault(){}});
+ assert.ok(adjustedByDrag,'Dragging must notify the Actions position inspector');
+ assert.equal(adjustedByDrag.x,25);
+ assert.equal(adjustedByDrag.y,10);
+ assert.equal(player.actor.actionAnchor.pixelOffsetX,25);
  element('scaleIdle').onclick();
  const standing=player.actor;
  assert.equal(standing.pose,'idle');
@@ -107,7 +123,7 @@ test('Mahluk Hidup walking → WC sit pose docks onto WC, then Idle moves back t
  assert.equal(standing.c,1);
  assert.equal(standing.r,2);
 });
-test('WC alignment remains editor-only and is not written into original asset JSON',()=>{
+test('native seat pivot remains canonical; only saved per-action offsets belong in building JSON',()=>{
  const html=read('bangun-ruang/index.html');
  const start=html.indexOf('function buildAsset()');
  const end=html.indexOf('function persist(',start);
