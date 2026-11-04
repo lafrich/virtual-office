@@ -11,8 +11,8 @@ function mount(opts){
  if(!enter||!dialog||!canvas)return;
  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
  let active=null,scene=null,selected=null,floor=1,view='iso',lastIso=null;
- function getInteriors(){
-  const item=opts.getSelected(),spec=item?.type==='sprite'?opts.catalog.get(item.asset):null;
+ function getInteriors(forItem=null){
+  const item=forItem||opts.getSelected(),spec=item?.type==='sprite'?opts.catalog.get(item.asset):null;
   const raw=item?.interior?.format==='virtual-life-interiors-v1'?item.interior:spec?.interior;
   if(!raw||!Array.isArray(raw.floors))return null;
   const footprint=spec?.footprint||item?.footprint||raw.floors[0]?.sourceFootprint||[3,3];
@@ -73,8 +73,8 @@ function mount(opts){
   $('interiorWalkthroughDetail').textContent='Tap a furniture item to select its action.';
   draw();
  }
- function open(){
-  active=getInteriors();
+ function open(forItem=null){
+  active=getInteriors(forItem);
   if(!active){opts.message?.('No interior data: edit this building in Bangun Ruang first.');return;}
   $('interiorWalkthroughTitle').textContent='INSIDE / '+String(active.item.name||'BUILDING').toUpperCase();
   const select=$('interiorWalkthroughFloor');select.replaceChildren();
@@ -88,7 +88,7 @@ function mount(opts){
   dialog.showModal();
  }
  function close(){dialog.close();active=null;scene=null;selected=null;}
- enter.onclick=open;$('interiorWalkthroughClose').onclick=close;
+ enter.onclick=()=>open();$('interiorWalkthroughClose').onclick=close;
  $('interiorWalkthroughFloor').onchange=()=>floorSelected(Number($('interiorWalkthroughFloor').value)||1);
  $('interiorWalkthroughIso').onclick=()=>changeView('iso');
  $('interiorWalkthroughPlan').onclick=()=>changeView('plan');
@@ -126,6 +126,7 @@ function mount(opts){
    (result?'Character rig pose: '+a.pose+'.':'No matching character rig; action metadata only.');
  };
  return {
+  openFor(item){return open(item);},
   update(item,spec){
    const available=item?.type==='sprite'&&(item?.enterable===true||spec?.enterable===true)&&
     (item?.interior?.floors?.length||spec?.interior?.floors?.length);
