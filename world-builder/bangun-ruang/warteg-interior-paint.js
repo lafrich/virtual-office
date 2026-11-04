@@ -4,6 +4,7 @@
  */
 (function(g){
 'use strict';
+if(g.VLWartegInteriorArt?.version===2)return;
 const V={green:['#1A6A3A','#22894A','#2A9A52','#4FB36B','#86E59A'],
  yellow:['#6B5320','#B07A1C','#F2B530','#FFC93C','#FFE27A'],
  cream:['#9B866F','#C3AD8D','#D4C8AE','#E8DEC6','#F4EBDA'],
