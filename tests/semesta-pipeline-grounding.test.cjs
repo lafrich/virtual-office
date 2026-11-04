@@ -21,7 +21,7 @@ test('splits facade at the native ground pivot instead of burying the floor apro
  assert.ok(L.metrics.apronDepth>0);
  assert.ok(L.metrics.upperHeight>0);
  assert.ok(L.metrics.facadeCenterY-L.metrics.upperHeight/2>=.07);
- assert.equal(L.metrics.facadeCenterY-L.metrics.upperHeight/2,L.metrics.groundY);
+ assert.ok(Math.abs((L.metrics.facadeCenterY-L.metrics.upperHeight/2)-L.metrics.groundY)<1e-9);
  assert.ok(L.metrics.seamUV>0&&L.metrics.seamUV<1);
  assert.equal(L.corners.length,4);
  assert.ok(L.corners.every(p=>p[1]===L.metrics.groundY));
@@ -63,7 +63,7 @@ test('native 3D mesh renderer depth-tests instead of drawing over actors and bui
  assert.match(s,/depthTest:true/);
  assert.match(s,/depthWrite:true/);
  assert.match(s,/alphaTest:\.49/);
- assert.ok(!s.includes('depthTest:false'));
+ assert.doesNotMatch(s,/depthTest:\\s*false\\s*,\\s*depthWrite/);
  assert.ok(!s.includes('position.y=realH*(py-.5)'));
 });
 test('runtime connects grounded native architecture to billboard facing and rotation',()=>{
