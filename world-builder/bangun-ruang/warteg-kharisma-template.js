@@ -1,4 +1,4 @@
-/* Warteg Kharisma Bahari — native Bangun Ruang starter template.
+/* Warteg Kharisma Bahari — Virtual Life Asset Pipeline authored starter template.
  * All four exteriors are code-drawn 2:1 isometric pixel sprites.
  * Uses the virtual-life-asset-pipeline street-material tones, not photo tracing.
  * 8x6 tiles, one floor, edit-friendly interior action slots. No backend writes.
@@ -39,9 +39,9 @@ const FONT={
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function sprite(direction){
  const se=direction==='se'||direction==='nw',back=direction==='ne'||direction==='nw';
- const can=document.createElement('canvas');can.width=548;can.height=466;
+ const can=document.createElement('canvas');can.width=620;can.height=500;
  const ctx=can.getContext('2d',{alpha:true});ctx.imageSmoothingEnabled=false;
- const OX=258,OY=202;
+ const OX=290,OY=214;
  const color=(m,t=3)=>P[m][clamp(t,0,4)];
  function xy(a,b,z=0){
   const c=se?D-b:a,r=se?W-a:D-b;
@@ -146,21 +146,32 @@ function sprite(direction){
  }
  for(const a of [0,1.08,4.90,5.56,7.85])front(a,a+.10,0,109,'green',3);
  front(0,W,110,128,'yellow',3);
- // Dark double-slope roof with corrugation and tall triangle, reused 4 directions.
- const e=145,peak=180;
- poly([[0,.85,e],[4,.85,peak],[8,.85,e]],'cream',2);
- poly([[0,D+.17,e],[4,D+.17,peak],[8,D+.17,e]],'cream',2);
- poly([[-.20,.85,e],[4,.85,peak],[4,D+.17,peak],[-.20,D+.17,e]],'dark',3);
- poly([[4,.85,peak],[8.20,.85,e],[8.20,D+.17,e],[4,D+.17,peak]],'dark',2);
- for(let a=.3;a<4;a+=.33){
-  const z=e+(peak-e)*a/4;
-  line([[a,.85,z+1],[a,D+.17,z+1]],'concrete',1);
+
+ // Full two-plane corrugated metal roof. Both slopes extend PAST the wall
+ // on every side. The right-hand fascia is a continuous solid strip, not
+ // a shortened polygon that exposes the yellow side wall.
+ const e=145,peak=180,rf=.62,rb=D+.54,roofL=-.44,roofR=W+.52;
+ poly([[roofL,rf,e],[W/2,rf,peak],[W/2,rb,peak],[roofL,rb,e]],'dark',3);
+ poly([[W/2,rf,peak],[roofR,rf,e],[roofR,rb,e],[W/2,rb,peak]],'dark',2);
+ // Roof gable infill beneath the metal planes at the facade and rear.
+ poly([[0,1.05,128],[W/2,1.05,peak-7],[W,1.05,128]],'cream',2);
+ // Corrugated seams run the complete roof depth (including right eave).
+ for(let a=roofL+.24;a<W/2;a+=.28){
+  const z=e+(peak-e)*(a-roofL)/(W/2-roofL);
+  line([[a,rf,z+1],[a,rb,z+1]],'concrete',a<W/2-.6?1:2);
  }
- for(let a=4.3;a<8;a+=.33){
-  const z=e+(peak-e)*(8-a)/4;
-  line([[a,.85,z+1],[a,D+.17,z+1]],'dark',1);
+ for(let a=W/2+.19;a<roofR-.06;a+=.28){
+  const z=e+(peak-e)*(roofR-a)/(roofR-W/2);
+  line([[a,rf,z+1],[a,rb,z+1]],'dark',a>W+.15?3:1);
  }
- line([[4,.85,peak+1],[4,D+.17,peak+1]],'concrete',3);
+ line([[W/2,rf,peak+1],[W/2,rb,peak+1]],'concrete',3);
+ // Right eave: exposed 6px white soffit + green 3px edge, from front to
+ // back. The right end is deliberately beyond the wall at a=W.
+ poly([[roofR,rf,e],[roofR,rb,e],[roofR,rb,e-7],[roofR,rf,e-7]],'white',4);
+ poly([[roofR,rf,e-7],[roofR,rb,e-7],[roofR,rb,e-10],[roofR,rf,e-10]],'green',2);
+ // Continue the finish across the rear drip edge as well.
+ poly([[W/2,rb,peak],[roofR,rb,e],[roofR,rb,e-4],[W/2,rb,peak-4]],'white',3);
+ line([[roofR,rf,e],[roofR,rb,e]],'concrete',4);
  // Mint-green extended flat awning/lintel, essential photographic silhouette.
  top(-.16,.4,8.16,1.43,135,'teal',4);
  front(-.16,8.16,128,135,'teal',3,.4);
@@ -185,15 +196,19 @@ function sprite(direction){
 }
 const placements=[
  ['shelf',0,0,'Rak Piring','browse'],
+ ['shelf',2,0,'Rak Bumbu dan Minuman','browse'],
+ ['fridge',6,0,'Kulkas Minuman','open'],
  ['counter',2,1,'Etalase Lauk','buy'],
  ['counter',4,1,'Etalase Lauk','buy'],
  ['cashier',5,2,'Kasir Warteg','sell'],
  ['stove',7,0,'Kompor Dapur','cook'],
  ['kitchen_sink',7,2,'Bak Cuci','wash'],
  ['table',1,3,'Meja Makan','browse'],
+ ['table',4,3,'Meja Tambahan','browse'],
  ['chair',1,4,'Kursi Makan','sit'],
  ['chair',2,4,'Kursi Makan','sit'],
- ['chair',5,4,'Bangku Warteg','sit']
+ ['chair',5,4,'Bangku Warteg','sit'],
+ ['chair',7,4,'Bangku Samping','sit']
 ];
 function create(model){
  if(!model?.create||!model?.add)throw Error('Interior model not ready');
@@ -204,7 +219,8 @@ function create(model){
   actions:'enter,buy,sell,sit,cook,wash,browse',collision:'yes',
   doorStyle:'glass',windowStyle:'wide',balcony:'no',interactive:true
  };
- const scene=model.create(config,'warung');scene.theme='warm';
+ const scene=model.create(config,'warung');scene.theme='warteg';
+ scene.notes='Warteg Bahari · modular layout · detailed warteg visual preset from Virtual Life Asset Pipeline v2';
  scene.entrance={c:3,r:5};
  for(const [assetId,c,r,name,actionId] of placements){
   const item=model.add(scene,assetId,c,r);
@@ -223,7 +239,7 @@ function create(model){
   interactive:true,enterable:true,
   entrance:{facing:'sw',groundFloor:1,entry:{...scene.entrance},exit:{...scene.entrance}},
   interior:{format:'virtual-life-interiors-v1',version:1,activeFloor:1,floors:[scene]},
-  actionSlots:slots,updatedAt:new Date().toISOString()};
+  actionSlots:slots,assetPipeline:{repo:'lafrich/virtual-life-asset-pipeline',family:'warteg_kharisma',version:2},updatedAt:new Date().toISOString()};
 }
-g.VLWartegKharismaTemplate=Object.freeze({id:'warteg-kharisma-bahari',label:'Warteg Kharisma Bahari',footprint:[8,6],create,render:sprite});
+g.VLWartegKharismaTemplate=Object.freeze({id:'warteg-kharisma-bahari',label:'Warteg Kharisma Bahari',footprint:[8,6],sourceVersion:'pipeline-v2',create,render:sprite});
 })(window);
