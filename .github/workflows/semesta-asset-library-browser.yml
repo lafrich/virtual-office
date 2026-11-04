@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "world-builder/asset-library.js"
+      - "world-builder/indonesia-assets.js"
       - "world-builder/asset-library.css"
       - "world-builder/semesta-traffic-art.js"
       - "world-builder/asset-thumbnails.js"
@@ -56,9 +57,18 @@ jobs:
             const audit=await page.locator('#salCount').textContent();
             const emptyThumbnails=await page.locator('#salGallery .sal-card .sal-thumb span').count();
             if(emptyThumbnails)throw Error('Gallery contains thumbnail placeholders: '+emptyThumbnails);
-            if(cards<20)throw Error('Too few assets in gallery: '+cards);
+            if(cards<300)throw Error('Published Indonesia 200 pack not loaded in gallery: '+cards);
             // Thumbnail/placement parity for all vehicle classes, including
             // bus_transjakarta and the published rider pipeline.
+            // The 200 native Indonesian sprites are generated, not metadata.
+            await page.locator('#salCategory').selectOption('indo200');
+            await page.waitForFunction(()=>document.querySelector('#salCount')?.textContent?.includes('VALID'),null,{timeout:120000});
+            const indonesia200=await page.locator('#salGallery .sal-card').count();
+            if(indonesia200!==200)throw Error('Indonesia 200 gallery contains '+indonesia200+' rather than 200 verified assets');
+            await page.locator('#salGallery [data-file="pipeline:id200_transport_angkot_kota"]').click();
+            await page.waitForFunction(()=>document.querySelector('#salHero img')?.naturalWidth>20,null,{timeout:15000});
+            await page.screenshot({path:'screenshots/semesta-indonesia-200-gallery.png',fullPage:false});
+
             await page.locator('#salCategory').selectOption('vehicle');
             await page.waitForFunction(()=>document.querySelector('#salCount')?.textContent?.includes('VALID'),null,{timeout:120000});
             await page.locator('#salGallery [data-file="vehicle:bus_transjakarta"]').click();
@@ -176,7 +186,7 @@ jobs:
             await page.waitForFunction(()=>[...document.querySelectorAll('#salGallery .sal-card')].some(x=>x.textContent.includes('Custom')),null,{timeout:120000});
             const customs=await page.locator('#salGallery .sal-card').count();
             await page.screenshot({path:'screenshots/semesta-custom-asset-library.png',fullPage:false});
-            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,vehicleCheck,allVehicles,carAudit,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
+            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,indonesia200,vehicleCheck,allVehicles,carAudit,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
             await browser.close();
             if(faults.some(x=>/SyntaxError|Cannot read properties|is not defined/i.test(x)))
               throw Error('Browser JS crash: '+faults.join('; '));
