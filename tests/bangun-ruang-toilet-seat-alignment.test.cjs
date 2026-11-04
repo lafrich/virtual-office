@@ -115,6 +115,6 @@ test('WC alignment remains editor-only and is not written into original asset JS
  const save=html.slice(start,end);
  assert.ok(!save.includes('actionAnchor'));
  assert.ok(!save.includes('scaleController'));
- assert.ok(html.includes('interior-isometric.js?v=furniture-v10'));
- assert.ok(html.includes('character-scale-preview.js?v=chair-bed-v2'));
+ assert.ok(html.includes('interior-isometric.js?v=action-alignment-v1'));
+ assert.ok(html.includes('character-scale-preview.js?v=action-alignment-v1'));
 });
