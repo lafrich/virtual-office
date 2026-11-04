@@ -20,6 +20,7 @@ on:
       - "tests/semesta-vehicle-visuals.test.cjs"
       - "tests/semesta-vehicle-flip.test.cjs"
       - "tests/semesta-pan-tool.test.cjs"
+      - "tests/semesta-clean-ui-menus.test.cjs"
       - "tests/semesta-tree-replacement.test.cjs"
       - "tests/semesta-placeholder-replacement.test.cjs"
       - "tests/semesta-active-asset-camera.test.cjs"
@@ -45,6 +46,7 @@ on:
       - "tests/semesta-vehicle-visuals.test.cjs"
       - "tests/semesta-vehicle-flip.test.cjs"
       - "tests/semesta-pan-tool.test.cjs"
+      - "tests/semesta-clean-ui-menus.test.cjs"
       - "tests/semesta-tree-replacement.test.cjs"
       - "tests/semesta-placeholder-replacement.test.cjs"
       - "tests/semesta-active-asset-camera.test.cjs"
@@ -113,6 +115,7 @@ jobs:
           node --check world-builder/semesta-wheel-ground.js
           node --check world-builder/semesta-traffic-art.js
           node --test tests/semesta-wheel-ground.test.cjs
+          node --test tests/semesta-clean-ui-menus.test.cjs
           node --check world-builder/semesta-vegetation-ground.js
           node --test tests/semesta-vegetation-ground.test.cjs
           node tests/semesta-mahluk-vehicles.test.cjs

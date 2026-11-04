@@ -328,7 +328,7 @@ function saved(){
  try{
   localStorage.setItem(STORE,JSON.stringify(documentMap));
   $('saveStatus').textContent=activeDraftId?'● Edited · Save City':'● Working draft';
- }catch(e){$('saveStatus').textContent='⚠ Storage full · Export JSON';}
+ }catch(e){$('saveStatus').textContent='⚠ Storage full · free browser space before saving';}
 }
 function undoPoint(){undoStack.push(JSON.stringify(documentMap));if(undoStack.length>60)undoStack.shift();redoStack=[];}
 function restoreStack(from,to){
@@ -2946,7 +2946,7 @@ function makeCityExample(){
  return sanitize(city);
 }
 $('newCity').onclick=()=>{
- if(!confirm('Start City Sample? Map draft saat ini akan diganti. Export JSON dulu jika ingin menyimpan layout lama.'))return;
+ if(!confirm('Start City Sample? Map draft saat ini akan diganti. Gunakan Save City untuk menyimpan layout lama.'))return;
  if(cameraFollowId)leaveCharacterCamera(false);
  undoPoint();documentMap=makeCityExample();restoreCityClock();selectedId=null;
  activeDraftId=null;draftDirty=true;

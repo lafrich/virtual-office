@@ -15,14 +15,14 @@
 <nav id="menubar" aria-label="XP Paint menus">
  <button id="saveDraftMenu" type="button" title="Save named city draft">💾 Save City</button>
  <button id="openDraftMenu" type="button" title="Open saved city drafts">📁 My Cities</button>
- <button id="export" type="button"><u>F</u>ile / Export</button>
- <button id="import" type="button"><u>E</u>dit / Import</button>
- <button id="reset" type="button"><u>V</u>iew / Reset</button>
- <button id="openVirtualAssets" type="button" title="Browse original encrypted Virtual Life asset files securely">🔐 Virtual Life Assets</button>
+ <button id="export" hidden type="button"><u>F</u>ile / Export</button>
+ <button id="import" hidden type="button"><u>E</u>dit / Import</button>
+ <button id="reset" hidden type="button"><u>V</u>iew / Reset</button>
+ <button id="openVirtualAssets" hidden type="button" title="Browse original encrypted Virtual Life asset files securely">🔐 Virtual Life Assets</button>
  <button id="openTutorial" type="button" title="Open the quick start guide">❔ Quick Tutorial</button>
- <button id="membangunHome" type="button" onclick="location.href='../membangun/?app=semesta'" title="Back to Membangun launcher">⌂ Membangun</button>
- <button id="buildingStudio" type="button" onclick="location.href='../membangun/?app=bangun'" title="Choose Bangun Ruang from the launcher">▤ Building Studio</button>
- <button id="openGame" type="button"><u>H</u>elp / Game</button>
+ <button id="membangunHome" hidden type="button" onclick="location.href='../membangun/?app=semesta'" title="Back to Membangun launcher">⌂ Membangun</button>
+ <button id="buildingStudio" hidden type="button" onclick="location.href='../membangun/?app=bangun'" title="Choose Bangun Ruang from the launcher">▤ Building Studio</button>
+ <button id="openGame" hidden type="button"><u>H</u>elp / Game</button>
  <span class="version">SEMESTA / CITY DESIGN STUDIO</span>
 </nav>
 <div id="workspace">
@@ -41,7 +41,6 @@
   <button class="chrome-tool active" id="gridToggle" aria-pressed="true" title="Show / hide placement grid">#</button>
   <button class="chrome-tool" id="buildingOutlineTool" type="button" aria-pressed="false" title="Building View: toggle architectural outline / solid">◇</button>
   <button class="chrome-tool active" id="markerVisibilityTool" type="button" aria-pressed="true" title="Show/hide yellow logic markers (not building outlines)">⚑</button>
-  <div class="stamp">✳<div>V/L<br>MAP</div></div>
  </aside>
  <aside id="assetsPanel" aria-label="Asset browser">
   <div class="panel-heading"><strong>FILES / ASSETS</strong><span id="assetCount">0</span><button id="closeAssets" class="sheet-close" type="button" aria-label="Close asset library">×</button></div>
@@ -265,15 +264,15 @@
      <label>Blocking<select id="logicBlocking"><option value="auto">Use asset footprint</option><option value="yes">Solid</option><option value="no">Passable</option></select></label>
      <label>Developer notes<textarea id="logicNotes" placeholder="Instructions for next AI developer; no executable code"></textarea></label>
     </div>
-    <p class="help">Export JSON includes asset provenance, footprint, map coordinates and human-readable interaction hooks. No mechanics execute inside the editor.</p>
+    <p class="help">Map logic keeps asset footprints, coordinates, and interaction hooks inside the saved city. No mechanics execute inside the editor.</p>
    </section>
   </div>
  </aside>
 </div>
 <footer id="footer">
  <button id="saveCityDraft" type="button">💾 Save Draft</button>
- <button id="manageDrafts" type="button">📁 My Cities</button>
- <button id="exportShortcut" type="button">Export JSON</button>
+ <button id="manageDrafts" hidden type="button">📁 My Cities</button>
+ <button id="exportShortcut" hidden type="button">Export JSON</button>
  <span>🌏 Semesta Draft / Game unchanged</span>
  <input id="file" type="file" accept=".json,application/json" hidden>
  <span class="status" id="saveStatus">● Draft</span>
@@ -295,7 +294,7 @@
     <button id="loadDraft" type="button">📂 Open City</button>
     <button id="deleteDraft" class="danger" type="button">Delete</button>
    </div>
-   <p class="draft-hint">Drafts are stored in this browser on this device, not in the cloud. Use Export JSON for a backup or to transfer cities to another device.</p>
+   <p class="draft-hint">Drafts are stored in this browser on this device, not in the cloud. Open your saved city here using My Cities. Browser data is not synced to another device.</p>
   </div>
  </div>
 </div>
