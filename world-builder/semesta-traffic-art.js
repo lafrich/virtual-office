@@ -256,8 +256,8 @@ function vehiclePreviewAsync(id,dir='se'){
  const spec=g.VLSemestaCatalog?.vehicle?.(id);
  const expected=RIDER_V3[id];
  const task=validNativeImage(sourceURL({id,views:spec?.views},side,'v3',0),expected)
-  .then(url=>url||null)
-  .catch(()=>null);
+  .then(url=>{if(!url)nativeGalleryImages.delete(key);return url||null;})
+  .catch(()=>{nativeGalleryImages.delete(key);return null;});
  nativeGalleryImages.set(key,task);
  return task;
 }
