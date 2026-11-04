@@ -323,9 +323,57 @@ function createRig(THREE,opt={}){
  return {mesh,state,setMoving,setPose,setDirection,setCharacter,setProfile:setCharacter,step,dispose,
   refresh(){previous='';lastAction='';}};
 }
-function retry(){imgCache.clear();}
+/* A single idle frame from the actual Mahluk Hidup rig source.
+ * Never use the full 44-row/animation sprite sheet as a gallery thumbnail.
+ * Preview frames are sourced from resolve(), exactly as createRig() does.
+ * All body/accessory layers are read-only and composited in gameplay order.
+ */
+const previewCache=new Map();
+function loadPreviewImage(src){
+ if(!src)return Promise.resolve(null);
+ return new Promise(resolve=>{
+  const im=new Image(),timeout=setTimeout(()=>finish(null),18000);
+  let done=false;
+  function finish(v){
+   if(done)return;done=true;clearTimeout(timeout);im.onload=null;im.onerror=null;resolve(v);
+  }
+  im.crossOrigin='anonymous';
+  im.onload=()=>finish(im.naturalWidth&&im.naturalHeight?im:null);
+  im.onerror=()=>finish(null);im.src=src;
+ });
+}
+function characterPreview(id,direction='sw'){
+ const who=canonical(id),dir=normalize(direction),entry=bridge()?.get(who);
+ const equip=bridge()?.equipmentFor(who)||{};
+ const appearanceKey=Object.values(equip).map(v=>v?.id||'').join(',');
+ const key=who+':'+dir+':'+(bridge()?.buildVersion||'')+':'+appearanceKey;
+ if(previewCache.has(key))return previewCache.get(key);
+ const task=(async()=>{
+  let spec=resolve(who,'idle',false);
+  if(!spec?.url||spec.unavailable)spec=resolve(who,'walk',true);
+  if(!spec?.url||spec.unavailable||spec.source==='template')return null;
+  const pic=await loadPreviewImage(spec.url);
+  const row=(Number(spec.row)||0)+DIR.indexOf(dir);
+  if(!pic||pic.naturalWidth<64||pic.naturalHeight<(row+1)*112)return null;
+  const cv=document.createElement('canvas');cv.width=64;cv.height=112;
+  const q=cv.getContext('2d');if(!q)return null;
+  q.imageSmoothingEnabled=false;
+  const layer=slot=>equip[slot]?.frames?.[dir]||null;
+  const layers=await Promise.all(['bag','shoes','pants','shirt','hair','helmet']
+   .map(slot=>loadPreviewImage(layer(slot))));
+  if(layers[0])q.drawImage(layers[0],0,0,64,112);
+  q.drawImage(pic,0,row*112,64,112,0,0,64,112);
+  if(entry)g.VLUniversalBodyActions?.tintBase?.(q,entry);
+  for(let i=1;i<layers.length;i++)if(layers[i])q.drawImage(layers[i],0,0,64,112);
+  return cv.toDataURL('image/png');
+ })().catch(()=>null);
+ previewCache.set(key,task);
+ return task;
+}
+
+function retry(){imgCache.clear();previewCache.clear();}
 g.VLCharacterRig=Object.freeze({
- createRig,retry,DIR,ROW,FRAME,directionFromWorld,canonical,resolve,frameAt,
+ createRig,retry,DIR,ROW,FRAME,directionFromWorld,canonical,resolve,frameAt,characterPreview,
  get profiles(){return {...legacyIds,...Object.fromEntries((bridge()?.list()||[]).map(c=>[c.id,c.id]))};}
 });
 })(window);
