@@ -60,7 +60,7 @@ test('Semesta loads the Indonesia pack before caching catalog, exposes placement
  assert.match(builder,/await window\.VLIndonesiaAssets\?\.load\(\)/);
  assert.ok(builder.indexOf('await window.VLIndonesiaAssets?.load()')<
    builder.indexOf('let assetCatalog=window.VLAssetCatalog||[]'));
- assert.match(builder,/if\(spec\.pack==='indonesia-v1'\)return 'indonesia'/);
+ assert.match(builder,/if\(spec\.pack==='indonesia-v1'\|\|spec\.pack==='indonesia-200-v1'\)return 'indonesia'/);
  assert.match(thumbs,/source==='pipeline-street'/);
  assert.match(builder,/pipelineGround\.attach\(THREE,root,spec,view/);
 });
