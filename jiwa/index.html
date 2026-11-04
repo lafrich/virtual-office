@@ -39,6 +39,15 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
 #notice{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 @media(max-width:1050px){.workspace{grid-template-columns:195px minmax(270px,1fr) 292px}.menubar select{max-width:190px}}
 @media(max-width:760px){.window{margin:0;width:100%;height:100dvh;min-height:0;outline:0;border:0}.titlebar{height:38px}.workspace{display:flex;flex-direction:column;overflow:auto}.panel{border:0;border-bottom:2px solid #9ca7af;flex:none}.panel.tree-panel{max-height:175px;overflow:auto}.tree{min-height:90px}.system-links{display:none}.middle{min-height:320px;height:42dvh;flex:none}.panel.inspector{min-height:240px}.inside{max-height:none}.menubar{gap:4px}.menubar select{max-width:150px}.menubar .mini{display:none}.map-note{font-size:9px}}
+.context-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:10px}
+.context-row{display:grid;grid-template-columns:minmax(145px,1.05fr) minmax(100px,1fr) 34px;gap:5px;margin-bottom:6px}
+.context-row button{padding:5px}
+.context-checkbox{display:flex;align-items:center;gap:5px;margin:10px 0}
+.context-checkbox input{margin:0}
+.context-object{background:#edf3f6;border:1px solid #b5c5cf;padding:9px;margin:8px 0}
+#contextEditor .card h4{margin:14px 0 8px;color:#2a5879;font:700 11px "Courier New",monospace}
+#contextEditor .controls{margin:8px 0}#contextEditor textarea{font-size:11px;resize:vertical}
+@media(max-width:520px){.context-grid{grid-template-columns:1fr}.context-row{grid-template-columns:1fr 1fr 30px}.tabs button{min-width:0;flex:1;padding:6px 4px}}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -57,8 +66,9 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
    <div class="system-links"><button id="toSystems">⚙ GAME SYSTEMS</button><button id="toTest">▶ PLAY TEST</button></div>
   </aside>
   <section class="middle">
-   <div class="tabs"><button class="active" data-tab="map">◈ WORLD</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button></div>
+   <div class="tabs"><button class="active" data-tab="map">◈ WORLD</button><button data-tab="context">◉ CONTEXT</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button></div>
    <div id="mapView" class="view"><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
+   <div id="contextView" class="view" hidden><div class="viewport-scroll" id="contextEditor"><div class="card">Loading contextual foundation...</div></div></div>
    <div id="systemsView" class="view" hidden><div class="viewport-scroll">
     <div class="card"><h3>WORLD SYSTEMS</h3><p class="subtle">Nilai awal untuk Play Test JIWA. Tidak mengubah game online atau City Draft.</p><div class="pair"><label>Start Wallet (Rp)<input id="sys-wallet" type="number" min="0" step="1000"></label><label>Start Time (HH:MM)<input id="sys-time" type="time"></label></div><div class="pair"><label>Fullness<input id="sys-fullness" type="number" min="0" max="100"></label><label>Energy<input id="sys-energy" type="number" min="0" max="100"></label><label>Hygiene<input id="sys-hygiene" type="number" min="0" max="100"></label><label>Bladder<input id="sys-bladder" type="number" min="0" max="100"></label></div></div>
     <div class="card"><h3>MECHANICS REGISTRY</h3><p>Rules menggunakan <b>WHEN → IF → THEN</b>. Template reusable dipakai sebagai default, sementara setiap objek Semesta bisa mempunyai override masing-masing.</p><div id="registryInfo" class="subtle"></div></div>
@@ -92,5 +102,7 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
  <footer class="footer"><span id="notice">JIWA / NO CHANGES TO SEMESTA</span><span id="dirtyState">SAVED</span><span>LOCAL MECHANICS V1</span></footer>
 </div>
 <script src="../world-builder/city-drafts.js"></script>
+<script src="./foundation-engine.js"></script>
 <script src="./jiwa.js"></script>
+<script src="./context-editor.js"></script>
 </body></html>

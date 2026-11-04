@@ -6,27 +6,29 @@
 const $=id=>document.getElementById(id), clone=x=>JSON.parse(JSON.stringify(x));
 const DB='jiwa-mechanics-v1',TABLE='projects',FALLBACK='jiwa-local-project:',CHANGE='jiwa-project-change';
 const ACTIVE='virtual-life-active-city-draft';
+const GLOBAL_CITY='__jiwa_global__';
 const params=new URLSearchParams(location.search);
 const KINDS=['wallet_min','stat_min','stat_max','has_item','quest_active','time_start','time_end'];
 const EFFECTS=['wallet_delta','stat_fullness','stat_energy','stat_hygiene','stat_bladder','inventory_add','quest_start','quest_complete','message','animation'];
 const TRIGGERS=['interact','enter','proximity','job_complete','time'];
 const STAT=['fullness','energy','hygiene','bladder'];
-const defaults=()=>({wallet:80000,time:'08:00',fullness:70,energy:80,hygiene:75,bladder:20});
+const JF=window.JiwaFoundation;
+const defaults=()=>({wallet:6000,time:'08:00',fullness:70,energy:80,hygiene:75,bladder:20});
 const rule=(id,label,animation,conditions,effects,trigger='interact')=>({id,label,animation,enabled:true,trigger,conditions,effects});
 const c=(kind,value)=>({kind,value:String(value)}),e=(kind,value)=>({kind,value:String(value)});
 const TEMPLATES={
   generic:{label:'General Interaction',rules:[rule('interact','Interact','idle',[],[e('message','Interaction completed')])]},
-  food:{label:'Food Vendor / Warteg',rules:[rule('buy_food','Beli makanan','eat',[c('wallet_min',15000)],[e('wallet_delta',-15000),e('stat_fullness',40),e('message','Makanan dibeli')])]},
-  shop:{label:'Shop / Retail',rules:[rule('buy_item','Beli barang','talk',[c('wallet_min',10000)],[e('wallet_delta',-10000),e('inventory_add','item_01'),e('message','Barang dibeli')])]},
+  food:{label:'Food Vendor / Warteg',rules:[rule('buy_food','Beli makanan','eat',[c('wallet_min',2500)],[e('wallet_delta',-2500),e('stat_fullness',40),e('message','Makanan dibeli')])]},
+  shop:{label:'Shop / Retail',rules:[rule('buy_item','Beli barang','talk',[c('wallet_min',1000)],[e('wallet_delta',-1000),e('inventory_add','item_01'),e('message','Barang dibeli')])]},
   bed:{label:'Bed / Sleep',rules:[rule('sleep','Tidur','sleep',[],[e('stat_energy',25),e('message','Energi pulih')])]},
   seat:{label:'Seat / Bench',rules:[rule('sit','Duduk','sit',[],[e('stat_energy',2)])]},
   toilet:{label:'Toilet / WC',rules:[rule('use_toilet','Gunakan toilet','toilet_sit',[],[e('stat_bladder',-100),e('message','Sudah lega')])]},
   bath:{label:'Bath / Shower',rules:[rule('bathe','Mandi','bath',[],[e('stat_hygiene',70)])]},
   job:{label:'Quest / Job NPC',rules:[
     rule('accept_job','Ambil pekerjaan','talk',[],[e('quest_start','street_job'),e('message','Pekerjaan dimulai')]),
-    rule('complete_job','Selesaikan pekerjaan','work',[c('quest_active','street_job')],[e('quest_complete','street_job'),e('wallet_delta',25000),e('message','Pekerjaan selesai')],'job_complete')
+    rule('complete_job','Selesaikan pekerjaan','work',[c('quest_active','street_job')],[e('quest_complete','street_job'),e('wallet_delta',3000),e('message','Pekerjaan selesai')],'job_complete')
   ]},
-  transport:{label:'Transport / Vehicle',rules:[rule('board','Naik kendaraan','ride',[c('wallet_min',5000)],[e('wallet_delta',-5000),e('message','Tiket dibayar')])]},
+  transport:{label:'Transport / Vehicle',rules:[rule('board','Naik kendaraan','ride',[c('wallet_min',1000)],[e('wallet_delta',-1000),e('message','Tiket dibayar')])]},
   building:{label:'Enterable Building',rules:[rule('enter','Masuk bangunan','walk',[],[e('message','Entrance activated')],'enter')]}
 };
 const state={cities:[],record:null,project:null,entities:[],selected:null,action:0,dirty:false,tab:'map',test:null,testLines:[],zoom:1,panX:0,panY:0,midX:0,midZ:0,points:[],drag:null,selectedCategory:'',suppress:false};
@@ -88,7 +90,7 @@ function currentTemplate(o){return binding(o)?.template||templateFor(o);}
 function rules(o){return binding(o)?.rules||fromTemplate(currentTemplate(o));}
 function ensureBinding(){const o=selectedObject();if(!o)return null;if(!state.project.bindings[o.id])state.project.bindings[o.id]={template:templateFor(o),rules:fromTemplate(templateFor(o))};return state.project.bindings[o.id];}
 function selectedObject(){return state.entities.find(o=>o.id===state.selected)||null;}
-function newProject(id){return {version:1,cityId:id,updatedAt:null,systems:defaults(),bindings:{},templates:{}};}
+function newProject(id){return {version:2,cityId:id,updatedAt:null,systems:defaults(),bindings:{},templates:{},foundation:JF.defaultFoundation()};}
 function dbOpen(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window))return reject(Error('IndexedDB unavailable'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(TABLE))r.result.createObjectStore(TABLE,{keyPath:'cityId'});};r.onerror=()=>reject(r.error);r.onsuccess=()=>resolve(r.result);});}
 async function dbOperation(op,val){
  const db=await dbOpen();return new Promise((resolve,reject)=>{const t=db.transaction(TABLE,op==='get'?'readonly':'readwrite'),r=t.objectStore(TABLE)[op](val);r.onerror=()=>reject(r.error);r.onsuccess=()=>resolve(r.result);t.oncomplete=()=>db.close();});
@@ -121,6 +123,7 @@ function validateProject(input,cityId){
   if(!ids.has(id)||!b||!Array.isArray(b.rules))continue;
   result.bindings[id]={template:(TEMPLATES[b.template]||result.templates[b.template])?b.template:'generic',rules:cleanRules(b.rules)};
  }
+ result.foundation=JF.normalizeFoundation(input.foundation);
  return result;
 }
 async function save(){
@@ -130,10 +133,11 @@ async function save(){
 }
 async function listCities(){
  try{
-  state.cities=await window.VLCityDrafts.list();
+  const savedCities=await window.VLCityDrafts.list();
+  state.cities=[{id:GLOBAL_CITY,name:'GLOBAL FOUNDATION',objectCount:0},...savedCities];
   const picker=$('cityPicker'),previous=picker.value;
   picker.replaceChildren();
-  if(!state.cities.length){picker.add(new Option('No saved cities', ''));emptyCity('No saved city found. Go to Semesta → Save City, then Refresh.');return;}
+  if(!savedCities.length)notice('No city draft yet · edit the Global Foundation, or save a city in Semesta.');
   for(const row of state.cities)picker.add(new Option(row.name+' · '+row.objectCount+' objects',row.id));
   let wanted=params.get('city')||previous||localStorage.getItem(ACTIVE)||state.cities[0].id;
   if(!state.cities.some(x=>x.id===wanted))wanted=state.cities[0].id;
@@ -144,13 +148,19 @@ function emptyCity(message){state.record=null;state.project=null;state.entities=
 async function loadCity(id){
  if(!id)return emptyCity('Select a Semesta city first.');
  try{
-  const record=await window.VLCityDrafts.load(id);
+  const record=id===GLOBAL_CITY?{id:GLOBAL_CITY,name:'GLOBAL FOUNDATION',document:{objects:[],map:{}}}:await window.VLCityDrafts.load(id);
   if(!Array.isArray(record.document?.objects))throw Error('Invalid city document');
   state.record=record;state.entities=collectEntities(record);
   const raw=await readProject(id);
+  if(id!==GLOBAL_CITY&&!raw.updatedAt){
+   // New city copies the globally authored foundation, then becomes independent.
+   const shared=await readProject(GLOBAL_CITY);
+   if(shared.updatedAt&&shared.foundation)raw.foundation=clone(shared.foundation);
+  }
   state.project=validateProject({...newProject(id),...raw,cityId:id},id);
   state.selected=(params.get('city')===id&&params.get('object')&&state.entities.some(o=>o.id===params.get('object')))?params.get('object'):(state.selected&&state.entities.some(o=>o.id===state.selected)?state.selected:state.entities[0]?.id||null);
   state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(state.entities.length);
+  window.dispatchEvent(new Event('jiwa:context:render'));
   $('mapInfo').textContent=record.name+' · '+state.entities.length+' OBJECTS';
   notice('City loaded: '+record.name+' · edit mechanics only, placement read-only');
  }catch(e){emptyCity('Load failed: '+e.message);}
@@ -165,7 +175,7 @@ function renderTree(){
   if(items.length>400){const hint=document.createElement('div');hint.className='empty';hint.textContent='Showing first 400 — filter to find more';d.append(hint);}
   root.append(d);
  }
- if(!shown){const el=document.createElement('div');el.className='empty';el.textContent=search?'No matching objects.':'No placed objects in city.';root.append(el);}
+ if(!shown){const el=document.createElement('div');el.className='empty';el.textContent=search?'No matching objects.':state.record?.id===GLOBAL_CITY?'Global core contexts: no map required. Choose a saved city to bind individual objects.':'No placed objects in city.';root.append(el);}
 }
 function selectObject(id,focus=false){state.selected=id;state.action=0;if(focus){const o=selectedObject();if(o){const p=iso(Number(o.x)||0,Number(o.z)||0);state.panX+=canvas.clientWidth/2-p.x;state.panY+=canvas.clientHeight/2-p.y;}}renderTree();renderInspector();draw();}
 function renderInspector(){
@@ -218,18 +228,19 @@ function renderSystems(){
  if(!state.project)return;
  for(const [k,v] of Object.entries(state.project.systems)){const input=$('sys-'+k);if(input)input.value=v;}
  const bound=Object.keys(state.project.bindings).length;
- $('registryInfo').textContent=Object.keys(allTemplates()).length+' reusable templates · '+bound+' object overrides · '+state.entities.length+' Semesta objects';
+ $('registryInfo').textContent=Object.keys(allTemplates()).length+' reusable templates · '+bound+' object overrides · '+state.entities.length+' Semesta objects · '+(state.project.foundation?.contexts?.length||0)+' foundational contexts';
 }
 function tab(which){
  state.tab=which;
  for(const b of document.querySelectorAll('[data-tab]'))b.classList.toggle('active',b.dataset.tab===which);
- for(const name of ['map','systems','test'])$(name+'View').hidden=which!==name;
+ for(const name of ['map','systems','test','context'])$(name+'View').hidden=which!==name;
  if(which==='map')resizeCanvas();
  if(which==='systems')renderSystems();
  if(which==='test')renderTest();
+ if(which==='context')window.dispatchEvent(new Event('jiwa:context:render'));
 }
 function resetTest(){
- const s=state.project?.systems||defaults();state.test={...clone(s),inventory:[],quests:[]};state.testLines=['Sandbox reset · player wallet Rp '+Number(s.wallet||0).toLocaleString('id-ID')];
+ const s=state.project?.systems||defaults();state.test=JF.newTestState(s,state.project?.foundation);state.testLines=['Sandbox reset · player wallet Rp '+Number(s.wallet||0).toLocaleString('id-ID')];
  renderTest();
 }
 function logTest(message){state.testLines.unshift(new Date().toLocaleTimeString('id-ID')+'  '+message);state.testLines=state.testLines.slice(0,55);renderTest();}
@@ -242,7 +253,8 @@ function renderTest(){
   if(key!=='wallet'){const bar=document.createElement('div');bar.className='bar';const fill=document.createElement('div');fill.className='fill';fill.style.width=clamp(state.test[key])+'%';bar.append(fill);t.append(bar);}
   $('testStats').append(t);
  }
- const inventory=document.createElement('div');inventory.className='subtle';inventory.textContent='Items: '+(state.test.inventory.join(', ')||'none')+' · Quests: '+(state.test.quests.join(', ')||'none')+' · Time '+state.test.time;$('testStats').append(inventory);
+ const more=document.createElement('div');more.className='stat';more.style.gridColumn='1 / -1';more.textContent='DAY '+(state.test.gameDay||1)+' · MORAL '+(state.test.moral??50)+' · TRUST '+(state.test.trust??20)+' · SPIRITUAL '+(state.test.spiritual??50)+' · REPUTATION '+(state.test.reputation??50)+' · SKILL '+(state.test.skill??0)+' · DAILY WAGE Rp '+(state.test.dailyWages??0)+' · COURSE XP '+(state.test.dailyCourseXP??0);$('testStats').append(more);
+ const inventory=document.createElement('div');inventory.className='subtle';inventory.style.gridColumn='1 / -1';inventory.textContent='BAG ('+state.test.inventory.length+'/8): '+(state.test.inventory.join(', ')||'empty')+' · QUESTS: '+(state.test.quests.join(', ')||'none')+' · SPAWN: '+(state.test.spawn||'hobo')+' · OFFERS: '+(state.test.offers||[]).join(', ');$('testStats').append(inventory);
  $('testLog').textContent=state.testLines.join('\n');
 }
 function passes(condition,s){
@@ -264,8 +276,19 @@ function runAction(){
  if(!r.enabled)return logTest('BLOCKED · '+r.label+' is disabled');
  const fail=(r.conditions||[]).find(x=>!passes(x,state.test));
  if(fail)return logTest('BLOCKED · '+r.label+' · condition '+fail.kind+' ('+fail.value+')');
- const s=state.test,changes=[];
- for(const effect of r.effects||[]){
+ const s=state.test,changes=[],effects=r.effects||[];
+ // Legacy object-rule sandbox uses the same economy and inventory invariants as Context v2.
+ // Preflight before applying ANY effect to avoid half-paid / half-granted transactions.
+ const totalCost=effects.filter(x=>x.kind==='wallet_delta'&&Number(x.value)<0).reduce((n,x)=>n+Number(x.value),0);
+ if(s.wallet+totalCost<0)return logTest('BLOCKED · Insufficient wallet for atomic purchase');
+ const adds=effects.filter(x=>x.kind==='inventory_add').map(x=>String(x.value||'')).filter(Boolean);
+ const maxBag=state.project.foundation?.settings?.bagSlots||8;
+ if(s.inventory.length+adds.length>maxBag||adds.some(id=>s.inventory.includes(id)))
+  return logTest('BLOCKED · Bag full or duplicate inventory item');
+ const wage=r.trigger==='job_complete'?effects.filter(x=>x.kind==='wallet_delta'&&Number(x.value)>0).reduce((n,x)=>n+Number(x.value),0):0;
+ if(wage>0&&(s.dailyWages||0)+wage>(state.project.foundation?.settings?.dailyWageCap||6000))
+  return logTest('BLOCKED · Daily wage quota reached');
+ for(const effect of effects){
   const n=Number(effect.value);
   if(effect.kind==='wallet_delta'){s.wallet=Math.max(0,s.wallet+safeNum(n,-1e8,1e8));changes.push('wallet '+n);}
   else if(effect.kind.startsWith('stat_')){const field=effect.kind.slice(5);if(STAT.includes(field)){s[field]=clamp(s[field]+safeNum(n,-100,100));changes.push(field+' '+n);}}
@@ -275,6 +298,7 @@ function runAction(){
   else if(effect.kind==='message')changes.push(effect.value);
   else if(effect.kind==='animation')changes.push('animation '+effect.value+' (preview log)');
  }
+ if(wage>0)s.dailyWages=(s.dailyWages||0)+wage;
  if(r.animation)changes.unshift('animation '+r.animation+' (preview log)');
  logTest('OK · '+objectName(o)+' / '+r.label+' → '+(changes.join(' · ')||'No effects'));
  tab('test');
@@ -383,6 +407,22 @@ $('importFile').onchange=async ev=>{
  const f=ev.target.files?.[0];ev.target.value='';if(!f||!state.record)return;if(f.size>2e6)return notice('Import file too large (>2MB)');
  try{const parsed=JSON.parse(await f.text());const incoming=validateProject(parsed,state.record.id);if(!confirm('Replace Jiwa mechanics for this city with imported project?'))return;state.project=incoming;state.action=0;markDirty();renderInspector();renderSystems();resetTest();notice('Imported project. Click SAVE RULES to persist.');}catch(e){notice('Import rejected: '+e.message);}
 };
+window.JiwaContextBridge=Object.freeze({
+ project:()=>state.project,
+ selectedObject:()=>{const o=selectedObject();return o?{id:o.id,name:objectName(o),type:o.type||''}:null;},
+ changed:()=>{if(!state.project)return;markDirty();renderSystems();},
+ test:(id,payload)=>{
+  if(!state.project||!state.test)return {ok:false,reason:'Choose saved Semesta city first'};
+  const result=JF.execute(state.project.foundation,id,state.test,payload);
+  if(result.ok)state.test=result.state;
+  logTest((result.ok?'OK · ':'BLOCKED · ')+id+' · '+(result.ok?result.changes.join(' · '):result.reason));
+  tab('test');return result;
+ },
+ sandbox:()=>state.test,
+ nextDay:()=>{if(!state.test)return;state.test=JF.nextDay(state.test);logTest('New game day '+state.test.gameDay+' · daily quotas reset');tab('test');},
+ reset:resetTest,
+ navigate:tab
+});
 window.addEventListener('beforeunload',ev=>{if(state.dirty){ev.preventDefault();ev.returnValue='';}});
 window.addEventListener('storage',ev=>{if(ev.key===CHANGE&&!state.dirty){notice('Mechanics changed in another tab. Click REFRESH to reload.');}});
 window.addEventListener('focus',()=>{if(!state.dirty&&state.record)notice('JIWA ready · '+state.record.name);});

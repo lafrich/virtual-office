@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "status": "proposal_only_not_live",
+  "name": "jiwa_foundation_v2",
+  "existingUI": {
+    "phone": [
+      "minimap",
+      "online_courses",
+      "messages",
+      "opportunities"
+    ],
+    "bag": {
+      "separateFromPhone": true,
+      "slots": 8
+    },
+    "status": [
+      "fullness",
+      "energy",
+      "hygiene",
+      "bladder"
+    ],
+    "action": {
+      "singleContextButton": true,
+      "defaultIdle": "fart",
+      "wallPeeFacingRequired": true,
+      "unsafeNeedsDeliberateChoice": true
+    },
+    "noExtraTopHUD": true
+  },
+  "world": {
+    "renderer": "semesta_3d_isometric",
+    "crossing": {
+      "event": "CROSSING_COMPLETED",
+      "energyDelta": -2,
+      "oncePerCrossingId": true,
+      "collisionResetCharge": 0
+    }
+  },
+  "authority": {
+    "state": "server",
+    "editorRules": "local_draft_until_published",
+    "offlineNeedsDecay": false,
+    "requiredEventKeys": [
+      "event_id",
+      "actor_id",
+      "world_id",
+      "game_day",
+      "occurred_at",
+      "object_id",
+      "event_type"
+    ],
+    "deduplicateEvents": true,
+    "atomicPayments": true
+  },
+  "economy": {
+    "dailyWorkQuotaRp": 6000,
+    "quotaType": "example_from_v15a",
+    "sandboxOriginal": {
+      "walletRp": 80000,
+      "exampleJobRp": 25000,
+      "exampleMealRp": 15000
+    },
+    "exampleBudget": {
+      "stapleMealRp": 2500,
+      "snackRp": 1000,
+      "freeWater": true,
+      "publicRestFree": true
+    },
+    "scavenge": {
+      "uniqueSpawnClaim": true,
+      "finiteRespawn": true,
+      "bagSlotValidation": true
+    },
+    "loak": {
+      "consumeItemBeforePayout": true,
+      "finiteDemand": true
+    }
+  },
+  "survival": {
+    "energyZeroCanMove": true,
+    "lowEnergySlowsWalk": true,
+    "publicRestAvailable": true,
+    "publicWaterAvailable": true,
+    "publicIncomeRouteAvailable": true,
+    "needs": [
+      "fullness",
+      "energy",
+      "hygiene",
+      "bladder"
+    ],
+    "needsCannotCausePermanentLock": true
+  },
+  "progression": {
+    "courseXpPerGameDay": 150,
+    "workXpSeparate": true,
+    "socialOptionalForCoreIncome": true,
+    "advancedJobsGates": [
+      "skill",
+      "referral",
+      "availability",
+      "luck"
+    ]
+  },
+  "housing": {
+    "authorizedRoomEntry": true,
+    "respawnOwnedOrActiveLease": true,
+    "homelessPublicFallback": true,
+    "ownershipNeverAssumedFromMapPlacement": true
+  },
+  "futureSocial": {
+    "enabled": false,
+    "moralityIndependentFromReputation": true,
+    "witnessScopedMemories": true,
+    "moralLuckOnlySocialEncounters": true,
+    "prayerNotMoralShortcut": true,
+    "hiddenOffersRequireValidReferrals": true,
+    "aiCannotMutateWallet": true
+  },
+  "actionPriority": [
+    "critical_exit",
+    "npc_interaction",
+    "furniture_use",
+    "legal_pickup",
+    "optional_wall_pee",
+    "idle_fart"
+  ]
+}
