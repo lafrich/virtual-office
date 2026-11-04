@@ -445,11 +445,13 @@ body{background:#0b357e;padding:clamp(12px,2.2vw,32px)}
 #app dialog{border-radius:0}
 @media(min-width:1001px){
  body{padding:clamp(12px,2.2vw,32px)}
- /* Desktop editor must grow vertically; never clip controls below the asset tray. */
- #app{height:auto;min-height:calc(100dvh - clamp(24px,4.4vw,64px));max-height:none;overflow:visible}
- #app .workspace{height:auto;min-height:620px;max-height:none;flex:none;align-items:stretch}
- #app .stage{flex:0 0 auto;height:clamp(280px,43dvh,520px);min-height:280px;max-height:none;overflow:auto}
- #app .panel.left,#app .panel.right,#app .center{min-height:0}
+ /* Restore a real independent vertical scrollbar on the center editor.
+    The status bar stays visible while every control below the asset tray is reachable. */
+ #app{height:calc(100dvh - clamp(24px,4.4vw,64px));min-height:540px;max-height:none;overflow:hidden}
+ #app .workspace{height:auto;min-height:0;max-height:none;flex:1;align-items:stretch;overflow:hidden}
+ #app .center{min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:auto}
+ #app .stage{flex:0 0 auto;height:clamp(260px,43dvh,520px);min-height:260px;max-height:none;overflow:auto}
+ #app .panel.left,#app .panel.right{min-height:0}
  #app .panel.right .properties{overflow:auto!important}
  #app .studio-tabs{top:0}
 }
