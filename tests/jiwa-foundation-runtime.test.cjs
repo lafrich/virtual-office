@@ -7,7 +7,7 @@ const fresh=()=>F.newTestState({wallet:6000,energy:80,fullness:70,hygiene:75,bla
 const fire=(f,id,state,over={})=>F.execute(f,id,state,Object.assign({
  eventId:'e_'+id,verified:true,progressComplete:true,confirmed:true,witnessed:true,
  recipient:true,itemId:'botol',spawnId:'spot_a',jobInstanceId:'job_a',
- verifiedPrice:1200,roll:0.1
+ verifiedPrice:1200,roll:0.1,crossingId:'crossing_a',referralKey:'npc_demo'
 },over));
 
 test('presets include every core life-system without changing 8-slot bag',()=>{
@@ -26,6 +26,8 @@ test('crossing charge is once per event ID and not tied to movement frames',()=>
  assert.equal(r.ok,true);assert.equal(r.state.energy,78);
  const duplicate=fire(f,'crossing',r.state,{eventId:'cross_1'});
  assert.equal(duplicate.ok,false);assert.equal(duplicate.state.energy,78);
+ const duplicateCrossing=fire(f,'crossing',r.state,{eventId:'crossing-new-event',crossingId:'crossing_a'});
+ assert.equal(duplicateCrossing.ok,false);
 });
 test('zero money and zero energy player can recover',()=>{
  const s=fresh();s.wallet=0;s.energy=0;
@@ -96,6 +98,8 @@ test('referral is disabled until feature gate and skill/trust met',()=>{
  s.skill=80;s.trust=80;
  const r=fire(f,'referral',s);
  assert.equal(r.ok,true);assert.ok(r.state.offers.includes('event_crew'));
+ const spam=fire(f,'referral',r.state,{eventId:'referral_repeat',referralKey:'npc_demo'});
+ assert.equal(spam.ok,false);
 });
 test('user-authored context survives save normalization; malicious fields are dropped',()=>{
  const f=foundation();
