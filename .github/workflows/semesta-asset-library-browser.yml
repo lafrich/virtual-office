@@ -6,6 +6,9 @@ on:
     paths:
       - "world-builder/asset-library.js"
       - "world-builder/asset-library.css"
+      - "world-builder/semesta-traffic-art.js"
+      - "world-builder/asset-thumbnails.js"
+      - "world-builder/builder.js"
       - "world-builder/bangun-ruang/asset-library-intake.js"
       - "world-builder/bangun-ruang/index.html"
       - ".github/workflows/semesta-asset-library-browser.yml"
@@ -61,9 +64,9 @@ jobs:
             await page.locator('#salGallery [data-file="vehicle:bus_transjakarta"]').click();
             await page.locator('#salHero img').waitFor({timeout:15000});
             await page.waitForFunction(()=>document.querySelector('#salHero img')?.naturalWidth>0,null,{timeout:15000});
-            const vehicleCheck=await page.evaluate(()=>{
+            const vehicleCheck=await page.evaluate(async()=>{
               const img=document.querySelector('#salHero img');
-              const s=window.VLSemestaArt.vehiclePreview('bus_transjakarta','se');
+              const s=await window.VLSemestaArt.vehiclePreviewAsync('bus_transjakarta','se');
               return {matching:img.src===s,width:img.naturalWidth,height:img.naturalHeight,
                 buttons:document.querySelectorAll('#salViews button').length,
                 source:img.dataset.source};
@@ -72,10 +75,43 @@ jobs:
               throw Error('TransJakarta preview mismatches actual Semesta artwork '+JSON.stringify(vehicleCheck));
             const allVehicles=await page.evaluate(async()=>{
               const list=window.VLSemestaCatalog.vehicles;
-              const result=await Promise.all(list.map(v=>Promise.resolve(window.VLSemestaArt.vehiclePreview(v.id,'se'))));
+              const result=await Promise.all(list.map(v=>window.VLSemestaArt.vehiclePreviewAsync(v.id,'se')));
               return {total:result.length,missing:result.filter(x=>!x).length};
             });
             if(allVehicles.missing)throw Error('Other vehicles have broken artwork: '+JSON.stringify(allVehicles));
+
+            // Check the exact native v3 artwork for EVERY rider and EVERY
+            // direction. The previous failure had a detailed Gojek but
+            // crude proxy Gojek+passenger/Maxim due source not being requested.
+            const riderAudit=await page.evaluate(async()=>{
+              const expected={gojek:[60,87],gojek_pax:[54,92],maxim:[54,87],
+                maxim_pax:[54,92],sma_triple:[66,96]};
+              const dirs=['se','sw','ne','nw'],results=[];
+              for(const [id,size] of Object.entries(expected)){
+                for(const dir of dirs){
+                  const url=await window.VLSemestaArt.vehiclePreviewAsync(id,dir);
+                  if(!url||!url.includes('riders_v3/frames/'+id+'_'+dir+'_f0.png')||
+                     url.startsWith('data:'))throw Error('Proxy thumbnail: '+id+'/'+dir+' '+url);
+                  const image=await new Promise((resolve,reject)=>{
+                    const img=new Image();
+                    img.onload=()=>resolve([img.naturalWidth,img.naturalHeight]);
+                    img.onerror=()=>reject(Error('Native PNG missing '+url));
+                    img.src=url;
+                  });
+                  if(image[0]!==size[0]||image[1]!==size[1])
+                    throw Error('Incorrect sprite geometry '+id+' '+dir+' '+image);
+                  results.push({id,dir,size:image});
+                }
+              }
+              return {nativeViews:results.length,ids:Object.keys(expected),failed:0};
+            });
+            await page.locator('#salGallery [data-file="vehicle:gojek_pax"]').click();
+            await page.waitForFunction(()=>
+              document.querySelector('#salHero img')?.naturalWidth===54&&
+              document.querySelector('#salHero img')?.naturalHeight===92,
+              null,{timeout:30000});
+            await page.screenshot({path:'screenshots/semesta-native-ojol-gallery.png',fullPage:false});
+
             await page.locator('#salCategory').selectOption('character');
             await page.waitForFunction(()=>document.querySelector('#salCount')?.textContent?.includes('VALID'),null,{timeout:120000});
             const characterCard=page.locator('#salGallery [data-file^="character:"]').first();
@@ -113,7 +149,7 @@ jobs:
             await page.waitForFunction(()=>[...document.querySelectorAll('#salGallery .sal-card')].some(x=>x.textContent.includes('Custom')),null,{timeout:120000});
             const customs=await page.locator('#salGallery .sal-card').count();
             await page.screenshot({path:'screenshots/semesta-custom-asset-library.png',fullPage:false});
-            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,vehicleCheck,allVehicles,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
+            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,vehicleCheck,allVehicles,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
             await browser.close();
             if(faults.some(x=>/SyntaxError|Cannot read properties|is not defined/i.test(x)))
               throw Error('Browser JS crash: '+faults.join('; '));
