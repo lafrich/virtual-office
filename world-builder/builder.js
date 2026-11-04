@@ -31,6 +31,7 @@ const style=window.VLWorldStyle;
 const terrain=window.VLMapTerrain;
 const physics=window.VLWorldPhysics;
 const studioSprites=window.VLSemestaStudioSprite;
+const pipelineGround=window.VLSemestaPipelineGround;
 const vegetationGround=window.VLSemestaVegetationGround;
 const traffic=window.VLSemestaTraffic;
 const trafficFlow=window.VLSemestaTrafficFlow;
@@ -790,6 +791,19 @@ function makeSprite(root,item){
   }
  }
  const view=spriteDirection(item.rotation);
+ // Pipeline buildings, electricity poles, park lamps and street props have
+ // an authored 2:1 GROUND apron below the center anchor. Render that apron
+ // on world XZ instead of letting the terrain clip a below-ground quad.
+ // Studio mesh Warteg and existing vegetation have independent grounding.
+ if(pipelineGround?.supports(spec)){
+  const grounded=pipelineGround.attach(THREE,root,spec,view,pixelTexture(item.asset,view));
+  if(grounded){
+   grounded.facade.userData.assetFile=item.asset;
+   grounded.facade.userData.groundBundle=grounded;
+   billboardSprites.push({root,plane:grounded.facade});
+   return;
+  }
+ }
  const data=spec.variants?.[view]||spec.variants?.sw||spec.variants?.se;
  const size=data?.size||spec.size,pivot=data?.pivot||spec.pivot;
  const width=item.width||spec.width||4,height=item.height||spec.height||4;
@@ -3234,6 +3248,15 @@ function frame(now){
  for(const entry of billboardSprites){
    const {root,plane}=entry;
    const key=plane.userData.assetFile,spec=assetByName.get(key);
+   const groundBundle=plane.userData.groundBundle;
+   if(groundBundle&&spec&&pipelineGround){
+    const dir=spriteDirection(root.rotation.y*180/Math.PI);
+    if(dir!==groundBundle.view){
+     pipelineGround.configure(THREE,groundBundle,spec,dir,pixelTexture(key,dir));
+    }
+    pipelineGround.faceCamera(groundBundle,root,camera);
+    continue;
+   }
    if(spec&&['pipeline-street','custom-building'].includes(spec.source)){
      const dir=spriteDirection(root.rotation.y*180/Math.PI);
      if(dir!==plane.userData.displayFacing){
