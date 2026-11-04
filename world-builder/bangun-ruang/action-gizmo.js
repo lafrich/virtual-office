@@ -35,11 +35,13 @@
    if(Math.abs(d-RADIUS)<GRAB+6||d<GRAB+7)return "rotate";
    return null;
   }
-  if(Math.abs(d-RADIUS)<GRAB&&d>RADIUS-GRAB)return "rotate";
+  // Axis handles must win against the ring at their intersections.
+  // Otherwise attempting to move X/Y accidentally rotates the actor.
   if(p.x>=center.x+13&&p.x<=center.x+LENGTH+20&&
       Math.abs(p.y-center.y)<GRAB)return "x";
   if(p.y<=center.y-13&&p.y>=center.y-LENGTH-20&&
       Math.abs(p.x-center.x)<GRAB)return "y";
+  if(Math.abs(d-RADIUS)<GRAB&&d>RADIUS-GRAB)return "rotate";
   if(d<=GRAB+7)return "xy";
   // Dragging anywhere on the actor's body also moves it, on touch.
   if(p.x>=center.x-38&&p.x<=center.x+40&&
