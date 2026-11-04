@@ -89,3 +89,17 @@ test("furniture gizmo exposes move X/Y/centre and two separate flip controls",()
  assert.equal(gizmo.hitObject(center,points.flipY),"flipY");
  assert.equal(gizmo.hitObject(center,{x:0,y:0}),null);
 });
+
+test("isometric furniture handles follow the 2:1 tile axes and project drags",()=>{
+ const center={x:180,y:180},h=gizmo.objectHandles(center,true);
+ assert.deepEqual(h.x,{x:235,y:207.5});
+ assert.deepEqual(h.y,{x:125,y:207.5});
+ for(const key of ['x','y','flipX','flipY'])
+  assert.equal(gizmo.hitObject(center,h[key],true),key);
+ assert.equal(gizmo.hitObject(center,center,true),'xy');
+ assert.equal(gizmo.objectAxisSteps(32,16,'x'),1);
+ assert.equal(gizmo.objectAxisSteps(-32,16,'y'),1);
+ assert.equal(gizmo.objectAxisSteps(32,16,'y'),-1);
+ assert.equal(gizmo.objectAxisSteps(-32,16,'x'),-1);
+ assert.equal(gizmo.objectAxisSteps(32,-64,'x'),-1);
+});
