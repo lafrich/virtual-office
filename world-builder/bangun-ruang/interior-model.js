@@ -16,7 +16,8 @@ const ACTIONS=Object.freeze({
  relax:{label:'Relax',pose:'sit',description:'Sit pose'},
  work:{label:'Work',pose:'work',description:'Work / sit_type pose'},
  study:{label:'Study',pose:'work',description:'Work / sit_type pose'},
- bathe:{label:'Bathe',pose:'bathe',description:'Bathe / swim pose'},
+ bathe:{label:'Bathe / Shower',pose:'bathe',description:'Standing shower action'},
+ bathtub_bathe:{label:'Bathtub / Soak',pose:'bathtub_bathe',description:'Open-eyed foamy reclined soak; 6-frame human animation'},
  wash:{label:'Wash',pose:null,description:'Gameplay hook only; no authored wash animation'},
  cook:{label:'Cook',pose:null,description:'Gameplay hook only; no authored cook animation'},
  buy:{label:'Buy',pose:'talk',description:'Talk pose; checkout gameplay not implemented'},
@@ -27,7 +28,7 @@ const ACTIONS=Object.freeze({
 const TYPES=Object.freeze({
  wc:{label:'WC / Toilet',category:'Bathroom',glyph:'🚽',w:1,d:1,actions:['use_toilet','pee','poop']},
  shower:{label:'Shower',category:'Bathroom',glyph:'🚿',w:1,d:1,actions:['bathe']},
- bathtub:{label:'Bathtub',category:'Bathroom',glyph:'🛁',w:2,d:1,actions:['bathe']},
+ bathtub:{label:'Bathtub',category:'Bathroom',glyph:'🛁',w:2,d:1,actions:['bathtub_bathe']},
  sink:{label:'Sink',category:'Bathroom',glyph:'🚰',w:1,d:1,actions:['wash']},
  bed:{label:'Kasur',category:'Bedroom',glyph:'🛏',w:2,d:2,actions:['sleep','rest']},
  wardrobe:{label:'Wardrobe',category:'Bedroom',glyph:'▥',w:2,d:1,actions:['open']},
@@ -200,7 +201,8 @@ function normalize(raw,cfg){
    triggerRadius:Math.max(.4,Math.min(3,Number(old.triggerRadius)||1.15)),
    actionAdjustments:ADJUST?.all(old.actionAdjustments,TYPES[old.assetId].actions,old.assetId)||{}};
   base.items.push(obj);
-  action(base,obj.id,old.actionId||obj.actionId);
+  action(base,obj.id,old.assetId==='bathtub'&&old.actionId==='bathe'?
+   'bathtub_bathe':(old.actionId||obj.actionId));
  }
  return base;
 }
