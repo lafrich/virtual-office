@@ -96,5 +96,12 @@ test("furniture directional nudge controls use grid movement and undo",()=>{
   assert.ok(html.includes('id="moveSelected'+direction+'"'));
  assert.ok(ui.includes("function nudgeSelected(direction)"));
  assert.ok(ui.includes("model.move(current,item.id,item.c+delta[0],item.r+delta[1])"));
+ // Down from the upper-right tile of a 2×2 isometric floor must reach
+ // the adjacent bottom/centre tile, not jump across two grid axes.
+ assert.ok(ui.includes("const offsets={left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]}"));
+ assert.ok(!ui.includes("down:[1,1]"));
+ const moves={left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]};
+ assert.deepEqual([1+moves.down[0],0+moves.down[1]],[1,1]);
+ for(const [dc,dr] of Object.values(moves))assert.equal(Math.abs(dc)+Math.abs(dr),1);
  assert.ok(ui.includes("recordUndo(before)"));
 });
