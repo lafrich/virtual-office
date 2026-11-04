@@ -57,7 +57,7 @@ test("Bangun Ruang keeps character pose gizmo and uses furniture H/V flip handle
  assert.ok(html.indexOf("action-gizmo.js?v=")<html.indexOf("character-scale-preview.js?v="),
   "gizmo helper should load before renderer");
  assert.ok(scale.includes("GIZMO.draw(ctx,actor.gizmoOrigin"));
- assert.ok(scale.includes("if(actor.adjusting&&GIZMO)"),
+ assert.ok(scale.includes("if(actor.adjusting&&actor.transformSelected&&GIZMO)"),
   "character gizmo must not show in gameplay or saved artwork");
  assert.ok(scale.includes("GIZMO.dragged("));
  assert.ok(scale.includes("GIZMO.rotateGesture("));
