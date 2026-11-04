@@ -14,7 +14,7 @@ const iso=g.VLInteriorIso;
 function init(api){
  let enabled=false,scenes={},floor=1,selected=null,placing=null,
    preview='exterior',tab='exterior',interiorView='iso',lastIso=null,
-   adjustmentDraft=null,adjustmentKey='',lastAdjusted=null;
+   adjustmentDraft=null,adjustmentKey='',lastAdjusted=null,actionTapTarget=null;
  const canvas=$('interiorCanvas'),ctx=canvas.getContext('2d');
  ctx.imageSmoothingEnabled=false;
  const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
@@ -141,6 +141,7 @@ function init(api){
  }
  function selectTab(which){
   if(!names[which]||(which==='interior'||which==='actions')&&!enabled)return;
+  if(tab!==which)actionTapTarget=null;
   tab=which;
   for(const [key,[button,pane]] of Object.entries(names)){
    const active=key===which;$(button).classList.toggle('active',active);
@@ -399,11 +400,13 @@ function init(api){
   const target=iso?.pointer?.(canvas,event,lastIso,{preferFloor:false});
   const id=target?.itemId||null,controller=api.getScaleController?.();
   if(!id){
+   actionTapTarget=null;
    controller?.setTransformMode?.('select');
    return true;
   }
-  const same=id===selected;
+  const same=id===actionTapTarget&&id===selected;
   if(!same){
+   actionTapTarget=id;
    if(controller?.actor?.adjusting)controller.endAdjustment();
    selected=id;adjustmentKey='';adjustmentDraft=null;
    renderObjects();renderActions();draw();
@@ -452,7 +455,7 @@ function init(api){
  }
  function load(pack){
   const c=cfg();scenes={};floor=1;selected=null;placing=null;
-  adjustmentKey='';adjustmentDraft=null;
+  adjustmentKey='';adjustmentDraft=null;actionTapTarget=null;
   const last=pack?.lastAdjusted;
   lastAdjusted=last&&typeof last.itemId==='string'&&typeof last.actionId==='string'?
    {floor:Number(last.floor)||1,itemId:last.itemId,actionId:last.actionId}:null;
