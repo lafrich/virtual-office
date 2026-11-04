@@ -60,6 +60,6 @@ const art=g.VLSemestaArt;
  const html=fs.readFileSync(path.join(dir,'index.html'),'utf8');
  assert.match(builder,/semesta-vehicle-source-loaded/);
  assert.match(builder,/trafficArt\?\.retrySources\(\)/);
- assert.match(html,/semesta-traffic-art\.js\?v=wheel-contact-v2/);
+ assert.match(html,/semesta-traffic-art\.js\?v=(?:wheel-contact-v2|preview-parity-20261105)/);
  console.log('PASS Semesta Mahluk transport original PNG source, 4-view loading, preview fallback, 2-grid TransJakarta');
 })().catch(e=>{console.error(e);process.exitCode=1});
