@@ -39,8 +39,12 @@ test('200 named Indonesian sprites load from secondary published manifest',async
  assert.equal(g.VLPipelineAssets.prefabs.length,200);
  assert.equal(new Set(g.VLAssetCatalog.map(x=>x.file)).size,200);
  assert.equal(g.VLPipelineAssets.building(all[0].id,'ne'),
-  'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+all[0].variants.ne.file);
+  'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+all[0].variants.ne.file+'?v='+g.VLIndonesiaAssets.IMAGE_REV);
  assert.equal(g.VLPipelineAssets.building('ruko_a'),'old-url');
+ assert.equal(g.VLIndonesiaAssets.cacheBust(all[0],'https://example.com/png.png'),
+  'https://example.com/png.png?v='+g.VLIndonesiaAssets.IMAGE_REV);
+ assert.equal(g.VLIndonesiaAssets.cacheBust({pack:'indonesia-v1'},'https://example.com/old.png'),
+  'https://example.com/old.png');
  assert.equal(calls.length,2);
  assert.ok(calls.some(x=>x.endsWith('indonesia_200_catalog.json')));
  assert.equal((await g.VLIndonesiaAssets.load()).count,200);
