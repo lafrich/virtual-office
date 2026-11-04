@@ -85,6 +85,9 @@ jobs:
       - name: Saved Bangun Ruang interaction placement and gizmo regression
         run: |
           node --test tests/bangun-ruang-action-adjustment.test.cjs tests/bangun-ruang-action-gizmo.test.cjs tests/bangun-ruang-adjustment-persistence.test.cjs tests/bangun-ruang-type-action-presets.test.cjs
+          node --check world-builder/bangun-ruang/warteg-kharisma-template.js
+          node --check world-builder/bangun-ruang/warteg-interior-paint.js
+          node --test tests/bangun-ruang-warteg-pipeline.test.cjs
           node --check world-builder/bangun-ruang/studio-interior-ui.js
           node --check world-builder/bangun-ruang/action-adjustment.js
       - name: Launcher desktop and navigation validation
