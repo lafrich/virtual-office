@@ -13,7 +13,7 @@ const BASES=['astrofrich_base','human_male_base','human_female_base'];
 const SAFE_ID=/^[a-z0-9_-]{1,90}$/;
 const ASSET=/^media\/[a-z0-9_.-]+\.png$/i;
 const DATA=/^data:image\/png;base64,[a-zA-Z0-9+/=]+$/;
-const SLOTS=['bag','shoes','pants','shirt','helmet'];
+const SLOTS=['bag','shoes','pants','shirt','hair','helmet'];
 let entries=new Map(),customs=new Map(),equipment={},accessories=new Map();
 let build='',loaded=false,lastError='',lastSync=0;
 const read=(key,def)=>{try{return JSON.parse(localStorage.getItem(key))??def}catch{return def}};
@@ -77,7 +77,10 @@ function localSync(){
     !BASES.includes(r.base)||!entries.has(r.base))continue;
    const parent=entries.get(r.base);
    nextCustoms.set(r.id,{...parent,id:r.id,name:String(r.name||r.id).slice(0,40),
-    baseId:r.base,category:parent.category,template:false,custom:true});
+    baseId:r.base,category:parent.category,template:false,custom:true,
+    bodyType:parent.bodyType||parent.gender||null,
+    skinTone:['base','light','medium','tan','deep','dark'].includes(r.skinTone)?
+     r.skinTone:'base'});
   }
  }
  const nextEquip={};
