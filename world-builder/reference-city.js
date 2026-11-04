@@ -28,7 +28,13 @@ function create(base,catalog,style,schema){
  const isRoad=(c,r)=>horizontal.some(([a,z])=>r>=a&&r<=z)||
   vertical.some(([a,z])=>c>=a&&c<=z);
  for(let r=b.minZ;r<b.maxZ;r++)for(let c=b.minX;c<b.maxX;c++){
-  if(isRoad(c,r))paint(c,r,'road');
+  if(isRoad(c,r)){
+   // Kebon Sirih 2026 streetscape: parts of the main road use concrete
+   // rigid-pavement repair, with quieter asphalt on connecting streets.
+   const rigid=(r>=42&&r<=45&&c>-12&&c<48)||
+    (c>=18&&c<=21&&r>40&&r<81);
+   paint(c,r,'road',rigid?{surface:'concrete'}:{});
+  }
  }
  // Continuous sidewalks follow roads at a one-tile margin.
  for(let r=b.minZ;r<b.maxZ;r++)for(let c=b.minX;c<b.maxX;c++){
