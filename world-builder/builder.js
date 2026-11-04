@@ -2784,6 +2784,35 @@ async function refreshMahlukHidup(full=true){
 }
 $('refreshAssets').onclick=()=>refreshMahlukHidup(true);
 $('syncBangunObjects').onclick=refreshBangunRuang;
+// A building saved from Bangun Ruang edits ONE placed instance in the
+// already-open named City Draft. Patch that instance here without replacing
+// the rest of the live 3D map (unsaved roads, NPCs and placements survive).
+const cityBuildingLink=window.VLSemestaCityBuildings;
+let lastCityBuildingNotice=null;
+try{lastCityBuildingNotice=localStorage.getItem(cityBuildingLink?.UPDATE_KEY||'virtual-life-city-building-update-v1');}catch{}
+function reconcileExternalCityBuilding(raw){
+ if(!raw||raw===lastCityBuildingNotice)return;
+ lastCityBuildingNotice=raw;
+ let notice;
+ try{notice=JSON.parse(raw);}catch{return;}
+ if(!cityBuildingLink||notice?.draftId!==activeDraftId)return;
+ const index=documentMap.objects.findIndex(o=>o.id===notice.objectId);
+ if(index<0)return;
+ const asset=cityBuildingLink.getAsset(notice.assetId);
+ if(!asset){tell('City building update unavailable · refresh Bangun Ruang assets');return;}
+ try{
+  const wasDirty=draftDirty;
+  // Rebuild the current catalog first to register the newly authored sprite.
+  refreshBangunRuang();
+  const updated=cityBuildingLink.replaceInstance(documentMap.objects[index],asset);
+  style.normalize(updated,assetByName);schema.normalize(updated,assetByName,style);
+  documentMap.objects[index]=updated;
+  rebuild();updateSelection();saved();
+  draftDirty=wasDirty;
+  if(!wasDirty)$('saveStatus').textContent='● City Draft building synced';
+  tell('✓ Bangun Ruang → '+asset.name+' updated in '+(documentMap.map?.name||'Semesta'));
+ }catch(error){tell('⚠ City building sync failed: '+error.message);}
+}
 window.addEventListener('storage',e=>{
  if(['virtual-life-character-storage-v1','virtual-life-accessory-equipment-v1',
      'virtual-life-accessories-v1'].includes(e.key))refreshMahlukHidup(false);
@@ -2793,6 +2822,7 @@ window.addEventListener('storage',e=>{
   updateSelection();
  }
  if(e.key===window.VLBuildingBridge?.key||e.key===window.VLBangunObjects?.key)refreshBangunRuang();
+ if(e.key===cityBuildingLink?.UPDATE_KEY)reconcileExternalCityBuilding(e.newValue);
 });
 // Backgrounded mobile tabs can miss a StorageEvent while suspended.
 // Reconciling on focus also covers a same-tab visit back from Bangun Ruang.
@@ -2800,6 +2830,7 @@ let lastBuildingPayload=null,lastObjectPayload=null;
 try{lastBuildingPayload=localStorage.getItem(window.VLBuildingBridge?.key||'virtual-life-bangun-ruang-v1');
  lastObjectPayload=localStorage.getItem(window.VLBangunObjects?.key||'virtual-life-bangun-objects-v1');}catch{}
 window.addEventListener('focus',()=>{
+ try{reconcileExternalCityBuilding(localStorage.getItem(cityBuildingLink?.UPDATE_KEY||'virtual-life-city-building-update-v1'));}catch{}
  let next;
  try{next=localStorage.getItem(window.VLBuildingBridge?.key||'virtual-life-bangun-ruang-v1');}catch{return;}
  let nextObjects;
