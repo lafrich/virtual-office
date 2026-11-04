@@ -234,7 +234,11 @@ function init(api){
  }
  function selectTab(which){
   if(!names[which]||(which==='interior'||which==='actions')&&!enabled)return;
-  if(tab!==which)actionTapTarget=null;
+  if(tab!==which){
+   actionTapTarget=null;objectGizmoActive=false;
+   // Leaving Actions must release the character overlay so furniture taps work.
+   if(which!=='actions')api.getScaleController?.()?.endAdjustment?.();
+  }
   tab=which;
   for(const [key,[button,pane]] of Object.entries(names)){
    const active=key===which;$(button).classList.toggle('active',active);
@@ -597,6 +601,7 @@ function init(api){
   }
   if(selected){
    const before=snapshot();
+   if(!objectGizmoActive){objectGizmoActive=false;selected=null;renderObjects();renderActions();draw();return;}
    if(model.move(s,selected,c,r,undefined)){recordUndo(before);renderObjects();draw();onStatus('Moved interior prop to '+c+','+r);}
    else onStatus('Cannot move: occupied or outside floor plan');
   }
@@ -618,9 +623,8 @@ function init(api){
   e.preventDefault();
   if(tab==='actions'&&!placing){tapActionObject(e);return;}
   if(api.onFloorClick?.(c,z,hit)===true)return;
-  if(hit?.itemId&&!placing){
-   selected=hit.itemId;renderObjects();renderActions();draw();return;
-  }
+  // Route all furniture selections through the same two-tap gizmo state.
+  // The previous short-circuit made the second tap do nothing in isometric view.
   moveSelectedTo(c,z);
  });
  for(const [key,[button]] of Object.entries(names))$(button).onclick=()=>selectTab(key);
@@ -634,12 +638,15 @@ function init(api){
  $('applyInteriorTemplate').onclick=()=>{
   const current=scene(),template=$('interiorTemplate').value;
   if(current.items.length&&!confirm('Replace this floor\'s furniture with '+model.templates[template].label+' template?'))return;
-  const next=model.preset(cfg(),template);next.floor=floor;scenes[floor]=next;
+  const before=snapshot();
+  const next=model.preset(cfg(),template);next.floor=floor;scenes[floor]=next;recordUndo(before);objectGizmoActive=false;
   selected=null;placing=null;refresh();setPreview('interior');onStatus('Floor '+floor+' template: '+model.templates[template].label);
  };
  $('clearInteriorRoom').onclick=()=>{
   if(scene().items.length&&!confirm('Remove all furniture on this floor?'))return;
-  scenes[floor]=model.create(cfg());scenes[floor].floor=floor;selected=null;placing=null;refresh();
+  const before=snapshot();
+  scenes[floor]=model.create(cfg());scenes[floor].floor=floor;recordUndo(before);
+  objectGizmoActive=false;selected=null;placing=null;refresh();
  };
  $('addInteriorItem').onclick=()=>armPlacement(asset.value);
  $('cancelInteriorPlacement').onclick=()=>{placing=null;draw();updateTray();updateRotateBar();};
@@ -655,7 +662,7 @@ function init(api){
  // E / R switch ACTOR gizmo, arrow keys nudge. Furniture-R still
  // rotates the object when actor adjustment is not active.
  document.addEventListener('keydown',e=>{
-  if(!enabled||preview!=='interior'||e.repeat||e.altKey||e.metaKey)return;
+  if(!enabled||preview!=='interior'||e.repeat||e.altKey)return;
   const focus=document.activeElement;
   if(focus&&(['INPUT','TEXTAREA','SELECT'].includes(focus.tagName)||
     focus.isContentEditable))return;
