@@ -11,7 +11,8 @@
 (function(g){
 'use strict';
 const $=id=>document.getElementById(id);
-const bridge=g.VLMahlukHidup,rig=g.VLCharacterRig,model=g.VLBuildingInterior,iso=g.VLInteriorIso;
+const bridge=g.VLMahlukHidup,rig=g.VLCharacterRig,model=g.VLBuildingInterior,iso=g.VLInteriorIso,
+ ADJUST=g.VLInteractionAdjust;
 const FRAME=rig?.FRAME||{w:64,h:112,pivotX:32,pivotY:100};
  // Native 64×32 art tile already includes Virtual Life's PPU=2.
  // Original V6B 64×112 image frame is drawn at 1x in both editor views.
@@ -187,7 +188,7 @@ function mount(api){
  if(!canvas||!stage||!ctx||!model)return null;
  const actor={active:false,profile:'ichsan',scene:'exterior',c:0,r:0,floor:1,
   pose:'idle',direction:'sw',moving:false,armed:false,segments:[],current:null,
-  actionAnchor:null,
+  actionAnchor:null,adjusting:false,adjustmentDraft:null,drag:null,
   walkProgress:0,then:null};
  let elapsed=0,lastFrame=0,lastDraw=0,activeSource=null;
  function cfg(){return api.getConfig();}
@@ -236,7 +237,8 @@ function mount(api){
   if(canvas.height!==naturalHeight)canvas.height=naturalHeight;
   canvas.style.left=left+'px';canvas.style.top=top+'px';
   canvas.style.width=width+'px';canvas.style.height=height+'px';
-  canvas.style.pointerEvents=actor.armed?'auto':'none';
+  canvas.style.pointerEvents=(actor.armed||actor.adjusting)?'auto':'none';
+  canvas.style.cursor=actor.adjusting?'move':actor.armed?'crosshair':'default';
   ctx.imageSmoothingEnabled=false;return true;
  }
  function draw(){
@@ -264,17 +266,22 @@ function mount(api){
     else {
      // Furniture can be moved or rotated while the actor is seated.
      // Use the shared CURRENT fixture geometry, never a stale anchor.
-     const seat=iso.actionAnchor(live);
+     const seat=actor.adjusting?
+      iso.actionAnchor(live,{raw:true,generic:true}):
+      iso.actionAnchor(live);
      if(!seat)leaveAction();
      else {
-      actor.actionAnchor={...seat,approach:actor.actionAnchor.approach};
-      actor.c=seat.c-.5;actor.r=seat.r-.5;
-      actor.direction=seat.direction;
+      const anchor=actor.adjusting&&ADJUST?
+       ADJUST.apply(seat,{actionAdjustments:{[live.actionId]:actor.adjustmentDraft}},live.actionId):seat;
+      actor.actionAnchor={...anchor,approach:actor.actionAnchor.approach};
+      actor.c=anchor.c-.5;actor.r=anchor.r-.5;
+      actor.direction=anchor.direction;
      }
     }
    }
    if(actor.actionAnchor){
     [x,y]=iso.point(geo,actor.actionAnchor.c,actor.actionAnchor.r,actor.actionAnchor.z||0);
+    x+=actor.actionAnchor.pixelOffsetX||0;
     y+=actor.actionAnchor.pixelOffsetY||0;
    }else [x,y]=iso.point(geo,actor.c+.5,actor.r+.5,0);
   }else{
@@ -286,7 +293,7 @@ function mount(api){
   const valid=drawActor(ctx,actor,elapsed,x,y,{seated:!!actor.actionAnchor});
   if(interiorGeometry&&actor.actionAnchor){
    const item=api.getInterior?.()?.items?.find(x=>x.id===actor.actionAnchor.itemId);
-   if(item)iso?.drawSeatForeground?.(ctx,interiorGeometry,item);
+   if(item&&actor.actionAnchor.objectLayer!=='front')iso?.drawSeatForeground?.(ctx,interiorGeometry,item);
   }
   if(!valid&&bridge?.ready&&!actor.reported){
    actor.reported=true;$('scaleStatus').textContent='Scale fallback · source sprite may be loading';
@@ -299,7 +306,8 @@ function mount(api){
   // Restore a freely walkable approach tile when standing up.
   if(actor.actionAnchor?.approach)
    [actor.c,actor.r]=actor.actionAnchor.approach;
-  actor.actionAnchor=null;actor.pose='idle';
+  actor.actionAnchor=null;actor.pose='idle';actor.adjusting=false;
+  actor.adjustmentDraft=null;actor.drag=null;
  }
  function placeDefault(){
   const p=spawnPoint();actor.c=p[0];actor.r=p[1];actor.floor=1;actor.scene='exterior';
@@ -365,6 +373,34 @@ function mount(api){
   };
   walk([start,dest],arrived);
  }
+ function beginAdjustment(draft){
+  const item=api.getSelectedProp?.(),room=api.getInterior?.();
+  if(!item||!room){status('Select furniture in the interior first');return false;}
+  actor.active=true;actor.profile=choose.value||actor.profile;
+  actor.armed=false;actor.scene='interior';actor.floor=room.floor;stop();
+  actor.adjusting=true;actor.adjustmentDraft=ADJUST?.normalize(
+    draft||ADJUST.get(item,item.actionId))||{x:0,y:0,direction:'auto',layer:'behind'};
+  const base=iso?.actionAnchor?.(item,{raw:true,generic:true});
+  if(!base){status('Cannot calculate an interaction anchor for '+item.name);return false;}
+  actor.actionAnchor={...base,approach:null};
+  actor.pose=model.actions?.[item.actionId]?.pose||'idle';
+  actor.c=base.c-.5;actor.r=base.r-.5;
+  actor.direction=actor.adjustmentDraft.direction==='auto'?base.direction:actor.adjustmentDraft.direction;
+  actor.reported=false;updateControls();draw();
+  status('ADJUST '+item.name+' / '+item.actionId+' · drag character or nudge / Save Adjustment');
+  return true;
+ }
+ function previewAdjustment(draft){
+  const item=api.getSelectedProp?.();
+  if(!item)return false;
+  if(!actor.adjusting||actor.actionAnchor?.itemId!==item.id)return beginAdjustment(draft);
+  actor.adjustmentDraft=ADJUST?.normalize(draft)||actor.adjustmentDraft;
+  draw();return true;
+ }
+ function isAdjusting(id,action){
+  const item=api.getSelectedProp?.();
+  return Boolean(actor.adjusting&&actor.actionAnchor?.itemId===id&&item?.actionId===action);
+ }
  function useSelected(){
   if(!actor.active||actor.scene!=='interior'){status('Place character inside the interior first');return;}
   const item=api.getSelectedProp?.(),scene=api.getInterior?.();
@@ -428,25 +464,12 @@ function mount(api){
  $('scaleWalkDoor').onclick=enterDoor;
  $('scaleUse').onclick=useSelected;
  $('scaleIdle').onclick=()=>{leaveAction();stop();updateControls();draw();status('Idle / Mahluk Hidup');};
- $('scaleEditAction').onclick=()=>{
-  const prop=api.getSelectedProp?.();
-  const action=prop?.assetId==='wc'?'toilet':
-   ['shower','bathtub'].includes(prop?.assetId)?'bathe':
-   prop?.assetId==='bed'?'sleep':
-   ['toilet','bathe','sleep'].includes(actor.pose)?actor.pose:'toilet';
-  // Open the native Mahluk Hidup Actions workspace, not the old standalone page.
-  const target=new URL('/virtual-life-asset-pipeline/',location.origin);
-  target.hash='actions';
-  target.searchParams.set('actor',choose.value||actor.profile);
-  target.searchParams.set('action',action);
-  const buildingId=api.getBuildingId?.();
-  if(buildingId)target.searchParams.set('building',buildingId);
-  const scene=api.getInterior?.();
-  if(scene?.floor)target.searchParams.set('floor',String(scene.floor));
-  if(prop?.id)target.searchParams.set('fixture',prop.id);
-  window.open(target.href,'_blank','noopener');
- };
+ $('scaleEditAction').onclick=()=>api.openAdjustment?.();
  canvas.addEventListener('pointerdown',e=>{
+  if(actor.adjusting&&showCharacter()){
+   actor.drag={id:e.pointerId,x:e.clientX,y:e.clientY,base:{...actor.adjustmentDraft}};
+   canvas.setPointerCapture?.(e.pointerId);e.preventDefault();return;
+  }
   if(!actor.armed||!showCharacter())return;
   const b=canvas.getBoundingClientRect();
   const x=(e.clientX-b.left)*canvas.width/b.width,y=(e.clientY-b.top)*canvas.height/b.height;
@@ -461,6 +484,21 @@ function mount(api){
    placeAt((u+zz)/2,(zz-u)/2,'exterior');
   }
   e.preventDefault();
+ });
+ canvas.addEventListener('pointermove',e=>{
+  if(!actor.adjusting||!actor.drag||actor.drag.id!==e.pointerId)return;
+  const box=canvas.getBoundingClientRect();if(!box.width||!box.height)return;
+  const dx=Math.round((e.clientX-actor.drag.x)*canvas.width/box.width);
+  const dy=Math.round((e.clientY-actor.drag.y)*canvas.height/box.height);
+  actor.adjustmentDraft=ADJUST?.normalize({...actor.drag.base,
+    x:actor.drag.base.x+dx,y:actor.drag.base.y+dy})||actor.adjustmentDraft;
+  api.onAdjustmentChange?.(actor.adjustmentDraft);draw();e.preventDefault();
+ });
+ for(const type of ['pointerup','pointercancel'])canvas.addEventListener(type,e=>{
+  if(actor.drag?.id===e.pointerId){
+   actor.drag=null;try{canvas.releasePointerCapture?.(e.pointerId)}catch{}
+   e.preventDefault();
+  }
  });
  async function refreshProfiles(full=false){
   try{
@@ -488,7 +526,8 @@ function mount(api){
  }
  requestAnimationFrame(tick);
  updateControls();
- return Object.freeze({placeAt,refreshProfiles,sync(){updateControls();draw();},reset(){
+ return Object.freeze({placeAt,refreshProfiles,beginAdjustment,previewAdjustment,isAdjusting,
+  sync(){updateControls();draw();},reset(){
   actor.active=false;actor.armed=false;stop();canvas.hidden=true;updateControls();
  },get actor(){return {...actor};},pathTo});
 }
