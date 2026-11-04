@@ -36,6 +36,85 @@ function entries(catalog,vehicles=[],characters=[]){
  });
  return items;
 }
+/* Gallery health gate: never show a card until its actual artwork has loaded
+ * and decoded. A published manifest alone is NOT proof of a working image.
+ * This only filters the gallery; saved cities/source files are never deleted.
+ */
+const imageChecks=new Map();
+function validGeometry(meta){
+ if(!meta||!Array.isArray(meta.size)||!Array.isArray(meta.pivot)||
+    meta.size.length!==2||meta.pivot.length!==2)return false;
+ const [w,h]=meta.size,[px,py]=meta.pivot;
+ return [w,h,px,py].every(Number.isFinite)&&
+  w>0&&h>0&&w<=8192&&h<=8192&&px>=0&&py>=0&&px<=w&&py<=h;
+}
+function checkImage(url,geometry=null){
+ if(typeof url!=='string'||!url||
+    !/^(?:https:\/\/|data:image\/(?:png|webp|jpeg|gif);base64,|blob:https?:\/\/)/i.test(url))
+  return Promise.resolve(false);
+ const key=url+(geometry?'|'+geometry.size.join('x'):'');
+ if(imageChecks.has(key))return imageChecks.get(key);
+ const done=new Promise(resolve=>{
+  const img=new Image();
+  if(/^https:\/\//i.test(url))img.crossOrigin='anonymous';
+  let ended=false;
+  const settle=valid=>{if(ended)return;ended=true;clearTimeout(timeout);img.onload=null;img.onerror=null;resolve(valid);};
+  const timeout=setTimeout(()=>settle(false),15000);
+  img.onerror=()=>settle(false);
+  img.onload=()=>{
+   const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+   if(w<1||h<1||w>8192||h>8192){settle(false);return;}
+   if(geometry?.size&&(w!==geometry.size[0]||h!==geometry.size[1])){
+    settle(false);return;
+   }
+   // Detect PNGs that decode but contain no visible pixels.
+   try{
+    const c=document.createElement('canvas');c.width=128;c.height=128;
+    const ctx=c.getContext('2d',{willReadFrequently:true});
+    if(!ctx){settle(true);return;}
+    ctx.clearRect(0,0,128,128);ctx.imageSmoothingEnabled=true;
+    ctx.drawImage(img,0,0,128,128);
+    const pixels=ctx.getImageData(0,0,128,128).data;
+    let visible=false;
+    for(let i=3;i<pixels.length;i+=4)if(pixels[i]>2){visible=true;break;}
+    settle(visible);
+   }catch(error){
+    // A browser may prohibit pixel reads on images from other hosts.
+    // A successfully decoded nonzero image still has a real thumbnail.
+    settle(true);
+   }
+  };
+  img.src=url;
+ });
+ imageChecks.set(key,done);
+ return done;
+}
+async function assetHealthy(spec,imageUrl){
+ if(!spec?.id||!spec?.file||spec.published===false)return false;
+ if(spec.source==='pipeline-street'){
+  const v=spec.variants||{},dirs=DIR.filter(d=>Object.prototype.hasOwnProperty.call(v,d));
+  if(!dirs.length)return false;
+  for(const dir of dirs){
+   if(!validGeometry(v[dir])||!/^((kampung|jalan_besar|props)\/)[a-z0-9_-]+_(sw|se|ne|nw)\.png$/i.test(v[dir].file||''))
+    return false;
+  }
+  // Every DECLARED facing must be real to avoid broken gallery detail views.
+  const checks=await Promise.all(dirs.map(d=>checkImage(imageUrl(spec,d),v[d])));
+  return checks.every(Boolean);
+ }
+ if(spec.source==='pipeline-vegetation'){
+  if(!/^trees\/[a-z0-9_-]+\.png$/i.test(spec.relativeFile||'')||!validGeometry(spec))return false;
+  return checkImage(imageUrl(spec,'sw'),spec);
+ }
+ if(spec.source==='custom-building'||spec.source==='bangun-object'){
+  const variants=spec.variants||{},dirs=DIR.filter(d=>Object.hasOwn(variants,d));
+  if(!dirs.length)return false;
+  return (await Promise.all(dirs.map(d=>checkImage(imageUrl(spec,d))))).every(Boolean);
+ }
+ // Vehicles, characters and non-pipeline assets must have a genuine image.
+ return checkImage(imageUrl(spec,'sw'));
+}
+
 function mount(options={}){
  const opener=document.getElementById('openAssetLibrary');if(!opener)return null;
  let selected=null,view='sw',query='',filter='all',all=[];
@@ -83,7 +162,7 @@ function mount(options={}){
   host.replaceChildren();
   if(!url){const a=document.createElement('span');a.textContent=glyph(s);host.append(a);return;}
   const i=document.createElement('img');i.alt=s.label||'Asset';i.loading='lazy';i.decoding='async';
-  i.onerror=()=>{i.remove();const fallback=document.createElement('span');fallback.textContent=glyph(s);host.append(fallback);};
+  i.onerror=()=>{i.remove();if(s?.file)invalidate(s.file);};
   i.src=url;host.append(i);
  }
  function datum(name,value){
@@ -127,11 +206,39 @@ function mount(options={}){
   $('salGallery').querySelectorAll('button[data-file]').forEach(b=>
    b.setAttribute('aria-pressed',String(b.dataset.file===s.file)));
  }
- function draw(){
-  all=entries(options.catalog?.()||[],options.vehicles?.()||[],options.characters?.()||[]);
+ let scanRevision=0,hiddenAssets=0,blocked=new Set();
+ function invalidate(file){
+  blocked.add(file);
+  if(dlg.open)void draw();
+ }
+ async function draw(){
+  const revision=++scanRevision;
+  const candidates=entries(options.catalog?.()||[],options.vehicles?.()||[],options.characters?.()||[]);
+  const gallery=$('salGallery');
+  gallery.replaceChildren();
+  const progress=document.createElement('p');progress.className='sal-empty';
+  progress.textContent='Checking asset images…';gallery.append(progress);
+  $('salCount').textContent='CHECKING '+candidates.length+' ASSETS';
+  const healthy=new Array(candidates.length).fill(false);
+  let cursor=0,completed=0;
+  // Bound concurrent decoding to keep editor responsive and prevent
+  // a flood of images from exhausting browser memory.
+  await Promise.all(Array.from({length:Math.min(10,candidates.length)},async()=>{
+   while(cursor<candidates.length){
+    const at=cursor++,asset=candidates[at];
+    let ok=false;
+    try{if(!blocked.has(asset.file))ok=await assetHealthy(asset,imgUrl);}catch{}
+    healthy[at]=ok;completed++;
+    if(revision===scanRevision&&completed%12===0)
+     progress.textContent='Checking real thumbnails '+completed+' / '+candidates.length+'…';
+   }
+  }));
+  if(revision!==scanRevision)return;
+  all=candidates.filter((_,i)=>healthy[i]);
+  hiddenAssets=candidates.length-all.length;
   const found=all.filter(s=>(filter==='all'||filter===s.category)&&
-   (s.label+' '+s.id+' '+s.source+' '+(s.group||'')).toLowerCase().includes(query));
-  $('salCount').textContent=found.length+' / '+all.length+' ASSETS';
+   (String(s.label||'')+' '+s.id+' '+s.source+' '+(s.group||'')).toLowerCase().includes(query));
+  $('salCount').textContent=found.length+' / '+all.length+' VALID · '+hiddenAssets+' HIDDEN';
   $('salGallery').replaceChildren();
   for(const s of found){
    const b=document.createElement('button');b.type='button';b.className='sal-card';
@@ -143,7 +250,7 @@ function mount(options={}){
    b.append(t,title,tiny);b.onclick=()=>{selected=s;view='sw';detail();};$('salGallery').append(b);
   }
   if(!found.length){const note=document.createElement('p');note.className='sal-empty';
-   note.textContent='Tidak ada aset untuk filter ini.';$('salGallery').append(note);}
+   note.textContent=all.length?'Tidak ada aset valid untuk filter ini.':'Tidak ada thumbnail valid yang bisa dimuat. Periksa jaringan lalu buka kembali Asset Library.';$('salGallery').append(note);}
   if(selected)selected=found.find(s=>s.file===selected.file)||null;
   if(!selected&&found.length)selected=found[0];
   detail();
@@ -157,9 +264,9 @@ function mount(options={}){
   const link=document.createElement('a');link.href=selected.editTarget;
   link.target='_blank';link.rel='noopener';link.click();
  };
- opener.onclick=()=>{draw();if(!dlg.open)dlg.showModal();};
- return Object.freeze({open(){opener.click();},refresh(){if(dlg.open)draw();},
-  get count(){return all.length;}});
+ opener.onclick=()=>{if(!dlg.open)dlg.showModal();void draw();};
+ return Object.freeze({open(){opener.click();},refresh(){if(dlg.open)void draw();},
+  get count(){return all.length;},get hidden(){return hiddenAssets;}});
 }
-g.VLSemestaAssetLibrary=Object.freeze({mount,category,canEdit,route,entries,CATS});
+g.VLSemestaAssetLibrary=Object.freeze({mount,category,canEdit,route,entries,CATS,assetHealthy,validGeometry,checkImage});
 })(typeof window!=='undefined'?window:globalThis);
