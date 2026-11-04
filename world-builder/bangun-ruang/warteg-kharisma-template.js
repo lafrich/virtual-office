@@ -5,6 +5,7 @@
  */
 (function(g){
 'use strict';
+if(g.VLWartegKharismaTemplate?.sourceVersion==='pipeline-v2')return;
 const W=8,D=6,DIRS=['sw','se','ne','nw'];
 const P={
  green:['#1A6A3A','#22894A','#2A9A52','#4FB36B','#86E59A'],
