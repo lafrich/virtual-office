@@ -45,6 +45,20 @@
  </aside>
  <aside id="assetsPanel" aria-label="Asset browser">
   <div class="panel-heading"><strong>FILES / ASSETS</strong><span id="assetCount">0</span><button id="closeAssets" class="sheet-close" type="button" aria-label="Close asset library">×</button></div>
+  <details id="treeReplaceMenu" class="tree-replace-menu">
+   <summary>♣ REPLACE TREES / BATCH</summary>
+   <div class="tree-replace-content">
+    <p>Ganti semua placeholder pohon tanpa mengubah titik placement.</p>
+    <label for="treeReplaceScope">TARGET</label>
+    <select id="treeReplaceScope"><option value="legacy">Placeholder / proxy only</option><option value="all">Semua pohon yang sudah dipasang</option></select>
+    <label for="treeReplaceMode">REPLACEMENT</label>
+    <select id="treeReplaceMode"><option value="mixed">Random mix spesies</option><option value="single">Satu jenis untuk semua</option></select>
+    <div id="treeReplaceSpeciesList" role="group" aria-label="Pilih jenis pohon" class="tree-replace-list"></div>
+    <label for="treeReplaceSeed">RANDOM SEED</label><input id="treeReplaceSeed" type="number" step="1" value="2026" inputmode="numeric">
+    <div class="tree-replace-actions"><button type="button" id="treeReplaceShuffle">↻ RANDOMIZE</button><button type="button" id="treeReplaceApply">⇄ REPLACE ALL</button></div>
+    <p class="tree-replace-hint" id="treeReplaceSummary" aria-live="polite">Memuat katalog pohon...</p>
+   </div>
+  </details>
   <div id="assetSearch">
    <input type="search" id="searchAsset" placeholder="⌕ Find asset..." aria-label="Find asset" autocomplete="off">
    <select id="assetCategory" aria-label="Asset category">
@@ -345,6 +359,19 @@
  </div>
 </dialog>
 </div></div>
+<style>
+.tree-replace-menu{margin:6px 8px;border:1px solid #8eaac0;background:#edf4f9;font:11px Tahoma,Arial,sans-serif;color:#24435b}
+.tree-replace-menu summary{cursor:pointer;padding:9px 10px;background:linear-gradient(#f8fcff,#dbe9f5);font-weight:bold;letter-spacing:.03em;list-style-position:inside}
+.tree-replace-content{padding:9px;display:flex;flex-direction:column;gap:6px}
+.tree-replace-content p{margin:0;line-height:1.4}
+.tree-replace-content label{font-weight:bold;font-size:10px}
+.tree-replace-content select,.tree-replace-content input[type=number]{width:100%;min-height:28px;box-sizing:border-box;background:#fff;border:1px solid #96afc2;color:#203b52;padding:4px;font:11px Tahoma,Arial,sans-serif}
+.tree-replace-list{max-height:165px;overflow-y:auto;border:1px solid #adbecd;padding:5px;background:#fff;display:grid;gap:3px}
+.tree-replace-list label{display:flex;align-items:center;gap:6px;font-weight:normal;cursor:pointer;padding:3px 2px}
+.tree-replace-list input{flex:none}
+.tree-replace-actions{display:flex;gap:5px}.tree-replace-actions button{flex:1;min-height:30px;cursor:pointer}
+.tree-replace-hint{font-size:10px;color:#4a657a}
+</style>
 <script src="./asset-catalog.js?v=2"></script>
 <script src="./pipeline-catalog.js?v=p4"></script>
 <script src="./semesta-building-spec.js?v=1"></script>
@@ -358,7 +385,8 @@
 <script src="./bangun-ruang/semesta-interior-preview.js?v=units-v7"></script>
 <script src="./bangun-ruang/semesta-bridge.js?v=live-sync-1"></script>
 <script src="./bangun-ruang/object-bridge.js?v=object-library-1"></script>
-<script src="./vegetation-catalog.js?v=builder-v3"></script>
+<script src="./vegetation-catalog.js?v=trees-22"></script>
+<script src="./tree-replacement.js?v=batch-trees-v1"></script>
 <script src="/virtual-life-asset-pipeline/universal-sleep.js?v=correct-four-view-rot90-20261104"></script>
 <script src="./mahluk-hidup-bridge.js?v=human-modular-v3"></script>
 <script src="/virtual-life-asset-pipeline/action-frame-bridge.js?v=action-v2"></script>
