@@ -23,7 +23,7 @@ function route(spec){
  return './bangun-ruang/?sourceAsset='+encodeURIComponent(id);
 }
 function entries(catalog,vehicles=[],characters=[]){
- const items=(catalog||[]).filter(s=>s?.id&&s?.file).map(s=>({
+ const items=(catalog||[]).filter(s=>s?.id&&s?.file&&s.published!==false).map(s=>({
   ...s,kind:'sprite',category:category(s),editTarget:route(s)
  }));
  for(const v of vehicles||[])if(v?.id)items.push({
