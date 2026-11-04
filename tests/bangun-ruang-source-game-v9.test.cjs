@@ -68,10 +68,13 @@ test('load game reference before renderer in both editor and Semesta',()=>{
   ['bangun-ruang/index.html','./'],['index.html','./bangun-ruang/']
  ]){
   const s=read(file);
-  const ref=prefix+'game-proportions.js?v=source-v9';
-  const renderer=prefix+'interior-isometric.js?v=hygiene-fixture-anchor-v1';
-  assert.ok(s.includes(ref));
-  assert.ok(s.includes(renderer));
-  assert.ok(s.indexOf(ref)<s.indexOf(renderer));
+  const scripts=[...s.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)]
+   .map(match=>match[1].split('?')[0]);
+  const ref=prefix+'game-proportions.js';
+  const renderer=prefix+'interior-isometric.js';
+  assert.ok(scripts.includes(ref),'missing actual source-game proportions module');
+  assert.ok(scripts.includes(renderer),'missing actual isometric renderer module');
+  assert.ok(scripts.indexOf(ref)<scripts.indexOf(renderer),
+   'source-game proportions must load before isometric renderer');
  }
 });
