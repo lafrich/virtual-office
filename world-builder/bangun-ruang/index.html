@@ -245,6 +245,18 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <div id="actionBuildingSummary" class="interactive-note">Enable Interactive in Exterior to use a door and interior action slots.</div>
   <div class="interior-header">ACTION TRIGGERS</div>
   <div id="actionSlotList"></div>
+  <div id="actSceneBinding" style="margin:12px 0;padding:10px;border:2px solid #9ba8b7;background:#e5edf9">
+   <div class="interior-header">MAHLUK HIDUP / MULTI-CHARACTER ACT</div>
+   <label for="actScenePreset">ACT PRESET FOR SELECTED OBJECT
+    <select id="actScenePreset"><option value="">SELECT OBJECT FIRST</option></select>
+   </label>
+   <div class="action-transform-bar">
+    <button type="button" id="actSceneBind" class="primary">✓ LINK ACT TO ACTION</button>
+    <button type="button" id="actSceneUnbind">× UNLINK</button>
+    <button type="button" id="actSceneEdit">✎ EDIT IN MAHLUK HIDUP</button>
+   </div>
+   <p id="actSceneSummary" class="muted" role="status">SELECT INTERACTIVE FURNITURE TO BIND AN ACT.</p>
+  </div>
   <div id="actionAdjustmentEditor" class="studio-item-editor" hidden style="padding:10px;margin-top:10px;border:1px solid #8bacc5;background:#f8fbff">
     <div class="interior-header">CHARACTER / ACTION ALIGNMENT</div>
     <strong id="actionAdjustObject">Select an interaction object</strong>
@@ -361,6 +373,7 @@ window.openBangunPixelCreator=async function(event){
 <script src="./pixel-object-creator.js?v=creator-simple-grid-v3&amp;asset-library=v2"></script>
 <script src="./building-guides.js?v=outline-v5"></script>
 <script src="../mahluk-hidup-bridge.js?v=human-modular-v3"></script>
+<script src="/virtual-life-asset-pipeline/action-scene-bridge.js?v=multi-act-v1"></script>
 <script src="/virtual-life-asset-pipeline/action-frame-bridge.js?v=action-v1"></script>
  <script src="/virtual-life-asset-pipeline/action-template-bridge.js?v=semesta-templates-v2"></script>
  <script src="/virtual-life-asset-pipeline/action-appearance-bridge.js?v=pose-expression-v2"></script>
