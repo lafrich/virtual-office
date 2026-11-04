@@ -84,7 +84,7 @@ function buildingPool(o){
 function pick(o,catalog){
  const type=category(o),h=hash(o.id);
  let options;
- if(type==='building')options=buildingPool(o);
+ if(type==='building')options=[...buildingPool(o),'rumah_kampung_d','rumah_kampung_c','warung_madura','pos_ronda'];
  else if(type==='tree'){
   const tags=o.tags||[],group=tags.includes('forest')?'forest':tags.includes('park')?'park':'street';
   options=POOLS[group];
@@ -124,7 +124,7 @@ function upgrade(source,catalog){
    rotation:0,scale:1,layer:category(o)==='tree'?'vegetation':category(o)==='building'?'structure':'prop',
    collision:spec.collision!==false,blocking:spec.collision===false?'no':'auto',
    replaceable:true,tags:[...new Set([...tags,'kebon-sirih','pipeline-native'])],
-   source:'pipeline-street',assetPath:undefined,assetCategory:undefined,
+   source:spec.source,assetPath:undefined,assetCategory:undefined,
    w:undefined,d:undefined,h:undefined,sizeClass:undefined,
    notes:(String(o.notes||'')+' | Kebon Sirih visual sprite: '+spec.label).trim().slice(0,500)};
   return res;
