@@ -373,9 +373,7 @@ function init(api){
   controller?.setTransformSnap?.($('actionTransformSnap').value);
   controller?.beginAdjustment?.(adjustmentDraft);
   $('previewStage').classList.add('action-adjust-viewport');
-  const mode=$('actionModeSelect').getAttribute('aria-pressed')==='true'?'select':
-   $('actionModeRotate').getAttribute('aria-pressed')==='true'?'rotate':'move';
-  setTransformMode(mode);
+  setTransformMode('move');
   $('actionAdjustStatus').textContent='Drag X / Y / center to move or the ring to rotate. Tap another object to change target.';
  }
  function changeAdjustment(next){
@@ -610,8 +608,6 @@ function init(api){
  },{passive:false,capture:true});
  for(const name of ['pointerup','pointercancel'])
   stage.addEventListener(name,e=>{touches.delete(e.pointerId);stage._pinchDistance=0;},true);
- $('actionModeMove').onclick=()=>setTransformMode('move');
- $('actionModeRotate').onclick=()=>setTransformMode('rotate');
  $('actionTransformSnap').onchange=()=>api.getScaleController?.()
   ?.setTransformSnap?.($('actionTransformSnap').value);
  function stepFacing(delta){
