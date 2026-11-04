@@ -78,7 +78,7 @@
    energy:int(s.energy,0,100,80),hygiene:int(s.hygiene,0,100,75),bladder:int(s.bladder,0,100,20),time:s.time||'08:00',
    inventory:[],quests:[],moral:50,spiritual:50,reputation:50,trust:20,skill:0,workXP:0,
    gameDay:1,dailyWages:0,dailyCourseXP:0,homeAccess:false,spawn:'hobo',offers:[],memories:[],
-   claimedSpawns:[],completedJobs:[],seenEvents:[],donationsToday:0,foundationVersion:VERSION};
+   claimedSpawns:[],completedJobs:[],completedCrossings:[],referralAttempts:[],seenEvents:[],donationsToday:0,foundationVersion:VERSION};
  }
  function conditionCheck(c,s,settings,payload){
   const n=Number(c.value);
@@ -113,6 +113,8 @@
   if(typeof ev.eventId!=='string'||!ev.eventId.trim())return {ok:false,reason:'Missing unique event ID',state:copy(previous)};
   if(previous.seenEvents&&previous.seenEvents.includes(ev.eventId))return {ok:false,reason:'Duplicate event rejected',state:copy(previous)};
   const s=copy(previous),settings=f.settings;
+  if(ctx.objectId&&ctx.objectId!==ev.objectId)return {ok:false,reason:'Event object differs from bound object',state:copy(previous)};
+  if(ctx.target&&ev.targetTag&&ctx.target!==ev.targetTag)return {ok:false,reason:'Context target does not match event',state:copy(previous)};
   // Engine guardrails are NOT removable by editing conditions.
   const sensitive=['basic_job','scavenge','loak_sell','charity','theft','help_npc','referral','home_enter','home_spawn','hobo_spawn','online_course'];
   if(sensitive.includes(id)&&ev.verified!==true)return {ok:false,reason:'Event not server-verified',state:copy(previous)};
@@ -132,6 +134,11 @@
   }
   if(id==='loak_sell'&&(!ev.itemId||!s.inventory.includes(ev.itemId)))return {ok:false,reason:'Cannot sell item not owned',state:copy(previous)};
   if(id==='basic_job'&&(!ev.jobInstanceId||s.completedJobs.includes(ev.jobInstanceId)))return {ok:false,reason:'Job already paid or job instance missing',state:copy(previous)};
+  if(id==='crossing'&&(!ev.crossingId||(s.completedCrossings||[]).includes(ev.crossingId)))return {ok:false,reason:'Crossing must have a new crossing ID',state:copy(previous)};
+  if(id==='referral'){
+   const key=txt(ev.referralKey||'default_referral',80)+':'+s.gameDay;
+   if((s.referralAttempts||[]).includes(key))return {ok:false,reason:'Referral already considered this day',state:copy(previous)};
+  }
   if(id==='referral'&&(s.skill<30||s.trust<60))return {ok:false,reason:'Referral prerequisites unmet',state:copy(previous)};
   const failed=ctx.conditions.find(c=>!conditionCheck(c,s,settings,ev));
   if(failed)return {ok:false,reason:describeBlock(failed),state:copy(previous)};
@@ -188,7 +195,9 @@
    }else if(e.kind==='message'){changes.push(txt(e.value,120));}
   }
   if(id==='scavenge')s.claimedSpawns.push(ev.spawnId);
+  if(id==='crossing')s.completedCrossings.push(ev.crossingId);
   if(id==='basic_job')s.completedJobs.push(ev.jobInstanceId);
+  if(id==='referral')s.referralAttempts.push(txt(ev.referralKey||'default_referral',80)+':'+s.gameDay);
   if(id==='charity')s.donationsToday++;
   s.seenEvents.push(ev.eventId);
   return {ok:true,state:s,changes,contextId:id};
