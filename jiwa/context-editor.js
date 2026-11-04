@@ -147,7 +147,8 @@
    const id='jiwa-demo-'+Date.now()+'-'+(++sequence);
    const payload={eventId:id,verified:scenario!=='unverified',progressComplete:true,confirmed:true,
     witnessed:true,recipient:true,itemId:'botol_bekas',spawnId:'scavenge-'+sequence,
-    jobInstanceId:'job-'+sequence,verifiedPrice:1200,roll:0.1,source:'sandbox'};
+    jobInstanceId:'job-'+sequence,crossingId:'crossing-'+sequence,referralKey:'demo_referral',
+    objectId:ctx.objectId||'',targetTag:ctx.target,verifiedPrice:1200,roll:0.1,source:'sandbox'};
    lastPayload=payload;
    B.test(ctx.id,payload);return;
   }
