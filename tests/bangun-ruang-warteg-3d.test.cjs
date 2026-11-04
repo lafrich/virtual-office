@@ -77,6 +77,8 @@ test('Semesta integrates four native variant meshes, visible Enter and Walk Test
  const html=read('index.html'),js=read('builder.js'),interior=read('bangun-ruang/semesta-interior-preview.js');
  assert.match(html,/warteg-3d\.js\?v=/);
  assert.match(html,/id="quickEnterBuilding"/);
+ assert.match(html,/\/virtual-life-asset-pipeline\/warteg-interior-paint\.js/);
+ assert.match(html,/\.\/bangun-ruang\/warteg-interior-paint\.js\?v=semesta-warteg-v2/);
  assert.match(js,/VLWarteg3D\.attach\(THREE,layer,spec,dir,pixelTexture/);
  assert.match(js,/root\.userData\.wartegTrueDepth=true/);
  assert.match(js,/root\.userData\.warteg3DVariants=views/);
