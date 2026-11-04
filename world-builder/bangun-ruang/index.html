@@ -63,6 +63,15 @@ dialog{border:1px solid #34619e;border-radius:5px;max-width:480px;width:calc(100
 dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#fff;padding:12px 15px;font-weight:bold}dialog section{padding:15px;line-height:1.7}dialog footer{padding:12px;text-align:right}
 @media(max-width:1000px){body{padding:0}#app{border-radius:0;min-height:100dvh}.workspace{grid-template-columns:190px minmax(260px,1fr)}.panel.right{grid-column:1/-1;border-top:1px solid #b8c6d4;border-left:0}.properties{display:grid;grid-template-columns:repeat(3,1fr);gap:7px 12px}.properties>*{min-width:0}.properties label{margin:5px 0}.properties .note,.properties .controls{grid-column:1/-1}}
 @media(max-width:640px){.workspace{display:flex;flex-direction:column}.panel{border-right:0}.panel.left{max-height:210px}.preset{padding:6px 10px}.preset-grid{grid-template-columns:repeat(5,1fr)}.preset-grid button{padding:5px 2px;font-size:10px}.library{max-height:100px}.stage{min-height:340px}.properties{grid-template-columns:1fr 1fr}.titlebar small{display:none}nav{gap:5px}nav button,nav a.button{padding:6px;font-size:10px}.canvas-head{font-size:10px}}
+.action-transform-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:8px 0}
+.action-transform-bar button{min-height:36px;min-width:84px;padding:6px 10px;border:1px solid #7897b5;background:#e4edf8;color:#203d62;font-weight:700}
+.action-transform-bar button.active{background:#2355a0;border-color:#173773;color:#fff;box-shadow:inset 1px 1px rgba(255,255,255,.2)}
+.action-transform-bar label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;margin-left:auto}
+.action-transform-bar select{min-height:36px;min-width:70px}
+.action-rotate-controls{justify-content:space-between;background:#edf3fb;padding:5px;border:1px solid #b5c7d9}
+.action-rotate-controls span{font-family:monospace;font-size:11px;color:#355172}
+#characterScaleCanvas{touch-action:none}
+@media(max-width:640px){.action-transform-bar button{min-height:42px;flex:1}.action-transform-bar label{margin-left:0}.action-rotate-controls span{flex:1;text-align:center}}
 </style>
 <link rel="stylesheet" href="./mobile-ui.css?v=xp-unified-v12">
 </head>
@@ -224,7 +233,19 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <div id="actionAdjustmentEditor" class="studio-item-editor" hidden style="padding:10px;margin-top:10px;border:1px solid #8bacc5;background:#f8fbff">
     <div class="interior-header">CHARACTER / ACTION ALIGNMENT</div>
     <strong id="actionAdjustObject">Select an interaction object</strong>
-    <p class="muted" style="font-size:11px;margin:6px 0">Drag the character on the isometric preview, or adjust its X/Y position. This does not resize or alter the character sprite.</p>
+    <p class="muted" style="font-size:11px;margin:6px 0">Gizmo on canvas: drag red X, green Y, center for free movement, or the rotation ring. Rotate snaps to the four original sprite directions, without deforming pixels.</p>
+    <div class="action-transform-bar" role="group" aria-label="Character transformation">
+      <button id="actionModeMove" type="button" class="active" aria-pressed="true" title="Move character — E shortcut">↔ MOVE</button>
+      <button id="actionModeRotate" type="button" aria-pressed="false" title="Rotate character — R shortcut">⟳ ROTATE</button>
+      <label>SNAP <select id="actionTransformSnap" aria-label="Translation grid snap">
+        <option value="1">1 PX</option><option value="4">4 PX</option><option value="8">8 PX</option>
+      </select></label>
+    </div>
+    <div class="action-transform-bar action-rotate-controls" aria-label="Actor facing shortcuts">
+      <button id="actionTurnLeft" type="button" title="Rotate facing 90 degrees counter-clockwise">↶ 90°</button>
+      <span id="actionTurnValue">0° / FURNITURE</span>
+      <button id="actionTurnRight" type="button" title="Rotate facing 90 degrees clockwise">↷ 90°</button>
+    </div>
     <label for="actionAdjustAction">OBJECT ACTION</label><select id="actionAdjustAction"></select>
     <div class="studio-grid" style="margin:8px 0">
       <label>POSITION X (px)<input id="actionAdjustX" type="number" min="-120" max="120" step="1" value="0"></label>
@@ -325,9 +346,10 @@ window.openBangunPixelCreator=async function(event){
  <script src="/virtual-life-asset-pipeline/action-appearance-bridge.js?v=pose-expression-v2"></script>
 <script src="/virtual-life-asset-pipeline/universal-sleep.js?v=correct-four-view-rot90-20261104"></script>
 <script src="../pipeline-character-rig.js?v=scale-v5&amp;pose-expression-v1"></script>
-<script src="./character-scale-preview.js?v=action-alignment-v4"></script>
+<script src="./action-gizmo.js?v=transform-gizmo-v1"></script>
+<script src="./character-scale-preview.js?v=transform-gizmo-v1"></script>
 <script src="./preview-scale.js?v=door-v8"></script>
-<script src="./studio-interior-ui.js?v=action-alignment-v4"></script>
+<script src="./studio-interior-ui.js?v=transform-gizmo-v1"></script>
 <script>
 (function(){
 'use strict';
