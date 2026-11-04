@@ -12,7 +12,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const bridge=g.VLMahlukHidup,rig=g.VLCharacterRig,model=g.VLBuildingInterior,iso=g.VLInteriorIso,
- ADJUST=g.VLInteractionAdjust;
+ ADJUST=g.VLInteractionAdjust,GIZMO=g.VLActionGizmo;
 const FRAME=rig?.FRAME||{w:64,h:112,pivotX:32,pivotY:100};
  // Native 64×32 art tile already includes Virtual Life's PPU=2.
  // Original V6B 64×112 image frame is drawn at 1x in both editor views.
@@ -194,6 +194,7 @@ function mount(api){
  const actor={active:false,profile:'ichsan',scene:'exterior',c:0,r:0,floor:1,
   pose:'idle',direction:'sw',moving:false,armed:false,segments:[],current:null,
   actionAnchor:null,adjusting:false,adjustmentDraft:null,drag:null,
+   transformMode:'move',transformSnap:1,gizmoOrigin:null,
   walkProgress:0,then:null};
  let elapsed=0,lastFrame=0,lastDraw=0,activeSource=null;
  function cfg(){return api.getConfig();}
@@ -243,7 +244,8 @@ function mount(api){
   canvas.style.left=left+'px';canvas.style.top=top+'px';
   canvas.style.width=width+'px';canvas.style.height=height+'px';
   canvas.style.pointerEvents=(actor.armed||actor.adjusting)?'auto':'none';
-  canvas.style.cursor=actor.adjusting?'move':actor.armed?'crosshair':'default';
+  canvas.style.cursor=actor.adjusting?(actor.transformMode==='rotate'?'crosshair':'grab'):actor.armed?'crosshair':'default';
+  canvas.style.touchAction=actor.adjusting?'none':'auto';
   ctx.imageSmoothingEnabled=false;return true;
  }
  function draw(){
@@ -300,6 +302,17 @@ function mount(api){
    const item=api.getInterior?.()?.items?.find(x=>x.id===actor.actionAnchor.itemId);
    if(item&&actor.actionAnchor.objectLayer!=='front')iso?.drawSeatForeground?.(ctx,interiorGeometry,item);
   }
+  // Always draw the on-screen gizmo LAST, above furniture and actor.
+  // It is editor-only and is never saved as artwork or exported to Semesta.
+  if(actor.adjusting&&GIZMO){
+   actor.gizmoOrigin=GIZMO.center({x,y},actor.pose);
+   const selected=api.getSelectedProp?.();
+   const native=selected?iso?.actionAnchor?.(selected,{raw:true,generic:true}):null;
+   GIZMO.draw(ctx,actor.gizmoOrigin,{
+    mode:actor.transformMode,hot:actor.drag?.handle||'',
+    direction:actor.adjustmentDraft?.direction,
+    baseDirection:native?.direction||'sw'});
+  }else actor.gizmoOrigin=null;
   if(!valid&&bridge?.ready&&!actor.reported){
    actor.reported=true;$('scaleStatus').textContent='Scale fallback · source sprite may be loading';
   }
@@ -312,7 +325,7 @@ function mount(api){
   if(actor.actionAnchor?.approach)
    [actor.c,actor.r]=actor.actionAnchor.approach;
   actor.actionAnchor=null;actor.pose='idle';actor.adjusting=false;
-  actor.adjustmentDraft=null;actor.drag=null;
+  actor.adjustmentDraft=null;actor.drag=null;actor.gizmoOrigin=null;
  }
  function placeDefault(){
   const p=spawnPoint();actor.c=p[0];actor.r=p[1];actor.floor=1;actor.scene='exterior';
@@ -383,7 +396,7 @@ function mount(api){
   if(!item||!room){status('Select furniture in the interior first');return false;}
   actor.active=true;actor.profile=choose.value||actor.profile;
   actor.armed=false;actor.scene='interior';actor.floor=room.floor;stop();
-  actor.adjusting=true;actor.adjustmentDraft=ADJUST?.normalize(
+  actor.adjusting=true;actor.gizmoOrigin=null;actor.adjustmentDraft=ADJUST?.normalize(
     draft||ADJUST.get(item,item.actionId))||{x:0,y:0,direction:'auto',layer:'behind'};
   const base=iso?.actionAnchor?.(item,{raw:true,generic:true});
   if(!base){status('Cannot calculate an interaction anchor for '+item.name);return false;}
@@ -400,6 +413,15 @@ function mount(api){
   actor.reported=false;updateControls();draw();
   status('ADJUST '+item.name+' / '+item.actionId+' · drag character or nudge / Save Adjustment');
   return true;
+ }
+ function setTransformMode(mode){
+  actor.transformMode=mode==='rotate'?'rotate':'move';
+  if(actor.adjusting)draw();
+  return actor.transformMode;
+ }
+ function setTransformSnap(step){
+  actor.transformSnap=GIZMO?.normalizeSnap(step)||1;
+  return actor.transformSnap;
  }
  function previewAdjustment(draft){
   const item=api.getSelectedProp?.();
@@ -484,8 +506,16 @@ function mount(api){
  $('scaleEditAction').onclick=()=>api.openAdjustment?.();
  canvas.addEventListener('pointerdown',e=>{
   if(actor.adjusting&&showCharacter()){
-   actor.drag={id:e.pointerId,x:e.clientX,y:e.clientY,base:{...actor.adjustmentDraft}};
-   canvas.setPointerCapture?.(e.pointerId);e.preventDefault();return;
+   const box=canvas.getBoundingClientRect();if(!box.width||!box.height)return;
+   const p={x:(e.clientX-box.left)*canvas.width/box.width,
+    y:(e.clientY-box.top)*canvas.height/box.height};
+   const handle=GIZMO?.hit(actor.gizmoOrigin,p,actor.transformMode);
+   if(!handle)return; // Do not accidentally move the actor from empty space.
+   const item=api.getSelectedProp?.();
+   const native=item?iso?.actionAnchor?.(item,{raw:true,generic:true}):null;
+   actor.drag={id:e.pointerId,handle,start:p,base:{...actor.adjustmentDraft},
+    center:{...actor.gizmoOrigin},baseDirection:native?.direction||'sw'};
+   canvas.setPointerCapture?.(e.pointerId);draw();e.preventDefault();return;
   }
   if(!actor.armed||!showCharacter())return;
   const b=canvas.getBoundingClientRect();
@@ -505,10 +535,17 @@ function mount(api){
  canvas.addEventListener('pointermove',e=>{
   if(!actor.adjusting||!actor.drag||actor.drag.id!==e.pointerId)return;
   const box=canvas.getBoundingClientRect();if(!box.width||!box.height)return;
-  const dx=Math.round((e.clientX-actor.drag.x)*canvas.width/box.width);
-  const dy=Math.round((e.clientY-actor.drag.y)*canvas.height/box.height);
-  actor.adjustmentDraft=ADJUST?.normalize({...actor.drag.base,
-    x:actor.drag.base.x+dx,y:actor.drag.base.y+dy})||actor.adjustmentDraft;
+  const p={x:(e.clientX-box.left)*canvas.width/box.width,
+   y:(e.clientY-box.top)*canvas.height/box.height};
+  const gesture=actor.drag;
+  const draft=gesture.handle==='rotate'?
+   {...gesture.base,direction:GIZMO.rotateGesture({
+      center:gesture.center,direction:gesture.base.direction
+    },gesture.start,p,gesture.baseDirection)}:
+   GIZMO.dragged(gesture.base,gesture.handle,
+    p.x-gesture.start.x,p.y-gesture.start.y,
+    e.shiftKey?Math.max(actor.transformSnap,8):actor.transformSnap);
+  actor.adjustmentDraft=ADJUST?.normalize(draft)||actor.adjustmentDraft;
   api.onAdjustmentChange?.(actor.adjustmentDraft);draw();e.preventDefault();
  });
  for(const type of ['pointerup','pointercancel'])canvas.addEventListener(type,e=>{
@@ -544,6 +581,7 @@ function mount(api){
  requestAnimationFrame(tick);
  updateControls();
  return Object.freeze({placeAt,refreshProfiles,beginAdjustment,previewAdjustment,endAdjustment,isAdjusting,
+  setTransformMode,setTransformSnap,
   sync(){updateControls();draw();},reset(){
   actor.active=false;actor.armed=false;stop();canvas.hidden=true;updateControls();
  },get actor(){return {...actor};},pathTo});
