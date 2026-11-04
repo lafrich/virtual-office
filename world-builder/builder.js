@@ -579,7 +579,24 @@ refreshWindow=()=>rebuildTerrain(false);
 rebuildTerrain();
 
 const texLoader=new THREE.TextureLoader();
-const spriteTexture=new Map();
+const spriteTexture=new Map(),spriteDepthTexture=new Map();
+function pixelDepthTexture(name,dir='sw'){
+ const spec=assetByName.get(name),data=spec?.variants?.[dir]||
+  spec?.variants?.sw||spec?.variants?.se;
+ if(spec?.source!=='pipeline-street'||!data?.file)return null;
+ const key=name+'|'+dir;
+ if(!spriteDepthTexture.has(key)){
+  const path=data.file.replace(/\\.png$/,'__depth.png');
+  const src='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+path;
+  const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,
+   ()=>console.warn('Missing native pixel depth',name,dir,src));
+  t.magFilter=t.minFilter=THREE.NearestFilter;
+  t.colorSpace=THREE.NoColorSpace;
+  t.generateMipmaps=false;
+  spriteDepthTexture.set(key,t);
+ }
+ return spriteDepthTexture.get(key);
+}
 function spriteDirection(deg=0){return ['sw','se','ne','nw'][((Math.round(deg/90)%4)+4)%4]}
 function pixelTexture(name,dir='sw'){
  const spec=assetByName.get(name);
@@ -796,7 +813,7 @@ function makeSprite(root,item){
  // on world XZ instead of letting the terrain clip a below-ground quad.
  // Studio mesh Warteg and existing vegetation have independent grounding.
  if(pipelineGround?.supports(spec)){
-  const grounded=pipelineGround.attach(THREE,root,spec,view,pixelTexture(item.asset,view));
+  const grounded=pipelineGround.attach(THREE,root,spec,view,pixelTexture(item.asset,view),pixelDepthTexture(item.asset,view));
   if(grounded){
    grounded.facade.userData.assetFile=item.asset;
    grounded.facade.userData.groundBundle=grounded;
@@ -3252,7 +3269,7 @@ function frame(now){
    if(groundBundle&&spec&&pipelineGround){
     const dir=spriteDirection(root.rotation.y*180/Math.PI);
     if(dir!==groundBundle.view){
-     pipelineGround.configure(THREE,groundBundle,spec,dir,pixelTexture(key,dir));
+     pipelineGround.configure(THREE,groundBundle,spec,dir,pixelTexture(key,dir),pixelDepthTexture(key,dir));
     }
     pipelineGround.faceCamera(groundBundle,root,camera);
     continue;
