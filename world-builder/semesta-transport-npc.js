@@ -64,10 +64,10 @@ function create(THREE,root,spec,record={},rigFactory=g.VLCharacterRig){
  function install(slot){
   // A real child template must exist; never shrink a grown human and call
   // it a child. Optional guests wait until the Mahluk catalog is ready.
-  if(slot.optional&&!bridge?.has?.(slot.profile))return;
-  const profile=bridge?.has?.(slot.profile)?slot.profile:
-   (slot.optional?null:BASES.includes(slot.profile)?slot.profile:null);
-  if(!profile)return;
+  // Only instantiate a genuinely published Mahluk profile. Otherwise
+  // createRig() permanently resolves the early placeholder as Ichsan.
+  if(!bridge?.has?.(slot.profile))return;
+  const profile=slot.profile;
   const seat=new THREE.Group();
   seat.name=npcLabel(slot);
   seat.position.set(slot.anchor[0],slot.anchor[1],slot.anchor[2]);
@@ -89,10 +89,6 @@ function create(THREE,root,spec,record={},rigFactory=g.VLCharacterRig){
   return actor;
  }
  for(const slot of desired)install(slot);
- if(!actors.size){
-  group.parent?.remove(group);
-  return null;
- }
  function step(dt,camera){
   if(disposed)return;
   time+=Math.min(.075,Math.max(0,Number(dt)||0));
@@ -123,7 +119,7 @@ function create(THREE,root,spec,record={},rigFactory=g.VLCharacterRig){
    // adds subtle bob/lean for a vehicle with its own four-way art. Dedicated
    // pedal-becak action sheets, when published, take priority automatically.
    const style=kindOf(slot.action),active=record.npcAnimation!==false;
-   const rate=style==='pedal'?1.55:style==='ride'?.93:.52;
+   const rate=style==='pedal'?1.55:style==='ride'?0.93:0.52;
    const phi=(time+actor.timeOffset)*Math.PI*2*rate;
    const a=active?Math.sin(phi):0;
    const b=active?Math.sin(phi*2):0;
