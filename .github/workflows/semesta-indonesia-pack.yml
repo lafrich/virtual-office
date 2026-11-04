@@ -8,6 +8,7 @@ on:
       - "world-builder/builder.js"
       - "world-builder/asset-thumbnails.js"
       - "tests/semesta-indonesia-pack.test.cjs"
+      - "tests/semesta-indonesia-200.test.cjs"
       - ".github/workflows/semesta-indonesia-pack.yml"
   workflow_dispatch:
 permissions:
@@ -26,4 +27,4 @@ jobs:
           node --check world-builder/indonesia-assets.js
           node --check world-builder/asset-thumbnails.js
       - name: Run Semesta Indonesia / depth / thumbnail regression
-        run: node --test tests/semesta-indonesia-pack.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/semesta-pipeline-grounding.test.cjs
+        run: node --test tests/semesta-indonesia-pack.test.cjs tests/semesta-indonesia-200.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/semesta-pipeline-grounding.test.cjs
