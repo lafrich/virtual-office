@@ -224,6 +224,8 @@ function vehiclePreview(id,dir='se'){
  */
 const nativeGalleryImages=new Map();
 const EXACT_RIDERS=new Set(Object.keys(RIDER_V3));
+const EXACT_CARS=new Set(['sedan_red','sedan_teal','hatchback_orange',
+ 'mpv_silver','taxi_bluebird','van_cream','bus_transjakarta']);
 function validNativeImage(url,expected){
  return new Promise(resolve=>{
   if(!url){resolve(null);return;}
@@ -250,12 +252,16 @@ function vehiclePreviewAsync(id,dir='se'){
  const ready=originalCache.get(originalKey(id,side,0))?.image;
  if(ready?.naturalWidth>0&&ready?.naturalHeight>0&&ready.src)
   return Promise.resolve(ready.src);
- if(!EXACT_RIDERS.has(id))return Promise.resolve(vehiclePreview(id,side));
+ if(!EXACT_RIDERS.has(id)&&!EXACT_CARS.has(id))
+  return Promise.resolve(vehiclePreview(id,side));
  const key=id+':'+side;
  if(nativeGalleryImages.has(key))return nativeGalleryImages.get(key);
  const spec=g.VLSemestaCatalog?.vehicle?.(id);
- const expected=RIDER_V3[id];
- const task=validNativeImage(sourceURL({id,views:spec?.views},side,'v3',0),expected)
+ const nativeRider=EXACT_RIDERS.has(id);
+ const expected=nativeRider?RIDER_V3[id]:spec;
+ const nativeURL=nativeRider?sourceURL({id,views:spec?.views},side,'v3',0):
+  sourceURL(spec,side,'legacy',0);
+ const task=validNativeImage(nativeURL,expected)
   .then(url=>{if(!url)nativeGalleryImages.delete(key);return url||null;})
   .catch(()=>{nativeGalleryImages.delete(key);return null;});
  nativeGalleryImages.set(key,task);
