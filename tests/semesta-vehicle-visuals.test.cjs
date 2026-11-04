@@ -28,14 +28,20 @@ assert.deepEqual(Array.from(window.VLWorldStyle.footprint(car,new Map())),[2,1],
 const group={position:{set(x,y,z){this.x=x;this.y=y;this.z=z;}}};
 placement.apply(group,car);
 assert.ok(Math.abs(group.position.x-.25/2.5)<1e-6);
-assert.ok(Math.abs(group.position.y-.42/2.5)<1e-6);
+assert.equal(group.position.y,0,'Auto Ground ignores old manual Y by default');
+assert.equal(car.visualOffset.y,.42,'old manual adjustment remains available');
+car.autoGround=false;placement.apply(group,car);
+assert.ok(Math.abs(group.position.y-.42/2.5)<1e-6,'Manual Y only when opted in');
 assert.ok(Math.abs(group.position.z+.15/2.5)<1e-6);
 
 const ui=read('index.html'),builder=read('builder.js'),effects=read('semesta-world-effects.js'),art=read('semesta-traffic-art.js');
 for(const id of ['vehicleControls','vehicleVisualScale','vehicleVisualScaleValue','vehicleOffsetX',
  'vehicleOffsetY','vehicleOffsetZ','vehicleResetVisual'])
  assert.ok(ui.includes('id="'+id+'"'),'missing vehicle inspector '+id);
-assert.ok(ui.includes('semesta-vehicle-placement.js?v=vehicle-edit-v1'));
+assert.ok(ui.includes('semesta-vehicle-placement.js?v=auto-wheel-ground-v2'));
+assert.ok(ui.includes('semesta-wheel-ground.js?v=wheel-contact-v1'));
+assert.ok(ui.includes('id="vehicleAutoGround"'));
+
 assert.ok(ui.includes('semesta-world-effects.js?v=character-contact-circle-v1'));
 assert.match(ui,/builder\.js\?v=[^"\n]*pan-camera-v1/, 'world builder retains pan camera version even when cache-busting tag changes');
 assert.match(builder,/e\.visualOffset=vehiclePlacement\.offset\(p\.visualOffset\)/,
