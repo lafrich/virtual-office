@@ -148,7 +148,8 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
      edits?.get(actor.profile,id,actor.direction,frame))).find(Boolean)||null;
    const patched=matched?image(matched):null;
    const worn=bridge?.equipmentFor(storageActor)||{};
-   const urls=(resolved.source==='universal-sleep'?[null,null,null,null,null]:
+   const urls=(resolved.source==='universal-sleep'||bodyRule?.kind==='bath'?
+     [null,null,null,null,null]:
      ['bag','shoes','pants','shirt','helmet'].map(k=>worn[k]?.frames?.[actor.direction]||null));
    const layers=urls.map(image);
    // Render isolated actor pixels before modifying the outfit. The main
@@ -480,11 +481,12 @@ function mount(api){
     actor.direction=anchor.direction;
    }
    actor.pose=pose||'idle';actor.actionId=item.actionId;actor.moving=false;
-   const requested=pose?({toilet:'sit',bathe:'swim',work:'sit_type'}[pose]||pose):'idle';
+   const requested=pose?({toilet:'sit',bathe:'bathe',work:'sit_type'}[pose]||pose):'idle';
    const motion=rig?.resolve(actor.profile,pose,false);
-   const supported=pose&&motion?.mode===requested;
+   const supported=pose&&(motion?.mode===requested||motion?.source==='universal-hygiene');
    status('Use '+item.name+' → '+item.actionId+' · '+(supported?
-    'Mahluk Hidup pose '+pose+(anchor?(item.assetId==='bed'?' / aligned to mattress':' / aligned to seat'):''):
+    'Mahluk Hidup '+(pose==='bathe'?'4-frame bath (base male/female body, no outfit)':'pose '+pose)+
+      (anchor?(item.assetId==='bed'?' / aligned to mattress':' / aligned to fixture'):''):
     'No authored rig; metadata action only'));
    updateControls();draw();
   };
