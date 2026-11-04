@@ -73,7 +73,7 @@ test("Bangun Ruang keeps character pose gizmo and uses furniture H/V flip handle
  // Furniture is selected on canvas; only then does its own direct gizmo appear.
  assert.ok(ui.includes("function drawObjectGizmo()"));
  assert.ok(ui.includes("gizmo.drawObject(ctx,p,"));
- assert.ok(ui.includes("const handle=gizmo.hitObject(center,p)"));
+ assert.ok(ui.includes("const handle=gizmo.hitObject(center,p,interiorView==='iso')"));
  assert.ok(ui.includes("if(handle==='flipX'||handle==='flipY')"));
  assert.ok(ui.includes("recordUndo(before)"));
  assert.ok(ui.includes("function tapActionObject(event)"));
