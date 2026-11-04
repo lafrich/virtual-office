@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "world-builder/asset-library.js"
+      - "world-builder/semesta-transport-npc.js"
       - "world-builder/indonesia-assets.js"
       - "world-builder/asset-library.css"
       - "world-builder/semesta-traffic-art.js"
@@ -65,6 +66,16 @@ jobs:
             await page.waitForFunction(()=>document.querySelector('#salCount')?.textContent?.includes('VALID'),null,{timeout:120000});
             const indonesia200=await page.locator('#salGallery .sal-card').count();
             if(indonesia200!==200)throw Error('Indonesia 200 gallery contains '+indonesia200+' rather than 200 verified assets');
+            const modularNPC=await page.evaluate(()=>{
+              const all=(window.VLAssetCatalog||[]).filter(s=>s.npcTransport?.modular);
+              const failures=all.filter(s=>s.npcTransport?.emptyVehicle!==true||
+                !window.VLSemestaTransportNPC?.slotsFor?.(s)?.some(x=>x.role==='driver'));
+              const samples=all.map(s=>({id:s.id,slots:s.npcTransport.slots.length}));
+              return {count:all.length,failures:failures.map(s=>s.id),samples};
+            });
+            if(modularNPC.count!==10||modularNPC.failures.length)
+              throw Error('Missing real modular Mahluk NPC seats '+JSON.stringify(modularNPC));
+
             await page.locator('#salGallery [data-file="pipeline:id200_transport_angkot_kota"]').click();
             await page.waitForFunction(()=>document.querySelector('#salHero img')?.naturalWidth>20,null,{timeout:15000});
             await page.screenshot({path:'screenshots/semesta-indonesia-200-gallery.png',fullPage:false});
@@ -186,7 +197,7 @@ jobs:
             await page.waitForFunction(()=>[...document.querySelectorAll('#salGallery .sal-card')].some(x=>x.textContent.includes('Custom')),null,{timeout:120000});
             const customs=await page.locator('#salGallery .sal-card').count();
             await page.screenshot({path:'screenshots/semesta-custom-asset-library.png',fullPage:false});
-            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,indonesia200,vehicleCheck,allVehicles,carAudit,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
+            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,indonesia200,modularNPC,vehicleCheck,allVehicles,carAudit,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
             await browser.close();
             if(faults.some(x=>/SyntaxError|Cannot read properties|is not defined/i.test(x)))
               throw Error('Browser JS crash: '+faults.join('; '));
