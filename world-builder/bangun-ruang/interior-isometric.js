@@ -123,6 +123,11 @@ function fixtureRotation(item){
 function fixturePoint(item,x,y){
  const c=Number(item.c),r=Number(item.r);
  const [w,d]=itemFootprint(item);
+ // Flip mirrors furniture in LOCAL footprint coordinates, retaining an
+ // isometric perspective and correct seat/actor alignment in Semesta.
+ const type=TYPES[item.assetId];
+ if(item.flipX===true)x=type.w-x;
+ if(item.flipY===true)y=type.d-y;
  switch(fixtureRotation(item)){
   case 1:return {c:c+w-y,r:r+x};
   case 2:return {c:c+w-x,r:r+d-y};
