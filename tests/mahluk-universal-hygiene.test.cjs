@@ -25,11 +25,19 @@ test("hygiene replacement keeps actor identity and bedroom/WC transforms intact"
  assert.match(body,/document\.createElement\('canvas'\)/);
  assert.match(body,/ctx\.drawImage\(composite,x,y,drawWidth,drawHeight\)/);
  assert.match(body,/actor\.actionId=item\.actionId/);
- assert.match(body,/\['toilet','sit','sleep','lie','work','bathe'\]/);
+ assert.match(body,/\['toilet','sit','sleep','lie','work','bathe','bathtub_bathe'\]/);
  assert.match(rig,/source:"universal-hygiene"/);
  assert.match(rig,/const idle=entry\.motions\.find\(m=>m\.id==="idle"/);
  assert.match(iso,/case 'shower'/);
  assert.match(iso,/case 'bathtub'/);
  assert.match(iso,/ACTION_ADJUST\?\.apply/);
+ assert.ok(rig.includes('source:"universal-bathtub"'),
+  "Semesta uses authored horizontal six-frame bathtub, not standing shower");
+ assert.ok(iso.includes("case 'bathtub':"));
+ assert.ok(iso.includes("part(.06,.80,TYPES.bathtub.w-.12,.14,18,25,'white')"),
+  "Bathtub front lip must occlude the immersed lower body");
+ assert.ok(body.includes("bodyRule?.kind==='bathtub'"),
+  "No standing clothing layers when actor reclines in bathtub");
+
 });
 console.log("PASS universal non-explicit body replacement, 4-frame bath and fixture anchors across apps");
