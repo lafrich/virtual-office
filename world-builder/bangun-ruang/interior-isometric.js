@@ -23,7 +23,8 @@ const PALETTES={
  cream:{floor:['#E8DEC6','#D4C8AE','#C3AD8D'],wall:['#F4EBDA','#E8DEC6','#C3AD8D'],skirt:'#9B866F'},
  warm:{floor:['#D4C8AE','#C3AD8D','#B48455'],wall:['#F4EBDA','#E8DEC6','#C3AD8D'],skirt:'#94704F'},
  aqua:{floor:['#BFD8E4','#A7B2C4','#8D97A8'],wall:['#E7EBF2','#C7CFDC','#A7B2C4'],skirt:'#535969'},
- blue:{floor:['#C7CFDC','#A7B2C4','#8D97A8'],wall:['#E7EBF2','#D2D5D9','#788197'],skirt:'#535969'}
+ blue:{floor:['#C7CFDC','#A7B2C4','#8D97A8'],wall:['#E7EBF2','#D2D5D9','#788197'],skirt:'#535969'},
+ warteg:{floor:['#E7EBF2','#D2D5D9','#C7CFDC'],wall:['#FFFFFF','#E7EBF2','#C7CFDC'],skirt:'#22894A'}
 };
 const MAT={
  wood:['#D49A5E','#B48455','#94704F','#6B4F3A'],
@@ -35,7 +36,10 @@ const MAT={
  pink:['#FFDDBE','#FFC2B8','#EE4D72','#BE2F56'],
  glass:['#BFD8E4','#7A9FB2','#4F6A86','#1C2330'],
  dark:['#788197','#535969','#2A3242','#15151F'],
- green:['#86E59A','#4FB36B','#22894A','#1A6A3A']
+ green:['#86E59A','#4FB36B','#22894A','#1A6A3A'],
+ red:['#FF8AA2','#E0434A','#B8323A','#7A2E35'],
+ yellow:['#FFE27A','#FFC93C','#F2B530','#B07A1C'],
+ orange:['#FFD0A8','#FF9440','#D9682A','#9A6A3E']
 };
 const C=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 const fmt=v=>Math.round(v*1000)/1000;
@@ -180,7 +184,7 @@ function actionAnchor(item,opts={}){
   itemId:item.id,kind:item.assetId,localSeat:seat};
  return opts.raw?anchor:ACTION_ADJUST?.apply(anchor,item,item.actionId)||anchor;
 }
-function furniture(ctx,geo,item,selected=false){
+function furniture(ctx,geo,item,selected=false,warteg=false){
  const c=Number(item.c),r=Number(item.r),type=item.assetId;
  const [fw,fd]=itemFootprint(item);
  const {w,d}=TYPES[type]; // unrotated local dimensions for art geometry
@@ -300,6 +304,9 @@ function furniture(ctx,geo,item,selected=false){
  }
  };
  place();
+ if(warteg&&g.VLWartegInteriorArt?.fixture){
+  g.VLWartegInteriorArt.fixture(ctx,geo,item,{fixtureBox,fixturePoint,box,point,line,polygon});
+ }
  // Selected footprint is a native pixel outline, drawn after the object.
  if(selected){
   const corners=polyPoint(geo,[[c,r,2],[c+fw,r,2],[c+fw,r+fd,2],[c,r+fd,2]]);
@@ -368,6 +375,9 @@ function draw(canvas,scene,opts={}){
    if(opts.grid!==false)tileOutline(ctx,geo,c,r,'#A7B2C4');
   }
  }
+ if(scene?.theme==='warteg'&&g.VLWartegInteriorArt?.walls){
+  g.VLWartegInteriorArt.walls(ctx,geo,{point,polygon,line,box});
+ }
  // Front-floor EXIT is an unobstructed threshold tile at r == depth.
  const en=scene?.entrance||{c:Math.floor(geo.w/2),r:geo.d-1};
  if(Number.isInteger(en.c)&&en.c>=0&&en.c<geo.w){
@@ -379,7 +389,7 @@ function draw(canvas,scene,opts={}){
  const items=(Array.isArray(scene?.items)?scene.items:[]).filter(x=>TYPES[x.assetId])
   .slice(0,250).sort((a,b)=>(a.c+a.r)-(b.c+b.r)||a.id.localeCompare(b.id));
  for(const item of items){
-  const info=furniture(ctx,geo,item,item.id===opts.selectedId);
+  const info=furniture(ctx,geo,item,item.id===opts.selectedId,scene?.theme==='warteg');
   if(info)hits.push(info);
  }
  return {...geo,hits,view:'isometric',floor:scene?.floor||1};
