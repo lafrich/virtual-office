@@ -2523,51 +2523,86 @@ window.addEventListener('semesta-vault-autolink',event=>{
  tell(changed.length+' vehicles / job NPCs linked to original image references');
 });
 
-// Tree placeholder conversion: one atomic edit / one Undo, preserving all world positions.
-const treeBatch=window.VLTreeReplace;
-function treeBatchSetup(){
- if(!treeBatch)return;
- const container=$('treeReplaceSpeciesList'),species=treeBatch.candidates(assetCatalog);
- container.replaceChildren();
- for(const spec of species){
-  const label=document.createElement('label'),input=document.createElement('input');
-  input.type='checkbox';input.value=spec.id;input.checked=treeBatch.DEFAULT_POOL.includes(spec.id);
-  const t=document.createElement('span');t.textContent=spec.label;label.append(input,t);container.append(label);
+// Categorized bulk placeholder replacement. The original city map is never
+// mutated until REPLACE ALL or RANDOMIZE is pressed; one undoPoint per batch.
+const placeholderBatch=window.VLPlaceholderReplace;
+function placeholderBatchSetup(){
+ if(!placeholderBatch)return;
+ const $choice=$('placeholderAssetChoices'),picked=new Map();
+ const categorySelect=$('placeholderCategory'),modeSelect=$('placeholderMode');
+ const scopeSelect=$('placeholderScope'),seedInput=$('placeholderSeed');
+ const getSelected=()=>[...$choice.querySelectorAll('input:checked')].map(x=>x.value);
+ function remember(){picked.set(categorySelect.value,getSelected());}
+ function ensureOne(){
+  if(modeSelect.value!=='single')return;
+  const inputs=[...$choice.querySelectorAll('input[type=checkbox]')];
+  const chosen=inputs.find(x=>x.checked)||inputs[0];
+  for(const i of inputs)i.checked=i===chosen;
  }
- function summary(){
-  const count=documentMap.objects.filter(o=>treeBatch.target(o,assetCatalog,$('treeReplaceScope').value)).length;
-  $('treeReplaceSummary').textContent=count+' pohon target · '+species.length+' jenis tersedia · posisi tetap · Undo tersedia';
-  if($('treeReplaceMode').value==='single'){
-   const inputs=[...container.querySelectorAll('input')],first=inputs.find(x=>x.checked)||inputs[0];
-   for(const i of inputs)i.checked=i===first;
+ function refreshChoices(){
+  const category=categorySelect.value,available=placeholderBatch.candidates(assetCatalog,category);
+  const defaults=placeholderBatch.CATEGORIES.find(c=>c.id===category)?.defaults||[];
+  const previous=picked.get(category)||defaults;
+  $choice.replaceChildren();
+  for(const spec of available){
+   const label=document.createElement('label'),input=document.createElement('input');
+   input.type='checkbox';input.value=spec.id;input.checked=previous.includes(spec.id);
+   const name=document.createElement('span');name.textContent=spec.label;
+   label.append(input,name);$choice.append(label);
   }
+  if(!$choice.querySelector('input:checked')&&available.length)
+   $choice.querySelector('input').checked=true;
+  ensureOne();refreshSummary();
  }
- container.onchange=e=>{
-  if($('treeReplaceMode').value==='single'&&e.target.matches('input[type=checkbox]'))
-   for(const i of container.querySelectorAll('input'))i.checked=i===e.target;
-  summary();
- };
- $('treeReplaceScope').onchange=summary;
- $('treeReplaceMode').onchange=summary;
- $('treeReplaceMenu').ontoggle=summary;
- $('treeReplaceShuffle').onclick=()=>{
-  const input=$('treeReplaceSeed');input.value=String(((Number(input.value)||0)+1)>>>0);
-  summary();tell('Random seed '+input.value+' · tekan REPLACE ALL');
- };
- $('treeReplaceApply').onclick=()=>{
-  const selected=[...container.querySelectorAll('input:checked')].map(i=>i.value);
+ function refreshSummary(){
+  const category=categorySelect.value,scope=scopeSelect.value;
+  const targets=documentMap.objects.filter(o=>placeholderBatch.target(o,assetCatalog,category,scope)).length;
+  const options=placeholderBatch.candidates(assetCatalog,category).length;
+  $('placeholderSummary').textContent=targets+' objek target · '+options+
+   ' aset pipeline tersedia · 1 batch = 1 Undo · koordinat tetap';
+  $('placeholderApply').disabled=targets===0||options===0;
+  $('placeholderShuffle').disabled=targets===0||options===0||modeSelect.value!=='mixed';
+ }
+ function applyBatch(){
+  const category=categorySelect.value,selected=getSelected();
+  if(!selected.length){tell('Pilih minimal satu aset pengganti.');return;}
   let result;
-  try{result=treeBatch.replace(documentMap.objects,assetCatalog,{
-   scope:$('treeReplaceScope').value,mode:$('treeReplaceMode').value,
-   species:selected[0]||'',selected,seed:Number($('treeReplaceSeed').value)||2026
-  });}catch(err){tell(err.message);return;}
-  if(!result.changed){tell(result.matched?'Pohon sudah sesuai pilihan':'Tidak ada pohon target');summary();return;}
-  undoPoint();documentMap.objects=result.objects;rebuild();saved();summary();
-  tell(result.changed+' pohon diganti · '+result.pool.length+' spesies · Undo tersedia');
+  try{
+   result=placeholderBatch.replace(documentMap.objects,assetCatalog,{
+    category,scope:scopeSelect.value,mode:modeSelect.value,
+    selected,seed:Number(seedInput.value)||2026
+   },(candidate,items)=>{
+    style.normalize(candidate,assetByName);
+    schema.normalize(candidate,assetByName,style);
+    return !style.reason(candidate,items,documentMap.map,assetByName);
+   });
+  }catch(err){tell(err.message);return;}
+  if(!result.changed){
+   tell(result.skipped?result.skipped+' objek dilewati karena footprint / collision.':
+    result.matched?'Semua objek sudah sesuai pilihan.':'Tidak ada placeholder pada kategori ini.');
+   refreshSummary();return;
+  }
+  undoPoint();documentMap.objects=result.objects;
+  rebuild();saved();refreshSummary();
+  tell(result.changed+' '+category+' diganti'+(result.skipped?' · '+result.skipped+' dilewati (footprint)':'')+' · Undo tersedia');
+ }
+ $choice.onchange=e=>{
+  if(modeSelect.value==='single'&&e.target.matches('input[type=checkbox]'))
+   for(const i of $choice.querySelectorAll('input'))i.checked=i===e.target;
+  remember();refreshSummary();
  };
- summary();
+ categorySelect.onchange=refreshChoices;
+ scopeSelect.onchange=refreshSummary;
+ modeSelect.onchange=()=>{ensureOne();remember();refreshSummary();};
+ $('placeholderReplaceMenu').ontoggle=refreshSummary;
+ $('placeholderApply').onclick=applyBatch;
+ $('placeholderShuffle').onclick=()=>{
+  seedInput.value=String(((Number(seedInput.value)||0)+1)>>>0);
+  applyBatch();
+ };
+ refreshChoices();
 }
-treeBatchSetup();
+placeholderBatchSetup();
 refreshCharacterOptions();
 $('searchAsset').oninput=renderAssetList;
 $('assetCategory').onchange=renderAssetList;
