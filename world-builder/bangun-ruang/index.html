@@ -368,6 +368,9 @@ window.openBangunPixelCreator=async function(event){
 <script src="./character-scale-preview.js?v=bathtub-universal-v3"></script>
 <script src="./preview-scale.js?v=local-zoom-v2"></script>
 <script src="./studio-interior-ui.js?v=object-flip-gizmo-v2"></script>
+<script src="../city-drafts.js?v=city-building-sync-v1"></script>
+<script src="../city-building-link.js?v=city-building-sync-v1"></script>
+<script src="./city-browser.js?v=city-building-sync-v1"></script>
 <script>
 (function(){
 'use strict';
@@ -395,7 +398,7 @@ const sources=semesta?.all||[];
 const defaultBase='semesta:small';
 const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
-let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null;
+let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null,cityBrowser=null;
 const exteriorGuides=window.VLBuildingGuides?.mount();
 try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
 // Adopt saved old per-item alignments as global per-type defaults once,
@@ -617,6 +620,7 @@ function buildAsset(){
   interactive:inter.interactive,enterable:inter.enterable,
   entrance:inter.entrance,interior:inter.interior,actionSlots:inter.actionSlots,
   lastAdjusted:inter.lastAdjusted||current?.lastAdjusted||null,
+  cityBinding:cityBrowser?.activeTarget()?{cityId:cityBrowser.activeTarget().cityId,objectId:cityBrowser.activeTarget().objectId}:(current?.cityBinding||null),
   updatedAt:new Date().toISOString()};
 }
 function persist(asset){
@@ -634,7 +638,15 @@ function persist(asset){
   return false;
  }
 }
-function saveAsset(){const a=buildAsset();if(persist(a)){status('Saved '+a.name+' · synced with open Semesta tabs');return a;}return null;}
+function saveAsset(){
+ const a=buildAsset();
+ if(!persist(a))return null;
+ if(cityBrowser?.activeTarget()){
+  status('Saved '+a.name+' · updating selected Semesta City Draft…');
+  void cityBrowser.afterSave(a);
+ }else status('Saved '+a.name+' · synced with open Semesta tabs');
+ return a;
+}
 function publish(){const a=saveAsset();if(!a)return;status('✓ '+a.name+' published locally · Semesta → BUILDINGS');}
 function download(name,text,type){
  const blob=new Blob([text],{type:type||'application/json'});
@@ -662,6 +674,17 @@ function openSavedAsset(asset,{resume=true}={}){
  if(resume&&asset.lastAdjusted)interiorUi?.resumeSavedAdjustment?.();
  status('Opened saved '+asset.name+(asset.lastAdjusted?' · last calibrated action restored':''));
  return true;
+}
+function openCityPrefab(obj,baseId,footprint){
+ preset(baseId);
+ const c=config();
+ apply({...c,name:safe(obj.name||c.name),w:Math.round(clamp(footprint?.[0]||c.w,2,24)*10)/10,
+  d:Math.round(clamp(footprint?.[1]||c.d,2,24)*10)/10,
+  interactive:obj.interactive===true});
+ interiorUi?.load({interactive:obj.interactive===true,enterable:obj.enterable===true,
+  interior:obj.interior||null,entrance:obj.entrance||null,
+  actionSlots:obj.actionSlots||[]});
+ status('Opened Semesta prefab geometry as an editable building; original pipeline PNG is unchanged');
 }
 function drawLibrary(){
  const q=$('search').value.toLowerCase();$('count').textContent=String(saved.length).padStart(2,'0');
@@ -869,6 +892,10 @@ scaleController=window.VLCharacterScale?.mount({
  onStatus:status
 });
 scaleController?.sync();
+cityBrowser=window.VLBangunCityBrowser?.mount({
+ getSaved:()=>saved,openAsset:a=>openSavedAsset(a,{resume:false}),
+ openPrefab:openCityPrefab,saveAsset,status
+})||null;
 // Opening Bangun Ruang starts a genuinely NEW EMPTY building by default.
 // Never auto-open an old saved room or select its last adjusted toilet.
 // Existing work is in the Saved Buildings library and can be opened explicitly.
