@@ -561,7 +561,17 @@ function makeView(c,dir){
 }
 function viewResult(c,d){
  const base=makeView(c,d),patch=manualOverrides[d];
- return patch&&patch.url&&patch.size?.join(',')===base.size.join(',')?{...base,url:patch.url}:base;
+ const sameDesign=manualSignature===artFingerprint(c);
+ // Imported pipeline sprites may have a native canvas and pivot different from
+ // the procedural Semesta base. Preserve their original pixel grid and pivot.
+ if(patch?.url&&patch.size?.length===2&&patch.pivot?.length===2&&
+    (patch.size.join(',')===base.size.join(',')||sameDesign))
+  return {url:patch.url,size:[...patch.size],pivot:[...patch.pivot]};
+ const original=current?.views?.[d];
+ if(sameDesign&&original?.size?.length===2&&original?.pivot?.length===2&&
+    /^data:image\/png;base64,/.test(original.url||''))
+  return {url:original.url,size:[...original.size],pivot:[...original.pivot]};
+ return base;
 }
 function render(){
  const c=config(),r=viewResult(c,view);
@@ -670,7 +680,7 @@ function importFile(file){
    manualSignature=artFingerprint(a.config);interiorUi?.load(a);
    const draft=buildAsset();
    const rebuilt={...draft,views:a.views,id:/^br-[a-z0-9-]{1,72}$/.test(a.id||'')?a.id:draft.id};
-   if(persist(rebuilt))status('Imported '+rebuilt.name+' · ready for Semesta');
+   if(persist(rebuilt)){render();status('Imported '+rebuilt.name+' · original pixels preserved · ready for Semesta');}
   }catch(e){status('⚠ Import failed: '+e.message);}
  };r.readAsText(file);
 }
@@ -805,7 +815,7 @@ for(const source of sources){
 $('baseSelect').onchange=()=>updateBaseSummary({...config(),baseId:$('baseSelect').value});
 $('applyBase').onclick=()=>preset($('baseSelect').value);
 $('resetBase').onclick=()=>preset($('baseSelect').value);
-$('generateBtn').onclick=()=>{manualOverrides={};render();interiorUi?.refresh();
+$('generateBtn').onclick=()=>{manualOverrides={};manualSignature='';render();interiorUi?.refresh();
  status('Re-generated four-direction pixels from Semesta geometry');};
 $('newBtn').onclick=()=>preset(defaultBase);$('saveBtn').onclick=saveAsset;$('publishBtn').onclick=publish;
 $('exportBtn').onclick=exportAsset;$('pngBtn').onclick=downloadPNG;
