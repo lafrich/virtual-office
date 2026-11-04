@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - "world-builder/indonesia-assets.js"
+      - "world-builder/semesta-transport-npc.js"
+      - "tests/semesta-transport-npc.test.cjs"
       - "world-builder/index.html"
       - "world-builder/builder.js"
       - "world-builder/asset-thumbnails.js"
@@ -25,6 +27,7 @@ jobs:
       - name: Check loader syntax
         run: |
           node --check world-builder/indonesia-assets.js
+          node --check world-builder/semesta-transport-npc.js
           node --check world-builder/asset-thumbnails.js
       - name: Run Semesta Indonesia / depth / thumbnail regression
-        run: node --test tests/semesta-indonesia-pack.test.cjs tests/semesta-indonesia-200.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/semesta-pipeline-grounding.test.cjs
+        run: node --test tests/semesta-indonesia-pack.test.cjs tests/semesta-indonesia-200.test.cjs tests/semesta-transport-npc.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/semesta-pipeline-grounding.test.cjs
