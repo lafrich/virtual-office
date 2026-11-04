@@ -79,6 +79,11 @@ jobs:
       - name: Bangun Ruang exterior/interior scale and WC regressions
         run: |
           node --test tests/bangun-ruang-shared-scale-v7.test.cjs tests/bangun-ruang-isometric-interior.test.cjs tests/bangun-ruang-toilet-seat-alignment.test.cjs tests/bangun-ruang-character-door-wc-v8.test.cjs tests/bangun-ruang-source-game-v9.test.cjs
+      - name: Saved Bangun Ruang interaction placement and gizmo regression
+        run: |
+          node --test tests/bangun-ruang-action-adjustment.test.cjs tests/bangun-ruang-action-gizmo.test.cjs tests/bangun-ruang-adjustment-persistence.test.cjs
+          node --check world-builder/bangun-ruang/studio-interior-ui.js
+          node --check world-builder/bangun-ruang/action-adjustment.js
       - name: Launcher desktop and navigation validation
         run: node --test tests/membangun-launcher.test.cjs
       - name: Live Membangun app sync regression
