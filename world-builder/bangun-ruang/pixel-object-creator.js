@@ -422,5 +422,65 @@ function open(){
 if(!button.hasAttribute('onclick'))button.addEventListener('click',open);
 const sidebar=byId('openObjectCreatorShelf');
 if(sidebar&&!sidebar.hasAttribute('onclick'))sidebar.addEventListener('click',open);
-g.VLPixelCreator=Object.freeze({open});
+function sourceUrl(spec,d){
+ if(spec.source==='pipeline-street'){
+  const v=spec.variants?.[d]||spec.variants?.[d==='nw'?'se':'sw']||
+    spec.variants?.sw||spec.variants?.se;
+  return v?.file?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+v.file:null;
+ }
+ if(spec.source==='pipeline-vegetation')
+  return spec.relativeFile?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+spec.relativeFile:null;
+ if(spec.source==='bangun-object')return bridge.image(spec.id,d);
+ return null;
+}
+function sourceCategory(spec){
+ if(spec.source==='pipeline-vegetation'||spec.objectCategory==='plant')return 'plant';
+ if(spec.objectCategory&&bridge.categories[spec.objectCategory])return spec.objectCategory;
+ if(/lampu|pju|lamp/i.test(spec.id||''))return 'lamp';
+ if(/bangku|meja|kursi|gazebo|taman/i.test(spec.id||''))return 'furniture';
+ return 'street';
+}
+// Always opens as a new user asset; original and existing custom rows remain.
+async function openSource(spec){
+ if(!spec||!['pipeline-street','pipeline-vegetation','bangun-object'].includes(spec.source))
+  throw Error('Asset type not compatible with Pixel Creator.');
+ open();fresh();
+ $('opcName').value=(String(spec.label||spec.id||'Object').slice(0,58)+' Custom').slice(0,80);
+ $('opcDescription').value=String(spec.description||spec.note||
+  'Modifikasi dari '+(spec.label||spec.id)+' / Semesta Asset Library.').slice(0,600);
+ $('opcCategory').value=sourceCategory(spec);categoryChanged();
+ const [fw,fd]=spec.footprint||[1,1];
+ $('opcWidth').value=Math.max(.25,Math.min(12,Number(fw)||1));
+ $('opcDepth').value=Math.max(.25,Math.min(12,Number(fd)||1));
+ $('opcCollision').value=String(spec.collision!==false);
+ const scaled=spec.size&&spec.pivot?Number(spec.height)*Number(spec.pivot[1])/Number(spec.size[1]):null;
+ const height=Number(spec.worldHeight??scaled);
+ preservedWorldHeight=Number.isFinite(height)&&height>=.3&&height<=24?height:null;
+ const failed=[];
+ await Promise.all(DIR.map(d=>new Promise(resolve=>{
+  const url=sourceUrl(spec,d);if(!url){failed.push(d);resolve();return;}
+  const image=new Image();if(/^https:\/\//.test(url))image.crossOrigin='anonymous';
+  image.onload=()=>{
+   try{
+    const ctx=canvas[d].getContext('2d');
+    const ratio=Math.min(1,W/image.width,(H-8)/image.height);
+    const w=Math.max(1,Math.round(image.width*ratio));
+    const h=Math.max(1,Math.round(image.height*ratio));
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(image,0,0,image.width,image.height,Math.floor((W-w)/2),H-8-h,w,h);
+   }catch{failed.push(d);}
+   resolve();
+  };
+  image.onerror=()=>{failed.push(d);resolve();};
+  image.src=url;
+ })));
+ show();library();
+ const missing=DIR.filter(d=>!spec.variants?.[d]);
+ status('Edit copy: '+spec.label+' · '+(failed.length?
+  'Periksa sudut '+failed.join(', ')+'.':'4 sudut diimpor.')+
+  (missing.length?' Sudut '+missing.join('/')+' memakai acuan depan; perbaiki manual.':'')+
+  ' Kanvas 96×144 (aset besar diperkecil). Save membuat ID baru.');
+ return {loaded:DIR.length-failed.length,failed};
+}
+g.VLPixelCreator=Object.freeze({open,openSource});
 })(window);
