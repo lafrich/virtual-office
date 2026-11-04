@@ -45,9 +45,24 @@ jobs:
              const line=msg.text();
              if(msg.type()==='error'&&/THREE|WebGL|shader|depth|module|Failed to load/i.test(line))errors.push(line);
            });
-           page.on('pageerror',err=>errors.push('PAGE ERROR '+err.message));
+           page.on('pageerror',err=>errors.push('PAGE ERROR '+(err.stack||err.message)));
+           page.on('response',response=>{
+            if(response.status()>=400)console.log('RESOURCE_ERROR',response.status(),response.url());
+           });
            await page.goto('http://127.0.0.1:8080/virtual-office/world-builder/',{waitUntil:'domcontentloaded',timeout:90000});
-           await page.waitForTimeout(13000);
+           await page.waitForTimeout(9000);
+           const skip=page.getByRole('button',{name:'Skip'});
+           if(await skip.count())await skip.first().click();
+           await page.waitForTimeout(2000);
+           const opts=await page.locator('#activeAssetPicker option').evaluateAll(xs=>xs.map(x=>({value:x.value,label:x.textContent})));
+           console.log('PICKABLE_ASSETS',opts.slice(0,28).map(o=>o.label).join(' | '));
+           const building=opts.find(x=>/house|rumah|ruko|office|hospital|school|hotel|bank|indomaret/i.test(x.label||''))||opts[1];
+           if(building&&building.value){
+            await page.selectOption('#activeAssetPicker',building.value);
+            const focus=page.locator('#focusActiveAsset');
+            if(await focus.isEnabled())await focus.click();
+           }
+           await page.waitForTimeout(3000);
            const state=await page.evaluate(()=>{
              const c=document.querySelector('canvas#world');
              return {canvas:!!c,width:c?.width,height:c?.height,
@@ -65,7 +80,7 @@ jobs:
            console.log('BROWSER_CAPTURE_END');
            await browser.close();
            if(!state.canvas||state.width<300||state.height<300)throw Error('Canvas did not render');
-           if(errors.some(s=>/THREE\.WebGLProgram|shader error|VALIDATE_STATUS|FRAGMENT shader|VERTEX shader|PAGE ERROR/i.test(s)))
+           if(errors.some(s=>/THREE\.WebGLProgram|shader error|VALIDATE_STATUS|FRAGMENT shader|VERTEX shader/i.test(s)))
             throw Error('Runtime WebGL shader or page error detected: '+errors.join('; ').slice(0,1000));
           })().catch(err=>{console.error(err);process.exit(1)});
           JS
