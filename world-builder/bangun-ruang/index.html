@@ -399,7 +399,7 @@ const sources=semesta?.all||[];
 const defaultBase='semesta:small';
 const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
-let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null,cityBrowser=null;
+let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null,cityBrowser=null,importSourceAsset=null;
 const exteriorGuides=window.VLBuildingGuides?.mount();
 try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
 // Adopt saved old per-item alignments as global per-type defaults once,
@@ -438,7 +438,7 @@ function preset(baseId=defaultBase){
   roofShape:spec.roofShape,detail:spec.detail,sign:'',
   doorStyle:spec.detail==='storefront'?'glass':'wood',windowStyle:kind==='kantor'?'wide':'square',
   balcony:'no',front:'sw',actions:['warung','ruko'].includes(kind)?'enter,buy':'enter',collision:'yes'};
- current=null;manualOverrides={};manualSignature=artFingerprint(cc);
+ current=null;manualOverrides={};manualSignature=artFingerprint(cc);importSourceAsset=null;
  $('assetDescription').value='';
  apply(cc);interiorUi?.reset();status('Generated from Semesta: '+spec.label);drawLibrary();
 }
@@ -614,6 +614,7 @@ function buildAsset(){
  const exteriorActions=c.actions.split(',').map(x=>x.trim()).filter(Boolean).slice(0,20);
  const combined=inter.interactive?[...new Set([...exteriorActions,...inter.interactions])]:[];
  return {id,name:c.name,description:$('assetDescription').value.trim().slice(0,600),config:c,views,editedViews:{...manualOverrides},
+  originSource:importSourceAsset||current?.originSource||null,
   semestaBase:c.baseId,semestaNativeSize:base?.variants||null,
   baseHeight:base?.height||null,format:'virtual-life-building-asset-v1',
   // Preserve specialized Warteg 3D mesh metadata when editing an existing city instance.
@@ -671,7 +672,7 @@ function exportAsset(){
 function openSavedAsset(asset,{resume=true}={}){
  if(!asset?.id||!asset.config||!asset.views)return false;
  current=asset;manualOverrides={...(asset.editedViews||{})};
- manualSignature=artFingerprint(asset.config);
+ manualSignature=artFingerprint(asset.config);importSourceAsset=asset.originSource||null;
  $('assetDescription').value=asset.description||'';
  apply(asset.config);
  interiorUi?.load(asset);
@@ -906,6 +907,69 @@ cityBrowser=window.VLBangunCityBrowser?.mount({
 // Never auto-open an old saved room or select its last adjusted toilet.
 // Existing work is in the Saved Buildings library and can be opened explicitly.
 status('New building · empty interior · open Saved Buildings to continue old work');
+// Asset Library -> Bangun Ruang is explicitly a SAVE-AS-NEW workflow.
+// The source remains intact; originals are not rewritten or published.
+async function openBuildingCopyFromSemesta(spec){
+ if(!spec||!spec.file||spec.source!=='pipeline-street')throw Error('Bukan bangunan pipeline.');
+ cityBrowser?.clearTarget?.();
+ const base=semesta?.byId('pipeline:'+spec.id);
+ preset(base?.id||defaultBase);
+ const before=config(),fp=spec.footprint||[before.w,before.d];
+ const next={...before,name:safe(spec.label+' Custom'),
+  w:Math.round(clamp(fp[0],2,24)*10)/10,d:Math.round(clamp(fp[1],2,24)*10)/10,
+  kind:base?.kind||(spec.group==='kampung'?'warung':'kantor'),
+  floors:base?.floors||(spec.group==='kampung'?1:2),
+  collision:spec.collision===false?'no':'yes'};
+ apply(next);
+ $('assetDescription').value=String(spec.description||spec.note||
+  'Modifikasi dari '+spec.label+' (original: '+spec.file+').').slice(0,600);
+ current=null;importSourceAsset=spec.file;
+ const errors=[],loaded=[];
+ for(const d of dirs){
+  const src=spec.variants?.[d];
+  if(!src?.file||!src.size||!src.pivot)continue;
+  const url=window.VLPipelineAssets?.building?.(spec.id,d)||
+   'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+src.file;
+  try{
+   const original=await new Promise((resolve,reject)=>{
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Image unavailable: '+d));img.src=url;
+   });
+   const c=document.createElement('canvas');c.width=src.size[0];c.height=src.size[1];
+   const ctx=c.getContext('2d',{alpha:true});ctx.imageSmoothingEnabled=false;
+   ctx.drawImage(original,0,0,c.width,c.height);
+   manualOverrides[d]={url:c.toDataURL('image/png'),size:[...src.size],pivot:[...src.pivot]};
+   loaded.push(d);
+  }catch(err){errors.push(d);}
+ }
+ manualSignature=artFingerprint(config());view='sw';render();drawLibrary();
+ status('Editing NEW copy: '+spec.label+' · native '+loaded.join('/')+
+  (errors.length?' · unavailable '+errors.join('/'):'')+
+  ' · missing directions use editable procedural rear view. SAVE creates a separate asset.');
+ return {loaded,errors};
+}
+function openSavedCopyFromSemesta(asset){
+ if(!asset?.config||!asset.views||!asset.id)throw Error('Original custom building not found.');
+ cityBrowser?.clearTarget?.();
+ const base=semesta?.byId(asset.config.baseId)?asset.config.baseId:defaultBase;
+ preset(base);
+ const copy={...asset.config,baseId:base,name:safe(asset.name+' Custom')};
+ apply(copy);
+ $('assetDescription').value=String(asset.description||'Copy of '+asset.name).slice(0,600);
+ manualOverrides=Object.fromEntries(dirs.filter(d=>asset.views[d]?.url).map(d=>
+  [d,{url:asset.views[d].url,size:[...asset.views[d].size],pivot:[...asset.views[d].pivot]}]));
+ manualSignature=artFingerprint(config());
+ interiorUi?.load(asset);current=null;importSourceAsset='studio:'+asset.id;
+ view='sw';render();drawLibrary();
+ status('Editing a NEW copy of '+asset.name+' · Save Asset creates a different ID.');
+ return true;
+}
+window.VLBangunEditorIntake=Object.freeze({
+ building:openBuildingCopyFromSemesta,
+ custom:openSavedCopyFromSemesta,
+ getSaved:id=>saved.find(a=>a.id===id)||null
+});
+
 $('scaleSync').onclick=()=>scaleController?.refreshProfiles?.(true);
 window.addEventListener('storage',event=>{
  if(event.key==='virtual-life-action-frame-edits-v1'){
