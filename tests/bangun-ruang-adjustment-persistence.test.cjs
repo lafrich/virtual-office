@@ -76,16 +76,20 @@ test("per-object, per-action saved positions survive changing from one furniture
  m.action(reloaded,item.id,one);
  assert.equal(w.VLInteriorIso.actionAnchor(item).pixelOffsetX,12);
 });
-test("startup and inspector code reload the saved building and the last saved adjustment",()=>{
+test("new building is genuinely blank, while saved buildings can be reopened explicitly",()=>{
  const html=read("index.html"),ui=read("studio-interior-ui.js");
- assert.ok(html.includes("if(saved.length)openSavedAsset(saved[0],{resume:true});"),
-  "Refresh must resume the latest saved building, never silently start blank.");
+ assert.ok(!html.includes("if(saved.length)openSavedAsset(saved[0],{resume:true});"),
+  "A new building should not auto-open the old toilet/last saved room.");
+ assert.ok(html.includes("interiorUi?.reset();"),
+  "New building must start with an empty interior, not an old toilet.");
+ assert.ok(html.includes("openSavedAsset(a,{resume:true})"),
+  "Existing saved rooms must still open when explicitly selected.");
  assert.ok(html.includes("interiorUi?.resumeSavedAdjustment?.()"),
   "Opening a saved building must restore its last adjusted object/action.");
  assert.ok(html.includes("lastAdjusted:inter.lastAdjusted||current?.lastAdjusted||null"),
   "Last saved action selection should be included in saved building metadata.");
  assert.ok(html.includes("const next=[asset,...saved.filter(x=>x.id!==asset.id)].slice(0,75)"),
-  "Last saved building should be the first automatically resumed item.");
+  "Last saved building should be first in the Library, but not auto-opened.");
  assert.ok(html.includes("localStorage.getItem(KEY)"),
   "Browser save must be read back before claiming success.");
  assert.ok(ui.includes("adjustmentKey='';adjustmentDraft=null;\n  selectTab('actions');"),
@@ -95,5 +99,9 @@ test("startup and inspector code reload the saved building and the last saved ad
  assert.ok(ui.includes("const confirmed=saved.actionSlots?"),
   "Do not report success without checking saved output data.");
  assert.ok(ui.includes("lastAdjusted={floor,itemId:item.id,actionId:item.actionId}"));
- assert.ok(ui.includes("✓ SAVED POSITION"),"Show a visible persisted marker in Actions list.");
+ assert.ok(ui.includes("TYPE DEFAULT"),"Show a visible reusable type default marker in Actions.");
+ assert.ok(ui.includes("adjust.setDefault(item.assetId,item.actionId,expected"),
+  "Save Adjustment should apply to the object TYPE, not a single toilet instance.");
+ assert.ok(html.includes("migrateFromBuildings?.(saved)"),
+  "Previously saved toilet adjustments should migrate into shared defaults.");
 });
