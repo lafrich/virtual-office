@@ -54,6 +54,41 @@ jobs:
             const emptyThumbnails=await page.locator('#salGallery .sal-card .sal-thumb span').count();
             if(emptyThumbnails)throw Error('Gallery contains thumbnail placeholders: '+emptyThumbnails);
             if(cards<20)throw Error('Too few assets in gallery: '+cards);
+            // Thumbnail/placement parity for all vehicle classes, including
+            // bus_transjakarta and the published rider pipeline.
+            await page.locator('#salCategory').selectOption('vehicle');
+            await page.waitForFunction(()=>document.querySelector('#salCount')?.textContent?.includes('VALID'),null,{timeout:120000});
+            await page.locator('#salGallery [data-file="vehicle:bus_transjakarta"]').click();
+            await page.locator('#salHero img').waitFor({timeout:15000});
+            await page.waitForFunction(()=>document.querySelector('#salHero img')?.naturalWidth>0,null,{timeout:15000});
+            const vehicleCheck=await page.evaluate(()=>{
+              const img=document.querySelector('#salHero img');
+              const s=window.VLSemestaArt.vehiclePreview('bus_transjakarta','se');
+              return {matching:img.src===s,width:img.naturalWidth,height:img.naturalHeight,
+                buttons:document.querySelectorAll('#salViews button').length,
+                source:img.dataset.source};
+            });
+            if(!vehicleCheck.matching||vehicleCheck.buttons!==4||vehicleCheck.width<50)
+              throw Error('TransJakarta preview mismatches actual Semesta artwork '+JSON.stringify(vehicleCheck));
+            const allVehicles=await page.evaluate(async()=>{
+              const list=window.VLSemestaCatalog.vehicles;
+              const result=await Promise.all(list.map(v=>Promise.resolve(window.VLSemestaArt.vehiclePreview(v.id,'se'))));
+              return {total:result.length,missing:result.filter(x=>!x).length};
+            });
+            if(allVehicles.missing)throw Error('Other vehicles have broken artwork: '+JSON.stringify(allVehicles));
+            await page.locator('#salCategory').selectOption('character');
+            await page.waitForFunction(()=>document.querySelector('#salCount')?.textContent?.includes('VALID'),null,{timeout:120000});
+            const characterCard=page.locator('#salGallery [data-file^="character:"]').first();
+            if(await characterCard.count()){
+              await characterCard.click();
+              await page.locator('#salHero img').waitFor({timeout:30000});
+              await page.waitForFunction(()=>document.querySelector('#salHero img')?.naturalWidth>0,null,{timeout:30000});
+              const size=await page.locator('#salHero img').evaluate(x=>[x.naturalWidth,x.naturalHeight]);
+              if(size[0]!==64||size[1]!==112)throw Error('Character gallery shows full animation sheet '+size);
+            }
+            await page.locator('#salCategory').selectOption('all');
+            await page.waitForFunction(()=>document.querySelector('#salCount')?.textContent?.includes('VALID'),null,{timeout:120000});
+
             await page.locator('#salGallery [data-file="pipeline:ruko_a"]').click();
             const views=await page.locator('#salViews button').count();
             if(views<2)throw Error('Native building views not shown');
@@ -78,7 +113,7 @@ jobs:
             await page.waitForFunction(()=>[...document.querySelectorAll('#salGallery .sal-card')].some(x=>x.textContent.includes('Custom')),null,{timeout:120000});
             const customs=await page.locator('#salGallery .sal-card').count();
             await page.screenshot({path:'screenshots/semesta-custom-asset-library.png',fullPage:false});
-            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
+            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,vehicleCheck,allVehicles,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
             await browser.close();
             if(faults.some(x=>/SyntaxError|Cannot read properties|is not defined/i.test(x)))
               throw Error('Browser JS crash: '+faults.join('; '));
