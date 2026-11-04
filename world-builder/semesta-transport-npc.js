@@ -66,7 +66,7 @@ function create(THREE,root,spec,record={},rigFactory=g.VLCharacterRig){
   // it a child. Optional guests wait until the Mahluk catalog is ready.
   // Only instantiate a genuinely published Mahluk profile. Otherwise
   // createRig() permanently resolves the early placeholder as Ichsan.
-  if(!bridge?.has?.(slot.profile))return;
+  if(!bridge?.ready||!bridge?.has?.(slot.profile))return;
   const profile=slot.profile;
   const seat=new THREE.Group();
   seat.name=npcLabel(slot);
