@@ -89,7 +89,7 @@ function add(scene,assetId,c,r){
  const x=limit(c,0,scene.width-1),z=limit(r,0,scene.depth-1);
  if(!canPlace(scene,assetId,x,z))return null;
  const item={id:'prop-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),
-  assetId,name:def.label,c:x,r:z,rotation:0,
+  assetId,name:def.label,c:x,r:z,rotation:0,flipX:false,flipY:false,
   actionId:def.actions[0],pose:ACTIONS[def.actions[0]]?.pose||null,
   capacity:assetId==='sofa'?2:1,blocking:true,triggerRadius:1.15,
    actionAdjustments:ADJUST?.forType(assetId,def.actions)||{}};
@@ -193,7 +193,8 @@ function normalize(raw,cfg){
   if(!pick)continue;
   ids.add(old.id);
   const obj={id:old.id.slice(0,90),assetId:old.assetId,name:TYPES[old.assetId].label,
-   c:pick.c,r:pick.r,rotation:rot,actionId:TYPES[old.assetId].actions[0],
+   c:pick.c,r:pick.r,rotation:rot,flipX:old.flipX===true,flipY:old.flipY===true,
+   actionId:TYPES[old.assetId].actions[0],
    pose:null,capacity:limit(old.capacity||1,1,8),
    blocking:old.blocking!==false,
    triggerRadius:Math.max(.4,Math.min(3,Number(old.triggerRadius)||1.15)),
@@ -211,7 +212,7 @@ function slots(scene){
   actionAdjustment:ADJUST?.get(item,item.actionId)||{x:0,y:0,direction:"auto",layer:"behind"},
   actionAdjustments:ADJUST?.all(item.actionAdjustments,TYPES[item.assetId]?.actions,item.assetId)||{},
   trigger:{kind:'proximity',radius:item.triggerRadius,capacity:item.capacity},
-  facing:item.rotation,blocking:item.blocking
+  facing:item.rotation,flipX:item.flipX===true,flipY:item.flipY===true,blocking:item.blocking
  }));
 }
 g.VLBuildingInterior=Object.freeze({types:TYPES,actions:ACTIONS,templates:TEMPLATES,
