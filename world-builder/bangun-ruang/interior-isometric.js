@@ -332,6 +332,14 @@ function drawSeatForeground(ctx,geometry,item){
    part(.12,.70,TYPES.sofa.w-.24,.12,14,24,'cream');break;
   case 'bed':
    part(.13,1.05,TYPES.bed.w-.26,.77,21,23,'pink');break;
+  case 'bathtub':
+   // Painted AFTER the reclined actor so the body sinks below the
+   // waterline; keep the pillow/head side (r=.05) unobstructed.
+   part(.22,.57,TYPES.bathtub.w-.44,.19,20,21,'teal');
+   for(const [x,r,w] of [[.33,.59,.18],[.75,.65,.25],[1.23,.60,.20],[1.50,.70,.17]])
+    part(x,r,w,.07,21,22,'white');
+   part(.06,.80,TYPES.bathtub.w-.12,.14,18,25,'white');
+   break;
  }
 }
 function draw(canvas,scene,opts={}){
