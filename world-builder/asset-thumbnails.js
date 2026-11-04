@@ -9,10 +9,10 @@ const raw='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline
 const cachedVehicles=new Map();
 const terrainNames={road:'road_asphalt',sidewalk:'sidewalk',grass:'grass',
  water:'water',plaza:'plaza',soil:'soil'};
-const symbols={terrain:'▦',custom:'⌂',building:'▥',street:'♧',
+const symbols={indonesia:'▥',terrain:'▦',custom:'⌂',building:'▥',street:'♧',
  vegetation:'♣',interior:'▤',character:'◉',vehicles:'▰',
  people:'♙',quest:'⚑',logic:'◇'};
-const labels={terrain:'TERRAIN',custom:'BUILDING',building:'BUILDING',
+const labels={indonesia:'INDONESIA',terrain:'TERRAIN',custom:'BUILDING',building:'BUILDING',
  street:'STREET',vegetation:'VEGETATION',interior:'INTERIOR',
  character:'CHARACTER',vehicles:'VEHICLE',people:'NPC',quest:'QUEST',logic:'LOGIC'};
 function validUrl(url){
