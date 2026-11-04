@@ -231,4 +231,4 @@ $('virtualAssetAutoMatch').onclick=()=>{
  g.dispatchEvent(new CustomEvent('semesta-vault-autolink',{detail:{map}}));
  hintText('Mencocokkan '+found+' tipe dengan file sumber. Cocok hanya jika nama asset ditemukan; sisanya tetap preview.');
 };
-})();
+})(window);
