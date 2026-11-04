@@ -2,9 +2,10 @@
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'],BUILD=new Set(['jalan','kampung','loak']);
-const CATS={all:'ALL ASSETS',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
+const CATS={all:'ALL ASSETS',indo200:'INDONESIA / 200 ASET',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
  interior:'INTERIOR',vehicle:'KENDARAAN',character:'KARAKTER',custom:'CUSTOM'};
 function category(spec){
+ if(spec?.objectCategory==='vehicle')return 'vehicle';
  if(spec?.source==='custom-building'||(spec?.source==='bangun-object'&&!spec.builtIn))return 'custom';
  if(spec?.source==='pipeline-vegetation'||spec?.objectCategory==='plant')return 'vegetation';
  if(spec?.source==='bangun-object')return spec.objectCategory==='furniture'?'interior':'street';
@@ -255,7 +256,8 @@ function mount(options={}){
   if(revision!==scanRevision)return;
   all=candidates.filter((_,i)=>healthy[i]);
   hiddenAssets=candidates.length-all.length;
-  const found=all.filter(s=>(filter==='all'||filter===s.category)&&
+  const found=all.filter(s=>(filter==='all'||filter===s.category||
+   (filter==='indo200'&&s.pack==='indonesia-200-v1'))&&
    (String(s.label||'')+' '+s.id+' '+s.source+' '+(s.group||'')).toLowerCase().includes(query));
   $('salCount').textContent=found.length+' / '+all.length+' VALID · '+hiddenAssets+' HIDDEN';
   $('salGallery').replaceChildren();
@@ -265,7 +267,8 @@ function mount(options={}){
    b.setAttribute('aria-pressed',String(selected?.file===s.file));
    const t=document.createElement('span');t.className='sal-thumb';showImage(t,imgUrl(s),s);
    const title=document.createElement('b');title.textContent=s.label;
-   const tiny=document.createElement('small');tiny.textContent=CATS[s.category]||'ASSET';
+   const tiny=document.createElement('small');tiny.textContent=s.pack==='indonesia-200-v1'?
+    (s.category||'INDONESIA').toUpperCase()+' / ID 200':CATS[s.category]||'ASSET';
    b.append(t,title,tiny);b.onclick=()=>{selected=s;view=s.kind==='vehicle'?'se':'sw';detail();};$('salGallery').append(b);
   }
   if(!found.length){const note=document.createElement('p');note.className='sal-empty';
