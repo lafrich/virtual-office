@@ -585,14 +585,23 @@ function buildAsset(){
   blocking:c.collision,interactions:combined.slice(0,20),
   interactive:inter.interactive,enterable:inter.enterable,
   entrance:inter.entrance,interior:inter.interior,actionSlots:inter.actionSlots,
+  lastAdjusted:inter.lastAdjusted||current?.lastAdjusted||null,
   updatedAt:new Date().toISOString()};
 }
 function persist(asset){
- const index=saved.findIndex(x=>x.id===asset.id);
- if(index>=0)saved[index]=asset;else saved.unshift(asset);
- if(saved.length>75)saved=saved.slice(0,75);
- try{localStorage.setItem(KEY,JSON.stringify(saved));current=asset;drawLibrary();return true;}
- catch(e){status('⚠ Storage full; use Export Package and delete old drafts.');return false;}
+ // Only update the in-memory Library after browser storage confirms a write.
+ // The four embedded PNG views can exhaust quota; never report a false save.
+ const next=[asset,...saved.filter(x=>x.id!==asset.id)].slice(0,75);
+ try{
+  localStorage.setItem(KEY,JSON.stringify(next));
+  const stored=JSON.parse(localStorage.getItem(KEY)||'[]').find(x=>x.id===asset.id);
+  if(!stored||stored.updatedAt!==asset.updatedAt)
+   throw new Error('Saved building could not be read back');
+  saved=next;current=asset;drawLibrary();return true;
+ }catch(e){
+  status('⚠ SAVE FAILED. Browser storage may be full; export building JSON. '+(e?.message||''));
+  return false;
+ }
 }
 function saveAsset(){const a=buildAsset();if(persist(a)){status('Saved '+a.name+' · synced with open Semesta tabs');return a;}return null;}
 function publish(){const a=saveAsset();if(!a)return;status('✓ '+a.name+' published locally · Semesta → BUILDINGS');}
@@ -612,6 +621,17 @@ function exportAsset(){
  download(a.id+'.json',JSON.stringify(a,null,2)+'\n','application/json');
  status('Exported four-direction asset package JSON');
 }
+function openSavedAsset(asset,{resume=true}={}){
+ if(!asset?.id||!asset.config||!asset.views)return false;
+ current=asset;manualOverrides={...(asset.editedViews||{})};
+ manualSignature=artFingerprint(asset.config);
+ apply(asset.config);
+ interiorUi?.load(asset);
+ drawLibrary();
+ if(resume&&asset.lastAdjusted)interiorUi?.resumeSavedAdjustment?.();
+ status('Opened saved '+asset.name+(asset.lastAdjusted?' · last calibrated action restored':''));
+ return true;
+}
 function drawLibrary(){
  const q=$('search').value.toLowerCase();$('count').textContent=String(saved.length).padStart(2,'0');
  const lib=$('library');lib.replaceChildren();
@@ -622,9 +642,8 @@ function drawLibrary(){
   const t=document.createElement('span');const b=document.createElement('b'),s=document.createElement('small');
   b.textContent=a.name;s.textContent=(a.footprint||[]).join('×')+' tile · '+a.config.floors+'F';
   t.append(b,s);btn.append(pic,t);
-  btn.onclick=()=>{current=a;manualOverrides={...(a.editedViews||{})};
-   manualSignature=artFingerprint(a.config);apply(a.config);
-   interiorUi?.load(a);drawLibrary();status('Editing '+a.name);
+  btn.onclick=()=>{
+   openSavedAsset(a,{resume:true});
    if(window.matchMedia('(max-width:640px)').matches){
     $('app').classList.remove('show-library');$('savedToggle').textContent='▣ Show Saved Buildings';
     $('savedToggle').setAttribute('aria-expanded','false');
@@ -807,6 +826,9 @@ scaleController=window.VLCharacterScale?.mount({
  onStatus:status
 });
 scaleController?.sync();
+// Resume the LAST SAVED building on refresh, rather than silently replacing
+// it with a blank default preset and making adjustments appear to vanish.
+if(saved.length)openSavedAsset(saved[0],{resume:true});
 $('scaleSync').onclick=()=>scaleController?.refreshProfiles?.(true);
 window.addEventListener('storage',event=>{
  if(event.key==='virtual-life-action-frame-edits-v1'){
