@@ -1,0 +1,29 @@
+name: Semesta Indonesia asset integration tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - "world-builder/indonesia-assets.js"
+      - "world-builder/index.html"
+      - "world-builder/builder.js"
+      - "world-builder/asset-thumbnails.js"
+      - "tests/semesta-indonesia-pack.test.cjs"
+      - ".github/workflows/semesta-indonesia-pack.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check loader syntax
+        run: |
+          node --check world-builder/indonesia-assets.js
+          node --check world-builder/asset-thumbnails.js
+      - name: Run Semesta Indonesia / depth / thumbnail regression
+        run: node --test tests/semesta-indonesia-pack.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/semesta-pipeline-grounding.test.cjs
