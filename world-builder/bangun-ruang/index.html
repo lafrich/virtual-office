@@ -72,7 +72,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 .action-rotate-controls span{font-family:monospace;font-size:11px;color:#355172}
 #characterScaleCanvas{touch-action:none}
 /* Keep the action canvas scrollable rather than clipping it at zoom > 100%. */
-#previewStage:has(#actionZoomValue){}
+#app .stage.action-adjust-viewport{overflow:auto!important;overscroll-behavior:contain}
 @media(max-width:640px){.action-transform-bar button{min-height:42px;flex:1}.action-transform-bar label{margin-left:0}.action-rotate-controls span{flex:1;text-align:center}}
 </style>
 <link rel="stylesheet" href="./mobile-ui.css?v=xp-unified-v12">
