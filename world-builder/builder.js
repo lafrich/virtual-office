@@ -2457,13 +2457,22 @@ function actionChoices(actorId,selectId,selectedAction){
 // Browsing never writes to the map. Every asset row retains the original click action.
 const assetThumbnails=window.VLAssetThumbnails;
 let assetViewMode='list',assetPreviewRevision=0;
-function assignAssetImage(img,fallback,url,lazy=true){
- if(!url){img.hidden=true;fallback.hidden=false;return;}
- img.hidden=false;img.style.opacity='0';fallback.hidden=false;
- img.alt='';img.decoding='async';img.loading=lazy?'lazy':'eager';
- img.onload=()=>{img.style.opacity='1';fallback.hidden=true;};
- img.onerror=()=>{img.hidden=true;fallback.hidden=false;img.removeAttribute('src');};
- img.src=url;
+function assignAssetImage(img,fallback,urlOrPromise,lazy=true){
+ const rev=Symbol('asset-picture');img._assetThumbRevision=rev;
+ img.hidden=true;img.removeAttribute('src');fallback.hidden=false;
+ void Promise.resolve(urlOrPromise).then(url=>{
+  if(img._assetThumbRevision!==rev||!url)return;
+  img.style.opacity='0';img.decoding='async';img.loading=lazy?'lazy':'eager';
+  img.onload=()=>{
+   if(img._assetThumbRevision!==rev)return;
+   img.hidden=false;img.style.opacity='1';fallback.hidden=true;
+  };
+  img.onerror=()=>{
+   if(img._assetThumbRevision!==rev)return;
+   img.hidden=true;fallback.hidden=false;img.removeAttribute('src');
+  };
+  img.src=url;
+ }).catch(()=>{if(img._assetThumbRevision===rev)fallback.hidden=false;});
 }
 function previewAssetCard(a,info){
  if(!info||!a)return;
@@ -2473,17 +2482,20 @@ function previewAssetCard(a,info){
   (info.footprint?' · '+info.footprint:'')+' · '+info.source;
  icon.textContent=info.fallback;
  const revision=++assetPreviewRevision;
- if(!info.url){img.hidden=true;icon.hidden=false;img.removeAttribute('src');return;}
- icon.hidden=false;img.hidden=false;img.style.opacity='0';img.decoding='async';
- img.onload=()=>{
-  if(revision!==assetPreviewRevision)return;
-  img.style.opacity='1';icon.hidden=true;
- };
- img.onerror=()=>{
-  if(revision!==assetPreviewRevision)return;
-  img.hidden=true;icon.hidden=false;img.removeAttribute('src');
- };
- img.src=info.url;
+ img.hidden=true;icon.hidden=false;img.removeAttribute('src');
+ void Promise.resolve(info.url).then(url=>{
+  if(revision!==assetPreviewRevision||!url)return;
+  img.style.opacity='0';img.decoding='async';
+  img.onload=()=>{
+   if(revision!==assetPreviewRevision)return;
+   img.hidden=false;img.style.opacity='1';icon.hidden=true;
+  };
+  img.onerror=()=>{
+   if(revision!==assetPreviewRevision)return;
+   img.hidden=true;icon.hidden=false;img.removeAttribute('src');
+  };
+  img.src=url;
+ }).catch(()=>{if(revision===assetPreviewRevision)icon.hidden=false;});
 }
 function setAssetViewMode(view){
  assetViewMode=view==='grid'?'grid':'list';
@@ -2831,10 +2843,8 @@ const assetLibrary=window.VLSemestaAssetLibrary?.mount({
  vehicles:()=>trafficCatalog?.vehicles||[],
  characters:()=>mahluk?.list?.()||[],
  thumbnail:spec=>assetThumbnails?.sourceFor?.(spec)||null,
- vehicleImage:id=>{
-  try{return trafficArt?.vehicleCanvas?.(id,'se')?.toDataURL?.('image/png')||null;}catch{return null;}
- },
- characterImage:id=>window.VLPipelineAssets?.character?.(id)||null,
+ vehicleImage:(id,dir)=>trafficArt?.vehiclePreview?.(id,dir)||null,
+ characterImage:(id,dir)=>window.VLCharacterRig?.characterPreview?.(id,dir)||null,
  place:spec=>{
   if(!assetByName.has(spec.file)||spec.published===false)return false;
   placementType='sprite:'+spec.file;
