@@ -73,7 +73,7 @@ test("Bangun Ruang keeps character pose gizmo and uses furniture H/V flip handle
  // Furniture is selected on canvas; only then does its own direct gizmo appear.
  assert.ok(ui.includes("function drawObjectGizmo()"));
  assert.ok(ui.includes("gizmo.drawObject(ctx,p,"));
- assert.ok(ui.includes("const handle=gizmo.hitObject(center,p,interiorView==='iso')"));
+ assert.ok(ui.includes("const handle=gizmo.hitObject(center,p)"));
  assert.ok(ui.includes("if(handle==='flipX'||handle==='flipY')"));
  assert.ok(ui.includes("recordUndo(before)"));
  assert.ok(ui.includes("function tapActionObject(event)"));
@@ -90,16 +90,11 @@ test("furniture gizmo exposes move X/Y/centre and two separate flip controls",()
  assert.equal(gizmo.hitObject(center,{x:0,y:0}),null);
 });
 
-test("isometric furniture handles follow the 2:1 tile axes and project drags",()=>{
- const center={x:180,y:180},h=gizmo.objectHandles(center,true);
- assert.deepEqual(h.x,{x:235,y:207.5});
- assert.deepEqual(h.y,{x:125,y:207.5});
- for(const key of ['x','y','flipX','flipY'])
-  assert.equal(gizmo.hitObject(center,h[key],true),key);
- assert.equal(gizmo.hitObject(center,center,true),'xy');
- assert.equal(gizmo.objectAxisSteps(32,16,'x'),1);
- assert.equal(gizmo.objectAxisSteps(-32,16,'y'),1);
- assert.equal(gizmo.objectAxisSteps(32,16,'y'),-1);
- assert.equal(gizmo.objectAxisSteps(-32,16,'x'),-1);
- assert.equal(gizmo.objectAxisSteps(32,-128,'x'),-1);
+test("furniture directional nudge controls use grid movement and undo",()=>{
+ const html=load("index.html"),ui=load("studio-interior-ui.js");
+ for(const direction of ["Up","Down","Left","Right"])
+  assert.ok(html.includes('id="moveSelected'+direction+'"'));
+ assert.ok(ui.includes("function nudgeSelected(direction)"));
+ assert.ok(ui.includes("model.move(current,item.id,item.c+delta[0],item.r+delta[1])"));
+ assert.ok(ui.includes("recordUndo(before)"));
 });
