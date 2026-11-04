@@ -132,5 +132,5 @@ test('native seat pivot remains canonical; only saved per-action offsets belong 
  assert.ok(!save.includes('actionAnchor'));
  assert.ok(!save.includes('scaleController'));
  assert.ok(html.includes('interior-isometric.js?v=action-alignment-v1'));
- assert.ok(html.includes('character-scale-preview.js?v=action-alignment-v1'));
+ assert.ok(html.includes('character-scale-preview.js?v=action-alignment-v2'));
 });
