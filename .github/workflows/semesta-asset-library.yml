@@ -13,6 +13,10 @@ on:
       - "world-builder/bangun-ruang/semesta-bridge.js"
       - "world-builder/bangun-ruang/object-bridge.js"
       - "tests/semesta-asset-library.test.cjs"
+      - "tests/semesta-preview-parity.test.cjs"
+      - "world-builder/semesta-traffic-art.js"
+      - "world-builder/pipeline-character-rig.js"
+      - "world-builder/asset-thumbnails.js"
       - ".github/workflows/semesta-asset-library.yml"
   workflow_dispatch:
 permissions:
@@ -29,7 +33,10 @@ jobs:
       - name: Syntax-check Asset Library and editor modules
         run: |
           node --check world-builder/asset-library.js
+          node --check world-builder/semesta-traffic-art.js
+          node --check world-builder/pipeline-character-rig.js
+          node --check world-builder/asset-thumbnails.js
           node --check world-builder/bangun-ruang/asset-library-intake.js
           node --check world-builder/bangun-ruang/pixel-object-creator.js
       - name: Gallery, cross-app edit copy, saved catalog and existing Semesta regressions
-        run: node --test tests/semesta-asset-library.test.cjs tests/semesta-indonesia-pack.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/bangun-ruang-bridge.test.cjs tests/bangun-ruang-object-bridge.test.cjs
+        run: node --test tests/semesta-preview-parity.test.cjs tests/semesta-asset-library.test.cjs tests/semesta-indonesia-pack.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/bangun-ruang-bridge.test.cjs tests/bangun-ruang-object-bridge.test.cjs
