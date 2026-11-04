@@ -148,13 +148,18 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
      edits?.get(actor.profile,id,actor.direction,frame))).find(Boolean)||null;
    const patched=matched?image(matched):null;
    const worn=bridge?.equipmentFor(storageActor)||{};
-   const urls=(resolved.source==='universal-sleep'||bodyRule?.kind==='bath'?
-     [null,null,null,null,null]:
-     ['bag','shoes','pants','shirt','helmet'].map(k=>worn[k]?.frames?.[actor.direction]||null));
+   const urls=(resolved.source==='universal-sleep'?
+     [null,null,null,null,null,null]:
+     bodyRule?.kind==='bath'?
+     [null,null,null,null,worn.hair?.frames?.[actor.direction]||null,null]:
+     ['bag','shoes','pants','shirt','hair','helmet']
+      .map(k=>worn[k]?.frames?.[actor.direction]||null));
    const layers=urls.map(image);
    // Render isolated actor pixels before modifying the outfit. The main
    // scene canvas contains furniture and must never be color-sampled.
-   const composite=bodyRule?document.createElement('canvas'):null;
+   const composite=(bodyRule||(
+    actorProfile?.skinTone&&!['base','light'].includes(actorProfile.skinTone)))?
+    document.createElement('canvas'):null;
    if(composite){composite.width=64;composite.height=112;}
    const paint=composite?composite.getContext('2d',{willReadFrequently:true}):ctx;
    paint.imageSmoothingEnabled=false;
@@ -169,6 +174,7 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
    if(patched?.ready)
     paint.drawImage(patched.pic,0,0,FRAME.w,FRAME.h,dx,dy,dw,dh);
    else paint.drawImage(pic,sx,sy,FRAME.w,FRAME.h,dx,dy,dw,dh);
+   if(composite)BODY?.tintBase?.(paint,actorProfile);
    for(let i=1;i<4;i++)drawPart(layers[i]);
    // Back-view backpack is ON the back torso, never over the head/neck.
    if(rearView&&layers[0]?.ready){
@@ -177,12 +183,16 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
     drawPart(layers[0]);
     paint.restore();
    }
-   drawPart(layers[4]);
+   if(bodyRule?.kind!=='bath')drawPart(layers[4]);
+   drawPart(layers[5]);
    if(composite){
-    if(BODY.apply(paint,{actor:actorProfile,action:actor.actionId||actor.pose,
-      direction:actor.direction,frame,bodyImage:bareAtlas.pic}))
-     ctx.drawImage(composite,x,y,drawWidth,drawHeight);
-    else silhouette(ctx,x,y,scale,actor.pose);
+    if(bodyRule){
+     if(BODY.apply(paint,{actor:actorProfile,action:actor.actionId||actor.pose,
+       direction:actor.direction,frame,bodyImage:bareAtlas.pic})){
+      if(bodyRule.kind==='bath')drawPart(layers[4]);
+      ctx.drawImage(composite,x,y,drawWidth,drawHeight);
+     }else silhouette(ctx,x,y,scale,actor.pose);
+    }else ctx.drawImage(composite,x,y,drawWidth,drawHeight);
    }
    drawn=true;
   }
