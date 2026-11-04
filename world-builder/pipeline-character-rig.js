@@ -49,6 +49,18 @@ function resolve(id,requested,moving){
   expression:template.expression||'neutral'};
  const entry=bridge()?.get(sourceId);
  const hygiene=entry&&body()?.resolve(entry,requested);
+ if(hygiene?.kind==="bathtub"){
+  // Awake, horizontal foam bath uses the genuine authored six-frame
+  // gender-specific LIE rig. It is NOT the standing shower animation.
+  const authored=(entry.motions||[]).find(m=>m.id==="bathtub_bathe"&&
+   m.available!==false&&Number(m.frames)>=6&&m.sheet);
+  if(authored){
+   const url=bridge().url(authored.sheet);
+   if(url)return {url,mode:"bathtub_bathe",frames:6,row:0,
+    durations:[...hygiene.frameMs],loop:true,separate:true,
+    source:"universal-bathtub",bodyRule:hygiene,objectLayer:"behind"};
+  }
+ }
  if(hygiene?.kind==="bath"){
   // Use the genuinely authored four-frame bath source for Human bases.
   // Other adults retain their own idle head/face, composited over the
@@ -78,7 +90,8 @@ function resolve(id,requested,moving){
   const actions=entry.motions;
   if(sleep()?.isSleep(requested))return {source:"unavailable",
    mode:requested,frames:1,unavailable:true,loop:false,url:null};
-  const possible=({bathe:['swim','bathe'],shower:['swim','bathe'],
+  const possible=({bathtub_bathe:['lie','sleep_seat','sit'],
+   bathe:['swim','bathe'],shower:['swim','bathe'],
    toilet:['sit','toilet'],toilet_sit:['sit','toilet'],
    sleep:['sleep','sleep_seat','lie'],rest:['lie','sleep','sleep_seat'],
    sit:['sit'],work:['sit_type','work'],office_type:['sit_type']
@@ -171,6 +184,7 @@ function createRig(THREE,opt={}){
   // The native lie frame already includes the actor's own base clothing.
   const overlayUrls=(spec.source==="universal-sleep"?
    [null,null,null,null,null,null]:
+   hygiene?.kind==="bathtub"?[null,null,null,null,null,null]:
    hygiene?.kind==="bath"?
    [null,null,null,null,layer('hair'),null]:
    ['bag','shoes','pants','shirt','hair','helmet'].map(layer));
@@ -182,7 +196,7 @@ function createRig(THREE,opt={}){
   const actionFallback={
    use_toilet:['toilet_sit','toilet'],toilet:['toilet_sit'],
    pee:['pee_stand','toilet'],poop:['toilet_sit','toilet'],
-   shower:['bathe'],bath:['bathe'],rest:['sleep'],lie:['lie_down','sleep'],
+   shower:['bathe'],bath:['bathtub_bathe'],rest:['sleep'],lie:['lie_down','sleep'],
    wash:['wash_hands'],work:['office_type'],study:['study_online','office_type'],
    cook:['cook_stir'],sit:['sit_idle'],relax:['sit_idle']
   };
@@ -235,7 +249,8 @@ function createRig(THREE,opt={}){
      ctx.drawImage(overlays[4].pic,0,0,64,112);
    }else{
     // Never show an accidentally clothed body while bath sprites load.
-    ctx.clearRect(0,53,64,59);state.loaded=false;
+    ctx.clearRect(0,hygiene.kind==="bathtub"?0:53,64,
+     hygiene.kind==="bathtub"?112:59);state.loaded=false;
    }
   }
   texture.needsUpdate=true;previous=key;
