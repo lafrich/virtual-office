@@ -6,19 +6,19 @@
 'use strict';
 const CATEGORIES=Object.freeze([
  {id:'building',label:'GEDUNG / BANGUNAN',defaults:['kantor_a','kantor_b','hotel','warung_madura','rumah_kampung_a','pos_ronda','ruko_a']},
- {id:'utility',label:'TIANG LISTRIK / LAMPU',defaults:['tiang_listrik','lampu_taman']},
+ {id:'utility',label:'TIANG LISTRIK / LAMPU',defaults:['tiang_listrik','tiang_listrik_polos','tiang_trafo','lampu_taman']},
  {id:'furniture',label:'FURNITUR / TAMAN',defaults:['bangku_taman','meja_taman','gazebo']},
  {id:'tree',label:'POHON / VEGETASI',defaults:['pohon_kiara_payung','pohon_angsana_M','pohon_asam_M','pohon_trembesi_M','pohon_bungur']},
- {id:'street',label:'PROPERTI JALAN',defaults:['tong_sampah','gapura_gang']}
+ {id:'street',label:'PROPERTI JALAN',defaults:['tong_sampah','pot_tanaman','gapura_gang']}
 ]);
 const categoryIds=new Set(CATEGORIES.map(c=>c.id));
 function specCategory(e){
  if(!e)return null;
  if(e.source==='pipeline-vegetation')return e.group==='Vegetation • trees'?'tree':null;
  if(e.source==='pipeline-street'){
-  if(/^(tiang_listrik|lampu_taman|lampu_lalin_)/.test(e.id))return 'utility';
+  if(/^(tiang_listrik|tiang_trafo|lampu_taman|lampu_lalin_|lampu_pejalan)/.test(e.id))return 'utility';
   if(/^(bangku_taman|meja_taman|gazebo)/.test(e.id))return 'furniture';
-  if(/^(tong_sampah|gapura_gang)/.test(e.id))return 'street';
+  if(/^(tong_sampah|gapura_gang|pot_tanaman)/.test(e.id))return 'street';
   if(['jalan','kampung','loak'].includes(e.group))return 'building';
   if(['taman','prop','gang','sinyal'].includes(e.group))return 'street';
  }
