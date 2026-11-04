@@ -523,6 +523,9 @@ function init(api){
   const ctl=api.getScaleController?.(),item=adjustmentItem();
   const active=!!item&&ctl?.isAdjusting?.(item.id,item.actionId);
   if(active){
+   if(key==='escape'||key==='q'){
+    e.preventDefault();setTransformMode('select');return;
+   }
    if(key==='e'||key==='r'){
     e.preventDefault();setTransformMode(key==='r'?'rotate':'move');return;
    }
@@ -643,6 +646,7 @@ function init(api){
  $('actionAdjustReset').onclick=()=>changeAdjustment({x:0,y:0,direction:'auto',layer:'behind'});
  $('actionAdjustExit').onclick=()=>{
   api.getScaleController?.()?.endAdjustment?.();
+  setActionZoom(1);
   adjustmentKey='';adjustmentDraft=null;showAdjustment();
   onStatus('Action adjustment closed; changes not saved');
  };
