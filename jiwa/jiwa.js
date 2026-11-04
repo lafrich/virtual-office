@@ -6,6 +6,7 @@
 const $=id=>document.getElementById(id), clone=x=>JSON.parse(JSON.stringify(x));
 const DB='jiwa-mechanics-v1',TABLE='projects',FALLBACK='jiwa-local-project:',CHANGE='jiwa-project-change';
 const ACTIVE='virtual-life-active-city-draft';
+const GLOBAL_CITY='__jiwa_global__';
 const params=new URLSearchParams(location.search);
 const KINDS=['wallet_min','stat_min','stat_max','has_item','quest_active','time_start','time_end'];
 const EFFECTS=['wallet_delta','stat_fullness','stat_energy','stat_hygiene','stat_bladder','inventory_add','quest_start','quest_complete','message','animation'];
@@ -132,10 +133,11 @@ async function save(){
 }
 async function listCities(){
  try{
-  state.cities=await window.VLCityDrafts.list();
+  const savedCities=await window.VLCityDrafts.list();
+  state.cities=[{id:GLOBAL_CITY,name:'GLOBAL FOUNDATION',objectCount:0},...savedCities];
   const picker=$('cityPicker'),previous=picker.value;
   picker.replaceChildren();
-  if(!state.cities.length){picker.add(new Option('No saved cities', ''));emptyCity('No saved city found. Go to Semesta → Save City, then Refresh.');return;}
+  if(!savedCities.length)notice('No city draft yet · edit the Global Foundation, or save a city in Semesta.');
   for(const row of state.cities)picker.add(new Option(row.name+' · '+row.objectCount+' objects',row.id));
   let wanted=params.get('city')||previous||localStorage.getItem(ACTIVE)||state.cities[0].id;
   if(!state.cities.some(x=>x.id===wanted))wanted=state.cities[0].id;
@@ -146,10 +148,15 @@ function emptyCity(message){state.record=null;state.project=null;state.entities=
 async function loadCity(id){
  if(!id)return emptyCity('Select a Semesta city first.');
  try{
-  const record=await window.VLCityDrafts.load(id);
+  const record=id===GLOBAL_CITY?{id:GLOBAL_CITY,name:'GLOBAL FOUNDATION',document:{objects:[],map:{}}}:await window.VLCityDrafts.load(id);
   if(!Array.isArray(record.document?.objects))throw Error('Invalid city document');
   state.record=record;state.entities=collectEntities(record);
   const raw=await readProject(id);
+  if(id!==GLOBAL_CITY&&!raw.updatedAt){
+   // New city copies the globally authored foundation, then becomes independent.
+   const shared=await readProject(GLOBAL_CITY);
+   if(shared.updatedAt&&shared.foundation)raw.foundation=clone(shared.foundation);
+  }
   state.project=validateProject({...newProject(id),...raw,cityId:id},id);
   state.selected=(params.get('city')===id&&params.get('object')&&state.entities.some(o=>o.id===params.get('object')))?params.get('object'):(state.selected&&state.entities.some(o=>o.id===state.selected)?state.selected:state.entities[0]?.id||null);
   state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(state.entities.length);
@@ -168,7 +175,7 @@ function renderTree(){
   if(items.length>400){const hint=document.createElement('div');hint.className='empty';hint.textContent='Showing first 400 — filter to find more';d.append(hint);}
   root.append(d);
  }
- if(!shown){const el=document.createElement('div');el.className='empty';el.textContent=search?'No matching objects.':'No placed objects in city.';root.append(el);}
+ if(!shown){const el=document.createElement('div');el.className='empty';el.textContent=search?'No matching objects.':state.record?.id===GLOBAL_CITY?'Global core contexts: no map required. Choose a saved city to bind individual objects.':'No placed objects in city.';root.append(el);}
 }
 function selectObject(id,focus=false){state.selected=id;state.action=0;if(focus){const o=selectedObject();if(o){const p=iso(Number(o.x)||0,Number(o.z)||0);state.panX+=canvas.clientWidth/2-p.x;state.panY+=canvas.clientHeight/2-p.y;}}renderTree();renderInspector();draw();}
 function renderInspector(){
