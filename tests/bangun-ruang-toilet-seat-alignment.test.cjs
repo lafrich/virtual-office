@@ -10,6 +10,7 @@ function modules(){
  vm.runInNewContext(read('bangun-ruang/action-adjustment.js'),{window:w});
  vm.runInNewContext(read('bangun-ruang/interior-model.js'),{window:w});
  vm.runInNewContext(read('bangun-ruang/interior-isometric.js'),{window:w});
+ vm.runInNewContext(read('bangun-ruang/action-gizmo.js'),{window:w});
  return w;
 }
 test('WC seat anchor is located at the actual porcelain seat in all four directions',()=>{
@@ -107,8 +108,13 @@ test('Mahluk Hidup walking → WC sit pose docks onto WC, then Idle moves back t
  assert.equal(player.actor.actionAnchor.objectLayer,'front');
  assert.equal(player.actor.direction,'se');
  const overlay=element('characterScaleCanvas');
- overlay.onpointerdown({pointerId:7,clientX:80,clientY:55,preventDefault(){}});
- overlay.onpointermove({pointerId:7,clientX:100,clientY:68,preventDefault(){}});
+ const origin=player.actor.gizmoOrigin;
+ assert.ok(origin,'Transform gizmo must be visible when adjusting');
+ const rect=overlay.getBoundingClientRect();
+ const startX=origin.x*rect.width/overlay.width;
+ const startY=origin.y*rect.height/overlay.height;
+ overlay.onpointerdown({pointerId:7,clientX:startX,clientY:startY,preventDefault(){}});
+ overlay.onpointermove({pointerId:7,clientX:startX+20,clientY:startY+13,preventDefault(){}});
  overlay.onpointerup({pointerId:7,preventDefault(){}});
  assert.ok(adjustedByDrag,'Dragging must notify the Actions position inspector');
  assert.equal(adjustedByDrag.x,25);
@@ -132,5 +138,5 @@ test('native seat pivot remains canonical; only saved per-action offsets belong 
  assert.ok(!save.includes('actionAnchor'));
  assert.ok(!save.includes('scaleController'));
  assert.ok(html.includes('interior-isometric.js?v=action-alignment-v1'));
- assert.ok(html.includes('character-scale-preview.js?v=action-alignment-v4'));
+ assert.ok(html.includes('character-scale-preview.js?v=transform-gizmo-v1'));
 });
