@@ -6,7 +6,7 @@ const mocks={
  VLBuildingBridge:{image:(id,dir)=>id==='studio-1'?'data:image/png;base64,AA==':null},
  VLBangunObjects:{image:(id,dir)=>id==='lampu-1'?'data:image/png;base64,AQ==':null},
  VLAssetThumbnails:undefined,
- VLSemestaArt:{vehicleCanvas(id,dir){return {toDataURL(){return 'data:image/png;base64,Ag=='}};}},
+ VLSemestaArt:{vehiclePreview(id,dir){return 'data:image/png;base64,Ag=='},vehicleCanvas(id,dir){return {toDataURL(){return 'data:image/png;base64,Ag=='}};}},
  VLSemestaCatalog:{vehicle(id){return {id,footprint:[2.5,1]}}},
  VLKebonSirihStyle:{tileUrl(k){return 'https://example.com/terrain/'+k+'.png'}}
 };
