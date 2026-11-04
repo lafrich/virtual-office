@@ -92,7 +92,7 @@ test('incoming route accepts only known source IDs and does not auto-edit withou
  const win={location:{search:''},VLAssetCatalog:[]};
  const document={readyState:'complete'};
  vm.runInNewContext(fs.readFileSync(path+'bangun-ruang/asset-library-intake.js','utf8'),
-  {window:win,document,console});
+  {window:win,document,console,URLSearchParams});
  await assert.rejects(win.VLAssetLibraryIntake.open('pipeline:../../file'),/ID aset/);
  await assert.rejects(win.VLAssetLibraryIntake.open('vehicle:angkot'),/ID aset/);
 });
