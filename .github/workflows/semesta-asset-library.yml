@@ -1,0 +1,35 @@
+name: Semesta Asset Library — Cross App Tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - "world-builder/asset-library.js"
+      - "world-builder/asset-library.css"
+      - "world-builder/index.html"
+      - "world-builder/builder.js"
+      - "world-builder/bangun-ruang/index.html"
+      - "world-builder/bangun-ruang/pixel-object-creator.js"
+      - "world-builder/bangun-ruang/asset-library-intake.js"
+      - "world-builder/bangun-ruang/semesta-bridge.js"
+      - "world-builder/bangun-ruang/object-bridge.js"
+      - "tests/semesta-asset-library.test.cjs"
+      - ".github/workflows/semesta-asset-library.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax-check Asset Library and editor modules
+        run: |
+          node --check world-builder/asset-library.js
+          node --check world-builder/bangun-ruang/asset-library-intake.js
+          node --check world-builder/bangun-ruang/pixel-object-creator.js
+      - name: Gallery, cross-app edit copy, saved catalog and existing Semesta regressions
+        run: node --test tests/semesta-asset-library.test.cjs tests/semesta-indonesia-pack.test.cjs tests/semesta-asset-thumbnails.test.cjs tests/bangun-ruang-bridge.test.cjs tests/bangun-ruang-object-bridge.test.cjs
