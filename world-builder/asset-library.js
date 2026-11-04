@@ -215,6 +215,13 @@ function mount(options={}){
   datum('Sudut',available.length?available.map(x=>x.toUpperCase()).join(' / '):'Native / single');
   datum('Collision',s.collision===false?'No':s.collision===true?'Yes':'Managed');
   datum('Sumber',s.source||'—');
+  if(s.npcTransport?.modular){
+   const riders=s.npcTransport.slots||[];
+   datum('NPC Hidup',riders.map(x=>
+    (x.optional?'Optional ':'')+x.role.replace(/_/g,' ')).join(' · '));
+   datum('Animasi',Array.from(new Set(riders.map(x=>x.action))).join(' / '));
+   datum('Character Source','Mahluk Hidup / rig 4 sisi');
+  }
   const custom=s.source==='custom-building'||(s.source==='bangun-object'&&!s.builtIn);
   $('salDescription').textContent=s.description||s.note||
    (custom?'Aset modifikasi dari Bangun Ruang, tersimpan di browser ini.':
