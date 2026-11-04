@@ -20,7 +20,7 @@
   ['sleep','Tidur','Survival','SLEEP_COMPLETE','bed','Energi pulih setelah istirahat yang sah.',[['verified',true]],[['stat_energy',25]]],
   ['basic_job','Kerja harian','Economy','JOB_COMPLETE','job_npc','Gaji dibatasi kuota per game-day, progress harus diverifikasi.',[['verified',true],['progress_complete',true],['energy_min',8]],[['wage',3000],['stat_energy',-8],['work_xp',10]]],
   ['scavenge','Memulung barang','Economy','SCAVENGE_COMPLETE','scavenge_spot','Barang unik masuk tas maksimum 8 slot.',[['verified',true],['inventory_free',1]],[['pickup','@event.itemId'],['stat_energy',-2]]],
-  ['loak_sell','Jual di Toko Loak','Economy','LOAK_SELL_COMPLETE','loak_vendor','Jual hanya item yang dimiliki, gunakan penawaran server.',[['verified',true],['has_item','@event.itemId']],[['sell_item','@event.itemId']]]],
+  ['loak_sell','Jual di Toko Loak','Economy','LOAK_SELL_COMPLETE','loak_vendor','Jual hanya item yang dimiliki, gunakan penawaran server.',[['verified',true],['has_item','@event.itemId']],[['sell_item','@event.itemId']]],
   ['online_course','Kursus di HP','Progression','COURSE_COMPLETE','phone_course','XP kursus maksimum 150 per game-day.',[['verified',true],['progress_complete',true]],[['course_xp',30],['stat_energy',-3]]],
   ['home_enter','Akses kamar Cove','Housing','ROOM_ENTER','cove_room','Hanya penghuni dengan hak akses aktif yang bisa masuk.',[['verified',true],['home_access',true]],[['message','Akses kamar diterima']]], 
   ['home_spawn','Spawn di kamar','Housing','SPAWN_REQUEST','cove_room','Spawn kamar hanya saat kepemilikan/sewa valid.',[['verified',true],['home_access',true]],[['set_spawn','home']]],
