@@ -62,3 +62,26 @@ test('JIWA reads saved Semesta city drafts and exposes city-object deep links',(
  assert.ok(bridge.includes("url.searchParams.set('city',city)"));
  assert.ok(bridge.includes("url.searchParams.set('object',id)"));
 });
+
+test('JIWA routes bypass the encrypted game service worker',()=>{
+ const vm=require('node:vm');
+ const handlers={};
+ const scope='https://lafrich.github.io/virtual-office/';
+ vm.runInNewContext(read('sw.js'),{
+  self:{registration:{scope},addEventListener(type,handler){handlers[type]=handler;}},
+  location:{origin:new URL(scope).origin},
+  URL,
+  importScripts(){},
+  atob(){return ''},
+  Uint8Array,console,Promise,setTimeout,clearTimeout
+ },{filename:'sw.js'});
+ assert.equal(typeof handlers.fetch,'function');
+ for(const asset of ['jiwa/','jiwa/index.html','jiwa/jiwa.js','membangun/','world-builder/']){
+  let intercepted=false;
+  handlers.fetch({
+   request:{method:'GET',url:scope+asset,mode:'navigate'},
+   respondWith(){intercepted=true;}
+  });
+  assert.equal(intercepted,false,asset+' should not require the encrypted game key');
+ }
+});
