@@ -10,6 +10,7 @@ on:
       - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
+      - "tests/mahluk-universal-hygiene.test.cjs"
       - "tests/mahluk-template-runtime.test.cjs"
       - "tests/mahluk-appearance-runtime.test.cjs"
       - "tests/membangun-live-sync.test.cjs"
@@ -32,6 +33,7 @@ on:
       - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
+      - "tests/mahluk-universal-hygiene.test.cjs"
       - "tests/mahluk-template-runtime.test.cjs"
       - "tests/mahluk-appearance-runtime.test.cjs"
       - "tests/membangun-live-sync.test.cjs"
@@ -74,6 +76,7 @@ jobs:
         run: |
           node tests/semesta-mahluk-sync.test.cjs
           node tests/mahluk-action-frame-sync.test.cjs
+          node --test tests/mahluk-universal-hygiene.test.cjs
           node tests/mahluk-template-runtime.test.cjs
           node tests/mahluk-appearance-runtime.test.cjs
       - name: Bangun Ruang exterior/interior scale and WC regressions
