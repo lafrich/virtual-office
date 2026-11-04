@@ -571,27 +571,34 @@ function init(api){
   if(!adjust.set(item,item.actionId,adjustmentDraft,model.types[item.assetId].actions))return;
   const expected=adjust.normalize(adjustmentDraft);
   lastAdjusted={floor,itemId:item.id,actionId:item.actionId};
-  // Validate after serialization, not just the editor's unsaved buffer.
-  const data=serialize();
-  const slot=data.actionSlots.find(x=>x.floor===floor&&x.id===item.id);
-  const actual=slot?.actionAdjustments?.[item.actionId];
-  if(!actual||JSON.stringify(adjust.normalize(actual))!==JSON.stringify(expected)){
-   const live=adjustmentItem()||item;
-   adjust.set(live,item.actionId,original,model.types[live.assetId].actions);
+  // Validate the edited instance first. The existing global type default
+  // intentionally overrides local slots UNTIL the replacement is committed.
+  const local=adjustmentItem()?.actionAdjustments?.[item.actionId];
+  if(!local||JSON.stringify(adjust.normalize(local))!==JSON.stringify(expected)){
    lastAdjusted=oldLast;
-   onStatus('⚠ Save failed: normalized building lost the adjustment');
+   $('actionAdjustStatus').textContent='⚠ Action adjustment was not kept in the editor.';
    return;
   }
-  // A shared WC / USE_TOILET preset must outlive this specific fixture,
-  // building, or room. This tiny key is stored separately from large PNG
-  // building assets, so newly placed copies inherit it immediately.
+  // Persist the TYPE/ACTION default independently from the building asset,
+  // so a newly added WC inherits this alignment without any copy operation.
   if(!adjust.setDefault(item.assetId,item.actionId,expected,
      model.types[item.assetId].actions)){
    const live=adjustmentItem()||item;
    adjust.set(live,item.actionId,original,model.types[live.assetId].actions);
    lastAdjusted=oldLast;
    $('actionAdjustStatus').textContent='⚠ TYPE DEFAULT NOT SAVED — browser storage blocked the update.';
-   onStatus('⚠ Could not save default for all '+item.name+' objects');
+   onStatus('⚠ Could not save a reusable default for '+item.name);
+   return;
+  }
+  // Every matching object in every floor of THIS building inherits the
+  // saved type preset. Old buildings import it on their next open.
+  const data=serialize();
+  const matches=data.actionSlots.filter(x=>x.assetId===item.assetId&&
+   x.actionAdjustments?.[item.actionId]);
+  if(!matches.length||matches.some(x=>
+    JSON.stringify(adjust.normalize(x.actionAdjustments[item.actionId]))!==
+    JSON.stringify(expected))){
+   $('actionAdjustStatus').textContent='⚠ Default saved, but building slots need refreshing.';
    return;
   }
   const saved=api.saveAsset?.();
