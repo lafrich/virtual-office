@@ -5,6 +5,7 @@
  */
 (function(g){
 'use strict';
+const ADJUST=g.VLInteractionAdjust;
 const ACTIONS=Object.freeze({
  use_toilet:{label:'Use toilet',pose:'toilet',description:'Toilet / sit animation'},
  pee:{label:'Pee',pose:'toilet',description:'Toilet pose only; dedicated pee rig not available'},
@@ -90,7 +91,7 @@ function add(scene,assetId,c,r){
  const item={id:'prop-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),
   assetId,name:def.label,c:x,r:z,rotation:0,
   actionId:def.actions[0],pose:ACTIONS[def.actions[0]]?.pose||null,
-  capacity:assetId==='sofa'?2:1,blocking:true,triggerRadius:1.15};
+  capacity:assetId==='sofa'?2:1,blocking:true,triggerRadius:1.15,actionAdjustments:{}};
  scene.items.push(item);return item;
 }
 function move(scene,id,c,r,rotation){
@@ -194,7 +195,8 @@ function normalize(raw,cfg){
    c:pick.c,r:pick.r,rotation:rot,actionId:TYPES[old.assetId].actions[0],
    pose:null,capacity:limit(old.capacity||1,1,8),
    blocking:old.blocking!==false,
-   triggerRadius:Math.max(.4,Math.min(3,Number(old.triggerRadius)||1.15))};
+   triggerRadius:Math.max(.4,Math.min(3,Number(old.triggerRadius)||1.15)),
+   actionAdjustments:ADJUST?.all(old.actionAdjustments,TYPES[old.assetId].actions)||{}};
   base.items.push(obj);
   action(base,obj.id,old.actionId||obj.actionId);
  }
@@ -205,6 +207,8 @@ function slots(scene){
  return (scene?.items||[]).map(item=>({
   id:item.id,assetId:item.assetId,grid:{c:item.c,r:item.r},
   interaction:item.actionId,characterPose:item.pose,actionStatus:item.pose?'rig-preview':'gameplay-hook-only',
+  actionAdjustment:ADJUST?.get(item,item.actionId)||{x:0,y:0,direction:"auto",layer:"behind"},
+  actionAdjustments:ADJUST?.all(item.actionAdjustments,TYPES[item.assetId]?.actions)||{},
   trigger:{kind:'proximity',radius:item.triggerRadius,capacity:item.capacity},
   facing:item.rotation,blocking:item.blocking
  }));
