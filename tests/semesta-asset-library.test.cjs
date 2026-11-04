@@ -41,6 +41,20 @@ test('locked originals, metadata-only assets and non-authoring types are not edi
  assert.equal(cars[1].category,'vehicle');assert.equal(cars[1].editTarget,null);
  assert.equal(cars[2].category,'character');assert.equal(cars[2].editTarget,null);
 });
+test('Broken metadata is rejected before any gallery thumbnail is rendered',async()=>{
+ assert.equal(library.validGeometry({size:[64,96],pivot:[32,80]}),true);
+ assert.equal(library.validGeometry({size:[64,0],pivot:[32,80]}),false);
+ assert.equal(library.validGeometry({size:[64,96],pivot:[32,100]}),false);
+ assert.equal(await library.assetHealthy({
+   ...pipeline('id_broken','prop'),variants:{sw:{file:'props/../bad.png',size:[64,64],pivot:[32,60]}}
+ },()=>{throw Error('Should not attempt network');}),false);
+ assert.equal(await library.assetHealthy({...pipeline('id_hidden','prop'),published:false},()=>null),false);
+ assert.equal(await library.assetHealthy({
+   id:'obj-empty',file:'object:obj-empty',source:'bangun-object',published:true,
+   variants:{sw:{size:[64,64],pivot:[32,60]}}
+ },()=>null),false);
+});
+
 test('Asset Library is linked to placement UI and refreshes when Bangun Ruang writes storage',()=>{
  const html=fs.readFileSync(path+'index.html','utf8');
  const builder=fs.readFileSync(path+'builder.js','utf8');
