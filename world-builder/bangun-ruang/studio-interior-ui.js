@@ -745,7 +745,9 @@ function init(api){
  // Do not hijack ordinary scrolling or page-wide browser zoom.
  const stage=$('previewStage');
  stage.addEventListener('wheel',event=>{
-  if(!enabled||preview!=='interior')return;
+  // Ordinary wheel/trackpad scroll must reach the scrollable viewport.
+  // Only the deliberate Ctrl+wheel (trackpad pinch in Chromium) zooms.
+  if(!enabled||preview!=='interior'||!event.ctrlKey)return;
   const rect=canvas.getBoundingClientRect();
   if(event.clientX<rect.left||event.clientX>rect.right||
      event.clientY<rect.top||event.clientY>rect.bottom)return;
