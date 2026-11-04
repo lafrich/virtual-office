@@ -87,8 +87,19 @@
     <option value="people">NPC / CROWD</option>
     <option value="quest">NPC QUEST / JOB ACTION</option><option value="logic">LOGIC MARKERS</option>
    </select>
+   <div class="asset-view-switch" role="group" aria-label="Asset thumbnail layout">
+    <button type="button" id="assetViewList" class="active" aria-pressed="true" title="Asset list with thumbnail">☷ List</button>
+    <button type="button" id="assetViewGrid" aria-pressed="false" title="Asset thumbnails grid">▦ Grid</button>
+   </div>
   </div>
-  <div id="assetList" role="list" aria-label="Available original and pipeline assets"></div>
+  <div id="assetPreview" class="asset-preview" aria-live="off">
+   <div class="asset-preview-thumb"><span id="assetPreviewIcon" class="asset-preview-icon">▦</span><img id="assetPreviewImage" alt="" decoding="async" hidden></div>
+   <div class="asset-preview-copy">
+    <strong id="assetPreviewName">SELECT AN ASSET</strong>
+    <span id="assetPreviewDetail">Hover / focus to preview · click to place</span>
+   </div>
+  </div>
+  <div id="assetList" data-view="list" role="list" aria-label="Available original and pipeline assets"></div>
   <select id="addType" aria-label="Asset loading fallback" tabindex="-1">
    <option value="">Add object</option><optgroup id="assetGroup" label="Assets"></optgroup>
   </select>
@@ -404,6 +415,7 @@
 <script src="./bangun-ruang/semesta-bridge.js?v=live-sync-1"></script>
 <script src="./bangun-ruang/object-bridge.js?v=object-library-1"></script>
 <script src="./vegetation-catalog.js?v=trees-22"></script>
+<script src="./asset-thumbnails.js?v=semesta-asset-thumbs-v1"></script>
 <script src="./tree-replacement.js?v=batch-trees-v1"></script>
 <script src="./placeholder-replacement.js?v=placeholder-category-v2"></script>
 <script src="/virtual-life-asset-pipeline/universal-sleep.js?v=correct-four-view-rot90-20261104"></script>
@@ -437,5 +449,5 @@
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
 <script src="./active-asset-camera.js?v=active-asset-camera-v1"></script>
-<script type="module" src="./builder.js?v=trees-grounded-v1&amp;warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1&amp;kebon-sirih-city-v2&amp;city-building-sync-v1&amp;native-pixel-depth-v3"></script>
+<script type="module" src="./builder.js?v=trees-grounded-v1&amp;warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1&amp;kebon-sirih-city-v2&amp;city-building-sync-v1&amp;native-pixel-depth-v3&amp;asset-thumbnails-v1"></script>
 </body></html>
