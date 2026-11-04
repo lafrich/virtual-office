@@ -39,5 +39,16 @@ test("hygiene replacement keeps actor identity and bedroom/WC transforms intact"
  assert.ok(body.includes("bodyRule?.kind==='bathtub'"),
   "No standing clothing layers when actor reclines in bathtub");
 
+ assert.ok(rig.includes('source:"universal-bathtub-auto"'),
+  "Other actors need their own 4-view LIE and not a human mannequin");
+ assert.ok(rig.includes('sourceFrames:Number(own.frames)||4'),
+  "Six foam frames must cycle safely over four actual native poses");
+ assert.ok(rig.includes('drawBathFoam'),
+  "The Semesta renderer must add its own animated foam");
+ assert.ok(body.includes("resolved.source==='universal-bathtub-auto'"),
+  "Bangun Ruang must render the same own-character bathtub animation");
+ assert.ok(body.includes('drawBathFoam'),
+  "Bangun Ruang must add foam to its own source sprite");
+
 });
 console.log("PASS universal non-explicit body replacement, 4-frame bath and fixture anchors across apps");
