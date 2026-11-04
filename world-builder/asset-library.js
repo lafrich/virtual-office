@@ -144,7 +144,7 @@ function mount(options={}){
   }
   if(!found.length){const note=document.createElement('p');note.className='sal-empty';
    note.textContent='Tidak ada aset untuk filter ini.';$('salGallery').append(note);}
-  if(selected)selected=all.find(s=>s.file===selected.file)||null;
+  if(selected)selected=found.find(s=>s.file===selected.file)||null;
   if(!selected&&found.length)selected=found[0];
   detail();
  }
