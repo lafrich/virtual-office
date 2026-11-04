@@ -47,6 +47,7 @@ function parse(a){
  return Object.freeze({
   id:a.id,file:'studio:'+a.id,label:String(a.name||'Building').slice(0,80),
   group:'kampung',source:'custom-building',published:true,
+  description:String(a.description||'').slice(0,600),
   footprint:[w,d],size:canonical.size,pivot:canonical.pivot,
   // height is the visible structure ABOVE its central ground pivot.
   // PNG bottom includes foreground sidewalk, not underground geometry.
