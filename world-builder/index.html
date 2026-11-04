@@ -203,13 +203,14 @@
      <div class="section-label">KENDARAAN / VISUAL PLACEMENT</div>
      <label class="vehicle-scale-label" for="vehicleVisualScale">Visual size <output id="vehicleVisualScaleValue" for="vehicleVisualScale">1.00×</output></label>
      <input id="vehicleVisualScale" type="range" min=".45" max="2.5" step=".05" value="1">
-     <div class="vehicle-offsets">
+     <label class="vehicle-auto-ground" for="vehicleAutoGround" style="display:flex;align-items:center;gap:7px;margin:5px 0 8px"><input id="vehicleAutoGround" type="checkbox" checked> AUTO GROUND / roda menapak jalan</label>
+   <div class="vehicle-offsets">
       <label>OFFSET X <input id="vehicleOffsetX" type="number" min="-3" max="3" step=".05" value="0"></label>
-      <label>HEIGHT Y <input id="vehicleOffsetY" type="number" min="-3" max="3" step=".05" value="0"></label>
+      <label>HEIGHT Y <input id="vehicleOffsetY" type="number" min="-3" max="3" step=".05" value="0" disabled></label>
       <label>OFFSET Z <input id="vehicleOffsetZ" type="number" min="-3" max="3" step=".05" value="0"></label>
      </div>
      <button id="vehicleResetVisual" type="button">↺ Reset Visual</button>
-     <p class="help">Scale dan offset hanya memindahkan sprite kendaraan, bukan jalur atau footprint aspal. Atur titik awal lewat C/X dan R/Z di atas, atau pilih Move lalu drag mobil di jalan. Perubahan tersimpan di City Draft.</p>
+     <p class="help">Auto Ground mengunci kontak roda ke jalan (otomatis juga untuk kendaraan yang sudah tersimpan). Nonaktifkan hanya jika memang butuh override Y. Scale dan offset X/Z tidak mengubah jalur atau footprint aspal. Atur titik awal lewat C/X dan R/Z di atas, atau pilih Move lalu drag mobil di jalan. Perubahan tersimpan di City Draft.</p>
     </div>
     <div id="motionControls" hidden>
      <div class="section-label">AUTO LOOP / SIMULATION</div>
@@ -413,7 +414,8 @@
 <script src="/virtual-life-asset-pipeline/action-appearance-bridge.js?v=pose-expression-v2"></script>
 <script src="/virtual-life-asset-pipeline/universal-body-actions.js?v=bathtub-universal-v3"></script>
 <script src="./pipeline-character-rig.js?v=bathtub-universal-v3"></script>
-<script src="./semesta-vehicle-placement.js?v=vehicle-edit-v1"></script>
+<script src="./semesta-vehicle-placement.js?v=auto-wheel-ground-v2"></script>
+<script src="./semesta-wheel-ground.js?v=wheel-contact-v1"></script>
 <script src="./style-rules.js?v=bus2-markers-v1"></script>
 <script src="./map-terrain.js?v=infinite-grid-mobile-fix4"></script>
 <script src="./map-schema.js?v=semesta-v2-final"></script>
@@ -428,7 +430,7 @@
 <script src="./building-outline.js?v=building-outline-v2"></script>
 <script src="./semesta-daynight.js?v=soft-night-v1"></script>
 <script src="./semesta-world-effects.js?v=character-contact-circle-v1"></script>
-<script src="./semesta-traffic-art.js?v=no-vehicle-shadow-v1&amp;mahluk-riders=20261103"></script>
+<script src="./semesta-traffic-art.js?v=wheel-contact-v2&amp;mahluk-riders=20261103"></script>
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
 <script src="./active-asset-camera.js?v=active-asset-camera-v1"></script>

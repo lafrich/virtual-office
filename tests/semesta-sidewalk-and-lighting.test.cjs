@@ -61,7 +61,7 @@ for(const o of walkers){
 }
 const art=read('semesta-traffic-art.js'),effects=read('semesta-world-effects.js'),
  builder=read('builder.js'),html=read('index.html');
-assert.match(art,/function footRatio\(image,fallback=\.935\)/);
+assert.match(art,/wheelGround\?\.contact\(image,fallback\)/,'all traffic sprites use the same wheel-ground anchor');
 assert.match(art,/height=w\*\(imageHeight\/imageWidth\)\*VCOMP/);
 assert.match(art,/function setGroundPivot\(original=false\)/);
 assert.match(art,/function setGroundPivot\(original=false\)/);

@@ -294,6 +294,7 @@ function sanitize(v){
     e.vehicleId=p.vehicleId;
     // Preserve authored visual tuning on import, reload, undo and city drafts.
     e.visualOffset=vehiclePlacement.offset(p.visualOffset);
+    e.autoGround=vehiclePlacement.autoGround(p);
    }else if(p.type==='quest_npc'){
     if(!trafficCatalog?.quest(p.questId)&&!mahluk?.has(p.profile))continue;
     e.questId=trafficCatalog?.quest(p.questId)?p.questId:'custom';
@@ -1472,6 +1473,8 @@ function updateSelection(){
   $('vehicleOffsetX').value=String(offset.x);
   $('vehicleOffsetY').value=String(offset.y);
   $('vehicleOffsetZ').value=String(offset.z);
+  $('vehicleAutoGround').checked=vehiclePlacement.autoGround(cur);
+  $('vehicleOffsetY').disabled=vehiclePlacement.autoGround(cur);
   const agent=automatedAgents.get(cur.id);
   const heading=traffic.routeHeading(agent?.route,agent?.distance)||
    traffic.config(cur).direction;
@@ -2205,6 +2208,10 @@ $('vehicleVisualScale').addEventListener('change',()=>{
 let vehicleScaleStart=1;
 $('vehicleVisualScale').addEventListener('pointerdown',()=>{vehicleScaleStart=vehiclePlacement.scale(item()?.scale);});
 $('vehicleVisualScale').addEventListener('focus',()=>{vehicleScaleStart=vehiclePlacement.scale(item()?.scale);});
+$('vehicleAutoGround').addEventListener('change',()=>{
+ const automatic=$('vehicleAutoGround').checked;
+ editVehicleVisual(o=>{o.autoGround=automatic;});
+});
 for(const [id,axis] of [['vehicleOffsetX','x'],['vehicleOffsetY','y'],['vehicleOffsetZ','z']]){
  $(id).addEventListener('change',()=>{
   const n=Number($(id).value);
@@ -2213,7 +2220,7 @@ for(const [id,axis] of [['vehicleOffsetX','x'],['vehicleOffsetY','y'],['vehicleO
  });
 }
 $('vehicleResetVisual').onclick=()=>editVehicleVisual(o=>{
- o.scale=1;o.visualOffset={x:0,y:0,z:0};
+ o.scale=1;o.visualOffset={x:0,y:0,z:0};o.autoGround=true;
 });
 // Change an existing vehicle's ACTUAL lane direction, not just its picture.
 // Keep its live position mid-route, even while driving or paused. This also

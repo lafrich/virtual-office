@@ -16,8 +16,10 @@ function offset(v){
   y:bounded(d.y,OFFSET_MIN,OFFSET_MAX,0),
   z:bounded(d.z,OFFSET_MIN,OFFSET_MAX,0)};
 }
+function autoGround(record){return record?.autoGround!==false;}
 function normalize(record){
  if(!record||record.type!=='vehicle')return record;
+ record.autoGround=autoGround(record);
  record.scale=scale(record.scale);
  record.visualOffset=offset(record.visualOffset);
  return record;
@@ -27,9 +29,11 @@ function apply(group,record){
  const v=offset(record?.visualOffset),s=scale(record?.scale);
  // Root.scale is used for sprite size. Compensate so offsets remain in
  // world tile units and the ground-pivot correction is never overwritten.
- group.position.set(v.x/s,v.y/s,v.z/s);
+ // AUTO uses the native pixel wheel contact, not a saved user-supplied Y lift.
+ // Keep old Y overrides in the draft for opt-in MANUAL mode only.
+ group.position.set(v.x/s,(autoGround(record)?0:v.y)/s,v.z/s);
 }
 g.VLSemestaVehiclePlacement=Object.freeze({
- SCALE_MIN,SCALE_MAX,OFFSET_MIN,OFFSET_MAX,scale,offset,normalize,apply
+ SCALE_MIN,SCALE_MAX,OFFSET_MIN,OFFSET_MAX,scale,offset,autoGround,normalize,apply
 });
 })(window);
