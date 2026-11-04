@@ -718,6 +718,24 @@ function makeSprite(root,item){
   root.userData.pendingPipelineImage=spec.id;return;
  }
 
+ // Warteg is a depth-tested 3D building: the authored 1× art is
+ // mapped onto reconstructed roof, walls and serving-front surfaces.
+ // All four rotations retain their own original sprite texture.
+ if(window.VLWarteg3D?.supported(spec)){
+  const views=new Map();
+  for(const dir of ['sw','se','ne','nw']){
+   const layer=new THREE.Group();
+   const ok=window.VLWarteg3D.attach(THREE,layer,spec,dir,pixelTexture(item.asset,dir));
+   if(!ok)continue;
+   layer.visible=dir===spriteDirection(item.rotation);
+   root.add(layer);views.set(dir,layer);
+  }
+  if(views.size){
+   root.userData.warteg3DVariants=views;
+   root.userData.wartegTrueDepth=true;
+   return;
+  }
+ }
  const view=spriteDirection(item.rotation);
  const data=spec.variants?.[view]||spec.variants?.sw||spec.variants?.se;
  const size=data?.size||spec.size,pivot=data?.pivot||spec.pivot;
@@ -1388,6 +1406,10 @@ $('trackActiveAsset').onclick=()=>{
  else focusPlacedAsset(obj.id,true);
 };
 let interiorPreview=null;
+$('quickEnterBuilding').onclick=()=>{
+ const building=item();
+ if(building&&interiorPreview?.openFor)interiorPreview.openFor(building);
+};
 function selectionGuide(cur){
  const spec=cur?.type==='sprite'?assetByName.get(cur.asset):null;
  if(!studioSprites?.isStudio(spec))return new THREE.BoxHelper(owners.get(cur.id),0xf5df42);
@@ -1493,6 +1515,9 @@ function updateSelection(){
  }
  updateLogicUI();
  interiorPreview?.update(cur,cur?.type==='sprite'?assetByName.get(cur.asset):null);
+ const enterAvailable=cur?.type==='sprite'&&cur.enterable===true&&
+  (cur?.interior?.floors?.length||assetByName.get(cur.asset)?.interior?.floors?.length);
+ $('quickEnterBuilding').hidden=!enterAvailable;
  if(highlight&&highlight.userData.selected===cur?.id){
    highlight.update();
  }else{
@@ -1547,6 +1572,10 @@ function applyItem(){
  r.position.set(o.x,o.y,o.z);
  r.rotation.y=actorType(o.type)?0:o.rotation*Math.PI/180;
  r.scale.setScalar(actorType(o.type)?1:o.scale);
+ if(r.userData.warteg3DVariants){
+  const display=spriteDirection(o.rotation);
+  for(const [dir,group] of r.userData.warteg3DVariants)group.visible=dir===display;
+ }
  if(o.type==='vehicle'){
   const agent=automatedAgents.get(o.id);
   if(agent?.visual)vehiclePlacement.apply(agent.visual,o);
@@ -1927,7 +1956,30 @@ canvas.addEventListener('wheel',e=>{
   e.preventDefault();viewSize=clamp(viewSize*(e.deltaY>0?1.12:.89),8,180);fitCamera();
  }
 },{passive:false});
-// Walk Test previews canonical movement and 3D occlusion without mutating
+// Walking near a Warteg doorway (rather than crossing solid wall collision)
+ // opens the editor's authored interior preview; no multiplayer teleport.
+ function enterNearbyBuilding(){
+  const root=owners.get(walkActorId);
+  if(!root||!interiorPreview)return false;
+  const candidates=documentMap.objects.filter(o=>o.type==='sprite'&&
+   o.enterable===true&&
+   (o.interior?.floors?.length||assetByName.get(o.asset)?.interior?.floors?.length));
+  const sorted=candidates.map(o=>{
+   const spec=assetByName.get(o.asset);
+   const door=window.VLWarteg3D?.supported(spec)?
+    window.VLWarteg3D.doorPosition(o):{x:o.x,z:o.z};
+   return {o,distance:Math.hypot(root.position.x-door.x,root.position.z-door.z)};
+  }).sort((a,b)=>a.distance-b.distance);
+  const nearest=sorted[0];
+  if(!nearest||nearest.distance>2.1){
+   tell('Dekati pintu bangunan, lalu tekan E untuk masuk.');return false;
+  }
+  for(const k of Object.keys(walkInput))walkInput[k]=false;
+  rigs.get(walkActorId)?.rig.setMoving(0,0,false);
+  interiorPreview.openFor(nearest.o);
+  return true;
+ }
+ // Walk Test previews canonical movement and 3D occlusion without mutating
 // the authored map or touching multiplayer / player data.
 const walkInput={up:false,down:false,left:false,right:false};
 let walkActorId=null;
@@ -2848,7 +2900,8 @@ window.addEventListener('keydown',e=>{
  if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||
   e.target instanceof HTMLTextAreaElement||e.target?.isContentEditable)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();restoreStack(undoStack,redoStack);}
-  else if(e.key.toLowerCase()==='h'){toggleGrid();}
+  else if(e.key.toLowerCase()==='e'&&mode==='walk'){e.preventDefault();enterNearbyBuilding();}
+ else if(e.key.toLowerCase()==='h'){toggleGrid();}
  else if(e.key==='Delete'&&item())remove();
  else if(e.key.toLowerCase()==='g')setMode('move');
  else if(e.key.toLowerCase()==='p')setMode('pan');

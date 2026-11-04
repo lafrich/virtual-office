@@ -55,6 +55,8 @@ function parse(a){
   collision:a.config.collision!=='no',
   entranceFacing:['sw','se'].includes(a.entranceFacing)?a.entranceFacing:'',
   interactive:enterable,enterable,entrance,interior,actionSlots,
+  assetPipeline:a.assetPipeline?.family==='warteg_kharisma'?
+   {family:'warteg_kharisma',version:Number(a.assetPipeline.version)||2}:null,
   interactions:Array.isArray(a.interactions)?
    a.interactions.filter(x=>typeof x==='string').slice(0,20):(enterable?['enter']:[]),
   blocking:a.config.collision==='no'?'no':'yes',
