@@ -71,14 +71,41 @@ jobs:
                 buttons:document.querySelectorAll('#salViews button').length,
                 source:img.dataset.source};
             });
-            if(!vehicleCheck.matching||vehicleCheck.buttons!==4||vehicleCheck.width<50)
-              throw Error('TransJakarta preview mismatches actual Semesta artwork '+JSON.stringify(vehicleCheck));
+            if(!vehicleCheck.matching||vehicleCheck.buttons!==4||vehicleCheck.width!==272||vehicleCheck.height!==256)
+              throw Error('TransJakarta is not the original 272x256 pipeline sprite '+JSON.stringify(vehicleCheck));
+            await page.screenshot({path:'screenshots/semesta-native-transjakarta-gallery.png',fullPage:false});
             const allVehicles=await page.evaluate(async()=>{
               const list=window.VLSemestaCatalog.vehicles;
               const result=await Promise.all(list.map(v=>window.VLSemestaArt.vehiclePreviewAsync(v.id,'se')));
               return {total:result.length,missing:result.filter(x=>!x).length};
             });
             if(allVehicles.missing)throw Error('Other vehicles have broken artwork: '+JSON.stringify(allVehicles));
+
+            const carAudit=await page.evaluate(async()=>{
+              const expected={sedan_red:[146,138],sedan_teal:[146,138],
+                hatchback_orange:[136,132],mpv_silver:[152,144],
+                taxi_bluebird:[152,148],van_cream:[162,162],
+                bus_transjakarta:[272,256]};
+              const dirs=['sw','se','ne','nw'],issues=[];
+              for(const [id,size] of Object.entries(expected)){
+                for(const dir of dirs){
+                  const url=await window.VLSemestaArt.vehiclePreviewAsync(id,dir);
+                  if(!url||!url.includes('/cars/'+id+'_'+dir+'.png')||url.startsWith('data:')){
+                    issues.push({id,dir,reason:'proxy-or-not-found',url});continue;
+                  }
+                  const dims=await new Promise(resolve=>{
+                    const img=new Image();
+                    img.onload=()=>resolve([img.naturalWidth,img.naturalHeight]);
+                    img.onerror=()=>resolve([0,0]);img.src=url;
+                  });
+                  if(dims[0]!==size[0]||dims[1]!==size[1])
+                    issues.push({id,dir,reason:'geometry',dims,size});
+                }
+              }
+              return {nativeViews:Object.keys(expected).length*dirs.length,issues};
+            });
+            if(carAudit.issues.length)throw Error('Other cars use wrong thumbnail art '+JSON.stringify(carAudit.issues));
+
 
             // Check the exact native v3 artwork for EVERY rider and EVERY
             // direction. The previous failure had a detailed Gojek but
@@ -149,7 +176,7 @@ jobs:
             await page.waitForFunction(()=>[...document.querySelectorAll('#salGallery .sal-card')].some(x=>x.textContent.includes('Custom')),null,{timeout:120000});
             const customs=await page.locator('#salGallery .sal-card').count();
             await page.screenshot({path:'screenshots/semesta-custom-asset-library.png',fullPage:false});
-            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,vehicleCheck,allVehicles,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
+            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,vehicleCheck,allVehicles,carAudit,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
             await browser.close();
             if(faults.some(x=>/SyntaxError|Cannot read properties|is not defined/i.test(x)))
               throw Error('Browser JS crash: '+faults.join('; '));
