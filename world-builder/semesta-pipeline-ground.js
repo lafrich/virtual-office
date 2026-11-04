@@ -123,7 +123,9 @@ function configure(THREE,bundle,spec,dir,color,depth){
  const old=bundle.facade.geometry;
  bundle.facade.geometry=new THREE.PlaneGeometry(m.width,m.height);
  if(old)old.dispose();
- bundle.facade.position.set(m.centerX,m.centerY,0);
+ // Screen-right is world (+X,-Z) for Semesta's locked ortho yaw=45deg.
+ // Do not shift the pivot purely along world X: it changes its screen depth.
+ bundle.facade.position.set(m.centerX/Math.SQRT2,m.centerY,-m.centerX/Math.SQRT2);
  bundle.facade.material.map=color;
  bundle.facade.material.needsUpdate=true;
  const u=bundle.facade.material.userData.nativeDepthUniforms;
@@ -151,9 +153,17 @@ function attach(THREE,root,spec,dir,color,depth){
  return bundle;
 }
 function faceCamera(bundle,root,camera){
- const yaw=Math.atan2(camera.position.x-root.position.x,
-                      camera.position.z-root.position.z);
- bundle.facade.rotation.y=yaw-root.rotation.y;
+ // Orthographic rays are parallel: yaw must be constant throughout the map.
+ // Looking at the camera's position relative to each object introduces
+ // different yaw and wrong depth for distant city-block objects.
+ const yaw=Math.PI/4;
+ const rot=root.rotation.y||0;
+ bundle.facade.rotation.y=yaw-rot;
+ // Rotate screen-right pivot offset into the object's local coordinates.
+ const dx=Math.cos(yaw)*bundle.metrics.centerX;
+ const dz=-Math.sin(yaw)*bundle.metrics.centerX;
+ bundle.facade.position.x=Math.cos(rot)*dx-Math.sin(rot)*dz;
+ bundle.facade.position.z=Math.sin(rot)*dx+Math.cos(rot)*dz;
  bundle.facade.material.userData.nativeDepthUniforms.uNativeScale.value=root.scale.x;
 }
 g.VLSemestaPipelineGround=Object.freeze({
