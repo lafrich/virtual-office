@@ -33,7 +33,7 @@ assert.ok(rig.includes('ctx.rect(0,56,64,56)'),
  "Semesta must not draw rear backpack over character head/neck");
 assert.ok(preview.includes("const rearView=actor.direction==='ne'||actor.direction==='nw'"),
  "Bangun Ruang must preserve the same back-facing bag orientation");
-assert.ok(preview.includes('ctx.rect(x,y+56*scale,drawWidth,(FRAME.h-56)*scale)'),
+assert.ok(preview.includes("paint.rect(dx,dy+56*(composite?1:scale),frameW,(FRAME.h-56)*(composite?1:scale))"),
  "Bangun Ruang must mask rear backpack away from head and neck");
 const builder=fs.readFileSync("world-builder/builder.js","utf8");
 assert.ok(world.includes("/virtual-life-asset-pipeline/action-appearance-bridge.js"),
