@@ -124,7 +124,7 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
  const drawWidth=FRAME.w*scale,drawHeight=FRAME.h*scale;
  const resolved=rig?.resolve(actor.profile,actor.pose,actor.moving);
  const sprite=resolved?.url?image(resolved.url):null;
- const actorProfile=bridge?.get(storageActor);
+ const actorProfile=bridge?.get?.(storageActor);
  const bodyRule=BODY?.resolve(actorProfile,actor.actionId||actor.pose);
  const bareAtlas=bodyRule?image(bridge?.url(bodyRule.sheet)):null;
  let drawn=false;
