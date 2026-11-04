@@ -58,12 +58,18 @@ test('furniture pixel hit test and empty floor preserve real c/r coordinates',()
 test('same iso module is loaded before both Bangun Ruang and Semesta UI',()=>{
  const editor=source('bangun-ruang/index.html');
  const semesta=source('index.html');
+ // Cache-bust query parameters are free to change when a script changes.
+ // Validate the actual script filenames and their load order instead.
+ const scriptPaths=html=>[...html.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)]
+   .map(match=>match[1].split('?')[0]);
  for(const [html,a,b] of [
-  [editor,'./interior-isometric.js?v=hygiene-fixture-anchor-v1','./studio-interior-ui.js?v=type-action-default-20261104'],
-  [semesta,'./bangun-ruang/interior-isometric.js?v=hygiene-fixture-anchor-v1','./bangun-ruang/semesta-interior-preview.js?v=units-v7']
+  [editor,'./interior-isometric.js','./studio-interior-ui.js'],
+  [semesta,'./bangun-ruang/interior-isometric.js','./bangun-ruang/semesta-interior-preview.js']
  ]){
-  assert.ok(html.includes(a),'missing renderer module');
-  assert.ok(html.indexOf(a)<html.indexOf(b),'renderer should load before UI controller');
+  const scripts=scriptPaths(html);
+  assert.ok(scripts.includes(a),'missing renderer module');
+  assert.ok(scripts.includes(b),'missing UI controller');
+  assert.ok(scripts.indexOf(a)<scripts.indexOf(b),'renderer should load before UI controller');
  }
  for(const id of ['interiorViewIso','interiorViewPlan'])assert.ok(editor.includes('id="'+id+'"'));
  for(const id of ['interiorWalkthroughIso','interiorWalkthroughPlan'])assert.ok(semesta.includes('id="'+id+'"'));
