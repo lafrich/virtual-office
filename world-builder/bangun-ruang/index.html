@@ -926,6 +926,8 @@ async function openBuildingCopyFromSemesta(spec){
  $('assetDescription').value=String(spec.description||spec.note||
   'Modifikasi dari '+spec.label+' (original: '+spec.file+').').slice(0,600);
  current=null;importSourceAsset=spec.file;
+ $('saveBtn').disabled=true;
+ status('Loading native 1× source views. Save will enable after import.');
  const errors=[],loaded=[];
  for(const d of dirs){
   const src=spec.variants?.[d];
@@ -945,6 +947,7 @@ async function openBuildingCopyFromSemesta(spec){
   }catch(err){errors.push(d);}
  }
  manualSignature=artFingerprint(config());view='sw';render();drawLibrary();
+ $('saveBtn').disabled=false;
  status('Editing NEW copy: '+spec.label+' · native '+loaded.join('/')+
   (errors.length?' · unavailable '+errors.join('/'):'')+
   ' · missing directions use editable procedural rear view. SAVE creates a separate asset.');
