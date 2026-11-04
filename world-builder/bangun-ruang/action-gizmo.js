@@ -103,25 +103,42 @@
  // Furniture uses its own gizmo: Move X/Y/XY plus discrete mirror handles.
  // No rotation ring. Flip handles are intentionally generous for touch input.
  const O_LEN=55,O_GRAB=17;
- function objectHandles(origin){
+ // In isometric view X follows +C (down-right) and Y follows +R
+ // (down-left). Keep orthogonal handles for the optional top-down view.
+ function objectHandles(origin,isometric=false){
+  if(isometric)return {x:{x:origin.x+O_LEN,y:origin.y+O_LEN/2},
+   y:{x:origin.x-O_LEN,y:origin.y+O_LEN/2},
+   flipX:{x:origin.x-O_LEN,y:origin.y-O_LEN/2},
+   flipY:{x:origin.x+O_LEN,y:origin.y-O_LEN/2}};
   return {x:{x:origin.x+O_LEN,y:origin.y},
    y:{x:origin.x,y:origin.y-O_LEN},
    flipX:{x:origin.x-O_LEN,y:origin.y},
    flipY:{x:origin.x,y:origin.y+O_LEN}};
  }
- function hitObject(origin,p){
+ function nearSegment(p,a,b,radius){
+  const vx=b.x-a.x,vy=b.y-a.y;
+  const t=clamp(((p.x-a.x)*vx+(p.y-a.y)*vy)/(vx*vx+vy*vy),0,1);
+  return dist(p,{x:a.x+t*vx,y:a.y+t*vy})<=radius;
+ }
+ function hitObject(origin,p,isometric=false){
   if(!origin||!p)return null;
-  const h=objectHandles(origin);
+  const h=objectHandles(origin,isometric);
   if(dist(p,h.flipX)<=O_GRAB+3)return 'flipX';
   if(dist(p,h.flipY)<=O_GRAB+3)return 'flipY';
-  if(p.x>=origin.x+12&&p.x<=h.x.x+O_GRAB&&Math.abs(p.y-origin.y)<=O_GRAB)return 'x';
-  if(p.y<=origin.y-12&&p.y>=h.y.y-O_GRAB&&Math.abs(p.x-origin.x)<=O_GRAB)return 'y';
   if(dist(p,origin)<=O_GRAB+6)return 'xy';
+  if(dist(p,h.x)<=O_GRAB+4||nearSegment(p,origin,h.x,O_GRAB*.65))return 'x';
+  if(dist(p,h.y)<=O_GRAB+4||nearSegment(p,origin,h.y,O_GRAB*.65))return 'y';
   return null;
+ }
+ // Convert screen movement onto one of the two 2:1 iso floor axes.
+ // Dot-product projection prevents off-axis pointer drift from moving a fixture.
+ function objectAxisSteps(dx,dy,axis,halfW=32,halfH=16){
+  const vx=axis==='x'?halfW:-halfW,vy=halfH;
+  return Math.round((dx*vx+dy*vy)/(vx*vx+vy*vy));
  }
  function drawObject(ctx,origin,options={}){
   if(!origin||!ctx?.beginPath)return;
-  const h=objectHandles(origin),hot=options.hot||'';
+  const h=objectHandles(origin,options.isometric===true),hot=options.hot||'';
   const axis=(end,color,label)=>{
    ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=4;
    ctx.moveTo(origin.x,origin.y);ctx.lineTo(end.x,end.y);ctx.stroke();
@@ -147,5 +164,5 @@
   ctx.restore();
  }
  return Object.freeze({ORDER,LENGTH,RADIUS,GRAB,center,hit,snap,
-  dragged,rotate,rotateGesture,facing,degrees,draw,normalizeSnap,drawObject,hitObject,objectHandles});
+  dragged,rotate,rotateGesture,facing,degrees,draw,normalizeSnap,drawObject,hitObject,objectHandles,objectAxisSteps});
 });
