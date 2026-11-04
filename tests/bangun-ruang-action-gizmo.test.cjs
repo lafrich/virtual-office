@@ -45,25 +45,47 @@ test("ring gestures select original four V6B facings without sprite distortion",
  const reloaded=JSON.parse(JSON.stringify(item));
  assert.deepEqual(adjustment.get(reloaded,"sit"),{x:19,y:-11,direction:"nw",layer:"front"});
 });
-test("Bangun Ruang renders gizmo only during adjustment; no destructive rotations",()=>{
+test("Bangun Ruang keeps character pose gizmo and uses furniture H/V flip handles",()=>{
  const html=load("index.html"),scale=load("character-scale-preview.js"),
   ui=load("studio-interior-ui.js"),helper=load("action-gizmo.js");
- for(const id of ["actionModeMove","actionModeRotate","actionTransformSnap",
-  "actionTurnLeft","actionTurnRight","actionTurnValue"])
+ for(const id of ["actionTransformSnap","actionTurnLeft","actionTurnRight",
+  "actionTurnValue","actionUndo"])
   assert.ok(html.includes('id="'+id+'"'),"missing "+id);
+ for(const obsolete of ["actionModeMove","actionModeRotate"])
+  assert.ok(!html.includes('id="'+obsolete+'"'),
+   "tool buttons were intentionally removed for two-tap object selection");
  assert.ok(html.indexOf("action-gizmo.js?v=")<html.indexOf("character-scale-preview.js?v="),
   "gizmo helper should load before renderer");
  assert.ok(scale.includes("GIZMO.draw(ctx,actor.gizmoOrigin"));
  assert.ok(scale.includes("if(actor.adjusting&&GIZMO)"),
-  "gizmo must not show in gameplay, saved artwork or regular preview");
+  "character gizmo must not show in gameplay or saved artwork");
  assert.ok(scale.includes("GIZMO.dragged("));
  assert.ok(scale.includes("GIZMO.rotateGesture("));
  assert.ok(scale.includes("api.onAdjustmentChange?.(actor.adjustmentDraft)"));
  assert.ok(ui.includes("api.getScaleController?.()?.setTransformMode?.(effective)"));
  assert.ok(ui.includes("gizmo.rotate(adjustmentDraft.direction,base,delta)"));
- assert.ok(ui.includes("api.saveAsset?.()"),"rotation should persist through existing saved building");
- assert.ok(ui.includes("key==='e'||key==='r'"),"keyboard mode switch should exist");
- assert.ok(ui.includes("arrowleft"),"arrow key nudge should exist");
- assert.ok(helper.includes("ctx.arc(x,y,RADIUS"),"render a visible transform ring");
- assert.ok(!scale.includes("ctx.rotate("),"actor sprite must use authored directional V6B frames");
+ assert.ok(ui.includes("api.saveAsset?.()"),"adjustments persist in the saved building");
+ assert.ok(ui.includes("key==='e'||key==='r'"));
+ assert.ok(ui.includes("arrowleft"));
+ assert.ok(helper.includes("ctx.arc(x,y,RADIUS"),"character pose rotation ring stays available");
+ assert.ok(!scale.includes("ctx.rotate("),"actor sprite uses native V6B facing frames");
+
+ // Furniture is selected on canvas; only then does its own direct gizmo appear.
+ assert.ok(ui.includes("function drawObjectGizmo()"));
+ assert.ok(ui.includes("gizmo.drawObject(ctx,p,"));
+ assert.ok(ui.includes("const handle=gizmo.hitObject(center,p)"));
+ assert.ok(ui.includes("if(handle==='flipX'||handle==='flipY')"));
+ assert.ok(ui.includes("recordUndo(before)"));
+ assert.ok(ui.includes("function tapActionObject(event)"));
+ assert.ok(ui.includes("const same=id===actionTapTarget&&id===selected"));
+ assert.ok(ui.includes("objectGizmoActive&&beginObjectDrag(e)"));
+});
+test("furniture gizmo exposes move X/Y/centre and two separate flip controls",()=>{
+ const center={x:180,y:180},points=gizmo.objectHandles(center);
+ assert.equal(gizmo.hitObject(center,points.x),"x");
+ assert.equal(gizmo.hitObject(center,points.y),"y");
+ assert.equal(gizmo.hitObject(center,center),"xy");
+ assert.equal(gizmo.hitObject(center,points.flipX),"flipX");
+ assert.equal(gizmo.hitObject(center,points.flipY),"flipY");
+ assert.equal(gizmo.hitObject(center,{x:0,y:0}),null);
 });
