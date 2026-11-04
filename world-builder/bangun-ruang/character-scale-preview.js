@@ -150,6 +150,7 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
    const worn=bridge?.equipmentFor(storageActor)||{};
    const urls=(resolved.source==='universal-sleep'?
      [null,null,null,null,null,null]:
+     bodyRule?.kind==='bathtub'?[null,null,null,null,null,null]:
      bodyRule?.kind==='bath'?
      [null,null,null,null,worn.hair?.frames?.[actor.direction]||null,null]:
      ['bag','shoes','pants','shirt','hair','helmet']
@@ -176,7 +177,7 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
    else paint.drawImage(pic,sx,sy,FRAME.w,FRAME.h,dx,dy,dw,dh);
    if(composite)BODY?.tintBase?.(paint,actorProfile);
    for(let i=1;i<4;i++)drawPart(layers[i]);
-   if(bodyRule?.kind!=='bath')drawPart(layers[4]);
+   if(bodyRule?.kind!=='bath'&&bodyRule?.kind!=='bathtub')drawPart(layers[4]);
    drawPart(layers[5]);
    if(composite){
     if(bodyRule){
