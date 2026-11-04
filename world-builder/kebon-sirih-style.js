@@ -129,10 +129,15 @@ function upgrade(source,catalog){
    notes:(String(o.notes||'')+' | Kebon Sirih visual sprite: '+spec.label).trim().slice(0,500)};
   return res;
  });
+ const beforeStyle=map.map.visualStyle;
  map.map.visualStyle=VERSION;
  map.map.terrainStyle='pipeline:assets/kebon_sirih/manifest.json';
- map.map.notes=(String(map.map.notes||'').replace(/Standalone 3D layout prototype\.?/g,'')+
-  ' Kebon Sirih Jakarta Pusat-inspired pixel architecture and infrastructure; editable fictional map, not geographic survey.').trim();
+ // A recognizable default scene name, not a claim of surveyed street geometry.
+ if(map.map.name==='Reference City · Isometric Town')map.map.name='Kebon Sirih · Jakarta Pusat (inspired)';
+ if(map.map.name==='Virtual Life · City Sample (editable placeholders)')map.map.name='Kebon Sirih · City Sample';
+ const description='Kebon Sirih Jakarta Pusat-inspired pixel architecture and infrastructure; editable fictional map, not geographic survey.';
+ if(beforeStyle!==VERSION&&!String(map.map.notes||'').includes(description))
+  map.map.notes=(String(map.map.notes||'')+' '+description).trim();
  return {map,changed,skipped};
 }
 g.VLKebonSirihStyle=Object.freeze({
