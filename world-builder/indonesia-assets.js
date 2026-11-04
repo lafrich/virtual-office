@@ -7,6 +7,12 @@
 const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/';
 const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json'];
 let cached=null;
+const IMAGE_REV='quality-v3-20261105';
+function cacheBust(spec,url){
+ if(!url)return url;
+ if(spec?.pack!=='indonesia-200-v1')return url;
+ return url+(url.includes('?')?'&':'?')+'v='+IMAGE_REV;
+}
 function valid(s){
  if(!/^id(?:200)?_[a-z0-9_]+$/.test(s?.id||''))return false;
  if(s.file!=='pipeline:'+s.id||s.source!=='pipeline-street'||s.published!==true)return false;
@@ -64,7 +70,7 @@ async function load(){
     const item=index.get(id);
     if(item){
      const v=item.variants[dir]||item.variants.sw||item.variants.se;
-     return v?base+'assets/street_buildings/'+v.file:null;
+     return v?cacheBust(item,base+'assets/street_buildings/'+v.file):null;
     }
     return legacy(id,dir);
    }
@@ -74,5 +80,5 @@ async function load(){
   packs:responses.filter(x=>x.status==='fulfilled').length};
  return cached;
 }
-g.VLIndonesiaAssets=Object.freeze({load,base,valid,PACKS});
+g.VLIndonesiaAssets=Object.freeze({load,base,valid,PACKS,cacheBust,IMAGE_REV});
 })(typeof window!=='undefined'?window:globalThis);
