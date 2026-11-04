@@ -726,6 +726,7 @@ function importFile(file){
  };r.readAsText(file);
 }
 function remove(){
+ if(cityBrowser?.activeTarget()){status('City building linked: remove it in Semesta, not from the asset library');return;}
  if(!current){status('Select a saved asset first');return;}
  if(!confirm('Delete "'+current.name+'" from this browser? Export backup first.'))return;
  saved=saved.filter(x=>x.id!==current.id);localStorage.setItem(KEY,JSON.stringify(saved));
@@ -870,7 +871,7 @@ $('applyBase').onclick=()=>preset($('baseSelect').value);
 $('resetBase').onclick=()=>preset($('baseSelect').value);
 $('generateBtn').onclick=()=>{manualOverrides={};manualSignature='';render();interiorUi?.refresh();
  status('Re-generated four-direction pixels from Semesta geometry');};
-$('newBtn').onclick=()=>preset(defaultBase);$('saveBtn').onclick=saveAsset;$('publishBtn').onclick=publish;
+$('newBtn').onclick=()=>{cityBrowser?.clearTarget?.();preset(defaultBase);};$('saveBtn').onclick=saveAsset;$('publishBtn').onclick=publish;
 $('exportBtn').onclick=exportAsset;$('pngBtn').onclick=downloadPNG;
 $('search').oninput=drawLibrary;$('deleteBtn').onclick=remove;
 $('importBtn').onclick=()=>$('upload').click();
