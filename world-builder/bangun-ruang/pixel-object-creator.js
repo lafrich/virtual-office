@@ -456,6 +456,8 @@ async function openSource(spec){
  const scaled=spec.size&&spec.pivot?Number(spec.height)*Number(spec.pivot[1])/Number(spec.size[1]):null;
  const height=Number(spec.worldHeight??scaled);
  preservedWorldHeight=Number.isFinite(height)&&height>=.3&&height<=24?height:null;
+ $('opcSave').disabled=true;
+ status('Loading source pixels, please finish import before saving…');
  const failed=[];
  await Promise.all(DIR.map(d=>new Promise(resolve=>{
   const url=sourceUrl(spec,d);if(!url){failed.push(d);resolve();return;}
@@ -474,7 +476,7 @@ async function openSource(spec){
   image.onerror=()=>{failed.push(d);resolve();};
   image.src=url;
  })));
- show();library();
+ show();library();$('opcSave').disabled=false;
  const missing=DIR.filter(d=>!spec.variants?.[d]);
  status('Edit copy: '+spec.label+' · '+(failed.length?
   'Periksa sudut '+failed.join(', ')+'.':'4 sudut diimpor.')+
