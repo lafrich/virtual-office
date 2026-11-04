@@ -496,7 +496,8 @@ function mount(api){
    const supported=pose&&(motion?.mode===requested||motion?.source==='universal-hygiene');
    status('Use '+item.name+' → '+item.actionId+' · '+(supported?
     'Mahluk Hidup '+(pose==='bathe'?'4-frame bath (base male/female body, no outfit)':'pose '+pose)+
-      (anchor?(item.assetId==='bed'?' / aligned to mattress':' / aligned to fixture'):''):
+      (anchor?(item.assetId==='bed'?' / aligned to mattress':
+       item.assetId==='wc'?' / aligned to seat':' / aligned to fixture'):''):
     'No authored rig; metadata action only'));
    updateControls();draw();
   };
