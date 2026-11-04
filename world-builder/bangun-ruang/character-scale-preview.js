@@ -475,7 +475,7 @@ function mount(api){
   const path=pathTo(scene,start,[item.c,item.r],{item});
   if(!path.length){status('No free route to '+item.name+' · move blocking furniture');return;}
   const action=model.actions?.[item.actionId],pose=action?.pose;
-  const anchor=pose&&['toilet','sit','sleep','lie','work','bathe'].includes(pose)?
+  const anchor=pose&&['toilet','sit','sleep','lie','work','bathe','bathtub_bathe'].includes(pose)?
     iso?.actionAnchor?.(item):null;
   const approach=path[path.length-1];
   const finish=()=>{
@@ -489,7 +489,8 @@ function mount(api){
    const motion=rig?.resolve(actor.profile,pose,false);
    const supported=pose&&(motion?.mode===requested||motion?.source==='universal-hygiene');
    status('Use '+item.name+' → '+item.actionId+' · '+(supported?
-    'Mahluk Hidup '+(pose==='bathe'?'4-frame bath (base male/female body, no outfit)':'pose '+pose)+
+    'Mahluk Hidup '+(pose==='bathe'?'4-frame shower (base male/female body, no outfit)':
+       pose==='bathtub_bathe'?'6-frame reclined foam soak (eyes open, no outfit)':'pose '+pose)+
       (anchor?(item.assetId==='bed'?' / aligned to mattress':
        item.assetId==='wc'?' / aligned to seat':' / aligned to fixture'):''):
     'No authored rig; metadata action only'));
