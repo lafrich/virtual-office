@@ -14,13 +14,100 @@ const iso=g.VLInteriorIso;
 function init(api){
  let enabled=false,scenes={},floor=1,selected=null,placing=null,
    preview='exterior',tab='exterior',interiorView='iso',lastIso=null,
-   adjustmentDraft=null,adjustmentKey='',lastAdjusted=null,actionTapTarget=null;
+   adjustmentDraft=null,adjustmentKey='',lastAdjusted=null,actionTapTarget=null,
+   objectGizmoActive=false,objectDrag=null,undoStack=[];
  const canvas=$('interiorCanvas'),ctx=canvas.getContext('2d');
  ctx.imageSmoothingEnabled=false;
  const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
  const group=$('interiorCategory'),asset=$('interiorAsset');
  const tray=$('interiorQuickBar'),trayContainer=$('interiorQuickTools');
  const tiles=new Map();
+ const HISTORY_LIMIT=40;
+ function snapshot(){return {scenes:copy(scenes),floor,selected,lastAdjusted:lastAdjusted?{...lastAdjusted}:null};}
+ function recordUndo(before=snapshot()){
+  undoStack.push(before);if(undoStack.length>HISTORY_LIMIT)undoStack.shift();
+  updateUndoButton();
+ }
+ function updateUndoButton(){const b=$('actionUndo');if(b)b.disabled=!undoStack.length;}
+ function undo(){
+  if(!undoStack.length)return;
+  api.getScaleController?.()?.endAdjustment?.();
+  const state=undoStack.pop();
+  scenes=copy(state.scenes);floor=state.floor;selected=state.selected;
+  lastAdjusted=state.lastAdjusted;placing=null;objectDrag=null;
+  objectGizmoActive=false;actionTapTarget=null;
+  adjustmentKey='';adjustmentDraft=null;
+  $('interiorFloor').value=String(floor);refresh();updateTray();updateUndoButton();
+  onStatus('Undo · previous editor state restored');
+ }
+ function objectOrigin(item){
+  if(!item)return null;
+  if(interiorView==='iso'&&iso){
+   const type=model.types[item.assetId],turn=item.rotation%180===90;
+   const w=turn?type.d:type.w,d=turn?type.w:type.d;
+   const [x,y]=iso.point(lastIso||iso.bounds(scene()),item.c+w/2,item.r+d/2,0);
+   return {x,y:y-23};
+  }
+  const type=model.types[item.assetId],turn=item.rotation%180===90;
+  return {x:(item.c+(turn?type.d:type.w)/2)*CELL,y:(item.r+(turn?type.w:type.d)/2)*CELL};
+ }
+ function drawObjectGizmo(){
+  if(!objectGizmoActive||placing||!selected||!gizmo||preview!=='interior')return;
+  const item=scene().items.find(x=>x.id===selected),p=objectOrigin(item);
+  if(p)gizmo.draw(ctx,p,{mode:'move',hot:objectDrag?.handle||'',direction:'sw',baseDirection:'sw'});
+ }
+ function pointOnCanvas(e){
+  const b=canvas.getBoundingClientRect();
+  if(!b.width||!b.height)return null;
+  return {x:(e.clientX-b.left)*canvas.width/b.width,y:(e.clientY-b.top)*canvas.height/b.height};
+ }
+ function beginObjectDrag(e){
+  if(!objectGizmoActive||placing||!selected||!gizmo)return false;
+  const p=pointOnCanvas(e),item=scene().items.find(x=>x.id===selected);
+  const center=objectOrigin(item);
+  if(!p||!center)return false;
+  const handle=gizmo.hit(center,p);
+  if(!handle)return false;
+  objectDrag={id:e.pointerId,handle,start:p,center,base:{c:item.c,r:item.r,rotation:item.rotation},before:snapshot(),changed:false};
+  canvas.setPointerCapture?.(e.pointerId);e.preventDefault();return true;
+ }
+ function dragObject(e){
+  const d=objectDrag;if(!d||d.id!==e.pointerId)return;
+  const p=pointOnCanvas(e);if(!p)return;
+  const item=scene().items.find(x=>x.id===selected);if(!item)return;
+  if(d.handle==='rotate'){
+   const from=Math.atan2(d.start.y-d.center.y,d.start.x-d.center.x);
+   const to=Math.atan2(p.y-d.center.y,p.x-d.center.x);
+   const turns=Math.round((to-from)/(Math.PI/2));
+   const delta=((turns+4)%4);
+   const target=((d.base.rotation+delta*90)%360+360)%360;
+   if(target!==item.rotation&&model.move(scene(),item.id,item.c,item.r,target))d.changed=true;
+  }else{
+   const dx=p.x-d.start.x,dy=p.y-d.start.y;
+   // Inverse of the 2:1 isometric projection: X=32(C-R), Y=16(C+R).
+   const dc=interiorView==='iso'?(dx/32+dy/16)/2:dx/CELL;
+   const dr=interiorView==='iso'?(dy/16-dx/32)/2:dy/CELL;
+   const c=d.base.c+Math.round(dc),r=d.base.r+Math.round(dr);
+   if((d.handle!=='y'||c===d.base.c)&&(d.handle!=='x'||r===d.base.r)){
+    if((c!==item.c||r!==item.r)&&model.move(scene(),item.id,c,r))d.changed=true;
+   }
+  }
+  draw();e.preventDefault();
+ }
+ function endObjectDrag(e){
+  if(!objectDrag||objectDrag.id!==e.pointerId)return;
+  const d=objectDrag;objectDrag=null;
+  try{canvas.releasePointerCapture?.(e.pointerId)}catch{}
+  const item=scene().items.find(x=>x.id===selected);
+  if(d.changed&&item&&(item.c!==d.base.c||item.r!==d.base.r||item.rotation!==d.base.rotation)){
+   recordUndo(d.before);renderObjects();renderActions();
+  }
+  draw();e.preventDefault();
+ }
+ canvas.addEventListener('pointermove',dragObject);
+ canvas.addEventListener('pointerup',endObjectDrag);
+ canvas.addEventListener('pointercancel',endObjectDrag);
+
  for(const key of categories){const option=document.createElement('option');option.value=key;option.textContent=key;group.append(option);}
  for(const [key,t] of Object.entries(model.templates)){const o=document.createElement('option');o.value=key;o.textContent=t.label;$('interiorTemplate').append(o);}
  function cfg(){return api.getConfig();}
@@ -56,6 +143,7 @@ function init(api){
   // Placement takes priority over the action actor overlay.
   // Otherwise its pointer layer swallows taps intended for a new fixture.
   api.getScaleController?.()?.endAdjustment?.();
+  objectGizmoActive=false;objectDrag=null;
   actionTapTarget=null;
   placing=placing===type?null:type;selected=null;
   if(placing){
@@ -122,11 +210,12 @@ function init(api){
   if(!enabled||preview!=='interior'||placing||!selected)return false;
   const current=scene(),item=current.items.find(x=>x.id===selected);
   if(!item)return false;
+  const before=snapshot();
   if(!model.rotate(current,item.id,steps)){
    onStatus('Cannot rotate '+item.name+' here · blocked by another object or doorway');
    return false;
   }
-  renderObjects();renderActions();draw();updateRotateBar();
+  recordUndo(before);renderObjects();renderActions();draw();updateRotateBar();
   onStatus('Rotated '+item.name+' to '+item.rotation+'° · Save Asset to keep changes');
   return true;
  }
@@ -184,6 +273,7 @@ function init(api){
   if(!enabled||preview!=='interior')return;
   if(interiorView==='iso'&&iso){
    lastIso=iso.draw(canvas,scene(),{selectedId:selected,grid:true});
+   drawObjectGizmo();
    g.VLBuildingPreviewScale?.interior([canvas.width,canvas.height],'iso');
    $('placementHint').textContent=placing?
     'Tap an empty diamond tile to place '+(model.types[placing]?.label||placing)+'. Door tile stays clear.':
@@ -231,6 +321,7 @@ function init(api){
     ctx.strokeRect(x+2,y+2,w*CELL-4,d*CELL-4);ctx.lineWidth=1;
    }
   }
+  drawObjectGizmo();
   g.VLBuildingPreviewScale?.interior([canvas.width,canvas.height],'plan');
   $('placementHint').textContent=placing?
    'Tap an empty tile to place '+(model.types[placing]?.label||placing)+'. Entrance is kept clear.':
@@ -404,12 +495,13 @@ function init(api){
   const target=iso?.pointer?.(canvas,event,lastIso,{preferFloor:false});
   const id=target?.itemId||null,controller=api.getScaleController?.();
   if(!id){
-   actionTapTarget=null;
+   objectGizmoActive=false;actionTapTarget=null;
    controller?.setTransformMode?.('select');
    return true;
   }
   const same=id===actionTapTarget&&id===selected;
   if(!same){
+   objectGizmoActive=false;
    actionTapTarget=id;
    if(controller?.actor?.adjusting)controller.endAdjustment();
    selected=id;adjustmentKey='';adjustmentDraft=null;
@@ -458,6 +550,7 @@ function init(api){
    interactions:[...new Set(['enter',...slots.map(slot=>slot.interaction)])]};
  }
  function load(pack){
+  undoStack=[];objectGizmoActive=false;updateUndoButton();
   const c=cfg();scenes={};floor=1;selected=null;placing=null;
   adjustmentKey='';adjustmentDraft=null;actionTapTarget=null;
   const last=pack?.lastAdjusted;
@@ -475,6 +568,7 @@ function init(api){
   setPreview('exterior');selectTab('exterior');refresh();
  }
  function reset(){
+  undoStack=[];objectGizmoActive=false;updateUndoButton();
   scenes={};floor=1;selected=null;placing=null;
   adjustmentKey='';adjustmentDraft=null;lastAdjusted=null;fillFloors();
   setMode(false);setPreview('exterior');selectTab('exterior');refresh();
@@ -489,15 +583,21 @@ function init(api){
  function moveSelectedTo(c,r){
   const s=scene();
   if(placing){
+   const before=snapshot();
    const obj=model.add(s,placing,c,r);
-   if(obj){selected=obj.id;placing=null;renderObjects();renderActions();draw();updateTray();onStatus('Placed '+obj.name+' · action '+obj.actionId);}
+   if(obj){recordUndo(before);selected=obj.id;placing=null;renderObjects();renderActions();draw();updateTray();onStatus('Placed '+obj.name+' · action '+obj.actionId);}
    else onStatus('Invalid tile: collides or blocks entrance');
    return;
   }
   const hit=hitItem(c,r);
-  if(hit){selected=hit.id;renderObjects();renderActions();draw();return;}
+  if(hit){
+   const same=selected===hit.id;
+   selected=hit.id;objectGizmoActive=same?!objectGizmoActive:false;
+   renderObjects();renderActions();draw();return;
+  }
   if(selected){
-   if(model.move(s,selected,c,r,undefined)){renderObjects();draw();onStatus('Moved interior prop to '+c+','+r);}
+   const before=snapshot();
+   if(model.move(s,selected,c,r,undefined)){recordUndo(before);renderObjects();draw();onStatus('Moved interior prop to '+c+','+r);}
    else onStatus('Cannot move: occupied or outside floor plan');
   }
  }
@@ -513,6 +613,7 @@ function init(api){
    c=Math.floor((e.clientX-r.left)*canvas.width/r.width/CELL);
    z=Math.floor((e.clientY-r.top)*canvas.height/r.height/CELL);
   }
+  if(objectGizmoActive&&beginObjectDrag(e))return;
   if(c<0||z<0||c>=scene().width||z>=scene().depth)return;
   e.preventDefault();
   if(tab==='actions'&&!placing){tapActionObject(e);return;}
@@ -554,12 +655,15 @@ function init(api){
  // E / R switch ACTOR gizmo, arrow keys nudge. Furniture-R still
  // rotates the object when actor adjustment is not active.
  document.addEventListener('keydown',e=>{
-  if(!enabled||preview!=='interior'||placing||!selected||
-     e.repeat||e.altKey||e.ctrlKey||e.metaKey)return;
+  if(!enabled||preview!=='interior'||e.repeat||e.altKey||e.metaKey)return;
   const focus=document.activeElement;
   if(focus&&(['INPUT','TEXTAREA','SELECT'].includes(focus.tagName)||
     focus.isContentEditable))return;
   const key=String(e.key).toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&key==='z'){
+   e.preventDefault();undo();return;
+  }
+  if(e.ctrlKey||e.metaKey||placing||!selected)return;
   const ctl=api.getScaleController?.(),item=adjustmentItem();
   const active=!!item&&ctl?.isAdjusting?.(item.id,item.actionId);
   if(active){
@@ -588,7 +692,7 @@ function init(api){
  // Do not hijack ordinary scrolling or page-wide browser zoom.
  const stage=$('previewStage');
  stage.addEventListener('wheel',event=>{
-  if(!enabled||preview!=='interior'||!event.ctrlKey)return;
+  if(!enabled||preview!=='interior')return;
   const rect=canvas.getBoundingClientRect();
   if(event.clientX<rect.left||event.clientX>rect.right||
      event.clientY<rect.top||event.clientY>rect.bottom)return;
@@ -714,24 +818,29 @@ function init(api){
  };
  $('updateInteriorItem').onclick=()=>{
   const s=scene(),item=s.items.find(x=>x.id===selected);if(!item)return;
+  const before=snapshot();
   const moved=model.move(s,item.id,Number($('interiorItemC').value),Number($('interiorItemR').value),Number($('interiorItemFacing').value));
   if(!moved){onStatus('Cannot save placement: collision or outside');return;}
   model.action(s,item.id,$('interiorItemAction').value);adjustmentKey='';
   item.capacity=Math.max(1,Math.min(8,Number($('interiorCapacity').value)||1));
   item.triggerRadius=Math.max(.4,Math.min(3,Number($('interiorItemRadius').value)||1));
-  refresh();onStatus('Saved '+item.name+' → '+item.actionId);
+  recordUndo(before);refresh();onStatus('Saved '+item.name+' → '+item.actionId);
  };
  $('removeInteriorItem').onclick=()=>{
-  const s=scene();s.items=s.items.filter(x=>x.id!==selected);selected=null;refresh();onStatus('Removed interior prop');
+  const before=snapshot(),s=scene();s.items=s.items.filter(x=>x.id!==selected);
+  recordUndo(before);selected=null;objectGizmoActive=false;refresh();onStatus('Removed interior prop');
  };
  $('duplicateInteriorItem').onclick=()=>{
   const s=scene(),old=s.items.find(x=>x.id===selected);if(!old)return;
+  const before=snapshot();
   const attempts=[[old.c+1,old.r],[old.c,old.r+1],[old.c+2,old.r+1],[old.c+1,old.r+2]];
   let obj=null;
   for(const [c,r] of attempts){obj=model.add(s,old.assetId,c,r);if(obj)break;}
   if(!obj){onStatus('No free adjacent tile to duplicate');return;}
+  recordUndo(before);
   model.action(s,obj.id,old.actionId);selected=obj.id;refresh();onStatus('Duplicated '+obj.name);
  };
+ $('actionUndo').onclick=undo;
  $('metadataExport').onclick=api.exportAsset;
  // No hard-coded fixed height; use a mobile-only Base header and collapsible storage.
  const base=document.querySelector('.panel.left .preset'),library=document.querySelector('.panel.left');
