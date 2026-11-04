@@ -14,7 +14,7 @@ const iso=g.VLInteriorIso;
 function init(api){
  let enabled=false,scenes={},floor=1,selected=null,placing=null,
    preview='exterior',tab='exterior',interiorView='iso',lastIso=null,
-   adjustmentDraft=null,adjustmentKey='';
+   adjustmentDraft=null,adjustmentKey='',lastAdjusted=null;
  const canvas=$('interiorCanvas'),ctx=canvas.getContext('2d');
  ctx.imageSmoothingEnabled=false;
  const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
@@ -365,8 +365,21 @@ function init(api){
  }
  function openSelectedAdjustment(){
   if(!adjustmentItem()){onStatus('Select an interior object first');return;}
+  // A new adjustment session must load the SAVED preset, not a stale draft.
+  adjustmentKey='';adjustmentDraft=null;
   selectTab('actions');showAdjustment();previewAdjustment();
   $('actionAdjustmentEditor').scrollIntoView?.({block:'nearest',behavior:'smooth'});
+ }
+ function resumeSavedAdjustment(){
+  if(!enabled||!lastAdjusted)return false;
+  const n=Math.max(1,Math.min(numFloors(),Number(lastAdjusted.floor)||1));
+  const room=scenes[n],item=room?.items?.find(x=>x.id===lastAdjusted.itemId);
+  if(!item||!model.types[item.assetId]?.actions.includes(lastAdjusted.actionId))return false;
+  floor=n;fillFloors();$('interiorFloor').value=String(n);
+  selected=item.id;placing=null;
+  model.action(scene(),item.id,lastAdjusted.actionId);
+  renderObjects();renderActions();openSelectedAdjustment();
+  return true;
  }
  function renderMetadata(){
   const c=cfg(),total=enabled?Object.values(scenes).reduce((sum,s)=>sum+(s.items?.length||0),0):0;
@@ -388,10 +401,15 @@ function init(api){
    entrance:{facing:c.front,groundFloor:1,entry:{...floors[0].entrance},exit:{...floors[0].entrance}},
    interior:{format:'virtual-life-interiors-v1',version:1,activeFloor:floor,floors},
    actionSlots:slots,
+   lastAdjusted:lastAdjusted?{...lastAdjusted}:null,
    interactions:[...new Set(['enter',...slots.map(slot=>slot.interaction)])]};
  }
  function load(pack){
   const c=cfg();scenes={};floor=1;selected=null;placing=null;
+  adjustmentKey='';adjustmentDraft=null;
+  const last=pack?.lastAdjusted;
+  lastAdjusted=last&&typeof last.itemId==='string'&&typeof last.actionId==='string'?
+   {floor:Number(last.floor)||1,itemId:last.itemId,actionId:last.actionId}:null;
   const interior=pack?.interior;
   if(interior?.format==='virtual-life-interiors-v1'&&Array.isArray(interior.floors)){
    for(const s of interior.floors.slice(0,12)){
@@ -404,7 +422,8 @@ function init(api){
   setPreview('exterior');selectTab('exterior');refresh();
  }
  function reset(){
-  scenes={};floor=1;selected=null;placing=null;fillFloors();
+  scenes={};floor=1;selected=null;placing=null;
+  adjustmentKey='';adjustmentDraft=null;lastAdjusted=null;fillFloors();
   setMode(false);setPreview('exterior');selectTab('exterior');refresh();
  }
  function refresh(){
@@ -540,14 +559,40 @@ function init(api){
  $('actionAdjustPreview').onclick=previewAdjustment;
  $('actionAdjustSave').onclick=()=>{
   const item=adjustmentItem();if(!item||!adjust||!adjustmentDraft)return;
+  const original=adjust.get(item,item.actionId),oldLast=lastAdjusted;
   if(!adjust.set(item,item.actionId,adjustmentDraft,model.types[item.assetId].actions))return;
-  api.getScaleController?.()?.previewAdjustment?.(adjustmentDraft);
-  refresh();const saved=api.saveAsset?.();
-  if(saved){
-   $('actionAdjustStatus').textContent='✓ SAVED '+item.name+' / '+item.actionId+
-     ' / X '+adjustmentDraft.x+' Y '+adjustmentDraft.y+' · Semesta action slot updated';
-   onStatus('Saved interaction alignment into building and Semesta metadata');
+  const expected=adjust.normalize(adjustmentDraft);
+  lastAdjusted={floor,itemId:item.id,actionId:item.actionId};
+  // Validate after serialization, not just the editor's unsaved buffer.
+  const data=serialize();
+  const slot=data.actionSlots.find(x=>x.floor===floor&&x.id===item.id);
+  const actual=slot?.actionAdjustments?.[item.actionId];
+  if(!actual||JSON.stringify(adjust.normalize(actual))!==JSON.stringify(expected)){
+   adjust.set(item,item.actionId,original,model.types[item.assetId].actions);
+   lastAdjusted=oldLast;
+   onStatus('⚠ Save failed: normalized building lost the adjustment');
+   return;
   }
+  const saved=api.saveAsset?.();
+  if(!saved){
+   adjust.set(item,item.actionId,original,model.types[item.assetId].actions);
+   lastAdjusted=oldLast;
+   $('actionAdjustStatus').textContent='⚠ SAVE FAILED — storage may be full; export the building JSON as backup.';
+   return;
+  }
+  const confirmed=saved.actionSlots?.find(x=>x.floor===floor&&x.id===item.id)
+    ?.actionAdjustments?.[item.actionId];
+  if(!confirmed||JSON.stringify(adjust.normalize(confirmed))!==JSON.stringify(expected)){
+   onStatus('⚠ Saved building is missing this adjustment — please export a backup');
+   return;
+  }
+  api.getScaleController?.()?.previewAdjustment?.(expected);
+  adjustmentDraft=expected;
+  refresh();
+  $('actionAdjustStatus').textContent='✓ SAVED & VERIFIED / '+item.name+' / '+item.actionId+
+    ' / X '+expected.x+' Y '+expected.y+' / '+expected.direction.toUpperCase();
+  onStatus('✓ Adjustment saved for '+item.name+' / '+item.actionId+
+    ' · reopening will restore this placement');
  };
  $('actionAdjustReset').onclick=()=>changeAdjustment({x:0,y:0,direction:'auto',layer:'behind'});
  $('actionAdjustExit').onclick=()=>{
@@ -599,7 +644,7 @@ function init(api){
  };
  fillFloors();buildTray();updateCategories();renderMetadata();setInteriorView('iso');
  return {load,reset,refresh,serialize,isInteractive:()=>enabled,
-  openSelectedAdjustment,updateAdjustmentFromDrag(next){
+  openSelectedAdjustment,resumeSavedAdjustment,updateAdjustmentFromDrag(next){
    const item=adjustmentItem();if(!item||!adjust||adjustmentKey!==adjustmentId(item))return;
    adjustmentDraft=adjust.normalize({...adjustmentDraft,...next});fillAdjustment();
   },
