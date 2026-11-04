@@ -100,6 +100,53 @@
   ctx.fillText("↻",x-RADIUS-13,y+4);
   ctx.restore();
  }
+ // Furniture uses its own gizmo: Move X/Y/XY plus discrete mirror handles.
+ // No rotation ring. Flip handles are intentionally generous for touch input.
+ const O_LEN=55,O_GRAB=17;
+ function objectHandles(origin){
+  return {x:{x:origin.x+O_LEN,y:origin.y},
+   y:{x:origin.x,y:origin.y-O_LEN},
+   flipX:{x:origin.x-O_LEN,y:origin.y},
+   flipY:{x:origin.x,y:origin.y+O_LEN}};
+ }
+ function hitObject(origin,p){
+  if(!origin||!p)return null;
+  const h=objectHandles(origin);
+  if(dist(p,h.flipX)<=O_GRAB+3)return 'flipX';
+  if(dist(p,h.flipY)<=O_GRAB+3)return 'flipY';
+  if(p.x>=origin.x+12&&p.x<=h.x.x+O_GRAB&&Math.abs(p.y-origin.y)<=O_GRAB)return 'x';
+  if(p.y<=origin.y-12&&p.y>=h.y.y-O_GRAB&&Math.abs(p.x-origin.x)<=O_GRAB)return 'y';
+  if(dist(p,origin)<=O_GRAB+6)return 'xy';
+  return null;
+ }
+ function drawObject(ctx,origin,options={}){
+  if(!origin||!ctx?.beginPath)return;
+  const h=objectHandles(origin),hot=options.hot||'';
+  const axis=(end,color,label)=>{
+   ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=4;
+   ctx.moveTo(origin.x,origin.y);ctx.lineTo(end.x,end.y);ctx.stroke();
+   ctx.beginPath();ctx.arc(end.x,end.y,9,0,Math.PI*2);
+   ctx.fillStyle=color;ctx.fill();
+   ctx.font='bold 11px monospace';ctx.textAlign='center';
+   ctx.fillStyle='#fff';ctx.fillText(label,end.x,end.y+4);
+  };
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=2;
+  axis(h.x,'#cf464c','X');
+  axis(h.y,'#289e65','Y');
+  ctx.beginPath();ctx.arc(origin.x,origin.y,12,0,Math.PI*2);
+  ctx.fillStyle=hot==='xy'?'#fff1a2':'#f8fbff';ctx.fill();
+  ctx.strokeStyle='#1a3b60';ctx.lineWidth=2;ctx.stroke();
+  for(const [key,label] of [['flipX','H'],['flipY','V']]){
+   const p=h[key],on=options[key]===true;
+   ctx.beginPath();ctx.roundRect(p.x-15,p.y-15,30,30,5);
+   ctx.fillStyle=on?'#e3ad43':'#385b85';ctx.fill();
+   ctx.lineWidth=2;ctx.strokeStyle='#e9f2ff';ctx.stroke();
+   ctx.fillStyle='#fff';ctx.font='bold 13px monospace';
+   ctx.textAlign='center';ctx.fillText(label,p.x,p.y+5);
+  }
+  ctx.restore();
+ }
  return Object.freeze({ORDER,LENGTH,RADIUS,GRAB,center,hit,snap,
-  dragged,rotate,rotateGesture,facing,degrees,draw,normalizeSnap});
+  dragged,rotate,rotateGesture,facing,degrees,draw,normalizeSnap,drawObject,hitObject,objectHandles});
 });
