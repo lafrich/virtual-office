@@ -2826,7 +2826,24 @@ $('replaceAsset').onclick=()=>{
 };
 $('exportShortcut').onclick=()=>$('export').click();
 renderAssetList();
-window.addEventListener('semesta-vehicle-source-loaded',()=>renderAssetList());
+const assetLibrary=window.VLSemestaAssetLibrary?.mount({
+ catalog:()=>assetCatalog,
+ vehicles:()=>trafficCatalog?.vehicles||[],
+ characters:()=>mahluk?.list?.()||[],
+ thumbnail:spec=>assetThumbnails?.sourceFor?.(spec)||null,
+ vehicleImage:id=>{
+  try{return trafficArt?.vehicleCanvas?.(id,'se')?.toDataURL?.('image/png')||null;}catch{return null;}
+ },
+ characterImage:id=>window.VLPipelineAssets?.character?.(id)||null,
+ place:spec=>{
+  if(!assetByName.has(spec.file)||spec.published===false)return false;
+  placementType='sprite:'+spec.file;
+  setMode('place');placementType='sprite:'+spec.file;
+  tell('Klik map untuk menempatkan '+spec.label);
+  closeMobileSheets();return true;
+ }
+});
+window.addEventListener('semesta-vehicle-source-loaded',()=>{renderAssetList();assetLibrary?.refresh();});
 
 /* Local Membangun sync: apply authored buildings without reloading the map.
  * Preserve explicit per-instance edits, coordinate transforms, and draft state.
@@ -2862,7 +2879,7 @@ function refreshBangunRuang(){
  }
  for(const texture of spriteTexture.values())texture.dispose();
  spriteTexture.clear();
- rebuild();updateSelection();renderAssetList();saved();
+ rebuild();updateSelection();renderAssetList();assetLibrary?.refresh();saved();
  tell('Bangun Ruang synced · '+summary.count+' buildings / '+(objects?.count||0)+' objects · '+updated+
   ' placed updated'+(missing?' · '+missing+' missing in studio':''));
 }
