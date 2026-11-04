@@ -45,18 +45,36 @@
  </aside>
  <aside id="assetsPanel" aria-label="Asset browser">
   <div class="panel-heading"><strong>FILES / ASSETS</strong><span id="assetCount">0</span><button id="closeAssets" class="sheet-close" type="button" aria-label="Close asset library">×</button></div>
-  <details id="treeReplaceMenu" class="tree-replace-menu">
-   <summary>♣ REPLACE TREES / BATCH</summary>
+  <details id="placeholderReplaceMenu" class="tree-replace-menu">
+   <summary>⇄ REPLACE PLACEHOLDER / BATCH</summary>
    <div class="tree-replace-content">
-    <p>Ganti semua placeholder pohon tanpa mengubah titik placement.</p>
-    <label for="treeReplaceScope">TARGET</label>
-    <select id="treeReplaceScope"><option value="legacy">Placeholder / proxy only</option><option value="all">Semua pohon yang sudah dipasang</option></select>
-    <label for="treeReplaceMode">REPLACEMENT</label>
-    <select id="treeReplaceMode"><option value="mixed">Random mix spesies</option><option value="single">Satu jenis untuk semua</option></select>
-    <div id="treeReplaceSpeciesList" role="group" aria-label="Pilih jenis pohon" class="tree-replace-list"></div>
-    <label for="treeReplaceSeed">RANDOM SEED</label><input id="treeReplaceSeed" type="number" step="1" value="2026" inputmode="numeric">
-    <div class="tree-replace-actions"><button type="button" id="treeReplaceShuffle">↻ RANDOMIZE</button><button type="button" id="treeReplaceApply">⇄ REPLACE ALL</button></div>
-    <p class="tree-replace-hint" id="treeReplaceSummary" aria-live="polite">Memuat katalog pohon...</p>
+    <p>Ganti placeholder serempak berdasarkan kategori. Posisi dan objek kategori lain tidak berubah.</p>
+    <label for="placeholderCategory">KATEGORI PLACEHOLDER</label>
+    <select id="placeholderCategory">
+     <option value="building">GEDUNG / BANGUNAN</option>
+     <option value="utility">TIANG LISTRIK / LAMPU</option>
+     <option value="furniture">FURNITUR / TAMAN</option>
+     <option value="tree">POHON / VEGETASI</option>
+     <option value="street">PROPERTI JALAN</option>
+    </select>
+    <label for="placeholderScope">TARGET</label>
+    <select id="placeholderScope">
+     <option value="legacy">Hanya placeholder / proxy</option>
+     <option value="all">Semua objek kategori terpilih</option>
+    </select>
+    <label for="placeholderMode">CARA PENGGANTIAN</label>
+    <select id="placeholderMode">
+     <option value="mixed">Random Mix · beberapa aset</option>
+     <option value="single">Single · satu aset</option>
+    </select>
+    <div id="placeholderAssetChoices" role="group" aria-label="Pilihan aset pengganti" class="tree-replace-list"></div>
+    <label for="placeholderSeed">RANDOM SEED</label>
+    <input id="placeholderSeed" type="number" value="2026" step="1" inputmode="numeric">
+    <div class="tree-replace-actions">
+     <button type="button" id="placeholderShuffle">↻ RANDOMIZE</button>
+     <button type="button" id="placeholderApply">⇄ REPLACE ALL</button>
+    </div>
+    <p class="tree-replace-hint" id="placeholderSummary" aria-live="polite">Pilih kategori untuk melihat aset pengganti.</p>
    </div>
   </details>
   <div id="assetSearch">
@@ -373,7 +391,7 @@
 .tree-replace-hint{font-size:10px;color:#4a657a}
 </style>
 <script src="./asset-catalog.js?v=2"></script>
-<script src="./pipeline-catalog.js?v=p4"></script>
+<script src="./pipeline-catalog.js?v=publish-street-props-v1"></script>
 <script src="./semesta-building-spec.js?v=1"></script>
 <script src="./bangun-ruang/action-adjustment.js?v=action-placement-v1"></script>
 <script src="./bangun-ruang/interior-model.js?v=bathtub-soak-v1"></script>
@@ -387,6 +405,7 @@
 <script src="./bangun-ruang/object-bridge.js?v=object-library-1"></script>
 <script src="./vegetation-catalog.js?v=trees-22"></script>
 <script src="./tree-replacement.js?v=batch-trees-v1"></script>
+<script src="./placeholder-replacement.js?v=placeholder-category-v1"></script>
 <script src="/virtual-life-asset-pipeline/universal-sleep.js?v=correct-four-view-rot90-20261104"></script>
 <script src="./mahluk-hidup-bridge.js?v=human-modular-v3"></script>
 <script src="/virtual-life-asset-pipeline/action-frame-bridge.js?v=action-v2"></script>
@@ -413,5 +432,5 @@
 <script src="./world-physics.js?v=solid-world-tour-v1"></script>
 <script src="./quick-tutorial.js?v=semesta-v2-final"></script>
 <script src="./active-asset-camera.js?v=active-asset-camera-v1"></script>
-<script type="module" src="./builder.js?v=warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1"></script>
+<script type="module" src="./builder.js?v=warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1"></script>
 </body></html>
