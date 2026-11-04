@@ -81,7 +81,7 @@ function silhouette(ctx,x,y,scale=ACTOR_SCALE,pose='idle'){
   ctx.fillRect(Math.round(x+rx*scale),Math.round(y+ry*scale),
    Math.max(1,Math.round(w*scale)),Math.max(1,Math.round(h*scale)));
  };
- if(pose==='sleep'||pose==='lie'){
+ if(pose==='sleep'||pose==='lie'||pose==='bathtub_bathe'){
   // A loading/unavailable sprite must not show a standing silhouette in bed.
   rect(7,79,17,17,'#8293a8');  // head on pillow
   rect(24,82,25,14,'#8293a8'); // lying torso
@@ -111,7 +111,7 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
  const actionFallback={
   use_toilet:["toilet_sit","toilet"],toilet:["toilet_sit"],
   pee:["pee_stand","toilet"],poop:["toilet_sit","toilet"],
-  shower:["bathe"],bath:["bathe"],rest:["sleep"],lie:["lie_down","sleep"],
+  shower:["bathe"],bath:["bathtub_bathe"],rest:["sleep"],lie:["lie_down","sleep"],
   work:["office_type"],study:["study_online"],wash:["wash_hands"],cook:["cook_stir"],
   sit:["sit_idle"],relax:["sit_idle"]
  };
@@ -138,7 +138,8 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
   // Original game sheetCell() loops its four seated frames at 3 FPS.
   // The SW direction is what makes the knees visibly bent.
   const frame=rig.frameAt(resolved,time);
-  const sx=frame*FRAME.w,sy=row*FRAME.h;
+  const sx=(resolved.source==="universal-bathtub-auto"?
+    frame%Math.max(1,resolved.sourceFrames||4):frame)*FRAME.w,sy=row*FRAME.h;
   const pic=sprite.pic;
   if(sx+FRAME.w<=pic.naturalWidth&&sy+FRAME.h<=pic.naturalHeight){
    const saved=action?(edits?.get(storageActor,action,actor.direction,frame)||
@@ -148,7 +149,8 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
      edits?.get(actor.profile,id,actor.direction,frame))).find(Boolean)||null;
    const patched=matched?image(matched):null;
    const worn=bridge?.equipmentFor(storageActor)||{};
-   const urls=(resolved.source==='universal-sleep'?
+   const urls=((resolved.source==='universal-sleep'||
+     resolved.source==='universal-bathtub-auto')?
      [null,null,null,null,null,null]:
      bodyRule?.kind==='bathtub'?[null,null,null,null,null,null]:
      bodyRule?.kind==='bath'?
@@ -158,7 +160,7 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
    const layers=urls.map(image);
    // Render isolated actor pixels before modifying the outfit. The main
    // scene canvas contains furniture and must never be color-sampled.
-   const composite=(bodyRule||(
+   const composite=(bodyRule||resolved.source==='universal-bathtub-auto'||(
     actorProfile?.skinTone&&!['base','light'].includes(actorProfile.skinTone)))?
     document.createElement('canvas'):null;
    if(composite){composite.width=64;composite.height=112;}
@@ -186,7 +188,11 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
       if(bodyRule.kind==='bath')drawPart(layers[4]);
       ctx.drawImage(composite,x,y,drawWidth,drawHeight);
      }else silhouette(ctx,x,y,scale,actor.pose);
-    }else ctx.drawImage(composite,x,y,drawWidth,drawHeight);
+    }else{
+      if(resolved.source==="universal-bathtub-auto")
+       BODY?.drawBathFoam?.(paint,{frame,direction:actor.direction});
+      ctx.drawImage(composite,x,y,drawWidth,drawHeight);
+    }
    }
    drawn=true;
   }
