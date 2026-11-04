@@ -4,7 +4,7 @@
 (function(g){
 'use strict';
 const $=id=>document.getElementById(id);
-const model=g.VLBuildingInterior;
+const model=g.VLBuildingInterior,adjust=g.VLInteractionAdjust;
 if(!model)return;
 const copy=model.clone;
 const names={exterior:['tabExterior','exteriorPane'],interior:['tabInterior','interiorPane'],
@@ -13,7 +13,8 @@ const CELL=28;
 const iso=g.VLInteriorIso;
 function init(api){
  let enabled=false,scenes={},floor=1,selected=null,placing=null,
-   preview='exterior',tab='exterior',interiorView='iso',lastIso=null;
+   preview='exterior',tab='exterior',interiorView='iso',lastIso=null,
+   adjustmentDraft=null,adjustmentKey='';
  const canvas=$('interiorCanvas'),ctx=canvas.getContext('2d');
  ctx.imageSmoothingEnabled=false;
  const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
@@ -247,7 +248,7 @@ function init(api){
    small.textContent='Tile '+item.c+','+item.r+' · '+model.actions[item.actionId]?.label;
    a.append(b,small);const edit=document.createElement('span');edit.textContent=item.id===selected?'●':'Edit';
    button.append(a,edit);
-   button.onclick=()=>{selected=item.id;placing=null;showItem();setPreview('interior');draw();renderObjects();};
+   button.onclick=()=>{selected=item.id;placing=null;showItem();setPreview('interior');draw();renderObjects();renderActions();};
    holder.append(button);
   }
   showItem();
@@ -286,10 +287,66 @@ function init(api){
     label.textContent='F'+n+' · '+item.name+' → '+(model.actions[item.actionId]?.label||item.actionId);
     const desc=document.createElement('div');desc.className='actor-action';
     desc.textContent=item.pose?'Mahluk Hidup pose: '+item.pose:'Action hook only · no dedicated character rig';
-    text.append(label,desc);row.append(glyph,text);list.append(row);
+    const edit=document.createElement('button');edit.type='button';
+    edit.textContent='✥ Adjust';
+    edit.onclick=()=>{
+      if(n!==floor)selectFloor(n);
+      selected=item.id;placing=null;renderObjects();renderActions();openSelectedAdjustment();
+    };
+    text.append(label,desc);row.append(glyph,text,edit);list.append(row);
    }
   }
   if(!any){const msg=document.createElement('p');msg.className='interior-empty';msg.textContent='No action spots. Place WC, bed, chair or other props in Interior.';list.append(msg);}
+  showAdjustment();
+ }
+ function adjustmentItem(){return enabled?scene().items.find(item=>item.id===selected)||null:null;}
+ function adjustmentId(item){return item?floor+':'+item.id+':'+item.actionId:'';}
+ function fillAdjustment(){
+  if(!adjustmentDraft)return;
+  $('actionAdjustX').value=String(adjustmentDraft.x);
+  $('actionAdjustY').value=String(adjustmentDraft.y);
+  $('actionAdjustDirection').value=adjustmentDraft.direction;
+  $('actionAdjustLayer').value=adjustmentDraft.layer;
+  $('actionAdjustStatus').textContent='X '+adjustmentDraft.x+'px, Y '+adjustmentDraft.y+
+   'px / Facing '+adjustmentDraft.direction.toUpperCase()+' / '+adjustmentDraft.layer.toUpperCase()+
+   ' · Save Adjustment to keep changes';
+ }
+ function showAdjustment(){
+  const item=adjustmentItem(),panel=$('actionAdjustmentEditor');panel.hidden=!item;
+  if(!item){adjustmentKey='';adjustmentDraft=null;return;}
+  $('actionAdjustObject').textContent=(model.types[item.assetId]?.glyph||'▣')+' '+item.name+' · F'+floor;
+  const selector=$('actionAdjustAction');selector.replaceChildren();
+  for(const id of model.types[item.assetId].actions){
+   const opt=document.createElement('option');opt.value=id;opt.textContent=model.actions[id]?.label||id;
+   selector.append(opt);
+  }
+  selector.value=item.actionId;
+  if(adjustmentKey!==adjustmentId(item)||!adjustmentDraft){
+   adjustmentKey=adjustmentId(item);
+   adjustmentDraft=adjust?.get(item,item.actionId)||{x:0,y:0,direction:'auto',layer:'behind'};
+  }
+  fillAdjustment();
+ }
+ function previewAdjustment(){
+  const item=adjustmentItem();
+  if(!item)return onStatus('Select a furniture item to adjust its action');
+  setPreview('interior');setInteriorView('iso');showAdjustment();
+  api.getScaleController?.()?.beginAdjustment?.(adjustmentDraft);
+  $('actionAdjustStatus').textContent='DRAG CHARACTER over the preview or nudge / edit X/Y. Save when aligned.';
+ }
+ function changeAdjustment(next){
+  const item=adjustmentItem();if(!item||!adjust)return;
+  if(adjustmentKey!==adjustmentId(item))showAdjustment();
+  adjustmentDraft=adjust.normalize({...adjustmentDraft,...next});
+  fillAdjustment();
+  const scale=api.getScaleController?.();
+  if(scale?.isAdjusting?.(item.id,item.actionId))scale.previewAdjustment(adjustmentDraft);
+  else scale?.beginAdjustment?.(adjustmentDraft);
+ }
+ function openSelectedAdjustment(){
+  if(!adjustmentItem()){onStatus('Select an interior object first');return;}
+  selectTab('actions');showAdjustment();previewAdjustment();
+  $('actionAdjustmentEditor').scrollIntoView?.({block:'nearest',behavior:'smooth'});
  }
  function renderMetadata(){
   const c=cfg(),total=enabled?Object.values(scenes).reduce((sum,s)=>sum+(s.items?.length||0),0):0;
@@ -346,7 +403,7 @@ function init(api){
    return;
   }
   const hit=hitItem(c,r);
-  if(hit){selected=hit.id;renderObjects();draw();return;}
+  if(hit){selected=hit.id;renderObjects();renderActions();draw();return;}
   if(selected){
    if(model.move(s,selected,c,r,undefined)){renderObjects();draw();onStatus('Moved interior prop to '+c+','+r);}
    else onStatus('Cannot move: occupied or outside floor plan');
@@ -368,7 +425,7 @@ function init(api){
   e.preventDefault();
   if(api.onFloorClick?.(c,z,hit)===true)return;
   if(hit?.itemId&&!placing){
-   selected=hit.itemId;renderObjects();draw();return;
+   selected=hit.itemId;renderObjects();renderActions();draw();return;
   }
   moveSelectedTo(c,z);
  });
@@ -412,11 +469,38 @@ function init(api){
   e.preventDefault();
   rotateSelected(e.shiftKey?-1:1);
  });
+ $('actionAdjustAction').onchange=()=>{
+  const item=adjustmentItem();if(!item)return;
+  if(!model.action(scene(),item.id,$('actionAdjustAction').value))return;
+  adjustmentKey='';renderObjects();renderActions();previewAdjustment();
+ };
+ for(const [id,field] of [['actionAdjustX','x'],['actionAdjustY','y'],
+  ['actionAdjustDirection','direction'],['actionAdjustLayer','layer']]){
+  $(id).addEventListener('input',()=>changeAdjustment({[field]:$(id).value}));
+ }
+ for(const [id,dx,dy] of [['actionNudgeLeft',-1,0],['actionNudgeUp',0,-1],
+  ['actionNudgeDown',0,1],['actionNudgeRight',1,0]]){
+  $(id).onclick=()=>changeAdjustment({x:(adjustmentDraft?.x||0)+dx,
+   y:(adjustmentDraft?.y||0)+dy});
+ }
+ $('actionAdjustPreview').onclick=previewAdjustment;
+ $('actionAdjustSave').onclick=()=>{
+  const item=adjustmentItem();if(!item||!adjust||!adjustmentDraft)return;
+  if(!adjust.set(item,item.actionId,adjustmentDraft,model.types[item.assetId].actions))return;
+  api.getScaleController?.()?.previewAdjustment?.(adjustmentDraft);
+  refresh();const saved=api.saveAsset?.();
+  if(saved){
+   $('actionAdjustStatus').textContent='✓ SAVED '+item.name+' / '+item.actionId+
+     ' / X '+adjustmentDraft.x+' Y '+adjustmentDraft.y+' · Semesta action slot updated';
+   onStatus('Saved interaction alignment into building and Semesta metadata');
+  }
+ };
+ $('actionAdjustReset').onclick=()=>changeAdjustment({x:0,y:0,direction:'auto',layer:'behind'});
  $('updateInteriorItem').onclick=()=>{
   const s=scene(),item=s.items.find(x=>x.id===selected);if(!item)return;
   const moved=model.move(s,item.id,Number($('interiorItemC').value),Number($('interiorItemR').value),Number($('interiorItemFacing').value));
   if(!moved){onStatus('Cannot save placement: collision or outside');return;}
-  model.action(s,item.id,$('interiorItemAction').value);
+  model.action(s,item.id,$('interiorItemAction').value);adjustmentKey='';
   item.capacity=Math.max(1,Math.min(8,Number($('interiorCapacity').value)||1));
   item.triggerRadius=Math.max(.4,Math.min(3,Number($('interiorItemRadius').value)||1));
   refresh();onStatus('Saved '+item.name+' → '+item.actionId);
@@ -456,6 +540,10 @@ function init(api){
  };
  fillFloors();buildTray();updateCategories();renderMetadata();setInteriorView('iso');
  return {load,reset,refresh,serialize,isInteractive:()=>enabled,
+  openSelectedAdjustment,updateAdjustmentFromDrag(next){
+   const item=adjustmentItem();if(!item||!adjust||adjustmentKey!==adjustmentId(item))return;
+   adjustmentDraft=adjust.normalize({...adjustmentDraft,...next});fillAdjustment();
+  },
   setPreview,selectTab,setInteriorView,selectFloor,
   getScene:()=>enabled?scene():null,getSelectedProp:()=>scene().items.find(x=>x.id===selected)||null,
   getInteriorView:()=>interiorView};
