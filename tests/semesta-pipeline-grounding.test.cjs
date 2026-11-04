@@ -3,81 +3,102 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const ctx={};
-vm.runInNewContext(fs.readFileSync('world-builder/semesta-pipeline-ground.js','utf8'),ctx,{
- filename:'world-builder/semesta-pipeline-ground.js'
-});
+vm.runInNewContext(fs.readFileSync('world-builder/semesta-pipeline-ground.js','utf8'),ctx);
 const ground=ctx.VLSemestaPipelineGround;
-const makespec=(id,size,pivot)=>({
- id,source:'pipeline-street',published:true,
+const makespec=(id,size,pivot,foot=[4,3])=>({
+ id,source:'pipeline-street',published:true,footprint:foot,
  variants:{sw:{size,pivot},se:{size:[size[0]-8,size[1]],pivot:[pivot[0]-4,pivot[1]]}}
 });
-const camera={position:{x:50,z:50}};
-function round(v){return Math.round(v*1000000)/1000000;}
-test('splits facade at the native ground pivot instead of burying the floor apron',()=>{
- const s=makespec('rumah_kampung_a',[232,312],[99,262]);
+const s=makespec('rumah_kampung_a',[232,312],[99,262]);
+const near=(a,b)=>Math.abs(a-b)<1e-7;
+test('complete bitmap retained: facade and balcony below footprint pivot must not be cropped',()=>{
+ assert.equal(ground.version,2);
  assert.equal(ground.supports(s),true);
- const L=ground.layout(s,'sw');
- assert.equal(L.metrics.pivotY,262);
- assert.ok(L.metrics.apronDepth>0);
- assert.ok(L.metrics.upperHeight>0);
- assert.ok(L.metrics.facadeCenterY-L.metrics.upperHeight/2>=.07);
- assert.ok(Math.abs((L.metrics.facadeCenterY-L.metrics.upperHeight/2)-L.metrics.groundY)<1e-9);
- assert.ok(L.metrics.seamUV>0&&L.metrics.seamUV<1);
- assert.equal(L.corners.length,4);
- assert.ok(L.corners.every(p=>p[1]===L.metrics.groundY));
- // The UV ranges meet exactly along the anchor row, no missing strip/overlap.
- assert.equal(L.upperUV[1],L.apronUV[1]);
+ const m=ground.metrics(s,'sw');
+ assert.equal(m.imageWidth,232);
+ assert.equal(m.imageHeight,312);
+ assert.equal(m.pivotY,262);
+ assert.equal(m.hasFrontPixels,true);
+ assert.ok(m.height>m.pivotY*(Math.SQRT2/64)*(2/Math.sqrt(3)));
+ assert.ok(m.centerY-m.height/2<0,'image extends below ground as real isometric projection');
 });
-test('the 2:1 ground plane projects back to the exact source-pixel x/y positions',()=>{
- const s=makespec('kantor_a',[474,692],[208,588]);
- const m=ground.metrics(s),p=Math.SQRT2/64;
- for(const px of [0,m.pivotX,m.imageWidth]){
-  for(const py of [m.pivotY,m.imageHeight]){
-   const [x,y,z]=ground.groundPoint(px,py,m);
-   const screenX=(x-z)/Math.SQRT2;
-   const down=(x+z)/(2*Math.SQRT2); // 30deg iso elevation
-   assert.equal(round(screenX),round((px-m.pivotX)*p));
-   assert.equal(round(down),round((py-m.pivotY)*p));
-   assert.equal(y,m.groundY);
+test('invert native 2:1 projection plus per-pixel depth to actual ground, facade and roof height',()=>{
+ const center=(4+3)/2;
+ for(const [c,r,z] of [[1,2,0],[-1,-.5,0],[0.7,1.5,100],[-.3,-1,222]]){
+  const v=16*(c+r)-z;
+  const d=center+c+r+z/32;
+  const reconstructed=ground.projectedSurface(v,d,center);
+  assert.ok(near(reconstructed.cr,c+r));
+  assert.ok(near(reconstructed.z,z));
+  assert.ok(Number.isFinite(ground.depthDelta(v,d,center)));
+ }
+});
+test('source RGB and pixel-depth textures are full dimensions for each rotated view',()=>{
+ const win={};
+ vm.runInNewContext(fs.readFileSync('world-builder/pipeline-catalog.js','utf8'),{window:win});
+ const published=win.VLAssetCatalog.filter(e=>e.source==='pipeline-street'&&e.published);
+ assert.ok(published.length>=34);
+ for(const spec of published){
+  assert.equal(ground.supports(spec),true,spec.id);
+  for(const view of Object.keys(spec.variants||{})){
+   const m=ground.metrics(spec,view);
+   assert.ok(m&&m.width>0&&m.height>0,spec.id+':'+view);
+   assert.ok(m.centerDepth>0,spec.id+':'+view);
   }
  }
 });
-test('all published pipeline-street assets have grounded geometry, even on alternate views',()=>{
- const body=fs.readFileSync('world-builder/pipeline-catalog.js','utf8');
- const window={};
- vm.runInNewContext(body,{window});
- const native=window.VLAssetCatalog.filter(s=>s.source==='pipeline-street'&&s.published);
- assert.ok(native.length>=25,native.length);
- for(const s of native){
-  assert.equal(ground.supports(s),true,s.id);
-  for(const direction of Object.keys(s.variants||{})){
-   const m=ground.metrics(s,direction);
-   assert.ok(m&&m.upperHeight>0,s.id+':'+direction);
-   assert.ok(m.facadeCenterY-m.upperHeight/2>=m.groundY-1e-12,s.id+':'+direction);
-   assert.ok(m.apronDepth>=0);
-  }
+test('Three source material gets per-texel WebGL depth, alpha cutoff, and proper shadowing',()=>{
+ class Material{
+  constructor(props){Object.assign(this,props);this.userData={};}
+  dispose(){}
  }
+ class Geometry{
+  constructor(w,h){this.width=w;this.height=h;}
+  dispose(){}
+ }
+ class Mesh{
+  constructor(geom,material){this.geometry=geom;this.material=material;this.userData={};this.position={set(...p){this.coords=p}};this.rotation={y:0};}
+ }
+ const THREE={MeshBasicMaterial:Material,BufferGeometry:Geometry,PlaneGeometry:Geometry,Mesh,DoubleSide:2};
+ const root={children:[],scale:{x:1},rotation:{y:0},position:{x:0,z:0},add(x){this.children.push(x)}};
+ const rgb={name:'color'},depth={name:'depthmap'};
+ const b=ground.attach(THREE,root,s,'sw',rgb,depth);
+ assert.ok(b&&b.facade);
+ assert.equal(root.children.length,1,'single full native PNG, NOT a row-split billboard');
+ assert.equal(b.facade.material.depthTest,true);
+ assert.equal(b.facade.material.depthWrite,true);
+ assert.equal(b.facade.material.transparent,false);
+ assert.equal(b.facade.material.alphaTest,.49);
+ assert.equal(b.facade.material.map,rgb);
+ assert.equal(b.facade.material.userData.nativeDepthUniforms.uNativeDepth.value,depth);
+ const shader={uniforms:{},vertexShader:'#include <uv_vertex>',fragmentShader:'#include <dithering_fragment>'};
+ b.facade.material.onBeforeCompile(shader);
+ assert.match(shader.fragmentShader,/gl_FragDepth/);
+ assert.match(shader.fragmentShader,/texture2D\(uNativeDepth,vNativeUv\)/);
+ assert.match(shader.fragmentShader,/uNativeDepthCenter/);
+ assert.match(shader.fragmentShader,/trueDepthAdvance/);
+ assert.match(shader.vertexShader,/vNativeUv = uv/);
+ assert.equal(shader.uniforms.uNativeDepth.value,depth);
+ const depth2={name:'depthmap-se'};
+ assert.ok(ground.configure(THREE,b,s,'se',{name:'color-se'},depth2));
+ assert.equal(b.facade.material.userData.nativeDepthUniforms.uNativeDepth.value,depth2);
+ assert.equal(b.view,'se');
+ root.scale.x=2.5;
+ ground.faceCamera(b,root,{position:{x:10,z:10}});
+ assert.equal(b.facade.material.userData.nativeDepthUniforms.uNativeScale.value,2.5);
 });
-test('native 3D mesh renderer depth-tests instead of drawing over actors and buildings',()=>{
- const s=fs.readFileSync('world-builder/semesta-pipeline-ground.js','utf8');
- assert.match(s,/depthTest:true/);
- assert.match(s,/depthWrite:true/);
- assert.match(s,/alphaTest:\.49/);
- assert.doesNotMatch(s,/depthTest:\\s*false\\s*,\\s*depthWrite/);
- assert.ok(!s.includes('position.y=realH*(py-.5)'));
+test('builder fetches matching published PNG depth by source variant and uses depth shader path',()=>{
+ const js=fs.readFileSync('world-builder/builder.js','utf8');
+ const html=fs.readFileSync('world-builder/index.html','utf8');
+ assert.ok(js.includes('function pixelDepthTexture(name,dir='));
+ assert.ok(js.includes("data.file.slice(0,-4)+'__depth.png'"));
+ assert.ok(js.includes('t.colorSpace=THREE.NoColorSpace'));
+ assert.ok(js.includes('pipelineGround.attach(THREE,root,spec,view,pixelTexture(item.asset,view),pixelDepthTexture(item.asset,view))'));
+ assert.ok(js.includes('pixelDepthTexture(key,dir)'));
+ assert.ok(html.indexOf('semesta-pipeline-ground.js')<html.indexOf('builder.js?v='));
 });
-test('runtime connects grounded native architecture to billboard facing and rotation',()=>{
- const code=fs.readFileSync('world-builder/builder.js','utf8');
- const page=fs.readFileSync('world-builder/index.html','utf8');
- assert.ok(code.includes('pipelineGround?.supports(spec)'));
- assert.ok(code.includes('pipelineGround.attach(THREE,root,spec,view,pixelTexture(item.asset,view))'));
- assert.ok(code.includes('pipelineGround.configure(THREE,groundBundle,spec,dir,pixelTexture(key,dir))'));
- assert.ok(code.includes('pipelineGround.faceCamera(groundBundle,root,camera)'));
- assert.ok(page.includes('semesta-pipeline-ground.js'));
- assert.ok(page.indexOf('semesta-pipeline-ground.js')<page.indexOf('builder.js?v='));
-});
-test('forest sprites, studio buildings and unpublished metadata stay on their own paths',()=>{
- assert.equal(ground.supports({source:'pipeline-vegetation',published:true,variants:{sw:{size:[10,20],pivot:[5,18]}}}),false);
- assert.equal(ground.supports({source:'custom-building',published:true,variants:{sw:{size:[10,20],pivot:[5,18]}}}),false);
- assert.equal(ground.supports({source:'pipeline-street',published:false,variants:{sw:{size:[10,20],pivot:[5,18]}}}),false);
+test('trees, studio buildings and unpublished pipeline shapes retain separate rendering',()=>{
+ assert.equal(ground.supports({source:'pipeline-vegetation',published:true,variants:{sw:{size:[20,30],pivot:[10,20]}}}),false);
+ assert.equal(ground.supports({source:'custom-building',published:true,variants:{sw:{size:[20,30],pivot:[10,20]}}}),false);
+ assert.equal(ground.supports({source:'pipeline-street',published:false,variants:{sw:{size:[20,30],pivot:[10,20]}}}),false);
 });
