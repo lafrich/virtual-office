@@ -214,6 +214,54 @@ function vehiclePreview(id,dir='se'){
  return url;
 }
 
+/*
+ * Canonical rider gallery resolver. Previously vehiclePreview() could show a
+ * beautiful native v3 driver *only after that vehicle had been placed*.
+ * Other cards rendered crude proxy drawings. Resolve each source PNG from
+ * the same sourceURL() and v3 dimensions used by vehicleGraphic(), even for
+ * vehicles not present in a saved city. NEVER use proxy drawings for these
+ * five rider variants: missing originals are hidden by gallery health gate.
+ */
+const nativeGalleryImages=new Map();
+const EXACT_RIDERS=new Set(Object.keys(RIDER_V3));
+function validNativeImage(url,expected){
+ return new Promise(resolve=>{
+  if(!url){resolve(null);return;}
+  const img=new Image();let finished=false;
+  const timer=setTimeout(()=>finish(null),14000);
+  function finish(value){
+   if(finished)return;finished=true;clearTimeout(timer);
+   img.onload=null;img.onerror=null;resolve(value);
+  }
+  img.decoding='async';
+  img.onload=()=>{
+   const w=img.naturalWidth,h=img.naturalHeight;
+   if(!w||!h||(expected&&(w!==expected.size[0]||h!==expected.size[1]))){
+    finish(null);return;
+   }
+   finish(url);
+  };
+  img.onerror=()=>finish(null);
+  img.src=url;
+ });
+}
+function vehiclePreviewAsync(id,dir='se'){
+ const side=['se','sw','ne','nw'].includes(dir)?dir:'se';
+ const ready=originalCache.get(originalKey(id,side,0))?.image;
+ if(ready?.naturalWidth>0&&ready?.naturalHeight>0&&ready.src)
+  return Promise.resolve(ready.src);
+ if(!EXACT_RIDERS.has(id))return Promise.resolve(vehiclePreview(id,side));
+ const key=id+':'+side;
+ if(nativeGalleryImages.has(key))return nativeGalleryImages.get(key);
+ const spec=g.VLSemestaCatalog?.vehicle?.(id);
+ const expected=RIDER_V3[id];
+ const task=validNativeImage(sourceURL({id,views:spec?.views},side,'v3',0),expected)
+  .then(url=>url||null)
+  .catch(()=>null);
+ nativeGalleryImages.set(key,task);
+ return task;
+}
+
 function texture(THREE,id,dir){
  const key=id+':'+dir;
  if(cache.has(key))return cache.get(key);
@@ -373,5 +421,5 @@ function questGraphic(THREE,record){
    mesh.rotation.y=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y;
  },dispose(){mesh.geometry.dispose();mat.dispose();tex.dispose();}};
 }
-g.VLSemestaArt=Object.freeze({sourcePublished,originalCount,retrySources,vehicleGraphic,questGraphic,vehicleCanvas,vehiclePreview,questPreview});
+g.VLSemestaArt=Object.freeze({sourcePublished,originalCount,retrySources,vehicleGraphic,questGraphic,vehicleCanvas,vehiclePreview,vehiclePreviewAsync,questPreview});
 })(window);
