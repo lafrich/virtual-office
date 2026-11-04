@@ -68,7 +68,7 @@ test('load game reference before renderer in both editor and Semesta',()=>{
   ['bangun-ruang/index.html','./'],['index.html','./bangun-ruang/']
  ]){
   const s=read(file);
-  const scripts=[...s.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)]
+  const scripts=[...s.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
    .map(match=>match[1].split('?')[0]);
   const ref=prefix+'game-proportions.js';
   const renderer=prefix+'interior-isometric.js';
