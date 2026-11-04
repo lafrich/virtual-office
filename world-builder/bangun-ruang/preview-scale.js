@@ -7,7 +7,7 @@
 const $=id=>document.getElementById(id);
 const stage=$('previewStage');
 const exterior=$('preview'),inside=$('interiorCanvas'),guide=$('buildingGuideCanvas');
-let exteriorSize=null,interiorSize=null,interiorMode='iso',lastScale=1;
+let exteriorSize=null,interiorSize=null,interiorMode='iso',lastScale=1,actionZoom=1;
 function cssMaxHeight(){
  const w=Number(g.innerWidth)||640;
  return w<=370?252:w<=640?294:w<=1000?340:430;
@@ -34,11 +34,15 @@ function sync(){
  applySize(exterior,exteriorSize,lastScale);
  applySize(guide,exteriorSize,lastScale);
  if(interiorSize){
-  if(interiorMode==='iso')applySize(inside,interiorSize,lastScale);
+  if(interiorMode==='iso'){
+   applySize(inside,interiorSize,lastScale*actionZoom);
+   if(actionZoom!==1){inside.style.setProperty('max-width','none','important');inside.style.setProperty('max-height','none','important');}
+  }
   else{
    // Plan / Edit is a tool-only zoomed grid, not the physical 1:1 preview.
    const planScale=Math.min(3.5,availableWidth/interiorSize[0],availableHeight/interiorSize[1]);
-   applySize(inside,interiorSize,planScale);
+   applySize(inside,interiorSize,planScale*actionZoom);
+   if(actionZoom!==1){inside.style.setProperty('max-width','none','important');inside.style.setProperty('max-height','none','important');}
   }
  }
 }
@@ -48,6 +52,8 @@ g.VLBuildingPreviewScale=Object.freeze({
  interior(size,mode='iso'){if(Array.isArray(size)&&size[0]>0&&size[1]>0){
   interiorSize=size;interiorMode=mode;sync();}},
  sync,
+ setActionZoom(value){actionZoom=Math.max(.5,Math.min(4,Number(value)||1));sync();return actionZoom;},
+ get actionZoom(){return actionZoom;},
  get worldPixelScale(){return lastScale;},
  get exteriorSize(){return exteriorSize?.slice()||null;},
  get interiorSize(){return interiorSize?.slice()||null;}
