@@ -353,6 +353,7 @@ function init(api){
  function setActionZoom(value){
   const zoom=g.VLBuildingPreviewScale?.setActionZoom?.(value)||1;
   $('actionZoomValue').textContent=Math.round(zoom*100)+'%';
+  $('previewStage').classList.toggle('action-adjust-viewport',zoom!==1);
   api.getScaleController?.()?.sync?.();
  }
  api.onTransformModeChange=mode=>setTransformMode(mode);
@@ -363,6 +364,7 @@ function init(api){
   const controller=api.getScaleController?.();
   controller?.setTransformSnap?.($('actionTransformSnap').value);
   controller?.beginAdjustment?.(adjustmentDraft);
+  $('previewStage').classList.add('action-adjust-viewport');
   const mode=$('actionModeSelect').getAttribute('aria-pressed')==='true'?'select':
    $('actionModeRotate').getAttribute('aria-pressed')==='true'?'rotate':'move';
   setTransformMode(mode);
@@ -647,6 +649,7 @@ function init(api){
  $('actionAdjustExit').onclick=()=>{
   api.getScaleController?.()?.endAdjustment?.();
   setActionZoom(1);
+  $('previewStage').classList.remove('action-adjust-viewport');
   adjustmentKey='';adjustmentDraft=null;showAdjustment();
   onStatus('Action adjustment closed; changes not saved');
  };
