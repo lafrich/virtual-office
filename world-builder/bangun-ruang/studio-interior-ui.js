@@ -54,7 +54,7 @@ function init(api){
  function drawObjectGizmo(){
   if(!objectGizmoActive||placing||!selected||!gizmo||preview!=='interior')return;
   const item=scene().items.find(x=>x.id===selected),p=objectOrigin(item);
-  if(p)gizmo.draw(ctx,p,{mode:'move',hot:objectDrag?.handle||'',direction:'sw',baseDirection:'sw'});
+  if(p)gizmo.drawObject(ctx,p,{hot:objectDrag?.handle||'',flipX:item?.flipX===true,flipY:item?.flipY===true});
  }
  function pointOnCanvas(e){
   const b=canvas.getBoundingClientRect();
@@ -66,40 +66,53 @@ function init(api){
   const p=pointOnCanvas(e),item=scene().items.find(x=>x.id===selected);
   const center=objectOrigin(item);
   if(!p||!center)return false;
-  const handle=gizmo.hit(center,p);
+  const handle=gizmo.hitObject(center,p);
   if(!handle)return false;
-  objectDrag={id:e.pointerId,handle,start:p,center,base:{c:item.c,r:item.r,rotation:item.rotation},before:snapshot(),changed:false};
+  if(handle==='flipX'||handle==='flipY'){
+   const before=snapshot();
+   item[handle]=item[handle]!==true;
+   recordUndo(before);
+   renderObjects();renderActions();draw();
+   onStatus((handle==='flipX'?'Flip horizontal':'Flip vertical')+' · '+item.name+' · Save Asset to keep changes');
+   e.preventDefault();return true;
+  }
+  objectDrag={id:e.pointerId,handle,start:p,center,
+   base:{c:item.c,r:item.r,flipX:item.flipX===true,flipY:item.flipY===true},
+   before:snapshot(),changed:false};
   canvas.setPointerCapture?.(e.pointerId);e.preventDefault();return true;
  }
  function dragObject(e){
   const d=objectDrag;if(!d||d.id!==e.pointerId)return;
   const p=pointOnCanvas(e);if(!p)return;
   const item=scene().items.find(x=>x.id===selected);if(!item)return;
-  if(d.handle==='rotate'){
-   const from=Math.atan2(d.start.y-d.center.y,d.start.x-d.center.x);
-   const to=Math.atan2(p.y-d.center.y,p.x-d.center.x);
-   const turns=Math.round((to-from)/(Math.PI/2));
-   const delta=((turns+4)%4);
-   const target=((d.base.rotation+delta*90)%360+360)%360;
-   if(target!==item.rotation&&model.move(scene(),item.id,item.c,item.r,target))d.changed=true;
-  }else{
-   const dx=p.x-d.start.x,dy=p.y-d.start.y;
-   // Inverse of the 2:1 isometric projection: X=32(C-R), Y=16(C+R).
-   const dc=interiorView==='iso'?(dx/32+dy/16)/2:dx/CELL;
-   const dr=interiorView==='iso'?(dy/16-dx/32)/2:dy/CELL;
-   const c=d.base.c+Math.round(dc),r=d.base.r+Math.round(dr);
-   if((d.handle!=='y'||c===d.base.c)&&(d.handle!=='x'||r===d.base.r)){
-    if((c!==item.c||r!==item.r)&&model.move(scene(),item.id,c,r))d.changed=true;
+  const dx=p.x-d.start.x,dy=p.y-d.start.y;
+  let c=d.base.c,r=d.base.r;
+  if(interiorView==='iso'){
+   if(d.handle==='x'){
+    // Horizontal screen axis corresponds to +C/-R on an isometric map.
+    const n=Math.round(dx/64);c+=n;r-=n;
+   }else if(d.handle==='y'){
+    // Vertical screen axis corresponds to +C/+R.
+    const n=Math.round(dy/32);c+=n;r+=n;
+   }else{
+    c+=Math.round((dx/32+dy/16)/2);
+    r+=Math.round((dy/16-dx/32)/2);
    }
+  }else{
+   if(d.handle!=='y')c+=Math.round(dx/CELL);
+   if(d.handle!=='x')r+=Math.round(dy/CELL);
   }
-  draw();e.preventDefault();
+  if((c!==item.c||r!==item.r)&&model.move(scene(),item.id,c,r)){
+   d.changed=true;draw();
+  }
+  e.preventDefault();
  }
  function endObjectDrag(e){
   if(!objectDrag||objectDrag.id!==e.pointerId)return;
   const d=objectDrag;objectDrag=null;
   try{canvas.releasePointerCapture?.(e.pointerId)}catch{}
   const item=scene().items.find(x=>x.id===selected);
-  if(d.changed&&item&&(item.c!==d.base.c||item.r!==d.base.r||item.rotation!==d.base.rotation)){
+  if(d.changed&&item&&(item.c!==d.base.c||item.r!==d.base.r)){
    recordUndo(d.before);renderObjects();renderActions();
   }
   draw();e.preventDefault();
@@ -311,7 +324,13 @@ function init(api){
    ctx.fillRect(x+1,y+1,w*CELL-2,d*CELL-2);
    ctx.fillStyle=colors[def.category]||'#c7ccd3';
    ctx.fillRect(x+3,y+3,w*CELL-6,d*CELL-6);
-   if(g.VLInteriorPixels)g.VLInteriorPixels.draw(ctx,item.assetId,x+3,y+3,w*CELL-6,d*CELL-6);
+   if(g.VLInteriorPixels){
+    ctx.save();
+    ctx.translate(x+w*CELL/2,y+d*CELL/2);
+    ctx.scale(item.flipX===true?-1:1,item.flipY===true?-1:1);
+    g.VLInteriorPixels.draw(ctx,item.assetId,-w*CELL/2+3,-d*CELL/2+3,w*CELL-6,d*CELL-6);
+    ctx.restore();
+   }
    else{ctx.fillStyle='#263e54';ctx.textAlign='center';ctx.font='14px monospace';ctx.fillText(def.label.slice(0,2),x+w*CELL/2,y+d*CELL/2+5);}
    // Direction chip stays visible for square props (WC, bed and chairs),
    // whose footprint does not change when rotated in Plan / Edit mode.
@@ -609,6 +628,9 @@ function init(api){
  canvas.addEventListener('pointerdown',e=>{
   if(!enabled||preview!=='interior')return;
   const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
+  // IMPORTANT: gizmo handles often sit beyond the furniture polygon or floor.
+  // Detect handles BEFORE tile hit tests, otherwise the editor ignores clicks.
+  if(objectGizmoActive&&beginObjectDrag(e))return;
   let c,z,hit=null;
   if(interiorView==='iso'&&iso){
    hit=iso.pointer(canvas,e,lastIso,{preferFloor:!!placing});
@@ -618,7 +640,6 @@ function init(api){
    c=Math.floor((e.clientX-r.left)*canvas.width/r.width/CELL);
    z=Math.floor((e.clientY-r.top)*canvas.height/r.height/CELL);
   }
-  if(objectGizmoActive&&beginObjectDrag(e))return;
   if(c<0||z<0||c>=scene().width||z>=scene().depth)return;
   e.preventDefault();
   if(tab==='actions'&&!placing){tapActionObject(e);return;}
