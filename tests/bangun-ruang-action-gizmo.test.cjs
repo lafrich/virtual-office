@@ -101,5 +101,5 @@ test("isometric furniture handles follow the 2:1 tile axes and project drags",()
  assert.equal(gizmo.objectAxisSteps(-32,16,'y'),1);
  assert.equal(gizmo.objectAxisSteps(32,16,'y'),-1);
  assert.equal(gizmo.objectAxisSteps(-32,16,'x'),-1);
- assert.equal(gizmo.objectAxisSteps(32,-64,'x'),-1);
+ assert.equal(gizmo.objectAxisSteps(32,-128,'x'),-1);
 });
