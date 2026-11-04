@@ -113,6 +113,8 @@ jobs:
           node --check world-builder/semesta-wheel-ground.js
           node --check world-builder/semesta-traffic-art.js
           node --test tests/semesta-wheel-ground.test.cjs
+          node --check world-builder/semesta-vegetation-ground.js
+          node --test tests/semesta-vegetation-ground.test.cjs
           node tests/semesta-mahluk-vehicles.test.cjs
           node tests/semesta-movement-grounding.test.cjs
           node tests/semesta-traffic.test.cjs
