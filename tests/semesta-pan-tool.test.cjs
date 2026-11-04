@@ -20,6 +20,6 @@ assert.match(js,/drag\.kind==='pan'&&!drag\.hit/,
 assert.match(js,/else if\(e\.key\.toLowerCase\(\)==='p'\)setMode\('pan'\)/);
 assert.match(css,/#world\.pan-tool-active\{cursor:grab\}/);
 assert.match(css,/#world\.pan-tool-active:active\{cursor:grabbing\}/);
-assert.match(html,/builder\.js\?v=pan-camera-v1/,'force updated script to load');
+assert.match(html,/builder\.js\?v=[^"\n]*pan-camera-v1/,'pan camera remains present in versioned builder script');
 assert.match(css,/#world\{display:block/);
 console.log('PASS Semesta explicit Pan tool, drag-anywhere without object selection, keyboard and touch-compatible cursor');
