@@ -2374,7 +2374,7 @@ function renderAssetList(){
     {title:'Small Building · 3×3',tag:'building:small',category:'custom',label:'PLACEHOLDER / REPLACEABLE'},
     {title:'Medium Building · 5×4',tag:'building:medium',category:'custom',label:'PLACEHOLDER / REPLACEABLE'},
     {title:'Large Building · 8×6',tag:'building:large',category:'custom',label:'PLACEHOLDER / REPLACEABLE'},
-    {title:'Park Tree · preview',tag:'tree',category:'vegetation',label:'PIXEL PLANE / PREVIEW'},
+    {title:'Kiara payung · native',tag:'sprite:vegetation:pohon_kiara_payung',category:'vegetation',label:'PIPELINE / PNG'},
     {title:'Street Light · preview',tag:'lamp',category:'street',label:'PIXEL PLANE / PREVIEW'},
     {title:'Park Bench · preview',tag:'bench',category:'street',label:'PIXEL PLANE / PREVIEW'},
     {title:'Trash Bin · original',tag:'sprite:street2/loak/props/tong_sampah_besi_se.png',category:'street',label:'GPT / ORIGINAL · login'},
@@ -2523,6 +2523,51 @@ window.addEventListener('semesta-vault-autolink',event=>{
  tell(changed.length+' vehicles / job NPCs linked to original image references');
 });
 
+// Tree placeholder conversion: one atomic edit / one Undo, preserving all world positions.
+const treeBatch=window.VLTreeReplace;
+function treeBatchSetup(){
+ if(!treeBatch)return;
+ const container=$('treeReplaceSpeciesList'),species=treeBatch.candidates(assetCatalog);
+ container.replaceChildren();
+ for(const spec of species){
+  const label=document.createElement('label'),input=document.createElement('input');
+  input.type='checkbox';input.value=spec.id;input.checked=treeBatch.DEFAULT_POOL.includes(spec.id);
+  const t=document.createElement('span');t.textContent=spec.label;label.append(input,t);container.append(label);
+ }
+ function summary(){
+  const count=documentMap.objects.filter(o=>treeBatch.target(o,assetCatalog,$('treeReplaceScope').value)).length;
+  $('treeReplaceSummary').textContent=count+' pohon target · '+species.length+' jenis tersedia · posisi tetap · Undo tersedia';
+  if($('treeReplaceMode').value==='single'){
+   const inputs=[...container.querySelectorAll('input')],first=inputs.find(x=>x.checked)||inputs[0];
+   for(const i of inputs)i.checked=i===first;
+  }
+ }
+ container.onchange=e=>{
+  if($('treeReplaceMode').value==='single'&&e.target.matches('input[type=checkbox]'))
+   for(const i of container.querySelectorAll('input'))i.checked=i===e.target;
+  summary();
+ };
+ $('treeReplaceScope').onchange=summary;
+ $('treeReplaceMode').onchange=summary;
+ $('treeReplaceMenu').ontoggle=summary;
+ $('treeReplaceShuffle').onclick=()=>{
+  const input=$('treeReplaceSeed');input.value=String(((Number(input.value)||0)+1)>>>0);
+  summary();tell('Random seed '+input.value+' · tekan REPLACE ALL');
+ };
+ $('treeReplaceApply').onclick=()=>{
+  const selected=[...container.querySelectorAll('input:checked')].map(i=>i.value);
+  let result;
+  try{result=treeBatch.replace(documentMap.objects,assetCatalog,{
+   scope:$('treeReplaceScope').value,mode:$('treeReplaceMode').value,
+   species:selected[0]||'',selected,seed:Number($('treeReplaceSeed').value)||2026
+  });}catch(err){tell(err.message);return;}
+  if(!result.changed){tell(result.matched?'Pohon sudah sesuai pilihan':'Tidak ada pohon target');summary();return;}
+  undoPoint();documentMap.objects=result.objects;rebuild();saved();summary();
+  tell(result.changed+' pohon diganti · '+result.pool.length+' spesies · Undo tersedia');
+ };
+ summary();
+}
+treeBatchSetup();
 refreshCharacterOptions();
 $('searchAsset').oninput=renderAssetList;
 $('assetCategory').onchange=renderAssetList;
