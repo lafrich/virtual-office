@@ -425,6 +425,26 @@ function plate(x,z,w,d,y,kind){
 const tileGround=new THREE.Group();tileGround.name='Editable terrain';scene.add(tileGround);
 const gridOverlay=new THREE.Group();gridOverlay.name='Grid overlay';scene.add(gridOverlay);
 let gridShown=true;
+const cityStyle=window.VLKebonSirihStyle;
+// Material sprites are built from the Virtual Life Asset Pipeline; 3D planes
+// project the tile textures into the editor's fixed 2:1 orthographic world.
+const cityTextureLoader=new THREE.TextureLoader(),cityTextures=new Map();
+function cityTexture(name){
+ const url=cityStyle?.tileUrl(name);
+ if(!url)return null;
+ if(!cityTextures.has(name)){
+  const tex=cityTextureLoader.load(url,()=>{
+   if(baseGround?.material&&name==='grass'){baseGround.material.needsUpdate=true;}
+   renderer.render(scene,camera);
+  },undefined,()=>console.warn('Kebon Sirih texture unavailable',name));
+  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+  tex.magFilter=tex.minFilter=THREE.NearestFilter;
+  tex.generateMipmaps=false;
+  tex.colorSpace=THREE.SRGBColorSpace;
+  cityTextures.set(name,tex);
+ }
+ return cityTextures.get(name);
+}
 const tilePalette={
  grass:0x409750,road:0x565d69,sidewalk:0xc2c6c8,
  water:0x459ac5,plaza:0xd9cfb5,soil:0x9c815e
@@ -434,6 +454,9 @@ const tilePalette={
 const baseGround=new THREE.Mesh(new THREE.PlaneGeometry(1,1),texMat('grass',1,1));
 baseGround.rotation.x=-Math.PI/2;baseGround.position.y=0;
 baseGround.name='Unbounded ground';scene.add(baseGround);
+const nativeGrass=cityTexture('grass');
+if(nativeGrass){baseGround.material.map=nativeGrass;baseGround.material.needsUpdate=true;}
+
 const pickGroundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 const windowRay=new THREE.Raycaster();
 const windowPoint=new THREE.Vector3();
@@ -489,32 +512,40 @@ function rebuildTerrain(force=true){
  const w=b.maxX-b.minX,d=b.maxZ-b.minZ;
  baseGround.position.set((b.minX+b.maxX)/2,.002,(b.minZ+b.maxZ)/2);
  baseGround.scale.set(w,d,1);
- baseGround.material.map.repeat.set(w/2.4,d/2.4);
+ baseGround.material.map.repeat.set(nativeGrass?w:w/2.4,nativeGrass?d:d/2.4);
  baseGround.material.map.needsUpdate=true;
  clearTerrain();
  const t=documentMap.map.terrain||{default:'grass',cells:[]};
- const itemsByKind=Object.fromEntries(terrain.types.map(type=>[type,[]]));
+ const tileIndex=new Map(t.cells.map(o=>[o.c+','+o.r,o.type]));
+ const byVisualTile=new Map();
  for(const cell of t.cells){
-  if(cell.c>=b.minX&&cell.c<b.maxX&&cell.r>=b.minZ&&cell.r<b.maxZ&&cell.type!==t.default)
-   itemsByKind[cell.type]?.push(cell);
+  if(cell.c<b.minX||cell.c>=b.maxX||cell.r<b.minZ||cell.r>=b.maxZ||cell.type===t.default)continue;
+  const assetName=cityStyle?.tile(cell.type,cell,tileIndex)||cell.type;
+  if(!byVisualTile.has(assetName))byVisualTile.set(assetName,[]);
+  byVisualTile.get(assetName).push(cell);
  }
  const tmp=new THREE.Object3D();
- for(const [kind,items] of Object.entries(itemsByKind)){
+ for(const [assetName,items] of byVisualTile){
   if(!items.length)continue;
-  const color=tilePalette[kind]||tilePalette.grass;
-  const mat=new THREE.MeshBasicMaterial({color,depthTest:true,depthWrite:true});
-  const mesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),mat,items.length);
-  mesh.name='Painted '+kind;
-  items.forEach((cell,i)=>{
-   const y=kind==='road'?.024:kind==='sidewalk'?.036:kind==='water'?.015:.026;
+  const kind=assetName.startsWith('sidewalk')?'sidewalk':
+   assetName.startsWith('road_')?'road':assetName;
+  const source=cityTexture(assetName);
+  const material=new THREE.MeshBasicMaterial({
+   map:source||null,color:source?0xffffff:tilePalette[kind]||tilePalette.grass,
+   depthTest:true,depthWrite:true
+  });
+  const mesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),material,items.length);
+  mesh.name='Kebon Sirih · '+assetName;
+  for(let i=0;i<items.length;i++){
+   const cell=items[i],y=kind==='road'?.024:kind==='sidewalk'?.036:kind==='water'?.015:.026;
    tmp.position.set(cell.c+.5,y,cell.r+.5);
    tmp.rotation.set(-Math.PI/2,0,0);tmp.scale.set(1,1,1);tmp.updateMatrix();
    mesh.setMatrixAt(i,tmp.matrix);
-   if(kind==='grass'||kind==='water'||kind==='soil'){
+   if(['grass','water','soil'].includes(kind)){
     const variation=((cell.c*12347+cell.r*2917)>>>0)%9;
-    mesh.setColorAt(i,new THREE.Color(color).multiplyScalar(.91+variation*.015));
+    mesh.setColorAt(i,new THREE.Color(source?0xffffff:tilePalette[kind]).multiplyScalar(.94+variation*.009));
    }
-  });
+  }
   mesh.instanceMatrix.needsUpdate=true;
   if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
   mesh.frustumCulled=false;
