@@ -69,7 +69,7 @@ test('load game reference before renderer in both editor and Semesta',()=>{
  ]){
   const s=read(file);
   const ref=prefix+'game-proportions.js?v=source-v9';
-  const renderer=prefix+'interior-isometric.js?v=furniture-v10';
+  const renderer=prefix+'interior-isometric.js?v=action-alignment-v1';
   assert.ok(s.includes(ref));
   assert.ok(s.includes(renderer));
   assert.ok(s.indexOf(ref)<s.indexOf(renderer));
