@@ -37,7 +37,7 @@ for(const id of ['vehicleControls','vehicleVisualScale','vehicleVisualScaleValue
  assert.ok(ui.includes('id="'+id+'"'),'missing vehicle inspector '+id);
 assert.ok(ui.includes('semesta-vehicle-placement.js?v=vehicle-edit-v1'));
 assert.ok(ui.includes('semesta-world-effects.js?v=character-contact-circle-v1'));
-assert.ok(ui.includes('builder.js?v=pan-camera-v1'));
+assert.match(ui,/builder\.js\?v=[^"\n]*pan-camera-v1/, 'world builder retains pan camera version even when cache-busting tag changes');
 assert.match(builder,/e\.visualOffset=vehiclePlacement\.offset\(p\.visualOffset\)/,
  'visual offset must survive city draft reload and import');
 assert.match(builder,/function editVehicleVisual\(/);
