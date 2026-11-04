@@ -137,6 +137,13 @@ test('native seat pivot remains canonical; only saved per-action offsets belong 
  const save=html.slice(start,end);
  assert.ok(!save.includes('actionAnchor'));
  assert.ok(!save.includes('scaleController'));
- assert.ok(html.includes('interior-isometric.js?v=hygiene-fixture-anchor-v1'));
- assert.ok(html.includes('character-scale-preview.js?v=hygiene-body-render-v1'));
+ const scripts=[...html.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)]
+  .map(match=>match[1].split('?')[0]);
+ assert.ok(scripts.includes('./interior-isometric.js'),
+  'native WC seat renderer is included');
+ assert.ok(scripts.includes('./character-scale-preview.js'),
+  'WC actor renderer is included');
+ assert.ok(scripts.indexOf('./interior-isometric.js')<
+  scripts.indexOf('./character-scale-preview.js'),
+  'WC seat geometry loads before actor overlay');
 });
