@@ -27,7 +27,7 @@ function entries(catalog,vehicles=[],characters=[]){
   ...s,kind:'sprite',category:category(s),editTarget:route(s)
  }));
  for(const v of vehicles||[])if(v?.id)items.push({
-  id:v.id,file:'vehicle:'+v.id,label:v.label||v.id,source:'vehicle',
+  id:v.id,file:'vehicle:'+v.id,label:v.label||v.id,source:'vehicle',views:v.views||{},
   category:'vehicle',kind:'vehicle',footprint:v.footprint||null,published:true,editTarget:null
  });
  for(const p of characters||[])if(p?.id)items.push({
@@ -91,6 +91,11 @@ function checkImage(url,geometry=null){
 }
 async function assetHealthy(spec,imageUrl){
  if(!spec?.id||!spec?.file||spec.published===false)return false;
+ if(spec.kind==='vehicle'||spec.kind==='character'){
+  // Validate all 4 exposed views, including genuine character pose frames.
+  const urls=await Promise.all(DIR.map(d=>imageUrl(spec,d)));
+  return (await Promise.all(urls.map(url=>checkImage(url)))).every(Boolean);
+ }
  if(spec.source==='pipeline-street'){
   const v=spec.variants||{},dirs=DIR.filter(d=>Object.prototype.hasOwnProperty.call(v,d));
   if(!dirs.length)return false;
@@ -99,20 +104,20 @@ async function assetHealthy(spec,imageUrl){
     return false;
   }
   // Every DECLARED facing must be real to avoid broken gallery detail views.
-  const checks=await Promise.all(dirs.map(d=>checkImage(imageUrl(spec,d),v[d])));
+  const checks=await Promise.all(dirs.map(async d=>checkImage(await imageUrl(spec,d),v[d])));
   return checks.every(Boolean);
  }
  if(spec.source==='pipeline-vegetation'){
   if(!/^trees\/[a-z0-9_-]+\.png$/i.test(spec.relativeFile||'')||!validGeometry(spec))return false;
-  return checkImage(imageUrl(spec,'sw'),spec);
+  return checkImage(await imageUrl(spec,'sw'),spec);
  }
  if(spec.source==='custom-building'||spec.source==='bangun-object'){
   const variants=spec.variants||{},dirs=DIR.filter(d=>Object.hasOwn(variants,d));
   if(!dirs.length)return false;
-  return (await Promise.all(dirs.map(d=>checkImage(imageUrl(spec,d))))).every(Boolean);
+  return (await Promise.all(dirs.map(async d=>checkImage(await imageUrl(spec,d))))).every(Boolean);
  }
  // Vehicles, characters and non-pipeline assets must have a genuine image.
- return checkImage(imageUrl(spec,'sw'));
+ return checkImage(await imageUrl(spec,'sw'));
 }
 
 function mount(options={}){
@@ -144,8 +149,8 @@ function mount(options={}){
   'character':'MAHLUK HIDUP / CHARACTER'};
  function imgUrl(s,side='sw'){
   if(!s)return null;
-  if(s.kind==='vehicle')return options.vehicleImage?.(s.id)||null;
-  if(s.kind==='character')return options.characterImage?.(s.id)||null;
+  if(s.kind==='vehicle')return options.vehicleImage?.(s.id,side)||null;
+  if(s.kind==='character')return options.characterImage?.(s.id,side)||null;
   if(s.source==='pipeline-street'){
    const v=s.variants?.[side]||s.variants?.sw||s.variants?.se;
    return v?.file?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+v.file:null;
@@ -158,12 +163,23 @@ function mount(options={}){
  }
  const glyph=s=>({building:'▥',street:'♧',vegetation:'♣',interior:'▤',
   vehicle:'▰',character:'◉',custom:'✎'})[s?.category]||'▦';
- function showImage(host,url,s){
+ function showImage(host,urlOrPromise,s){
+  // Async rig previews arrive after an atlas/image load. An older selection
+  // must never overwrite the currently selected art.
+  const token=Symbol('asset-preview');host._salToken=token;
   host.replaceChildren();
-  if(!url){const a=document.createElement('span');a.textContent=glyph(s);host.append(a);return;}
-  const i=document.createElement('img');i.alt=s.label||'Asset';i.loading='lazy';i.decoding='async';
-  i.onerror=()=>{i.remove();if(s?.file)invalidate(s.file);};
-  i.src=url;host.append(i);
+  void Promise.resolve(urlOrPromise).then(url=>{
+   if(host._salToken!==token)return;
+   if(!url){
+    if(s?.file)invalidate(s.file);
+    else{const a=document.createElement('span');a.textContent=glyph(s);host.append(a);}
+    return;
+   }
+   const i=document.createElement('img');i.alt=s?.label||'Asset';
+   i.loading='lazy';i.decoding='async';i.dataset.source=s?.source||'';
+   i.onerror=()=>{i.remove();if(s?.file)invalidate(s.file);};
+   i.src=url;host.append(i);
+  }).catch(()=>{if(host._salToken===token&&s?.file)invalidate(s.file);});
  }
  function datum(name,value){
   const a=document.createElement('dt'),b=document.createElement('dd');
@@ -176,7 +192,8 @@ function mount(options={}){
    $('salDescription').textContent='';showImage($('salHero'),null,null);
    $('salPlace').disabled=true;$('salEdit').disabled=true;return;
   }
-  const s=selected,variants=s.variants||{},available=DIR.filter(v=>!!variants[v]);
+  const s=selected,variants=s.variants||{},available=DIR.filter(v=>
+   s.kind==='vehicle'?!!s.views?.[v]:s.kind==='character'||!!variants[v]);
   $('salName').textContent=s.label||s.id;
   $('salSource').textContent=names[s.source]||s.source||'SEMESTA ASSET';
   if(available.length){
@@ -247,7 +264,7 @@ function mount(options={}){
    const t=document.createElement('span');t.className='sal-thumb';showImage(t,imgUrl(s),s);
    const title=document.createElement('b');title.textContent=s.label;
    const tiny=document.createElement('small');tiny.textContent=CATS[s.category]||'ASSET';
-   b.append(t,title,tiny);b.onclick=()=>{selected=s;view='sw';detail();};$('salGallery').append(b);
+   b.append(t,title,tiny);b.onclick=()=>{selected=s;view=s.kind==='vehicle'?'se':'sw';detail();};$('salGallery').append(b);
   }
   if(!found.length){const note=document.createElement('p');note.className='sal-empty';
    note.textContent=all.length?'Tidak ada aset valid untuk filter ini.':'Tidak ada thumbnail valid yang bisa dimuat. Periksa jaringan lalu buka kembali Asset Library.';$('salGallery').append(note);}
