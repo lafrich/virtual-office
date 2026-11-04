@@ -41,6 +41,10 @@ function parseCatalog(json){
   const entry={id:raw.id,name:String(raw.name||raw.id).slice(0,90),
    sheet:raw.sheet,motions,expressions,row_starts,baseId:raw.id,
    category:raw.template_category||'npc',template:raw.template===true,
+   gender:['male','female'].includes(raw.gender)?raw.gender:null,
+   bodyType:['male','female'].includes(raw.bodyType)?raw.bodyType:
+    ['male','female'].includes(raw.gender)?raw.gender:null,
+   skinTone:typeof raw.skinTone==='string'?raw.skinTone:null,
    status:raw.asset_status||'published',custom:false};
   next.set(entry.id,entry);
  }
