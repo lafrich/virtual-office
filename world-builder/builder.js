@@ -1554,6 +1554,40 @@ function updateSelection(){
    actionChoices(cur.profile,'pose',cur.pose||'');
  }
  $('profile').disabled=!actor;
+ // The placed Indonesian bike/becak/andong keeps its own empty sprite.
+ // Select the real Mahluk Hidup driver/passenger templates here.
+ const transportSpec=cur?.type==='sprite'?assetByName.get(cur.asset):null;
+ const modularTransport=!!transportSpec?.npcTransport?.modular;
+ $('transportNPCControls').hidden=!modularTransport;
+ if(modularTransport){
+  const slots=transportSpec.npcTransport.slots||[];
+  const driver=slots.find(s=>s.role==='driver');
+  const pax=slots.find(s=>s.role==='passenger_1');
+  const available=mahluk?.list?.()||[];
+  for(const [selectId,slot] of [['transportNPCDriver',driver],['transportNPCPassenger',pax]]){
+   const select=$(selectId);
+   const chosen=cur.npcProfiles?.[slot?.role]||slot?.profile||'';
+   select.replaceChildren();
+   const seen=new Set();
+   const insertOption=(id,label)=>{
+    if(!id||seen.has(id))return;seen.add(id);
+    const option=document.createElement('option');option.value=id;
+    option.textContent=label;select.append(option);
+   };
+   insertOption(chosen,mahluk?.get?.(chosen)?.name||chosen);
+   for(const actor of available){
+    if(actor.id==='human_child_base'&&!pax)continue;
+    insertOption(actor.id,actor.name||actor.id);
+   }
+   select.value=chosen;select.disabled=!slot;
+  }
+  $('transportNPCEnabled').checked=cur.npcDisabled!==true;
+  $('transportNPCAnimate').checked=cur.npcAnimation!==false;
+  $('transportNPCPassengerRow').hidden=!pax;
+  $('transportNPCPassengerToggle').hidden=!pax;
+  $('transportNPCHasPassenger').checked=!!pax&&
+   (cur.npcPassengers?.passenger_1??(pax.enabledByDefault===true||!pax.optional));
+ }
  const vehicle=cur?.type==='vehicle';
  $('vehicleControls').hidden=!vehicle;
  if(vehicle){
@@ -2356,6 +2390,32 @@ $('facing').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.facing=$(
 $('pose').onchange=()=>{if(item()&&actorType(item().type))edit(o=>{o.pose=$('pose').value||null;});};
 $('profile').onchange=()=>{if(item()&&actorType(item().type))
  edit(o=>{o.profile=$('profile').value;o.pose=null;});};
+
+function editTransportNPC(fn){
+ const obj=item(),spec=obj?.type==='sprite'?assetByName.get(obj.asset):null;
+ if(!spec?.npcTransport?.modular)return;
+ edit(o=>{fn(o)},false);
+ rebuild(); // Mahluk seats/rigs must be reattached to the saved asset.
+}
+$('transportNPCEnabled').onchange=()=>editTransportNPC(o=>{
+ o.npcDisabled=!$('transportNPCEnabled').checked;
+});
+$('transportNPCAnimate').onchange=()=>editTransportNPC(o=>{
+ o.npcAnimation=$('transportNPCAnimate').checked;
+});
+$('transportNPCHasPassenger').onchange=()=>editTransportNPC(o=>{
+ o.npcPassengers={...o.npcPassengers,
+  passenger_1:$('transportNPCHasPassenger').checked};
+});
+for(const [id,role] of [['transportNPCDriver','driver'],
+                        ['transportNPCPassenger','passenger_1']]){
+ $(id).onchange=()=>editTransportNPC(o=>{
+  const profile=$(id).value;
+  if(!mahluk?.has(profile))return;
+  o.npcProfiles={...o.npcProfiles,[role]:profile};
+ });
+}
+
 function changeMotion(field,value,rebuildCrowd=false){
  const selected=item();if(!selected||!automaticType(selected.type))return;
  edit(o=>{o.motion={...o.motion,[field]:value};},false);
