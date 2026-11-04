@@ -90,6 +90,19 @@ function resolve(id,requested,moving){
   const actions=entry.motions;
   if(sleep()?.isSleep(requested))return {source:"unavailable",
    mode:requested,frames:1,unavailable:true,loop:false,url:null};
+  if(requested==="bathtub_bathe"){
+   // Shared AUTO bath: own horizontal LIE sprites first. Every actor with
+   // a native atlas remains usable; NEVER import the sample Male/Female body.
+   const own=["lie","sleep_seat","sit","idle","walk","move"]
+    .map(key=>actions.find(m=>m.id===key&&m.available!==false)).find(Boolean);
+   if(own){
+    const separate=!!own.sheet,url=bridge().url(own.sheet||entry.sheet);
+    if(url)return {url,mode:"bathtub_bathe",frames:6,
+     sourceFrames:Number(own.frames)||4,
+     row:separate?0:own.row||0,durations:[320,340,360,350,340,330],
+     loop:true,separate,source:"universal-bathtub-auto",objectLayer:"behind"};
+   }
+  }
   const possible=({walk:['walk','move'],
    bathtub_bathe:['lie','sleep_seat','sit'],
    bathe:['swim','bathe'],shower:['swim','bathe'],
@@ -186,7 +199,8 @@ function createRig(THREE,opt={}){
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
   // Standing equipment layers have the wrong anchors on horizontal bodies.
   // The native lie frame already includes the actor's own base clothing.
-  const overlayUrls=(spec.source==="universal-sleep"?
+  const overlayUrls=((spec.source==="universal-sleep"||
+    spec.source==="universal-bathtub-auto")?
    [null,null,null,null,null,null]:
    hygiene?.kind==="bathtub"?[null,null,null,null,null,null]:
    hygiene?.kind==="bath"?
@@ -223,7 +237,8 @@ function createRig(THREE,opt={}){
   state.loaded=templated?!!edited?.ready:!!sprite?.ready;
   state.failed=!templated&&!!sprite?.error;
   if(!state.loaded||key===previous)return;
-  const pic=sprite?.pic,sx=frame*64,sy=row*112;
+  const pic=sprite?.pic,sx=(spec.source==="universal-bathtub-auto"?
+    frame%Math.max(1,spec.sourceFrames||4):frame)*64,sy=row*112;
   if(!templated&&(sx+64>pic.naturalWidth||sy+112>pic.naturalHeight)){
    state.failed=true;state.loaded=false;return;
   }
@@ -243,6 +258,10 @@ function createRig(THREE,opt={}){
   if(hygiene?.kind!=="bath"&&overlays[4]?.ready)
    ctx.drawImage(overlays[4].pic,0,0,64,112);
   if(overlays[5]?.ready)ctx.drawImage(overlays[5].pic,0,0,64,112);
+  if(spec.source==="universal-bathtub-auto"){
+   // Foam stays on this actor's own pixels across all six loop frames.
+   body()?.drawBathFoam?.(ctx,{frame,direction:state.direction});
+  }
   if(hygiene){
    if(bareAtlas?.ready){
     if(hygiene.kind==="bath")body()?.tintBase?.(ctx,asset);
