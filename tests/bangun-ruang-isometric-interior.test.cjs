@@ -59,7 +59,7 @@ test('same iso module is loaded before both Bangun Ruang and Semesta UI',()=>{
  const editor=source('bangun-ruang/index.html');
  const semesta=source('index.html');
  for(const [html,a,b] of [
-  [editor,'./interior-isometric.js?v=action-alignment-v1','./studio-interior-ui.js?v=action-alignment-v1'],
+  [editor,'./interior-isometric.js?v=action-alignment-v1','./studio-interior-ui.js?v=action-alignment-v2'],
   [semesta,'./bangun-ruang/interior-isometric.js?v=action-alignment-v1','./bangun-ruang/semesta-interior-preview.js?v=units-v7']
  ]){
   assert.ok(html.includes(a),'missing renderer module');
