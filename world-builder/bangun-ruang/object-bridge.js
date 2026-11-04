@@ -184,6 +184,7 @@ function makeSpec(row,isBuiltIn){
  const placement=placementDimensions(row,dim,pivot,isBuiltIn);
  return Object.freeze({
  id,file:'object:'+id,label:row.name,group:category.group,source:'bangun-object',
+ description:String(row.description||'').slice(0,600),
  objectCategory:row.category,layer:category.layer,published:true,builtIn:isBuiltIn,
  collision:row.collision!==false,footprint:row.footprint.slice(),size:dim,pivot,
  width:placement.width,height:placement.height,
