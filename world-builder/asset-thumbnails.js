@@ -46,7 +46,7 @@ function vehicleUrl(id,env=g){
  // Same image and orientation as vehicleGraphic uses in the actual scene.
  // Do not memoize old previews: a live native PNG can replace a fallback
  // after the underlying placement texture finishes loading.
- try{return validUrl(env.VLSemestaArt?.vehiclePreview?.(id,'se'))||null;}catch{return null;}
+ try{return env.VLSemestaArt?.vehiclePreviewAsync?.(id,'se')||null;}catch{return null;}
 }
 function footprint(spec){
  if(!spec)return '';
