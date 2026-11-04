@@ -141,7 +141,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
    <button id="scaleWalkDoor" type="button" disabled>▶ Enter Door</button>
    <button id="scaleUse" type="button" disabled>▶ Use Selected</button>
    <button id="scaleIdle" type="button" disabled>◉ Idle</button>
-   <button id="scaleEditAction" type="button" title="Edit player action sprites in Mahluk Hidup">✎ Edit Action</button>
+   <button id="scaleEditAction" type="button" title="Adjust a character action against the selected furniture in Bangun Ruang">✥ Adjust Action</button>
   </div>
  </div>
  <div class="direction-bar"><strong>VIEW</strong>
@@ -221,6 +221,30 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <div id="actionBuildingSummary" class="interactive-note">Enable Interactive in Exterior to use a door and interior action slots.</div>
   <div class="interior-header">ACTION TRIGGERS</div>
   <div id="actionSlotList"></div>
+  <div id="actionAdjustmentEditor" class="studio-item-editor" hidden style="padding:10px;margin-top:10px;border:1px solid #8bacc5;background:#f8fbff">
+    <div class="interior-header">CHARACTER / ACTION ALIGNMENT</div>
+    <strong id="actionAdjustObject">Select an interaction object</strong>
+    <p class="muted" style="font-size:11px;margin:6px 0">Drag the character on the isometric preview, or adjust its X/Y position. This does not resize or alter the character sprite.</p>
+    <label for="actionAdjustAction">OBJECT ACTION</label><select id="actionAdjustAction"></select>
+    <div class="studio-grid" style="margin:8px 0">
+      <label>POSITION X (px)<input id="actionAdjustX" type="number" min="-120" max="120" step="1" value="0"></label>
+      <label>POSITION Y (px)<input id="actionAdjustY" type="number" min="-120" max="120" step="1" value="0"></label>
+      <label>CHARACTER FACING<select id="actionAdjustDirection"><option value="auto">Auto / Furniture</option><option value="sw">SW</option><option value="se">SE</option><option value="ne">NE</option><option value="nw">NW</option></select></label>
+      <label>CHARACTER LAYER<select id="actionAdjustLayer"><option value="behind">Behind Object / Occluded</option><option value="front">In Front of Object</option></select></label>
+    </div>
+    <div class="studio-buttonrow" style="justify-content:center">
+      <button type="button" id="actionNudgeLeft" aria-label="Move character left">←</button>
+      <button type="button" id="actionNudgeUp" aria-label="Move character up">↑</button>
+      <button type="button" id="actionNudgeDown" aria-label="Move character down">↓</button>
+      <button type="button" id="actionNudgeRight" aria-label="Move character right">→</button>
+    </div>
+    <div class="studio-buttonrow" style="margin-top:9px">
+      <button type="button" id="actionAdjustPreview" class="primary">▶ PREVIEW ACTION</button>
+      <button type="button" id="actionAdjustSave" class="primary">💾 SAVE ADJUSTMENT</button>
+      <button type="button" id="actionAdjustReset">RESET</button>
+    </div>
+    <p id="actionAdjustStatus" class="muted" role="status" style="font-size:11px;margin:8px 0">Select an item to adjust its character interaction.</p>
+  </div>
   <p class="note">Mahluk Hidup sprite poses are previews only. WC uses the canonical toilet/sit pose; bed sleep; chair sit; shower bathe/swim; work desk work/sit_type. Buy, wash and cook hooks are saved as metadata if no dedicated rig exists.</p>
  </section>
  <section id="metadataPane" class="studio-section" role="tabpanel" hidden>
@@ -286,7 +310,8 @@ window.openBangunPixelCreator=async function(event){
 </script>
 <script src="../pipeline-catalog.js?v=bangun-ruang-v2"></script>
 <script src="../semesta-building-spec.js?v=bangun-ruang-v2"></script>
-<script src="./interior-model.js?v=rotate-v12"></script>
+<script src="./action-adjustment.js?v=action-placement-v1"></script>
+<script src="./interior-model.js?v=adjustment-v1"></script>
 <script src="./interior-pixel-art.js?v=interior-v3"></script>
 <script src="./game-proportions.js?v=source-v9"></script>
 <script src="./interior-isometric.js?v=furniture-v10"></script>
@@ -298,9 +323,9 @@ window.openBangunPixelCreator=async function(event){
  <script src="/virtual-life-asset-pipeline/action-template-bridge.js?v=semesta-templates-v2"></script>
  <script src="/virtual-life-asset-pipeline/action-appearance-bridge.js?v=pose-expression-v2"></script>
 <script src="../pipeline-character-rig.js?v=scale-v5&amp;pose-expression-v1"></script>
-<script src="./character-scale-preview.js?v=chair-bed-v2"></script>
+<script src="./character-scale-preview.js?v=action-alignment-v1"></script>
 <script src="./preview-scale.js?v=door-v8"></script>
-<script src="./studio-interior-ui.js?v=rotate-v12"></script>
+<script src="./studio-interior-ui.js?v=action-alignment-v1"></script>
 <script>
 (function(){
 'use strict';
@@ -743,7 +768,7 @@ $('helpBtn').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
 preset(defaultBase);
 interiorUi=window.VLStudioInteriors?.init({getConfig:config,
- status,exportAsset,showExterior:on=>exteriorGuides?.setVisible(on),
+ status,exportAsset,saveAsset,getScaleController:()=>scaleController,showExterior:on=>exteriorGuides?.setVisible(on),
  onFloorClick:(c,r,hit)=>scaleController?.placeAt(c,r,'interior')||false});
 interiorUi?.reset();
 scaleController=window.VLCharacterScale?.mount({
