@@ -66,7 +66,7 @@ test('Semesta also normalizes old interior floors without rewriting map data',()
  const studio=read('bangun-ruang/index.html');
  // These files deliberately receive new cache-bust versions on deployment.
  // Assert the actual loaded modules, not obsolete query parameters.
- const scripts=[...studio.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)]
+ const scripts=[...studio.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
   .map(match=>match[1].split('?')[0]);
  for(const module of ['interior-model.js','interior-isometric.js','character-scale-preview.js'])
   assert.ok(scripts.includes('./'+module),'missing shared interior module: '+module);
