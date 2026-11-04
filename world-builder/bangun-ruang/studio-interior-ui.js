@@ -4,7 +4,7 @@
 (function(g){
 'use strict';
 const $=id=>document.getElementById(id);
-const model=g.VLBuildingInterior,adjust=g.VLInteractionAdjust,gizmo=g.VLActionGizmo;
+const model=g.VLBuildingInterior,adjust=g.VLInteractionAdjust,gizmo=g.VLActionGizmo,actScenes=g.VLActionScenes;
 if(!model)return;
 const copy=model.clone;
 const names={exterior:['tabExterior','exteriorPane'],interior:['tabInterior','interiorPane'],
@@ -444,6 +444,30 @@ function init(api){
   }
   if(!any){const msg=document.createElement('p');msg.className='interior-empty';msg.textContent='No action spots. Place WC, bed, chair or other props in Interior.';list.append(msg);}
   showAdjustment();
+  renderActScenes();
+ }
+ function renderActScenes(){
+  const select=$("actScenePreset"),caption=$("actSceneSummary");
+  if(!select||!caption)return;
+  const item=adjustmentItem(),list=actScenes?.list?.()||[];
+  select.replaceChildren();
+  const empty=document.createElement("option");empty.value="";
+  empty.textContent=item?"SELECT SAVED ACT":"SELECT AN INTERACTIVE OBJECT";
+  select.append(empty);
+  for(const preset of list){
+   const option=document.createElement("option");option.value=preset.id;
+   option.textContent=preset.name+" · "+preset.participants.length+" CHAR · "+
+    preset.trigger.toUpperCase();
+   select.append(option);
+  }
+  const current=item?actScenes?.readBindings?.()[item.assetId+"::"+item.actionId]:null;
+  if(current&&list.some(p=>p.id===current))select.value=current;
+  $("actSceneBind").disabled=!item||!list.length;
+  $("actSceneUnbind").disabled=!item||!current;
+  caption.textContent=!item?"SELECT A WC, CHAIR, BED OR ACTION OBJECT FIRST":
+   current?"LINKED: "+(list.find(p=>p.id===current)?.name||"MISSING PRESET")+
+     " / "+item.assetId+"."+item.actionId:
+    "NO ACT BINDING FOR "+item.assetId+"."+item.actionId;
  }
  function adjustmentItem(){return enabled?scene().items.find(item=>item.id===selected)||null:null;}
  function adjustmentId(item){return item?floor+':'+item.id+':'+item.actionId:'';}
@@ -585,7 +609,10 @@ function init(api){
   const floors=[],slots=[];
   for(let n=1;n<=numFloors();n++){
    const s=normalizeScene(n);floors.push(copy(s));
-   for(const item of model.slots(s))slots.push({...item,floor:n});
+   for(const item of model.slots(s)){
+    const act=actScenes?.forPlacement?.(item.assetId,item.interaction);
+    slots.push({...item,floor:n,...(act?{actSceneId:act.id}: {})});
+   }
   }
   return {interactive:true,enterable:true,
    entrance:{facing:c.front,groundFloor:1,entry:{...floors[0].entrance},exit:{...floors[0].entrance}},
@@ -785,6 +812,36 @@ function init(api){
  }
  $('actionTurnLeft').onclick=()=>stepFacing(-1);
  $('actionTurnRight').onclick=()=>stepFacing(1);
+ $("actSceneBind").onclick=()=>{
+  const item=adjustmentItem(),id=$("actScenePreset").value;
+  if(!item||!id||!actScenes?.bind){
+   onStatus("SELECT AN INTERACTIVE OBJECT AND SAVED ACT");return;
+  }
+  if(!actScenes.bind(item.assetId,item.actionId,id)){
+   onStatus("ACT LINK FAILED / BROWSER STORAGE");return;
+  }
+  renderActScenes();
+  onStatus("✓ MULTI-CHARACTER ACT LINKED TO "+item.assetId+" / "+item.actionId);
+ };
+ $("actSceneUnbind").onclick=()=>{
+  const item=adjustmentItem();if(!item)return;
+  actScenes?.unbind?.(item.assetId,item.actionId);
+  renderActScenes();onStatus("ACT PRESET UNLINKED");
+ };
+ $("actSceneEdit").onclick=()=>{
+  const id=$("actScenePreset").value;
+  const url=new URL("/virtual-life-asset-pipeline/",location.origin);
+  if(id)url.searchParams.set("scene",id);
+  const item=adjustmentItem();
+  if(item)url.searchParams.set("action",item.actionId);
+  url.hash="actions";
+  g.open(url.href,"_blank","noopener");
+ };
+ g.addEventListener("storage",event=>{
+  if(["virtual-life-action-scenes-v1","virtual-life-action-scene-placements-v1"]
+    .includes(event.key))renderActScenes();
+ });
+ g.addEventListener("focus",()=>renderActScenes());
  $('actionAdjustAction').onchange=()=>{
   const item=adjustmentItem();if(!item)return;
   if(!model.action(scene(),item.id,$('actionAdjustAction').value))return;
