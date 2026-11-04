@@ -850,7 +850,7 @@ function makeSprite(root,item){
   root.add(plane);billboardSprites.push({root,plane});
  }
 }
-const rigs=new Map(),automatedAgents=new Map();
+const rigs=new Map(),automatedAgents=new Map(),transportRiders=new Map();
 function resetAutoRoute(agent,obj){
  const mode=obj.type==='vehicle'?'vehicle':'pedestrian';
  agent.settings=traffic.config(obj);
@@ -1397,7 +1397,13 @@ function instantiate(o){
   case 'lamp':makePixelProp(root,'lamp',o);break;
   case 'tree':makePixelProp(root,'tree',o);break;
   case 'box':makePixelProp(root,'box',o);break;
-  case 'sprite':makeSprite(root,o);break;
+  case 'sprite':{
+   makeSprite(root,o);
+   const vehicleSpec=assetByName.get(o.asset);
+   const riderSet=window.VLSemestaTransportNPC?.create?.(THREE,root,vehicleSpec,o);
+   if(riderSet)transportRiders.set(o.id,riderSet);
+   break;
+  }
   case 'avatar':case 'npc':makeAvatar(root,o);break;
   case 'vehicle':case 'pedestrian':case 'crowd':case 'quest_npc':makeAutomated(root,o);break;
   case 'marker':makeMarker(root,o);root.visible=markerShown;break;
@@ -1418,6 +1424,8 @@ function clearAll(){
   for(const part of agent.parts)part.rig.dispose();
  }
  automatedAgents.clear();
+ for(const riders of transportRiders.values())riders.dispose();
+ transportRiders.clear();
  bigOccluders.clear();
  for(const {rig} of rigs.values())rig.dispose();
  rigs.clear();billboardSprites.length=0;
@@ -3330,6 +3338,7 @@ function frame(now){
   }
  }
  updateAutomated(dt);
+ for(const riders of transportRiders.values())riders.step(dt,camera);
  if(activeAssetAimId&&!cameraFollowId){
   const target=activeAssetCamera?.target(documentMap.objects,owners,activeAssetAimId);
   if(!target)cancelActiveAssetAim();
