@@ -244,9 +244,29 @@ try{
   documentMap=clone(defaultSeed);
  }
 }catch(error){console.warn('Could not seed Reference City; original map remains',error);}
+// Upgrade the built-in template immediately, without touching authored city data.
 try{
- const saved=JSON.parse(localStorage.getItem(STORE)||'null');
- if(saved&&saved.format===seed.format&&Array.isArray(saved.objects))documentMap=sanitize(saved);
+ const starter=window.VLKebonSirihStyle?.upgrade(defaultSeed,assetCatalog);
+ if(starter?.map){defaultSeed=sanitize(starter.map);documentMap=clone(defaultSeed);}
+}catch(error){console.warn('Kebon Sirih starter upgrade',error);}
+// Existing working drafts keep their coordinates, IDs and custom sprites.
+// Only recognizable proxy objects are migrated; preserve their old draft.
+try{
+ const previousRaw=localStorage.getItem(STORE),saved=JSON.parse(previousRaw||'null');
+ if(saved&&saved.format===seed.format&&Array.isArray(saved.objects)){
+  const upgrade=window.VLKebonSirihStyle?.upgrade(saved,assetCatalog);
+  if(upgrade?.changed&&previousRaw){
+   try{
+    const backupKey=STORE+'-backup-pre-kebon-sirih';
+    if(!localStorage.getItem(backupKey))localStorage.setItem(backupKey,previousRaw);
+   }catch(error){console.warn('Cannot retain old working draft backup',error);}
+  }
+  documentMap=sanitize(upgrade?.map||saved);
+  if(upgrade?.changed){
+   try{localStorage.setItem(STORE,JSON.stringify(documentMap));}
+   catch(error){console.warn('Could not auto-save upgraded draft',error);}
+  }
+ }
 }catch(e){console.warn('World Builder previous draft',e);}
 documentMap.map.unbounded=true;
 documentMap.map.terrain=terrain.normalize(documentMap.map.terrain||terrain.seeded(documentMap.map.worldBounds,documentMap.map.road),null);
@@ -2918,7 +2938,7 @@ function loadReferencePreset(){
  try{
   const reference=window.VLReferenceCity.create(defaultSeed,assetByName,style,schema);
   if(cameraFollowId)leaveCharacterCamera(false);
-  undoPoint();documentMap=sanitize(reference);restoreCityClock();selectedId=null;
+  undoPoint();documentMap=sanitize(window.VLKebonSirihStyle?.upgrade(reference,assetCatalog).map||reference);restoreCityClock();selectedId=null;
   activeDraftId=null;draftDirty=true;
   try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
   closeMobileSheets();setMode('select');
@@ -2974,7 +2994,7 @@ function makeCityExample(){
   obj.replaceable=true;
   if(!style.reason(obj,city.objects,city.map,assetByName))city.objects.push(obj);
  }
- return sanitize(city);
+ return sanitize(window.VLKebonSirihStyle?.upgrade(city,assetCatalog).map||city);
 }
 $('newCity').onclick=()=>{
  if(!confirm('Start City Sample? Map draft saat ini akan diganti. Gunakan Save City untuk menyimpan layout lama.'))return;
