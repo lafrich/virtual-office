@@ -162,6 +162,8 @@ vm.runInContext(loadFile('mahluk-hidup-bridge.js'),context,
  const builder=loadFile('builder.js');
  assert.match(builder,/UNIVERSAL \/ BED SLEEP/);
  assert.match(builder,/sleep_bed_right','sleep_bed_left/);
+ assert.match(builder,/sleep_bed_left','bathe','bathtub_bathe','toilet'/,
+  'Semesta must preserve bathtub_bathe action after load/save');
  const htmlSource=loadFile('index.html');
  assert.ok(htmlSource.includes('universal-sleep.js'));
  assert.ok(htmlSource.indexOf('universal-sleep.js')<
