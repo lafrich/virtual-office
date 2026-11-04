@@ -169,9 +169,11 @@ function createRig(THREE,opt={}){
   const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
   // Standing equipment layers have the wrong anchors on horizontal bodies.
   // The native lie frame already includes the actor's own base clothing.
-  const overlayUrls=(spec.source==="universal-sleep"||hygiene?.kind==="bath"?
-   [null,null,null,null,null]:
-   ['bag','shoes','pants','shirt','helmet'].map(layer));
+  const overlayUrls=(spec.source==="universal-sleep"?
+   [null,null,null,null,null,null]:
+   hygiene?.kind==="bath"?
+   [null,null,null,null,layer('hair'),null]:
+   ['bag','shoes','pants','shirt','hair','helmet'].map(layer));
   const overlays=overlayUrls.map(url=>image(url));
   // Edited canonical activities follow the exact gameplay pose ID when
   // available; legacy furniture aliases preserve old WC/shower/sleep edits.
@@ -198,7 +200,7 @@ function createRig(THREE,opt={}){
   const editTag=editURL||'';
   const key=[who,spec.url,spec.mode,row,frame,hygiene?.sheet,bareAtlas?.ready,...overlayUrls.map(x=>x?.length||0),
    status,editTag,edited?.ready,facePath,faceImage?.ready,
-   state.expression,state.rotation].join(':');
+   state.expression,state.rotation,asset?.skinTone||'base'].join(':');
   const templated=spec.source==='template';
   state.loaded=templated?!!edited?.ready:!!sprite?.ready;
   state.failed=!templated&&!!sprite?.error;
@@ -215,6 +217,7 @@ function createRig(THREE,opt={}){
   if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
   else if(!templated)ctx.drawImage(pic,sx,sy,64,112,
     0,sleepPose?sleep().breathing(frame):0,64,112);
+  if(asset&&hygiene?.kind!=="bath")body()?.tintBase?.(ctx,asset);
   for(let i=1;i<4;i++)if(overlays[i]?.ready)
    ctx.drawImage(overlays[i].pic,0,0,64,112);
   if(rearView&&overlays[0]?.ready){
@@ -226,11 +229,17 @@ function createRig(THREE,opt={}){
   // Do not turn full-body legacy expression sheets into body replacements.
   if(face&&appearance())appearance().drawExpression(ctx,face,state.direction,frame,
    path=>image(bridge()?.url(path)));
-  if(overlays[4]?.ready)ctx.drawImage(overlays[4].pic,0,0,64,112);
+  if(hygiene?.kind!=="bath"&&overlays[4]?.ready)
+   ctx.drawImage(overlays[4].pic,0,0,64,112);
+  if(overlays[5]?.ready)ctx.drawImage(overlays[5].pic,0,0,64,112);
   if(hygiene){
    if(bareAtlas?.ready){
+    if(hygiene.kind==="bath")body()?.tintBase?.(ctx,asset);
     body().apply(ctx,{actor:asset,action:hygiene.actionId,
      direction:state.direction,frame,bodyImage:bareAtlas.pic});
+    // Bath removes garments, not separately authored hair on the head.
+    if(hygiene.kind==="bath"&&overlays[4]?.ready)
+     ctx.drawImage(overlays[4].pic,0,0,64,112);
    }else{
     // Never show an accidentally clothed body while bath sprites load.
     ctx.clearRect(0,53,64,59);state.loaded=false;
