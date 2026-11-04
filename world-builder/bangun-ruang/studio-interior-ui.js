@@ -496,6 +496,11 @@ function init(api){
   }
  };
  $('actionAdjustReset').onclick=()=>changeAdjustment({x:0,y:0,direction:'auto',layer:'behind'});
+ $('actionAdjustExit').onclick=()=>{
+  api.getScaleController?.()?.endAdjustment?.();
+  adjustmentKey='';adjustmentDraft=null;showAdjustment();
+  onStatus('Action adjustment closed; changes not saved');
+ };
  $('updateInteriorItem').onclick=()=>{
   const s=scene(),item=s.items.find(x=>x.id===selected);if(!item)return;
   const moved=model.move(s,item.id,Number($('interiorItemC').value),Number($('interiorItemR').value),Number($('interiorItemFacing').value));
