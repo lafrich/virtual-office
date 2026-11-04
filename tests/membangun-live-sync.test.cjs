@@ -59,7 +59,7 @@ test('Semesta refreshes building assets and instance metadata without replacing 
  assert.match(s,/function refreshBangunRuang\(/);
  assert.match(s,/e\.key===window\.VLBuildingBridge\?\.key/);
  assert.match(s,/assetByName\.clear\(\)/);
- assert.match(s,/renderAssetList\(\);saved\(\)/);
+ assert.match(s,/renderAssetList\(\);(?:assetLibrary\?\.refresh\(\);)?saved\(\)/);
  assert.match(s,/const fields=\['width','height','collision'/);
  assert.ok(!s.includes('window.location.reload()'));
 });
