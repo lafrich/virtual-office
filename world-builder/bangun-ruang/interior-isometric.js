@@ -155,6 +155,13 @@ function actionAnchor(item,opts={}){
    // Feet toward the duvet, head toward the pillow/headboard.
    // Lift the sprite foot pivot onto the 21px-high mattress.
    seat=[TYPES.bed.w/2,TYPES.bed.d*.69];z=21;break;
+  case 'shower':
+   // Stand under the fixture, not at the doorway.
+   seat=[.5,.56];break;
+  case 'bathtub':
+   // Reuse the bath body override and the tub's centre; the near rim
+   // occludes lower-body detail in both the editor and Semesta.
+   seat=[TYPES.bathtub.w/2,.50];z=6;break;
   default:
    if(!opts.generic)return null;
    seat=[TYPES[item.assetId].w/2,TYPES[item.assetId].d/2];break;
