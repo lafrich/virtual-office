@@ -30,7 +30,7 @@ test('Warteg-only authentic pixel details do not affect other interiors',()=>{
  assert.match(source,/scene\?\.theme==='warteg'/);
  assert.match(source,/VLWartegInteriorArt\.walls/);
  assert.match(source,/VLWartegInteriorArt\.fixture/);
- for(const feature of ['clock','fan','case','counter','fridge','stove','cashier','sofa']){
+ for(const feature of ['clock','fan','tray','counter','fridge','stove','cashier','sofa']){
   assert.match(art,new RegExp(feature),'detail '+feature);
  }
  assert.match(art,/version:2/);
