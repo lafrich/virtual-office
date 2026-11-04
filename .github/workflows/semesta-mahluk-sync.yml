@@ -24,6 +24,7 @@ on:
       - "tests/semesta-tree-replacement.test.cjs"
       - "tests/semesta-placeholder-replacement.test.cjs"
       - "tests/semesta-kebon-sirih-style.test.cjs"
+      - "tests/semesta-pipeline-grounding.test.cjs"
       - "tests/semesta-active-asset-camera.test.cjs"
       - "tests/semesta-simple-effects.test.cjs"
       - "tests/semesta-daynight.test.cjs"
@@ -51,6 +52,7 @@ on:
       - "tests/semesta-tree-replacement.test.cjs"
       - "tests/semesta-placeholder-replacement.test.cjs"
       - "tests/semesta-kebon-sirih-style.test.cjs"
+      - "tests/semesta-pipeline-grounding.test.cjs"
       - "tests/semesta-active-asset-camera.test.cjs"
       - "tests/semesta-simple-effects.test.cjs"
       - "tests/semesta-daynight.test.cjs"
@@ -75,6 +77,7 @@ jobs:
           node --check world-builder/tree-replacement.js
           node --check world-builder/placeholder-replacement.js
           node --check world-builder/kebon-sirih-style.js
+          node --check world-builder/semesta-pipeline-ground.js
           node --check world-builder/bangun-ruang/object-bridge.js
           node --check world-builder/bangun-ruang/pixel-object-creator.js
           node --check world-builder/map-schema.js
@@ -131,7 +134,7 @@ jobs:
           node tests/semesta-vehicle-visuals.test.cjs
           node tests/semesta-vehicle-flip.test.cjs
           node tests/semesta-pan-tool.test.cjs
-          node --test tests/semesta-tree-replacement.test.cjs tests/semesta-placeholder-replacement.test.cjs tests/semesta-kebon-sirih-style.test.cjs
+          node --test tests/semesta-tree-replacement.test.cjs tests/semesta-placeholder-replacement.test.cjs tests/semesta-kebon-sirih-style.test.cjs tests/semesta-pipeline-grounding.test.cjs
           node tests/semesta-active-asset-camera.test.cjs
           node tests/semesta-simple-effects.test.cjs
           node tests/semesta-daynight.test.cjs
