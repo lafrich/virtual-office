@@ -54,7 +54,7 @@ function init(api){
  function drawObjectGizmo(){
   if(!objectGizmoActive||placing||!selected||!gizmo||preview!=='interior')return;
   const item=scene().items.find(x=>x.id===selected),p=objectOrigin(item);
-  if(p)gizmo.drawObject(ctx,p,{isometric:interiorView==='iso',hot:objectDrag?.handle||'',flipX:item?.flipX===true,flipY:item?.flipY===true});
+  if(p)gizmo.drawObject(ctx,p,{hot:objectDrag?.handle||'',flipX:item?.flipX===true,flipY:item?.flipY===true});
  }
  function pointOnCanvas(e){
   const b=canvas.getBoundingClientRect();
@@ -66,7 +66,7 @@ function init(api){
   const p=pointOnCanvas(e),item=scene().items.find(x=>x.id===selected);
   const center=objectOrigin(item);
   if(!p||!center)return false;
-  const handle=gizmo.hitObject(center,p,interiorView==='iso');
+  const handle=gizmo.hitObject(center,p);
   if(!handle)return false;
   if(handle==='flipX'||handle==='flipY'){
    const before=snapshot();
@@ -89,9 +89,11 @@ function init(api){
   let c=d.base.c,r=d.base.r;
   if(interiorView==='iso'){
    if(d.handle==='x'){
-    c+=gizmo.objectAxisSteps(dx,dy,'x');
+    // Horizontal screen axis corresponds to +C/-R on an isometric map.
+    const n=Math.round(dx/64);c+=n;r-=n;
    }else if(d.handle==='y'){
-    r+=gizmo.objectAxisSteps(dx,dy,'y');
+    // Vertical screen axis corresponds to +C/+R.
+    const n=Math.round(dy/32);c+=n;r+=n;
    }else{
     c+=Math.round((dx/32+dy/16)/2);
     r+=Math.round((dy/16-dx/32)/2);
@@ -212,10 +214,31 @@ function init(api){
   bar.hidden=!item;
   $('toolRotateLeft').disabled=!item;
   $('toolRotateRight').disabled=!item;
+  for(const id of ['moveSelectedLeft','moveSelectedRight','moveSelectedUp','moveSelectedDown'])
+   $(id).disabled=!item;
   if(!item)return;
   const facing=['↙ SW','↘ SE','↗ NE','↖ NW'][((item.rotation||0)/90)%4];
   $('rotateSelection').textContent=(model.types[item.assetId]?.glyph||'□')+' '+item.name;
   $('rotateHint').textContent=facing+' · '+(item.rotation||0)+'° · R shortcut';
+ }
+ // One-tile nudges move the selected fixture on the existing room grid.
+ // Screen arrows use visual directions in the iso preview.
+ function nudgeSelected(direction){
+  if(!enabled||preview!=='interior'||placing||!selected)return false;
+  const current=scene(),item=current.items.find(x=>x.id===selected);
+  if(!item)return false;
+  const offsets=interiorView==='iso'?
+   {left:[-1,1],right:[1,-1],up:[-1,-1],down:[1,1]}:
+   {left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]};
+  const delta=offsets[direction];if(!delta)return false;
+  const before=snapshot();
+  if(!model.move(current,item.id,item.c+delta[0],item.r+delta[1])){
+   onStatus('Cannot move '+item.name+' there · blocked or outside room');
+   return false;
+  }
+  recordUndo(before);renderObjects();renderActions();draw();updateRotateBar();
+  onStatus('Moved '+item.name+' · Save Asset to keep changes');
+  return true;
  }
  function rotateSelected(steps){
   if(!enabled||preview!=='interior'||placing||!selected)return false;
@@ -672,6 +695,10 @@ function init(api){
  $('quickCancel').onclick=()=>{placing=null;draw();updateTray();updateRotateBar();};
  $('rotateLeft').onclick=()=>rotateSelected(-1);
  $('rotateRight').onclick=()=>rotateSelected(1);
+ for(const direction of ['left','right','up','down']){
+  const id='moveSelected'+direction[0].toUpperCase()+direction.slice(1);
+  $(id).onclick=()=>nudgeSelected(direction);
+ }
  $('toolExterior').onclick=()=>selectTab('exterior');
  $('toolInterior').onclick=()=>selectTab('interior');
  $('toolIso').onclick=()=>{selectTab('interior');setInteriorView('iso');};
