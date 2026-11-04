@@ -31,6 +31,7 @@ const style=window.VLWorldStyle;
 const terrain=window.VLMapTerrain;
 const physics=window.VLWorldPhysics;
 const studioSprites=window.VLSemestaStudioSprite;
+const vegetationGround=window.VLSemestaVegetationGround;
 const traffic=window.VLSemestaTraffic;
 const trafficFlow=window.VLSemestaTrafficFlow;
 const trafficCatalog=window.VLSemestaCatalog;
@@ -3173,6 +3174,19 @@ function frame(now){
      plane.scale.y=realH/plane.userData.authorHeight;
      plane.position.y=realH*((plane.userData.pivotY??.8)-.5);
      plane.position.x=realW*(plane.userData.pivotX||0);
+     // For 22 published tree species the authored pipeline pivot is under
+     // the trunk, but the grass skirt may extend below it in 2:1 space.
+     // Seat the lowest OPAQUE root/skirt pixels on the terrain automatically
+     // (while retaining the normal WebGL depth test and character occlusion).
+     if(vegetationGround?.isTree(spec)){
+      const contact=vegetationGround.anchor(spec,img,realH);
+      if(contact){
+       plane.position.y=contact.y;
+       plane.userData.autoGround=true;
+       plane.userData.nativeContactRatio=contact.ratio;
+       plane.userData.nativeContactSource=contact.source;
+      }
+     }
      plane.userData.aspectFixed=true;
    }
    const yaw=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z);
