@@ -127,7 +127,11 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
  let drawn=false;
  if(sprite?.ready&&resolved){
   const direct=DIR.indexOf(actor.direction);
-  const row=(resolved.row||0)+(direct<0?1:direct);
+  const effectiveDir=resolved.source==='universal-sleep'?
+    (g.VLUniversalSleep?.directionFor(resolved.mode,actor.direction)||actor.direction):
+    actor.direction;
+   const nativeDir=DIR.indexOf(effectiveDir);
+   const row=(resolved.row||0)+(nativeDir<0?1:nativeDir);
   // Original game sheetCell() loops its four seated frames at 3 FPS.
   // The SW direction is what makes the knees visibly bent.
   const frame=rig.frameAt(resolved,time);
@@ -141,7 +145,8 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
      edits?.get(actor.profile,id,actor.direction,frame))).find(Boolean)||null;
    const patched=matched?image(matched):null;
    const worn=bridge?.equipmentFor(storageActor)||{};
-   const urls=['bag','shoes','pants','shirt','helmet'].map(k=>worn[k]?.frames?.[actor.direction]||null);
+   const urls=(resolved.source==='universal-sleep'?[null,null,null,null,null]:
+     ['bag','shoes','pants','shirt','helmet'].map(k=>worn[k]?.frames?.[actor.direction]||null));
    const layers=urls.map(image);
    const drawPart=entry=>{
     if(entry?.ready&&entry.pic.naturalWidth>=FRAME.w&&entry.pic.naturalHeight>=FRAME.h)
