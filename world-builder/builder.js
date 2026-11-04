@@ -586,7 +586,7 @@ function pixelDepthTexture(name,dir='sw'){
  if(spec?.source!=='pipeline-street'||!data?.file)return null;
  const key=name+'|'+dir;
  if(!spriteDepthTexture.has(key)){
-  const path=data.file.replace(/\\.png$/,'__depth.png');
+  const path=data.file.slice(0,-4)+'__depth.png';
   const src='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+path;
   const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,
    ()=>console.warn('Missing native pixel depth',name,dir,src));
