@@ -286,7 +286,11 @@ function init(api){
     const text=document.createElement('div');const label=document.createElement('strong');
     label.textContent='F'+n+' · '+item.name+' → '+(model.actions[item.actionId]?.label||item.actionId);
     const desc=document.createElement('div');desc.className='actor-action';
-    desc.textContent=item.pose?'Mahluk Hidup pose: '+item.pose:'Action hook only · no dedicated character rig';
+    const preset=item.actionAdjustments?.[item.actionId];
+    const placement=preset?adjust.normalize(preset):null;
+    desc.textContent=(item.pose?'Mahluk Hidup pose: '+item.pose:'Action hook only · no dedicated character rig')+
+      (placement?' · ✓ SAVED POSITION ('+placement.x+', '+placement.y+
+       ', '+(placement.direction==='auto'?'AUTO':placement.direction.toUpperCase())+')':' · default placement');
     const edit=document.createElement('button');edit.type='button';
     edit.textContent='✥ Adjust';
     edit.onclick=()=>{
@@ -568,14 +572,16 @@ function init(api){
   const slot=data.actionSlots.find(x=>x.floor===floor&&x.id===item.id);
   const actual=slot?.actionAdjustments?.[item.actionId];
   if(!actual||JSON.stringify(adjust.normalize(actual))!==JSON.stringify(expected)){
-   adjust.set(item,item.actionId,original,model.types[item.assetId].actions);
+   const live=adjustmentItem()||item;
+   adjust.set(live,item.actionId,original,model.types[live.assetId].actions);
    lastAdjusted=oldLast;
    onStatus('⚠ Save failed: normalized building lost the adjustment');
    return;
   }
   const saved=api.saveAsset?.();
   if(!saved){
-   adjust.set(item,item.actionId,original,model.types[item.assetId].actions);
+   const live=adjustmentItem()||item;
+   adjust.set(live,item.actionId,original,model.types[live.assetId].actions);
    lastAdjusted=oldLast;
    $('actionAdjustStatus').textContent='⚠ SAVE FAILED — storage may be full; export the building JSON as backup.';
    return;
