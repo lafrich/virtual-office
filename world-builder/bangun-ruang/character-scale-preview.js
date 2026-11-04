@@ -532,17 +532,13 @@ function mount(api){
    const handle=actor.transformSelected&&actor.transformMode!=='select'?
     GIZMO?.hit(actor.gizmoOrigin,p,actor.transformMode):null;
    if(!handle){
-    // Empty-space click deselects the transform gizmo, like a DCC viewport.
-    // Clicking the actor again selects it without moving its saved position.
-    const origin=actor.gizmoOrigin;
-    if(!actor.transformSelected&&actor.actionAnchor){
-     const foot=iso?.point(iso.bounds(api.getInterior?.()),actor.actionAnchor.c,actor.actionAnchor.r,actor.actionAnchor.z||0);
-     if(foot){const x=foot[0]+(actor.actionAnchor.pixelOffsetX||0),y=foot[1]+(actor.actionAnchor.pixelOffsetY||0);
-      if(p.x>=x-36&&p.x<=x+36&&p.y>=y-110&&p.y<=y+16){actor.transformSelected=true;actor.transformMode='move';api.onTransformModeChange?.('move');draw();e.preventDefault();return;}
-     }
+    // Furniture stays clickable through the transparent actor overlay.
+    // This enables one tap to select another action target directly.
+    if(inside()&&api.onActionCanvasTap?.(e)===true){
+     e.preventDefault();return;
     }
-    if(actor.transformSelected){actor.transformSelected=false;actor.transformMode='select';api.onTransformModeChange?.('select');draw();}
-    e.preventDefault();return;
+    actor.transformSelected=false;actor.transformMode='select';
+    draw();e.preventDefault();return;
    }
    const item=api.getSelectedProp?.();
    const native=item?iso?.actionAnchor?.(item,{raw:true,generic:true}):null;
