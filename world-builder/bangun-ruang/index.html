@@ -72,7 +72,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 .action-rotate-controls span{font-family:monospace;font-size:11px;color:#355172}
 #characterScaleCanvas{touch-action:none}
 /* Keep the action canvas scrollable rather than clipping it at zoom > 100%. */
-#app .stage.action-adjust-viewport{overflow:auto!important;overscroll-behavior:contain}
+#app .stage.action-adjust-viewport{overflow:auto!important;overscroll-behavior:contain;touch-action:none}
 @media(max-width:640px){.action-transform-bar button{min-height:42px;flex:1}.action-transform-bar label{margin-left:0}.action-rotate-controls span{flex:1;text-align:center}}
 </style>
 <link rel="stylesheet" href="./mobile-ui.css?v=xp-unified-v12">
@@ -235,20 +235,11 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
   <div id="actionAdjustmentEditor" class="studio-item-editor" hidden style="padding:10px;margin-top:10px;border:1px solid #8bacc5;background:#f8fbff">
     <div class="interior-header">CHARACTER / ACTION ALIGNMENT</div>
     <strong id="actionAdjustObject">Select an interaction object</strong>
-    <p class="muted" style="font-size:11px;margin:6px 0">Select an actor, then use Move / Rotate. Click empty canvas to deselect; zoom with + / − or Ctrl + mouse wheel. Drag red X, green Y, center, or the rotation ring. Rotate snaps to the four original sprite directions, without deforming pixels.</p>
-    <div class="action-transform-bar" role="group" aria-label="Character transformation">
-      <button id="actionModeSelect" type="button" aria-pressed="false" title="Select / deselect — Esc shortcut">⌖ SELECT</button>
-      <button id="actionModeMove" type="button" class="active" aria-pressed="true" title="Move character — E shortcut">↔ MOVE</button>
-      <button id="actionModeRotate" type="button" aria-pressed="false" title="Rotate character — R shortcut">⟳ ROTATE</button>
+    <p class="muted" style="font-size:11px;margin:6px 0">Tap an object to select it; tap again to adjust. Tap another object to switch target. Drag the red X / green Y / center to move, or the ring to rotate. Pinch on the canvas with your touchpad to zoom.</p>
+    <div class="action-transform-bar" role="group" aria-label="Action grid snap">
       <label>SNAP <select id="actionTransformSnap" aria-label="Translation grid snap">
         <option value="1">1 PX</option><option value="4">4 PX</option><option value="8">8 PX</option>
       </select></label>
-    </div>
-    <div class="action-transform-bar" role="group" aria-label="Action canvas zoom">
-      <button id="actionZoomOut" type="button" title="Zoom out">−</button>
-      <span id="actionZoomValue" style="font:700 12px monospace;min-width:48px;text-align:center">100%</span>
-      <button id="actionZoomIn" type="button" title="Zoom in">＋</button>
-      <button id="actionZoomReset" type="button" title="Reset zoom">FIT / 100%</button>
     </div>
     <div class="action-transform-bar action-rotate-controls" aria-label="Actor facing shortcuts">
       <button id="actionTurnLeft" type="button" title="Rotate facing 90 degrees counter-clockwise">↶ 90°</button>
