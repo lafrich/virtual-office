@@ -588,7 +588,8 @@ function pixelDepthTexture(name,dir='sw'){
  const key=name+'|'+dir;
  if(!spriteDepthTexture.has(key)){
   const path=data.file.slice(0,-4)+'__depth.png';
-  const src='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+path;
+  const source='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+path;
+  const src=window.VLIndonesiaAssets?.cacheBust?.(spec,source)||source;
   const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,
    ()=>console.warn('Missing native pixel depth',name,dir,src));
   t.magFilter=t.minFilter=THREE.NearestFilter;
