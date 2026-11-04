@@ -54,7 +54,7 @@ function init(api){
  function drawObjectGizmo(){
   if(!objectGizmoActive||placing||!selected||!gizmo||preview!=='interior')return;
   const item=scene().items.find(x=>x.id===selected),p=objectOrigin(item);
-  if(p)gizmo.drawObject(ctx,p,{hot:objectDrag?.handle||'',flipX:item?.flipX===true,flipY:item?.flipY===true});
+  if(p)gizmo.drawObject(ctx,p,{isometric:interiorView==='iso',hot:objectDrag?.handle||'',flipX:item?.flipX===true,flipY:item?.flipY===true});
  }
  function pointOnCanvas(e){
   const b=canvas.getBoundingClientRect();
@@ -66,7 +66,7 @@ function init(api){
   const p=pointOnCanvas(e),item=scene().items.find(x=>x.id===selected);
   const center=objectOrigin(item);
   if(!p||!center)return false;
-  const handle=gizmo.hitObject(center,p);
+  const handle=gizmo.hitObject(center,p,interiorView==='iso');
   if(!handle)return false;
   if(handle==='flipX'||handle==='flipY'){
    const before=snapshot();
@@ -89,11 +89,9 @@ function init(api){
   let c=d.base.c,r=d.base.r;
   if(interiorView==='iso'){
    if(d.handle==='x'){
-    // Horizontal screen axis corresponds to +C/-R on an isometric map.
-    const n=Math.round(dx/64);c+=n;r-=n;
+    c+=gizmo.objectAxisSteps(dx,dy,'x');
    }else if(d.handle==='y'){
-    // Vertical screen axis corresponds to +C/+R.
-    const n=Math.round(dy/32);c+=n;r+=n;
+    r+=gizmo.objectAxisSteps(dx,dy,'y');
    }else{
     c+=Math.round((dx/32+dy/16)/2);
     r+=Math.round((dy/16-dx/32)/2);
