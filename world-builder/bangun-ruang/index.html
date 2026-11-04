@@ -614,6 +614,8 @@ function buildAsset(){
  return {id,name:c.name,config:c,views,editedViews:{...manualOverrides},
   semestaBase:c.baseId,semestaNativeSize:base?.variants||null,
   baseHeight:base?.height||null,format:'virtual-life-building-asset-v1',
+  // Preserve specialized Warteg 3D mesh metadata when editing an existing city instance.
+  assetPipeline:current?.assetPipeline||null,
   projection:{type:'iso-2:1',tilePixels:[64,32],groundCoordinates:'c/r',directions:dirs},
   footprint:[c.w,c.d],entranceFacing:inter.interactive?c.front:null,
   blocking:c.collision,interactions:combined.slice(0,20),
