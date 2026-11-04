@@ -196,6 +196,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  </div>
  <label>SEMESTA SOURCE<input id="sourceId" readonly value="semesta:small" aria-label="Source Semesta building ID"></label>
  <label>BUILDING NAME<input id="name" maxlength="50" value="Small Building"></label>
+ <label>ASSET DESCRIPTION<textarea id="assetDescription" maxlength="600" rows="3" placeholder="Keterangan aset, fungsi dan ciri bangunan..." style="width:100%;min-height:58px;resize:vertical"></textarea></label>
  <label>BUILDING TYPE<select id="kind"><option value="rumah">Rumah</option><option value="ruko">Ruko</option><option value="warung">Warung</option><option value="kost">Kost</option><option value="kantor">Kantor</option></select></label>
  <div class="dual"><label>WIDTH / C<input id="w" type="number" min="2" max="24" step=".1" value="3"></label><label>DEPTH / R<input id="d" type="number" min="2" max="24" step=".1" value="3"></label></div>
  <div class="dual"><label>FLOORS<input id="floors" type="number" min="1" max="12" step="1" value="1"></label><label>WINDOWS / FLOOR<input id="windows" type="number" min="0" max="6" step="1" value="2"></label></div>
@@ -438,6 +439,7 @@ function preset(baseId=defaultBase){
   doorStyle:spec.detail==='storefront'?'glass':'wood',windowStyle:kind==='kantor'?'wide':'square',
   balcony:'no',front:'sw',actions:['warung','ruko'].includes(kind)?'enter,buy':'enter',collision:'yes'};
  current=null;manualOverrides={};manualSignature=artFingerprint(cc);
+ $('assetDescription').value='';
  apply(cc);interiorUi?.reset();status('Generated from Semesta: '+spec.label);drawLibrary();
 }
 function status(message){$('status').textContent='● '+message;}
@@ -611,7 +613,7 @@ function buildAsset(){
  const inter=interiorUi?.serialize()||{interactive:false,enterable:false,interior:null,actionSlots:[],entrance:null,interactions:[]};
  const exteriorActions=c.actions.split(',').map(x=>x.trim()).filter(Boolean).slice(0,20);
  const combined=inter.interactive?[...new Set([...exteriorActions,...inter.interactions])]:[];
- return {id,name:c.name,config:c,views,editedViews:{...manualOverrides},
+ return {id,name:c.name,description:$('assetDescription').value.trim().slice(0,600),config:c,views,editedViews:{...manualOverrides},
   semestaBase:c.baseId,semestaNativeSize:base?.variants||null,
   baseHeight:base?.height||null,format:'virtual-life-building-asset-v1',
   // Preserve specialized Warteg 3D mesh metadata when editing an existing city instance.
@@ -670,6 +672,7 @@ function openSavedAsset(asset,{resume=true}={}){
  if(!asset?.id||!asset.config||!asset.views)return false;
  current=asset;manualOverrides={...(asset.editedViews||{})};
  manualSignature=artFingerprint(asset.config);
+ $('assetDescription').value=asset.description||'';
  apply(asset.config);
  interiorUi?.load(asset);
  drawLibrary();
