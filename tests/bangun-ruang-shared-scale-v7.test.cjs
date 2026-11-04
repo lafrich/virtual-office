@@ -64,7 +64,14 @@ test('Semesta also normalizes old interior floors without rewriting map data',()
  assert.ok(code.includes('model.normalize(original,active.cfg)'));
  assert.ok(code.includes('spec?.footprint||item?.footprint'));
  const studio=read('bangun-ruang/index.html');
- assert.ok(studio.includes('interior-model.js?v=hygiene-action-v1'));
- assert.ok(studio.includes('interior-isometric.js?v=hygiene-fixture-anchor-v1'));
- assert.ok(studio.includes('character-scale-preview.js?v=hygiene-body-render-v1'));
+ // These files deliberately receive new cache-bust versions on deployment.
+ // Assert the actual loaded modules, not obsolete query parameters.
+ const scripts=[...studio.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)]
+  .map(match=>match[1].split('?')[0]);
+ for(const module of ['interior-model.js','interior-isometric.js','character-scale-preview.js'])
+  assert.ok(scripts.includes('./'+module),'missing shared interior module: '+module);
+ assert.ok(scripts.indexOf('./interior-model.js')<scripts.indexOf('./interior-isometric.js'),
+  'room model must load before isometric renderer');
+ assert.ok(scripts.indexOf('./interior-isometric.js')<scripts.indexOf('./character-scale-preview.js'),
+  'isometric renderer must load before character overlay');
 });
