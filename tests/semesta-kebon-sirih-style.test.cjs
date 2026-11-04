@@ -76,7 +76,7 @@ test('the authored reference map can be fully converted',()=>{
  const upgraded=theme.upgrade(city,catalog);
  assert.equal(upgraded.changed,eligible.length,'All authored placeholder classes have published native replacements');
  assert.equal(upgraded.skipped,0);
- assert.deepEqual(Array.from(upgraded.map.objects,x=>x.id),city.objects.map(x=>x.id));
+ assert.deepEqual(Array.from(upgraded.map.objects,x=>x.id),Array.from(city.objects,x=>x.id));
  assert.equal(upgraded.map.objects.length,city.objects.length);
 });
 test('renderer uses texture with pixel filtering, batches and retains full world geometry',()=>{
