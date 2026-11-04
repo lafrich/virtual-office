@@ -76,6 +76,24 @@ jobs:
            });
            fs.mkdirSync('screenshots',{recursive:true});
            await page.screenshot({path:'screenshots/native-depth-city.png',fullPage:false});
+           // Verify actual native art is visible in the sidebar, not just alt text.
+           await page.selectOption('#assetCategory','building');
+           await page.locator('#assetList .asset-card').first().hover();
+           await page.waitForFunction(()=>
+             [...document.querySelectorAll('#assetList .asset-card img')].some(i=>i.complete&&i.naturalWidth>0),
+             null,{timeout:30000});
+           const thumbInfo=await page.locator('#assetList').evaluate(e=>({
+             view:e.dataset.view,cards:e.querySelectorAll('button.asset-card').length,
+             loaded:[...e.querySelectorAll('img')].filter(i=>i.naturalWidth>0).length,
+             preview:document.querySelector('#assetPreviewName')?.textContent
+           }));
+           if(!thumbInfo.cards||!thumbInfo.loaded)throw Error('Native thumbnail did not load');
+           await page.screenshot({path:'screenshots/asset-thumbnails-list.png',fullPage:false});
+           await page.locator('#assetViewGrid').click();
+           if(await page.locator('#assetList').getAttribute('data-view')!=='grid')
+             throw Error('Grid switch is not functional');
+           await page.screenshot({path:'screenshots/asset-thumbnails-grid.png',fullPage:false});
+           console.log('ASSET_THUMB_STATE',JSON.stringify(thumbInfo));
            console.log('BROWSER_STATE',JSON.stringify(state));
            console.log('BROWSER_ERRORS',JSON.stringify(errors.slice(0,30)));
            const encoded=fs.readFileSync('screenshots/native-depth-city.png').toString('base64');
