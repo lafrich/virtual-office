@@ -227,9 +227,10 @@ function init(api){
   if(!enabled||preview!=='interior'||placing||!selected)return false;
   const current=scene(),item=current.items.find(x=>x.id===selected);
   if(!item)return false;
-  const offsets=interiorView==='iso'?
-   {left:[-1,1],right:[1,-1],up:[-1,-1],down:[1,1]}:
-   {left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]};
+  // Move by exactly ONE adjacent floor tile in either projection.
+  // In iso view +C slopes down-right and +R slopes down-left;
+  // changing both at once skips the middle tile on the diamond grid.
+  const offsets={left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]};
   const delta=offsets[direction];if(!delta)return false;
   const before=snapshot();
   if(!model.move(current,item.id,item.c+delta[0],item.r+delta[1])){
