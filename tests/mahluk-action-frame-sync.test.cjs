@@ -27,14 +27,14 @@ assert.ok(bangun.includes("event.key==='virtual-life-action-frame-edits-v1'"),
 assert.ok(rig.includes("sleep:['sleep','sleep_seat','lie']"),
  "Human sleep_seat fallback must not override native character sleep");
 assert.ok(preview.includes("iso?.drawSeatForeground?."),"Saved toilet/bed occlusion must remain");
-assert.ok(rig.includes("const rearView=state.direction==='ne'||state.direction==='nw'"),
- "Semesta must distinguish rear camera views for backpack layering");
-assert.ok(rig.includes('ctx.rect(0,56,64,56)'),
- "Semesta must not draw rear backpack over character head/neck");
-assert.ok(preview.includes("const rearView=actor.direction==='ne'||actor.direction==='nw'"),
- "Bangun Ruang must preserve the same back-facing bag orientation");
-assert.ok(preview.includes("paint.rect(dx,dy+56*(composite?1:scale),dw,(FRAME.h-56)*(composite?1:scale))"),
- "Bangun Ruang must mask rear backpack away from head and neck");
+assert.ok(rig.includes("if(overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112)"),
+ "Semesta must draw backpack before the original character body in EVERY view");
+assert.ok(!rig.includes("ctx.rect(0,56,64,56)"),
+ "Semesta should never promote rear backpack in front of torso or head");
+assert.ok(preview.includes("drawPart(layers[0]);"),
+ "Bangun Ruang must draw backpack as rearmost layer in every view");
+assert.ok(!preview.includes("paint.rect(dx,dy+56*(composite?1:scale),dw,(FRAME.h-56)*(composite?1:scale))"),
+ "Bangun Ruang should never put a clipped backpack over the character");
 const builder=fs.readFileSync("world-builder/builder.js","utf8");
 assert.ok(world.includes("/virtual-life-asset-pipeline/action-appearance-bridge.js"),
  "Semesta must use the same character face/presentation module as Mahluk Hidup");
