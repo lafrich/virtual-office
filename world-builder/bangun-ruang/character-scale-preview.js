@@ -169,20 +169,13 @@ function drawActor(ctx,actor,time,footX,footY,options={}){
     if(entry?.ready&&entry.pic.naturalWidth>=FRAME.w&&entry.pic.naturalHeight>=FRAME.h)
      paint.drawImage(entry.pic,0,0,FRAME.w,FRAME.h,dx,dy,dw,dh);
    };
-   const rearView=actor.direction==='ne'||actor.direction==='nw';
-   if(!rearView)drawPart(layers[0]);
+   // Backpack is backmost in every direction, including NE/NW.
+   drawPart(layers[0]);
    if(patched?.ready)
     paint.drawImage(patched.pic,0,0,FRAME.w,FRAME.h,dx,dy,dw,dh);
    else paint.drawImage(pic,sx,sy,FRAME.w,FRAME.h,dx,dy,dw,dh);
    if(composite)BODY?.tintBase?.(paint,actorProfile);
    for(let i=1;i<4;i++)drawPart(layers[i]);
-   // Back-view backpack is ON the back torso, never over the head/neck.
-   if(rearView&&layers[0]?.ready){
-    paint.save();paint.beginPath();
-    paint.rect(dx,dy+56*(composite?1:scale),dw,(FRAME.h-56)*(composite?1:scale));paint.clip();
-    drawPart(layers[0]);
-    paint.restore();
-   }
    if(bodyRule?.kind!=='bath')drawPart(layers[4]);
    drawPart(layers[5]);
    if(composite){
