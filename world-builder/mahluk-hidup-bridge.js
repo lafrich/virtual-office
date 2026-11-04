@@ -125,6 +125,9 @@ function motions(id){return get(id)?.motions||[]}
 function available(id,motion){return motions(id).find(m=>m.id===motion)||null}
 function equipmentFor(id){return equipment[id]||{}}
 function has(id){return !!get(id)}
+function actionSceneFor(fixture,action){
+ return g.VLActionScenes?.forPlacement?.(fixture,action)||null;
+}
 function questProfile(id){
  if(has(id))return id;
  if(has('legacy_'+id))return 'legacy_'+id;
