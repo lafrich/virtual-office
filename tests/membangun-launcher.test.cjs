@@ -105,3 +105,26 @@ test('Emotion Studio uses native Male Base four-view head overlay without baking
  assert.match(html,/function exportPng\(/);
  assert.ok(!html.includes('loadUniversalAssets()'),'Emotion Studio must remain independent from Mahluk 2');
 });
+
+test('Emotion Studio Google Drive auth is separate from local save and uses drive.file only',()=>{
+ const html=read('emotion-studio/index.html');
+ const js=read('emotion-studio/drive-sync.js');
+ for(const id of ['driveClientId','driveConfigure','driveConnect','driveRefresh','driveSave','driveFolder','save','deleteLocal'])
+  assert.ok(html.includes('id="'+id+'"'),'Missing Drive/local control '+id);
+ assert.ok(html.includes('src="./drive-sync.js?v=1"'));
+ assert.ok(html.includes('https://accounts.google.com/gsi/client'));
+ assert.ok(html.includes('await D.connect()'));
+ assert.ok(html.includes('await D.loadAll('));
+ assert.ok(html.includes('await D.save(entry,'));
+ assert.ok(html.includes('await persistSaved(entry)'));
+ assert.ok(js.includes('https://www.googleapis.com/auth/drive.file'));
+ assert.ok(!js.includes('https://www.googleapis.com/auth/drive"'));
+ assert.ok(js.includes('async function save(entry,opts={})'));
+ assert.ok(js.includes('async function loadAll(onProgress)'));
+ assert.ok(js.includes('async function ensureLibrary()'));
+ assert.ok(js.includes('delete clean.template'));
+ assert.ok(js.includes('https://www.googleapis.com/upload/drive/v3/files'));
+ assert.ok(!html.includes('id="token"'),'Do not ask for GitHub token');
+ assert.ok(!js.includes('localStorage.setItem(CLIENT_KEY,token)'),'OAuth access tokens must never persist');
+ assert.doesNotThrow(()=>new (require('node:vm').Script)(js));
+});
