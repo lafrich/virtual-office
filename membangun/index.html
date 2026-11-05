@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="id">
 <head>
-<script src="/virtual-life-asset-pipeline/character-reference-reset.js?v=await-new-rig-v1"></script>
+<script src="/virtual-life-asset-pipeline/character-reference-reset.js?v=mahluk2-approval-v1"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073a9d">
@@ -176,11 +176,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <div class="desktop">
 <main class="window" aria-label="Membangun Launcher">
 <header class="titlebar"><div class="window-icon" aria-hidden="true">✳</div><div class="window-title"><strong>MEMBANGUN</strong><span> .EXE — Launcher</span></div><div class="window-controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
-<nav class="menubar" aria-label="Menu"><button id="fileMenu"><u>F</u>ile</button><button id="viewMenu"><u>V</u>iew</button><button id="helpMenu"><u>H</u>elp</button><span class="version">V1.1 / 04 PROGRAMS</span></nav>
+<nav class="menubar" aria-label="Menu"><button id="fileMenu"><u>F</u>ile</button><button id="viewMenu"><u>V</u>iew</button><button id="helpMenu"><u>H</u>elp</button><span class="version">V1.2 / 05 PROGRAMS</span></nav>
 <section class="workspace">
 <aside class="file-panel">
-<div class="panel-heading"><strong>FILES</strong><small>04</small></div>
+<div class="panel-heading"><strong>FILES</strong><small>05</small></div>
 <div class="file-list" role="group" aria-label="Pilih aplikasi">
+<button class="file" data-app="mahluk2" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP 2.0.EXE</span><span class="file-kind">2.5D / PLANE STUDIO</span></span></button>
 <button class="file active" data-app="mahluk" aria-pressed="true"><span class="file-thumb"><canvas class="mahluk-sprite" width="64" height="112" aria-hidden="true" hidden></canvas><img class="mahluk-static" src="https://lafrich.github.io/virtual-life-asset-pipeline/media/ichsan-thumb.png" alt="" loading="eager" decoding="async"><svg class="mahluk-fallback" aria-hidden="true" hidden><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP.EXE</span><span class="file-kind">CHARACTER STUDIO</span></span></button>
 <button class="file" data-app="bangun" aria-pressed="false"><span class="file-thumb"><img class="warteg-thumb" alt="Warteg Kharisma Bahari" hidden></span><span class="file-txt"><span class="file-name">BANGUN RUANG.EXE</span><span class="file-kind">BUILDING STUDIO</span></span></button>
 <button class="file" data-app="semesta" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-semesta"/></svg></span><span class="file-txt"><span class="file-name">SEMESTA.EXE</span><span class="file-kind">WORLD BUILDER</span></span></button><button class="file" data-app="jiwa" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-jiwa"/></svg></span><span class="file-txt"><span class="file-name">JIWA.EXE</span><span class="file-kind">MECHANICS STUDIO</span></span></button>
@@ -188,8 +189,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <div class="file-hint">DOUBLE CLICK TO OPEN</div>
 </aside>
 <section class="canvas-panel" aria-label="Preview">
-<div class="canvas-header"><strong>PREVIEW</strong><span>1 / 4</span></div>
+<div class="canvas-header"><strong>PREVIEW</strong><span>1 / 5</span></div>
 <div class="canvas-space" id="canvas">
+<div class="art" data-art="mahluk2"><svg role="img" aria-label="Mahluk Hidup 2.0 modular pixel character"><use href="#icon-mahluk"/></svg></div>
 <div class="art active" data-art="mahluk"><canvas class="mahluk-sprite" width="64" height="112" role="img" aria-label="Animasi berjalan karakter Ichsan dengan background transparan" hidden></canvas><img class="mahluk-static" src="https://lafrich.github.io/virtual-life-asset-pipeline/media/ichsan-thumb.png" alt="Karakter Ichsan transparan dari Mahluk Hidup" loading="eager" decoding="async"><svg class="mahluk-fallback" aria-label="Karakter pixel" role="img" hidden><use href="#icon-mahluk"/></svg></div>
 <div class="art" data-art="bangun"><img class="warteg-thumb" role="img" alt="Warteg Kharisma Bahari — aset bangunan isometrik dari Bangun Ruang" hidden></div>
 <div class="art" data-art="semesta"><svg role="img" aria-label="Pixel art isometric world"><use href="#icon-semesta"/></svg></div><div class="art" data-art="jiwa"><svg role="img" aria-label="Pixel-art node based mechanics editor"><use href="#icon-jiwa"/></svg></div>
@@ -233,7 +235,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <div class="modal">
 <header class="titlebar"><div class="window-icon">✳</div><div class="window-title"><strong>LINK SETTINGS</strong></div></header>
 <form class="modal-body" id="linkForm">
-<label>MAHLUK HIDUP<input id="url-mahluk" type="url" placeholder="https://..."></label>
+<label>MAHLUK HIDUP 2.0<input id="url-mahluk2" type="url" placeholder="https://..."></label>
+<label>MAHLUK HIDUP (LEGACY)<input id="url-mahluk" type="url" placeholder="https://..."></label>
 <label>BANGUN RUANG<input id="url-bangun" type="url" placeholder="https://..."></label>
 <label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label><label>JIWA<input id="url-jiwa" type="url" placeholder="https://..."></label>
 <div class="modal-error" id="urlError" role="alert"></div>
@@ -312,15 +315,16 @@ const $=id=>document.getElementById(id);
   sprite.onerror=showStatic;
   sprite.src='https://lafrich.github.io/virtual-life-asset-pipeline/media/ichsan-sheet.png';
 })();
-const ids=['mahluk','bangun','semesta','jiwa'];
+const ids=['mahluk2','mahluk','bangun','semesta','jiwa'];
 // Deep links only select a program; opening it remains a deliberate user action.
 const requestedApp=new URLSearchParams(location.search).get('app');
 const data={
+mahluk2:{name:'MAHLUK HIDUP 2.0.EXE',type:'2.5D CHARACTER',desc:'Edit transparent cutout planes dengan gizmo X/Y/Z, 4-view game sprite, dan sync ke Semesta/Bangun Ruang.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/mahluk-2/'},
 mahluk:{name:'MAHLUK HIDUP.EXE',type:'CHARACTER',desc:'Buat karakter dan NPC pixel.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/'},
 bangun:{name:'BANGUN RUANG.EXE',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
 semesta:{name:'SEMESTA.EXE',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'},jiwa:{name:'JIWA.EXE',type:'MECHANICS',desc:'Atur rules dan Play Test dari kota Semesta.',url:'https://lafrich.github.io/virtual-office/jiwa/'}
 };
-let selected=ids.includes(requestedApp)?requestedApp:'mahluk';
+let selected=ids.includes(requestedApp)?requestedApp:'mahluk2';
 function getUrl(id){try{const x=localStorage.getItem('membangun-link-'+id);return x?x:data[id].url;}catch(e){return data[id].url}}
 function okUrl(raw){if(!raw)return true;try{let u=new URL(raw);return (u.protocol==='https:'||u.protocol==='http:')&&u.hostname!==''}catch(e){return false}}
 function render(){
@@ -341,7 +345,7 @@ function pick(id){
  try{const url=new URL(location.href);url.searchParams.set('app',selected);history.replaceState(null,'',url);}catch{}
  render();
 }
-function settings(){ids.forEach(id=>$('url-'+id).value=getUrl(id));$('urlError').textContent='';$('modal').hidden=false;let key=getUrl(selected)?'mahluk':selected;$('url-'+key).focus()}
+function settings(){ids.forEach(id=>$('url-'+id).value=getUrl(id));$('urlError').textContent='';$('modal').hidden=false;let key=getUrl(selected)?selected:selected;$('url-'+key).focus()}
 function open(){
  const url=getUrl(selected);
  if(!url){settings();return;}
