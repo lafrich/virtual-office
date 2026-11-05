@@ -261,18 +261,27 @@ function createRig(THREE,opt={}){
   ctx.clearRect(0,0,64,112);
   // Skin tint applies ONLY to the isolated source body, not independently
   // colored hair or bags. This preserves wardrobe hues for darker skins.
-  const bodyLayer=document.createElement('canvas');
-  bodyLayer.width=64;bodyLayer.height=112;
-  const bodyCtx=bodyLayer.getContext('2d',{willReadFrequently:true});
-  bodyCtx.imageSmoothingEnabled=false;
-  if(edited?.ready)bodyCtx.drawImage(edited.pic,0,0,64,112);
-  else if(!templated)bodyCtx.drawImage(pic,sx,sy,64,112,
-    0,sleepPose?sleep().breathing(frame):0,64,112);
-  if(asset&&hygiene?.kind!=="bath")body()?.tintBase?.(bodyCtx,asset);
-  // Bags and rear hair behind the ORIGINAL skin-corrected body and head.
+  // Preserve the original fast path and source-draw count for existing
+  // characters. Only two-layer Human hair needs isolated body tinting:
+  // warm rear hair must never accidentally become the chosen skin color.
   if(overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
-  if(rearHair?.ready)ctx.drawImage(rearHair.pic,0,0,64,112);
-  ctx.drawImage(bodyLayer,0,0,64,112);
+  if(rearHair?.ready){
+   ctx.drawImage(rearHair.pic,0,0,64,112);
+   const bodyLayer=document.createElement('canvas');
+   bodyLayer.width=64;bodyLayer.height=112;
+   const bodyCtx=bodyLayer.getContext('2d',{willReadFrequently:true});
+   bodyCtx.imageSmoothingEnabled=false;
+   if(edited?.ready)bodyCtx.drawImage(edited.pic,0,0,64,112);
+   else if(!templated)bodyCtx.drawImage(pic,sx,sy,64,112,
+     0,sleepPose?sleep().breathing(frame):0,64,112);
+   if(asset&&hygiene?.kind!=="bath")body()?.tintBase?.(bodyCtx,asset);
+   ctx.drawImage(bodyLayer,0,0,64,112);
+  }else{
+   if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
+   else if(!templated)ctx.drawImage(pic,sx,sy,64,112,
+     0,sleepPose?sleep().breathing(frame):0,64,112);
+   if(asset&&hygiene?.kind!=="bath")body()?.tintBase?.(ctx,asset);
+  }
   for(let i=1;i<4;i++)if(overlays[i]?.ready)
    ctx.drawImage(overlays[i].pic,0,0,64,112);
   // Apply the SAME authentic face crop as Mahluk Hidup Action Editor.
@@ -388,13 +397,18 @@ function characterPreview(id,direction='sw'){
   const rearHair=await loadPreviewImage(equip.hair?.back_frames?.[dir]||null);
   if(layers[0])q.drawImage(layers[0],0,0,64,112);
   if(rearHair)q.drawImage(rearHair,0,0,64,112);
-  const bodyCv=document.createElement('canvas');
-  bodyCv.width=64;bodyCv.height=112;
-  const bodyP=bodyCv.getContext('2d',{willReadFrequently:true});
-  bodyP.imageSmoothingEnabled=false;
-  bodyP.drawImage(pic,0,row*112,64,112,0,0,64,112);
-  if(entry)g.VLUniversalBodyActions?.tintBase?.(bodyP,entry);
-  q.drawImage(bodyCv,0,0,64,112);
+  if(rearHair){
+   const bodyCv=document.createElement('canvas');
+   bodyCv.width=64;bodyCv.height=112;
+   const bodyP=bodyCv.getContext('2d',{willReadFrequently:true});
+   bodyP.imageSmoothingEnabled=false;
+   bodyP.drawImage(pic,0,row*112,64,112,0,0,64,112);
+   if(entry)g.VLUniversalBodyActions?.tintBase?.(bodyP,entry);
+   q.drawImage(bodyCv,0,0,64,112);
+  }else{
+   q.drawImage(pic,0,row*112,64,112,0,0,64,112);
+   if(entry)g.VLUniversalBodyActions?.tintBase?.(q,entry);
+  }
   for(let i=1;i<layers.length;i++)if(layers[i])q.drawImage(layers[i],0,0,64,112);
   return cv.toDataURL('image/png');
  })().catch(()=>null);
