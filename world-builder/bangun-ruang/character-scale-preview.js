@@ -242,6 +242,7 @@ function mount(api){
  }
  function updateControls(){
   const active=actor.active,interior=inside();
+  $('scaleSpawn').disabled=bridge?.referenceReset!==false;
   $('scaleRemove').disabled=!active;
   $('scaleIdle').disabled=!active;
   $('scaleWalkDoor').disabled=!active||interior||cfg().interactive!==true||actor.scene!=='exterior';
@@ -250,6 +251,7 @@ function mount(api){
   $('scaleSpawn').textContent=actor.armed?'⌖ Tap Canvas':'＋ Place';
  }
  function showCharacter(){
+  if(bridge?.referenceReset!==false)return false;
   return actor.active&&((inside()&&actor.scene==='interior'&&
    actor.floor===api.getInterior?.()?.floor)||(!inside()&&actor.scene==='exterior'));
  }
@@ -361,6 +363,9 @@ function mount(api){
   const p=spawnPoint();actor.c=p[0];actor.r=p[1];actor.floor=1;actor.scene='exterior';
  }
  function spawn(){
+  if(bridge?.referenceReset!==false){
+   status('MENUNGGU MODEL & RIG KARAKTER BARU');return;
+  }
   if(!actor.active){
    actor.active=true;actor.profile=choose.value||'ichsan';
    placeDefault();actor.direction=spriteDir();actor.pose='idle';
@@ -422,6 +427,9 @@ function mount(api){
   walk([start,dest],arrived);
  }
  function beginAdjustment(draft){
+  if(bridge?.referenceReset!==false){
+   status('MENUNGGU MODEL & RIG KARAKTER BARU');return false;
+  }
   const item=api.getSelectedProp?.(),room=api.getInterior?.();
   if(!item||!room){status('Select furniture in the interior first');return false;}
   actor.active=true;actor.profile=choose.value||actor.profile;
@@ -516,16 +524,23 @@ function mount(api){
  function showProfiles(){
   const previous=choose.value;choose.replaceChildren();
   const entries=bridge?.list?.()||[];
-  const fallback=[{id:'ichsan',name:'Ichsan / V6B'}];
+  const reset=bridge?.referenceReset!==false;
+  const fallback=reset?[]:[{id:'ichsan',name:'Ichsan / V6B'}];
   const catalog=entries.length?entries:fallback;
   for(const item of catalog){
    const option=document.createElement('option');option.value=item.id;
    option.textContent=item.name+(item.custom?' · Saved':'');
    choose.append(option);
   }
-  choose.value=catalog.some(c=>c.id===previous)?previous:catalog[0]?.id||'ichsan';
+  if(reset&&!catalog.length){
+   const option=document.createElement('option');
+   option.value='';option.textContent='MENUNGGU ACUAN RIG BARU';choose.append(option);
+   actor.active=false;actor.armed=false;stop();canvas.hidden=true;
+  }
+  choose.value=catalog.some(c=>c.id===previous)?previous:catalog[0]?.id||'';
   actor.profile=choose.value;
-  if(!entries.length)$('scaleStatus').textContent='Catalog not loaded · 64×112 scale stand-in if offline';
+  if(!entries.length)$('scaleStatus').textContent=reset?
+   'MENUNGGU MODEL & RIG KARAKTER BARU':'Catalog not loaded · 64×112 scale stand-in if offline';
  }
  choose.onchange=()=>{leaveAction();stop();actor.profile=choose.value;actor.pose='idle';actor.reported=false;
   status('Selected Mahluk Hidup · '+choose.selectedOptions?.[0]?.textContent||actor.profile);};
