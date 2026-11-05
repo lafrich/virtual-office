@@ -15,7 +15,7 @@ const legacyIds=Object.fromEntries(
  [...(g.VLPipelineAssets?.characters||[]).map(x=>x.id),...Object.keys(ALIAS)]
  .map(id=>[id,ALIAS[id]||id]));
 const bridge=()=>g.VLMahlukHidup;
-const reset=()=>bridge()?.referenceReset!==false;
+const reset=()=>bridge()?.referenceReset===true;
 const sleep=()=>g.VLUniversalSleep;
 const body=()=>g.VLUniversalBodyActions;
 const canonical=id=>bridge()?.has(id)?id:
