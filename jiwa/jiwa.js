@@ -13,6 +13,10 @@ const EFFECTS=['wallet_delta','stat_fullness','stat_energy','stat_hygiene','stat
 const TRIGGERS=['interact','enter','proximity','job_complete','time'];
 const STAT=['fullness','energy','hygiene','bladder'];
 const JF=window.JiwaFoundation;
+const oldCharacter=o=>['avatar','npc','pedestrian','crowd','quest_npc'].includes(o?.type)||
+ o?.layer==='character';
+const visibleEntities=()=>window.VLCharacterReferenceReset?.active!==false?
+ state.entities.filter(o=>!oldCharacter(o)):state.entities;
 const defaults=()=>({wallet:6000,time:'08:00',fullness:70,energy:80,hygiene:75,bladder:20});
 const rule=(id,label,animation,conditions,effects,trigger='interact')=>({id,label,animation,enabled:true,trigger,conditions,effects});
 const c=(kind,value)=>({kind,value:String(value)}),e=(kind,value)=>({kind,value:String(value)});
@@ -89,7 +93,7 @@ function binding(o){return state.project?.bindings?.[o.id]||null;}
 function currentTemplate(o){return binding(o)?.template||templateFor(o);}
 function rules(o){return binding(o)?.rules||fromTemplate(currentTemplate(o));}
 function ensureBinding(){const o=selectedObject();if(!o)return null;if(!state.project.bindings[o.id])state.project.bindings[o.id]={template:templateFor(o),rules:fromTemplate(templateFor(o))};return state.project.bindings[o.id];}
-function selectedObject(){return state.entities.find(o=>o.id===state.selected)||null;}
+function selectedObject(){return visibleEntities().find(o=>o.id===state.selected)||null;}
 function newProject(id){return {version:2,cityId:id,updatedAt:null,systems:defaults(),bindings:{},templates:{},foundation:JF.defaultFoundation()};}
 function dbOpen(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window))return reject(Error('IndexedDB unavailable'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(TABLE))r.result.createObjectStore(TABLE,{keyPath:'cityId'});};r.onerror=()=>reject(r.error);r.onsuccess=()=>resolve(r.result);});}
 async function dbOperation(op,val){
@@ -158,15 +162,16 @@ async function loadCity(id){
    if(shared.updatedAt&&shared.foundation)raw.foundation=clone(shared.foundation);
   }
   state.project=validateProject({...newProject(id),...raw,cityId:id},id);
-  state.selected=(params.get('city')===id&&params.get('object')&&state.entities.some(o=>o.id===params.get('object')))?params.get('object'):(state.selected&&state.entities.some(o=>o.id===state.selected)?state.selected:state.entities[0]?.id||null);
-  state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(state.entities.length);
+  const shown=visibleEntities();
+  state.selected=(params.get('city')===id&&params.get('object')&&shown.some(o=>o.id===params.get('object')))?params.get('object'):(state.selected&&shown.some(o=>o.id===state.selected)?state.selected:shown[0]?.id||null);
+  state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(visibleEntities().length);
   window.dispatchEvent(new Event('jiwa:context:render'));
   $('mapInfo').textContent=record.name+' · '+state.entities.length+' OBJECTS';
   notice('City loaded: '+record.name+' · edit mechanics only, placement read-only');
  }catch(e){emptyCity('Load failed: '+e.message);}
 }
 function renderTree(){
- const root=$('tree');root.replaceChildren();const rows=state.entities,search=$('objectSearch').value.trim().toLowerCase();const groups=new Map();
+ const root=$('tree');root.replaceChildren();const rows=visibleEntities(),search=$('objectSearch').value.trim().toLowerCase();const groups=new Map();
  for(const o of rows){const cat=category(o);if(search&&!(objectName(o)+' '+(o.asset||'')+' '+o.id+' '+cat).toLowerCase().includes(search))continue;if(!groups.has(cat))groups.set(cat,[]);groups.get(cat).push(o);}
  let shown=0;
  for(const [cat,items] of groups){
@@ -343,7 +348,7 @@ function draw(){
  const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);ctx.fillStyle='#dfedf1';ctx.fillRect(0,0,w,h);
  state.points=[];
  if(!state.record){ctx.fillStyle='#587487';ctx.textAlign='center';ctx.fillText('Save a City Draft in Semesta to begin.',w/2,h/2);return;}
- const objects=state.entities,terrain=state.record.document.map?.terrain?.cells||[];
+ const objects=visibleEntities(),terrain=state.record.document.map?.terrain?.cells||[];
  // Draw a bounded, non-editable 2:1 ground reference. The underlying city is not changed.
  const vis=24/Math.max(.45,state.zoom),sx=Math.round(state.midX-vis/2),sz=Math.round(state.midZ-vis/2);
  if(terrain.length){
