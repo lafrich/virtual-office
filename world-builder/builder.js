@@ -25,6 +25,7 @@ try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
 // before loading any saved city, so custom profiles survive import.
 const mahluk=window.VLMahlukHidup;
 const characterSync=mahluk?await mahluk.load():{loaded:false,total:0,custom:0};
+const hideLegacyCharacters=mahluk?.referenceReset!==false;
 const indonesiaSync=await window.VLIndonesiaAssets?.load();
 let assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
@@ -945,6 +946,9 @@ function loadVehicleImage(gfx,obj){
  }).catch(()=>{});
 }
 function makeAutomated(root,obj){
+ if(hideLegacyCharacters&&obj.type!=="vehicle"){
+  root.visible=false;return; // Saved city NPC data remains intact.
+ }
  const kind=obj.type,settings=traffic.config(obj);
  const agent={id:obj.id,root,kind,route:null,distance:0,settings,parts:[],graphic:null};
  if(kind==='vehicle'){
@@ -1202,6 +1206,7 @@ function updateAutomated(dt){
 }
 
 function makeAvatar(root,item){
+ if(hideLegacyCharacters)return;
  const factory=window.VLCharacterRig;
  if(factory){
    const rig=factory.createRig(THREE,{direction:item.facing||'sw',pose:item.pose||null,profile:item.profile||'ichsan'});
@@ -1400,12 +1405,15 @@ function instantiate(o){
   case 'sprite':{
    makeSprite(root,o);
    const vehicleSpec=assetByName.get(o.asset);
-   const riderSet=window.VLSemestaTransportNPC?.create?.(THREE,root,vehicleSpec,o);
+   const riderSet=hideLegacyCharacters?null:window.VLSemestaTransportNPC?.create?.(THREE,root,vehicleSpec,o);
    if(riderSet)transportRiders.set(o.id,riderSet);
    break;
   }
-  case 'avatar':case 'npc':makeAvatar(root,o);break;
-  case 'vehicle':case 'pedestrian':case 'crowd':case 'quest_npc':makeAutomated(root,o);break;
+  case 'avatar':case 'npc':makeAvatar(root,o);if(hideLegacyCharacters)root.visible=false;break;
+  case 'vehicle':case 'pedestrian':case 'crowd':case 'quest_npc':
+   makeAutomated(root,o);
+   if(hideLegacyCharacters&&o.type!=='vehicle')root.visible=false;
+   break;
   case 'marker':makeMarker(root,o);root.visible=markerShown;break;
  }
  assetRoots.add(root);owners.set(o.id,root);
@@ -1725,6 +1733,11 @@ function applyItem(){
 }
 function id(type){return type+'-'+Math.random().toString(36).slice(2,8);}
 function makeObject(type,point){
+ if(hideLegacyCharacters&&(
+  type==='avatar'||type==='npc'||type.startsWith('character:')||
+  type.startsWith('pedestrian:')||type.startsWith('crowd:')||
+  type.startsWith('quest:')||type.startsWith('quest-character:')
+ ))return null;
  const customActor=type.startsWith('character:')?type.slice(10):null;
  const customQuest=type.startsWith('quest-character:')?type.slice(16):null;
  const isVault=type.startsWith('vault:');
@@ -2463,9 +2476,14 @@ function refreshCharacterOptions(){
  sel.replaceChildren();
  const old=document.createElement('optgroup');old.label='VIRTUAL LIFE / ORIGINAL';
  for(const [id,name] of [['ichsan','Ichsan'],['theodore','Theodore'],['noor','Noor'],['grok','Grok Bot'],['raka','Raka'],['bima','Bima'],['ellen','Ellen'],['nadia','Nadia'],['warteg','Bu Warteg'],['barista','Barista'],['kasir','Kasir']]){
+  if(hideLegacyCharacters)continue;
   const opt=document.createElement('option');opt.value=id;opt.textContent=name;old.append(opt);
  }
- sel.append(old);
+ if(old.children.length)sel.append(old);
+ if(hideLegacyCharacters){
+  const placeholder=document.createElement('option');placeholder.value='';
+  placeholder.textContent='MENUNGGU ACUAN RIG BARU';sel.append(placeholder);
+ }
  const published=document.createElement('optgroup');published.label='MAHLUK HIDUP / PUBLISHED';
  const custom=document.createElement('optgroup');custom.label='MAHLUK HIDUP / CHAR STORAGE';
  for(const c of (mahluk?.list()||[])){
@@ -2645,7 +2663,9 @@ function renderAssetList(){
    origin:spec.source==='gpt-original'?'original':spec.published?'published':'unpublished'
   }))
  ];
- const list=assets.filter(a=>(cat==='all'||a.category===cat)&&
+ const list=assets.filter(a=>(!hideLegacyCharacters||
+  !['character','people','quest'].includes(a.category))&&
+  (cat==='all'||a.category===cat)&&
   (a.title+' '+a.tag+' '+a.label).toLowerCase().includes(q));
  $('assetCount').textContent=String(list.length).padStart(2,'0');
  const holder=$('assetList');holder.replaceChildren();
