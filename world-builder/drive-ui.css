@@ -1,0 +1,17 @@
+/* Windows XP-ish Drive dialog, scoped to both Membangun editors. */
+.mb-cloud-dialog[hidden]{display:none!important}
+.mb-cloud-dialog{position:fixed;inset:0;z-index:1900;background:rgba(12,28,59,.58);display:flex;align-items:center;justify-content:center;padding:12px}
+.mb-cloud-window{display:flex;flex-direction:column;width:min(490px,100%);max-height:calc(100dvh - 24px);background:#d6dce7;color:#193052;border:2px solid;border-color:#fff #526278 #526278 #fff;box-shadow:7px 9px 0 #17273f50;font:12px Tahoma,Arial,sans-serif}
+.mb-cloud-header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 10px;background:linear-gradient(90deg,#103782,#2c7bc3);color:#fff}
+.mb-cloud-header button{min-width:30px;min-height:26px;color:#102b4d;background:#dce4ed}
+.mb-cloud-body{padding:13px;overflow:auto;display:grid;gap:10px}
+.mb-cloud-body label{display:grid;gap:5px;font:700 11px Tahoma,Arial,sans-serif;color:#213c62}
+.mb-cloud-body input,.mb-cloud-body select{width:100%;max-width:100%;min-width:0;padding:8px;border:1px solid #91a2b8;border-radius:0;background:#fff;color:#193052;box-sizing:border-box}
+.mb-cloud-body select{min-height:110px;font:11px Consolas,monospace}
+.mb-cloud-actions{display:flex;flex-wrap:wrap;gap:6px}
+.mb-cloud-actions button{flex:1 1 125px;padding:9px 8px;min-height:36px;background:#e9edf4;border:1px solid;border-color:#fff #7d90a6 #7d90a6 #fff;color:#183a6b;cursor:pointer}
+.mb-cloud-actions button:disabled{opacity:.43;cursor:not-allowed}
+.mb-cloud-actions button:first-child{background:#c1d8f4}
+.mb-cloud-note{font:10px/1.55 Tahoma,Arial,sans-serif;color:#45617f;margin:0}
+#mbCloudStatus{display:block;min-height:36px;padding:8px;border:1px solid #a2b8d1;background:#ecf3ff;font:11px/1.4 Consolas,monospace;overflow-wrap:anywhere}
+@media(max-width:650px){.mb-cloud-dialog{padding:5px;align-items:flex-start}.mb-cloud-window{width:100%;margin-top:4px;max-height:calc(100dvh - 10px)}.mb-cloud-body{padding:10px}.mb-cloud-actions button{flex-basis:45%;font-size:11px}}
