@@ -5,11 +5,11 @@ const fs=require('node:fs');
 const path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 
-test('Membangun is the entry point with all six canonical .EXE programs',()=>{
+test('Membangun is the entry point with five current .EXE programs',()=>{
  const s=read('membangun/index.html');
- assert.ok(s.includes("const ids=['mahluk2','emotion','mahluk','bangun','semesta','jiwa'];"));
+ assert.ok(s.includes("const ids=['mahluk2','emotion','bangun','semesta','jiwa'];"));
  for(const [id,name] of [
-  ['mahluk2','MAHLUK HIDUP 2.0.EXE'],['emotion','EMOTION STUDIO.EXE'],['mahluk','MAHLUK HIDUP.EXE'],['bangun','BANGUN RUANG.EXE'],
+  ['mahluk2','MAHLUK HIDUP 2.0.EXE'],['emotion','EMOTION STUDIO.EXE'],['bangun','BANGUN RUANG.EXE'],
   ['semesta','SEMESTA.EXE'],['jiwa','JIWA.EXE']
  ]){
   assert.ok(s.includes('data-app="'+id+'"'),'launcher missing '+id+' button');
@@ -33,7 +33,7 @@ test('desktop panels remain aligned and mobile launcher layout survives',()=>{
  assert.ok(s.includes('grid-template-columns:218px minmax(0,1fr) 236px'));
  assert.ok(s.includes('@media (min-width:701px) and (max-width:900px)'));
  assert.ok(s.includes('@media(max-width:700px)'));
- for(const id of ['mahluk2','emotion','mahluk','bangun','semesta','jiwa']){
+ for(const id of ['mahluk2','emotion','bangun','semesta','jiwa']){
   assert.ok(s.includes('data-app="'+id+'"'));
  }
 });
@@ -111,7 +111,7 @@ test('Emotion Studio Google Drive auth is separate from local save and uses driv
  const js=read('emotion-studio/drive-sync.js');
  for(const id of ['driveClientId','driveConfigure','driveConnect','driveRefresh','driveSave','driveFolder','save','deleteLocal'])
   assert.ok(html.includes('id="'+id+'"'),'Missing Drive/local control '+id);
- assert.ok(html.includes('src="./drive-sync.js?v=1"'));
+ assert.match(html,/src="\.\/drive-sync\.js\?v=[^"]+"/);
  assert.ok(html.includes('https://accounts.google.com/gsi/client'));
  assert.ok(html.includes('await D.connect()'));
  assert.ok(html.includes('await D.loadAll('));
@@ -127,4 +127,38 @@ test('Emotion Studio Google Drive auth is separate from local save and uses driv
  assert.ok(!html.includes('id="token"'),'Do not ask for GitHub token');
  assert.ok(!js.includes('localStorage.setItem(CLIENT_KEY,token)'),'OAuth access tokens must never persist');
  assert.doesNotThrow(()=>new (require('node:vm').Script)(js));
+});
+
+test('Emotion Studio provides responsive mobile tabs and scrollable file tools',()=>{
+ const html=read('emotion-studio/index.html');
+ for(const panel of ['library','preview','properties'])
+  assert.ok(html.includes('data-mobile-panel="'+panel+'"'));
+ assert.match(html,/\.emotion-mobile-tabs/);
+ assert.match(html,/\.emotion-window>\.menubar/);
+ assert.match(html,/overflow-x:auto!important/);
+});
+test('Semesta and Bangun Ruang offer separate cross-device Drive libraries',()=>{
+ const cloud=read('world-builder/drive-sync.js');
+ const ui=read('world-builder/drive-ui.js');
+ const semesta=read('world-builder/index.html');
+ const bangun=read('world-builder/bangun-ruang/index.html');
+ const builder=read('world-builder/builder.js');
+ const objects=read('world-builder/bangun-ruang/object-bridge.js');
+ assert.match(cloud,/https:\/\/www\.googleapis\.com\/auth\/drive\.file/);
+ assert.ok(!cloud.includes('localStorage.setItem(KEY,token)'));
+ assert.match(cloud,/function validateRecord\(/);
+ assert.match(cloud,/async function save\(/);
+ assert.match(cloud,/async function load\(/);
+ assert.match(ui,/async function loadSelected\(/);
+ for(const html of [semesta,bangun]){
+  assert.ok(html.includes('id="mbCloudDialog"'));
+  assert.ok(html.includes('id="mbCloudOpen"'));
+  assert.ok(html.includes('mbCloudConnect'));
+ }
+ assert.match(builder,/membangun:local-saved/);
+ assert.match(builder,/app:'semesta'/);
+ assert.match(bangun,/app:'bangun'/);
+ assert.match(objects,/membangun:local-saved/);
+ assert.doesNotThrow(()=>new(require('node:vm').Script)(cloud));
+ assert.doesNotThrow(()=>new(require('node:vm').Script)(ui));
 });
