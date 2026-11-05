@@ -1,7 +1,7 @@
 /* Editable isometric terrain: integer c/r cells, sparse overrides. */
 (function(g){
 'use strict';
-const types=['grass','road','sidewalk','water','plaza','soil'];
+const types=['grass','road','sidewalk','water','plaza','soil','drain','river'];
 const bounds=b=>b===null?null:(b||{minX:-30,maxX:40,minZ:20,maxZ:55});
 const valid=(c,r,b)=>!b||(c>=b.minX&&c<b.maxX&&r>=b.minZ&&r<b.maxZ);
 const key=(c,r)=>c+','+r;
