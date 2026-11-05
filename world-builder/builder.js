@@ -1458,7 +1458,8 @@ function rebuild(){
 }
 function item(){return documentMap.objects.find(o=>o.id===selectedId)||null;}
 function syncActiveAssetUI(){
- const rows=activeAssetCamera?.list(documentMap.objects)||[];
+ const rows=(activeAssetCamera?.list(documentMap.objects)||[]).filter(o=>
+  !hideLegacyCharacters||!['avatar','npc','pedestrian','crowd','quest_npc'].includes(o.type));
  const picker=$('activeAssetPicker');
  const key=rows.map(o=>[o.id,o.name,o.type].join('~')).join('|');
  if(key!==activeAssetListKey){
