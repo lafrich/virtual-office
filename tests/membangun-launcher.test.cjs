@@ -17,7 +17,7 @@ test('Membangun is the entry point with all six canonical .EXE programs',()=>{
   assert.ok(s.includes(name),'launcher missing '+name+' label');
  }
  assert.ok(s.includes('https://lafrich.github.io/virtual-life-asset-pipeline/'));
-  assert.ok(s.includes('https://lafrich.github.io/virtual-life-asset-pipeline/emotion-studio/'));
+  assert.ok(s.includes('https://lafrich.github.io/virtual-office/emotion-studio/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/jiwa/'));
