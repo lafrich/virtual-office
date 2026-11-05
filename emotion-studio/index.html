@@ -1354,15 +1354,15 @@ async function saveToDrive(){
    frames:selected.frames,fps:Math.max(1,Math.min(30,Number($("fps").value)||6)),png:atlas.toDataURL("image/png")};
   delete entry.template;delete entry.driveFileId;delete entry.driveModifiedTime;
   if(!U.validEntry(entry))throw Error("Invalid emotion atlas. Use native 64×112 / 4-view format.");
-  const result=await D.save(entry,{expectedModifiedTime:driveEntries.get(entry.id)?.driveModifiedTime});
-  // Preserve local backup so offline editing stays possible.
+  // Write local copy first: even if Drive fails, no artwork is lost.
   await persistSaved(entry);
+  const result=await D.save(entry,{expectedModifiedTime:driveEntries.get(entry.id)?.driveModifiedTime});
   driveEntries.set(entry.id,{...entry,driveFileId:result.project.id,driveModifiedTime:result.project.modifiedTime});
   selected={...driveEntries.get(entry.id)};mergeCatalog();setDirty(false);await renderList();
   if(result.folderId)$("driveFolder").href="https://drive.google.com/drive/folders/"+encodeURIComponent(result.folderId);
   driveStatus("✓ GOOGLE DRIVE SYNCED · "+driveEntries.size+" PROJECT(S)");
   status("✓ SAVED TO GOOGLE DRIVE (JSON + PNG) · SAME ACCOUNT ON PC / PHONE");
- }catch(e){status("DRIVE SAVE FAILED: "+e.message,true);driveStatus("SAVE FAILED: "+e.message,true)}
+ }catch(e){status("LOCAL BACKUP KEPT · DRIVE SAVE FAILED: "+e.message,true);driveStatus("DRIVE SAVE FAILED · LOCAL COPY KEPT: "+e.message,true)}
  finally{driveBusy=false;$("driveSave").disabled=false}
 }
 
@@ -1484,7 +1484,10 @@ async function save(){
   selected=clone(entry);
   mergeCatalog();setDirty(false);await renderList();
   $("online").textContent="LOCAL LIBRARY / "+savedEntries.size+" SAVED";
-  status("✓ SAVED ON THIS DEVICE · "+entry.name+" · NO TOKEN REQUIRED");
+  if(D?.connected()){
+   status("LOCAL BACKUP SAVED · UPLOADING TO GOOGLE DRIVE...");
+   await saveToDrive();
+  }else status("✓ SAVED ON THIS DEVICE · CONNECT GOOGLE DRIVE FOR CROSS-DEVICE SYNC");
  }catch(e){status("SAVE FAILED: "+e.message,true)}
  finally{saving=false;$("save").disabled=false}
 }
