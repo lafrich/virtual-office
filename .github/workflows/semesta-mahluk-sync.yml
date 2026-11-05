@@ -9,6 +9,7 @@ on:
       - "membangun/**"
       - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/semesta-base-human-gameplay.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
       - "tests/mahluk-universal-hygiene.test.cjs"
       - "tests/mahluk-template-runtime.test.cjs"
@@ -38,6 +39,7 @@ on:
       - "membangun/**"
       - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/semesta-base-human-gameplay.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
       - "tests/mahluk-universal-hygiene.test.cjs"
       - "tests/mahluk-template-runtime.test.cjs"
@@ -91,6 +93,7 @@ jobs:
           node --input-type=module --check < world-builder/builder.js
       - name: Mahluk Hidup catalog, frames and custom equipment integration
         run: |
+          node tests/semesta-base-human-gameplay.test.cjs
           node tests/semesta-mahluk-sync.test.cjs
           node tests/mahluk-action-frame-sync.test.cjs
           node --test tests/mahluk-universal-hygiene.test.cjs

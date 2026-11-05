@@ -15,7 +15,7 @@ const ASSET=/^media\/[a-z0-9_.-]+\.png$/i;
 const DATA=/^data:image\/png;base64,[a-zA-Z0-9+/=]+$/;
 const SLOTS=['bag','shoes','pants','shirt','hair','helmet'];
 let entries=new Map(),customs=new Map(),equipment={},accessories=new Map();
-let build='',loaded=false,lastError='',lastSync=0;
+let build='',loaded=false,lastError='',lastSync=0,gameplayRig=null;
 const read=(key,def)=>{try{return JSON.parse(localStorage.getItem(key))??def}catch{return def}};
 function parseCatalog(json){
  if(!Array.isArray(json?.characters))throw Error('Invalid Mahluk Hidup character catalog');
@@ -40,7 +40,8 @@ function parseCatalog(json){
   const row_starts=raw.row_starts?.lie===36?{lie:36}:{};
   const entry={id:raw.id,name:String(raw.name||raw.id).slice(0,90),
    sheet:raw.sheet,motions,expressions,row_starts,baseId:raw.id,
-   category:raw.template_category||'npc',template:raw.template===true,
+   category:raw.template_category||'npc',template_category:raw.template_category||null,
+   template:raw.template===true,
    gender:['male','female'].includes(raw.gender)?raw.gender:null,
    bodyType:['male','female'].includes(raw.bodyType)?raw.bodyType:
     ['male','female'].includes(raw.gender)?raw.gender:null,
@@ -109,7 +110,9 @@ async function load(){
   if(!res.ok)throw Error('Mahluk Hidup catalog HTTP '+res.status);
   const json=await res.json();
   const parsed=parseCatalog(json);
-  entries=parsed;build=String(json.build_version||'').slice(0,25);
+  // Reference rig is Male/Female only; NPC sprite data is never replaced.
+  const baseline=g.VLHumanGameplayRig?.compile?.([...parsed.values()])||null;
+  entries=parsed;gameplayRig=baseline;build=String(json.build_version||'').slice(0,25);
   loaded=true;lastError='';
  }catch(e){lastError=String(e.message||e);}
  const local=localSync();
@@ -123,6 +126,9 @@ function url(path){if(!ASSET.test(path))return null;
 }
 function motions(id){return get(id)?.motions||[]}
 function available(id,motion){return motions(id).find(m=>m.id===motion)||null}
+function gameplayAction(id,action,fixture){
+ return gameplayRig?.forActor(get(id),action,fixture)||null;
+}
 function equipmentFor(id){return equipment[id]||{}}
 function has(id){return !!get(id)}
 function actionSceneFor(fixture,action){
@@ -134,7 +140,9 @@ function questProfile(id){
  return null;
 }
 g.VLMahlukHidup=Object.freeze({
- load,localSync,get,list,url,motions,available,equipmentFor,actionSceneFor,questProfile,has,
+ load,localSync,get,list,url,motions,available,gameplayAction,
+ equipmentFor,actionSceneFor,questProfile,has,
+ get gameplayRigReady(){return !!gameplayRig?.ready},
  get buildVersion(){return build},get ready(){return loaded},
  get error(){return lastError},get baseUrl(){return BASE.href},
  DIR,FRAME:Object.freeze({w:64,h:112,pivotX:32,pivotY:100})

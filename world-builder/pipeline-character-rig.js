@@ -111,6 +111,14 @@ function resolve(id,requested,moving){
    sit:['sit'],work:['sit_type','work'],office_type:['sit_type']
    }[requested]||[requested]);
   let motion=possible.map(id=>actions.find(m=>m.id===id&&m.available!==false)).find(Boolean);
+  // Retarget only the existing HUMAN base templates and their custom clones.
+  // No legacy NPC's artwork, metadata or motion selection is modified.
+  const humanBase=entry.category==='human'&&
+   ['human_male_base','human_female_base'].includes(entry.baseId);
+  const reference=humanBase&&requested?
+   bridge()?.gameplayAction?.(sourceId,requested):null;
+  if(!motion&&reference?.previewReady&&reference.motionId)
+   motion=actions.find(m=>m.id===reference.motionId&&m.available===true);
   // Floating NPCs such as Yerbies/Gfunk author MOVE rather than WALK.
   // Use their genuine four-direction motion; never substitute a human walk.
   if(!motion&&moving)motion=actions.find(m=>
