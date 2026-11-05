@@ -76,7 +76,7 @@ function enrich(map,catalog,style){
  if(g.VLMapTerrain){
   const t=g.VLMapTerrain.normalize(doc.map.terrain||g.VLMapTerrain.seeded(doc.map.worldBounds,doc.map.road),doc.map.unbounded?null:doc.map.worldBounds);
   t.cells=g.VLMapTerrain.exported(t).map(cell=>({
-   ...cell,walkable:!['water','road'].includes(cell.type),driveable:cell.type==='road',
+   ...cell,walkable:!['water','river','drain','road'].includes(cell.type),driveable:cell.type==='road',
    buildable:['grass','soil','plaza'].includes(cell.type)
   }));
   doc.map.terrain=t;
