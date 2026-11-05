@@ -628,6 +628,10 @@ function mount(api){
  }
  showProfiles();
  refreshProfiles(true);
+ // Receive Mahluk 2.0 publish events from other same-origin tabs.
+ g.addEventListener("storage",event=>{
+  if(event.key==="mahluk-2-library-v1")refreshProfiles(false);
+ });
  function tick(now){
   const dt=lastFrame?Math.min(.06,Math.max(0,(now-lastFrame)/1000)):0;
   lastFrame=now;
