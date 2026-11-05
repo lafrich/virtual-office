@@ -3122,12 +3122,61 @@ async function saveNamedCity(asNew=false){
   $('draftName').value=name;
   await refreshDraftPicker(result.id);
   tell('City Draft saved: '+name);
+  // Only a successful named local Save can request optional Google Drive backup.
+  try{
+   const cloudRecord=await drafts.load(result.id);
+   window.dispatchEvent(new CustomEvent('membangun:local-saved',{
+    detail:{app:'semesta',kind:'city',record:cloudRecord}
+   }));
+  }catch(error){console.warn('Optional cloud save event unavailable',error)}
   return result;
  }catch(error){
   documentMap.map.name=previousName;
   throw error;
  }
 }
+
+// Google Drive storage adapter: named City Drafts only, never live game state.
+// Cloud imports are validated, backed up locally and explicitly opened in this editor.
+window.MembangunCloudAdapter=Object.freeze({
+ app:'semesta',
+ async currentRecord(){
+  if(!activeDraftId)return null;
+  return {kind:'city',record:await window.VLCityDrafts.load(activeDraftId)};
+ },
+ async localRecords(){
+  const rows=await window.VLCityDrafts.list();
+  const docs=await Promise.all(rows.map(x=>window.VLCityDrafts.load(x.id).catch(()=>null)));
+  return docs.filter(Boolean).map(record=>({kind:'city',record}));
+ },
+ async importRemote(payload){
+  const record=payload?.record;
+  if(payload?.kind!=='city'||record?.format!=='vl-city-draft-1'||
+     !Array.isArray(record.document?.objects))throw Error('Incompatible Semesta City Draft');
+  const errors=schema.validate(record.document,assetByName,style);
+  if(errors.length)throw Error('Drive city not valid: '+errors.join('; '));
+  let original=null;
+  try{original=await window.VLCityDrafts.load(record.id)}catch{}
+  if(original){
+   // Preserve the last local version as a distinct named backup before replacing.
+   await window.VLCityDrafts.save({id:null,name:original.name+' / Before Drive',document:original.document});
+  }
+  const imported=await window.VLCityDrafts.save({id:record.id,name:record.name,document:record.document});
+  const migrated=window.VLKebonSirihStyle?.upgrade(record.document,assetCatalog);
+  if(cameraFollowId)leaveCharacterCamera(false);
+  undoPoint();
+  documentMap=sanitize(migrated?.map||record.document);
+  restoreCityClock();selectedId=null;activeDraftId=imported.id;
+  draftDirty=!!migrated?.changed;
+  try{localStorage.setItem(ACTIVE_DRAFT_KEY,activeDraftId)}catch{}
+  rebuild();rebuildTerrain();resetCamera();saved();
+  draftDirty=!!migrated?.changed;
+  $('saveStatus').textContent='☁ Drive City opened'+(migrated?.changed?' / Save upgraded copy':'');
+  await refreshDraftPicker(activeDraftId);
+  tell('✓ Opened Drive City: '+record.name+' / local draft backed up');
+ }
+});
+
 $('saveDraftMenu').onclick=()=>$('saveCityDraft').click();
 $('openDraftMenu').onclick=openDraftDialog;
 $('manageDrafts').onclick=openDraftDialog;
