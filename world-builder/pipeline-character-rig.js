@@ -16,6 +16,7 @@ const legacyIds=Object.fromEntries(
  .map(id=>[id,ALIAS[id]||id]));
 const bridge=()=>g.VLMahlukHidup;
 const reset=()=>bridge()?.referenceReset===true;
+const approvedV2=id=>typeof id==='string'&&/^mh2_[a-z0-9]+$/.test(id);
 const sleep=()=>g.VLUniversalSleep;
 const body=()=>g.VLUniversalBodyActions;
 const canonical=id=>bridge()?.has(id)?id:
@@ -39,7 +40,7 @@ function directionFromWorld(dx,dz,last='sw'){
  return Math.abs(dx)>=Math.abs(dz)?dx>0?'se':'nw':dz>0?'sw':'ne';
 }
 function resolve(id,requested,moving){
- if(reset())return null; // No old actor sprites, even via direct rig calls.
+ if(reset()&&!approvedV2(id))return null; // Only the newly authored Mahluk 2.0 actor can bypass the legacy reset.
  const sourceId=canonical(id);
  // Local published templates outrank the stock rig. A mere frame edit or
  // planned action is NOT a playable animation until published in all 4 views.
@@ -50,6 +51,17 @@ function resolve(id,requested,moving){
   objectLayer:template.objectLayer,rotation:normalizeRotation(template.rotation),
   expression:template.expression||'neutral'};
  const entry=bridge()?.get(sourceId);
+ if(entry?.v2){
+  // Mahluk 2.0 is pre-composited from independently authored transparent planes.
+  // The four native direction rows remain consistent with every fixture in
+  // Semesta/Bangun Ruang; never substitute an unrelated NPC body or head.
+  const target=moving?"walk":requested||"idle";
+  const own=entry.v2Clips?.[target]||(target==="walk"?entry.v2Clips?.idle:null);
+  if(!own)return {url:null,mode:target,frames:1,unavailable:true,
+   source:"unavailable",loop:false};
+  return {url:own.url,mode:target,frames:own.frames,row:0,
+   durations:own.frame_ms||[],loop:own.loop!==false,separate:true,source:"mahluk2"};
+ }
  const hygiene=entry&&body()?.resolve(entry,requested);
  if(hygiene?.kind==="bathtub"){
   // Awake, horizontal foam bath uses the genuine authored six-frame
@@ -422,6 +434,6 @@ function characterPreview(id,direction='sw'){
 function retry(){imgCache.clear();previewCache.clear();}
 g.VLCharacterRig=Object.freeze({
  createRig,retry,DIR,ROW,FRAME,directionFromWorld,canonical,resolve,frameAt,characterPreview,
- get profiles(){return reset()?{}:{...legacyIds,...Object.fromEntries((bridge()?.list()||[]).map(c=>[c.id,c.id]))};}
+ get profiles(){return reset()?Object.fromEntries((bridge()?.list()||[]).filter(c=>c.v2).map(c=>[c.id,c.id])):{...legacyIds,...Object.fromEntries((bridge()?.list()||[]).map(c=>[c.id,c.id]))};}
 });
 })(window);
