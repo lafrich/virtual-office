@@ -34,7 +34,7 @@ test("hygiene replacement keeps actor identity and bedroom/WC transforms intact"
  assert.ok(rig.includes('source:"universal-bathtub"'),
   "Semesta uses authored horizontal six-frame bathtub, not standing shower");
  assert.ok(iso.includes("case 'bathtub':"));
- assert.ok(iso.includes("part(.06,.80,TYPES.bathtub.w-.12,.14,18,25,'white')"),
+ assert.ok(iso.includes("part(.06,.80,TYPES[item.assetId].w-.12,.14,18,25,'white')"),
   "Bathtub front lip must occlude the immersed lower body");
  assert.ok(body.includes("bodyRule?.kind==='bathtub'"),
   "No standing clothing layers when actor reclines in bathtub");
