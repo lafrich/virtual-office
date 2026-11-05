@@ -15,7 +15,7 @@ const STAT=['fullness','energy','hygiene','bladder'];
 const JF=window.JiwaFoundation;
 const oldCharacter=o=>['avatar','npc','pedestrian','crowd','quest_npc'].includes(o?.type)||
  o?.layer==='character';
-const visibleEntities=()=>window.VLCharacterReferenceReset?.active!==false?
+const visibleEntities=()=>window.VLCharacterReferenceReset?.active===true?
  state.entities.filter(o=>!oldCharacter(o)):state.entities;
 const defaults=()=>({wallet:6000,time:'08:00',fullness:70,energy:80,hygiene:75,bladder:20});
 const rule=(id,label,animation,conditions,effects,trigger='interact')=>({id,label,animation,enabled:true,trigger,conditions,effects});
