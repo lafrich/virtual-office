@@ -1,0 +1,11 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const html=fs.readFileSync('jiwa/index.html','utf8');
+const ui=fs.readFileSync('jiwa/jiwa.js','utf8');
+assert.ok(html.includes('/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1'));
+assert.ok(html.indexOf('human-gameplay-rig.js')<html.indexOf('jiwa.js'));
+assert.match(ui,/\$\('animation'\)\.onchange=ev=>/);
+assert.match(ui,/shared\.actionId\(typed\)/);
+assert.match(ui,/Existing saved Jiwa rules and legacy NPC sprites are never auto-rewritten/);
+assert.ok(!ui.includes("animationReady=true"));
+console.log('PASS Jiwa: canonical Male/Female gameplay animation ID on newly edited rules only');

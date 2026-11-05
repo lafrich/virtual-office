@@ -392,6 +392,20 @@ $('enabled').onchange=ev=>{const r=editedRule();if(r){r.enabled=ev.target.checke
 $('ruleLabel').oninput=ev=>{const r=editedRule();if(r){r.label=cleanWord(ev.target.value,70);markDirty();}};
 $('trigger').onchange=ev=>{const r=editedRule();if(r){r.trigger=ev.target.value;markDirty();}};
 $('animation').oninput=ev=>{const r=editedRule();if(r){r.animation=cleanWord(ev.target.value,80);markDirty();}};
+/* Shared Male/Female pose registry is a naming reference only.
+ * Existing saved Jiwa rules and legacy NPC sprites are never auto-rewritten.
+ * Normalize newly typed GAME verbs only when the user finishes editing.
+ */
+$('animation').onchange=ev=>{
+ const r=editedRule(),shared=window.VLHumanGameplayRig;
+ if(!r||!shared?.actionId)return;
+ const typed=cleanWord(ev.target.value,80);
+ const canonical=shared.actionId(typed);
+ if(canonical&&canonical!==typed){
+  r.animation=canonical;ev.target.value=canonical;markDirty();
+  notice('Mahluk Hidup action ID: '+canonical.toUpperCase()+' / animation preview only');
+ }
+};
 $('testThis').onclick=runAction;$('runSelected').onclick=runAction;$('resetTest').onclick=resetTest;
 for(const key of ['wallet','time','fullness','energy','hygiene','bladder'])$('sys-'+key).addEventListener('change',ev=>{
  if(!state.project)return;state.project.systems[key]=key==='time'?ev.target.value:key==='wallet'?safeNum(ev.target.value,0,1e9):clamp(ev.target.value);markDirty();renderSystems();resetTest();
