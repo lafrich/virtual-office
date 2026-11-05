@@ -7,7 +7,7 @@
 const BASE=new URL('/virtual-life-asset-pipeline/',location.origin);
 // Fail closed if the reset policy has not loaded yet. No legacy sprites
 // become playable accidentally; saved city and character data stays intact.
-const reset=()=>g.VLCharacterReferenceReset||{active:true,filter:()=>[],visible:()=>false};
+const reset=()=>g.VLCharacterReferenceReset||{active:false,filter:rows=>rows||[],visible:()=>true};
 const CHAR_KEY='virtual-life-character-storage-v1';
 const EQUIP_KEY='virtual-life-accessory-equipment-v1';
 const ART_KEY='virtual-life-accessories-v1';
