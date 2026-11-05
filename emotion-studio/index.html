@@ -348,6 +348,15 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 .preview-card{display:flex;flex-direction:column;align-items:center;gap:9px}
 .checker{width:200px;height:350px;max-height:42vh;display:flex;align-items:center;justify-content:center;border:1px solid #8fa6c3;background-color:#fff;background-image:linear-gradient(45deg,#e9ecf1 25%,transparent 25%),linear-gradient(-45deg,#e9ecf1 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e9ecf1 75%),linear-gradient(-45deg,transparent 75%,#e9ecf1 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
 #preview{width:100%;height:100%;image-rendering:pixelated;object-fit:contain}
+.checker{position:relative}
+.checker canvas#maleGuidePreview,.checker canvas#preview{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none}
+#maleGuidePreview{z-index:0}#preview{z-index:1}
+.male-overlay-tools{display:grid;gap:7px;background:#e4ecf7;border:1px solid #9eb4cf;padding:8px;margin:9px 0;font:10px Consolas,monospace}
+.male-overlay-tools .check{display:flex;align-items:center;gap:6px;padding:0;color:#1d426b}
+.male-overlay-tools label:not(.check){display:flex;flex-direction:column;gap:4px}
+.male-overlay-tools input[type=range],.male-guide-range input{width:100%;accent-color:#285a97}
+.male-overlay-tools small{font-size:9px;line-height:1.5;color:#50627a}
+.male-guide-range{display:flex;flex-direction:column;gap:4px;padding:5px 8px;color:#345a85}
 #previewInfo{font-size:10px;color:#53617c}
 .preview-side{max-width:175px;font-size:11px;color:#697790;line-height:1.55}
 .preview-side b{display:block;color:#273858;font-size:10px}
@@ -382,7 +391,11 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 <div id="cards" class="emotion-list" aria-label="Universal emotion assets"></div>
 <div class="library-bottom">STANDALONE ASSET LIBRARY<br>PNG/JSON exports match Mahluk Hidup 2.0. No automatic sync to characters, Semesta or Bangun Ruang.</div></aside>
 <main class="emotion-main"><div class="viewbar"><div class="viewtitle"><strong>EMOTION PREVIEW</strong><span>TRANSPARENT ALPHA PLANE</span></div><div class="viewcontrols"><button id="play">▶ PLAY</button><button id="edit" class="primary">▦ PIXEL EDITOR</button></div></div>
-<div class="preview-stage"><div class="preview-card"><div class="checker"><canvas id="preview" width="64" height="112" aria-label="Pixel emotion preview, transparent"></canvas></div><span id="previewInfo">SE · FRAME 1</span></div><div class="preview-side"><b>CAMERA VIEW</b><div id="directions" class="direction-picks"><button data-dir="se" class="active">SE</button><button data-dir="sw">SW</button><button data-dir="ne">NE</button><button data-dir="nw">NW</button></div><p>Emotion only. Head, hair, body and glasses remain separate.</p><div class="direction-note">Back views normally remain transparent — no floating face behind the head.</div></div></div>
+<div class="preview-stage"><div class="preview-card"><div class="checker"><canvas id="maleGuidePreview" width="64" height="112" aria-label="Native Human Male Base head overlay for alignment only"></canvas><canvas id="preview" width="64" height="112" aria-label="Pixel emotion preview, transparent"></canvas></div><span id="previewInfo">SE · FRAME 1</span></div><div class="preview-side"><b>CAMERA VIEW</b><div id="directions" class="direction-picks"><button data-dir="se" class="active">SE</button><button data-dir="sw">SW</button><button data-dir="ne">NE</button><button data-dir="nw">NW</button></div><div class="male-overlay-tools">
+  <label class="check"><input id="showMaleGuide" type="checkbox" checked> HUMAN MALE BASE / FACE PLACEMENT</label>
+  <label>OVERLAY OPACITY <input id="maleGuideOpacity" type="range" min="5" max="100" step="5" value="55"><span id="maleGuideOpacityLabel">55%</span></label>
+  <small>Source: original Human Male Base, idle frame 0, four native camera views. Display-only reference.</small>
+ </div><p>Emotion only. Head, hair, body and glasses remain separate.</p><div class="direction-note">Back views normally remain transparent — no floating face behind the head.</div></div></div>
 <div class="timeline-head"><strong>FRAME-BY-FRAME TIMELINE</strong><span id="frameInfo">1 FRAME</span></div>
 <div id="timeline" class="emotion-timeline" aria-label="Editable emotion animation frames"></div>
 <div class="timeline-actions"><button id="duplicateFrame">＋ DUPLICATE FRAME</button><button id="deleteFrame">− DELETE FRAME</button><span class="push"></span><span>Click a frame → Pixel Editor</span></div>
@@ -460,7 +473,8 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
      <div class="plane-buttons"><button id="pixelDeleteSelection" type="button">⌫ DELETE PIXELS</button></div>
      <p class="hint" id="pixelSelectionInfo">No selection. Select rectangle, then Move Pixels or Flip.</p>
     </div>
-    <label class="check"><input type="checkbox" id="pixelOnion" checked> CHARACTER REFERENCE (ONION)</label>
+    <label class="check"><input type="checkbox" id="pixelOnion" checked> HUMAN MALE BASE HEAD OVERLAY</label>
+    <label class="male-guide-range">MALE HEAD OPACITY <input id="pixelMaleOpacity" type="range" min="5" max="100" step="5" value="55"><span id="pixelMaleOpacityLabel">55%</span></label>
     <div class="pixel-grid-controls">
      <label class="check"><input type="checkbox" id="pixelGrid" checked> GRID MODE</label>
      <label>GRID SIZE <select id="pixelGridType"><option value="1">1 × 1 PX</option><option value="8">8 × 8 PX</option><option value="16">16 × 16 PX</option></select></label>
@@ -626,7 +640,7 @@ window.EMOTION_STUDIO_STANDALONE=true;
   const els={
    heading:overlay.querySelector("#pixelTitle"),dir:overlay.querySelector("#pixelDirection"),
    color:overlay.querySelector("#pixelColor"),size:overlay.querySelector("#pixelSize"),
-   onion:overlay.querySelector("#pixelOnion"),grid:overlay.querySelector("#pixelGrid"),
+   onion:overlay.querySelector("#pixelOnion"),headOpacity:overlay.querySelector("#pixelMaleOpacity"),headOpacityLabel:overlay.querySelector("#pixelMaleOpacityLabel"),grid:overlay.querySelector("#pixelGrid"),
    sync:overlay.querySelector("#pixelSync"),syncExisting:overlay.querySelector("#pixelSyncExisting"),
    refView:overlay.querySelector("#pixelReferenceView"),
    refFlip:overlay.querySelector("#pixelReferenceFlip"),
@@ -716,7 +730,7 @@ window.EMOTION_STUDIO_STANDALONE=true;
     if(((x/checker+y/checker)&1)===0){out.fillStyle="#d7dce5";out.fillRect(x,y,checker,checker)}
    }
    if(els.onion.checked&&ref){
-    out.save();out.globalAlpha=.20;
+    out.save();out.globalAlpha=els.headOpacity?Math.max(.05,Math.min(1,Number(els.headOpacity.value)/100)):.2;
     out.drawImage(ref,0,0,ref.width,ref.height,0,0,canvas.width,canvas.height);
     out.restore();
    }
@@ -914,6 +928,7 @@ window.EMOTION_STUDIO_STANDALONE=true;
   for(const el of [els.refView,els.refFlip,els.refOpacity,els.refX,els.refY])
    el.addEventListener(el===els.refOpacity?"input":"change",updateRef);
   els.onion.onchange=draw;els.grid.onchange=draw;els.gridType.onchange=draw;
+  els.headOpacity.oninput=()=>{els.headOpacityLabel.textContent=els.headOpacity.value+"%";draw()};
   els.sync.onchange=updateHistory;
   els.syncExisting.onclick=()=>{
    if(!source)return;
@@ -1112,7 +1127,7 @@ window.EMOTION_STUDIO_STANDALONE=true;
    draw();zoomFit();updateHistory();
    canvas.focus({preventScroll:true});
   }
-  return {open,isOpen:()=>!overlay.hidden,close:()=>{overlay.hidden=true}};
+  return {open,redraw:draw,isOpen:()=>!overlay.hidden,close:()=>{overlay.hidden=true}};
  }
  return Object.freeze({W,H,DIR,rasterLine,flood,rgba,mirroredX,create});
 });
@@ -1190,6 +1205,32 @@ return Object.freeze({FORMAT,PATH,API,DIR,TEMPLATES,validEntry,validateCatalog,r
 const U=window.MH2UniversalEmotions,P=window.MH2PlanePixelEditor;
 const $=id=>document.getElementById(id),DIR=U.DIR;
 let catalog=null,selected=null,atlas=null,frame=0,direction="se",dirty=false,playing=false,authToken="",saving=false,editor=null;
+
+// Original 64x112 RGBA Human Male Base idle frame 0 head reference,
+// extracted from media/human-male-base-guide.png in the official asset build.
+// Directions are stacked as SE, SW, NE, NW. Head-only pixels; no body layer.
+const MALE_BASE_HEAD_ATLAS="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAHACAYAAAASrm6yAAAFCklEQVR42u3dP2iUZxwH8OcOmyUGMUMrHZySJSKOOogdhEIQit2CU0ugWUrt0qVLcamDWOyYQsDFEttCJVAEpdCGDAk4GIouutRBAgWlHOdwS7r0fXnvcv9ifJ573/PzmS6XC7nn9/7e533eZ3i/IQAAAAAAAAAA4642in+6+uVHu/1+v3BjLdn3OjSKgc8vLvX/XAi7qYpRSzn4QQPPtJqN/PXvqz9GLUK9bIPvdH7h0sBTptQFOMjgM2fOnY1WhHp4y9XLfvRjd0FpOuDlk0fj1wFv/SmwH0dnT3R9v/n82fgVYD/tPvn+8fFZCYYQws72Vjh26nTX96dn5sLE5FTXI7+5vhFlQRS9AHdXlkNx+Xvs1OnwwcXP9nzu9pXFfPAhhHDxq+/z13euXa5eB/S7BN6/dT18+Mk3+c/3bl5pG/zE5FSovXM4hBDCr98uVnsO2NneCjvbW23r+79332v7TOfPw0yOlTkFpmfmwounj9uO8OzhV+GPn78rfOrVnr+7d/NKfmP00y9r4fi709XqgIUba7Xs/J+emQs721ttV4FeV4KXTx7l3dJ8/iyfDGPdEUbtgIUba7XivX148DDMLy71beujsyfyAsS+BCbdDxg0OWbdkt0Cp9oPGNmWWL+bpKwDYg9+JAuhYdcNMc/7kRWgeDvbbzk8VpuixUHPLy6FVrPRdknsND97Yvw2RYfZGMkK01mguyvL1Z4E38SuUOwiAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEUkfVZvmXIGM8kfrd1Lq9nIH6mdshC12IMvY8ZgUb0Mg+8UO2MwegHKnjGYpAOqol7Go5+yC0oftuYUqHIBeh3p2PFZpSnAfgYaO1gxWQGKEVtZpFaxE1rNRlvsVrFYL54+Tl6AqEvhYmbg/VvXw8TkVB6g0i1z8M87P+Qrws31jeoX4M61y+Hjr1dCCKEtOebYqdPh/q25PZmDRcVL6WoIu7GWxiObAwZlDmY5hZXtgOWrV8OnX3y+58hmemUOFjtlemaumleBrF2LeYGtZqNvxmDxd1kAawjxM4aizgGdeYG9Toni+3nY2oOHSTZJou8HdGYH9tscGUWiVJKorawI/ULWRhWnFX1LrDN2803dKVamAzq74cy5s11/V1z4jHXeYC/z/4etTkxOjU/eYOfmSK9MwVHOCbVUg38dcgYBAAAAAAAAAAAAAAAAAACgTfJn9pYtc/BQ6kGXLXMwyeP1y5w5WC/L4DulyhwsZeBiZmzT5sqktImTqbpAByiAAijAG1fMHNQBCnBw84tL0S6FOqAKXzJm3E60ArzORFjMJM1srm9EvSuMerv571+/Hfi8PXLyQq2yp8BBv3zswSeZA46cvFDb70DuriwnGXzSSfDIyQsD54RWsxFazUYoplTGNpJN0UG3yq1mI4/nrHTcXnHQxUXNsLJCVDZ1ttsR30/mYIqN0dqo232UiyAAAAAAAAAAAAAAAAAAAAAAAAAAAACoGHmDqQc+6EHLWd5gqmIke7Z4WTMH62UafKcUmYOlDVzMSJuLrNSJkym6QAcogAIoQOnFjNvSAWW/BDoFqliAKmWOvvU5Q9Fvh8ueOZgkbq+sg082CQ4Ttdftb1JkDibbf/tnc3U3hDAwYC3FUS9KkjaXvR40+FEEq0W/CpxfuDTUUS8WoXg5rfwpMGzCZLcMwhQdIW8QAAAAAAAAAAAAAAAAAMbHf9JBdyeE9h5gAAAAAElFTkSuQmCC";
+const maleGuide=new Image(),maleRefs={};let maleReady=false;
+function buildMaleReferences(){
+ for(let i=0;i<DIR.length;i++){
+  const c=document.createElement("canvas");c.width=64;c.height=112;
+  const ctx=c.getContext("2d");ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(maleGuide,0,i*112,64,112,0,0,64,112);
+  maleRefs[DIR[i]]=c;
+ }
+ maleReady=true;
+ if(selected)drawPreview();
+ if(editor?.isOpen())editor.redraw();
+}
+maleGuide.onload=buildMaleReferences;
+maleGuide.src=MALE_BASE_HEAD_ATLAS;
+function drawMalePreview(){
+ const c=$("maleGuidePreview"),ctx=c.getContext("2d");
+ ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,64,112);
+ if(!maleReady||!$("showMaleGuide").checked)return;
+ ctx.drawImage(maleRefs[direction],0,0);
+ c.style.opacity=String(Math.max(.05,Math.min(1,Number($("maleGuideOpacity").value)/100)));
+}
 const snapshot=()=>({...selected}),clone=x=>JSON.parse(JSON.stringify(x));
 function status(s,error=false){$("status").textContent=s;$("status").style.color=error?"#b62230":""}
 function setDirty(value=true){dirty=value;$("dirty").textContent=dirty?"● UNSAVED / EXPORT OR PUBLISH":"✓ READY / NO UNSAVED EDITS";$("dirty").style.color=dirty?"#b62230":"#276744"}
@@ -1197,7 +1238,7 @@ function stageImage(index=frame){const c=document.createElement("canvas");c.widt
  if(atlas)c.getContext("2d").drawImage(atlas,index*64,0,64,448,0,0,64,448);return c}
 function drawTile(target,index,dir="se"){const ctx=target.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,target.width,target.height);
  if(!atlas)return;const sy=DIR.indexOf(dir)*112;ctx.drawImage(atlas,index*64,sy,64,112,0,0,target.width,target.height)}
-function drawPreview(){drawTile($("preview"),frame,direction);$("previewInfo").textContent=direction.toUpperCase()+" · FRAME "+(frame+1)+" / "+selected.frames}
+function drawPreview(){drawTile($("preview"),frame,direction);drawMalePreview();$("previewInfo").textContent=direction.toUpperCase()+" · FRAME "+(frame+1)+" / "+selected.frames}
 function renderFrames(){const t=$("timeline");t.replaceChildren();
  for(let i=0;i<selected.frames;i++){const b=document.createElement("button");b.className="frame-cell"+(i===frame?" active":"");
   const c=document.createElement("canvas");c.width=64;c.height=112;drawTile(c,i,"se");
@@ -1244,7 +1285,10 @@ async function applyFrame(png){const im=await new Promise((resolve,reject)=>{con
  if(im.width!==64||im.height!==448)throw Error("Frame must be 64×448");
  const ctx=atlas.getContext("2d");ctx.clearRect(frame*64,0,64,448);ctx.drawImage(im,frame*64,0);mark();status("FRAME "+(frame+1)+" APPLIED · SAVE TO GITHUB TO PUBLISH")}
 function openEditor(){if(!atlas)return;const img=stageImage();
- editor.open({id:"emotion-frame-"+(frame+1),initialAtlas:img,originalAtlas:img,direction});
+ $("pixelOnion").checked=$("showMaleGuide").checked;
+ $("pixelMaleOpacity").value=$("maleGuideOpacity").value;
+ $("pixelMaleOpacityLabel").textContent=$("maleGuideOpacity").value+"%";
+ editor.open({id:"emotion-frame-"+(frame+1),initialAtlas:img,originalAtlas:img,direction,referenceImages:maleRefs});
 }
 function newEmotion(){if(dirty&&!window.confirm("Discard unsaved emotion edits?"))return;
  const id="emotion-"+Date.now().toString(36),fresh={id,name:"NEW EMOTION",base:"universal",frames:1,fps:6,template:"neutral"};
@@ -1308,6 +1352,8 @@ function animationTick(t){if(playing&&selected&&atlas&&!editor?.isOpen()){
 function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas"),reference:$("preview"),
  onApply:(id,png)=>{applyFrame(png).then(()=>editor.close()).catch(e=>status(e.message,true));return false},
  onSaveDefault:(id,png)=>{applyFrame(png).then(()=>editor.close()).catch(e=>status(e.message,true));return false}});
+ $("showMaleGuide").onchange=drawMalePreview;
+ $("maleGuideOpacity").oninput=()=>{$("maleGuideOpacityLabel").textContent=$("maleGuideOpacity").value+"%";drawMalePreview()};
  $("filter").oninput=renderList;$("reload").onclick=()=>reload();$("new").onclick=newEmotion;$("export").onclick=exportPng;
  $("import").onchange=e=>{importPng(e.target.files?.[0]);e.target.value=""};
  $("exportProject").onclick=exportProject;
