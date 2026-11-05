@@ -39,7 +39,7 @@ test('17 Jakarta v6b sprites publish and alias legacy lamp/bin without changing 
  assert.equal(root.VLPipelineAssets.building('kantor_a'),'legacy:kantor_a');
  assert.equal(root.VLAssetCatalog.filter(e=>e.file==='pipeline:hydrant_jakarta').length,1);
  assert.equal((await root.VLJakartaUrban.load()).loaded,true);
- assert.equal(root.VLAssetCatalog.length,18);
+ assert.equal(root.VLAssetCatalog.length,20);
 });
 test('malformed Jakarta catalog never overwrites previous published assets',async()=>{
  const {root}=fixture();
