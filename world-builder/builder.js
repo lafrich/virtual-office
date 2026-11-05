@@ -2999,6 +2999,10 @@ async function refreshMahlukHidup(full=true){
   'Mahluk Hidup synced · '+(mahluk?.list().length||0)+' characters · '+(trafficArt?.originalCount()||0)+' original vehicle types');
 }
 $('refreshAssets').onclick=()=>refreshMahlukHidup(true);
+// Rebuild live instances when Mahluk 2.0 publishes on another same-origin tab.
+window.addEventListener('storage',e=>{
+ if(e.key==='mahluk-2-library-v1')refreshMahlukHidup(false).catch(console.warn);
+});
 $('syncBangunObjects').onclick=refreshBangunRuang;
 // A building saved from Bangun Ruang edits ONE placed instance in the
 // already-open named City Draft. Patch that instance here without replacing
