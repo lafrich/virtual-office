@@ -5,6 +5,9 @@
 (function(g){
 'use strict';
 const BASE=new URL('/virtual-life-asset-pipeline/',location.origin);
+// Fail closed if the reset policy has not loaded yet. No legacy sprites
+// become playable accidentally; saved city and character data stays intact.
+const reset=()=>g.VLCharacterReferenceReset||{active:true,filter:()=>[],visible:()=>false};
 const CHAR_KEY='virtual-life-character-storage-v1';
 const EQUIP_KEY='virtual-life-accessory-equipment-v1';
 const ART_KEY='virtual-life-accessories-v1';
@@ -20,7 +23,7 @@ const read=(key,def)=>{try{return JSON.parse(localStorage.getItem(key))??def}cat
 function parseCatalog(json){
  if(!Array.isArray(json?.characters))throw Error('Invalid Mahluk Hidup character catalog');
  const next=new Map();
- for(const raw of json.characters){
+ for(const raw of (reset().active?reset().filter(json.characters):json.characters)){
   if(!raw||!SAFE_ID.test(raw.id)||/^(?:legacy_)?otis$/.test(raw.id))continue;
   if(typeof raw.sheet!=='string'||!ASSET.test(raw.sheet))continue;
   const motions=Array.isArray(raw.motions)?raw.motions.filter(m=>
@@ -49,7 +52,7 @@ function parseCatalog(json){
    status:raw.asset_status||'published',custom:false};
   next.set(entry.id,entry);
  }
- if(!next.size)throw Error('No published Mahluk Hidup characters');
+ if(!next.size&&!reset().active)throw Error('No published Mahluk Hidup characters');
  return next;
 }
 function localSync(){
@@ -113,27 +116,29 @@ async function load(){
   const json=await res.json();
   const parsed=parseCatalog(json);
   // Reference rig is Male/Female only; NPC sprite data is never replaced.
-  const baseline=g.VLHumanGameplayRig?.compile?.([...parsed.values()])||null;
+  const baseline=reset().active?null:g.VLHumanGameplayRig?.compile?.([...parsed.values()])||null;
   entries=parsed;gameplayRig=baseline;build=String(json.build_version||'').slice(0,25);
   loaded=true;lastError='';
  }catch(e){lastError=String(e.message||e);}
  const local=localSync();
  return {loaded,total:entries.size,custom:local.characters,accessories:local.accessories,error:lastError};
 }
-function get(id){return customs.get(id)||entries.get(id)||null}
-function list(){return [...entries.values(),...customs.values()]}
-function url(path){if(!ASSET.test(path))return null;
+function get(id){return reset().active&&!reset().visible(id)?null:customs.get(id)||entries.get(id)||null}
+function list(){return [...entries.values(),...customs.values()].filter(x=>!reset().active||reset().visible(x.id))}
+function url(path){if(reset().active||!ASSET.test(path))return null;
  const link=new URL(path,BASE);if(build)link.searchParams.set('build',build);
  return link.href;
 }
 function motions(id){return get(id)?.motions||[]}
 function available(id,motion){return motions(id).find(m=>m.id===motion)||null}
 function gameplayAction(id,action,fixture){
+ if(reset().active&&!reset().visible(id))return null;
  return gameplayRig?.forActor(get(id),action,fixture)||null;
 }
 function equipmentFor(id){return equipment[id]||{}}
 function has(id){return !!get(id)}
 function actionSceneFor(fixture,action){
+ if(reset().active)return null;
  return g.VLActionScenes?.forPlacement?.(fixture,action)||null;
 }
 function questProfile(id){
@@ -144,6 +149,7 @@ function questProfile(id){
 g.VLMahlukHidup=Object.freeze({
  load,localSync,get,list,url,motions,available,gameplayAction,
  equipmentFor,actionSceneFor,questProfile,has,
+ get referenceReset(){return reset().active},get referenceMessage(){return reset().message||'MENUNGGU RIG BARU'},
  get gameplayRigReady(){return !!gameplayRig?.ready},
  get buildVersion(){return build},get ready(){return loaded},
  get error(){return lastError},get baseUrl(){return BASE.href},
