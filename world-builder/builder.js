@@ -1566,7 +1566,7 @@ function updateSelection(){
  // Select the real Mahluk Hidup driver/passenger templates here.
  const transportSpec=cur?.type==='sprite'?assetByName.get(cur.asset):null;
  const modularTransport=!!transportSpec?.npcTransport?.modular;
- $('transportNPCControls').hidden=!modularTransport;
+ $('transportNPCControls').hidden=hideLegacyCharacters||!modularTransport;
  if(modularTransport){
   const slots=transportSpec.npcTransport.slots||[];
   const driver=slots.find(s=>s.role==='driver');
