@@ -383,13 +383,13 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 
 </style></head>
 <body><div class="window emotion-window">
-<header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOTION STUDIO <em>.EXE</em></b><small>UNIVERSAL DATABASE</small></div><div class="title-actions"><span class="led"></span><span id="online">STANDALONE / LOADING</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
-<nav class="menubar"><button id="reload">↻ RELOAD GITHUB</button><button id="new">＋ NEW EMOTION</button><label class="importbtn">↑ IMPORT 4-VIEW PNG<input id="import" type="file" accept="image/png,.png"></label><button id="export">↓ EXPORT PNG</button><button id="exportProject">↓ PROJECT JSON</button><label class="importbtn">↑ IMPORT PROJECT<input id="importProject" type="file" accept=".json,application/json"></label><span class="push"></span><span class="tiny">MAHLUK HIDUP 2.0 FORMAT · NO LIVE SYNC</span><span class="tiny">64×112 / VIEW · 4 DIR · MAX 48F</span></nav>
+<header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOTION STUDIO <em>.EXE</em></b><small>UNIVERSAL DATABASE</small></div><div class="title-actions"><span class="led"></span><span id="online">LOCAL LIBRARY</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
+<nav class="menubar"><button id="reload">↻ RELOAD LIBRARY</button><button id="new">＋ NEW EMOTION</button><label class="importbtn">↑ IMPORT 4-VIEW PNG<input id="import" type="file" accept="image/png,.png"></label><button id="export">↓ EXPORT PNG</button><button id="exportProject">↓ PROJECT JSON</button><label class="importbtn">↑ IMPORT PROJECT<input id="importProject" type="file" accept=".json,application/json"></label><span class="push"></span><span class="tiny">MAHLUK HIDUP 2.0 FORMAT · NO LIVE SYNC</span><span class="tiny">64×112 / VIEW · 4 DIR · MAX 48F</span></nav>
 <div class="emotion-workspace">
 <aside class="emotion-library panel"><div class="panelhead"><strong>EMOTION DATABASE</strong><small id="count">0</small></div>
 <label class="filterbox">⌕ <input id="filter" type="search" placeholder="Find an emotion..." aria-label="Search emotions"></label>
 <div id="cards" class="emotion-list" aria-label="Universal emotion assets"></div>
-<div class="library-bottom">STANDALONE ASSET LIBRARY<br>PNG/JSON exports match Mahluk Hidup 2.0. No automatic sync to characters, Semesta or Bangun Ruang.</div></aside>
+<div class="library-bottom">LOCAL LIBRARY / NO TOKEN<br>Edits are saved in this browser. Export PROJECT JSON for backup or transfer. No automatic sync to Mahluk Hidup 2 or Semesta.</div></aside>
 <main class="emotion-main"><div class="viewbar"><div class="viewtitle"><strong>EMOTION PREVIEW</strong><span>TRANSPARENT ALPHA PLANE</span></div><div class="viewcontrols"><button id="play">▶ PLAY</button><button id="edit" class="primary">▦ PIXEL EDITOR</button></div></div>
 <div class="preview-stage"><div class="preview-card"><div class="checker"><canvas id="maleGuidePreview" width="64" height="112" aria-label="Native Human Male Base head overlay for alignment only"></canvas><canvas id="preview" width="64" height="112" aria-label="Pixel emotion preview, transparent"></canvas></div><span id="previewInfo">SE · FRAME 1</span></div><div class="preview-side"><b>CAMERA VIEW</b><div id="directions" class="direction-picks"><button data-dir="se" class="active">SE</button><button data-dir="sw">SW</button><button data-dir="ne">NE</button><button data-dir="nw">NW</button></div><div class="male-overlay-tools">
   <label class="check"><input id="showMaleGuide" type="checkbox" checked> HUMAN MALE BASE / FACE PLACEMENT</label>
@@ -405,13 +405,13 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 <label>APPLY TO<select id="base"><option value="universal">UNIVERSAL / ALL BASES</option><option value="male">HUMAN MALE</option><option value="female">HUMAN FEMALE</option><option value="original">V6B ORIGINAL</option></select></label>
 <label>ANIMATION FPS<input id="fps" type="number" min="1" max="30" value="6"></label>
 <div class="small-note">RGBA frame atlas: 64 × frame count wide, 448 px high. Each column contains SE, SW, NE and NW.</div>
-<div class="sectionhead">GITHUB / PUBLISH</div><p class="hint">Save directly to the repository. No local browser database. A GitHub fine-grained token with Contents: Read &amp; write is required for publishing.</p>
-<label>GITHUB ACCESS TOKEN<input id="token" type="password" autocomplete="off" placeholder="github_pat_…" spellcheck="false"></label>
-<button id="connect">🔒 CONNECT FOR THIS TAB</button><span class="auth-label" id="authLabel">READ-ONLY · GitHub data</span>
-<button class="save" id="save">▣ SAVE TO GITHUB</button>
-<div class="small-note">GitHub publishing is optional. Export PNG or Project JSON to keep your edited files. No local browser database, and no live connection to Mahluk Hidup 2.</div>
+<div class="sectionhead">LOCAL ASSET LIBRARY</div>
+<p class="hint">Klik SAVE untuk menyimpan langsung di perangkat ini. Tidak perlu GitHub token.</p>
+<button class="save" id="save">▣ SAVE EMOTION</button>
+<button id="deleteLocal" type="button">✕ DELETE SAVED EMOTION</button>
+<div class="small-note">Saved in this browser on this device (IndexedDB). Not automatically uploaded to GitHub or synchronized with another device. Export PROJECT JSON for backup / transfer.</div>
 </div></aside>
-</div><footer class="status"><span id="status">FETCHING UNIVERSAL CATALOG ...</span><span class="push"></span><span id="dirty">SYNCED</span><span>EMOTION STUDIO / MAHLUK 2</span></footer>
+</div><footer class="status"><span id="status">FETCHING UNIVERSAL CATALOG ...</span><span class="push"></span><span id="dirty">LOCAL / READY</span><span>EMOTION STUDIO / MAHLUK 2</span></footer>
 </div>
 <div id="pixelOverlay" class="pixel-overlay" hidden>
  <section class="pixel-dialog" role="dialog" aria-modal="true" aria-labelledby="pixelTitle">
@@ -1196,7 +1196,7 @@ async function saveEntry(entry,token){if(!token)throw Error("Connect GitHub with
  if(!response.ok){const info=await response.json().catch(()=>({}));throw Error("GitHub save failed ("+response.status+"): "+String(info.message||"check permissions/conflicts"));}
  return {catalog,commit:(await response.json()).commit?.sha||""};
 }
-return Object.freeze({FORMAT,PATH,API,DIR,TEMPLATES,validEntry,validateCatalog,renderTemplate,renderAtlas,loadCatalog,saveEntry});
+return Object.freeze({FORMAT,PATH,API,DIR,TEMPLATES,validEntry,validateCatalog,renderTemplate,renderAtlas,loadCatalog,saveEntry,getStarterCatalog:()=>JSON.parse(JSON.stringify(EMBEDDED_CATALOG))});
 });
 </script>
 <script>
@@ -1232,8 +1232,64 @@ function drawMalePreview(){
  c.style.opacity=String(Math.max(.05,Math.min(1,Number($("maleGuideOpacity").value)/100)));
 }
 const snapshot=()=>({...selected}),clone=x=>JSON.parse(JSON.stringify(x));
+const LOCAL_DB="emotion-studio-local-v1",LOCAL_STORE="emotion-assets",LOCAL_FALLBACK="emotion-studio-local-fallback-v1";
+let savedEntries=new Map();
+function openLocalDB(){
+ return new Promise((resolve,reject)=>{
+  if(typeof indexedDB==="undefined")return reject(Error("IndexedDB unavailable"));
+  const req=indexedDB.open(LOCAL_DB,1);
+  req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(LOCAL_STORE))req.result.createObjectStore(LOCAL_STORE,{keyPath:"id"})};
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error||Error("Cannot open IndexedDB"));
+ });
+}
+async function localTransaction(mode,fn){
+ const db=await openLocalDB();
+ try{return await new Promise((resolve,reject)=>{
+  let request;
+  const tx=db.transaction(LOCAL_STORE,mode),store=tx.objectStore(LOCAL_STORE);
+  try{request=fn(store)}catch(error){reject(error);return}
+  tx.oncomplete=()=>resolve(request?.result);
+  tx.onerror=()=>reject(tx.error||Error("Local database write failed"));
+  tx.onabort=()=>reject(tx.error||Error("Local database transaction aborted"));
+ })}finally{db.close()}
+}
+function fallbackGet(){try{const val=JSON.parse(localStorage.getItem(LOCAL_FALLBACK)||"[]");return Array.isArray(val)?val:[]}catch{return []}}
+function fallbackSet(rows){localStorage.setItem(LOCAL_FALLBACK,JSON.stringify(rows))}
+async function loadSaved(){
+ let entries;
+ try{entries=await localTransaction("readonly",store=>store.getAll())}
+ catch(error){console.warn("IndexedDB unavailable; using browser storage fallback",error);entries=fallbackGet()}
+ const verified=entries.filter(U.validEntry);
+ return new Map(verified.map(x=>[x.id,x]));
+}
+async function persistSaved(entry){
+ // Keep exactly the same MH2 atlas fields and validate before writing.
+ if(!U.validEntry(entry))throw Error("Emotion format invalid / PNG too large");
+ try{await localTransaction("readwrite",store=>store.put(entry))}
+ catch(dbError){
+  try{const rows=fallbackGet().filter(x=>x.id!==entry.id);rows.push(entry);fallbackSet(rows)}
+  catch(localError){throw Error("Storage blocked or full. Export PROJECT JSON to keep this emotion. "+localError.message)}
+ }
+ savedEntries.set(entry.id,clone(entry));
+}
+async function removeSaved(id){
+ try{await localTransaction("readwrite",store=>store.delete(id))}
+ catch(dbError){
+  try{fallbackSet(fallbackGet().filter(x=>x.id!==id))}
+  catch(localError){throw Error("Unable to delete saved emotion: "+localError.message)}
+ }
+ savedEntries.delete(id);
+}
+function mergeCatalog(){
+ const starter=U.getStarterCatalog();
+ const result=starter.entries.filter(x=>!savedEntries.has(x.id));
+ result.push(...savedEntries.values());
+ catalog={...starter,entries:result};
+}
+
 function status(s,error=false){$("status").textContent=s;$("status").style.color=error?"#b62230":""}
-function setDirty(value=true){dirty=value;$("dirty").textContent=dirty?"● UNSAVED / EXPORT OR PUBLISH":"✓ READY / NO UNSAVED EDITS";$("dirty").style.color=dirty?"#b62230":"#276744"}
+function setDirty(value=true){dirty=value;$("dirty").textContent=dirty?"● UNSAVED CHANGES":savedEntries.has(selected?.id)?"✓ SAVED ON THIS DEVICE":"○ STARTER / NOT SAVED";$("dirty").style.color=dirty?"#b62230":"#276744"}
 function stageImage(index=frame){const c=document.createElement("canvas");c.width=64;c.height=448;
  if(atlas)c.getContext("2d").drawImage(atlas,index*64,0,64,448,0,0,64,448);return c}
 function drawTile(target,index,dir="se"){const ctx=target.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,target.width,target.height);
@@ -1249,7 +1305,7 @@ function render(){if(!selected||!atlas)return;$("name").value=selected.name;$("b
  for(const b of document.querySelectorAll("[data-dir]"))b.classList.toggle("active",b.dataset.dir===direction);
  renderFrames();drawPreview();}
 async function choose(entry,{force=false}={}){
- if(dirty&&!force&&!window.confirm("Unsaved pixels are not on GitHub. Discard them?"))return;
+ if(dirty&&!force&&!window.confirm("Discard unsaved emotion edits?"))return;
  playing=false;$("play").textContent="▶ PLAY";selected=clone(entry);frame=0;
  try{atlas=await U.renderAtlas(selected)}catch(e){status("ASSET INVALID: "+e.message,true);return}
  setDirty(false);render();renderList();status("LOADED / "+selected.name.toUpperCase()+" · "+selected.frames+" FRAMES");
@@ -1267,11 +1323,18 @@ async function renderList(){
   row.onclick=()=>choose(item);list.append(row);
  }
 }
-async function reload({force=false}={}){if(dirty&&!force&&!window.confirm("Discard unsaved emotion edits?"))return;
- status("LOADING GITHUB CATALOG ...");try{const result=await U.loadCatalog();catalog=result.catalog;
- $("online").textContent=result.from==="github"?"CATALOG / GITHUB":"STANDALONE / 12 TEMPLATES";
- const next=catalog.entries.find(x=>x.id===selected?.id)||catalog.entries[0];if(next)await choose(next,{force:true});else{status("No assets in catalog",true);await renderList()}
- }catch(e){status("CATALOG LOAD FAILED: "+e.message,true);$("online").textContent="GITHUB / OFFLINE"}}
+async function reload({force=false}={}){
+ if(dirty&&!force&&!window.confirm("Discard unsaved emotion edits?"))return;
+ status("OPENING LOCAL EMOTION LIBRARY ...");
+ try{
+  savedEntries=await loadSaved();
+  mergeCatalog();
+  $("online").textContent="LOCAL LIBRARY / "+savedEntries.size+" SAVED";
+  const next=catalog.entries.find(x=>x.id===selected?.id)||catalog.entries[0];
+  if(next)await choose(next,{force:true});
+  else{status("No assets in library",true);await renderList()}
+ }catch(e){status("LOCAL LIBRARY ERROR: "+e.message,true)}
+}
 function mark(){setDirty();renderFrames();drawPreview()}
 function addFrame(){if(selected.frames>=48){status("MAXIMUM 48 FRAMES",true);return}
  const next=document.createElement("canvas");next.width=(selected.frames+1)*64;next.height=448;
@@ -1283,7 +1346,7 @@ function removeFrame(){if(selected.frames<=1){status("ONE FRAME MUST REMAIN",tru
  atlas=next;selected.frames--;frame=Math.min(frame,selected.frames-1);mark()}
 async function applyFrame(png){const im=await new Promise((resolve,reject)=>{const x=new Image();x.onload=()=>resolve(x);x.onerror=()=>reject(Error("Frame PNG invalid"));x.src=png});
  if(im.width!==64||im.height!==448)throw Error("Frame must be 64×448");
- const ctx=atlas.getContext("2d");ctx.clearRect(frame*64,0,64,448);ctx.drawImage(im,frame*64,0);mark();status("FRAME "+(frame+1)+" APPLIED · SAVE TO GITHUB TO PUBLISH")}
+ const ctx=atlas.getContext("2d");ctx.clearRect(frame*64,0,64,448);ctx.drawImage(im,frame*64,0);mark();status("FRAME "+(frame+1)+" APPLIED · CLICK SAVE EMOTION TO KEEP")}
 function openEditor(){if(!atlas)return;const img=stageImage();
  $("pixelOnion").checked=$("showMaleGuide").checked;
  $("pixelMaleOpacity").value=$("maleGuideOpacity").value;
@@ -1318,7 +1381,7 @@ async function importProject(file){
   if(project.entries.length!==1)throw Error("Import one emotion per Project JSON");
   if(dirty&&!window.confirm("Discard unsaved changes?"))return;
   await choose(project.entries[0],{force:true});setDirty(true);
-  status("PROJECT OPENED · EXPORT PNG OR PUBLISH WHEN READY");
+  status("PROJECT OPENED · CLICK SAVE EMOTION TO KEEP ON THIS DEVICE");
  }catch(error){status("IMPORT PROJECT FAILED: "+error.message,true)}
 }
 function exportPng(){if(!atlas)return;atlas.toBlob(blob=>{if(!blob)return;const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=(selected.id||"emotion")+".png";a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)},"image/png")}
@@ -1330,21 +1393,30 @@ async function importPng(file){if(!file)return;
  const canvas=document.createElement("canvas");canvas.width=im.naturalWidth;canvas.height=448;canvas.getContext("2d").drawImage(im,0,0);
  const id="emotion-"+Date.now().toString(36);
  const fresh={id,name:file.name.replace(/\.png$/i,"").slice(0,80)||"Imported emotion",base:"universal",fps:6,frames:canvas.width/64,png:canvas.toDataURL("image/png")};
- await choose(fresh,{force:true});setDirty();status("IMPORTED INTO EDITOR · SAVE TO GITHUB TO PUBLISH");
+ await choose(fresh,{force:true});setDirty();status("IMPORTED INTO EDITOR · CLICK SAVE EMOTION TO KEEP");
  }catch(e){status("IMPORT FAILED: "+e.message,true)}}
-async function connect(){const proposed=$("token").value.trim();if(!proposed){status("ENTER GITHUB FINE-GRAINED TOKEN FOR THIS REPOSITORY",true);return}
- $("connect").disabled=true;try{await U.loadCatalog(proposed);authToken=proposed;$("token").value="";$("authLabel").textContent="✓ GITHUB AUTHORIZED · THIS TAB ONLY";status("GITHUB CONNECTED / READY TO PUBLISH")}
- catch(e){authToken="";status("TOKEN CHECK FAILED: "+e.message,true)}finally{$("connect").disabled=false}}
 async function save(){
  if(!selected||!atlas||saving)return;
- if(!authToken){status("CONNECT GITHUB FIRST TO SAVE (Contents: Read and write)",true);$("token").focus();return}
- saving=true;$("save").disabled=true;status("PUBLISHING EMOTION TO GITHUB ...");
- try{const entry={...snapshot(),name:$("name").value.trim()||"UNTITLED",base:$("base").value,frames:selected.frames,fps:Math.max(1,Math.min(30,Number($("fps").value)||6)),png:atlas.toDataURL("image/png")};
- delete entry.template;
- if(entry.png.length>3000000)throw Error("PNG too large for GitHub catalog");
- const result=await U.saveEntry(entry,authToken);catalog=result.catalog;selected=clone(entry);
- setDirty(false);await renderList();status("✓ SAVED ON GITHUB · "+result.commit.slice(0,10)+" · REFRESH MAHLUK HIDUP 2 TO LOAD");
- }catch(e){status("SAVE FAILED: "+e.message,true)}finally{saving=false;$("save").disabled=false}
+ saving=true;$("save").disabled=true;status("SAVING EMOTION LOCALLY ...");
+ try{
+  const entry={...snapshot(),name:$("name").value.trim()||"UNTITLED",base:$("base").value,
+   frames:selected.frames,fps:Math.max(1,Math.min(30,Number($("fps").value)||6)),png:atlas.toDataURL("image/png")};
+  delete entry.template;
+  await persistSaved(entry);
+  selected=clone(entry);
+  mergeCatalog();setDirty(false);await renderList();
+  $("online").textContent="LOCAL LIBRARY / "+savedEntries.size+" SAVED";
+  status("✓ SAVED ON THIS DEVICE · "+entry.name+" · NO TOKEN REQUIRED");
+ }catch(e){status("SAVE FAILED: "+e.message,true)}
+ finally{saving=false;$("save").disabled=false}
+}
+async function deleteSavedEmotion(){
+ if(!selected||!savedEntries.has(selected.id)){status("THIS IS A STARTER TEMPLATE / NOTHING TO DELETE",true);return}
+ if(!window.confirm("Delete this saved emotion from this device? Export PROJECT JSON first if you need a backup."))return;
+ const id=selected.id;
+ try{await removeSaved(id);selected=null;setDirty(false);await reload({force:true});
+  status("DELETED LOCAL EMOTION · "+id)}
+ catch(e){status("DELETE FAILED: "+e.message,true)}
 }
 function animationTick(t){if(playing&&selected&&atlas&&!editor?.isOpen()){
  if(!animationTick.prev||t-animationTick.prev>=1000/(selected.fps||6)){frame=(frame+1)%selected.frames;animationTick.prev=t;renderFrames();drawPreview()}
@@ -1364,7 +1436,7 @@ function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas
  $("name").oninput=()=>{if(selected){selected.name=$("name").value;setDirty();renderList()}};
  $("base").onchange=()=>{if(selected){selected.base=$("base").value;setDirty()}};
  $("fps").onchange=()=>{if(selected){selected.fps=Math.max(1,Math.min(30,Number($("fps").value)||6));setDirty();renderFrames()}};
- $("connect").onclick=connect;$("save").onclick=save;
+ $("save").onclick=save;$("deleteLocal").onclick=deleteSavedEmotion;
  window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
  requestAnimationFrame(animationTick);
 }
