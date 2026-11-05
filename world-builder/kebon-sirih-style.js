@@ -17,6 +17,8 @@ const TILES=Object.freeze({
  grass:'terrain/grass.png',
  plaza:'terrain/plaza.png',
  water:'terrain/water.png',
+ drain:'terrain/drain.png',
+ river:'terrain/river.png',
  soil:'terrain/soil.png'
 });
 function at(map,c,r){
@@ -147,7 +149,7 @@ function upgrade(source,catalog){
  return {map,changed,skipped};
 }
 g.VLKebonSirihStyle=Object.freeze({
- VERSION,TILES,ROOT,tileUrl(name){return TILES[name]?ROOT+TILES[name]:null},
+ VERSION,TILES,ROOT,tileUrl(name){return TILES[name]?ROOT+TILES[name]+(['road_asphalt','grass','water','drain','river'].includes(name)?'?v=jakarta-urban-terrain-v1-20261106':''):null},
  tile,category,eligible,pick,upgrade
 });
 })(window);
