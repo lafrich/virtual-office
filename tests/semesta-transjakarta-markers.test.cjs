@@ -8,13 +8,15 @@ for(const p of ['semesta-traffic-catalog.js','style-rules.js','semesta-traffic-f
  vm.runInContext(get(p),ctx,{filename:p});
 const bus=w.VLSemestaCatalog.vehicle('bus_transjakarta');
 assert.equal(bus.footprint[0],6.6);
-assert.equal(bus.editorFootprint?.[0]??bus.footprint[0],6.6);
-assert.equal(bus.editorFootprint?.[1]??bus.footprint[1],1.3);
+assert.equal(bus.editorFootprint[0],2);
+assert.equal(bus.editorFootprint[1],1);
 assert.deepEqual(Array.from(w.VLWorldStyle.footprint({
  type:'vehicle',vehicleId:'bus_transjakarta',scale:1,motion:{direction:'east'}
- },new Map())),[6.6,1.3]);
-assert.equal(w.VLSemestaTrafficFlow.lengthOf({vehicleId:'bus_transjakarta'}),6.6);
+ },new Map())),[2,1]);
+assert.equal(w.VLSemestaTrafficFlow.lengthOf({vehicleId:'bus_transjakarta'}),2);
+assert.deepEqual(Array.from(bus.editorArtFootprint),[6.6,1.3]);
 assert.match(get('semesta-traffic-art.js'),/spec\.editorArtScale/);
+assert.match(get('semesta-traffic-art.js'),/spec\.editorArtFootprint\|\|spec\.editorFootprint/);
 const engine=get('builder.js'),html=get('index.html');
 for(const id of ['markerVisibility','markerVisibilityTool','markerPicker','markerFind',
  'markerDelete','markerDeleteAll']) assert.match(html,new RegExp('id="'+id+'"'));
@@ -24,4 +26,4 @@ assert.match(engine,/const radius=isTouch\?27:20/);
 assert.match(engine,/new THREE\.CylinderGeometry\(\.48,\.48,1\.4,8\)/);
 assert.match(engine,/documentMap\.objects=documentMap\.objects\.filter\(o=>o\.type!=='marker'\)/);
 assert.match(engine,/undoPoint\(\)/);
-console.log('Semesta full-scale TransJakarta + yellow marker controls: PASS');
+console.log('Semesta full-scale art + drivable compact TransJakarta traffic: PASS');
