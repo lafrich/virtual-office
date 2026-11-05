@@ -472,7 +472,7 @@ function cityTexture(name){
 }
 const tilePalette={
  grass:0x409750,road:0x565d69,sidewalk:0xc2c6c8,
- water:0x459ac5,plaza:0xd9cfb5,soil:0x9c815e
+ water:0x459ac5,river:0x39727f,drain:0x6c7271,plaza:0xd9cfb5,soil:0x9c815e
 };
 // An infinite visual plane with sparse tile overrides avoids creating millions
 // of objects: only terrain near the current camera is rendered.
@@ -562,11 +562,11 @@ function rebuildTerrain(force=true){
   const mesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),material,items.length);
   mesh.name='Kebon Sirih · '+assetName;
   for(let i=0;i<items.length;i++){
-   const cell=items[i],y=kind==='road'?.024:kind==='sidewalk'?.036:kind==='water'?.015:.026;
+   const cell=items[i],y=kind==='road'?.024:kind==='sidewalk'?.036:['water','river','drain'].includes(kind)?.015:.026;
    tmp.position.set(cell.c+.5,y,cell.r+.5);
    tmp.rotation.set(-Math.PI/2,0,0);tmp.scale.set(1,1,1);tmp.updateMatrix();
    mesh.setMatrixAt(i,tmp.matrix);
-   if(['grass','water','soil'].includes(kind)){
+   if(['grass','water','river','soil'].includes(kind)){
     const variation=((cell.c*12347+cell.r*2917)>>>0)%9;
     mesh.setColorAt(i,new THREE.Color(source?0xffffff:tilePalette[kind]).multiplyScalar(.94+variation*.009));
    }
@@ -2608,6 +2608,8 @@ function renderAssetList(){
     {title:'Sidewalk · paint',tag:'terrain:sidewalk',category:'terrain',label:'TERRAIN / WALKABLE'},
     {title:'Grass · paint',tag:'terrain:grass',category:'terrain',label:'TERRAIN / GROUND'},
     {title:'Water · paint',tag:'terrain:water',category:'terrain',label:'TERRAIN / NOT WALKABLE'},
+    {title:'Selokan · paint',tag:'terrain:drain',category:'terrain',label:'JAKARTA / DRAIN · NOT WALKABLE'},
+    {title:'Sungai · paint',tag:'terrain:river',category:'terrain',label:'JAKARTA / RIVER · NOT WALKABLE'},
     {title:'Plaza / Paving · paint',tag:'terrain:plaza',category:'terrain',label:'TERRAIN / PLAZA'},
     {title:'Soil · paint',tag:'terrain:soil',category:'terrain',label:'TERRAIN / DIRT'},
     {title:'Ruko Kebon Sirih · 3×6',tag:'sprite:pipeline:ruko_a',category:'custom',label:'PIPELINE / PIXEL'},
