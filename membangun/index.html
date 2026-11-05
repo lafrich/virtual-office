@@ -262,6 +262,15 @@ const $=id=>document.getElementById(id);
 // Draw native walk frames into transparent canvases, never the background-baked GIF.
 (function startTransparentCharacter(){
   const canvases=[...document.querySelectorAll('.mahluk-sprite')];
+  if(window.VLCharacterReferenceReset?.active!==false){
+    for(const canvas of canvases){canvas.hidden=true;canvas.getContext('2d')?.clearRect(0,0,64,112);}
+    for(const img of document.querySelectorAll('.mahluk-static')){
+      img.hidden=true;img.removeAttribute('src');
+    }
+    for(const icon of document.querySelectorAll('.mahluk-fallback'))icon.hidden=false;
+    document.querySelector('[data-art="mahluk"]')?.setAttribute('aria-label','Menunggu model dan rig karakter baru');
+    return;
+  }
   const thumbs=[...document.querySelectorAll('.mahluk-static')];
   for(const pic of thumbs){
     pic.addEventListener('error',()=>{
