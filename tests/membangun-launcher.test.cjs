@@ -86,3 +86,22 @@ test('JIWA routes bypass the encrypted game service worker',()=>{
   assert.equal(intercepted,false,asset+' should not require the encrypted game key');
  }
 });
+
+test('Emotion Studio uses native Male Base four-view head overlay without baking it into exports',()=>{
+ const html=read('emotion-studio/index.html');
+ for(const id of ['maleGuidePreview','showMaleGuide','maleGuideOpacity','pixelMaleOpacity','pixelOnion']){
+  assert.ok(html.includes('id="'+id+'"'),'missing male overlay control '+id);
+ }
+ assert.match(html,/referenceImages:maleRefs/);
+ assert.match(html,/ctx\.drawImage\(maleGuide,0,i\*112,64,112,0,0,64,112\)/);
+ assert.match(html,/drawMalePreview\(\)/);
+ assert.match(html,/MALE_BASE_HEAD_ATLAS/);
+ const source=html.match(/const MALE_BASE_HEAD_ATLAS="data:image\/png;base64,([^"]+)"/);
+ assert.ok(source,'original Human Male Base PNG should be embedded to avoid a cross-app dependency');
+ const image=Buffer.from(source[1],'base64');
+ assert.equal(image.readUInt32BE(16),64);
+ assert.equal(image.readUInt32BE(20),448);
+ assert.match(html,/function exportProject\(/);
+ assert.match(html,/function exportPng\(/);
+ assert.ok(!html.includes('loadUniversalAssets()'),'Emotion Studio must remain independent from Mahluk 2');
+});
