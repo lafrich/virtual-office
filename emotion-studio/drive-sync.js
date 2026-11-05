@@ -2,7 +2,7 @@
  * Requires a Google OAuth Web client ID with origin https://lafrich.github.io.
  * A Google account access token lives only in page memory, never localStorage.
  */
-(function(root,factory){"use strict";const api=factory();if(typeof module==="object"&&module.exports)module.exports=api;if(root)root.EmotionDrive=api;})(typeof window!=="undefined"?window:null,function(){
+(function(root,factory){"use strict";const api=factory(root);if(typeof module==="object"&&module.exports)module.exports=api;if(root)root.EmotionDrive=api;})(typeof window!=="undefined"?window:null,function(root){
 "use strict";
 const SCOPE="https://www.googleapis.com/auth/drive.file";
 const CLIENT_KEY="emotion-studio-drive-client-id-v1";
