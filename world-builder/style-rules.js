@@ -139,7 +139,7 @@ function reason(o,objects,map,catalog){
   const minR=Math.floor(z-d/2+.08),maxR=Math.ceil(z+d/2-.08);
   for(let c=minC;c<maxC;c++)for(let r=minR;r<maxR;r++){
    const kind=tiles.get(c+','+r)||map.terrain.default||'grass';
-   if(kind==='water'&&!isMobile)return 'Objek tidak boleh menutupi air.';
+   if(['water','river','drain'].includes(kind)&&!isMobile)return 'Objek tidak boleh menutupi air atau selokan.';
    if(kind==='road'&&!isActor)return 'Bangunan/prop tidak boleh menutupi jalan.';
   }
  }
