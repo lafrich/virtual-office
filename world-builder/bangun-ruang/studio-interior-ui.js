@@ -122,7 +122,21 @@ function init(api){
  canvas.addEventListener('pointercancel',endObjectDrag);
 
  for(const key of categories){const option=document.createElement('option');option.value=key;option.textContent=key;group.append(option);}
- for(const [key,t] of Object.entries(model.templates)){const o=document.createElement('option');o.value=key;o.textContent=t.label;$('interiorTemplate').append(o);}
+ // Group 66 Indonesia presets by building context to keep the picker usable.
+ const templateSelect=$('interiorTemplate'),groups=new Map();
+ for(const [key,t] of Object.entries(model.templates)){
+  let parent=templateSelect;
+  if(t.category){
+   if(!groups.has(t.category)){
+    const group=document.createElement('optgroup');group.label=t.category;
+    templateSelect.append(group);groups.set(t.category,group);
+   }
+   parent=groups.get(t.category);
+  }
+  const o=document.createElement('option');o.value=key;
+  o.textContent=t.category?t.label.replace(t.category+' · ','')+(t.min?' · '+t.min.join('×'):''):t.label;
+  parent.append(o);
+ }
  function cfg(){return api.getConfig();}
  function numFloors(){return Math.max(1,Math.min(12,Number(cfg().floors)||1));}
  function onStatus(message){api.status(message);}
@@ -710,7 +724,11 @@ function init(api){
   if(current.items.length&&!confirm('Replace this floor\'s furniture with '+model.templates[template].label+' template?'))return;
   const before=snapshot();
   const next=model.preset(cfg(),template);next.floor=floor;scenes[floor]=next;recordUndo(before);objectGizmoActive=false;
-  selected=null;placing=null;refresh();setPreview('interior');onStatus('Floor '+floor+' template: '+model.templates[template].label);
+  selected=null;placing=null;refresh();setPreview('interior');
+  const missing=next.omitted||0;
+  onStatus('Floor '+floor+' · '+model.templates[template].label+' · '+next.items.length+
+   ' interactive furniture'+(missing?' · '+missing+' could not fit; use a larger Semesta base/footprint':'')+
+   ' · SAVE ASSET to keep this room');
  };
  $('clearInteriorRoom').onclick=()=>{
   if(scene().items.length&&!confirm('Remove all furniture on this floor?'))return;
