@@ -1,5 +1,16 @@
 # Bangun Ruang — Virtual Life Building Studio
 
+## Indonesia Interior Pack v1 — 66 context presets (2026-11-05)
+
+Bangun Ruang now loads the shared pipeline registry `/virtual-life-asset-pipeline/indonesia-interior-templates.js` with a same-repository fallback `./indonesia-interior-templates.js`. It extends the original 8 templates with **66 Indonesian layouts** (74 total) and adds **43 furniture definitions** (61 total). Presets are grouped into Rumah, Toko, Kuliner, Publik and Jasa. New furniture includes kasur lantai, WC jongkok, bak mandi/gayung, sajadah, gerobak, etalase, rak minimarket, ATM, TV, kipas, mesin cuci, and many more. Saved buildings retain action slots and are rendered by the same Semesta interior preview renderer.
+
+Choose an appropriate Semesta building footprint first, preferably at least 8×6 for retail/public rooms or 5×4 for compact housing. In **INTERIOR → ROOM TEMPLATE**, select a preset and apply it, then adjust individual furniture and its action in **INTERIOR / ACTIONS**. Finally use **Save Asset / Save to Semesta**. Smaller rooms automatically omit furniture that cannot fit and show a status warning. Existing buildings are never rewritten just by adding the new catalog.
+
+Every placement has an action ID, trigger range and collision-safe grid cell. Rig actions such as sit/sleep/toilet preview existing Mahluk Hidup poses. Unsupported actions like cook, pray, eat and laundry are explicit gameplay hooks—saved and exportable to Semesta, but **not finished multiplayer animations or executed game logic**. These must be implemented separately in Jiwa before calling them playable.
+
+Regression coverage: `tests/bangun-ruang-indonesia-interiors.test.cjs` checks all 66 rooms, 383 items at 8×6, collision/door protection, action slots, rendering, and normalize/save roundtrips.
+
+
 Standalone pixel-building asset editor, integrated with Semesta (City Builder) without touching the production game, online inventory, map, accounts, or multiplayer.
 
 - Editor: https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/
