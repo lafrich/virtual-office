@@ -26,6 +26,7 @@ try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
 const mahluk=window.VLMahlukHidup;
 const characterSync=mahluk?await mahluk.load():{loaded:false,total:0,custom:0};
 const hideLegacyCharacters=mahluk?.referenceReset===true;
+const approvedCharacter=profile=>!!mahluk?.get?.(profile)?.v2;
 const indonesiaSync=await window.VLIndonesiaAssets?.load();
 let assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
@@ -946,7 +947,7 @@ function loadVehicleImage(gfx,obj){
  }).catch(()=>{});
 }
 function makeAutomated(root,obj){
- if(hideLegacyCharacters&&obj.type!=="vehicle"){
+ if(hideLegacyCharacters&&obj.type!=="vehicle"&&!approvedCharacter(obj.profile)){
   root.visible=false;return; // Saved city NPC data remains intact.
  }
  const kind=obj.type,settings=traffic.config(obj);
@@ -1206,7 +1207,7 @@ function updateAutomated(dt){
 }
 
 function makeAvatar(root,item){
- if(hideLegacyCharacters)return;
+ if(hideLegacyCharacters&&!approvedCharacter(item.profile))return;
  const factory=window.VLCharacterRig;
  if(factory){
    const rig=factory.createRig(THREE,{direction:item.facing||'sw',pose:item.pose||null,profile:item.profile||'ichsan'});
@@ -1409,10 +1410,10 @@ function instantiate(o){
    if(riderSet)transportRiders.set(o.id,riderSet);
    break;
   }
-  case 'avatar':case 'npc':makeAvatar(root,o);if(hideLegacyCharacters)root.visible=false;break;
+  case 'avatar':case 'npc':makeAvatar(root,o);if(hideLegacyCharacters&&!approvedCharacter(o.profile))root.visible=false;break;
   case 'vehicle':case 'pedestrian':case 'crowd':case 'quest_npc':
    makeAutomated(root,o);
-   if(hideLegacyCharacters&&o.type!=='vehicle')root.visible=false;
+   if(hideLegacyCharacters&&o.type!=='vehicle'&&!approvedCharacter(o.profile))root.visible=false;
    break;
   case 'marker':makeMarker(root,o);root.visible=markerShown;break;
  }
@@ -1459,7 +1460,7 @@ function rebuild(){
 function item(){return documentMap.objects.find(o=>o.id===selectedId)||null;}
 function syncActiveAssetUI(){
  const rows=(activeAssetCamera?.list(documentMap.objects)||[]).filter(o=>
-  !hideLegacyCharacters||!['avatar','npc','pedestrian','crowd','quest_npc'].includes(o.type));
+  !hideLegacyCharacters||!['avatar','npc','pedestrian','crowd','quest_npc'].includes(o.type)||approvedCharacter(o.profile));
  const picker=$('activeAssetPicker');
  const key=rows.map(o=>[o.id,o.name,o.type].join('~')).join('|');
  if(key!==activeAssetListKey){
@@ -1738,7 +1739,9 @@ function makeObject(type,point){
   type==='avatar'||type==='npc'||type.startsWith('character:')||
   type.startsWith('pedestrian:')||type.startsWith('crowd:')||
   type.startsWith('quest:')||type.startsWith('quest-character:')
- ))return null;
+ )&&!/^character:mh2_[a-z0-9]+$/.test(type)&&
+   !/^pedestrian:mh2_[a-z0-9]+$/.test(type)&&
+   !/^quest-character:mh2_[a-z0-9]+$/.test(type))return null;
  const customActor=type.startsWith('character:')?type.slice(10):null;
  const customQuest=type.startsWith('quest-character:')?type.slice(16):null;
  const isVault=type.startsWith('vault:');
@@ -2665,7 +2668,8 @@ function renderAssetList(){
   }))
  ];
  const list=assets.filter(a=>(!hideLegacyCharacters||
-  !['character','people','quest'].includes(a.category))&&
+  !['character','people','quest'].includes(a.category)||
+  /^(character|pedestrian|quest-character):mh2_[a-z0-9]+$/.test(a.tag))&&
   (cat==='all'||a.category===cat)&&
   (a.title+' '+a.tag+' '+a.label).toLowerCase().includes(q));
  $('assetCount').textContent=String(list.length).padStart(2,'0');
