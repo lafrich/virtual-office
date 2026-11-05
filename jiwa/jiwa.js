@@ -166,7 +166,7 @@ async function loadCity(id){
   state.selected=(params.get('city')===id&&params.get('object')&&shown.some(o=>o.id===params.get('object')))?params.get('object'):(state.selected&&shown.some(o=>o.id===state.selected)?state.selected:shown[0]?.id||null);
   state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(visibleEntities().length);
   window.dispatchEvent(new Event('jiwa:context:render'));
-  $('mapInfo').textContent=record.name+' · '+state.entities.length+' OBJECTS';
+  $('mapInfo').textContent=record.name+' · '+visibleEntities().length+' OBJECTS';
   notice('City loaded: '+record.name+' · edit mechanics only, placement read-only');
  }catch(e){emptyCity('Load failed: '+e.message);}
 }
