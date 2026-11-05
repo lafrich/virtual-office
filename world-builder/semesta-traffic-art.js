@@ -280,8 +280,10 @@ function vehicleGraphic(THREE,record){
  const spec=g.VLSemestaCatalog.vehicle(record.vehicleId)||g.VLSemestaCatalog.vehicles[0];
  const scale=record.scale||1;
  const visualScale=Number(spec.editorArtScale)||1;
- const editorFootprint=spec.editorFootprint||spec.footprint||[2.9,1];
- const w=Math.max(.7,Math.min(spec.size[0]*PX*visualScale,editorFootprint[0]*.95));
+ // Artwork uses the native world ratio; editorFootprint is exclusively
+ // for traffic occupancy and must not shrink a bus's image to collision size.
+ const artFootprint=spec.editorArtFootprint||spec.editorFootprint||spec.footprint||[2.9,1];
+ const w=Math.max(.7,Math.min(spec.size[0]*PX*visualScale,artFootprint[0]*.95));
  // Alpha-56 artwork shadow must never write depth or sink into road.
  // Native tyres stay opaque and depth-test against actual 3D objects.
  const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:false,
