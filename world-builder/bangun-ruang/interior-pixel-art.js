@@ -10,7 +10,8 @@ const PAL={
  slate:'#535969',blue:'#2c6bd8',steel:'#8d97a8',seat:'#a7b2c4',
  pink:'#eabed1',mint:'#86e59a',light:'#f4ebda',warm:'#e8dec6',ink:'#2a3242'
 };
-function draw(ctx,type,x,y,W,H){
+function draw(ctx,assetId,x,y,W,H){
+ const type=g.VLBuildingInterior?.types?.[assetId]?.visualAs||assetId;
  const ox=Math.round(x),oy=Math.round(y);
  const width=Math.max(10,Math.round(W)),height=Math.max(10,Math.round(H));
  const q=(color,l,t,w,h)=>{
@@ -21,7 +22,34 @@ function draw(ctx,type,x,y,W,H){
  const box=(base='#c7cfdc',edge='#344657')=>{
   q(edge,1,2,22,20);q(base,2,2,20,19);q('#788197',2,20,20,2);
  };
- if(type==='wc'){
+ if(type==='prayer_mat'){
+  box(PAL.woodDark);q(PAL.mint,3,4,18,16);q('#f2b530',5,6,14,4);
+ }else if(type==='floor_mattress'){
+  box(PAL.wood);q(PAL.white,3,3,18,18);q(PAL.pink,3,13,18,7);
+ }else if(type==='squat_toilet'){
+  box(PAL.whiteShadow);q(PAL.white,3,3,18,17);q(PAL.slate,9,7,6,10);q(PAL.water,10,8,4,7);
+  q(PAL.white,5,8,3,10);q(PAL.white,16,8,3,10);
+ }else if(type==='water_tub'){
+  box(PAL.white);q(PAL.water,4,4,16,15);q(PAL.glass,12,10,6,4);
+ }else if(type==='food_cart'){
+  box(PAL.woodDark);q(PAL.wood,2,15,20,6);q('#f2b530',2,3,20,5);
+  q(PAL.glass,3,9,18,6);
+ }else if(type==='tv'){
+  box(PAL.woodDark);q(PAL.ink,3,5,18,13);q(PAL.glass,5,7,14,9);
+ }else if(type==='fan'){
+  box(PAL.whiteShadow);q(PAL.steel,11,12,3,9);
+  q(PAL.glass,5,4,14,11);q(PAL.blue,10,6,4,8);q(PAL.blue,7,10,10,3);
+ }else if(type==='aisle_rack'){
+  box(PAL.steel);for(const h of [6,13]){q(PAL.blue,3,h,18,2);
+   for(const xx of [5,11,17])q(PAL.mint,xx,h-4,3,4);}
+ }else if(type==='atm'){
+  box(PAL.blue);q(PAL.ink,5,5,14,9);q(PAL.glass,6,6,12,7);
+  q(PAL.white,7,17,10,2);
+ }else if(type==='food_vitrine'){
+  box(PAL.wood);q(PAL.glass,3,3,18,13);q(PAL.warm,5,12,14,3);
+ }else if(type==='rice_cooker'){
+  box(PAL.wood);q(PAL.white,5,5,14,14);q(PAL.slate,6,4,12,2);
+ }else if(type==='wc'){
   box(PAL.whiteShadow);
   q(PAL.steel,7,1,10,6);q(PAL.white,8,1,8,5);
   q(PAL.white,4,9,16,13);q(PAL.slate,7,12,10,7);
