@@ -15,6 +15,7 @@ const legacyIds=Object.fromEntries(
  [...(g.VLPipelineAssets?.characters||[]).map(x=>x.id),...Object.keys(ALIAS)]
  .map(id=>[id,ALIAS[id]||id]));
 const bridge=()=>g.VLMahlukHidup;
+const reset=()=>bridge()?.referenceReset!==false;
 const sleep=()=>g.VLUniversalSleep;
 const body=()=>g.VLUniversalBodyActions;
 const canonical=id=>bridge()?.has(id)?id:
@@ -38,6 +39,7 @@ function directionFromWorld(dx,dz,last='sw'){
  return Math.abs(dx)>=Math.abs(dz)?dx>0?'se':'nw':dz>0?'sw':'ne';
 }
 function resolve(id,requested,moving){
+ if(reset())return null; // No old actor sprites, even via direct rig calls.
  const sourceId=canonical(id);
  // Local published templates outrank the stock rig. A mere frame edit or
  // planned action is NOT a playable animation until published in all 4 views.
@@ -376,6 +378,7 @@ function loadPreviewImage(src){
  });
 }
 function characterPreview(id,direction='sw'){
+ if(reset())return Promise.resolve(null);
  const who=canonical(id),dir=normalize(direction),entry=bridge()?.get(who);
  const equip=bridge()?.equipmentFor(who)||{};
  const appearanceKey=Object.values(equip).map(v=>v?.id||'').join(',');
@@ -419,6 +422,6 @@ function characterPreview(id,direction='sw'){
 function retry(){imgCache.clear();previewCache.clear();}
 g.VLCharacterRig=Object.freeze({
  createRig,retry,DIR,ROW,FRAME,directionFromWorld,canonical,resolve,frameAt,characterPreview,
- get profiles(){return {...legacyIds,...Object.fromEntries((bridge()?.list()||[]).map(c=>[c.id,c.id]))};}
+ get profiles(){return reset()?{}:{...legacyIds,...Object.fromEntries((bridge()?.list()||[]).map(c=>[c.id,c.id]))};}
 });
 })(window);
