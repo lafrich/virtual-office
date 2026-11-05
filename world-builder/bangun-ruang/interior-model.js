@@ -6,6 +6,7 @@
 (function(g){
 'use strict';
 const ADJUST=g.VLInteractionAdjust;
+const INDONESIA=g.VLIndonesiaInteriorPack||{actions:{},types:{},templates:{}};
 const ACTIONS=Object.freeze({
  use_toilet:{label:'Use toilet',pose:'toilet',description:'Toilet / sit animation'},
  pee:{label:'Pee',pose:'toilet',description:'Toilet pose only; dedicated pee rig not available'},
@@ -23,7 +24,8 @@ const ACTIONS=Object.freeze({
  buy:{label:'Buy',pose:'talk',description:'Talk pose; checkout gameplay not implemented'},
  sell:{label:'Sell',pose:'talk',description:'Talk pose; vendor gameplay not implemented'},
  browse:{label:'Browse',pose:'idle',description:'Idle preview only'},
- open:{label:'Open',pose:null,description:'Interaction hook only'}
+ open:{label:'Open',pose:null,description:'Interaction hook only'},
+ ...INDONESIA.actions
 });
 const TYPES=Object.freeze({
  wc:{label:'WC / Toilet',category:'Bathroom',glyph:'🚽',w:1,d:1,actions:['use_toilet','pee','poop']},
@@ -43,7 +45,8 @@ const TYPES=Object.freeze({
  kitchen_sink:{label:'Kitchen Sink',category:'Kitchen',glyph:'▨',w:1,d:1,actions:['wash']},
  cashier:{label:'Kasir',category:'Shop',glyph:'▣',w:2,d:1,actions:['buy','sell']},
  shelf:{label:'Rak Barang',category:'Shop',glyph:'▤',w:2,d:1,actions:['browse']},
- counter:{label:'Display Counter',category:'Shop',glyph:'▥',w:2,d:1,actions:['buy','sell']}
+ counter:{label:'Display Counter',category:'Shop',glyph:'▥',w:2,d:1,actions:['buy','sell']},
+ ...INDONESIA.types
 });
 const TEMPLATES=Object.freeze({
  empty:{label:'Empty / Kosong',theme:'cream',items:[]},
@@ -53,7 +56,8 @@ const TEMPLATES=Object.freeze({
  office:{label:'Kantor',theme:'blue',items:[['desk',2,1],['office_chair',2,3],['computer',4,1]]},
  warung:{label:'Warung / Toko',theme:'warm',items:[['counter',3,1],['shelf',1,1],['cashier',4,3]]},
  cafe:{label:'Cafe',theme:'warm',items:[['table',2,2],['chair',2,4],['counter',4,1]]},
- kost:{label:'Kamar Kost',theme:'warm',items:[['bed',1,1],['desk',4,1],['chair',4,3],['wardrobe',1,4]]}
+ kost:{label:'Kamar Kost',theme:'warm',items:[['bed',1,1],['desk',4,1],['chair',4,3],['wardrobe',1,4]]},
+ ...INDONESIA.templates
 });
 const clone=x=>JSON.parse(JSON.stringify(x));
 const limit=(v,lo,hi)=>Math.min(hi,Math.max(lo,Math.round(Number(v)||lo)));
@@ -142,8 +146,56 @@ function action(scene,id,actionId){
  if(!TYPES[item.assetId]?.actions.includes(actionId))return false;
  item.actionId=actionId;item.pose=ACTIONS[actionId]?.pose||null;return true;
 }
+/* A preset is authored in the pipeline as relative anchors, so the same
+ * room adapts to different Semesta exterior footprints without stretching.
+ * Preserve exact legacy absolute-coordinate behavior for existing presets. */
+function reachablePositions(scene){
+ const blocked=new Set(scene.items.flatMap(occupied)),visited=new Set();
+ const start=scene.entrance,queue=[[start.c,start.r]];
+ for(let i=0;i<queue.length;i++){
+  const [c,r]=queue[i],key=c+','+r;
+  if(visited.has(key)||blocked.has(key)||c<0||r<0||c>=scene.width||r>=scene.depth)continue;
+  visited.add(key);
+  queue.push([c+1,r],[c-1,r],[c,r+1],[c,r-1]);
+ }
+ return visited;
+}
+function reachableActions(scene){
+ const seen=reachablePositions(scene);
+ if(!seen.size)return false;
+ return scene.items.every(item=>occupied(item).some(cell=>{
+  const [c,r]=cell.split(',').map(Number);
+  return [[c+1,r],[c-1,r],[c,r+1],[c,r-1]]
+   .some(([x,y])=>seen.has(x+','+y));
+ }));
+}
 function preset(cfg,key){
- const scene=layout(cfg,key);const p=TEMPLATES[key]||TEMPLATES.empty;scene.theme=p.theme;
+ const scene=layout(cfg,key),p=TEMPLATES[key]||TEMPLATES.empty;
+ scene.theme=p.theme;
+ if(p.source==='indonesia-interior-pack-v1'){
+  let skipped=0;
+  for(const [assetId,c,r] of p.items){
+   const t=TYPES[assetId];if(!t){skipped++;continue;}
+   const x=Math.max(0,Math.round(c*Math.max(0,scene.width-t.w)));
+   const z=Math.max(0,Math.round(r*Math.max(0,scene.depth-t.d)));
+   const candidates=[];
+   for(let zz=0;zz<=scene.depth-t.d;zz++)for(let xx=0;xx<=scene.width-t.w;xx++)
+    candidates.push({x:xx,z:zz,dist:Math.abs(xx-x)+Math.abs(zz-z)});
+   candidates.sort((a,b)=>a.dist-b.dist||a.z-b.z||a.x-b.x);
+   let obj=null;
+   for(const pos of candidates){
+    if(!canPlace(scene,assetId,pos.x,pos.z))continue;
+    obj=add(scene,assetId,pos.x,pos.z);
+    if(obj&&!reachableActions(scene)){scene.items.pop();obj=null;continue;}
+    if(obj)break;
+   }
+   if(!obj)skipped++;
+  }
+  scene.notes=p.label+' · '+scene.items.length+' actionable props · '+skipped+' omitted (room footprint/circulation)';
+  scene.templateId=key;scene.templateCategory=p.category;
+  scene.omitted=skipped;scene.recommendedFootprint=p.min;
+  return scene;
+ }
  for(const [assetId,c,r] of p.items){
   const t=TYPES[assetId];if(!t)continue;
   const x=Math.min(c,scene.width-t.w),z=Math.min(r,scene.depth-t.d);
@@ -161,6 +213,9 @@ function normalize(raw,cfg){
  if(!raw||raw.format!=='virtual-life-interior-v1')return base;
  base.theme=typeof raw.theme==='string'&&raw.theme.length<25?raw.theme:'empty';
  base.floor=limit(raw.floor||1,1,12);
+ if(typeof raw.templateId==='string'&&TEMPLATES[raw.templateId])base.templateId=raw.templateId;
+ if(typeof raw.templateCategory==='string')base.templateCategory=raw.templateCategory;
+ if(typeof raw.notes==='string')base.notes=raw.notes.slice(0,200);
  const oldWidth=Math.max(1,Number(raw.width)||base.width),oldDepth=Math.max(1,Number(raw.depth)||base.depth);
  // Old Bangun Ruang doubled the footprint; reproject legacy furniture into
  // matching exterior coordinates, preserving item IDs, actions and rotation.
