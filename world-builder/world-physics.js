@@ -38,7 +38,7 @@ function check(actor,point,objects,map,catalog,style,livePositions){
  const minR=Math.floor(candidate.minZ+EPS),maxR=Math.ceil(candidate.maxZ-EPS);
  for(let c=minC;c<maxC;c++)for(let r=minR;r<maxR;r++){
   const kind=at.get(c+','+r)||terrain.default||'grass';
-  if(kind==='water')return {ok:false,reason:'water',id:c+','+r};
+  if(['water','river','drain'].includes(kind))return {ok:false,reason:'water',id:c+','+r};
  }
  const old=area(actor,catalog,style,livePositions?.get(actor.id)||{x:actor.x,z:actor.z});
  for(const o of objects||[]){
