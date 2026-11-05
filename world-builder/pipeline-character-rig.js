@@ -205,7 +205,7 @@ function createRig(THREE,opt={}){
   }
   const motionKey=state.pose||spec.mode;
   if(lastAction!==motionKey){time=0;previous='';lastAction=motionKey;}
-  const count=Math.max(1,Math.min(40,spec.frames)),frame=Math.min(frameAt(spec,time),count-1);
+  const count=Math.max(1,Math.min(48,spec.frames)),frame=Math.min(frameAt(spec,time),count-1);
   const sleepPose=spec.source==="universal-sleep";
   const actualDir=sleepPose?sleep().directionFor(spec.mode,state.direction):
    state.direction;
@@ -215,7 +215,7 @@ function createRig(THREE,opt={}){
    (asset?.expressions||[]).find(f=>f.id===spec.expression):null;
   const facePath=face?.overlay||face?.sheet||null;
   const faceImage=facePath?image(bridge()?.url(facePath)):null;
-  const hygiene=asset&&body()?.resolve(asset,state.pose||spec.mode);
+  const hygiene=asset&&!asset.v2&&body()?.resolve(asset,state.pose||spec.mode);
   const bareAtlas=hygiene?image(bridge()?.url(hygiene.sheet)):null;
   const equipped=asset?bridge().equipmentFor(who):{};
   const layer=(slot,part='front')=>(slot==='hair'&&part==='back'?
@@ -288,13 +288,13 @@ function createRig(THREE,opt={}){
    if(edited?.ready)bodyCtx.drawImage(edited.pic,0,0,64,112);
    else if(!templated)bodyCtx.drawImage(pic,sx,sy,64,112,
      0,sleepPose?sleep().breathing(frame):0,64,112);
-   if(asset&&hygiene?.kind!=="bath")body()?.tintBase?.(bodyCtx,asset);
+   if(asset&&!asset.v2&&hygiene?.kind!=="bath")body()?.tintBase?.(bodyCtx,asset);
    ctx.drawImage(bodyLayer,0,0,64,112);
   }else{
    if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
    else if(!templated)ctx.drawImage(pic,sx,sy,64,112,
      0,sleepPose?sleep().breathing(frame):0,64,112);
-   if(asset&&hygiene?.kind!=="bath")body()?.tintBase?.(ctx,asset);
+   if(asset&&!asset.v2&&hygiene?.kind!=="bath")body()?.tintBase?.(ctx,asset);
   }
   for(let i=1;i<4;i++)if(overlays[i]?.ready)
    ctx.drawImage(overlays[i].pic,0,0,64,112);
@@ -390,7 +390,7 @@ function loadPreviewImage(src){
  });
 }
 function characterPreview(id,direction='sw'){
- if(reset())return Promise.resolve(null);
+ if(reset()&&!approvedV2(id))return Promise.resolve(null);
  const who=canonical(id),dir=normalize(direction),entry=bridge()?.get(who);
  const equip=bridge()?.equipmentFor(who)||{};
  const appearanceKey=Object.values(equip).map(v=>v?.id||'').join(',');
@@ -418,11 +418,11 @@ function characterPreview(id,direction='sw'){
    const bodyP=bodyCv.getContext('2d',{willReadFrequently:true});
    bodyP.imageSmoothingEnabled=false;
    bodyP.drawImage(pic,0,row*112,64,112,0,0,64,112);
-   if(entry)g.VLUniversalBodyActions?.tintBase?.(bodyP,entry);
+   if(entry&&!entry.v2)g.VLUniversalBodyActions?.tintBase?.(bodyP,entry);
    q.drawImage(bodyCv,0,0,64,112);
   }else{
    q.drawImage(pic,0,row*112,64,112,0,0,64,112);
-   if(entry)g.VLUniversalBodyActions?.tintBase?.(q,entry);
+   if(entry&&!entry.v2)g.VLUniversalBodyActions?.tintBase?.(q,entry);
   }
   for(let i=1;i<layers.length;i++)if(layers[i])q.drawImage(layers[i],0,0,64,112);
   return cv.toDataURL('image/png');
