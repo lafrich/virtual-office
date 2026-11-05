@@ -6,7 +6,7 @@
 "use strict";
 const SCOPE="https://www.googleapis.com/auth/drive.file";
 const CLIENT_KEY="emotion-studio-drive-client-id-v1";
-const CLIENT_DEFAULT=""; // Set only after user configures their public OAuth Web Client ID.
+const CLIENT_DEFAULT="369223065433-idbuhhj6akuf2cmo6vpbiblkhu019csn.apps.googleusercontent.com"; // Public OAuth Web Client ID; not a secret.
 const API="https://www.googleapis.com/drive/v3/files";
 const UPLOAD="https://www.googleapis.com/upload/drive/v3/files";
 const FOLDER_TYPE="application/vnd.google-apps.folder";
