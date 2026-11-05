@@ -8,6 +8,8 @@
 const ROAD=[32.75,36.3], BOUNDS={minX:-30,maxX:40,minZ:20,maxZ:55};
 const PRESETS=Object.freeze({
  building:'pipeline:kantor_a',shop:'pipeline:warung_madura',
+ // Newly placed generic trees should use real published vegetation immediately.
+ tree:'vegetation:pohon_angsana_M',
  bench:'pipeline:bangku_taman',lamp:'pipeline:lampu_taman',
  box:'street2/loak/props/tumpukan_kardus_sw.png',
  trash:'street2/loak/props/tong_sampah_besi_se.png'
