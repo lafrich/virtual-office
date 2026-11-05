@@ -204,7 +204,14 @@ function createRig(THREE,opt={}){
   const hygiene=asset&&body()?.resolve(asset,state.pose||spec.mode);
   const bareAtlas=hygiene?image(bridge()?.url(hygiene.sheet)):null;
   const equipped=asset?bridge().equipmentFor(who):{};
-  const layer=(slot)=>equipped[slot]?.frames?.[state.direction];
+  const layer=(slot,part='front')=>(slot==='hair'&&part==='back'?
+   equipped[slot]?.back_frames:equipped[slot]?.frames)?.[state.direction];
+  // A native hair model has a REAR strand layer below the skull. Compositing
+  // it above the face caused the original curtain/fringe corruption.
+  const rearHairURL=!(spec.source==='universal-sleep'||
+   spec.source==='universal-bathtub-auto'||hygiene?.kind==='bathtub')?
+   layer('hair','back'):null;
+  const rearHair=rearHairURL?image(rearHairURL):null;
   // Standing equipment layers have the wrong anchors on horizontal bodies.
   // The native lie frame already includes the actor's own base clothing.
   const overlayUrls=((spec.source==="universal-sleep"||
@@ -239,6 +246,7 @@ function createRig(THREE,opt={}){
   // a stale cached GPU texture while the same action frame is displayed.
   const editTag=editURL||'';
   const key=[who,spec.url,spec.mode,row,frame,hygiene?.sheet,bareAtlas?.ready,...overlayUrls.map(x=>x?.length||0),
+   rearHairURL?.length||0,rearHair?.ready,
    status,editTag,edited?.ready,facePath,faceImage?.ready,
    state.expression,state.rotation,asset?.skinTone||'base'].join(':');
   const templated=spec.source==='template';
@@ -251,8 +259,9 @@ function createRig(THREE,opt={}){
    state.failed=true;state.loaded=false;return;
   }
   ctx.clearRect(0,0,64,112);
-  // Bags sit behind every body/head layer in all four camera directions.
+  // Back packs AND modular rear hair are behind the entire skull.
   if(overlays[0]?.ready)ctx.drawImage(overlays[0].pic,0,0,64,112);
+  if(rearHair?.ready)ctx.drawImage(rearHair.pic,0,0,64,112);
   if(edited?.ready)ctx.drawImage(edited.pic,0,0,64,112);
   else if(!templated)ctx.drawImage(pic,sx,sy,64,112,
     0,sleepPose?sleep().breathing(frame):0,64,112);
@@ -369,7 +378,9 @@ function characterPreview(id,direction='sw'){
   const layer=slot=>equip[slot]?.frames?.[dir]||null;
   const layers=await Promise.all(['bag','shoes','pants','shirt','hair','helmet']
    .map(slot=>loadPreviewImage(layer(slot))));
+  const rearHair=await loadPreviewImage(equip.hair?.back_frames?.[dir]||null);
   if(layers[0])q.drawImage(layers[0],0,0,64,112);
+  if(rearHair)q.drawImage(rearHair,0,0,64,112);
   q.drawImage(pic,0,row*112,64,112,0,0,64,112);
   if(entry)g.VLUniversalBodyActions?.tintBase?.(q,entry);
   for(let i=1;i<layers.length;i++)if(layers[i])q.drawImage(layers[i],0,0,64,112);

@@ -61,14 +61,16 @@ function localSync(){
   for(const raw of stored.slice(0,100)){
    if(!raw||!SAFE_ID.test(raw.id)||!SLOTS.includes(raw.category)||
       !BASES.includes(raw.template_base||'astrofrich_base'))continue;
-   const frames={};
+   const frames={},back_frames={};
    for(const dir of DIR){
-    const url=raw.frames?.[dir];
+    const url=raw.frames?.[dir],rear=raw.back_frames?.[dir];
     if(typeof url==='string'&&url.length<100000&&DATA.test(url))frames[dir]=url;
+    if(typeof rear==='string'&&rear.length<100000&&DATA.test(rear))back_frames[dir]=rear;
    }
-   if(DIR.every(d=>frames[d]))nextAccessories.set(raw.id,{
+   const nativeRear=raw.category==='hair'&&DIR.every(d=>!!back_frames[d]);
+   if(DIR.every(d=>!!frames[d]))nextAccessories.set(raw.id,{
     id:raw.id,category:raw.category,baseId:raw.template_base||'astrofrich_base',
-    frames
+    frames,...(nativeRear?{back_frames}:{})
    });
   }
  }
