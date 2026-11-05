@@ -629,7 +629,7 @@ function mount(api){
  showProfiles();
  refreshProfiles(true);
  // Receive Mahluk 2.0 publish events from other same-origin tabs.
- g.addEventListener("storage",event=>{
+ if(typeof g.addEventListener==="function")g.addEventListener("storage",event=>{
   if(event.key==="mahluk-2-library-v1")refreshProfiles(false);
  });
  function tick(now){
