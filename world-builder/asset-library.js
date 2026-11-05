@@ -103,7 +103,7 @@ async function assetHealthy(spec,imageUrl){
   const v=spec.variants||{},dirs=DIR.filter(d=>Object.prototype.hasOwnProperty.call(v,d));
   if(!dirs.length)return false;
   for(const dir of dirs){
-   if(!validGeometry(v[dir])||!/^((kampung|jalan_besar|props|pasar_loak|gang|taman|sinyal)\/)[a-z0-9_-]+_(sw|se|ne|nw)\.png$/i.test(v[dir].file||''))
+   if(!validGeometry(v[dir])||!/^((kampung|jalan_besar|jalan_lokal|props|pasar_loak|gang|taman|sinyal)\/)[a-z0-9_-]+_(sw|se|ne|nw)\.png$/i.test(v[dir].file||''))
     return false;
   }
   // Every DECLARED facing must be real to avoid broken gallery detail views.
