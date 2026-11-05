@@ -69,6 +69,11 @@ function category(o){
 }
 function eligible(o,isReference=false){
  if(!o||!ALLOWED.has(o.type))return false;
+ // Every legacy 'tree' uses Semesta's generic proxy plane. Earlier migration
+ // only recognized tagged/reference trees, leaving hand-placed and older
+ // saved-city trees looking like placeholders after reload.
+ // Native sprite trees and user-supplied vault art are never remapped.
+ if(o.type==='tree'&&!o.assetPath)return true;
  const tags=Array.isArray(o.tags)?o.tags:[];
  if(tags.some(t=>['reference-city','city-sample','placeholder','builder-placeholder','pixel-preview'].includes(t)))return true;
  if(String(o.id||'').startsWith('ref-'))return true;
@@ -121,7 +126,8 @@ function upgrade(source,catalog){
   // Keep exact object ID, position, semantic name and existing interactions;
   // only visual/type/metadata change. Do not alter original city topology.
   const res={...o,type:'sprite',asset:spec.file,width:spec.width,height:spec.height,
-   rotation:0,scale:1,layer:category(o)==='tree'?'vegetation':category(o)==='building'?'structure':'prop',
+   rotation:0,scale:category(o)==='tree'?Number(o.scale)||1:1,
+   layer:category(o)==='tree'?'vegetation':category(o)==='building'?'structure':'prop',
    collision:spec.collision!==false,blocking:spec.collision===false?'no':'auto',
    replaceable:true,tags:[...new Set([...tags,'kebon-sirih','pipeline-native'])],
    source:spec.source,assetPath:undefined,assetCategory:undefined,
