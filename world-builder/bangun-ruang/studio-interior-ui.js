@@ -192,7 +192,7 @@ function init(api){
  }
  function buildTray(){
   tray.replaceChildren();tiles.clear();
-  for(const [key,def] of Object.entries(model.types)){
+  for(const [key,def] of Object.entries(model.types).filter(([,def])=>def.category===group.value)){
    const button=document.createElement('button');button.type='button';
    button.className='interior-quick-card';button.dataset.interiorAsset=key;
    button.setAttribute('aria-label','Place '+def.label);
@@ -718,7 +718,7 @@ function init(api){
  $('interiorViewPlan').onclick=()=>setInteriorView('plan');
  $('buildingMode').onchange=()=>{setMode($('buildingMode').value==='interactive');onStatus(enabled?'Interactive: floor editor enabled':'Decorative building: interior disabled');};
  $('interiorFloor').onchange=()=>selectFloor($('interiorFloor').value);
- group.onchange=updateCategories;updateCategories();
+ group.onchange=()=>{updateCategories();buildTray();};updateCategories();
  $('applyInteriorTemplate').onclick=()=>{
   const current=scene(),template=$('interiorTemplate').value;
   if(current.items.length&&!confirm('Replace this floor\'s furniture with '+model.templates[template].label+' template?'))return;
