@@ -44,7 +44,7 @@ self.addEventListener('fetch', ev => {
   const req = ev.request, u = new URL(req.url);
   if (req.method !== 'GET' || u.origin !== location.origin || !u.pathname.startsWith(BASE)) return;
   let p; try { p = decodeURIComponent(u.pathname.slice(BASE.length)); } catch (e) { return; }
-  if (p.startsWith('staging/') || p.startsWith('world-builder/') || p.startsWith('membangun/') || p.startsWith('jiwa/')) return; // independent apps bypass encrypted game routing
+  if (p.startsWith('staging/') || p.startsWith('world-builder/') || p.startsWith('membangun/') || p.startsWith('jiwa/') || p === 'emotion-studio' || p.startsWith('emotion-studio/')) return; // independent apps bypass encrypted game routing
   if (PLAIN.has(p) || p.endsWith('.enc')) return;               // lock page + ciphertext straight from the network
   ev.respondWith(handle(ev, p, u));
 });
