@@ -381,11 +381,85 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 @media(max-width:950px){.emotion-window{height:auto;min-height:100vh;width:100%;margin:0}.emotion-workspace{grid-template-columns:200px minmax(0,1fr)}.emotion-inspector{grid-column:1/-1}.ins-body{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))}.preview-stage{gap:18px}.checker{max-height:310px}}
 @media(max-width:650px){.emotion-workspace{display:flex;flex-direction:column}.emotion-library{max-height:180px;min-height:160px}.emotion-list{flex-direction:row;overflow-x:auto}.emotion-card{min-width:135px}.preview-stage{min-height:300px}.checker{width:150px;height:260px}.preview-side{max-width:130px}.ins-body{grid-template-columns:1fr!important}.timeline-actions{flex-wrap:wrap}.menubar{flex-wrap:wrap}}
 
+
+/* Mobile Emotion Studio workspace tabs. Desktop keeps the original 3-column XP layout. */
+.emotion-mobile-tabs{display:none}
+@media(max-width:650px){
+ html,body{max-width:100%;overflow-x:hidden}
+ .emotion-window{width:100%!important;height:auto!important;min-height:100dvh!important;overflow:visible!important;margin:0!important}
+ .emotion-window>.titlebar{height:auto;min-height:42px;padding:6px 8px;flex-wrap:wrap;gap:4px}
+ .emotion-window .titlebar .brand{font-size:12px;gap:5px}
+ .emotion-window .titlebar .brand small,.emotion-window .titlebar .window-buttons{display:none}
+ .emotion-window .title-actions{gap:5px;font-size:9px}
+ .emotion-window>.menubar{
+   display:flex!important;flex-wrap:nowrap!important;align-items:center;
+   overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain;
+   -webkit-overflow-scrolling:touch;touch-action:pan-x;
+   gap:5px;min-height:43px;height:auto;max-width:100vw;padding:5px 8px;
+   flex:0 0 auto;scrollbar-width:thin
+ }
+ .emotion-window>.menubar>button,.emotion-window>.menubar>.importbtn{
+   flex:0 0 auto!important;white-space:nowrap;font-size:11px;min-height:30px;
+   padding:6px 9px!important;border:1px solid #9cabbc;border-radius:2px;background:#ebeae7
+ }
+ .emotion-window>.menubar>.push,.emotion-window>.menubar>.tiny{display:none!important}
+ .emotion-mobile-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+   gap:2px;padding:5px 7px;background:#c2cbd9;border-bottom:2px solid #859db7;
+   position:sticky;top:0;z-index:12}
+ .emotion-mobile-tabs button{min-width:0;padding:10px 2px;text-align:center;
+   background:#e9ecf3;color:#23436a;border:1px solid #fff;
+   border-right-color:#7d8fa6;border-bottom-color:#7d8fa6;
+   font:700 10px Tahoma,Arial,sans-serif}
+ .emotion-mobile-tabs button.active{background:#fff;color:#064d9f;
+   box-shadow:inset 0 3px #1a64b4;border-color:#7196c8}
+ .emotion-workspace{display:block!important;min-height:calc(100dvh - 160px);padding:5px!important}
+ .emotion-workspace>.emotion-library,.emotion-workspace>.emotion-main,
+ .emotion-workspace>.emotion-inspector{display:none!important}
+ .emotion-workspace[data-mobile-panel="library"]>.emotion-library{display:flex!important;max-height:none!important;min-height:calc(100dvh - 180px)}
+ .emotion-workspace[data-mobile-panel="preview"]>.emotion-main{display:flex!important;min-height:calc(100dvh - 180px)}
+ .emotion-workspace[data-mobile-panel="properties"]>.emotion-inspector{display:flex!important;grid-column:auto;max-height:none!important;min-height:calc(100dvh - 180px)}
+ .emotion-workspace .emotion-list{display:flex!important;flex-direction:column!important;
+   gap:5px;overflow-y:auto!important;overflow-x:hidden!important;max-height:none}
+ .emotion-workspace .emotion-card{min-width:0!important;width:100%;flex:0 0 auto}
+ .emotion-workspace .emotion-inspector .ins-body{display:flex!important;flex-direction:column!important;
+   gap:10px;overflow:visible!important;padding:10px!important}
+ .emotion-workspace .emotion-inspector .ins-body>*{min-width:0}
+ .emotion-main .preview-stage{display:flex;flex-direction:column;gap:14px;
+   min-height:0;align-items:center;justify-content:flex-start;padding:12px}
+ .emotion-main .preview-card{max-width:100%}
+ .emotion-main .checker{width:min(56vw,180px);height:auto;aspect-ratio:64/112;max-height:none}
+ .emotion-main .preview-side{width:100%;max-width:390px;display:grid;gap:8px}
+ .emotion-main .direction-picks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+ .emotion-main .direction-picks button{min-height:36px}
+ .emotion-main .viewbar{min-height:40px;flex-wrap:wrap;gap:4px}
+ .emotion-main .viewcontrols{flex:1 1 auto;justify-content:flex-end}
+ .emotion-main .viewcontrols .primary{margin:0;width:auto;padding:7px}
+ .emotion-main .emotion-timeline{min-height:102px;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+ .emotion-main .timeline-actions{display:flex;flex-wrap:wrap;gap:5px}
+ .emotion-main .timeline-actions button{flex:1 1 130px;min-height:36px}
+ .emotion-window>.status{height:auto;min-height:29px;flex-wrap:wrap;white-space:normal;padding:5px 8px;font-size:9px}
+ .emotion-window .pixel-overlay{padding:2px}
+ .emotion-window .pixel-dialog{width:100%;height:calc(100dvh - 4px);max-height:calc(100dvh - 4px)}
+ .emotion-window .pixel-toolbar{display:flex!important;flex-wrap:nowrap!important;align-items:center;
+   overflow-x:auto!important;overflow-y:hidden!important;min-height:46px;flex:0 0 auto;
+   -webkit-overflow-scrolling:touch;touch-action:pan-x}
+ .emotion-window .pixel-toolbar>*{flex:0 0 auto;white-space:nowrap}
+ .emotion-window .pixel-side{max-width:100%;overflow-x:hidden}
+ .emotion-window .pixel-workarea{min-width:0;overflow-y:auto}
+ .emotion-window .pixel-dialog-foot{flex-wrap:wrap}
+ .emotion-window .pixel-dialog-foot button{min-height:36px}
+}
+
 </style></head>
 <body><div class="window emotion-window">
 <header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOTION STUDIO <em>.EXE</em></b><small>UNIVERSAL DATABASE</small></div><div class="title-actions"><span class="led"></span><span id="online">LOCAL LIBRARY</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
 <nav class="menubar"><button id="reload">↻ RELOAD LIBRARY</button><button id="new">＋ NEW EMOTION</button><label class="importbtn">↑ IMPORT 4-VIEW PNG<input id="import" type="file" accept="image/png,.png"></label><button id="export">↓ EXPORT PNG</button><button id="exportProject">↓ PROJECT JSON</button><label class="importbtn">↑ IMPORT PROJECT<input id="importProject" type="file" accept=".json,application/json"></label><span class="push"></span><span class="tiny">MAHLUK HIDUP 2.0 FORMAT · NO LIVE SYNC</span><span class="tiny">64×112 / VIEW · 4 DIR · MAX 48F</span></nav>
-<div class="emotion-workspace">
+<nav class="emotion-mobile-tabs" aria-label="Emotion Studio mobile workspace">
+  <button type="button" data-mobile-panel="library" aria-pressed="false">▦ DATABASE</button>
+  <button type="button" data-mobile-panel="preview" aria-pressed="true" class="active">▶ PREVIEW</button>
+  <button type="button" data-mobile-panel="properties" aria-pressed="false">⚙ PROPERTIES</button>
+</nav>
+<div class="emotion-workspace" id="emotionWorkspace" data-mobile-panel="preview">
 <aside class="emotion-library panel"><div class="panelhead"><strong>EMOTION DATABASE</strong><small id="count">0</small></div>
 <label class="filterbox">⌕ <input id="filter" type="search" placeholder="Find an emotion..." aria-label="Search emotions"></label>
 <div id="cards" class="emotion-list" aria-label="Universal emotion assets"></div>
@@ -1505,7 +1579,19 @@ function animationTick(t){if(playing&&selected&&atlas&&!editor?.isOpen()){
 function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas"),reference:$("preview"),
  onApply:(id,png)=>{applyFrame(png).then(()=>editor.close()).catch(e=>status(e.message,true));return false},
  onSaveDefault:(id,png)=>{applyFrame(png).then(()=>editor.close()).catch(e=>status(e.message,true));return false}});
- $("showMaleGuide").onchange=drawMalePreview;
+ for(const tab of document.querySelectorAll("[data-mobile-panel]")){
+  if(!tab.matches("button"))continue;
+  tab.onclick=()=>{
+   const pane=tab.dataset.mobilePanel;
+   $("emotionWorkspace").dataset.mobilePanel=pane;
+   for(const button of document.querySelectorAll(".emotion-mobile-tabs button")){
+    const on=button.dataset.mobilePanel===pane;
+    button.classList.toggle("active",on);
+    button.setAttribute("aria-pressed",String(on));
+   }
+  };
+ }
+  $("showMaleGuide").onchange=drawMalePreview;
  $("maleGuideOpacity").oninput=()=>{$("maleGuideOpacityLabel").textContent=$("maleGuideOpacity").value+"%";drawMalePreview()};
  $("filter").oninput=renderList;$("reload").onclick=()=>reload();$("new").onclick=newEmotion;$("export").onclick=exportPng;
  $("import").onchange=e=>{importPng(e.target.files?.[0]);e.target.value=""};
