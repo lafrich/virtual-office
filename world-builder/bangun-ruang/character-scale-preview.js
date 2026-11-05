@@ -242,7 +242,7 @@ function mount(api){
  }
  function updateControls(){
   const active=actor.active,interior=inside();
-  $('scaleSpawn').disabled=bridge?.referenceReset!==false;
+  $('scaleSpawn').disabled=bridge?.referenceReset===true;
   $('scaleRemove').disabled=!active;
   $('scaleIdle').disabled=!active;
   $('scaleWalkDoor').disabled=!active||interior||cfg().interactive!==true||actor.scene!=='exterior';
@@ -251,7 +251,7 @@ function mount(api){
   $('scaleSpawn').textContent=actor.armed?'⌖ Tap Canvas':'＋ Place';
  }
  function showCharacter(){
-  if(bridge?.referenceReset!==false)return false;
+  if(bridge?.referenceReset===true)return false;
   return actor.active&&((inside()&&actor.scene==='interior'&&
    actor.floor===api.getInterior?.()?.floor)||(!inside()&&actor.scene==='exterior'));
  }
@@ -363,7 +363,7 @@ function mount(api){
   const p=spawnPoint();actor.c=p[0];actor.r=p[1];actor.floor=1;actor.scene='exterior';
  }
  function spawn(){
-  if(bridge?.referenceReset!==false){
+  if(bridge?.referenceReset===true){
    status('MENUNGGU MODEL & RIG KARAKTER BARU');return;
   }
   if(!actor.active){
@@ -427,7 +427,7 @@ function mount(api){
   walk([start,dest],arrived);
  }
  function beginAdjustment(draft){
-  if(bridge?.referenceReset!==false){
+  if(bridge?.referenceReset===true){
    status('MENUNGGU MODEL & RIG KARAKTER BARU');return false;
   }
   const item=api.getSelectedProp?.(),room=api.getInterior?.();
@@ -524,7 +524,7 @@ function mount(api){
  function showProfiles(){
   const previous=choose.value;choose.replaceChildren();
   const entries=bridge?.list?.()||[];
-  const reset=bridge?.referenceReset!==false;
+  const reset=bridge?.referenceReset===true;
   const fallback=reset?[]:[{id:'ichsan',name:'Ichsan / V6B'}];
   const catalog=entries.length?entries:fallback;
   for(const item of catalog){
