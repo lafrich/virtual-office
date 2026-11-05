@@ -389,7 +389,7 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 <aside class="emotion-library panel"><div class="panelhead"><strong>EMOTION DATABASE</strong><small id="count">0</small></div>
 <label class="filterbox">⌕ <input id="filter" type="search" placeholder="Find an emotion..." aria-label="Search emotions"></label>
 <div id="cards" class="emotion-list" aria-label="Universal emotion assets"></div>
-<div class="library-bottom">LOCAL LIBRARY / NO TOKEN<br>Edits are saved in this browser. Export PROJECT JSON for backup or transfer. No automatic sync to Mahluk Hidup 2 or Semesta.</div></aside>
+<div class="library-bottom">GOOGLE DRIVE + LOCAL LIBRARY<br>Drive-authored emotions can be opened from PC and HP with the same Google account. Native 64×112 four-view format.</div></aside>
 <main class="emotion-main"><div class="viewbar"><div class="viewtitle"><strong>EMOTION PREVIEW</strong><span>TRANSPARENT ALPHA PLANE</span></div><div class="viewcontrols"><button id="play">▶ PLAY</button><button id="edit" class="primary">▦ PIXEL EDITOR</button></div></div>
 <div class="preview-stage"><div class="preview-card"><div class="checker"><canvas id="maleGuidePreview" width="64" height="112" aria-label="Native Human Male Base head overlay for alignment only"></canvas><canvas id="preview" width="64" height="112" aria-label="Pixel emotion preview, transparent"></canvas></div><span id="previewInfo">SE · FRAME 1</span></div><div class="preview-side"><b>CAMERA VIEW</b><div id="directions" class="direction-picks"><button data-dir="se" class="active">SE</button><button data-dir="sw">SW</button><button data-dir="ne">NE</button><button data-dir="nw">NW</button></div><div class="male-overlay-tools">
   <label class="check"><input id="showMaleGuide" type="checkbox" checked> HUMAN MALE BASE / FACE PLACEMENT</label>
@@ -405,11 +405,21 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 <label>APPLY TO<select id="base"><option value="universal">UNIVERSAL / ALL BASES</option><option value="male">HUMAN MALE</option><option value="female">HUMAN FEMALE</option><option value="original">V6B ORIGINAL</option></select></label>
 <label>ANIMATION FPS<input id="fps" type="number" min="1" max="30" value="6"></label>
 <div class="small-note">RGBA frame atlas: 64 × frame count wide, 448 px high. Each column contains SE, SW, NE and NW.</div>
-<div class="sectionhead">LOCAL ASSET LIBRARY</div>
-<p class="hint">Klik SAVE untuk menyimpan langsung di perangkat ini. Tidak perlu GitHub token.</p>
-<button class="save" id="save">▣ SAVE EMOTION</button>
-<button id="deleteLocal" type="button">✕ DELETE SAVED EMOTION</button>
-<div class="small-note">Saved in this browser on this device (IndexedDB). Not automatically uploaded to GitHub or synchronized with another device. Export PROJECT JSON for backup / transfer.</div>
+<div class="sectionhead">GOOGLE DRIVE / CROSS-DEVICE SYNC</div>
+ <p class="hint">Simpan emosi ke Google Drive agar bisa dibuka dari PC dan HP. Sign in dilakukan langsung oleh Google, bukan GitHub token.</p>
+ <label>GOOGLE OAUTH WEB CLIENT ID<input id="driveClientId" type="text" autocomplete="off" spellcheck="false" placeholder="123456789-xxxx.apps.googleusercontent.com"></label>
+ <button id="driveConfigure" type="button">⚙ SAVE CLIENT ID</button>
+ <button id="driveConnect" type="button">☁ CONNECT GOOGLE DRIVE</button>
+ <span id="driveLabel" class="auth-label">NOT CONNECTED · GOOGLE LOGIN REQUIRED</span>
+ <button id="driveRefresh" type="button">↻ LOAD FROM GOOGLE DRIVE</button>
+ <button class="save" id="driveSave" type="button">☁ SAVE TO GOOGLE DRIVE</button>
+ <a id="driveFolder" href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="noopener noreferrer">OPEN MY GOOGLE DRIVE</a>
+ <div class="small-note">Setup awal: Google Cloud → enable Google Drive API → OAuth Web Client ID, authorized JavaScript origin <code>https://lafrich.github.io</code>. Jangan masukkan Client Secret. Drive API scope: drive.file (file yang dibuat aplikasi saja).</div>
+ <div class="sectionhead">LOCAL / OFFLINE BACKUP</div>
+ <p class="hint">Save lokal tetap tersedia untuk offline. Untuk pindah perangkat, gunakan Google Drive setelah connect.</p>
+ <button class="save" id="save">▣ SAVE LOCALLY</button>
+ <button id="deleteLocal" type="button">✕ DELETE SAVED EMOTION (LOCAL)</button>
+ <div class="small-note">Local Save stays on this device. Google Drive Save writes the editable JSON and PNG atlas to a Drive folder. No sync with Mahluk Hidup 2 / Semesta yet.</div>
 </div></aside>
 </div><footer class="status"><span id="status">FETCHING UNIVERSAL CATALOG ...</span><span class="push"></span><span id="dirty">LOCAL / READY</span><span>EMOTION STUDIO / MAHLUK 2</span></footer>
 </div>
@@ -1199,12 +1209,16 @@ async function saveEntry(entry,token){if(!token)throw Error("Connect GitHub with
 return Object.freeze({FORMAT,PATH,API,DIR,TEMPLATES,validEntry,validateCatalog,renderTemplate,renderAtlas,loadCatalog,saveEntry,getStarterCatalog:()=>JSON.parse(JSON.stringify(EMBEDDED_CATALOG))});
 });
 </script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="./drive-sync.js?v=1"></script>
 <script>
-/* Standalone Emotion Studio. Only exports compatible assets; no cross-app sync. */
+/* Standalone Emotion Studio. Optional Google Drive cross-device sync, no game integration. */
 (function(){"use strict";
 const U=window.MH2UniversalEmotions,P=window.MH2PlanePixelEditor;
 const $=id=>document.getElementById(id),DIR=U.DIR;
-let catalog=null,selected=null,atlas=null,frame=0,direction="se",dirty=false,playing=false,authToken="",saving=false,editor=null;
+let catalog=null,selected=null,atlas=null,frame=0,direction="se",dirty=false,playing=false,saving=false,editor=null;
+const D=window.EmotionDrive;
+let driveEntries=new Map(),driveBusy=false;
 
 // Original 64x112 RGBA Human Male Base idle frame 0 head reference,
 // extracted from media/human-male-base-guide.png in the official asset build.
@@ -1283,9 +1297,73 @@ async function removeSaved(id){
 }
 function mergeCatalog(){
  const starter=U.getStarterCatalog();
- const result=starter.entries.filter(x=>!savedEntries.has(x.id));
- result.push(...savedEntries.values());
- catalog={...starter,entries:result};
+ const merged=new Map(starter.entries.map(e=>[e.id,e]));
+ for(const [id,entry] of savedEntries)merged.set(id,entry);
+ for(const [id,entry] of driveEntries)merged.set(id,entry);
+ catalog={...starter,entries:[...merged.values()]};
+}
+function driveStatus(message,error=false){
+ $("driveLabel").textContent=message;
+ $("driveLabel").style.color=error?"#b62230":"#276744";
+}
+function driveConfigured(){
+ if(!D){driveStatus("DRIVE MODULE UNAVAILABLE",true);return}
+ $("driveClientId").value=D.client()||"";
+ driveStatus(D.connected()?"✓ GOOGLE DRIVE CONNECTED":"NOT CONNECTED · GOOGLE LOGIN REQUIRED");
+}
+function configureDrive(){
+ if(!D){driveStatus("DRIVE MODULE UNAVAILABLE",true);return}
+ try{D.configure($("driveClientId").value);
+  driveStatus("CLIENT ID SAVED ON THIS DEVICE · CLICK CONNECT");status("GOOGLE OAUTH CLIENT ID CONFIGURED · NOT YET CONNECTED");
+ }catch(e){driveStatus(e.message,true);status("SETUP FAILED: "+e.message,true)}
+}
+async function connectDrive(){
+ if(!D){driveStatus("DRIVE MODULE UNAVAILABLE",true);return}
+ if(driveBusy)return;
+ driveBusy=true;$("driveConnect").disabled=true;
+ try{
+  if($("driveClientId").value.trim()&&D.client()!==$("driveClientId").value.trim())D.configure($("driveClientId").value);
+  await D.connect();driveStatus("✓ GOOGLE DRIVE CONNECTED · PERSONAL DRIVE FILES");
+  const folder=await D.ensureLibrary();
+  $("driveFolder").href="https://drive.google.com/drive/folders/"+encodeURIComponent(folder);
+  status("GOOGLE DRIVE CONNECTED · LOADING EMOTIONS");
+  await refreshDrive({force:true});
+ }catch(e){driveStatus("CONNECT FAILED: "+e.message,true);status("DRIVE CONNECT FAILED: "+e.message,true)}
+ finally{driveBusy=false;$("driveConnect").disabled=false}
+}
+async function refreshDrive({force=false}={}){
+ if(!D?.connected()){status("CONNECT GOOGLE DRIVE FIRST TO LOAD CROSS-DEVICE EMOTIONS",true);return}
+ if(dirty&&!force&&!window.confirm("You have unsaved changes. Load Drive library anyway? Existing edits will stay in the current canvas."))return;
+ $("driveRefresh").disabled=true;
+ try{
+  const result=await D.loadAll((n,total)=>driveStatus("LOADING "+n+" / "+total+" FROM DRIVE"));
+  driveEntries=new Map(result.entries.filter(U.validEntry).map(e=>[e.id,e]));
+  mergeCatalog();await renderList();
+  driveStatus("✓ GOOGLE DRIVE · "+driveEntries.size+" PROJECT(S)"+(result.errors.length?" · "+result.errors.length+" READ ERROR(S)":""));
+  if(result.folderId)$("driveFolder").href="https://drive.google.com/drive/folders/"+encodeURIComponent(result.folderId);
+  status("GOOGLE DRIVE LIBRARY LOADED · "+driveEntries.size+" EMOTION(S) · CHOOSE FROM LEFT");
+ }catch(e){driveStatus("DRIVE LOAD FAILED: "+e.message,true);status("DRIVE LOAD FAILED: "+e.message,true)}
+ finally{$("driveRefresh").disabled=false}
+}
+async function saveToDrive(){
+ if(!D?.connected()){status("CONNECT GOOGLE DRIVE FIRST · GOOGLE LOGIN REQUIRED",true);return}
+ if(driveBusy||!selected||!atlas)return;
+ driveBusy=true;$("driveSave").disabled=true;
+ try{
+  const entry={...snapshot(),name:$("name").value.trim()||"UNTITLED",base:$("base").value,
+   frames:selected.frames,fps:Math.max(1,Math.min(30,Number($("fps").value)||6)),png:atlas.toDataURL("image/png")};
+  delete entry.template;delete entry.driveFileId;delete entry.driveModifiedTime;
+  if(!U.validEntry(entry))throw Error("Invalid emotion atlas. Use native 64×112 / 4-view format.");
+  const result=await D.save(entry,{expectedModifiedTime:driveEntries.get(entry.id)?.driveModifiedTime});
+  // Preserve local backup so offline editing stays possible.
+  await persistSaved(entry);
+  driveEntries.set(entry.id,{...entry,driveFileId:result.project.id,driveModifiedTime:result.project.modifiedTime});
+  selected={...driveEntries.get(entry.id)};mergeCatalog();setDirty(false);await renderList();
+  if(result.folderId)$("driveFolder").href="https://drive.google.com/drive/folders/"+encodeURIComponent(result.folderId);
+  driveStatus("✓ GOOGLE DRIVE SYNCED · "+driveEntries.size+" PROJECT(S)");
+  status("✓ SAVED TO GOOGLE DRIVE (JSON + PNG) · SAME ACCOUNT ON PC / PHONE");
+ }catch(e){status("DRIVE SAVE FAILED: "+e.message,true);driveStatus("SAVE FAILED: "+e.message,true)}
+ finally{driveBusy=false;$("driveSave").disabled=false}
 }
 
 function status(s,error=false){$("status").textContent=s;$("status").style.color=error?"#b62230":""}
@@ -1437,6 +1515,11 @@ function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas
  $("base").onchange=()=>{if(selected){selected.base=$("base").value;setDirty()}};
  $("fps").onchange=()=>{if(selected){selected.fps=Math.max(1,Math.min(30,Number($("fps").value)||6));setDirty();renderFrames()}};
  $("save").onclick=save;$("deleteLocal").onclick=deleteSavedEmotion;
+ $("driveConfigure").onclick=configureDrive;
+ $("driveConnect").onclick=connectDrive;
+ $("driveRefresh").onclick=()=>refreshDrive();
+ $("driveSave").onclick=saveToDrive;
+ driveConfigured();
  window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
  requestAnimationFrame(animationTick);
 }
