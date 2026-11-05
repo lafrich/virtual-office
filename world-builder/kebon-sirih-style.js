@@ -97,7 +97,7 @@ function pick(o,catalog){
   const park=(o.tags||[]).includes('park');
   options=park?['lampu_taman']:['lampu_taman','lampu_taman','tiang_listrik','tiang_listrik_polos','tiang_trafo'];
  }else if(type==='furniture')options=['bangku_taman'];
- else options=['tong_sampah','pot_tanaman'];
+ else options=['tong_sampah','hydrant_jakarta','pot_tanaman'];
  if(!options)return null;
  // Resolve preferred semantic subtype, then deterministically fall back to
  // another published compatible sprite if the preferred one doesn't fit.
