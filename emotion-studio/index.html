@@ -1,0 +1,1328 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#234d94">
+<title>EMOTION STUDIO.EXE — Standalone Pixel Emotion Editor</title>
+
+
+
+<style>
+:root{--bg:#19202a;--panel:#252d38;--panel2:#303946;--line:#495364;--text:#dae2ec;--muted:#8f9bab;--blue:#6ab4ec;--cream:#e8d49b;--yellow:#f1ba53}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font:12px/1.4 "Segoe UI",Tahoma,Arial,sans-serif;background:#14191f;color:var(--text)}button,select,input{font:inherit}button{cursor:pointer;border:1px solid #546070;background:#384455;color:#e3e8f0;border-radius:3px;padding:5px 9px}button:hover{background:#526177}button:active{background:#7c8797}button.active{background:#4b6684;border-color:#7badde}button:disabled{opacity:.3;cursor:default}.window{display:flex;flex-direction:column;height:100dvh;min-height:580px;max-width:2400px;margin:auto;border:1px solid #647d9b}.titlebar{height:37px;background:linear-gradient(#3865a0,#224773);border-bottom:1px solid #122b49;display:flex;justify-content:space-between;align-items:center;padding:0 12px;flex-shrink:0}.brand{display:flex;align-items:center;gap:9px;font-size:14px;letter-spacing:.07em}.brand em{font-style:normal;color:#b6e5ff}.brand small{font:10px Consolas,monospace;color:#b1cae0}.appicon{font-size:20px;color:#ffcd7a}.title-actions{display:flex;align-items:center;gap:11px;font:10px Consolas,monospace}.title-actions a{color:#eaf4ff;text-decoration:none;border:1px solid #8eb8d4;padding:3px 8px}.led{height:8px;width:8px;border-radius:50%;background:#ed9b62;box-shadow:0 0 3px #ac633a}.led.ok{background:#66cc98}.window-buttons{letter-spacing:6px;color:#d0deeb}.menubar{height:38px;background:#2e3948;display:flex;align-items:center;gap:6px;padding:5px 9px;border-bottom:1px solid #647082;flex-shrink:0}.menubar button,.importbtn{background:transparent;border-color:transparent;padding:5px 8px;color:#cdd9e6}.menubar button:hover,.importbtn:hover{background:#435569;border-color:#677990}.importbtn{cursor:pointer;border:1px solid transparent;border-radius:3px}.importbtn input{display:none}.tiny{font:10px Consolas,monospace;color:#97acc1}.push{flex:1}.workspace{display:grid;grid-template-columns:228px minmax(280px,1fr) 278px;flex:1;min-height:0}.panel{background:var(--panel);display:flex;flex-direction:column;min-width:0}.objects{border-right:1px solid #0c121a}.inspector{border-left:1px solid #0c121a}.panelhead{height:34px;padding:9px 10px;display:flex;justify-content:space-between;background:#343f4f;border-bottom:1px solid #59697a;font-size:10px;letter-spacing:.09em}.panelhead small{color:#a5b5c8}.object-scroll,.inspector-scroll{flex:1;min-height:0;overflow:auto;scrollbar-color:#62748a #25303b}.sectionhead{height:28px;border-top:1px solid #485667;border-bottom:1px solid #3f4a5a;background:#2b3441;color:#d3dfec;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:10px Consolas,monospace;letter-spacing:.07em}.selectline{display:flex;flex-direction:column;gap:5px;color:#a6b6c5;font-size:10px;margin:8px 10px}select,input[type=text],input[type=number]{background:#1a2330;color:#e3edf9;border:1px solid #586b82;border-radius:2px;padding:7px;min-width:0;width:100%}select{appearance:auto}.tree{padding:6px 0 25px}.tree-group{padding:7px 10px 4px;color:#8cafce;text-transform:uppercase;font:10px Consolas,monospace;letter-spacing:.04em}.tree button{display:flex;width:100%;border:0;border-radius:0;background:transparent;text-align:left;align-items:center;gap:6px;white-space:nowrap;font-size:11px;color:#cdd8e5;padding:4px 5px 4px 14px}.tree button:hover{background:#40546b}.tree button.selected{background:#2f6b9b;outline:1px solid #6aa8d6;outline-offset:-1px}.tree .dot{font-size:9px;color:#f8cb79;min-width:11px}.tree .eye{margin-left:auto;color:#8da1b4;min-width:18px}.tree .off{opacity:.38}.object-foot{display:flex;padding:7px;gap:4px;border-top:1px solid #435062}.object-foot button{flex:1;font-size:10px;padding:6px 4px}.center{display:flex;flex-direction:column;background:#1d2733;min-width:0;min-height:0}.viewbar{background:#303b4c;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 9px;border-bottom:1px solid #607085}.viewtitle{display:flex;align-items:center;gap:10px;white-space:nowrap}.viewtitle strong{font:11px Consolas,monospace}.viewtitle span{font:9px Consolas,monospace;color:#a9bcd1}.viewcontrols{display:flex;gap:3px}.viewcontrols button{padding:4px 7px;font:10px Consolas,monospace}.axis.x{color:#ff9e90}.axis.y{color:#9ee2ae}.axis.z{color:#91baff}.viewstage{flex:1;position:relative;min-height:200px;overflow:hidden;background:radial-gradient(circle at 55% 45%,#303f50,#172230 80%)}#editor{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}.cornerinfo{position:absolute;left:12px;bottom:10px;right:12px;display:flex;gap:6px;justify-content:space-between;pointer-events:none;font:9px Consolas,monospace;color:#8fabc4}.timeline{height:240px;flex-shrink:0;display:flex;flex-direction:column;background:#242e3b;border-top:2px solid #576a7e;min-height:0}.timelinetop{display:flex;gap:6px;align-items:center;padding:6px 9px;background:#334050;border-bottom:1px solid #5b6878}.timelinetop strong{font:11px Consolas,monospace;margin-right:auto}.timelinetop label{font:10px Consolas,monospace;display:flex;align-items:center;gap:4px;color:#a4b9c7}.timelinetop input{width:46px;padding:4px}.timelinetop button{font-size:10px}.ruler{display:grid;grid-template-columns:132px 1fr;min-height:31px;border-bottom:1px solid #425367}.ruler-track{display:flex}.ruler-track button{background:transparent;border:0;border-right:1px solid #495769;border-radius:0;flex:1;min-width:14px;padding:0;color:#94aabf;font:9px Consolas,monospace}.ruler-track button.current{color:white;background:#375d7e}.ruler-label{padding:8px 12px;color:#94a9b7;font:10px Consolas,monospace}.keyrows{min-height:0;overflow:auto}.keyrow{display:grid;grid-template-columns:132px 1fr;border-bottom:1px solid #3e4b5a;min-height:23px}.keylabel{border:0;border-right:1px solid #566678;border-radius:0;background:transparent;text-align:left;padding:3px 9px;font:10px Consolas,monospace;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.keylabel.selected{background:#3a6385}.keycells{display:flex}.keycells button{flex:1;min-width:14px;border:0;border-right:1px solid #3f4a57;border-radius:0;background:transparent;font:10px Consolas,monospace;color:#6d8ca5;padding:2px 0}.keycells button.current{background:#284b6d}.keycells button.keyed{color:#f6c36b}.ins-section{padding:0 0 8px}.selected-name{padding:8px 11px;font-weight:700;color:#ffe2a9}.hint{color:#a6b3c2;font:10px/1.5 Consolas,monospace;padding:0 11px;margin:6px 0}.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:5px 10px}.fields label{font:10px Consolas,monospace;color:#95a6bd}.fields input{margin-top:3px;padding:6px 3px;text-align:center}.check{display:flex;gap:7px;padding:8px 11px;align-items:center;color:#b4c4d5;font:10px Consolas,monospace}.primary{background:#276aa3;border-color:#79b6de;font-weight:bold;width:calc(100% - 20px);margin:9px 10px;padding:10px 7px}.primary:hover{background:#3184c6}.gamepreview{height:220px;display:grid;place-items:center;margin:9px 10px;border:1px solid #667587;background:repeating-conic-gradient(#405068 0 25%,#334157 0 50%) 50%/28px 28px;overflow:hidden}.gamepreview.flat{background:#2d394b}.gamepreview canvas{height:196px;max-width:100%;width:auto;image-rendering:pixelated}.directions{display:flex;gap:3px;margin:0 10px}.directions button{flex:1;font:10px Consolas,monospace;padding:5px 4px}.status{height:27px;border-top:1px solid #75889e;background:#354454;display:flex;align-items:center;gap:14px;padding:0 10px;font:10px Consolas,monospace;color:#b8c9da;flex-shrink:0;white-space:nowrap;overflow:hidden}
+@media(max-width:1120px){.workspace{grid-template-columns:186px minmax(240px,1fr) 242px}.timeline{height:180px}.title-actions #syncLabel,.viewtitle span,.tiny{display:none}}@media(max-width:750px){.window{min-height:100dvh;height:auto}.workspace{display:flex;flex-direction:column}.objects{max-height:210px}.center{min-height:490px}.viewstage{height:350px;min-height:350px}.inspector{max-height:590px}.titlebar small,.titlebar .window-buttons{display:none}.menubar{flex-wrap:wrap;height:auto}.cornerinfo{font-size:8px}.timeline{height:170px}}
+
+/* Asset-oriented emotion/accessory workflow: texture swaps, never face micro-rigging. */
+.asset-import{display:block;margin:8px 10px;padding:9px 6px;background:#344a62;border:1px solid #7195b6;border-radius:3px;cursor:pointer;color:#e4eefb;font:10px Consolas,monospace;text-align:center}
+.asset-import:hover{background:#426281}
+.asset-import input{display:none}
+.plane-buttons{display:flex;gap:5px;padding:6px 10px}
+.plane-buttons button{flex:1;min-width:0;padding:6px 4px;font:10px Consolas,monospace}
+.tree button[data-bone="emotion"] .dot{color:#d5a1ef}
+.tree button[data-bone="glasses"] .dot{color:#f2bc75}
+
+/* General reusable rig authoring and precise pinch / mouse viewport controls. */
+.viewcontrols{flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.zoom-label{min-width:43px;display:inline-block;text-align:center;color:#b9dcff;font:10px Consolas,monospace}
+button#toolAnchor.active{background:#2b736b;border-color:#8ff7e2;color:#e2fffa}
+#editor{touch-action:none;overscroll-behavior:contain}
+.draw-order{padding:5px 4px 12px;max-height:238px;overflow:auto;border-bottom:1px solid #455369}
+.draw-row{display:flex;gap:2px;padding:2px;border-bottom:1px solid #394452;align-items:stretch;cursor:grab}
+.draw-row:active{cursor:grabbing}
+.draw-row.drag-over{outline:1px dashed #a9e6fc;background:#3d637c}
+.draw-row .draw-select{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;background:#303f4e;font:10px Consolas,monospace;padding:5px 6px}
+.draw-row .draw-select.selected{background:#2f6b9b;border-color:#7badde}
+.draw-row .draw-step{flex:none;min-width:24px;padding:5px 2px;border-color:#49596c}
+.draw-row .draw-step:disabled{opacity:.27}
+.tree button{border-radius:2px}
+.tree button.selected{background:#2f6b9b}
+.tree button[draggable=true]{cursor:grab}
+.anchor-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.anchor-fields input{width:100%}
+#saveGeneralRig{font-size:10px;background:#326f76;border-color:#83b9b6}
+#saveGeneralRig:hover{background:#44888b}
+#undo:disabled,#redo:disabled{opacity:.34}
+@media(max-width:750px){
+ .viewbar{flex-wrap:wrap}
+ .viewcontrols{justify-content:flex-start;gap:3px}
+ .viewcontrols button{padding:5px 6px}
+ .cornerinfo span:last-child{max-width:63%;text-align:right}
+ .draw-order{max-height:185px}
+ .object-scroll{overflow:auto}
+}
+
+/* Native pixel-plane editing dialog. 64x112 is never resampled for saved art. */
+.pixel-overlay[hidden]{display:none!important}
+.pixel-overlay{position:fixed;inset:0;z-index:50;background:rgba(8,13,22,.88);display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
+.pixel-dialog{display:flex;flex-direction:column;width:min(1010px,100%);max-height:calc(100dvh - 28px);overflow:hidden;background:#263449;color:#ebf2fc;border:1px solid #7e96b3;box-shadow:0 15px 65px #06090e}
+.pixel-dialog-header{background:linear-gradient(#507caa,#2b527f);padding:9px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;font:12px Consolas,monospace;letter-spacing:.04em}
+.pixel-dialog-header button{background:#cbd8e7;color:#1e3147;min-width:28px;font-size:18px;padding:0 7px}
+.pixel-toolbar{display:flex;gap:6px;padding:9px;align-items:center;flex-wrap:wrap;background:#2a3b53;border-bottom:1px solid #5a708a}
+.pixel-toolbar label{display:flex;align-items:center;gap:4px;font:10px Consolas,monospace}
+.pixel-toolbar select{max-width:160px;padding:6px;background:#1d3047;color:#e7f2fd}
+.pixel-toolbar button{font-size:10px;padding:6px 8px}
+.pixel-toolbar button.active{background:#326c9b;border-color:#a8d3ff}
+.pixel-toolbar input[type=color]{width:38px;height:27px;border:1px solid #627d9c;background:transparent;padding:1px;cursor:pointer}
+.pixel-workarea{display:flex;flex:1;min-height:0;gap:11px;padding:10px;overflow:auto}
+.pixel-canvas-wrap{display:flex;align-items:flex-start;justify-content:center;flex:1;min-width:0;min-height:0;overflow:auto;border:1px solid #4c617b;background:#182639;padding:9px}
+#pixelCanvas{width:min(384px,100%);height:auto;aspect-ratio:64/112;image-rendering:pixelated;touch-action:none;cursor:crosshair;background:#dae2e9;flex:none}
+.pixel-side{width:220px;flex:none;display:flex;flex-direction:column;gap:9px;font:10px Consolas,monospace}
+.pixel-side .hint{line-height:1.5}
+.pixel-side>button{padding:8px 4px;font-size:10px}
+.pixel-side .plane-buttons{padding:0}
+.pixel-side .check{display:flex;gap:6px;align-items:center}
+.pixel-swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.pixel-swatches button{height:27px;background:var(--swatch);border:1px solid #8d9cad;padding:0;min-width:0}
+.pixel-swatches button:hover{outline:2px solid #fff;outline-offset:1px}
+.pixel-dialog-foot{display:flex;align-items:center;gap:9px;border-top:1px solid #5e7490;padding:9px;background:#2c3d53;flex-wrap:wrap}
+.pixel-dialog-foot>span{margin-right:auto;flex:1;min-width:180px;font:10px Consolas,monospace;color:#afcce6}
+.pixel-dialog-foot button{padding:9px 11px;font:10px Consolas,monospace}
+#editPixelPlane{background:#32698b;border-color:#97caff}
+#openPlaneEditor{margin-top:7px}
+#pixelPlaneStatus{font-size:10px}
+@media(max-width:660px){
+ .pixel-overlay{padding:3px}
+ .pixel-dialog{width:100%;max-height:calc(100dvh - 6px)}
+ .pixel-workarea{flex-direction:column;gap:8px}
+ .pixel-canvas-wrap{overflow:auto;flex:none;max-height:min(48dvh,510px)}
+ #pixelCanvas{width:min(270px,100%);max-width:100%;flex:none}
+ .pixel-side{width:100%}
+ .pixel-swatches{grid-template-columns:repeat(8,minmax(0,1fr))}
+ .pixel-dialog-foot>span{flex-basis:100%}
+ .pixel-dialog-foot button{flex:1}
+}
+
+/* ROOT STUDIO / Desktop overlap regression: no fixed-height toolbar overflow. */
+.timeline[hidden]{display:none!important}
+.window,.workspace,.panel,.center,.viewbar,.viewcontrols,.menubar{min-width:0}
+.window{min-height:0}
+.workspace{overflow:hidden;grid-template-columns:clamp(205px,19vw,258px) minmax(0,1fr) clamp(256px,22vw,310px)}
+.objects,.inspector,.center{overflow:hidden;min-height:0}
+.panelhead{flex-shrink:0}
+.object-scroll,.inspector-scroll{overflow-y:auto;overflow-x:hidden;min-height:0}
+.menubar{height:auto;min-height:38px;flex-wrap:wrap;gap:3px 5px;overflow:visible}
+.menubar button,.menubar .importbtn,.menubar .legacy-action-link{white-space:nowrap}
+.legacy-action-link{font:10px Consolas,monospace;display:inline-flex;align-items:center;color:#bee0ff;text-decoration:none;border:1px solid #627994;border-radius:3px;padding:5px 8px}
+.legacy-action-link:hover{background:#405970}
+.titlebar{min-width:0;gap:8px}
+.titlebar .brand{min-width:0;flex:1;white-space:nowrap}
+.titlebar .title-actions{min-width:0;flex-shrink:0;gap:6px}
+.viewbar{flex-wrap:wrap;align-items:flex-start;align-content:start;gap:5px;flex:none;padding:6px 8px}
+.viewtitle{flex:1 1 100%;min-width:0;justify-content:space-between;white-space:normal}
+.viewcontrols{flex:1 1 100%;display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:3px;min-width:0}
+.viewcontrols button{flex:0 0 auto;white-space:nowrap}
+.viewstage{min-height:0;flex:1 1 0}
+.object-foot{flex-wrap:wrap}
+.object-foot button{min-width:0;white-space:normal}
+.timelinetop{flex-wrap:wrap}
+.ruler{grid-template-columns:132px minmax(0,1fr)}
+.ruler-track,.keycells{min-width:0;overflow-x:auto}
+.keyrow{grid-template-columns:132px minmax(0,1fr)}
+.status{min-width:0;gap:8px}
+.status>span{overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1120px) and (min-width:751px){
+ .workspace{grid-template-columns:202px minmax(0,1fr) 252px}
+ .brand small,.titlebar .window-buttons{display:none}
+ .menubar button,.menubar .importbtn{padding:4px 6px}
+ .viewcontrols button{padding:4px 5px}
+ .object-foot button{flex-basis:45%;font-size:9px}
+}
+@media (max-width:750px){
+ .window{min-height:100dvh}
+ .workspace{overflow:visible}
+ .objects,.inspector{overflow:hidden}
+ .viewbar{flex-wrap:wrap}
+ .viewcontrols{justify-content:flex-start}
+ .center{min-height:490px}
+ .viewstage{flex:1;min-height:255px}
+ .status{gap:5px}
+}
+
+/* Pixel editor: the drawing surface is scrolled, NEVER shrunk behind tools. */
+.pixel-dialog{height:min(880px,calc(100dvh - 28px));min-height:0}
+.pixel-dialog-header,.pixel-toolbar,.pixel-dialog-foot{flex-shrink:0}
+.pixel-workarea{overflow:hidden;min-height:0}
+.pixel-canvas-wrap{display:block;overflow:auto;min-width:0;min-height:0;position:relative;overscroll-behavior:contain}
+#pixelCanvas{display:block;box-sizing:content-box;width:320px;height:560px;max-width:none;max-height:none;min-width:0;min-height:0;flex:none;margin:0 auto;image-rendering:pixelated}
+.pixel-side{overflow-y:auto;min-height:0}
+.pixel-grid-controls{display:flex;flex-direction:column;gap:3px;padding:2px 0 8px;border-bottom:1px solid #4d637d}
+.pixel-grid-controls .check{padding:2px 0}
+.pixel-grid-controls>label:last-child{display:flex;flex-direction:column;gap:4px;color:#b6c9dc}
+.pixel-grid-controls select{width:100%;padding:6px}
+.pixel-zoom-controls{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:6px 0 8px;border-bottom:1px solid #4d637d}
+.pixel-zoom-controls>span:first-child{font:10px Consolas,monospace;color:#b6c9dc}
+.pixel-zoom-controls button{font-size:10px;padding:5px 7px;flex:0 0 auto}
+.pixel-zoom-controls input[type=range]{flex:1 1 64px;min-width:40px;max-width:100%;cursor:pointer;accent-color:#7dbef5}
+#pixelZoomLabel{font:10px Consolas,monospace;color:#cde2f5;min-width:39px;text-align:right}
+@media(max-width:660px){
+ .pixel-dialog{height:calc(100dvh - 6px)}
+ .pixel-workarea{overflow-y:auto;overflow-x:hidden;min-height:0}
+ .pixel-canvas-wrap{flex:0 0 auto;height:min(47dvh,490px);max-height:none}
+ #pixelCanvas{width:320px;max-width:none}
+ .pixel-side{overflow:visible;flex:none}
+ .pixel-zoom-controls input[type=range]{flex:1}
+}
+
+/* C4D-inspired 2.5D character root: independent orbit camera / depth inspection. */
+.viewbar .depth-gap{display:flex;align-items:center;gap:5px;font:10px Consolas,monospace;color:#afc4d8;padding-left:5px;min-width:145px}
+.depth-gap input{width:82px;min-width:60px;accent-color:#79b6df;cursor:pointer}
+.depth-gap span{min-width:24px;font-variant-numeric:tabular-nums}
+.depth-gap:has(input:disabled){opacity:.4}
+#togglePlaneDepth.active{background:#366684;border-color:#9ac6f3}
+.orbit-gizmo{position:absolute;top:14px;right:14px;width:152px;z-index:5;color:#e0ebfa;background:rgba(19,30,43,.86);border:1px solid rgba(124,153,184,.56);border-radius:6px;box-shadow:0 3px 18px #1119;padding:7px;user-select:none;touch-action:manipulation}
+.orbit-head{display:flex;justify-content:space-between;align-items:center;font:9px Consolas,monospace;letter-spacing:.08em}
+.orbit-head span{color:#b3d6ff;font-size:11px}
+.orbit-control{display:flex;gap:2px;align-items:center;justify-content:space-between;margin-top:5px}
+.orbit-control>button{width:27px;height:29px;padding:0;font-size:20px;border:0;background:transparent;color:#a9c4e3}
+.orbit-control>button:hover{color:white;background:#355371}
+.orbit-compass{width:78px;height:84px;position:relative;background:radial-gradient(circle,#394b5e 0%,#243649 55%,#1b2938 78%);border-radius:50%;border:1px solid #607d9b}
+.orbit-compass::before,.orbit-compass::after{content:"";position:absolute;top:50%;left:50%;width:52px;border-top:1px dashed #71879b;transform-origin:center;pointer-events:none}
+.orbit-compass::before{transform:translate(-50%,-50%) rotate(45deg)}
+.orbit-compass::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.orbit-axes{position:absolute;inset:0;pointer-events:none;font:700 9px Consolas,monospace;color:#f8f9fc}
+.orbit-axes i{position:absolute;display:block;font-style:normal;z-index:1}
+.orbit-x{color:#ff8c7c;left:34px;top:38px}
+.orbit-y{color:#89e7a4;left:34px;top:15px}
+.orbit-z{color:#7eaefe;left:47px;top:33px}
+.orbit-compass button{position:absolute;min-width:25px;height:21px;z-index:2;padding:0;font:9px Consolas,monospace;border-radius:11px;background:#20394e;color:#b7d2eb;border:1px solid #56758e}
+.orbit-compass button.active{color:white;background:#387caf;border-color:#c6e8ff;box-shadow:0 0 6px #4897cc9a}
+.orbit-compass button:hover{background:#517eaa;color:white}
+.orbit-nw{left:2px;top:5px}
+.orbit-ne{right:2px;top:5px}
+.orbit-sw{left:2px;bottom:4px}
+.orbit-se{right:2px;bottom:4px}
+.orbit-caption{margin:4px auto 0;text-align:center;font:9px Consolas,monospace;color:#9ab5cd}
+.four-view-check{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;margin:9px 7px}
+.four-view-check button{min-width:0;overflow:hidden;padding:4px 1px;display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid #516881;background:#25394c}
+.four-view-check button.active{background:#385d7e;border-color:#8dc8f0}
+.four-view-check button:hover{background:#41617a}
+.four-view-check canvas{display:block;width:100%;max-width:64px;height:auto;aspect-ratio:64/112;image-rendering:pixelated;background:repeating-conic-gradient(#4b6277 0 25%,#344759 0 50%) 50%/12px 12px}
+.four-view-check span{font:8px Consolas,monospace;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#depthReadout{font-variant-numeric:tabular-nums}
+@media(max-width:1130px){.orbit-gizmo{top:8px;right:8px;transform:scale(.86);transform-origin:top right}.viewbar .depth-gap{min-width:122px}.depth-gap input{width:65px}}
+@media(max-width:750px){.orbit-gizmo{transform:scale(.75)}}
+
+/* Membangun desktop family chrome — classic Windows XP/98 visual system.
+ * Match launcher: blue title, warm grey chrome, bevelled borders, Tahoma.
+ * Character viewport remains dark so rig artwork and axis handles read clearly.
+ */
+:root{--bg:#c7c6c3;--panel:#d3d1cd;--panel2:#e3e1dc;
+ --line:#898782;--text:#1a1c20;--muted:#565b62;--blue:#0755b5;
+ --cream:#ede5c6;--yellow:#d6a74d}
+html,body{background:#073b92;color:#151719;font:12px/1.42 Tahoma,"MS Sans Serif",Verdana,sans-serif}
+button{background:#d6d4d0;color:#1b1f25;border:2px solid;border-color:#fff #777975 #777975 #fff;border-radius:0;
+ box-shadow:inset 1px 1px #f3f2ef;line-height:1.22}
+button:hover{background:#bad0f6;color:#132c59}
+button:active,button.active{border-color:#737672 #fff #fff #737672;box-shadow:inset 1px 1px #6d7275}
+button:disabled{opacity:.48;color:#777;cursor:default}
+select,input[type=text],input[type=number]{background:#fff;color:#171b22;border:2px inset #a4a6a5;border-radius:0;padding:5px 6px;font:11px Tahoma,sans-serif}
+select:focus,input:focus-visible,button:focus-visible{outline:1px dotted #163773;outline-offset:1px}
+.window{background:#c7c6c3;max-width:2400px;border:2px solid;border-color:#fff #393b3b #393b3b #fff;outline:1px solid #1c2a42}
+.titlebar{background:linear-gradient(90deg,#042777,#0755b5 64%,#2786d9);border-bottom:2px solid #163970;color:#fff;height:41px}
+.brand{font-weight:bold}.brand em{color:#fff3b6}.brand small{color:#b8e2ff}
+.title-actions a{color:#fff;border:1px solid #9dc9ff;background:#154b99;padding:5px 8px}
+.menubar{background:#d7d5d1;border-bottom:2px solid #96938e;box-shadow:inset 0 1px #fff}
+.menubar button,.menubar .importbtn{color:#23282e;border:1px solid transparent;box-shadow:none;background:transparent;font:11px Tahoma,sans-serif}
+.menubar button:hover,.menubar .importbtn:hover{color:#fff;background:#16499d;border-color:#356cb6}
+.legacy-action-link{color:#173d77;background:#c8d7ef;border:1px solid #8195b7;border-radius:0}
+.legacy-action-link:hover{background:#9cbdf2}
+.tiny{color:#62656a}
+.workspace{grid-template-columns:clamp(212px,18vw,265px) minmax(0,1fr) clamp(290px,25vw,365px);background:#c5c3be}
+.panel{background:#d3d1cd;color:#1c2026}
+.objects{border-right:2px solid #898884}.inspector{border-left:2px solid #898884}
+.panelhead{background:#d0ceca;border-bottom:2px solid #858784;color:#1a2030;font:700 10px "Courier New",monospace;letter-spacing:.055em}
+.panelhead small{color:#4b5b70}
+.sectionhead{background:#e3e1dc;border-top:1px solid #fff;border-bottom:1px solid #999790;color:#1b2b42;font:bold 10px "Courier New",monospace;letter-spacing:.015em}
+.selectline{color:#45484d;font:700 10px "Courier New",monospace}
+.hint{color:#5a5b5f;font:10px/1.55 "Courier New",monospace}
+.tree button{background:transparent;color:#1f2936;box-shadow:none;font:11px Tahoma,sans-serif;border:0}
+.tree button:hover{background:#bfd1ef;color:#08265d}
+.tree button.selected{background:#396aaf;color:#fff;outline:1px dotted #e4efff}
+.tree .dot{color:#9f6822}.tree .eye{color:#63758a}
+.draw-order{border-bottom:2px inset #a8a6a2}
+.draw-row{border-bottom:1px solid #b6b3ae}
+.draw-row .draw-select{background:#e7e5e0;color:#233043}
+.draw-row .draw-select.selected{background:#a9c8f3;color:#102954;border-color:#5676a5}
+.draw-row .draw-step{border-color:#fff #797975 #797975 #fff;background:#e6e3dd}
+.object-foot{background:#cdcbc7;border-top:2px solid #8f8d88}
+#editPixelPlane,.primary,#saveGeneralRig{background:#a9c7f2;color:#102d5b;border-color:#fff #5d7ead #5d7ead #fff;border-radius:0;box-shadow:none}
+.primary:hover,#saveGeneralRig:hover,#editPixelPlane:hover{background:#8cb6f0;color:#091d46}
+.center{background:#a9a8a5}
+.viewbar{background:#d1cfca;border-bottom:2px solid #8a8884;color:#232831}
+.viewtitle strong{font:bold 11px "Courier New",monospace}
+.viewtitle span{color:#526070}
+.viewcontrols button{background:#e3e1dc;color:#252c37;border-color:#fff #777975 #777975 #fff}
+.viewcontrols button.active{background:#a6c7ef;color:#0b325f;border-color:#667e9e #fff #fff #667e9e}
+.viewcontrols button:hover{background:#bed5f5}
+.zoom-label{color:#244a73}
+.viewstage{background:radial-gradient(circle at 50% 42%,#46505d,#26303b 75%);border:2px inset #7a818c;margin:5px;min-height:0}
+.timeline{background:#d4d2cd;border-top:2px solid #868684}
+.ins-section{border-bottom:1px solid #bdbab3}
+.selected-name{color:#192d49}
+.fields label,.check{color:#364251}
+.gamepreview{border:2px inset #8c8c86;background-color:#c5cbd1}
+.directions button{background:#e1dfda;color:#263342}
+.status{background:#d0cec8;color:#26303a;border-top:2px solid #8b8883;font:10px "Courier New",monospace}
+#coords{color:#24466a}
+.object-scroll,.inspector-scroll{scrollbar-color:#a7a7a3 #dedbd5}
+.four-view-check button{background:#e3e3df;border-color:#fff #888 #888 #fff;color:#233040}
+.four-view-check button.active{background:#abcaf4;border-color:#6b82a3 #fff #fff #6b82a3}
+.four-view-check span{font:8px "Courier New",monospace}
+#depthReadout{color:#345272}
+/* Selected art only gets a thin bounded outline, not a full screen rectangle */
+.selected-part-chip{position:absolute;z-index:4;top:10px;left:11px;max-width:min(50%,350px);white-space:nowrap;
+ overflow:hidden;text-overflow:ellipsis;padding:6px 9px;background:rgba(10,29,51,.91);
+ color:#fae2a0;border:1px solid #d9b668;font:bold 10px "Courier New",monospace;
+ pointer-events:none;box-shadow:1px 2px #09152155}
+/* XP pop-up window for source pixels */
+.pixel-overlay{background:rgba(5,22,50,.72)}
+.pixel-dialog{background:#cac9c6;color:#21262f;border:2px solid;border-color:#fff #444 #444 #fff;box-shadow:8px 11px #07152c66}
+.pixel-dialog-header{background:linear-gradient(90deg,#072d81,#1762c2 65%,#3995da);color:white;padding:8px 10px;border-bottom:2px solid #123f82}
+.pixel-dialog-header button{color:#1c1e21;background:#d8d6d0;border-color:#fff #777 #777 #fff}
+.pixel-toolbar{background:#d9d7d2;border-bottom:2px solid #999793;color:#242a33}
+.pixel-toolbar label{color:#333;font:10px "Courier New",monospace}
+.pixel-toolbar select{color:#1a1e29;background:#fff;border:2px inset #a0a0a0}
+.pixel-toolbar button{background:#e2e0db;color:#242b35;border-color:#fff #7b7b78 #7b7b78 #fff}
+.pixel-toolbar button.active{background:#b3cffe;color:#133d76;border-color:#6c829b #fff #fff #6c829b}
+.pixel-workarea{background:#d0ceca}
+.pixel-canvas-wrap{background:#a7a6a3;border:2px inset #8d8b85}
+.pixel-side{color:#293440}
+.pixel-side .sectionhead{margin-bottom:4px}
+.pixel-side .check{color:#34435a}
+.pixel-side .hint{padding:1px 2px;line-height:1.4}
+.pixel-side>button{background:#d9d7d1;color:#222;border-color:#fff #888 #888 #fff}
+.pixel-side .pixel-swatches button{border:1px solid #747474}
+.pixel-zoom-controls,.pixel-grid-controls{border-bottom:1px solid #9f9d98}
+.pixel-dialog-foot{background:#d2d0cb;color:#1e2d42;border-top:2px solid #a4a29b}
+.pixel-dialog-foot>span{color:#3c526f}
+.pixel-dialog-foot button{background:#e0ded9;color:#253142;border-color:#fff #777 #777 #fff}
+.pixel-dialog-foot button.primary{background:#a9c8f6;color:#143d78;border-color:#fff #5f7da4 #5f7da4 #fff}
+.pixel-reference-controls,.pixel-selection-controls{border:1px solid #a7a4a0;background:#e1dfda;padding:5px}
+.pixel-reference-controls label{display:flex;flex-direction:column;gap:3px;margin:5px 2px;font:10px "Courier New",monospace;color:#3d4146}
+.pixel-reference-controls .check{flex-direction:row;padding:3px 2px}
+.pixel-reference-controls input[type=range]{width:100%;accent-color:#346fbe}
+.pixel-reference-controls select,.pixel-reference-controls input[type=number]{width:100%;background:#fff}
+.pixel-selection-controls .plane-buttons{padding:3px 0}
+#pixelSelectionInfo{font-variant-numeric:tabular-nums}
+@media(max-width:1120px) and (min-width:751px){
+ .workspace{grid-template-columns:195px minmax(0,1fr) 262px}
+ .viewstage{margin:3px}
+}
+@media(max-width:750px){
+ html,body{background:#c7c6c3}
+ .window{height:auto;min-height:100dvh}
+ .objects,.inspector{background:#d3d1cd}
+ .workspace{display:flex;flex-direction:column}
+ .selected-part-chip{max-width:67%}
+}
+
+.github-master-box{margin:8px;padding:9px;background:#1b2533;border:1px solid #5c6b7d}
+.github-master-box .sectionhead{margin:-9px -9px 9px}
+.github-master-box .hint{font-size:10px;line-height:1.4;overflow-wrap:anywhere}
+.github-master-box input[type=password]{width:100%;padding:7px;background:#141e2c;border:1px solid #5d7189;color:#e6ecf8;box-sizing:border-box}
+.github-master-box .plane-buttons{display:flex;flex-wrap:wrap;gap:4px;margin:7px 0}
+.github-master-box .plane-buttons button{flex:1;min-width:99px;font-size:10px}
+
+/* Copy selected native pixels between SE/SW/NE/NW and other plane editors. */
+.pixel-clipboard-actions{display:flex;gap:4px;flex-wrap:wrap}
+.pixel-clipboard-actions button{flex:1 1 58px;min-width:0;white-space:normal}
+#pixelClipboardInfo{min-height:29px;overflow-wrap:anywhere;color:#264d83}
+.pixel-selection-controls>.check{padding:3px 0;font:10px "Courier New",monospace}
+@media(max-width:750px){.pixel-clipboard-actions button{min-height:34px}}
+
+/* Emotion Studio / Windows XP family; reuse the Mahluk 2 pixel editor unchanged. */
+body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
+.emotion-window{width:min(1480px,calc(100vw - 22px));height:min(850px,calc(100vh - 22px));min-height:610px;margin:11px auto;display:flex;flex-direction:column;overflow:hidden}
+.emotion-workspace{flex:1;display:grid;grid-template-columns:230px minmax(0,1fr) 244px;min-height:0;background:#dce4ee;gap:3px;padding:3px}
+.emotion-library,.emotion-inspector{display:flex;flex-direction:column;min-height:0;border:1px solid #99acc7;background:#eff3f8}
+.emotion-list{overflow:auto;flex:1;padding:6px;display:flex;flex-direction:column;gap:5px}
+.emotion-card{display:flex;align-items:center;gap:8px;width:100%;min-height:52px;text-align:left;border:1px solid #acbad1;background:#fff;color:#21354c;padding:5px;cursor:pointer}
+.emotion-card.active{background:#d8e8ff;border-color:#245db4;box-shadow:inset 0 0 0 1px #739ee4}
+.emotion-card canvas{height:42px;width:24px;image-rendering:pixelated;background:linear-gradient(45deg,#e1e1e1 25%,transparent 25%,transparent 75%,#e1e1e1 75%),linear-gradient(45deg,#e1e1e1 25%,#fff 25%,#fff 75%,#e1e1e1 75%);background-size:8px 8px;background-position:0 0,4px 4}
+.emotion-card b{display:block;font-size:11px}.emotion-card small{display:block;font-size:9px;color:#65758b;margin-top:4px}
+.filterbox{display:flex;align-items:center;gap:6px;background:white;border:1px solid #abbcd4;margin:7px;padding:4px}
+.filterbox input{min-width:0;width:100%;border:0;outline:0;background:transparent}
+.library-bottom{border-top:1px solid #b7c7d9;color:#617087;padding:10px 8px;font-size:9px;line-height:1.5}
+.emotion-main{display:flex;flex-direction:column;min-width:0;background:#f5f8fc;border:1px solid #96adc8}
+.emotion-main .viewbar{flex-shrink:0}
+.viewcontrols{display:flex;align-items:center;gap:5px}
+.viewcontrols button{font-weight:700}
+.preview-stage{display:flex;align-items:center;justify-content:center;gap:38px;flex:1;min-height:230px;padding:18px}
+.preview-card{display:flex;flex-direction:column;align-items:center;gap:9px}
+.checker{width:200px;height:350px;max-height:42vh;display:flex;align-items:center;justify-content:center;border:1px solid #8fa6c3;background-color:#fff;background-image:linear-gradient(45deg,#e9ecf1 25%,transparent 25%),linear-gradient(-45deg,#e9ecf1 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e9ecf1 75%),linear-gradient(-45deg,transparent 75%,#e9ecf1 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
+#preview{width:100%;height:100%;image-rendering:pixelated;object-fit:contain}
+#previewInfo{font-size:10px;color:#53617c}
+.preview-side{max-width:175px;font-size:11px;color:#697790;line-height:1.55}
+.preview-side b{display:block;color:#273858;font-size:10px}
+.direction-picks{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin:10px 0}
+.direction-picks button.active{background:#c6defd;border-color:#2d60aa}
+.direction-note{margin-top:16px;border-left:2px solid #7598c9;padding-left:9px}
+.timeline-head{display:flex;justify-content:space-between;background:#d2dff0;border-top:1px solid #9ab2cc;padding:8px 11px;font-size:10px}
+.emotion-timeline{display:flex;overflow-x:auto;gap:6px;padding:9px;min-height:96px;background:#e8edf5}
+.frame-cell{flex:0 0 64px;border:1px solid #9cadc0;background:white;padding:3px;cursor:pointer;font-size:9px;color:#576885}
+.frame-cell.active{border-color:#1158ad;background:#cbddfa;outline:1px solid #246ebf}
+.frame-cell canvas{width:56px;height:70px;object-fit:contain;image-rendering:pixelated}
+.timeline-actions{display:flex;gap:7px;align-items:center;padding:10px;border-top:1px solid #b4c7da;font-size:10px;color:#63728d}
+.emotion-inspector .ins-body{padding:11px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.ins-body label{display:flex;flex-direction:column;gap:4px;color:#334662;font-size:10px;font-weight:700}
+.ins-body input,.ins-body select{border:1px solid #9db0c5;background:#fff;padding:7px;color:#22344d;max-width:100%;min-width:0}
+.small-note{font-size:10px;line-height:1.55;color:#64748b}
+.ins-body .sectionhead{padding:7px}
+.ins-body .hint{font-size:10px;line-height:1.5;margin:0}
+.auth-label{font-size:10px;color:#60748e}
+.save{background:linear-gradient(#e8f4ff,#a7c6f3);border:1px solid #3574c6;font-weight:700;padding:11px;cursor:pointer}
+#dirty{padding:0 12px;font-weight:700}
+@media(max-width:950px){.emotion-window{height:auto;min-height:100vh;width:100%;margin:0}.emotion-workspace{grid-template-columns:200px minmax(0,1fr)}.emotion-inspector{grid-column:1/-1}.ins-body{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))}.preview-stage{gap:18px}.checker{max-height:310px}}
+@media(max-width:650px){.emotion-workspace{display:flex;flex-direction:column}.emotion-library{max-height:180px;min-height:160px}.emotion-list{flex-direction:row;overflow-x:auto}.emotion-card{min-width:135px}.preview-stage{min-height:300px}.checker{width:150px;height:260px}.preview-side{max-width:130px}.ins-body{grid-template-columns:1fr!important}.timeline-actions{flex-wrap:wrap}.menubar{flex-wrap:wrap}}
+
+</style></head>
+<body><div class="window emotion-window">
+<header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOTION STUDIO <em>.EXE</em></b><small>UNIVERSAL DATABASE</small></div><div class="title-actions"><span class="led"></span><span id="online">STANDALONE / LOADING</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
+<nav class="menubar"><button id="reload">↻ RELOAD GITHUB</button><button id="new">＋ NEW EMOTION</button><label class="importbtn">↑ IMPORT 4-VIEW PNG<input id="import" type="file" accept="image/png,.png"></label><button id="export">↓ EXPORT PNG</button><button id="exportProject">↓ PROJECT JSON</button><label class="importbtn">↑ IMPORT PROJECT<input id="importProject" type="file" accept=".json,application/json"></label><span class="push"></span><span class="tiny">MAHLUK HIDUP 2.0 FORMAT · NO LIVE SYNC</span><span class="tiny">64×112 / VIEW · 4 DIR · MAX 48F</span></nav>
+<div class="emotion-workspace">
+<aside class="emotion-library panel"><div class="panelhead"><strong>EMOTION DATABASE</strong><small id="count">0</small></div>
+<label class="filterbox">⌕ <input id="filter" type="search" placeholder="Find an emotion..." aria-label="Search emotions"></label>
+<div id="cards" class="emotion-list" aria-label="Universal emotion assets"></div>
+<div class="library-bottom">STANDALONE ASSET LIBRARY<br>PNG/JSON exports match Mahluk Hidup 2.0. No automatic sync to characters, Semesta or Bangun Ruang.</div></aside>
+<main class="emotion-main"><div class="viewbar"><div class="viewtitle"><strong>EMOTION PREVIEW</strong><span>TRANSPARENT ALPHA PLANE</span></div><div class="viewcontrols"><button id="play">▶ PLAY</button><button id="edit" class="primary">▦ PIXEL EDITOR</button></div></div>
+<div class="preview-stage"><div class="preview-card"><div class="checker"><canvas id="preview" width="64" height="112" aria-label="Pixel emotion preview, transparent"></canvas></div><span id="previewInfo">SE · FRAME 1</span></div><div class="preview-side"><b>CAMERA VIEW</b><div id="directions" class="direction-picks"><button data-dir="se" class="active">SE</button><button data-dir="sw">SW</button><button data-dir="ne">NE</button><button data-dir="nw">NW</button></div><p>Emotion only. Head, hair, body and glasses remain separate.</p><div class="direction-note">Back views normally remain transparent — no floating face behind the head.</div></div></div>
+<div class="timeline-head"><strong>FRAME-BY-FRAME TIMELINE</strong><span id="frameInfo">1 FRAME</span></div>
+<div id="timeline" class="emotion-timeline" aria-label="Editable emotion animation frames"></div>
+<div class="timeline-actions"><button id="duplicateFrame">＋ DUPLICATE FRAME</button><button id="deleteFrame">− DELETE FRAME</button><span class="push"></span><span>Click a frame → Pixel Editor</span></div>
+</main>
+<aside class="emotion-inspector panel"><div class="panelhead"><strong>PROPERTIES</strong><small>EMOTION PLANE</small></div>
+<div class="ins-body"><label>EMOTION NAME<input id="name" maxlength="90" placeholder="Emotion name"></label>
+<label>APPLY TO<select id="base"><option value="universal">UNIVERSAL / ALL BASES</option><option value="male">HUMAN MALE</option><option value="female">HUMAN FEMALE</option><option value="original">V6B ORIGINAL</option></select></label>
+<label>ANIMATION FPS<input id="fps" type="number" min="1" max="30" value="6"></label>
+<div class="small-note">RGBA frame atlas: 64 × frame count wide, 448 px high. Each column contains SE, SW, NE and NW.</div>
+<div class="sectionhead">GITHUB / PUBLISH</div><p class="hint">Save directly to the repository. No local browser database. A GitHub fine-grained token with Contents: Read &amp; write is required for publishing.</p>
+<label>GITHUB ACCESS TOKEN<input id="token" type="password" autocomplete="off" placeholder="github_pat_…" spellcheck="false"></label>
+<button id="connect">🔒 CONNECT FOR THIS TAB</button><span class="auth-label" id="authLabel">READ-ONLY · GitHub data</span>
+<button class="save" id="save">▣ SAVE TO GITHUB</button>
+<div class="small-note">GitHub publishing is optional. Export PNG or Project JSON to keep your edited files. No local browser database, and no live connection to Mahluk Hidup 2.</div>
+</div></aside>
+</div><footer class="status"><span id="status">FETCHING UNIVERSAL CATALOG ...</span><span class="push"></span><span id="dirty">SYNCED</span><span>EMOTION STUDIO / MAHLUK 2</span></footer>
+</div>
+<div id="pixelOverlay" class="pixel-overlay" hidden>
+ <section class="pixel-dialog" role="dialog" aria-modal="true" aria-labelledby="pixelTitle">
+  <header class="pixel-dialog-header"><strong id="pixelTitle">PIXEL EDITOR / SELECTED PLANE</strong><button id="pixelClose" title="Close editor">×</button></header>
+  <div class="pixel-toolbar">
+   <label>DIRECTION <select id="pixelDirection"><option value="se">SE / FRONT RIGHT</option><option value="sw">SW / FRONT LEFT</option><option value="ne">NE / BACK RIGHT</option><option value="nw">NW / BACK LEFT</option></select></label>
+   <button data-pixel-tool="pencil" class="active">✎ PENCIL</button>
+   <button data-pixel-tool="eraser">⌫ ERASER</button><button data-pixel-tool="select" title="Draw a rectangle around pixels to select them / S">▣ SELECT</button><button data-pixel-tool="move-pixels" title="Move selected pixels / M">✣ MOVE PIXELS</button>
+   <button data-pixel-tool="fill">▤ FILL</button>
+   <button data-pixel-tool="picker">◎ PICK</button><button data-pixel-tool="hand" title="Pan canvas by dragging / H">✥ HAND</button>
+   <label>COLOR <input id="pixelColor" type="color" value="#211d22"></label>
+   <label>SIZE <select id="pixelSize"><option value="1">1 PX</option><option value="2">2 PX</option><option value="3">3 PX</option><option value="5">5 PX</option></select></label>
+  </div>
+  <div class="pixel-workarea">
+   <div class="pixel-canvas-wrap" id="pixelCanvasWrap"><canvas id="pixelCanvas" tabindex="0" width="384" height="672" aria-label="Edit a 64 by 112 source pixel plane, one isometric direction at a time. Scroll to zoom, pinch to zoom on touch."></canvas></div>
+   <aside class="pixel-side">
+    <div class="sectionhead">PALETTE / SWATCHES</div>
+    <div class="pixel-swatches">
+     <button data-pixel-swatch="#1b1519" style="--swatch:#1b1519" title="Dark ink"></button>
+     <button data-pixel-swatch="#443330" style="--swatch:#443330" title="Shadow"></button>
+     <button data-pixel-swatch="#b97656" style="--swatch:#b97656" title="Skin shade"></button>
+     <button data-pixel-swatch="#e9a77c" style="--swatch:#e9a77c" title="Skin"></button>
+     <button data-pixel-swatch="#ffc99b" style="--swatch:#ffc99b" title="Highlight"></button>
+     <button data-pixel-swatch="#f4ece5" style="--swatch:#f4ece5" title="White"></button>
+     <button data-pixel-swatch="#5b718d" style="--swatch:#5b718d" title="Blue"></button>
+     <button data-pixel-swatch="#b28ec3" style="--swatch:#b28ec3" title="Lilac"></button>
+    </div>
+    <label class="check"><input type="checkbox" id="pixelSync" checked> SYNC BRUSH · ALL 4 VIEWS</label>
+    <button id="pixelSyncExisting" type="button" title="Transfer this view\u0027s existing pixel changes to other camera directions while preserving each native silhouette">↻ SYNC CURRENT EDITS TO 4 VIEWS</button>
+    <p class="hint">Brush / eraser edits map to all camera directions while retaining each native silhouette. Disable for angle-specific details.</p>
+    <div class="pixel-reference-controls">
+     <div class="sectionhead">VIEW OVERLAY / REDRAW GUIDE</div>
+     <label>REFERENCE PLANE
+      <select id="pixelReferenceView">
+       <option value="off">OFF / NO OVERLAY</option>
+       <option value="se">SE · FRONT RIGHT</option>
+       <option value="sw">SW · FRONT LEFT</option>
+       <option value="ne">NE · BACK RIGHT</option>
+       <option value="nw">NW · BACK LEFT</option>
+      </select>
+     </label>
+     <label class="check"><input id="pixelReferenceFlip" type="checkbox" checked> AUTO MIRROR REFERENCE</label>
+     <label>OPACITY <input id="pixelReferenceOpacity" type="range" min="5" max="85" step="5" value="40"><span id="pixelReferenceOpacityLabel">40%</span></label>
+     <label>REF OFFSET X <input id="pixelReferenceX" type="number" min="-32" max="32" value="0" step="1"></label>
+     <label>REF OFFSET Y <input id="pixelReferenceY" type="number" min="-56" max="56" value="0" step="1"></label>
+     <p class="hint">Colored ghost overlay shows the selected source view over the active drawing view. For aligning and redrawing only; it is NEVER saved in the PNG.</p>
+    </div>
+    <div class="pixel-selection-controls">
+     <div class="sectionhead">SELECTION / TRANSFORM</div>
+     <div class="plane-buttons pixel-clipboard-actions">
+      <button id="pixelCopySelection" type="button" title="Copy selected RGBA pixels from active view / Ctrl+C">⧉ COPY</button>
+      <button id="pixelPasteSelection" type="button" title="Paste to active view without changing other views / Ctrl+V">▣ PASTE</button>
+      <button id="pixelPasteMirrored" type="button" title="Paste flipped horizontally, at mirrored X position / Ctrl+Shift+V">⇆ PASTE FLIP</button>
+     </div>
+     <label class="check"><input id="pixelPasteReplace" type="checkbox"> REPLACE TRANSPARENT PIXELS</label>
+     <p class="hint" id="pixelClipboardInfo" aria-live="polite">CLIPBOARD EMPTY · SELECT + COPY (CTRL+C)</p>
+     <div class="plane-buttons"><button id="pixelSelectAll" type="button">▣ SELECT ALL</button><button id="pixelDeselect" type="button">◇ DESELECT</button></div>
+     <div class="plane-buttons"><button id="pixelFlipH" type="button">⇆ FLIP H</button><button id="pixelFlipV" type="button">⇅ FLIP V</button></div>
+     <div class="plane-buttons"><button id="pixelDeleteSelection" type="button">⌫ DELETE PIXELS</button></div>
+     <p class="hint" id="pixelSelectionInfo">No selection. Select rectangle, then Move Pixels or Flip.</p>
+    </div>
+    <label class="check"><input type="checkbox" id="pixelOnion" checked> CHARACTER REFERENCE (ONION)</label>
+    <div class="pixel-grid-controls">
+     <label class="check"><input type="checkbox" id="pixelGrid" checked> GRID MODE</label>
+     <label>GRID SIZE <select id="pixelGridType"><option value="1">1 × 1 PX</option><option value="8">8 × 8 PX</option><option value="16">16 × 16 PX</option></select></label>
+    </div>
+    <div class="pixel-zoom-controls">
+     <span>ZOOM</span>
+     <button id="pixelZoomOut" title="Zoom out (mouse wheel or pinch)">−</button>
+     <input id="pixelZoom" type="range" min="2" max="16" step="1" value="5" aria-label="Pixel canvas zoom">
+     <button id="pixelZoomIn" title="Zoom in (mouse wheel or pinch)">＋</button>
+     <button id="pixelZoomFit" title="Fit artwork to editor">FIT</button>
+     <span id="pixelZoomLabel">500%</span>
+    </div>
+    <div class="plane-buttons"><button id="pixelUndo">↶ UNDO</button><button id="pixelRedo">↷ REDO</button></div>
+    <p class="hint">Edits work at native 64 × 112, across four directions. Pencil/eraser can be dragged with mouse or touch. Source planes and rig transforms remain separate.</p>
+    <button id="pixelRestore">↶ RESET PIXELS TO SOURCE</button>
+    <button id="pixelExport">↓ EXPORT 4-DIR PNG</button>
+   </aside>
+  </div>
+  <footer class="pixel-dialog-foot">
+   <span id="pixelStatus">SOURCE READY</span>
+   <button id="pixelApply">APPLY EDITED FRAME</button>
+   <button id="pixelSaveDefault" class="primary">▣ APPLY FRAME</button>
+  </footer>
+ </section>
+</div>
+<script>
+window.EMOTION_STUDIO_STANDALONE=true;
+</script>
+<script>
+/* Native 64x112 rectangular pixel selection operations for Mahluk 2.0.
+ * Operations are pure, so no browser canvas resizing or rig changes.
+ */
+(function(root,factory){"use strict";
+ const api=factory();
+ if(typeof module==="object"&&module.exports)module.exports=api;
+ if(root)root.MH2PixelSelection=api;
+})(typeof window!=="undefined"?window:null,function(){"use strict";
+ const clamp=(n,min,max)=>Math.min(max,Math.max(min,Math.round(Number(n)||0)));
+ function rectFromPoints(a,b,width=64,height=112){
+  const ax=clamp(a.x,0,width-1),bx=clamp(b.x,0,width-1),
+   ay=clamp(a.y,0,height-1),by=clamp(b.y,0,height-1);
+  return {x:Math.min(ax,bx),y:Math.min(ay,by),
+   w:Math.abs(bx-ax)+1,h:Math.abs(by-ay)+1};
+ }
+ function normalizeRect(r,w,h){
+  if(!r)return {x:0,y:0,w,h};
+  const x=clamp(r.x,0,w-1),y=clamp(r.y,0,h-1);
+  return {x,y,w:clamp(r.w,1,w-x),h:clamp(r.h,1,h-y)};
+ }
+ function contains(rect,x,y){
+  return Boolean(rect&&x>=rect.x&&x<rect.x+rect.w&&y>=rect.y&&y<rect.y+rect.h);
+ }
+ function flip(data,width,height,rect,axis="horizontal"){
+  const box=normalizeRect(rect,width,height);
+  const output=new Uint8ClampedArray(data);
+  for(let y=0;y<box.h;y++)for(let x=0;x<box.w;x++){
+   const ix=box.x+x,iy=box.y+y;
+   const fromX=axis==="horizontal"?box.x+box.w-1-x:ix;
+   const fromY=axis==="vertical"?box.y+box.h-1-y:iy;
+   const i=(iy*width+ix)*4,j=(fromY*width+fromX)*4;
+   output.set(data.slice(j,j+4),i);
+  }
+  return output;
+ }
+ function translate(data,width,height,rect,dx,dy){
+  const box=normalizeRect(rect,width,height),out=new Uint8ClampedArray(data),
+   xstep=Math.round(dx),ystep=Math.round(dy);
+  // Remove original selection then deposit visible pixels at destination.
+  for(let y=0;y<box.h;y++)for(let x=0;x<box.w;x++){
+   const i=((box.y+y)*width+box.x+x)*4;
+   out.fill(0,i,i+4);
+  }
+  for(let y=0;y<box.h;y++)for(let x=0;x<box.w;x++){
+   const destX=box.x+x+xstep,destY=box.y+y+ystep;
+   if(destX<0||destY<0||destX>=width||destY>=height)continue;
+   const from=((box.y+y)*width+box.x+x)*4,to=(destY*width+destX)*4;
+   if(data[from+3]===0)continue;
+   out.set(data.slice(from,from+4),to);
+  }
+  return out;
+ }
+
+ const CLIP_FORMAT="mh2-native-rgba-selection-v1";
+ function copy(data,width,height,rect){
+  const box=normalizeRect(rect,width,height),pixels=new Uint8ClampedArray(box.w*box.h*4);
+  for(let row=0;row<box.h;row++){
+   const offset=((box.y+row)*width+box.x)*4;
+   pixels.set(data.subarray(offset,offset+box.w*4),row*box.w*4);
+  }
+  return {format:CLIP_FORMAT,...box,pixels};
+ }
+ function validStamp(stamp,width=64,height=112){
+  return !!stamp&&stamp.format===CLIP_FORMAT&&
+   Number.isInteger(stamp.w)&&stamp.w>0&&stamp.w<=width&&
+   Number.isInteger(stamp.h)&&stamp.h>0&&stamp.h<=height&&
+   Number.isInteger(stamp.x)&&Number.isInteger(stamp.y)&&
+   stamp.x>=0&&stamp.y>=0&&stamp.x+stamp.w<=width&&stamp.y+stamp.h<=height&&
+   (stamp.pixels instanceof Uint8ClampedArray||Array.isArray(stamp.pixels))&&
+   stamp.pixels.length===stamp.w*stamp.h*4;
+ }
+ function paste(data,width,height,stamp,{x=stamp.x,y=stamp.y,mirror=false,replace=false}={}){
+  if(!validStamp(stamp,width,height))throw new Error("Invalid native RGBA clipboard");
+  const output=new Uint8ClampedArray(data),left=Math.round(x),top=Math.round(y);
+  for(let row=0;row<stamp.h;row++)for(let col=0;col<stamp.w;col++){
+   const dx=left+col,dy=top+row;
+   if(dx<0||dy<0||dx>=width||dy>=height)continue;
+   const sx=mirror?stamp.w-1-col:col;
+   const src=(row*stamp.w+sx)*4,dest=(dy*width+dx)*4;
+   if(!replace&&stamp.pixels[src+3]===0)continue;
+   for(let channel=0;channel<4;channel++)output[dest+channel]=stamp.pixels[src+channel];
+  }
+  return output;
+ }
+ return Object.freeze({rectFromPoints,normalizeRect,contains,flip,translate,copy,paste,validStamp,CLIP_FORMAT});
+});
+
+</script>
+<script>
+/* Mahluk Hidup 2.0 — native-resolution pixel editor per transparent plane.
+ * Edits 64x112 RGBA pixels across SE/SW/NE/NW in a 64x448 source atlas.
+ * No canvas scaling is saved. The rig, pivots, bones and animations stay data-only.
+ */
+(function(root,factory){"use strict";
+ const api=factory();
+ if(typeof module==="object"&&module.exports)module.exports=api;
+ if(root)root.MH2PlanePixelEditor=api;
+})(typeof window!=="undefined"?window:null,function(){"use strict";
+ const W=64,H=112,DIR=["se","sw","ne","nw"],MAX_HISTORY=24,S=typeof window!=="undefined"?window.MH2PixelSelection:require("./pixel-selection.js");
+ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+ function mirroredX(x,from,to){
+  const flip=i=>i===1||i===3; // SW/NW are mirrored camera silhouettes.
+  return flip(from)===flip(to)?x:W-1-x;
+ }
+ function rasterLine(x0,y0,x1,y1,plot){
+  x0=Math.round(x0);y0=Math.round(y0);x1=Math.round(x1);y1=Math.round(y1);
+  let dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,err=dx+dy;
+  for(;;){plot(x0,y0);if(x0===x1&&y0===y1)break;
+   const e=2*err;if(e>=dy){err+=dy;x0+=sx}if(e<=dx){err+=dx;y0+=sy}}
+ }
+ function flood(data,w,h,x,y,rgba){
+  if(x<0||y<0||x>=w||y>=h)return false;
+  const at=(x,y)=>(y*w+x)*4,src=at(x,y);
+  const old=[...data.slice(src,src+4)];
+  if(old.every((v,i)=>v===rgba[i]))return false;
+  const visited=new Uint8Array(w*h),stack=[y*w+x];
+  while(stack.length){
+   const p=stack.pop();if(visited[p])continue;visited[p]=1;
+   const px=p%w,py=Math.floor(p/w),i=p*4;
+   if(data[i]!==old[0]||data[i+1]!==old[1]||data[i+2]!==old[2]||data[i+3]!==old[3])continue;
+   data.set(rgba,i);
+   if(px>0)stack.push(p-1);
+   if(px<w-1)stack.push(p+1);
+   if(py>0)stack.push(p-w);
+   if(py<h-1)stack.push(p+w);
+  }
+  return true;
+ }
+ function rgba(hex){
+  const code=/^#[\da-f]{6}$/i.test(hex)?hex:"#18151b";
+  return [parseInt(code.slice(1,3),16),parseInt(code.slice(3,5),16),parseInt(code.slice(5,7),16),255];
+ }
+ function create({overlay,canvas,reference,onApply,onSaveDefault,onRestore}){
+  const els={
+   heading:overlay.querySelector("#pixelTitle"),dir:overlay.querySelector("#pixelDirection"),
+   color:overlay.querySelector("#pixelColor"),size:overlay.querySelector("#pixelSize"),
+   onion:overlay.querySelector("#pixelOnion"),grid:overlay.querySelector("#pixelGrid"),
+   sync:overlay.querySelector("#pixelSync"),syncExisting:overlay.querySelector("#pixelSyncExisting"),
+   refView:overlay.querySelector("#pixelReferenceView"),
+   refFlip:overlay.querySelector("#pixelReferenceFlip"),
+   refOpacity:overlay.querySelector("#pixelReferenceOpacity"),
+   refOpacityLabel:overlay.querySelector("#pixelReferenceOpacityLabel"),
+   refX:overlay.querySelector("#pixelReferenceX"),refY:overlay.querySelector("#pixelReferenceY"),
+   copy:overlay.querySelector("#pixelCopySelection"),
+   paste:overlay.querySelector("#pixelPasteSelection"),
+   pasteMirror:overlay.querySelector("#pixelPasteMirrored"),
+   pasteReplace:overlay.querySelector("#pixelPasteReplace"),
+   clipboardInfo:overlay.querySelector("#pixelClipboardInfo"),
+   selectAll:overlay.querySelector("#pixelSelectAll"),
+   deselect:overlay.querySelector("#pixelDeselect"),
+   flipH:overlay.querySelector("#pixelFlipH"),flipV:overlay.querySelector("#pixelFlipV"),
+   delSelection:overlay.querySelector("#pixelDeleteSelection"),
+   selectionInfo:overlay.querySelector("#pixelSelectionInfo"),
+   gridType:overlay.querySelector("#pixelGridType"),wrap:overlay.querySelector("#pixelCanvasWrap"),
+   zoom:overlay.querySelector("#pixelZoom"),zoomOut:overlay.querySelector("#pixelZoomOut"),
+   zoomIn:overlay.querySelector("#pixelZoomIn"),zoomFit:overlay.querySelector("#pixelZoomFit"),
+   zoomLabel:overlay.querySelector("#pixelZoomLabel"),
+   status:overlay.querySelector("#pixelStatus"),undo:overlay.querySelector("#pixelUndo"),
+   redo:overlay.querySelector("#pixelRedo"),apply:overlay.querySelector("#pixelApply"),
+   save:overlay.querySelector("#pixelSaveDefault"),restore:overlay.querySelector("#pixelRestore"),
+   export:overlay.querySelector("#pixelExport"),close:overlay.querySelector("#pixelClose")
+  };
+  const atlas=document.createElement("canvas");atlas.width=W;atlas.height=H*4;
+  const ctx=atlas.getContext("2d",{willReadFrequently:true});
+  const out=canvas.getContext("2d");
+  let bone="",tool="pencil",dir=0,active=null,history=[],redo=[],dirty=false,source=null,ref=null,refs=null;
+  let zoom=5,pan=null,pinch=null,selection=null,moveStart=null;
+  const touches=new Map();
+  // Shared by the Mahluk 2 and Emotion Studio editors on the same GitHub Pages
+  // origin. Clipboard is not part of character/master-rig saves or GitHub.
+  const CLIP_KEY="mh2-rgba-clipboard-v1";
+  let clipboard=null;
+  function currentClipboard(){
+   try{
+    const saved=JSON.parse(window.localStorage.getItem(CLIP_KEY));
+    if(S.validStamp(saved,W,H))
+     return {...saved,pixels:new Uint8ClampedArray(saved.pixels)};
+   }catch{}
+   return clipboard&&S.validStamp(clipboard,W,H)?clipboard:null;
+  }
+  function updateClipboardInfo(){
+   const saved=currentClipboard();
+   const available=!!saved;
+   els.paste.disabled=!available;els.pasteMirror.disabled=!available;
+   els.clipboardInfo.textContent=available?
+    "READY · "+(saved.bone||"PLANE").toUpperCase()+" / "+(saved.direction||"SE").toUpperCase()+
+    " · "+saved.w+"×"+saved.h+" PX · COPY BETWEEN VIEWS / PARTS":
+    "CLIPBOARD EMPTY · SELECT + COPY (CTRL+C)";
+  }
+  const controls=[...overlay.querySelectorAll("[data-pixel-tool]")];
+  const updateSelection=()=>{
+   updateClipboardInfo();
+   els.selectionInfo.textContent=selection?
+    "SELECTED "+selection.w+"×"+selection.h+" · X"+selection.x+" Y"+selection.y+
+      " · MOVE/FLIP AFFECT THIS VIEW ONLY":
+    "NO SELECTION · FLIP AFFECTS FULL ACTIVE VIEW";
+  };
+  const updateHistory=()=>{
+   updateSelection();
+   els.undo.disabled=!history.length;els.redo.disabled=!redo.length;
+   els.status.textContent=(dirty?"● UNSAVED PIXELS":"ORIGINAL PLANE")+
+    " · "+bone.toUpperCase()+" · "+DIR[dir].toUpperCase()+
+    (els.sync.checked?" · SYNC 4 VIEW":" · VIEW ONLY")+
+    " · "+history.length+" undo steps";
+  };
+  function saveHistory(){
+   history.push(ctx.getImageData(0,0,W,H*4));
+   if(history.length>MAX_HISTORY)history.shift();
+   redo=[];dirty=true;updateHistory();
+  }
+  function historyStep(from,to){
+   if(!from.length)return;
+   to.push(ctx.getImageData(0,0,W,H*4));
+   ctx.putImageData(from.pop(),0,0);dirty=true;draw();updateHistory();
+  }
+  function draw(){
+   const sx=0,sy=dir*H;
+   out.clearRect(0,0,canvas.width,canvas.height);
+   out.imageSmoothingEnabled=false;
+   out.fillStyle="#fff";out.fillRect(0,0,canvas.width,canvas.height);
+   const u=canvas.width/W,v=canvas.height/H;
+   const checker=Math.max(4,Math.round(u*4));
+   for(let y=0;y<canvas.height;y+=checker)for(let x=0;x<canvas.width;x+=checker){
+    if(((x/checker+y/checker)&1)===0){out.fillStyle="#d7dce5";out.fillRect(x,y,checker,checker)}
+   }
+   if(els.onion.checked&&ref){
+    out.save();out.globalAlpha=.20;
+    out.drawImage(ref,0,0,ref.width,ref.height,0,0,canvas.width,canvas.height);
+    out.restore();
+   }
+   out.drawImage(atlas,sx,sy,W,H,0,0,canvas.width,canvas.height);
+   // Ghost another angle on top of the active cutout to guide redraw.
+   // This is only a display composite: the 64×448 source atlas is intact.
+   const ghost=DIR.indexOf(els.refView.value);
+   if(ghost>=0&&ghost!==dir){
+    const ox=clamp(Number(els.refX.value)||0,-32,32)*u,
+     oy=clamp(Number(els.refY.value)||0,-56,56)*v;
+    const autoFlip=els.refFlip.checked&&
+      ((ghost===1||ghost===3)!==(dir===1||dir===3));
+    out.save();out.imageSmoothingEnabled=false;
+    out.globalAlpha=clamp(Number(els.refOpacity.value)||40,5,85)/100;
+    out.filter="sepia(1) saturate(3) hue-rotate(160deg)";
+    if(autoFlip){out.translate(canvas.width,0);out.scale(-1,1)}
+    out.drawImage(atlas,0,ghost*H,W,H,ox,oy,canvas.width,canvas.height);
+    out.restore();
+   }
+   if(els.grid.checked){
+    const step=Math.max(1,Math.min(16,Number(els.gridType.value)||1));
+    out.save();out.strokeStyle=step===1?"rgba(65,94,128,.29)":"rgba(56,111,161,.65)";
+    out.lineWidth=step===1?1:1.5;out.beginPath();
+    for(let x=0;x<=W;x+=step){const px=Math.round(x*u)+.5;out.moveTo(px,0);out.lineTo(px,canvas.height)}
+    for(let y=0;y<=H;y+=step){const py=Math.round(y*v)+.5;out.moveTo(0,py);out.lineTo(canvas.width,py)}
+    out.stroke();out.restore();
+   }
+   if(selection){
+    const x=selection.x*u,y=selection.y*v,w=selection.w*u,h=selection.h*v;
+    out.save();out.fillStyle="rgba(65,150,225,.11)";out.fillRect(x,y,w,h);
+    out.strokeStyle="#16335a";out.lineWidth=2;out.setLineDash([5,3]);
+    out.strokeRect(x+.5,y+.5,w-1,h-1);out.lineDashOffset=4;
+    out.strokeStyle="#f9feff";out.strokeRect(x+.5,y+.5,w-1,h-1);
+    out.restore();
+   }
+  }
+  function setZoom(next,cx,cy){
+   const target=clamp(Math.round(Number(next)||5),2,16);
+   const wrap=els.wrap,box=wrap.getBoundingClientRect();
+   const x=Number.isFinite(cx)?cx:box.left+box.width/2;
+   const y=Number.isFinite(cy)?cy:box.top+box.height/2;
+   const before=canvas.getBoundingClientRect();
+   const fx=before.width?(x-before.left)/before.width:.5;
+   const fy=before.height?(y-before.top)/before.height:.5;
+   zoom=target;
+   canvas.style.width=(W*zoom)+"px";
+   canvas.style.height=(H*zoom)+"px";
+   els.zoom.value=String(zoom);els.zoomLabel.textContent=zoom*100+"%";
+   const after=canvas.getBoundingClientRect();
+   wrap.scrollLeft+=after.left+fx*after.width-x;
+   wrap.scrollTop+=after.top+fy*after.height-y;
+  }
+  function zoomFit(){
+   const box=els.wrap.getBoundingClientRect();
+   const best=Math.min((box.width-22)/W,(box.height-22)/H);
+   setZoom(Math.floor(clamp(best,2,16)));
+  }
+  function touchPair(){
+   const p=[...touches.values()];
+   if(p.length<2)return null;
+   return {distance:Math.max(1,Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)),
+    center:{x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2}};
+  }
+  els.zoomOut.onclick=()=>setZoom(zoom-1);
+  els.zoomIn.onclick=()=>setZoom(zoom+1);
+  els.zoomFit.onclick=zoomFit;
+  els.zoom.oninput=()=>setZoom(els.zoom.value);
+  els.wrap.addEventListener("wheel",e=>{
+   if(overlay.hidden)return;
+   e.preventDefault();setZoom(zoom+(e.deltaY<0?1:-1),e.clientX,e.clientY);
+  },{passive:false});
+  function coords(e){
+   const rect=canvas.getBoundingClientRect();
+   return {
+    x:clamp(Math.floor((e.clientX-rect.left)/rect.width*W),0,W-1),
+    y:clamp(Math.floor((e.clientY-rect.top)/rect.height*H),0,H-1)
+   };
+  }
+  function targetDirections(){return els.sync.checked?[0,1,2,3]:[dir]}
+  function plot(x,y){
+   const size=Math.round(Number(els.size.value)||1);
+   const start=Math.floor((size-1)/2),ink=rgba(els.color.value);
+   for(const target of targetDirections()){
+    const mapped=mirroredX(x,dir,target);
+    const left=clamp(mapped-start,0,W),top=clamp(y-start+target*H,target*H,(target+1)*H);
+    const width=Math.max(0,Math.min(size,W-left));
+    const height=Math.max(0,Math.min(size,(target+1)*H-top));
+    if(!width||!height)continue;
+    if(target===dir){
+     if(tool==="eraser")ctx.clearRect(left,top,width,height);
+     else{ctx.fillStyle=els.color.value;ctx.fillRect(left,top,width,height)}
+     continue;
+    }
+    // Other directions preserve their independently authored silhouette.
+    // Recolor/erase only pixels which already belong to that view's plane.
+    const region=ctx.getImageData(left,top,width,height);
+    for(let i=0;i<region.data.length;i+=4){
+     if(region.data[i+3]===0)continue;
+     if(tool==="eraser")region.data[i+3]=0;
+     else{region.data[i]=ink[0];region.data[i+1]=ink[1];region.data[i+2]=ink[2]}
+    }
+    ctx.putImageData(region,left,top);
+   }
+  }
+  function paintPoint(from,to){
+   if(tool==="fill"){
+    const color=rgba(els.color.value);
+    for(const target of targetDirections()){
+     const x=mirroredX(to.x,dir,target),image=ctx.getImageData(0,target*H,W,H);
+     // Never fill an unoccupied background on another native angle.
+     const oldAlpha=image.data[(to.y*W+x)*4+3];
+     if(target!==dir&&oldAlpha===0)continue;
+     if(flood(image.data,W,H,x,to.y,color))ctx.putImageData(image,0,target*H);
+    }
+   }else rasterLine(from.x,from.y,to.x,to.y,plot);
+   draw();
+  }
+  function pipette(p){
+   const data=ctx.getImageData(p.x,p.y+dir*H,1,1).data;
+   if(data[3]===0)return;
+   els.color.value="#"+Array.from(data.slice(0,3)).map(c=>c.toString(16).padStart(2,"0")).join("");
+   selectTool("pencil");
+  }
+  function selectTool(name){
+   tool=name;controls.forEach(b=>b.classList.toggle("active",b.dataset.pixelTool===name));
+  }
+  controls.forEach(b=>b.addEventListener("click",()=>selectTool(b.dataset.pixelTool)));
+  overlay.querySelectorAll("[data-pixel-swatch]").forEach(el=>el.addEventListener("click",()=>{
+   els.color.value=el.dataset.pixelSwatch;selectTool("pencil");
+  }));
+  function frameImage(){return ctx.getImageData(0,dir*H,W,H)}
+  function replaceFrame(pixels){
+   const frame=frameImage();frame.data.set(pixels);
+   ctx.putImageData(frame,0,dir*H);
+  }
+  function copySelection(){
+   if(!bone)return;
+   clipboard={...S.copy(frameImage().data,W,H,selection),
+    bone,direction:DIR[dir]};
+   try{window.localStorage.setItem(CLIP_KEY,JSON.stringify({
+    ...clipboard,pixels:Array.from(clipboard.pixels)
+   }))}catch{/* Copy still works in this editor when browser storage is unavailable. */}
+   updateClipboardInfo();
+   els.status.textContent="COPIED "+clipboard.w+"×"+clipboard.h+" PIXELS · "+
+    bone.toUpperCase()+" / "+DIR[dir].toUpperCase()+" · SWITCH VIEW THEN PASTE";
+  }
+  function pasteSelection(mirror=false){
+   const stamp=currentClipboard();
+   if(!stamp){els.status.textContent="NO COPIED PIXELS · SELECT + COPY FIRST";return;}
+   const destX=selection?selection.x:(mirror?W-stamp.x-stamp.w:stamp.x);
+   const destY=selection?selection.y:stamp.y;
+   const dx=clamp(destX,0,W-1),dy=clamp(destY,0,H-1);
+   saveHistory();
+   replaceFrame(S.paste(frameImage().data,W,H,stamp,{
+    x:dx,y:dy,mirror,replace:els.pasteReplace.checked
+   }));
+   selection={x:dx,y:dy,w:Math.min(stamp.w,W-dx),h:Math.min(stamp.h,H-dy)};
+   selectTool("move-pixels");
+   draw();updateHistory();
+   els.status.textContent="PASTED "+stamp.w+"×"+stamp.h+" RGBA · "+
+    (mirror?"HORIZONTAL MIRROR · ":"")+DIR[dir].toUpperCase()+
+    " · DRAG TO ALIGN · UNDO AVAILABLE";
+  }
+  els.copy.onclick=copySelection;
+  els.paste.onclick=()=>pasteSelection(false);
+  els.pasteMirror.onclick=()=>pasteSelection(true);
+  function flipSelection(axis){
+   saveHistory();const image=frameImage();
+   replaceFrame(S.flip(image.data,W,H,selection,axis));
+   draw();updateHistory();
+  }
+  function moveSelectionFrom(sourcePixels,rect,dx,dy){
+   const x=clamp(dx,-W,W),y=clamp(dy,-H,H);
+   replaceFrame(S.translate(sourcePixels,W,H,rect,x,y));
+   selection={x:clamp(rect.x+x,0,W-1),y:clamp(rect.y+y,0,H-1),
+    w:Math.min(rect.w,W-clamp(rect.x+x,0,W-1)),
+    h:Math.min(rect.h,H-clamp(rect.y+y,0,H-1))};
+   draw();updateSelection();
+  }
+  els.selectAll.onclick=()=>{selection={x:0,y:0,w:W,h:H};selectTool("select");draw();updateSelection()};
+  els.deselect.onclick=()=>{selection=null;draw();updateSelection()};
+  els.flipH.onclick=()=>flipSelection("horizontal");
+  els.flipV.onclick=()=>flipSelection("vertical");
+  els.delSelection.onclick=()=>{
+   saveHistory();const box=S.normalizeRect(selection,W,H);
+   ctx.clearRect(box.x,dir*H+box.y,box.w,box.h);draw();updateHistory();
+  };
+  els.dir.onchange=()=>{
+   dir=DIR.indexOf(els.dir.value);ref=refs?.[DIR[dir]]||ref;
+   selection=null;moveStart=null;draw();updateHistory();
+  };
+  const updateRef=()=>{
+   els.refOpacityLabel.textContent=els.refOpacity.value+"%";draw();
+  };
+  for(const el of [els.refView,els.refFlip,els.refOpacity,els.refX,els.refY])
+   el.addEventListener(el===els.refOpacity?"input":"change",updateRef);
+  els.onion.onchange=draw;els.grid.onchange=draw;els.gridType.onchange=draw;
+  els.sync.onchange=updateHistory;
+  els.syncExisting.onclick=()=>{
+   if(!source)return;
+   const native=document.createElement("canvas");native.width=W;native.height=H*4;
+   const nativeContext=native.getContext("2d",{willReadFrequently:true});
+   nativeContext.drawImage(source,0,0,W,H*4);
+   const before=nativeContext.getImageData(0,dir*H,W,H).data;
+   const after=ctx.getImageData(0,dir*H,W,H).data;
+   const changed=[];
+   for(let i=0;i<W*H;i++){
+    const p=i*4;
+    if(before[p+3]===0)continue; // Preserve every original opposite silhouette.
+    if(before[p]!==after[p]||before[p+1]!==after[p+1]||
+       before[p+2]!==after[p+2]||before[p+3]!==after[p+3])changed.push(i);
+   }
+   if(!changed.length){
+    els.status.textContent="NO EXISTING SOURCE-PIXEL DIFFERENCES IN "+DIR[dir].toUpperCase();
+    return;
+   }
+   saveHistory();
+   let count=0;
+   for(let target=0;target<DIR.length;target++){
+    if(target===dir)continue;
+    const output=ctx.getImageData(0,target*H,W,H),data=output.data;
+    for(const index of changed){
+     const x=mirroredX(index%W,dir,target),y=Math.floor(index/W),
+      from=index*4,to=(y*W+x)*4;
+     if(data[to+3]===0)continue;
+     if(after[from+3]===0)data[to+3]=0;
+     else{
+      data[to]=after[from];data[to+1]=after[from+1];data[to+2]=after[from+2];
+     }
+     count++;
+    }
+    ctx.putImageData(output,0,target*H);
+   }
+   draw();updateHistory();
+   els.status.textContent="SYNCED "+count+" EXISTING PIXELS · 4 DIRECTIONS · NATIVE SILHOUETTES KEPT";
+  };
+  els.undo.onclick=()=>historyStep(history,redo);
+  els.redo.onclick=()=>historyStep(redo,history);
+  els.close.onclick=()=>{overlay.hidden=true};
+  els.apply.onclick=()=>{
+   if(onApply(bone,atlas.toDataURL("image/png"))!==false){
+    dirty=false;updateHistory();overlay.hidden=true;
+   }
+  };
+  els.save.onclick=()=>{
+   const png=atlas.toDataURL("image/png");
+   if(onSaveDefault(bone,png)!==false){
+    dirty=false;updateHistory();overlay.hidden=true;
+   }
+  };
+  els.restore.onclick=()=>{
+   if(!source)return;
+   saveHistory();ctx.clearRect(0,0,W,H*4);ctx.drawImage(source,0,0);
+   draw();els.status.textContent="RESTORED ORIGINAL SOURCE · APPLY TO COMMIT";
+  };
+  els.export.onclick=()=>{
+   atlas.toBlob(blob=>{
+    if(!blob)return;const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="mahluk-plane-"+bone+"-4dir.png";a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+   },"image/png");
+  };
+  function capture(e){try{canvas.setPointerCapture(e.pointerId)}catch{}}
+  function release(e){try{canvas.releasePointerCapture(e.pointerId)}catch{}}
+  canvas.addEventListener("pointerdown",e=>{
+   if(!bone||e.button>1)return;
+   e.preventDefault();
+   if(e.pointerType==="touch"){
+    touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    capture(e);
+    if(touches.size===2){
+     const pair=touchPair();
+     pinch={distance:pair.distance,zoom,lastCenter:pair.center};
+     active=null;pan=null;return;
+    }
+    if(touches.size>2){active=null;return}
+   }
+   if(tool==="hand"||e.button===1||e.altKey){
+    pan={id:e.pointerId,startX:e.clientX,startY:e.clientY,
+     scrollX:els.wrap.scrollLeft,scrollY:els.wrap.scrollTop};
+    active=null;capture(e);return;
+   }
+   const point=coords(e);
+   if(tool==="picker"){pipette(point);return}
+   if(tool==="select"){
+    selection=S.rectFromPoints(point,point,W,H);
+    active={id:e.pointerId,at:point,origin:point,mode:"select",painted:true};
+    capture(e);draw();updateSelection();return;
+   }
+   if(tool==="move-pixels"){
+    if(!selection){els.status.textContent="SELECT A RECTANGLE FIRST (▣ SELECT)";return}
+    if(!S.contains(selection,point.x,point.y)){
+     els.status.textContent="DRAG FROM INSIDE SELECTED PIXELS";return;
+    }
+    saveHistory();
+    moveStart={rect:{...selection},pixels:frameImage().data.slice(),from:point};
+    active={id:e.pointerId,at:point,mode:"move-pixels",painted:true};
+    capture(e);return;
+   }
+   // A touch that becomes a pinch must not paint a stray first dot.
+   active={id:e.pointerId,at:point,painted:false};
+   capture(e);
+   if(e.pointerType!=="touch"){saveHistory();paintPoint(point,point);active.painted=true}
+  });
+  canvas.addEventListener("pointermove",e=>{
+   if(e.pointerType==="touch"&&touches.has(e.pointerId)){
+    touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&touches.size>=2){
+     const pair=touchPair(),ratio=pair.distance/pinch.distance;
+     const dx=pair.center.x-pinch.lastCenter.x,dy=pair.center.y-pinch.lastCenter.y;
+     setZoom(pinch.zoom*ratio,pair.center.x,pair.center.y);
+     els.wrap.scrollLeft-=dx;els.wrap.scrollTop-=dy;
+     pinch.lastCenter=pair.center;
+     e.preventDefault();return;
+    }
+   }
+   if(pan?.id===e.pointerId){
+    els.wrap.scrollLeft=pan.scrollX+pan.startX-e.clientX;
+    els.wrap.scrollTop=pan.scrollY+pan.startY-e.clientY;
+    e.preventDefault();return;
+   }
+   if(active?.id!==e.pointerId)return;
+   e.preventDefault();
+   const next=coords(e);
+   if(active.mode==="select"){
+    selection=S.rectFromPoints(active.origin,next,W,H);
+    draw();updateSelection();return;
+   }
+   if(active.mode==="move-pixels"&&moveStart){
+    moveSelectionFrom(moveStart.pixels,moveStart.rect,
+     next.x-moveStart.from.x,next.y-moveStart.from.y);
+    return;
+   }
+   if(!active.painted){saveHistory();active.painted=true;paintPoint(active.at,active.at)}
+   paintPoint(active.at,next);active.at=next;
+  });
+  for(const evt of ["pointerup","pointercancel","lostpointercapture"])
+   canvas.addEventListener(evt,e=>{
+    if(active?.id===e.pointerId){
+     if(evt==="pointerup"&&!active.painted){saveHistory();paintPoint(active.at,active.at)}
+     active=null;moveStart=null;
+     updateSelection();
+    }
+    if(pan?.id===e.pointerId)pan=null;
+    if(e.pointerType==="touch")touches.delete(e.pointerId);
+    if(touches.size<2)pinch=null;
+    if(evt!=="lostpointercapture")release(e);
+   });
+  overlay.addEventListener("keydown",e=>{
+   if(overlay.hidden)return;
+   const typing=["INPUT","SELECT","TEXTAREA"].includes(document.activeElement?.tagName);
+   if((e.ctrlKey||e.metaKey)&&!typing){
+    const k=e.key.toLowerCase();
+    if(k==="c"){e.preventDefault();e.stopPropagation();copySelection();return;}
+    if(k==="v"){e.preventDefault();e.stopPropagation();pasteSelection(e.shiftKey);return;}
+   }
+   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="a"&&!typing){
+    e.preventDefault();e.stopPropagation();els.selectAll.click();return;
+   }
+   if(!typing&&e.key==="Delete"){
+    e.preventDefault();e.stopPropagation();els.delSelection.click();return;
+   }
+   if(!typing&&e.key.toLowerCase()==="s"&&!e.ctrlKey&&!e.metaKey){
+    e.preventDefault();e.stopPropagation();selectTool("select");return;
+   }
+   if(!typing&&e.key.toLowerCase()==="m"&&!e.ctrlKey&&!e.metaKey){
+    e.preventDefault();e.stopPropagation();selectTool("move-pixels");return;
+   }
+   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){
+    e.preventDefault();e.stopPropagation();
+    if(e.shiftKey)historyStep(redo,history);else historyStep(history,redo);
+   }else if(!["INPUT","SELECT"].includes(document.activeElement?.tagName)&&["=","+","-","0"].includes(e.key)){
+    e.preventDefault();e.stopPropagation();
+    if(e.key==="0")zoomFit();else setZoom(zoom+(e.key==="-"?-1:1));
+   }else if(e.key==="Escape"){
+    e.stopPropagation();
+    if(selection){selection=null;draw();updateSelection()}else overlay.hidden=true;
+   }
+  });
+  function open({id,initialAtlas,originalAtlas,referenceImage,referenceImages,direction="se"}){
+   if(!id)throw Error("Select an editable plane");
+   bone=id;dir=Math.max(0,DIR.indexOf(direction));source=originalAtlas||null;
+   refs=referenceImages||null;ref=refs?.[DIR[dir]]||referenceImage||null;
+   history=[];redo=[];dirty=false;active=null;selection=null;moveStart=null;
+   els.refView.value=dir===0?"off":"se";
+   els.refOpacity.value="40";els.refOpacityLabel.textContent="40%";
+   els.refFlip.checked=true;els.refX.value="0";els.refY.value="0";
+   ctx.clearRect(0,0,W,H*4);
+   if(initialAtlas)ctx.drawImage(initialAtlas,0,0,W,H*4);
+   else if(source)ctx.drawImage(source,0,0,W,H*4);
+   els.heading.textContent="PIXEL EDITOR / "+id.replaceAll("_"," ").toUpperCase();
+   els.dir.value=DIR[dir];selectTool("pencil");overlay.hidden=false;
+   draw();zoomFit();updateHistory();
+   canvas.focus({preventScroll:true});
+  }
+  return {open,isOpen:()=>!overlay.hidden,close:()=>{overlay.hidden=true}};
+ }
+ return Object.freeze({W,H,DIR,rasterLine,flood,rgba,mirroredX,create});
+});
+
+</script>
+<script>
+/* Emotion Studio / universal four-view emotion planes. Standalone editor with Mahluk Hidup 2 compatible atlas layout. */
+(function(root,factory){"use strict";const api=factory();if(typeof module==="object"&&module.exports)module.exports=api;if(root)root.MH2UniversalEmotions=api;})(typeof window!=="undefined"?window:null,function(){"use strict";
+const FORMAT="mahluk-2-universal-emotions-v1",OWNER="lafrich",REPO="virtual-life-asset-pipeline",BRANCH="main";
+const PATH="site/emotion-studio/catalog.json";
+const API="https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+PATH;
+const DIR=["se","sw","ne","nw"];
+const TEMPLATES=["neutral","happy","angry","sad","surprised","shy","cheeky","bleh","wink","sleepy","cry","grimace"];
+function validEntry(a){return !!a&&/^[-a-z0-9_]{1,64}$/.test(a.id)&&typeof a.name==="string"&&a.name.length<=90&&["universal","male","female","original"].includes(a.base)&&Number.isInteger(a.frames)&&a.frames>=1&&a.frames<=48&&(TEMPLATES.includes(a.template)||typeof a.png==="string"&&/^data:image\/png;base64,[a-z\d+/=]+$/i.test(a.png)&&a.png.length<3000000);}
+function validateCatalog(d){if(!d||d.format!==FORMAT||!Array.isArray(d.entries)||d.entries.length>250||!d.entries.every(validEntry)||new Set(d.entries.map(a=>a.id)).size!==d.entries.length)throw Error("Universal emotion catalog invalid");return d;}
+function rgba(ctx,color,x,y,w=1,h=1){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+function drawFace(ctx,type,frame,direction,xOffset){
+ if(direction>1)return; // Back of head is intentionally transparent.
+ const x=xOffset+(direction===1?0:0),off=frame%3===1?1:0;
+ const ink="#2b2024",rose="#ed8ca1",blue="#6c9ad6";
+ const eye=(xx,y,closed=false)=>{if(closed)rgba(ctx,ink,x+xx,y,5,1);else{rgba(ctx,ink,x+xx,y,3,3);rgba(ctx,"#faf0e7",x+xx+1,y,1,1)}};
+ const line=(points,color=ink)=>{for(const [xx,yy,w=2,h=1] of points)rgba(ctx,color,x+xx,yy,w,h)};
+ if(type==="angry"){line([[21,35,7,2],[36,37,7,2],[26,37,3,2],[36,35,5,2]]);eye(23,40);eye(38,40);line([[28,51,10,2],[26,53,3,1],[38,53,3,1]])}
+ else if(type==="sad"){line([[22,37,6,1],[37,36,6,1]]);eye(23,40);eye(38,40);line([[27,54,3,2],[30,52,7,1],[37,54,3,2]])}
+ else if(type==="surprised"){eye(23,36);eye(39,36);line([[31,49,5,7],[30,51,1,3],[36,51,1,3]])}
+ else if(type==="happy"){eye(23,36,off===1);eye(39,36,off===1);line([[26,48,2,3],[28,51,3,2],[31,52,5,2],[36,51,3,2],[39,48,2,3]])}
+ else if(type==="shy"){eye(23,37,true);eye(39,37,true);rgba(ctx,rose,x+18,45,8,3);rgba(ctx,rose,x+42,45,8,3);line([[28,51,3,1],[31,52,6,1],[37,51,3,1]])}
+ else if(type==="cheeky"){eye(23,36,off!==0);eye(39,36);line([[27,49,4,2],[31,51,8,2],[39,49,3,1]]);rgba(ctx,rose,x+45,44,5,2)}
+ else if(type==="bleh"){eye(23,36,true);eye(39,36,true);line([[28,49,13,2],[30,51,9,2]]);rgba(ctx,rose,x+33,53,6,4+off);rgba(ctx,ink,x+34,54,1,2)}
+ else if(type==="wink"){eye(23,36,frame%3===0?false:true);eye(39,36);line([[28,50,3,1],[31,51,6,2],[37,50,3,1]])}
+ else if(type==="sleepy"){eye(23,39,true);eye(39,39,true);line([[31,52,6,1]])}
+ else if(type==="cry"){eye(23,36);eye(39,36);rgba(ctx,blue,x+25,41,2,5+off*2);rgba(ctx,blue,x+41,41,2,5+off*2);line([[28,52,3,1],[31,50,6,1],[37,52,3,1]])}
+ else if(type==="grimace"){eye(23,36);eye(39,36);rgba(ctx,ink,x+28,49,13,6);rgba(ctx,"#faf1e7",x+29,50,11,2);line([[33,50,1,4],[37,50,1,4]])}
+ else{eye(23,37);eye(39,37);line([[31,51,6,1]])}
+}
+function renderTemplate(entry){const c=document.createElement("canvas");c.width=64*entry.frames;c.height=448;const ctx=c.getContext("2d");ctx.imageSmoothingEnabled=false;
+ for(let d=0;d<2;d++)for(let f=0;f<entry.frames;f++){ctx.save();ctx.translate(f*64,d*112);drawFace(ctx,entry.template,f,d,0);ctx.restore()}return c}
+async function renderAtlas(entry){if(!validEntry(entry))throw Error("Invalid emotion entry");if(entry.template&&!entry.png)return renderTemplate(entry);
+ const img=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error("Unable to decode emotion image"));im.src=entry.png});
+ if(img.naturalWidth!==64*entry.frames||img.naturalHeight!==448)throw Error("PNG must be "+(64*entry.frames)+"×448");
+ const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=448;c.getContext("2d").drawImage(img,0,0);return c;
+}
+function decode64(s){const bin=atob(s.replace(/\s/g,""));const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}
+function encode64(s){const bytes=new TextEncoder().encode(s);let r="";for(let i=0;i<bytes.length;i+=8192)r+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(r)}
+const EMBEDDED_CATALOG={"format":"mahluk-2-universal-emotions-v1","cell":[64,112],"directions":["se","sw","ne","nw"],"updated":"2026-11-06","entries":[{"id":"universal-neutral","name":"Neutral","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"universal-happy","name":"Happy","base":"universal","frames":3,"fps":6,"template":"happy"},{"id":"universal-angry","name":"Angry","base":"universal","frames":3,"fps":6,"template":"angry"},{"id":"universal-sad","name":"Sad","base":"universal","frames":3,"fps":6,"template":"sad"},{"id":"universal-surprised","name":"Surprised","base":"universal","frames":3,"fps":6,"template":"surprised"},{"id":"universal-shy","name":"Blush / Shy","base":"universal","frames":3,"fps":6,"template":"shy"},{"id":"universal-cheeky","name":"Cheeky","base":"universal","frames":3,"fps":6,"template":"cheeky"},{"id":"universal-bleh","name":"Bleh","base":"universal","frames":4,"fps":6,"template":"bleh"},{"id":"universal-wink","name":"Wink","base":"universal","frames":3,"fps":6,"template":"wink"},{"id":"universal-sleepy","name":"Sleepy","base":"universal","frames":3,"fps":6,"template":"sleepy"},{"id":"universal-cry","name":"Crying","base":"universal","frames":4,"fps":6,"template":"cry"},{"id":"universal-grimace","name":"Grimace","base":"universal","frames":3,"fps":6,"template":"grimace"}]};
+async function loadCatalog(token=""){
+ const headers={"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+ if(token)headers.Authorization="Bearer "+token;
+ if(!token&&typeof location!=="undefined"&&location.protocol==="file:")return {catalog:validateCatalog(EMBEDDED_CATALOG),sha:null,from:"embedded"};
+ try{
+  const response=await fetch(API+"?t="+Date.now(),{headers,cache:"no-store"});
+  if(!response.ok)throw Error("GitHub HTTP "+response.status);
+  const file=await response.json();
+  return {catalog:validateCatalog(JSON.parse(decode64(file.content))),sha:file.sha,from:"github"};
+ }catch(error){
+  if(token)throw error;
+  return {catalog:validateCatalog(EMBEDDED_CATALOG),sha:null,from:"embedded"};
+ }
+}
+async function saveEntry(entry,token){if(!token)throw Error("Connect GitHub with a fine-grained token (Contents: Read and write).");if(!validEntry(entry))throw Error("Invalid emotion asset");
+ const latest=await loadCatalog(token);if(!latest.sha)throw Error("Cannot determine GitHub version");
+ const entries=latest.catalog.entries.filter(a=>a.id!==entry.id);entries.push(entry);
+ if(entries.length>250)throw Error("Maximum 250 emotion assets");
+ const catalog=validateCatalog({...latest.catalog,updated:new Date().toISOString(),entries});
+ const response=await fetch(API,{method:"PUT",headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","Content-Type":"application/json","X-GitHub-Api-Version":"2022-11-28"},body:JSON.stringify({message:"Emotion Studio: publish "+entry.id,content:encode64(JSON.stringify(catalog,null,2)+"\n"),sha:latest.sha,branch:BRANCH})});
+ if(!response.ok){const info=await response.json().catch(()=>({}));throw Error("GitHub save failed ("+response.status+"): "+String(info.message||"check permissions/conflicts"));}
+ return {catalog,commit:(await response.json()).commit?.sha||""};
+}
+return Object.freeze({FORMAT,PATH,API,DIR,TEMPLATES,validEntry,validateCatalog,renderTemplate,renderAtlas,loadCatalog,saveEntry});
+});
+</script>
+<script>
+/* Standalone Emotion Studio. Only exports compatible assets; no cross-app sync. */
+(function(){"use strict";
+const U=window.MH2UniversalEmotions,P=window.MH2PlanePixelEditor;
+const $=id=>document.getElementById(id),DIR=U.DIR;
+let catalog=null,selected=null,atlas=null,frame=0,direction="se",dirty=false,playing=false,authToken="",saving=false,editor=null;
+const snapshot=()=>({...selected}),clone=x=>JSON.parse(JSON.stringify(x));
+function status(s,error=false){$("status").textContent=s;$("status").style.color=error?"#b62230":""}
+function setDirty(value=true){dirty=value;$("dirty").textContent=dirty?"● UNSAVED / EXPORT OR PUBLISH":"✓ READY / NO UNSAVED EDITS";$("dirty").style.color=dirty?"#b62230":"#276744"}
+function stageImage(index=frame){const c=document.createElement("canvas");c.width=64;c.height=448;
+ if(atlas)c.getContext("2d").drawImage(atlas,index*64,0,64,448,0,0,64,448);return c}
+function drawTile(target,index,dir="se"){const ctx=target.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,target.width,target.height);
+ if(!atlas)return;const sy=DIR.indexOf(dir)*112;ctx.drawImage(atlas,index*64,sy,64,112,0,0,target.width,target.height)}
+function drawPreview(){drawTile($("preview"),frame,direction);$("previewInfo").textContent=direction.toUpperCase()+" · FRAME "+(frame+1)+" / "+selected.frames}
+function renderFrames(){const t=$("timeline");t.replaceChildren();
+ for(let i=0;i<selected.frames;i++){const b=document.createElement("button");b.className="frame-cell"+(i===frame?" active":"");
+  const c=document.createElement("canvas");c.width=64;c.height=112;drawTile(c,i,"se");
+  const num=document.createElement("span");num.textContent="◆ "+String(i+1).padStart(2,"0");b.append(c,num);b.title="Edit frame "+(i+1);b.onclick=()=>{frame=i;renderFrames();drawPreview()};t.append(b)}
+ $("frameInfo").textContent=selected.frames+" FRAME(S) · "+selected.fps+" FPS";
+}
+function render(){if(!selected||!atlas)return;$("name").value=selected.name;$("base").value=selected.base;$("fps").value=selected.fps||6;
+ for(const b of document.querySelectorAll("[data-dir]"))b.classList.toggle("active",b.dataset.dir===direction);
+ renderFrames();drawPreview();}
+async function choose(entry,{force=false}={}){
+ if(dirty&&!force&&!window.confirm("Unsaved pixels are not on GitHub. Discard them?"))return;
+ playing=false;$("play").textContent="▶ PLAY";selected=clone(entry);frame=0;
+ try{atlas=await U.renderAtlas(selected)}catch(e){status("ASSET INVALID: "+e.message,true);return}
+ setDirty(false);render();renderList();status("LOADED / "+selected.name.toUpperCase()+" · "+selected.frames+" FRAMES");
+}
+async function renderList(){
+ const list=$("cards");if(!catalog)return;list.replaceChildren();
+ const q=$("filter").value.trim().toLowerCase();const entries=selected&&!catalog.entries.some(x=>x.id===selected.id)?[...catalog.entries,selected]:catalog.entries;
+ const filtered=entries.filter(x=>x.name.toLowerCase().includes(q)||x.id.includes(q));
+ $("count").textContent=filtered.length+" ASSETS";
+ for(const item of filtered){const row=document.createElement("button");row.className="emotion-card"+(selected?.id===item.id?" active":"");
+  const thumb=document.createElement("canvas");thumb.width=64;thumb.height=112;
+  U.renderAtlas(item).then(src=>{const ctx=thumb.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,64,112);ctx.drawImage(src,0,0,64,112,0,0,64,112)}).catch(()=>{});
+  const labels=document.createElement("span"),name=document.createElement("b"),info=document.createElement("small");
+  name.textContent=item.name;info.textContent=item.frames+" FRAMES · "+item.base.toUpperCase();labels.append(name,info);row.append(thumb,labels);
+  row.onclick=()=>choose(item);list.append(row);
+ }
+}
+async function reload({force=false}={}){if(dirty&&!force&&!window.confirm("Discard unsaved emotion edits?"))return;
+ status("LOADING GITHUB CATALOG ...");try{const result=await U.loadCatalog();catalog=result.catalog;
+ $("online").textContent=result.from==="github"?"CATALOG / GITHUB":"STANDALONE / 12 TEMPLATES";
+ const next=catalog.entries.find(x=>x.id===selected?.id)||catalog.entries[0];if(next)await choose(next,{force:true});else{status("No assets in catalog",true);await renderList()}
+ }catch(e){status("CATALOG LOAD FAILED: "+e.message,true);$("online").textContent="GITHUB / OFFLINE"}}
+function mark(){setDirty();renderFrames();drawPreview()}
+function addFrame(){if(selected.frames>=48){status("MAXIMUM 48 FRAMES",true);return}
+ const next=document.createElement("canvas");next.width=(selected.frames+1)*64;next.height=448;
+ const ctx=next.getContext("2d");ctx.drawImage(atlas,0,0);ctx.drawImage(atlas,frame*64,0,64,448,selected.frames*64,0,64,448);
+ atlas=next;frame=selected.frames++;mark()}
+function removeFrame(){if(selected.frames<=1){status("ONE FRAME MUST REMAIN",true);return}
+ const next=document.createElement("canvas");next.width=(selected.frames-1)*64;next.height=448;const ctx=next.getContext("2d");
+ let x=0;for(let f=0;f<selected.frames;f++)if(f!==frame){ctx.drawImage(atlas,f*64,0,64,448,x*64,0,64,448);x++}
+ atlas=next;selected.frames--;frame=Math.min(frame,selected.frames-1);mark()}
+async function applyFrame(png){const im=await new Promise((resolve,reject)=>{const x=new Image();x.onload=()=>resolve(x);x.onerror=()=>reject(Error("Frame PNG invalid"));x.src=png});
+ if(im.width!==64||im.height!==448)throw Error("Frame must be 64×448");
+ const ctx=atlas.getContext("2d");ctx.clearRect(frame*64,0,64,448);ctx.drawImage(im,frame*64,0);mark();status("FRAME "+(frame+1)+" APPLIED · SAVE TO GITHUB TO PUBLISH")}
+function openEditor(){if(!atlas)return;const img=stageImage();
+ editor.open({id:"emotion-frame-"+(frame+1),initialAtlas:img,originalAtlas:img,direction});
+}
+function newEmotion(){if(dirty&&!window.confirm("Discard unsaved emotion edits?"))return;
+ const id="emotion-"+Date.now().toString(36),fresh={id,name:"NEW EMOTION",base:"universal",frames:1,fps:6,template:"neutral"};
+ choose(fresh,{force:true}).then(()=>{setDirty();$("name").focus();$("name").select()})}
+
+// Portable project files use the exact universal 64x112 RGBA 4-view format.
+// They can be imported on another computer without GitHub or localStorage.
+function exportProject(){
+ if(!atlas||!selected)return;
+ const record={...snapshot(),name:$("name").value.trim()||selected.name,base:$("base").value,
+  fps:Math.max(1,Math.min(30,Number($("fps").value)||6)),frames:selected.frames,png:atlas.toDataURL("image/png")};
+ delete record.template;
+ const project={format:U.FORMAT,cell:[64,112],directions:[...DIR],entries:[record]};
+ const file=new Blob([JSON.stringify(project,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(file),a=document.createElement("a");
+ a.href=url;a.download=(selected.id||"emotion")+".emotion.json";a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+ status("PROJECT JSON EXPORTED · 64×"+selected.frames+" BY 448 RGBA ATLAS");
+}
+async function importProject(file){
+ if(!file)return;
+ try{
+  if(file.size>4000000)throw Error("Project JSON too large (4 MB limit)");
+  const project=U.validateCatalog(JSON.parse(await file.text()));
+  if(!Array.isArray(project.cell)||project.cell[0]!==64||project.cell[1]!==112||
+     JSON.stringify(project.directions)!==JSON.stringify(DIR))throw Error("Expected MH2: 64x112 / SE SW NE NW");
+  if(project.entries.length!==1)throw Error("Import one emotion per Project JSON");
+  if(dirty&&!window.confirm("Discard unsaved changes?"))return;
+  await choose(project.entries[0],{force:true});setDirty(true);
+  status("PROJECT OPENED · EXPORT PNG OR PUBLISH WHEN READY");
+ }catch(error){status("IMPORT PROJECT FAILED: "+error.message,true)}
+}
+function exportPng(){if(!atlas)return;atlas.toBlob(blob=>{if(!blob)return;const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=(selected.id||"emotion")+".png";a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)},"image/png")}
+async function importPng(file){if(!file)return;
+ if(!/^image\/png$/.test(file.type)){status("SELECT A PNG FILE",true);return}
+ try{const url=URL.createObjectURL(file);let im;try{im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url})}finally{URL.revokeObjectURL(url)}
+ if(im.naturalHeight!==448||im.naturalWidth%64||im.naturalWidth<64||im.naturalWidth>64*48)throw Error("PNG must be 64×N width and exactly 448 height");
+ if(dirty&&!window.confirm("Discard unsaved edits?"))return;
+ const canvas=document.createElement("canvas");canvas.width=im.naturalWidth;canvas.height=448;canvas.getContext("2d").drawImage(im,0,0);
+ const id="emotion-"+Date.now().toString(36);
+ const fresh={id,name:file.name.replace(/\.png$/i,"").slice(0,80)||"Imported emotion",base:"universal",fps:6,frames:canvas.width/64,png:canvas.toDataURL("image/png")};
+ await choose(fresh,{force:true});setDirty();status("IMPORTED INTO EDITOR · SAVE TO GITHUB TO PUBLISH");
+ }catch(e){status("IMPORT FAILED: "+e.message,true)}}
+async function connect(){const proposed=$("token").value.trim();if(!proposed){status("ENTER GITHUB FINE-GRAINED TOKEN FOR THIS REPOSITORY",true);return}
+ $("connect").disabled=true;try{await U.loadCatalog(proposed);authToken=proposed;$("token").value="";$("authLabel").textContent="✓ GITHUB AUTHORIZED · THIS TAB ONLY";status("GITHUB CONNECTED / READY TO PUBLISH")}
+ catch(e){authToken="";status("TOKEN CHECK FAILED: "+e.message,true)}finally{$("connect").disabled=false}}
+async function save(){
+ if(!selected||!atlas||saving)return;
+ if(!authToken){status("CONNECT GITHUB FIRST TO SAVE (Contents: Read and write)",true);$("token").focus();return}
+ saving=true;$("save").disabled=true;status("PUBLISHING EMOTION TO GITHUB ...");
+ try{const entry={...snapshot(),name:$("name").value.trim()||"UNTITLED",base:$("base").value,frames:selected.frames,fps:Math.max(1,Math.min(30,Number($("fps").value)||6)),png:atlas.toDataURL("image/png")};
+ delete entry.template;
+ if(entry.png.length>3000000)throw Error("PNG too large for GitHub catalog");
+ const result=await U.saveEntry(entry,authToken);catalog=result.catalog;selected=clone(entry);
+ setDirty(false);await renderList();status("✓ SAVED ON GITHUB · "+result.commit.slice(0,10)+" · REFRESH MAHLUK HIDUP 2 TO LOAD");
+ }catch(e){status("SAVE FAILED: "+e.message,true)}finally{saving=false;$("save").disabled=false}
+}
+function animationTick(t){if(playing&&selected&&atlas&&!editor?.isOpen()){
+ if(!animationTick.prev||t-animationTick.prev>=1000/(selected.fps||6)){frame=(frame+1)%selected.frames;animationTick.prev=t;renderFrames();drawPreview()}
+ }requestAnimationFrame(animationTick)}
+function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas"),reference:$("preview"),
+ onApply:(id,png)=>{applyFrame(png).then(()=>editor.close()).catch(e=>status(e.message,true));return false},
+ onSaveDefault:(id,png)=>{applyFrame(png).then(()=>editor.close()).catch(e=>status(e.message,true));return false}});
+ $("filter").oninput=renderList;$("reload").onclick=()=>reload();$("new").onclick=newEmotion;$("export").onclick=exportPng;
+ $("import").onchange=e=>{importPng(e.target.files?.[0]);e.target.value=""};
+ $("exportProject").onclick=exportProject;
+ $("importProject").onchange=e=>{importProject(e.target.files?.[0]);e.target.value=""};
+ $("duplicateFrame").onclick=addFrame;$("deleteFrame").onclick=removeFrame;$("edit").onclick=openEditor;
+ $("play").onclick=()=>{playing=!playing;$("play").textContent=playing?"Ⅱ PAUSE":"▶ PLAY";animationTick.prev=0};
+ for(const b of document.querySelectorAll("[data-dir]"))b.onclick=()=>{direction=b.dataset.dir;render()};
+ $("name").oninput=()=>{if(selected){selected.name=$("name").value;setDirty();renderList()}};
+ $("base").onchange=()=>{if(selected){selected.base=$("base").value;setDirty()}};
+ $("fps").onchange=()=>{if(selected){selected.fps=Math.max(1,Math.min(30,Number($("fps").value)||6));setDirty();renderFrames()}};
+ $("connect").onclick=connect;$("save").onclick=save;
+ window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
+ requestAnimationFrame(animationTick);
+}
+wire();reload({force:true});
+})();
+</script>
+</body></html>
