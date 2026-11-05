@@ -666,6 +666,8 @@ function persist(asset){
 function saveAsset(){
  const a=buildAsset();
  if(!persist(a))return null;
+ window.dispatchEvent(new CustomEvent('membangun:local-saved',
+  {detail:{app:'bangun',kind:'building',record:a}}));
  if(cityBrowser?.activeTarget()){
   status('Saved '+a.name+' · updating selected Semesta City Draft…');
   void cityBrowser.afterSave(a);
@@ -1014,6 +1016,54 @@ window.addEventListener('storage',event=>{
   }catch{status('Unable to read external building update');}
  }
 });
+
+/* Google Drive backup for saved buildings and manually authored pixel objects.
+ * Imported Drive assets never edit placed Semesta objects automatically.
+ */
+window.MembangunCloudAdapter=Object.freeze({
+ app:'bangun',
+ async currentRecord(){
+  const row=current?.id?saved.find(x=>x.id===current.id):null;
+  return row?{kind:'building',record:row}:null;
+ },
+ async localRecords(){
+  const buildings=saved.map(record=>({kind:'building',record}));
+  const objects=(window.VLBangunObjects?.read?.()||[])
+   .filter(record=>window.VLBangunObjects.valid(record))
+   .map(record=>({kind:'object',record}));
+  return [...buildings,...objects];
+ },
+ async importRemote(payload){
+  const row=payload?.record,kind=payload?.kind;
+  if(payload?.app!=='bangun'||!row||typeof row.id!=='string')throw Error('Not a Bangun Ruang project');
+  if(kind==='building'){
+   if(!row.config||!row.views||row.format!=='virtual-life-building-asset-v1')
+    throw Error('Missing building configuration or four-view sprites');
+   const existing=saved.find(x=>x.id===row.id);
+   if(existing){
+    // Never overwrite the only local version without a durable backup.
+    const key='membangun-drive-before-building:'+existing.id;
+    try{localStorage.setItem(key,JSON.stringify(existing))}
+    catch(error){throw Error('Not enough browser storage for safety backup. Export the existing building first. '+error.message)}
+   }
+   if(!persist(row))throw Error('Not enough browser storage to import Drive building');
+   openSavedAsset(row,{resume:false});
+   status('✓ OPENED DRIVE BUILDING '+row.name+' · Saved in local library. Semesta unchanged.');
+  }else if(kind==='object'){
+   const objects=window.VLBangunObjects;
+   if(!objects?.valid(row))throw Error('Invalid Drive Pixel Creator object');
+   const old=objects.read().find(x=>x.id===row.id);
+   if(old){
+    try{localStorage.setItem('membangun-drive-before-object:'+old.id,JSON.stringify(old))}
+    catch(error){throw Error('Not enough storage for safety backup. Export object before import. '+error.message)}
+   }
+   window.__mbCloudRestoring=true;
+   try{objects.save(row)}finally{window.__mbCloudRestoring=false}
+   status('✓ DRIVE PIXEL OBJECT LOADED · '+row.name+' · Ready in Semesta Object Library');
+  }else throw Error('Unknown Bangun Ruang Drive file kind: '+kind);
+ }
+});
+
 window.addEventListener('focus',()=>scaleController?.refreshProfiles?.(false));
 })();
 </script>
