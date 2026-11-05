@@ -9,7 +9,7 @@ function category(spec){
  if(spec?.source==='custom-building'||(spec?.source==='bangun-object'&&!spec.builtIn))return 'custom';
  if(spec?.source==='pipeline-vegetation'||spec?.objectCategory==='plant')return 'vegetation';
  if(spec?.source==='bangun-object')return spec.objectCategory==='furniture'?'interior':'street';
- if(spec?.source==='pipeline-street')return BUILD.has(spec.group)?'building':'street';
+ if(spec?.source==='pipeline-street')return /^(semak_kota_|rumput_kota_)/.test(spec.id||'')?'vegetation':BUILD.has(spec.group)?'building':'street';
  if(spec?.source==='gpt-original')return ['Interior','Office'].includes(spec.group)?'interior':'street';
  return ['Interior','Office'].includes(spec?.group)?'interior':'street';
 }
