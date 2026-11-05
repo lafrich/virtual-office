@@ -151,6 +151,10 @@ function actionAnchor(item,opts={}){
  let seat=null,z=0,offset=0;
  const visualType=TYPES[item.assetId].visualAs||item.assetId;
  switch(visualType){
+  case 'squat_toilet':seat=[.5,.5];z=3;break;
+  case 'floor_mattress':seat=[TYPES[item.assetId].w/2,TYPES[item.assetId].d*.69];z=8;break;
+  case 'water_tub':seat=[.5,.55];z=0;break;
+  case 'wooden_bench':seat=[TYPES[item.assetId].w/2,.61];z=14;break;
   case 'wc':
    // Preserve the source-grounded V6B toilet docking calibration.
    seat=GAME?.toilet.seatedPoint||[.61,.69];
@@ -203,7 +207,31 @@ function furniture(ctx,geo,item,selected=false,warteg=false){
  };
  const place=()=>{
  switch(type){
- case 'prayer_mat':
+ case 'floor_mattress':
+   B(.06,.05,w-.12,d-.10,0,6,'wood');
+   B(.11,.08,w-.22,d-.16,6,8,'cream');
+   B(.18,.15,w-.36,.40,8,10,'white');
+   B(.15,d*.60,w-.30,d*.30,8,9,'pink');break;
+  case 'squat_toilet':
+   B(.12,.12,w-.24,d-.24,0,5,'white');
+   B(.31,.22,w-.62,d-.46,5,6,'steel');
+   B(.34,.40,w-.68,.25,6,7,'dark');
+   B(.15,.12,.16,.42,5,7,'white');
+   B(w-.31,.12,.16,.42,5,7,'white');break;
+  case 'water_tub':
+   B(.08,.07,w-.16,d-.14,0,29,'white');
+   B(.20,.18,w-.40,d-.36,29,30,'blue');
+   B(.50,.13,.28,.23,29,33,'teal');break;
+  case 'wooden_bench':
+   B(.09,.22,w-.18,d-.35,0,13,'wood');
+   B(.10,.10,w-.20,.16,13,37,'wood');
+   B(.16,.30,w-.32,.36,13,17,'cream');break;
+  case 'food_cart':
+   B(.05,.10,w-.10,d-.20,0,28,'wood');
+   B(.08,.10,w-.16,.36,28,56,'glass');
+   B(.08,.04,w-.16,.16,56,62,'yellow');
+   B(.10,.61,w-.20,.19,25,32,'steel');break;
+  case 'prayer_mat':
   B(.08,.06,w-.16,d-.12,0,2,'green');B(.20,.10,w-.4,.25,2,3,'yellow');break;
  case 'tv':
   B(.05,.13,w-.1,.36,0,26,'wood');B(.13,.07,w-.26,.43,26,65,'dark');B(.20,.02,w-.4,.36,31,61,'glass');break;
