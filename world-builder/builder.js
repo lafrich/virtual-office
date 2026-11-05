@@ -28,6 +28,7 @@ const characterSync=mahluk?await mahluk.load():{loaded:false,total:0,custom:0};
 const hideLegacyCharacters=mahluk?.referenceReset===true;
 const approvedCharacter=profile=>!!mahluk?.get?.(profile)?.v2;
 const indonesiaSync=await window.VLIndonesiaAssets?.load();
+const jakartaUrbanSync=await window.VLJakartaUrban?.load();
 let assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
 const style=window.VLWorldStyle;
