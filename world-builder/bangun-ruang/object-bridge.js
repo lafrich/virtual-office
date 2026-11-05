@@ -216,7 +216,9 @@ const api=Object.freeze({key:KEY,categories:CATEGORY,builtins,read,valid,refresh
   if(list.length>=60)throw new Error('Batas 60 custom objects. Hapus atau ekspor beberapa objek.');
   list.push(row);localStorage.setItem(KEY,JSON.stringify(list));
   const result=refresh();
-  if(!g.__mbCloudRestoring)g.dispatchEvent(new CustomEvent("membangun:local-saved",{detail:{app:"bangun",kind:"object",record:row}}));
+  if(!g.__mbCloudRestoring&&typeof g.dispatchEvent==="function"&&typeof CustomEvent==="function"){
+   try{g.dispatchEvent(new CustomEvent("membangun:local-saved",{detail:{app:"bangun",kind:"object",record:row}}))}catch(error){console.warn("Optional Drive cloud event unavailable",error)}
+  }
   return result;
  },
  remove(id){
