@@ -215,7 +215,9 @@ const api=Object.freeze({key:KEY,categories:CATEGORY,builtins,read,valid,refresh
   const list=read().filter(x=>x.id!==row.id);
   if(list.length>=60)throw new Error('Batas 60 custom objects. Hapus atau ekspor beberapa objek.');
   list.push(row);localStorage.setItem(KEY,JSON.stringify(list));
-  return refresh();
+  const result=refresh();
+  if(!g.__mbCloudRestoring)g.dispatchEvent(new CustomEvent("membangun:local-saved",{detail:{app:"bangun",kind:"object",record:row}}));
+  return result;
  },
  remove(id){
   localStorage.setItem(KEY,JSON.stringify(read().filter(x=>x.id!==id)));
