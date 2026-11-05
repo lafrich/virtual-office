@@ -18,6 +18,7 @@ const FRAME=rig?.FRAME||{w:64,h:112,pivotX:32,pivotY:100};
  // Original V6B 64×112 image frame is drawn at 1x in both editor views.
 const ACTOR_SCALE=g.VLGameProportions?.character.scale??iso?.ACTOR_SCALE??1;
 const DIR=rig?.DIR||['se','sw','ne','nw'];
+const approved=profile=>!!bridge?.get?.(profile)?.v2;
 const imageCache=new Map();
 const finite=(x,fallback)=>Number.isFinite(Number(x))?Number(x):fallback;
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
@@ -242,7 +243,7 @@ function mount(api){
  }
  function updateControls(){
   const active=actor.active,interior=inside();
-  $('scaleSpawn').disabled=bridge?.referenceReset===true;
+  $('scaleSpawn').disabled=bridge?.referenceReset===true&&!approved($('scaleCharacter')?.value);
   $('scaleRemove').disabled=!active;
   $('scaleIdle').disabled=!active;
   $('scaleWalkDoor').disabled=!active||interior||cfg().interactive!==true||actor.scene!=='exterior';
@@ -251,7 +252,7 @@ function mount(api){
   $('scaleSpawn').textContent=actor.armed?'⌖ Tap Canvas':'＋ Place';
  }
  function showCharacter(){
-  if(bridge?.referenceReset===true)return false;
+  if(bridge?.referenceReset===true&&!approved(actor.profile))return false;
   return actor.active&&((inside()&&actor.scene==='interior'&&
    actor.floor===api.getInterior?.()?.floor)||(!inside()&&actor.scene==='exterior'));
  }
@@ -363,7 +364,7 @@ function mount(api){
   const p=spawnPoint();actor.c=p[0];actor.r=p[1];actor.floor=1;actor.scene='exterior';
  }
  function spawn(){
-  if(bridge?.referenceReset===true){
+  if(bridge?.referenceReset===true&&!approved(choose.value)){
    status('MENUNGGU MODEL & RIG KARAKTER BARU');return;
   }
   if(!actor.active){
@@ -427,7 +428,7 @@ function mount(api){
   walk([start,dest],arrived);
  }
  function beginAdjustment(draft){
-  if(bridge?.referenceReset===true){
+  if(bridge?.referenceReset===true&&!approved(choose.value)){
    status('MENUNGGU MODEL & RIG KARAKTER BARU');return false;
   }
   const item=api.getSelectedProp?.(),room=api.getInterior?.();
