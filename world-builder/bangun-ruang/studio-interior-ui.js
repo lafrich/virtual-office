@@ -855,11 +855,13 @@ function init(api){
   url.hash="actions";
   g.open(url.href,"_blank","noopener");
  };
- g.addEventListener("storage",event=>{
-  if(["virtual-life-action-scenes-v1","virtual-life-action-scene-placements-v1"]
-    .includes(event.key))renderActScenes();
- });
- g.addEventListener("focus",()=>renderActScenes());
+ if(typeof g.addEventListener==="function"){
+  g.addEventListener("storage",event=>{
+   if(["virtual-life-action-scenes-v1","virtual-life-action-scene-placements-v1"]
+     .includes(event.key))renderActScenes();
+  });
+  g.addEventListener("focus",()=>renderActScenes());
+ }
  $('actionAdjustAction').onchange=()=>{
   const item=adjustmentItem();if(!item)return;
   if(!model.action(scene(),item.id,$('actionAdjustAction').value))return;
