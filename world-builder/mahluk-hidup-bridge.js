@@ -9,6 +9,7 @@ const BASE=new URL('/virtual-life-asset-pipeline/',location.origin);
 // become playable accidentally; saved city and character data stays intact.
 const reset=()=>g.VLCharacterReferenceReset||{active:false,filter:rows=>rows||[],visible:()=>true};
 const CHAR_KEY='virtual-life-character-storage-v1';
+const V2_KEY='mahluk-2-library-v1';
 const EQUIP_KEY='virtual-life-accessory-equipment-v1';
 const ART_KEY='virtual-life-accessories-v1';
 const DIR=['se','sw','ne','nw'];
@@ -88,6 +89,32 @@ function localSync(){
     skinTone:['base','light','medium','tan','deep','dark'].includes(r.skinTone)?
      r.skinTone:'base'});
   }
+ }
+ // Mahluk Hidup 2.0 publishes pixel-perfect 4-direction 2.5D cutout
+ // composites, plus independent plane transforms in the authored project.
+ // These actors live alongside (not over) all historical V6B profiles.
+ const v2=read(V2_KEY,[]);
+ if(Array.isArray(v2))for(const row of v2.slice(-30)){
+  if(!row||row.format!=="mahluk-2-character-v1"||
+     !/^mh2_[a-z0-9]+$/.test(row.id)||typeof row.name!=="string"||
+     typeof row.sprite!=="string"||!DATA.test(row.sprite)||row.sprite.length>1250000)continue;
+  const clips={};
+  if(row.clips&&typeof row.clips==="object")for(const [id,c] of Object.entries(row.clips)){
+   if(!/^(idle|walk|talk|sit|lie|custom)$/.test(id)||!c||
+      !Number.isInteger(c.frames)||c.frames<1||c.frames>48||
+      typeof c.sheet!=="string"||!DATA.test(c.sheet)||c.sheet.length>1250000)continue;
+   clips[id]={url:c.sheet,frames:c.frames,
+     frame_ms:Array.isArray(c.frame_ms)?c.frame_ms.slice(0,c.frames):[],loop:c.loop!==false};
+  }
+  if(!clips.idle)clips.idle={url:row.sprite,frames:1,frame_ms:[240],loop:true};
+  nextCustoms.set(row.id,{id:row.id,name:row.name.slice(0,60),
+   baseId:row.template_base==="human_female_base"?"human_female_base":"human_male_base",
+   category:"human",template_category:"human",template:false,custom:true,
+   bodyType:row.base==="female"?"female":"male",gender:row.base==="female"?"female":"male",
+   v2:true,v2Sheet:row.sprite,v2Clips:clips,
+   motions:Object.entries(clips).map(([id,c])=>({id,frames:c.frames,available:true,
+    frame_ms:c.frame_ms,source:"mahluk2"})),
+   expressions:[],sheet:"media/human-male-base-sheet.png"});
  }
  const nextEquip={};
  if(worn&&typeof worn==='object'){
