@@ -149,7 +149,8 @@ function fixtureBox(item,x,y,w,d){
 function actionAnchor(item,opts={}){
  if(!item||!TYPES[item.assetId])return null;
  let seat=null,z=0,offset=0;
- switch(item.assetId){
+ const visualType=TYPES[item.assetId].visualAs||item.assetId;
+ switch(visualType){
   case 'wc':
    // Preserve the source-grounded V6B toilet docking calibration.
    seat=GAME?.toilet.seatedPoint||[.61,.69];
@@ -159,18 +160,18 @@ function actionAnchor(item,opts={}){
    // The seat, rather than the adjacent floor tile, is the sit target.
    seat=[.50,.55];break;
   case 'sofa':
-   seat=[TYPES.sofa.w/2,.60];break;
+   seat=[TYPES[item.assetId].w/2,.60];break;
   case 'bed':
    // Feet toward the duvet, head toward the pillow/headboard.
    // Lift the sprite foot pivot onto the 21px-high mattress.
-   seat=[TYPES.bed.w/2,TYPES.bed.d*.69];z=21;break;
+   seat=[TYPES[item.assetId].w/2,TYPES[item.assetId].d*.69];z=21;break;
   case 'shower':
    // Stand under the fixture, not at the doorway.
    seat=[.5,.56];break;
   case 'bathtub':
    // Reuse the bath body override and the tub's centre; the near rim
    // occludes lower-body detail in both the editor and Semesta.
-   seat=[TYPES.bathtub.w/2,.50];z=6;break;
+   seat=[TYPES[item.assetId].w/2,.50];z=6;break;
   default:
    if(!opts.generic)return null;
    seat=[TYPES[item.assetId].w/2,TYPES[item.assetId].d/2];break;
@@ -178,16 +179,16 @@ function actionAnchor(item,opts={}){
  const p=fixturePoint(item,...seat);
  // A zero-rotation chair/bed faces out from its backrest at local r=0.
  // The original WC pose is deliberately always SW regardless of rotation.
- const direction=item.assetId==='wc'?(GAME?.toilet.sitFacing||'sw'):
+ const direction=visualType==='wc'?(GAME?.toilet.sitFacing||'sw'):
   ['sw','se','ne','nw'][fixtureRotation(item)];
  const anchor={c:p.c,r:p.r,z,pixelOffsetY:offset,direction,
   itemId:item.id,kind:item.assetId,localSeat:seat};
  return opts.raw?anchor:ACTION_ADJUST?.apply(anchor,item,item.actionId)||anchor;
 }
 function furniture(ctx,geo,item,selected=false,warteg=false){
- const c=Number(item.c),r=Number(item.r),type=item.assetId;
+ const c=Number(item.c),r=Number(item.r),type=TYPES[item.assetId]?.visualAs||item.assetId;
  const [fw,fd]=itemFootprint(item);
- const {w,d}=TYPES[type]; // unrotated local dimensions for art geometry
+ const {w,d}=TYPES[item.assetId]; // unrotated local dimensions for art geometry
  if(!Number.isFinite(c)||!Number.isFinite(r))return null;
  const inset=.08;
  // Physical shadow is pixel geometry projected at ground level.
@@ -202,6 +203,39 @@ function furniture(ctx,geo,item,selected=false,warteg=false){
  };
  const place=()=>{
  switch(type){
+ case 'prayer_mat':
+  B(.08,.06,w-.16,d-.12,0,2,'green');B(.20,.10,w-.4,.25,2,3,'yellow');break;
+ case 'tv':
+  B(.05,.13,w-.1,.36,0,26,'wood');B(.13,.07,w-.26,.43,26,65,'dark');B(.20,.02,w-.4,.36,31,61,'glass');break;
+ case 'fan':
+  B(.40,.32,.20,.20,0,36,'steel');B(.27,.20,.47,.38,35,39,'white');B(.35,.26,.30,.26,39,48,'blue');break;
+ case 'rice_cooker':
+  B(.12,.15,w-.24,d-.30,0,22,'wood');B(.20,.20,w-.40,d-.40,22,42,'white');break;
+ case 'water_dispenser':
+  B(.16,.13,w-.32,d-.26,0,38,'white');B(.27,.27,w-.54,d-.46,38,58,'blue');break;
+ case 'food_vitrine':
+  B(.05,.09,w-.10,d-.18,0,29,'wood');B(.09,.12,w-.18,d-.24,29,58,'glass');break;
+ case 'aisle_rack':
+  B(.06,.08,w-.12,d-.16,0,53,'steel');
+  for(const z of [12,28,44]){B(.09,.66,w-.18,.13,z,z+3,'blue');
+   for(const x of [.18,.57,.97,1.45])B(x,.37,.18,.23,z+3,z+8,'yellow');}break;
+ case 'atm':
+  B(.10,.12,w-.20,d-.24,0,63,'blue');B(.20,.06,w-.40,.10,32,51,'dark');break;
+ case 'whiteboard':
+  B(.10,.19,w-.20,.18,0,58,'wood');B(.08,.06,w-.16,.10,45,86,'white');break;
+ case 'arcade':
+  B(.09,.12,w-.18,d-.24,0,65,'dark');B(.15,.04,w-.30,.12,28,53,'blue');break;
+ case 'washing_machine':
+  B(.08,.11,w-.16,d-.22,0,41,'white');B(.18,.05,w-.36,.17,28,37,'steel');break;
+ case 'trash_bin':
+  B(.22,.24,w-.44,d-.40,0,23,'green');B(.18,.20,w-.36,d-.34,23,26,'dark');break;
+ case 'treadmill':
+  B(.06,.13,w-.12,d-.24,0,10,'dark');B(.16,.18,w-.32,d-.36,10,12,'steel');break;
+ case 'market_crate':
+  B(.08,.10,w-.16,d-.20,0,20,'wood');B(.17,.20,w-.34,d-.35,20,27,'green');break;
+ case 'coffee_machine':
+  B(.06,.10,w-.12,d-.20,0,33,'steel');B(.18,.20,w-.36,.28,33,53,'dark');break;
+
  case 'wc':
   // User-supplied original game source: indoor p_indoor.py / Cove p_cove.py.
   // Tank sits against the back wall (c.18-.82, r.03-.30).
@@ -329,23 +363,24 @@ function drawSeatForeground(ctx,geometry,item){
   const p=fixtureBox(item,x,y,w,d);
   box(ctx,geometry,p.c,p.r,p.w,p.d,low,top,material);
  };
- switch(item.assetId){
+ const visualType=TYPES[item.assetId]?.visualAs||item.assetId;
+ switch(visualType){
   case 'wc':
    part(.30,.77,.40,.11,2,WC_SEAT_Z-2,'white');break;
   case 'chair':
   case 'office_chair':
    part(.18,.63,.64,.11,10,18,item.assetId==='chair'?'cream':'dark');break;
   case 'sofa':
-   part(.12,.70,TYPES.sofa.w-.24,.12,14,24,'cream');break;
+   part(.12,.70,TYPES[item.assetId].w-.24,.12,14,24,'cream');break;
   case 'bed':
-   part(.13,1.05,TYPES.bed.w-.26,.77,21,23,'pink');break;
+   part(.13,1.05,TYPES[item.assetId].w-.26,.77,21,23,'pink');break;
   case 'bathtub':
    // Painted AFTER the reclined actor so the body sinks below the
    // waterline; keep the pillow/head side (r=.05) unobstructed.
-   part(.22,.57,TYPES.bathtub.w-.44,.19,20,21,'teal');
+   part(.22,.57,TYPES[item.assetId].w-.44,.19,20,21,'teal');
    for(const [x,r,w] of [[.33,.59,.18],[.75,.65,.25],[1.23,.60,.20],[1.50,.70,.17]])
     part(x,r,w,.07,21,22,'white');
-   part(.06,.80,TYPES.bathtub.w-.12,.14,18,25,'white');
+   part(.06,.80,TYPES[item.assetId].w-.12,.14,18,25,'white');
    break;
  }
 }
