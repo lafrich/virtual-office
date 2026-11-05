@@ -110,7 +110,8 @@ test('Semesta links animated sprite NPC lifecycle and keeps four-way placement i
  const b=fs.readFileSync('world-builder/builder.js','utf8');
  const html=fs.readFileSync('world-builder/index.html','utf8');
  assert.match(b,/transportRiders=new Map\(\)/);
- assert.match(b,/const riderSet=window\.VLSemestaTransportNPC\?\.create\?\.\(THREE,root,vehicleSpec,o\)/);
+ assert.match(b,/const riderSet=hideLegacyCharacters\?null:window\.VLSemestaTransportNPC\?\.create\?\.\(THREE,root,vehicleSpec,o\)/);
+ assert.match(b,/const hideLegacyCharacters=mahluk\?\.referenceReset===true/);
  assert.match(b,/for\(const riders of transportRiders\.values\(\)\)riders\.step\(dt,camera\)/);
  assert.match(b,/for\(const riders of transportRiders\.values\(\)\)riders\.dispose\(\)/);
  assert.match(html,/semesta-transport-npc\.js\?v=modular-transport-npc-v1/);
