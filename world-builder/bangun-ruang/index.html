@@ -419,7 +419,7 @@ const sources=semesta?.all||[];
 const defaultBase='semesta:small';
 const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
-let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null,cityBrowser=null,importSourceAsset=null;
+let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null,cityBrowser=null,importSourceAsset=null,buildingAutoTimer=null;
 const exteriorGuides=window.VLBuildingGuides?.mount();
 try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
 // Adopt saved old per-item alignments as global per-type defaults once,
@@ -616,6 +616,7 @@ function viewResult(c,d){
 }
 function render(){
  const c=config(),r=viewResult(c,view);
+ scheduleBuildingAutosave();
  $('preview').src=r.url;
  window.VLBuildingPreviewScale?.exterior(r.size);
  exteriorGuides?.update(r,c,view);
@@ -663,6 +664,33 @@ function persist(asset){
   return false;
  }
 }
+
+function editableBuildingSignature(asset){
+ if(!asset)return "";
+ // Exclude volatile save timestamps. Four-view sprite image bits are generated
+ // from deterministic config and edited overrides, so they are included.
+ return JSON.stringify([asset.config,asset.description,asset.editedViews,
+  asset.views,asset.interior,asset.actionSlots,asset.entrance,asset.interactions,
+  asset.interactive,asset.enterable,asset.originSource]);
+}
+function scheduleBuildingAutosave(){
+ if(buildingAutoTimer)clearTimeout(buildingAutoTimer);
+ if(!current?.id||!window.MembangunCloudDrive?.connected())return;
+ buildingAutoTimer=setTimeout(()=>{
+  buildingAutoTimer=null;
+  if(!current?.id||!window.MembangunCloudDrive?.connected())return;
+  try{
+   const draft=buildAsset();
+   if(draft.id!==current.id||editableBuildingSignature(draft)===editableBuildingSignature(current))return;
+   if(!persist(draft))return;
+   window.dispatchEvent(new CustomEvent('membangun:local-saved',{
+    detail:{app:'bangun',kind:'building',record:draft}
+   }));
+   status('✓ Building auto-saved locally · syncing to Google Drive');
+  }catch(error){status('⚠ Building cloud autosave error: '+error.message)}
+ },3200);
+}
+
 function saveAsset(){
  const a=buildAsset();
  if(!persist(a))return null;
@@ -1022,6 +1050,15 @@ window.addEventListener('storage',event=>{
  */
 window.MembangunCloudAdapter=Object.freeze({
  app:'bangun',
+ async prepareLocalSync(){
+  if(!current?.id)return;
+  // Capture in-progress edits to an existing saved building before comparing
+  // remote versions; never create a new building automatically from a preset.
+  const draft=buildAsset();
+  if(draft.id===current.id&&editableBuildingSignature(draft)!==editableBuildingSignature(current)){
+   if(!persist(draft))throw Error('Could not back up the current building locally');
+  }
+ },
  async assetCatalogSnapshot(){
   // Include every built-in furniture sprite (including real generated 4-view PNG
   // where available), all 66+ interior room templates, exterior sources,
@@ -1066,6 +1103,9 @@ window.MembangunCloudAdapter=Object.freeze({
  },
  async importRemoteQuiet(payload){
   const row=payload?.record,kind=payload?.kind;
+  if(kind==='building'&&current?.id===row?.id){
+   throw Error('ACTIVE BUILDING OPEN: keep local editor state; resolve conflict before importing');
+  }
   if(payload?.app!=='bangun'||!row?.id)throw Error('Not a Bangun Ruang Drive asset');
   if(kind==='building'){
    if(!row.config||!row.views||row.format!=='virtual-life-building-asset-v1')
@@ -1118,6 +1158,12 @@ window.MembangunCloudAdapter=Object.freeze({
  }
 });
 
+$('app').addEventListener('input',scheduleBuildingAutosave);
+$('app').addEventListener('change',scheduleBuildingAutosave);
+$('app').addEventListener('pointerup',event=>{
+ if(event.target?.closest?.('.interior,.properties,.edit-panel,.pixel-creator'))
+  scheduleBuildingAutosave();
+});
 window.addEventListener('focus',()=>scaleController?.refreshProfiles?.(false));
 })();
 </script>
