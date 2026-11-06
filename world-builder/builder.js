@@ -347,12 +347,40 @@ function sanitize(v){
  out.map.terrain=terrain.normalize(v.map?.terrain||terrain.seeded(out.map.worldBounds,out.map.road),null);
  return out;
 }
+let cloudCitySaveTimer=null;
+async function persistWorkingCityForCloud(){
+ if(!activeDraftId||!draftDirty||!window.VLCityDrafts)return null;
+ const id=activeDraftId;
+ const name=window.VLCityDrafts.cleanName(documentMap.map?.name);
+ const copy=JSON.parse(JSON.stringify(documentMap));
+ const record=await window.VLCityDrafts.save({id,name,document:copy});
+ // Do not overwrite a newer active selection if the user switched cities meanwhile.
+ if(activeDraftId!==id)return null;
+ draftDirty=false;
+ $('saveStatus').textContent='☁ City saved locally · syncing Google Drive';
+ return window.VLCityDrafts.load(record.id);
+}
+function scheduleCloudCitySave(){
+ if(cloudCitySaveTimer)clearTimeout(cloudCitySaveTimer);
+ if(!activeDraftId||!window.MembangunCloudDrive?.connected())return;
+ cloudCitySaveTimer=setTimeout(async()=>{
+  cloudCitySaveTimer=null;
+  if(!draftDirty||!activeDraftId)return;
+  try{
+   const record=await persistWorkingCityForCloud();
+   if(record)window.dispatchEvent(new CustomEvent('membangun:local-saved',{
+    detail:{app:'semesta',kind:'city',record}
+   }));
+  }catch(e){$('saveStatus').textContent='⚠ Cloud autosave pending · '+e.message}
+ },3200);
+}
 function saved(){
  syncClockToMap();
  draftDirty=true;
  try{
   localStorage.setItem(STORE,JSON.stringify(documentMap));
-  $('saveStatus').textContent=activeDraftId?'● Edited · Save City':'● Working draft';
+  $('saveStatus').textContent=activeDraftId?'● Edited · auto-save pending':'● Working draft';
+  scheduleCloudCitySave();
  }catch(e){$('saveStatus').textContent='⚠ Storage full · free browser space before saving';}
 }
 function undoPoint(){undoStack.push(JSON.stringify(documentMap));if(undoStack.length>60)undoStack.shift();redoStack=[];}
@@ -3141,6 +3169,11 @@ async function saveNamedCity(asNew=false){
 // Cloud imports are validated, backed up locally and explicitly opened in this editor.
 window.MembangunCloudAdapter=Object.freeze({
  app:'semesta',
+ async prepareLocalSync(){
+  // If the user edited their already-named city while offline, preserve its working
+  // copy before comparing PC/HP versions. A new unsaved scene is not published.
+  await persistWorkingCityForCloud();
+ },
  async assetCatalogSnapshot(){return assetLibrary?.assetCatalogSnapshot?.()||null;},
  async assetLocalRecords(){return assetLibrary?.assetLocalRecords?.()||[];},
  async importRemoteQuiet(payload){
