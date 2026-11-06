@@ -317,8 +317,8 @@ function assetIndex(){
   id:"semesta-all-v1",format:"semesta-asset-library-v1",name:"Semesta Asset Library",
   createdAt:new Date().toISOString(),source:"Semesta + Bangun Ruang + Character Stock",
   entries:JSON.parse(JSON.stringify(all.map(x=>({
-   id:x.id,file:x.file,label:x.label||x.name||x.id,category:x.category,
-   source:x.source,kind:x.kind,group:x.group||null,
+   id:String(x.id),file:String(x.file),label:x.label||x.name||String(x.id),category:x.category||"other",
+   source:String(x.source||"catalog"),kind:x.kind||"sprite",group:x.group||null,
    published:x.published!==false,pack:x.pack||null,
    footprint:x.footprint||null,variants:x.variants||null,
    // Canonical published paths remain in GitHub; do not copy encrypted game files.
