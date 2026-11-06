@@ -162,3 +162,35 @@ test('Semesta and Bangun Ruang offer separate cross-device Drive libraries',()=>
  assert.doesNotThrow(()=>new(require('node:vm').Script)(cloud));
  assert.doesNotThrow(()=>new(require('node:vm').Script)(ui));
 });
+
+test('Semesta Asset Library Drive backup captures full catalog and native PNG custom sources',()=>{
+ const html=read('world-builder/index.html');
+ const gallery=read('world-builder/asset-library.js');
+ const drive=read('world-builder/drive-sync.js');
+ const css=read('world-builder/asset-library.css');
+ for(const id of ['salSaveDrive','salLoadDrive','salCloudStatus'])assert.ok(gallery.includes(id),id);
+ for(const snippet of ['async function archiveLibrary','async function restoreLibrary','assetIndex()',
+   'assetBuilding','assetObject','virtual-life-bangun-ruang-v1','VLBuildingBridge',
+   'VLBangunObjects','protectedReference'])assert.ok(gallery.includes(snippet),snippet);
+ assert.match(drive,/semesta-asset-library-v1/);
+ assert.match(drive,/function validateRecord\(/);
+ assert.match(drive,/ensureFolder\(await folder\(app\),"Asset Library"\)/);
+ assert.match(html,/asset-library\.js/);
+ assert.match(css,/salSaveDrive/);
+ assert.doesNotThrow(()=>new(require('node:vm').Script)(gallery));
+});
+test('Bangun Ruang can back up built-in furniture, interior templates, exteriors and custom PNG library',()=>{
+ const html=read('world-builder/bangun-ruang/index.html');
+ const driveUI=read('world-builder/drive-ui.js');
+ const drive=read('world-builder/drive-sync.js');
+ for(const id of ['mbCloudAssetBackup','mbCloudAssetRestore'])
+  assert.ok(html.includes('id="'+id+'"'),id);
+ for(const key of ['VLIndonesiaInteriorPack','VLBangunObjects','VLAssetCatalog',
+  "family:'interior-prop'","family:'interior-template'","family:'exterior-or-source'"])
+  assert.ok(html.includes(key),key);
+ assert.match(html,/assetCatalogSnapshot/);
+ assert.match(driveUI,/async function backupEntireAssetLibrary\(/);
+ assert.match(driveUI,/async function restoreEntireAssetLibrary\(/);
+ assert.match(drive,/bangun-ruang-asset-library-v1/);
+ assert.match(driveUI,/A newer Drive version|all\.length|nativeCount/);
+});
