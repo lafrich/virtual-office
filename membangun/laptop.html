@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071d55">
+<meta name="color-scheme" content="only light">
+<title>Membangun — Mini Laptop</title>
+<style>
+:root{font-family:Tahoma,"MS Sans Serif",Verdana,Arial,sans-serif;color:#192338;--xp:#d6d5ce;--line:#75859a;--blue:#154c9f;--paper:#f9f9f3}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
+body{background:#08245c;font-size:12px}
+button,input,select{font:inherit}
+button{touch-action:manipulation;cursor:pointer;color:#152840;border:1px solid #899aaf;border-top-color:#fff;border-left-color:#fff;border-radius:2px;background:linear-gradient(#fff,#d3dbe5);padding:5px 9px;white-space:nowrap}
+button:active,button.active{background:linear-gradient(#b7d5ff,#e2eaff);border-color:#3765a2}
+button:disabled{opacity:.4}
+button:focus-visible{outline:2px solid #f5b450;outline-offset:2px}
+a{color:inherit}
+[hidden]{display:none!important}
+.laptop{display:grid;grid-template-rows:minmax(0,1fr) 9px minmax(0,1fr);height:100dvh;max-height:100dvh;overflow:hidden}
+.display{background:#ece9d8;display:flex;flex-direction:column;min-height:0;overflow:hidden;border:2px solid #183d86}
+.topbar{background:linear-gradient(180deg,#5aafff,#1a70d5 22%,#083f9f 75%,#0b3990);color:white;display:flex;align-items:center;gap:8px;padding:4px 8px;height:36px;flex:none}
+.brand{font-size:13px;font-weight:bold;letter-spacing:.025em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand small{font-size:9px;font-weight:normal;margin-left:4px;letter-spacing:0}
+.topbar .right{margin-left:auto;display:flex;gap:5px;align-items:center}
+.topbar button{font-size:11px;min-height:26px}
+.topbar .close{background:linear-gradient(#e88c80,#b82825);color:white;border-color:#f7b6ae #7b1c1c #7b1c1c #f7b6ae}
+.apps{height:35px;flex:none;display:flex;align-items:stretch;gap:2px;padding:4px 5px 0;background:#cfd7e4;border-bottom:1px solid #8296b1;overflow-x:auto;scrollbar-width:none}
+.apps button{border-bottom:0;border-radius:5px 5px 0 0;font-size:10px;font-weight:bold;padding:4px 10px;min-width:95px}
+.apps button.active{background:#f7f8f4;border-bottom-color:#f7f8f4;color:#153e83}
+.screen-shell{flex:1;position:relative;min-height:0;overflow:hidden;background:#b1b8c2}
+.screen-scroll{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;scrollbar-width:thin}
+.frame-wrap{position:relative;transform-origin:0 0}
+#appFrame{display:block;position:absolute;top:0;left:0;transform-origin:0 0;border:0;background:#fff}
+#cursor{position:absolute;left:50%;top:50%;width:22px;height:27px;pointer-events:none;z-index:6;filter:drop-shadow(1px 2px 1px #101c3290)}
+#cursor svg{width:100%;height:100%}
+.placeholder{position:absolute;inset:0;z-index:4;display:grid;place-items:center;background:#eff3fa;color:#42556e;padding:20px;text-align:center}
+.placeholder strong{display:block;color:#1e3f83;margin-bottom:6px;font-size:16px}
+.placeholder a{display:inline-block;margin-top:9px;background:#d8e9ff;padding:8px}
+.display-status{height:23px;flex:none;background:#e1e5e7;border-top:1px solid #f9ffff;display:flex;align-items:center;gap:8px;padding:0 8px;color:#536377;font:10px "Courier New",monospace;white-space:nowrap;overflow:hidden}
+.display-status .name{font-weight:bold;color:#194b99}
+.display-status #bridgeStatus{overflow:hidden;text-overflow:ellipsis}
+.hinge{background:linear-gradient(180deg,#354052,#181e2d 35%,#7e8490 51%,#151e2d 70%,#354052);position:relative}
+.hinge:after{content:"";width:17%;position:absolute;left:41.5%;top:3px;height:3px;border-radius:4px;background:#a5aab4}
+.controls{min-height:0;display:flex;flex-direction:column;background:#c8d3e4;overflow:hidden;border:2px solid #183d86;border-top:0}
+.controlsbar{flex:none;min-height:41px;background:linear-gradient(#eaf3ff,#cbd7e8);border-bottom:1px solid #90a1ba;display:flex;align-items:center;gap:6px;padding:5px 8px;overflow-x:auto;scrollbar-width:none}
+.controlsbar button{min-height:29px;font-weight:bold;font-size:10px}
+.controlsbar .small{padding:5px 7px}
+.controlsbar .spacer{flex:1}
+.controlsbar .mode{border-color:#6e84a4}
+.controlsbar .mode.active{background:#8eace1;color:#0a306f}
+.control-area{position:relative;flex:1;min-height:0;overflow:hidden}
+.pad-page{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 50px;gap:7px;padding:7px}
+.pad-main{display:flex;flex-direction:column;min-height:0;gap:6px}
+.touchpad{position:relative;flex:1;min-height:90px;touch-action:none;background:linear-gradient(125deg,#c8d3df,#eef2f7 62%,#ced9e6);border:1px solid #71869f;box-shadow:inset 2px 2px 6px #7c8da347;overflow:hidden}
+.touchpad:before{content:"";position:absolute;inset:9px;border:1px solid #a3b1c1;pointer-events:none}
+.touchpad:after{content:"";position:absolute;top:48%;left:48%;width:15px;height:15px;border-right:1px solid #99a9b9;border-bottom:1px solid #99a9b9;transform:rotate(45deg);opacity:.35;pointer-events:none}
+.pad-hint{position:absolute;left:12px;top:10px;color:#76879a;font:10px/1.5 "Courier New",monospace;user-select:none;pointer-events:none}
+.pad-buttons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;height:36px;flex:none}
+.pad-buttons button{font-size:11px;min-width:0}
+.scroll-zone{border:1px solid #72849b;background:linear-gradient(#e9eff5,#acbfd6);display:flex;align-items:center;justify-content:space-around;flex-direction:column;touch-action:none;color:#526e8e;font-weight:bold}
+.scroll-zone span{font-size:11px;writing-mode:vertical-rl;letter-spacing:2px;opacity:.75}
+.keyboard-page{height:100%;display:flex;flex-direction:column;padding:5px 6px;gap:5px;background:#c8d2e0}
+.key-toolbar{display:flex;align-items:center;gap:5px;height:25px;flex:none}
+.key-toolbar span{font-size:10px;color:#50627a;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-toolbar button{font-size:10px;padding:3px 8px}
+.keyboard{display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:4px;flex:1;min-height:0}
+.key-row{display:flex;justify-content:center;gap:4px;min-height:0}
+.key{flex:1;min-width:0;min-height:0;padding:1px;box-shadow:0 2px 0 #7889a3;font-size:clamp(11px,2.2vw,18px);font-weight:bold;touch-action:manipulation;background:linear-gradient(#f9fcff,#e4e9f0);border:1px solid #8c9cb3}
+.key.special{flex:1.4;font-size:clamp(9px,1.4vw,12px);background:linear-gradient(#e1ebfa,#cad9ef)}
+.key.space{flex:5}
+.key.active{background:#7a9fd1}
+#nativeInput{width:1px;height:1px;position:absolute;opacity:0;pointer-events:none}
+.toast{position:absolute;z-index:8;bottom:9px;left:50%;transform:translateX(-50%);background:#203d6b;color:#fff;padding:7px 12px;border-radius:4px;max-width:90%;text-align:center;font:11px Tahoma,sans-serif;box-shadow:0 2px 7px #0006;pointer-events:none}
+@media (orientation:portrait){.laptop{grid-template-rows:minmax(0,1fr) 7px minmax(0,1fr)}.brand small{display:none}.apps button{min-width:100px}}
+@media(max-width:470px){.topbar{gap:3px;padding:3px}.brand{font-size:11px}.topbar button{padding:4px 6px}.controlsbar{gap:3px;padding:4px}.controlsbar button{padding:3px 5px}.key-row{gap:2px}.key{font-size:11px}.pad-page{grid-template-columns:minmax(0,1fr) 34px}.pad-buttons{height:33px}.scroll-zone span{font-size:8px}}
+</style>
+</head>
+<body>
+<div class="laptop" id="laptop">
+ <section class="display" aria-label="Tampilan aplikasi desktop">
+  <header class="topbar">
+   <div class="brand">✳ MEMBANGUN.EXE <small>MINI LAPTOP MODE</small></div>
+   <div class="right">
+    <button id="zoomOut" title="Perkecil tampilan">−</button><span id="zoomText" aria-label="Zoom">FIT</span>
+    <button id="zoomIn" title="Perbesar tampilan">＋</button>
+    <button id="fullscreen" title="Mode layar penuh">⛶</button>
+    <button class="close" id="exit" title="Kembali ke Membangun">×</button>
+   </div>
+  </header>
+  <nav class="apps" id="appTabs" aria-label="Pindah aplikasi"></nav>
+  <div class="screen-shell" id="screenShell">
+   <div class="screen-scroll" id="screenScroll"><div class="frame-wrap" id="frameWrap"><iframe id="appFrame" title="Aplikasi desktop" referrerpolicy="no-referrer" allow="clipboard-read; clipboard-write; fullscreen"></iframe></div></div>
+   <div id="cursor" aria-hidden="true"><svg viewBox="0 0 24 29"><path d="M2 1v24l6-7 4 9 5-3-5-9h9z" fill="#fff" stroke="#162037" stroke-width="2" stroke-linejoin="round"/></svg></div>
+   <div class="placeholder" id="placeholder"><div><strong>MEMBANGUN / MINI LAPTOP</strong><span id="placeholderText">Memuat aplikasi desktop...</span><div><a id="externalFallback" href="#" target="_blank" rel="noopener">Buka aplikasi di tab baru</a></div></div></div>
+   <div class="toast" id="toast" hidden></div>
+  </div>
+  <footer class="display-status"><span class="name" id="currentApp">SEMESTA.EXE</span><span id="bridgeStatus">Mouse & keyboard siap</span></footer>
+ </section>
+ <div class="hinge" aria-hidden="true"></div>
+ <section class="controls" aria-label="Touchpad dan keyboard virtual">
+  <div class="controlsbar">
+   <button class="mode active" id="padMode">▣ TOUCHPAD</button>
+   <button class="mode" id="keyMode">⌨ KEYBOARD</button>
+   <span class="spacer"></span>
+   <button class="small" id="undoKey" title="Ctrl+Z">↶ UNDO</button>
+   <button class="small" id="escapeKey" title="Esc">ESC</button>
+   <button class="small" id="external" title="Buka aplikasi secara langsung">↗ APP</button>
+  </div>
+  <div class="control-area">
+   <div class="pad-page" id="padPage">
+    <div class="pad-main">
+     <div class="touchpad" id="touchpad" aria-label="Geser untuk mengontrol mouse; ketuk untuk klik; dua jari untuk scroll" role="application">
+      <div class="pad-hint">DRAG 1 JARI = KURSOR<br>TAP = KLIK · TAHAN = DRAG<br>2 JARI = SCROLL</div>
+     </div>
+     <div class="pad-buttons">
+      <button id="leftClick">◩ LEFT CLICK</button>
+      <button id="dragLock" aria-pressed="false">✥ DRAG OFF</button>
+      <button id="rightClick">◪ RIGHT CLICK</button>
+     </div>
+    </div>
+    <div class="scroll-zone" id="scrollZone" aria-label="Usap untuk scroll"><strong>▲</strong><span>SCROLL</span><strong>▼</strong></div>
+   </div>
+   <div class="keyboard-page" id="keyboardPage" hidden>
+    <div class="key-toolbar">
+     <span>⌨ VIRTUAL KEYBOARD · TAP UNTUK KETIK</span>
+     <button id="pasteKey" title="Paste dari clipboard">PASTE</button>
+     <button id="copyKey" title="Copy selection">COPY</button>
+    </div>
+    <div class="keyboard" id="keyboard" aria-label="Keyboard virtual"></div>
+   </div>
+   <textarea id="nativeInput" aria-label="Input keyboard sistem" autocomplete="off"></textarea>
+  </div>
+ </section>
+</div>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const apps=[
+ {id:'mahluk',label:'MAHLUK HIDUP',url:'https://lafrich.github.io/virtual-life-asset-pipeline/'},
+ {id:'emotion',label:'EMOSI',url:'https://lafrich.github.io/virtual-office/emotion-studio/'},
+ {id:'bangun',label:'BANGUN RUANG',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
+ {id:'semesta',label:'SEMESTA',url:'https://lafrich.github.io/virtual-office/world-builder/'},
+ {id:'jiwa',label:'JIWA',url:'https://lafrich.github.io/virtual-office/jiwa/'}
+];
+const params=new URLSearchParams(location.search);
+let selected=apps.find(a=>a.id===params.get('app'))?.id || 'semesta';
+let mode='pad',zoom=1,scale=1,frameWidth=1180,frameHeight=660;
+let cx=0,cy=0,pressed=false,dragLock=false,dragTarget=null,shift=false,symbols=false,ctrl=false;
+let canBridge=false,lastFocus=null,toastTimer=null,gesture=null,longPressTimer=null,scrollGesture=null;
+const frame=$('appFrame'),shell=$('screenShell'),scroller=$('screenScroll'),cursor=$('cursor');
+const getApp=()=>apps.find(a=>a.id===selected);
+const getUrl=(id)=>{const def=apps.find(a=>a.id===id)?.url||'';try{return localStorage.getItem('membangun-link-'+id)||def}catch{return def}};
+function message(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,2100)}
+function currentDocument(){try{const doc=frame.contentDocument;if(doc&&doc.defaultView&&doc.defaultView.location.origin===location.origin)return doc}catch{}return null}
+function frameWindow(){try{return currentDocument()?.defaultView||null}catch{return null}}
+function screenRect(){return shell.getBoundingClientRect()}
+function setCursor(x,y){cx=Math.max(1,Math.min(shell.clientWidth-2,x));cy=Math.max(1,Math.min(shell.clientHeight-2,y));cursor.style.left=cx+'px';cursor.style.top=cy+'px'}
+function layout(){
+ const oldWidth=frameWidth;
+ const shellWidth=shell.clientWidth,shellHeight=shell.clientHeight;
+ if(!shellWidth||!shellHeight)return;
+ frameWidth=1180;
+ scale=(shellWidth/frameWidth)*zoom;
+ frameHeight=Math.max(620,Math.ceil(shellHeight/scale));
+ $('frameWrap').style.width=(frameWidth*scale)+'px';
+ $('frameWrap').style.height=(frameHeight*scale)+'px';
+ frame.style.width=frameWidth+'px';
+ frame.style.height=frameHeight+'px';
+ frame.style.transform='scale('+scale+')';
+ $('zoomText').textContent=Math.round(zoom*100)+'%';
+ if(oldWidth!==frameWidth||cx===0)setCursor(shellWidth*.5,shellHeight*.45);
+ else setCursor(cx,cy);
+}
+function pointInFrame(){
+ const x=(cx+scroller.scrollLeft)/scale,y=(cy+scroller.scrollTop)/scale;
+ return {x:Math.min(frameWidth-1,Math.max(0,x)),y:Math.min(frameHeight-1,Math.max(0,y))};
+}
+function targetAt(){
+ const doc=currentDocument();if(!doc)return null;
+ const pt=pointInFrame();
+ return doc.elementFromPoint(pt.x,pt.y)||doc.body;
+}
+function sendPointer(type,element,button=0,buttons=0){
+ const doc=currentDocument();if(!doc||!element)return;
+ const w=doc.defaultView,pt=pointInFrame();
+ try{
+  if(typeof w.PointerEvent==='function'){
+   element.dispatchEvent(new w.PointerEvent(type,{bubbles:true,cancelable:true,composed:true,clientX:pt.x,clientY:pt.y,button,buttons,pointerId:1,pointerType:'mouse',isPrimary:true}));
+  }
+  const map={pointerdown:'mousedown',pointermove:'mousemove',pointerup:'mouseup',pointerover:'mouseover',pointerout:'mouseout'};
+  if(map[type])element.dispatchEvent(new w.MouseEvent(map[type],{bubbles:true,cancelable:true,composed:true,view:w,clientX:pt.x,clientY:pt.y,button,buttons}));
+ }catch(e){console.warn('Mouse event failed',e)}
+}
+function movePointer(){
+ if(!canBridge)return;
+ const target=targetAt();
+ sendPointer('pointermove',target,0,pressed?1:0);
+}
+function pressMouse(button=0){
+ if(!canBridge){message('Mouse hanya tersedia untuk aplikasi dari lafrich.github.io');return}
+ if(pressed)return;
+ const t=targetAt();if(!t)return;
+ pressed=true;dragTarget=t;
+ sendPointer('pointerdown',t,button,button===2?2:1);
+ if(t.focus&&button===0)try{t.focus({preventScroll:true})}catch{}
+}
+function releaseMouse(button=0){
+ if(!pressed)return;
+ const target=targetAt()||dragTarget;
+ sendPointer('pointerup',target,button,0);
+ pressed=false;dragTarget=null;
+}
+function clickMouse(button=0){
+ if(!canBridge){message('Gunakan tombol ↗ APP untuk aplikasi eksternal');return}
+ const t=targetAt();if(!t)return;
+ if(button===2){
+  const doc=currentDocument(),w=doc.defaultView,p=pointInFrame();
+  const ev=new w.MouseEvent('contextmenu',{bubbles:true,cancelable:true,view:w,button:2,buttons:2,clientX:p.x,clientY:p.y});
+  t.dispatchEvent(ev);
+  return;
+ }
+ pressMouse(0);releaseMouse(0);
+ const doc=currentDocument(),w=doc.defaultView,p=pointInFrame();
+ t.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true,view:w,button:0,buttons:0,clientX:p.x,clientY:p.y}));
+ if(t.closest&&t.closest('input,textarea,[contenteditable="true"]'))lastFocus=t.closest('input,textarea,[contenteditable="true"]');
+}
+function scrollContent(deltaY,deltaX=0){
+ const doc=currentDocument();if(!doc)return;
+ const target=targetAt(),w=doc.defaultView,pt=pointInFrame();
+ let canceled=false;
+ if(target&&typeof w.WheelEvent==='function')canceled=!target.dispatchEvent(new w.WheelEvent('wheel',{bubbles:true,cancelable:true,clientX:pt.x,clientY:pt.y,deltaY,deltaX,deltaMode:0}));
+ if(canceled)return;
+ let n=target;
+ while(n&&n!==doc.documentElement){
+  if(n.nodeType===1){
+   const style=w.getComputedStyle(n);
+   const vertical=/(auto|scroll|overlay)/.test(style.overflowY)&&n.scrollHeight>n.clientHeight+2;
+   const horizontal=/(auto|scroll|overlay)/.test(style.overflowX)&&n.scrollWidth>n.clientWidth+2;
+   if(vertical||horizontal){n.scrollBy({top:vertical?deltaY:0,left:horizontal?deltaX:0,behavior:'instant'});return}
+  }
+  n=n.parentElement;
+ }
+ w.scrollBy({top:deltaY,left:deltaX,behavior:'instant'});
+}
+function focusDoc(){
+ const doc=currentDocument();if(!doc)return null;
+ if(lastFocus&&lastFocus.isConnected)return lastFocus;
+ const active=doc.activeElement;
+ return active&&active!==doc.body?active:doc.body;
+}
+function keyEvent(type,key,code=key){
+ const doc=currentDocument();if(!doc){message('Keyboard tidak dapat mengontrol situs lintas origin');return null}
+ const target=focusDoc(),w=doc.defaultView;
+ const evt=new w.KeyboardEvent(type,{key,code,bubbles:true,cancelable:true,composed:true,shiftKey:shift,ctrlKey:ctrl,view:w});
+ target.dispatchEvent(evt);
+ return {target,prevented:evt.defaultPrevented};
+}
+function putText(target,text){
+ const doc=currentDocument();if(!doc)return;
+ if(target instanceof doc.defaultView.HTMLInputElement||target instanceof doc.defaultView.HTMLTextAreaElement){
+  if(target.readOnly||target.disabled)return;
+  const a=target.selectionStart??target.value.length,b=target.selectionEnd??a;
+  const isDelete=text==='__BACKSPACE__';
+  const start=isDelete&&a===b?Math.max(0,a-1):a;
+  target.setRangeText(isDelete?'':text,start,b,'end');
+  target.dispatchEvent(new doc.defaultView.InputEvent('input',{bubbles:true,inputType:isDelete?'deleteContentBackward':'insertText',data:isDelete?null:text}));
+  return;
+ }
+ if(target.isContentEditable){
+  target.focus();
+  doc.execCommand(text==='__BACKSPACE__'?'delete':'insertText',false,text==='__BACKSPACE__'?'':text);
+ }
+}
+function stepFocus(){
+ const doc=currentDocument();if(!doc)return;
+ const list=[...doc.querySelectorAll('input:not([disabled]),textarea:not([disabled]),select:not([disabled]),button:not([disabled]),a[href],[contenteditable="true"]')].filter(el=>el.getClientRects().length);
+ if(!list.length)return;
+ const index=list.indexOf(focusDoc());
+ const next=list[(index+(shift?-1:1)+list.length)%list.length];
+ next.focus({preventScroll:true});lastFocus=next;
+}
+function applyKey(key){
+ const normalized=key==='SPACE'?' ':key==='BACKSPACE'?'Backspace':key==='ENTER'?'Enter':key==='TAB'?'Tab':key==='ESC'?'Escape':key;
+ if(key==='SHIFT'){shift=!shift;renderKeyboard();return}
+ if(key==='SYM'){symbols=!symbols;renderKeyboard();return}
+ if(key==='CTRL'){ctrl=!ctrl;renderKeyboard();return}
+ const target=focusDoc();
+ const down=keyEvent('keydown',normalized,normalized.length===1?'Key'+normalized.toUpperCase():normalized);
+ if(!down)return;
+ if(!down.prevented&&!ctrl){
+  if(key==='TAB')stepFocus();
+  else if(key==='BACKSPACE')putText(target,'__BACKSPACE__');
+  else if(key==='ENTER'){
+   if(target&&target.tagName==='TEXTAREA')putText(target,'\n');
+   else if(target&&target.tagName==='INPUT'&&target.form){try{target.form.requestSubmit()}catch{}}
+  }
+  else if(normalized==='ArrowLeft'||normalized==='ArrowRight'){
+   if(target&&typeof target.selectionStart==='number'){
+    let n=target.selectionStart+(normalized==='ArrowLeft'?-1:1);n=Math.max(0,Math.min(target.value.length,n));target.setSelectionRange(n,n);
+   }
+  }
+  else if(normalized.length===1)putText(target,shift?normalized.toUpperCase():normalized);
+ }
+ keyEvent('keyup',normalized,normalized.length===1?'Key'+normalized.toUpperCase():normalized);
+ if(shift&&key!=='SHIFT'){shift=false;renderKeyboard()}
+ if(ctrl){ctrl=false;renderKeyboard()}
+}
+const letterRows=[['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['SHIFT','z','x','c','v','b','n','m','BACKSPACE'],['SYM','CTRL',',','SPACE','.','ArrowLeft','ArrowRight','ENTER']];
+const symbolRows=[['1','2','3','4','5','6','7','8','9','0'],['@','#','$','%','&','-','+','(',')','/'],['SHIFT','*','"',"'",':',';','!','?','BACKSPACE'],['SYM','CTRL','_','SPACE','=','ArrowLeft','ArrowRight','ENTER']];
+function renderKeyboard(){
+ $('keyboard').replaceChildren();
+ (symbols?symbolRows:letterRows).forEach(row=>{
+  const host=document.createElement('div');host.className='key-row';
+  row.forEach(key=>{
+   const btn=document.createElement('button');btn.type='button';btn.className='key'+(key.length>1?' special':'')+(key==='SPACE'?' space':'');
+   btn.textContent=key==='BACKSPACE'?'⌫':key==='ENTER'?'↵ ENTER':key==='SPACE'?'SPACE':key==='ArrowLeft'?'←':key==='ArrowRight'?'→':key==='SHIFT'?'⇧ SHIFT':key==='SYM'?'123':key==='CTRL'?'CTRL':shift?key.toUpperCase():key;
+   if((key==='SHIFT'&&shift)||(key==='SYM'&&symbols)||(key==='CTRL'&&ctrl))btn.classList.add('active');
+   btn.addEventListener('pointerdown',e=>e.preventDefault());
+   btn.addEventListener('click',()=>applyKey(key));host.appendChild(btn);
+  });
+  $('keyboard').appendChild(host);
+ });
+}
+function setMode(next){
+ mode=next;$('padPage').hidden=next!=='pad';$('keyboardPage').hidden=next!=='keyboard';
+ $('padMode').classList.toggle('active',next==='pad');$('keyMode').classList.toggle('active',next==='keyboard');
+ try{localStorage.setItem('membangun-laptop-mode',next)}catch{}
+}
+function setZoom(z){zoom=Math.max(.7,Math.min(1.7,Math.round(z*10)/10));layout();try{localStorage.setItem('membangun-laptop-zoom',String(zoom))}catch{}}
+function setApp(id){
+ if(!apps.some(a=>a.id===id))return;
+ if(selected!==id&&pressed)releaseMouse();
+ selected=id;lastFocus=null;canBridge=false;setDragLock(false);
+ $('currentApp').textContent=getApp().label+'.EXE';
+ $('bridgeStatus').textContent='Memuat aplikasi...';
+ $('placeholder').hidden=false;$('placeholderText').textContent='Membuka '+getApp().label+'...';
+ const url=getUrl(id);
+ $('externalFallback').href=url;
+ frame.src=url;
+ document.querySelectorAll('#appTabs button').forEach(b=>b.classList.toggle('active',b.dataset.app===id));
+ const u=new URL(location.href);u.searchParams.set('app',id);history.replaceState(null,'',u);
+ try{localStorage.setItem('membangun-laptop-app',id)}catch{}
+}
+function setDragLock(value){
+ dragLock=value;$('dragLock').classList.toggle('active',dragLock);$('dragLock').textContent=dragLock?'✥ DRAG ON':'✥ DRAG OFF';$('dragLock').setAttribute('aria-pressed',String(dragLock));
+ if(!dragLock)releaseMouse();else pressMouse(0);
+}
+function onLoad(){
+ canBridge=!!currentDocument();
+ $('placeholder').hidden=true;
+ $('bridgeStatus').textContent=canBridge?'Touchpad + keyboard aktif':'Situs membatasi kontrol tersemat; gunakan ↗ APP';
+ if(canBridge){
+  try{
+   const doc=currentDocument();
+   doc.addEventListener('focusin',e=>{if(e.target&&e.target!==doc.body)lastFocus=e.target});
+   doc.addEventListener('click',e=>{if(e.target&&e.target.matches('input,textarea,[contenteditable="true"]'))lastFocus=e.target},true);
+  }catch{}
+ }
+}
+function configure(){
+ try{
+  const z=Number(localStorage.getItem('membangun-laptop-zoom'));if(z>=.7&&z<=1.7)zoom=z;
+  const m=localStorage.getItem('membangun-laptop-mode');if(m==='keyboard')mode='keyboard';
+ }catch{}
+ for(const app of apps){
+  const b=document.createElement('button');b.type='button';b.dataset.app=app.id;b.textContent=app.label+'.EXE';b.addEventListener('click',()=>setApp(app.id));$('appTabs').appendChild(b);
+ }
+ renderKeyboard();setMode(mode);layout();setApp(selected);
+}
+let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0;
+function clearLongPress(){clearTimeout(longPressTimer);longPressTimer=null}
+const pad=$('touchpad');
+pad.addEventListener('touchstart',e=>{
+ e.preventDefault();clearLongPress();
+ if(e.touches.length>=2){
+  prevTouches={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+  if(longHeld){releaseMouse();longHeld=false}
+  return;
+ }
+ touching=true;moved=false;longHeld=false;startTime=Date.now();
+ prevTouches={x:e.touches[0].clientX,y:e.touches[0].clientY};
+ longPressTimer=setTimeout(()=>{if(touching&&!moved&&!pressed){pressMouse();longHeld=true}},460);
+},{passive:false});
+pad.addEventListener('touchmove',e=>{
+ e.preventDefault();
+ if(e.touches.length>=2){
+  clearLongPress();
+  const x=(e.touches[0].clientX+e.touches[1].clientX)/2,y=(e.touches[0].clientY+e.touches[1].clientY)/2;
+  if(prevTouches)scrollContent((prevTouches.y-y)*2,(prevTouches.x-x)*2);
+  prevTouches={x,y};moved=true;return;
+ }
+ if(!e.touches.length)return;
+ const t=e.touches[0];
+ if(prevTouches){
+  const dx=t.clientX-prevTouches.x,dy=t.clientY-prevTouches.y;
+  if(Math.abs(dx)+Math.abs(dy)>1.5){moved=true;clearLongPress()}
+  setCursor(cx+dx*1.5,cy+dy*1.5);movePointer();
+ }
+ prevTouches={x:t.clientX,y:t.clientY};
+},{passive:false});
+pad.addEventListener('touchend',e=>{
+ e.preventDefault();clearLongPress();
+ if(e.touches.length){prevTouches=null;return}
+ if(longHeld&&!dragLock){releaseMouse()}
+ else if(!moved&&Date.now()-startTime<430&&!dragLock)clickMouse(0);
+ touching=false;prevTouches=null;longHeld=false;
+},{passive:false});
+pad.addEventListener('touchcancel',()=>{clearLongPress();if(longHeld&&!dragLock)releaseMouse();touching=false;prevTouches=null});
+let pointerGesture=null;
+pad.addEventListener('pointerdown',e=>{
+ if(e.pointerType==='touch')return;
+ e.preventDefault();pad.setPointerCapture(e.pointerId);
+ pointerGesture={x:e.clientX,y:e.clientY,moved:false};startTime=Date.now();
+});
+pad.addEventListener('pointermove',e=>{
+ if(e.pointerType==='touch'||!pointerGesture)return;
+ const dx=e.clientX-pointerGesture.x,dy=e.clientY-pointerGesture.y;
+ if(Math.abs(dx)+Math.abs(dy)>2)pointerGesture.moved=true;
+ pointerGesture.x=e.clientX;pointerGesture.y=e.clientY;
+ setCursor(cx+dx*1.3,cy+dy*1.3);movePointer();
+});
+pad.addEventListener('pointerup',e=>{
+ if(e.pointerType==='touch'||!pointerGesture)return;
+ if(!pointerGesture.moved)clickMouse(0);
+ pointerGesture=null;
+});
+const scrollZone=$('scrollZone');
+scrollZone.addEventListener('touchstart',e=>{e.preventDefault();scrollGesture=e.touches[0].clientY},{passive:false});
+scrollZone.addEventListener('touchmove',e=>{
+ e.preventDefault();if(scrollGesture===null)return;
+ const y=e.touches[0].clientY;scrollContent((scrollGesture-y)*2.8);scrollGesture=y;
+},{passive:false});
+scrollZone.addEventListener('touchend',()=>scrollGesture=null);
+scrollZone.addEventListener('wheel',e=>{e.preventDefault();scrollContent(e.deltaY)},{passive:false});
+$('leftClick').addEventListener('click',()=>clickMouse(0));
+$('rightClick').addEventListener('click',()=>clickMouse(2));
+$('dragLock').addEventListener('click',()=>setDragLock(!dragLock));
+$('padMode').addEventListener('click',()=>setMode('pad'));
+$('keyMode').addEventListener('click',()=>setMode('keyboard'));
+$('escapeKey').addEventListener('click',()=>applyKey('ESC'));
+$('undoKey').addEventListener('click',()=>{ctrl=true;keyEvent('keydown','Control','ControlLeft');keyEvent('keydown','z','KeyZ');keyEvent('keyup','z','KeyZ');keyEvent('keyup','Control','ControlLeft');ctrl=false;try{currentDocument()?.execCommand('undo')}catch{}});
+$('zoomOut').addEventListener('click',()=>setZoom(zoom-.1));
+$('zoomIn').addEventListener('click',()=>setZoom(zoom+.1));
+$('external').addEventListener('click',()=>window.open(getUrl(selected),'_blank','noopener,noreferrer'));
+$('exit').addEventListener('click',()=>location.href='./?app='+encodeURIComponent(selected));
+$('fullscreen').addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch{message('Gunakan Tambah ke layar utama jika fullscreen diblokir')}});
+$('pasteKey').addEventListener('click',async()=>{try{const str=await navigator.clipboard.readText();if(str)putText(focusDoc(),str)}catch{message('Izin paste ditolak browser')}});
+$('copyKey').addEventListener('click',async()=>{
+ const doc=currentDocument();if(!doc)return;
+ const node=focusDoc();
+ let str='';
+ if((node.tagName==='INPUT'||node.tagName==='TEXTAREA')&&node.selectionStart!==null)str=node.value.slice(node.selectionStart,node.selectionEnd);
+ else str=doc.getSelection()?.toString()||'';
+ if(!str){message('Seleksi teks dulu');return}
+ try{await navigator.clipboard.writeText(str);message('Teks tersalin')}catch{message('Izin copy ditolak browser')}
+});
+frame.addEventListener('load',onLoad);
+window.addEventListener('resize',layout);
+if(window.visualViewport)window.visualViewport.addEventListener('resize',layout);
+document.addEventListener('keydown',e=>{
+ if(e.target===$('nativeInput'))return;
+ if(e.key==='Escape'&&document.fullscreenElement){document.exitFullscreen();return}
+ if(e.key==='F11'){e.preventDefault();$('fullscreen').click()}
+});
+configure();
+})();
+</script>
+</body>
+</html>
