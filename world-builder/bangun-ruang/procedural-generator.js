@@ -36,6 +36,7 @@
   const w=clamp(options.w,2,24,recipe.w),d=clamp(options.d,2,24,recipe.d);
   const floors=clamp(options.floors,1,12,recipe.floors);
   const roomTemplate=String(options.roomTemplate||recipe.room);
+  const detailLevel=['simple','standard','rich'].includes(options.detailLevel)?options.detailLevel:'rich';
   return {
    config:{
     baseId:recipe.baseId,name,kind:recipe.kind,w,d,floors,windows,wall,roof,
@@ -44,9 +45,9 @@
     windowStyle,balcony:(floors>1&&random()>.64)?'yes':'no',
     sign:options.sign?String(options.sign).slice(0,14):'',front:'sw',
     actions:interactive?'enter'+(['ruko','warung','mall'].includes(type)?',buy':''):'',collision:'yes',
-    interactive
+    interactive,detailLevel,facadeSeed:seed
    },
-   recipe:{generator:'bangun-ruang-procedural-v1',type,seed,roomTemplate,
+   recipe:{generator:'bangun-ruang-procedural-v2',type,seed,roomTemplate,detailLevel,
     renderer:recipe.nativeId?'native-pipeline-source-copy':'bangun-ruang-browser-v6b',
     sourceId:recipe.nativeId||recipe.baseId},
    roomTemplate,nativeId:recipe.nativeId||null
@@ -86,6 +87,7 @@
    '<label>ROOF PALETTE<select id="brgRoof"><option value="auto">Auto · deterministic variation</option><option value="terracotta">Terracotta</option><option value="slate">Slate</option><option value="navy">Navy</option><option value="green">Green</option></select></label>',
    '</div>',
    '<label><span><input id="brgInteractive" type="checkbox" checked style="width:auto;margin-right:6px"> Enterable building · create editable interior</span></label>',
+   '<label>DETAIL LEVEL<select id="brgDetail"><option value="rich" selected>Rich · detailed facade (recommended)</option><option value="standard">Standard · balanced</option><option value="simple">Simple · blockout</option></select></label>',
    '<label>GROUND FLOOR INTERIOR TEMPLATE<select id="brgRoom"></select></label>',
    '<label>AFTER GENERATE<select id="brgAfter"><option value="exterior">Edit exterior first</option><option value="interior">Edit interior first</option></select></label>',
    '<small id="brgNote">One draft building. Changes are not saved until Save Asset / Save to Semesta. Existing saved buildings remain untouched.</small>',
@@ -110,7 +112,7 @@
    $('brgW').value=p.w;$('brgD').value=p.d;$('brgFloors').value=p.floors;
    $('brgRoom').value=rooms[p.room]?p.room:'empty';
    $('brgName').value=p.label+' '+String($('brgSeed').value||1).padStart(3,'0');
-   $('brgWall').value='auto';$('brgRoof').value='auto';autoName=true;
+   $('brgWall').value='auto';$('brgRoof').value='auto';$('brgDetail').value='rich';autoName=true;
    const landmark=!!p.nativeId;
    for(const id of ['brgW','brgD','brgFloors'])$(id).disabled=landmark;
    $('brgNote').textContent=landmark
@@ -131,7 +133,7 @@
     name:$('brgName').value,w:$('brgW').value,d:$('brgD').value,
     floors:$('brgFloors').value,seed:$('brgSeed').value,
     wall:$('brgWall').value,roof:$('brgRoof').value,
-    interactive:$('brgInteractive').checked,roomTemplate:$('brgRoom').value
+    interactive:$('brgInteractive').checked,roomTemplate:$('brgRoom').value,detailLevel:$('brgDetail').value
    };
    const result=make($('brgType').value,options);
    $('brgCreate').disabled=true;$('brgStatus').textContent='CREATING EDITABLE BUILDING DRAFT…';
