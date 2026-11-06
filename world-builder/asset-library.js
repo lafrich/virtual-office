@@ -142,6 +142,7 @@ function mount(options={}){
  '<div class="sal-views" id="salViews" aria-label="Sudut tampilan"></div><dl id="salData" class="sal-data"></dl>',
  '<p id="salDescription" class="sal-description"></p>',
  '<div class="sal-actions"><button id="salPlace" class="sal-primary" type="button">＋ Place in Semesta</button>',
+ '<button id="salReplace" type="button">⇄ Replace Selected</button>',
  '<button id="salEdit" type="button">✎ Edit in Bangun Ruang</button></div>',
  '<small class="sal-help">SAVE ALL ASSETS menyimpan indeks seluruh katalog + custom PNG ke Google Drive. Aset bawaan GitHub tetap menggunakan file asli di pipeline; original game encrypted hanya direferensikan, tidak disalin.</small>',
  '</section></div>'
@@ -231,6 +232,7 @@ function mount(options={}){
     s.published===false?'Artwork belum dipublikasikan; metadata saja.':
     'Aset native isometrik Semesta. Buka di Bangun Ruang untuk membuat salinan baru yang bisa dimodifikasi.');
   $('salPlace').disabled=s.kind!=='sprite'||s.published===false;
+  $('salReplace').disabled=s.kind!=='sprite'||s.published===false||!options.replaceTarget?.();
   $('salEdit').disabled=!s.editTarget;
   $('salEdit').title=s.editTarget?'Buat salinan di Bangun Ruang':'Editor aset ini tidak tersedia di Bangun Ruang';
   $('salGallery').querySelectorAll('button[data-file]').forEach(b=>
@@ -409,6 +411,7 @@ $('salLoadDrive').onclick=restoreLibrary;
  $('salSearch').oninput=e=>{query=e.target.value.trim().toLowerCase();draw();};
  $('salCategory').onchange=e=>{filter=e.target.value;selected=null;draw();};
  $('salPlace').onclick=()=>{if(selected?.kind==='sprite'&&options.place?.(selected))dlg.close();};
+ $('salReplace').onclick=()=>{if(selected?.kind==='sprite'&&options.replace?.(selected))dlg.close();};
  $('salEdit').onclick=()=>{
   if(!selected?.editTarget)return;
   const link=document.createElement('a');link.href=selected.editTarget;
