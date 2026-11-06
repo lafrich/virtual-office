@@ -1208,7 +1208,7 @@ window.addEventListener('focus',()=>scaleController?.refreshProfiles?.(false));
 <div class="mb-cloud-dialog" id="mbCloudDialog" data-app="bangun" role="dialog" aria-modal="true" aria-label="Google Drive cloud library" hidden>
 <section class="mb-cloud-window"><header class="mb-cloud-header"><strong>☁ BANGUN RUANG.PNT / GOOGLE DRIVE</strong><button id="mbCloudClose" type="button" aria-label="Close Google Drive dialog">×</button></header>
 <div class="mb-cloud-body">
-<p class="mb-cloud-note">Save and open projects using the same Google account on PC and HP. Your local files stay available offline. Folder: Membangun / Bangun Ruang.</p>
+<p class="mb-cloud-note">AUTO SYNC: Connect Google to automatically load saved buildings, furniture, interiors and Pixel Creator assets. Changes to an existing saved building sync after a short pause. New buildings need one initial Save Asset to receive an ID. Local backups stay on this device. Folder: Membangun / Bangun Ruang.</p>
 <label>GOOGLE OAUTH WEB CLIENT ID <input id="mbCloudClient" spellcheck="false" autocomplete="off" placeholder="Client ID"></label>
 <div class="mb-cloud-actions"><button id="mbCloudConnect" type="button">☁ CONNECT GOOGLE DRIVE</button><button id="mbCloudDisconnect" type="button">DISCONNECT</button></div>
 <div class="mb-cloud-actions"><button id="mbCloudSave" type="button">↑ SAVE CURRENT TO DRIVE</button><button id="mbCloudBackup" type="button">↑ BACKUP LOCAL LIBRARY</button></div>
@@ -1217,7 +1217,7 @@ window.addEventListener('focus',()=>scaleController?.refreshProfiles?.(false));
 <label>CLOUD PROJECTS <select id="mbCloudFiles" size="5" aria-label="Saved Google Drive projects"></select></label>
 <div class="mb-cloud-actions"><button id="mbCloudRefresh" type="button">↻ REFRESH DRIVE</button><button id="mbCloudLoad" type="button">↓ OPEN SELECTED FROM DRIVE</button></div>
 <output id="mbCloudStatus" role="status">NOT CONNECTED · Login through Google required.</output>
-<p class="mb-cloud-note">Google Drive API permission: <code>drive.file</code>. No GitHub token. Cloud files are not automatically loaded into Semesta or Bangun Ruang until selected; saving locally only syncs to Drive when already connected.</p>
+<p class="mb-cloud-note">Google Drive API permission: <code>drive.file</code>. No GitHub token. Connect automatically reconciles saved libraries; conflicts are reported instead of silently overwriting. Manual Save All / Restore is optional.</p>
 </div></section></div>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="../drive-sync.js?v=cloud-autosync-20261106"></script>
