@@ -1482,13 +1482,20 @@ async function saveToDrive(){
  try{
   const entry={...snapshot(),name:$("name").value.trim()||"UNTITLED",base:$("base").value,
    frames:selected.frames,fps:Math.max(1,Math.min(30,Number($("fps").value)||6)),png:atlas.toDataURL("image/png")};
-  delete entry.template;delete entry.driveFileId;delete entry.driveModifiedTime;
+  const ownVersion=selected?.driveModifiedTime||savedEntries.get(entry.id)?.driveModifiedTime;
+  const remoteVersion=driveEntries.get(entry.id)?.driveModifiedTime;
+  delete entry.template;delete entry.driveFileId;delete entry.driveModifiedTime;delete entry.cloudSyncHash;
   if(!U.validEntry(entry))throw Error("Invalid emotion atlas. Use native 64×112 / 4-view format.");
-  // Write local copy first: even if Drive fails, no artwork is lost.
+  // Local storage remains a backup even if the cloud update must be rejected.
   await persistSaved(entry);
-  const result=await D.save(entry,{expectedModifiedTime:driveEntries.get(entry.id)?.driveModifiedTime});
-  driveEntries.set(entry.id,{...entry,driveFileId:result.project.id,driveModifiedTime:result.project.modifiedTime});
-  selected={...driveEntries.get(entry.id)};mergeCatalog();setDirty(false);await renderList();
+  if(remoteVersion&&ownVersion!==remoteVersion)
+   throw Error("CONFLICT: a newer cloud version exists. Refresh Drive to preserve both copies before uploading.");
+  const result=await D.save(entry,{expectedModifiedTime:remoteVersion||ownVersion});
+  const synced={...entry,driveFileId:result.project.id,
+   driveModifiedTime:result.project.modifiedTime,cloudSyncHash:emotionHash(entry)};
+  await persistSaved(synced);
+  driveEntries.set(entry.id,synced);selected={...synced};
+  mergeCatalog();setDirty(false);await renderList();
   if(result.folderId)$("driveFolder").href="https://drive.google.com/drive/folders/"+encodeURIComponent(result.folderId);
   driveStatus("✓ GOOGLE DRIVE SYNCED · "+driveEntries.size+" PROJECT(S)");
   status("✓ SAVED TO GOOGLE DRIVE (JSON + PNG) · SAME ACCOUNT ON PC / PHONE");
