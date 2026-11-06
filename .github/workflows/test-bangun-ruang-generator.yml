@@ -5,7 +5,9 @@ on:
     paths:
       - 'world-builder/bangun-ruang/procedural-generator.js'
       - 'world-builder/bangun-ruang/index.html'
+      - 'world-builder/bangun-ruang/studio-interior-ui.js'
       - 'tests/bangun-ruang-generator.test.cjs'
+      - 'tests/bangun-ruang-rich-drag.test.cjs'
       - '.github/workflows/test-bangun-ruang-generator.yml'
   workflow_dispatch:
 permissions:
@@ -20,6 +22,8 @@ jobs:
         with:
           node-version: '22'
       - name: Check generator syntax
-        run: node --check world-builder/bangun-ruang/procedural-generator.js
+        run: |
+          node --check world-builder/bangun-ruang/procedural-generator.js
+          node --check world-builder/bangun-ruang/studio-interior-ui.js
       - name: Verify deterministic presets and editor handoff
-        run: node --test tests/bangun-ruang-generator.test.cjs
+        run: node --test tests/bangun-ruang-generator.test.cjs tests/bangun-ruang-rich-drag.test.cjs
