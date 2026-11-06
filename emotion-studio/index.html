@@ -1423,6 +1423,98 @@ const $=id=>document.getElementById(id),DIR=U.DIR;
 let catalog=null,selected=null,atlas=null,frame=0,direction="se",dirty=false,playing=false,saving=false,editor=null;
 const D=window.EmotionDrive;
 let driveEntries=new Map(),driveBusy=false,autoSaveTimer=null;
+let createAction='duplicate';
+const draftEntries=new Set();
+function setWorkspaceTab(panel='preview'){
+ const allowed=['library','preview','properties'];
+ const mode=allowed.includes(panel)?panel:'preview';
+ $('emotionWorkspace').dataset.mobilePanel=mode;
+ for(const tab of document.querySelectorAll('.emotion-mobile-tabs [data-mobile-panel]')){
+  const active=tab.dataset.mobilePanel===mode;
+  tab.classList.toggle('active',active);
+  tab.setAttribute('aria-pressed',String(active));
+  tab.setAttribute('aria-selected',String(active));
+ }
+}
+function currentEmotionKind(){
+ if(!selected)return 'NO DATABASE ENTRY';
+ if(draftEntries.has(selected.id))return 'NEW DATABASE / DRAFT';
+ if(driveEntries.has(selected.id))return 'GOOGLE DRIVE EMOTION';
+ if(savedEntries.has(selected.id))return 'LOCAL SAVED EMOTION';
+ return 'STARTER TEMPLATE';
+}
+function updateEntryIdentity(){
+ if(!selected)return;
+ $('entryKind').textContent=currentEmotionKind();
+ $('entryId').textContent='ID / '+selected.id+
+  ' · '+selected.frames+' FRAMES · '+(dirty?'UNSAVED':'READY');
+}
+function allocateEmotionId(){
+ const keys=[...(catalog?.entries||[]).map(x=>x.id),
+  ...savedEntries.keys(),...driveEntries.keys(),...draftEntries.keys(),selected?.id].filter(Boolean);
+ return DB.newId(keys);
+}
+function emptyEmotionPng(){
+ const c=document.createElement('canvas');c.width=64;c.height=448;
+ return c.toDataURL('image/png');
+}
+function createEmotionRecord(source,values){
+ return DB.fork(source,{
+  id:allocateEmotionId(),name:values.name,base:values.base,
+  png:values.png||emptyEmotionPng()
+ });
+}
+function showDuplicateDialog(mode='duplicate'){
+ if(!selected||!atlas){status('SELECT A SOURCE EMOTION FIRST',true);return}
+ createAction=mode==='save-as-new'?'save-as-new':'duplicate';
+ const dialog=$('newEmotionDialog');
+ $('newEmotionName').value=DB.cleanName(
+  (String($('name').value||selected.name).trim()+' / COPY').slice(0,90));
+ $('newEmotionBase').value=$('base').value;
+ $('newEmotionTitle').textContent=createAction==='save-as-new'?
+  '▣ SAVE AS NEW EMOTION':'⧉ DUPLICATE EMOTION DATABASE';
+ $('newEmotionDescription').textContent=createAction==='save-as-new'?
+  'Save your current 4-view artwork under a NEW database ID. The source will not be replaced by this action.':
+  'Copy all frames and views to a new editable emotion. Edit this copy without changing the source.';
+ $('newEmotionSource').textContent=selected.name+' · '+
+  selected.frames+' frame(s) · SE / SW / NE / NW';
+ $('confirmCreate').textContent=createAction==='save-as-new'?
+  '▣ SAVE NEW EMOTION':'＋ CREATE EDITABLE COPY';
+ if(!dialog.open)dialog.showModal();
+ $('newEmotionName').focus();$('newEmotionName').select();
+}
+async function submitDuplicateDialog(e){
+ e.preventDefault();
+ if(!selected||!atlas)return;
+ const name=DB.cleanName($('newEmotionName').value);
+ const base=$('newEmotionBase').value;
+ if(!name){status('NAME IS REQUIRED',true);return}
+ const button=$('confirmCreate');button.disabled=true;
+ try{
+  const source={...selected,frames:selected.frames,
+   fps:Math.max(1,Math.min(30,Number($('fps').value)||6))};
+  const entry=createEmotionRecord(source,{
+   name,base,png:atlas.toDataURL('image/png')
+  });
+  const oldId=selected.id;
+  await choose(entry,{force:true});
+  if(!selected||selected.id!==entry.id)throw Error('New database entry could not open');
+  draftEntries.add(entry.id);
+  $('newEmotionDialog').close();
+  setWorkspaceTab('preview');
+  if(createAction==='save-as-new'){
+   await save();
+   status('✓ SAVED AS NEW EMOTION · '+name+
+    ' · SOURCE '+oldId+' LEFT INTACT');
+  }else{
+   setDirty(true);
+   status('✓ NEW EDITABLE COPY · '+name+
+    ' · EDIT FRAMES THEN SAVE · SOURCE '+oldId+' UNCHANGED');
+  }
+  updateEntryIdentity();
+ }catch(error){status('CREATE NEW EMOTION FAILED: '+error.message,true)}
+ finally{button.disabled=false}
+}
 
 // Original 64x112 RGBA Human Male Base idle frame 0 head reference,
 // extracted from media/human-male-base-guide.png in the official asset build.
@@ -1634,7 +1726,16 @@ async function saveToDrive(){
 }
 
 function status(s,error=false){$("status").textContent=s;$("status").style.color=error?"#b62230":""}
-function setDirty(value=true){dirty=value;$("dirty").textContent=dirty?"● AUTO SAVE PENDING":savedEntries.has(selected?.id)?"✓ SAVED ON THIS DEVICE":"○ STARTER / NOT SAVED";$("dirty").style.color=dirty?"#b62230":"#276744";if(value)scheduleEmotionAutosave();else if(autoSaveTimer){clearTimeout(autoSaveTimer);autoSaveTimer=null}}
+function setDirty(value=true){
+ dirty=value;
+ $('dirty').textContent=dirty?'● AUTO SAVE PENDING':
+  savedEntries.has(selected?.id)?'✓ SAVED ON THIS DEVICE':
+  draftEntries.has(selected?.id)?'○ NEW EMOTION DRAFT':'○ STARTER / NOT SAVED';
+ $('dirty').style.color=dirty?'#b62230':'#276744';
+ if(value)scheduleEmotionAutosave();
+ else if(autoSaveTimer){clearTimeout(autoSaveTimer);autoSaveTimer=null}
+ updateEntryIdentity();
+}
 function stageImage(index=frame){const c=document.createElement("canvas");c.width=64;c.height=448;
  if(atlas)c.getContext("2d").drawImage(atlas,index*64,0,64,448,0,0,64,448);return c}
 function drawTile(target,index,dir="se"){const ctx=target.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,target.width,target.height);
@@ -1746,7 +1847,9 @@ function renderFrames(){const t=$("timeline");t.replaceChildren();
  $("frameMoveLeft").disabled=frame<=0||selected.frames<2;
  $("frameMoveRight").disabled=frame>=selected.frames-1;
 }
-function render(){if(!selected||!atlas)return;$("name").value=selected.name;$("base").value=selected.base;$("fps").value=selected.fps||6;
+function render(){if(!selected||!atlas)return;
+ $('name').value=selected.name;$('base').value=selected.base;$('fps').value=selected.fps||6;
+ updateEntryIdentity();
  for(const b of document.querySelectorAll("[data-dir]"))b.classList.toggle("active",b.dataset.dir===direction);
  renderFrames();drawPreview();}
 async function choose(entry,{force=false}={}){
@@ -1765,7 +1868,8 @@ async function renderList(){
   U.renderAtlas(item).then(src=>{const ctx=thumb.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,64,112);ctx.drawImage(src,0,0,64,112,0,0,64,112)}).catch(()=>{});
   const labels=document.createElement("span"),name=document.createElement("b"),info=document.createElement("small");
   name.textContent=item.name;info.textContent=item.frames+" FRAMES · "+item.base.toUpperCase();labels.append(name,info);row.append(thumb,labels);
-  row.onclick=()=>choose(item);list.append(row);
+  row.onclick=async()=>{await choose(item);if(selected?.id===item.id)setWorkspaceTab('preview')};
+  list.append(row);
  }
 }
 async function reload({force=false}={}){
@@ -1813,9 +1917,17 @@ function openEditor(){if(!atlas)return;const img=stageImage();
  $("pixelMaleOpacityLabel").textContent=$("maleGuideOpacity").value+"%";
  editor.open({id:"emotion-frame-"+(frame+1),initialAtlas:img,originalAtlas:img,direction,referenceImages:maleRefs});
 }
-function newEmotion(){if(dirty&&!window.confirm("Discard unsaved emotion edits?"))return;
- const id="emotion-"+Date.now().toString(36),fresh={id,name:"NEW EMOTION",base:"universal",frames:1,fps:6,template:"neutral"};
- choose(fresh,{force:true}).then(()=>{setDirty();$("name").focus();$("name").select()})}
+async function newEmotion(){
+ if(dirty&&!window.confirm('Discard unsaved emotion edits?'))return;
+ try{
+  const fresh=createEmotionRecord(null,{name:'NEW EMOTION',base:'universal'});
+  await choose(fresh,{force:true});
+  draftEntries.add(fresh.id);
+  setDirty(true);setWorkspaceTab('preview');
+  updateEntryIdentity();
+  status('✓ NEW BLANK EMOTION DATABASE · EDIT PIXELS, RENAME AND SAVE');
+ }catch(error){status('NEW EMOTION FAILED: '+error.message,true)}
+}
 
 // Portable project files use the exact universal 64x112 RGBA 4-view format.
 // They can be imported on another computer without GitHub or localStorage.
@@ -1864,6 +1976,7 @@ async function save(){
   delete entry.template;
   await persistSaved(entry);
   selected=clone(entry);
+  draftEntries.delete(entry.id);
   mergeCatalog();setDirty(false);await renderList();
   $("online").textContent="LOCAL LIBRARY / "+savedEntries.size+" SAVED";
   if(D?.connected()){
@@ -1887,18 +2000,19 @@ function animationTick(t){if(playing&&selected&&atlas&&!editor?.isOpen()){
 function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas"),reference:$("preview"),
  onApply:(id,png)=>{applyFrame(png).then(()=>editor.close()).catch(e=>status(e.message,true));return false},
  onSaveDefault:(id,png)=>{applyFrame(png).then(()=>editor.close()).catch(e=>status(e.message,true));return false}});
- for(const tab of document.querySelectorAll("[data-mobile-panel]")){
-  if(!tab.matches("button"))continue;
-  tab.onclick=()=>{
-   const pane=tab.dataset.mobilePanel;
-   $("emotionWorkspace").dataset.mobilePanel=pane;
-   for(const button of document.querySelectorAll(".emotion-mobile-tabs button")){
-    const on=button.dataset.mobilePanel===pane;
-    button.classList.toggle("active",on);
-    button.setAttribute("aria-pressed",String(on));
-   }
-  };
+ for(const tab of document.querySelectorAll('.emotion-mobile-tabs [data-mobile-panel]')){
+  tab.onclick=()=>setWorkspaceTab(tab.dataset.mobilePanel);
  }
+ setWorkspaceTab('preview');
+ $('duplicateEmotion').onclick=()=>showDuplicateDialog('duplicate');
+ $('libraryDuplicate').onclick=()=>showDuplicateDialog('duplicate');
+ $('duplicateEmotionDetails').onclick=()=>showDuplicateDialog('duplicate');
+ $('saveAsNewTop').onclick=()=>showDuplicateDialog('save-as-new');
+ $('saveAsNew').onclick=()=>showDuplicateDialog('save-as-new');
+ $('libraryNew').onclick=newEmotion;
+ $('newEmotionForm').addEventListener('submit',submitDuplicateDialog);
+ $('cancelCreate').onclick=()=>$('newEmotionDialog').close();
+ $('cancelCreateTop').onclick=()=>$('newEmotionDialog').close();
   $("showMaleGuide").onchange=drawMalePreview;
  $("maleGuideOpacity").oninput=()=>{$("maleGuideOpacityLabel").textContent=$("maleGuideOpacity").value+"%";drawMalePreview()};
  $("filter").oninput=renderList;$("reload").onclick=()=>reload();$("new").onclick=newEmotion;$("export").onclick=exportPng;
