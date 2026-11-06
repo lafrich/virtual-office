@@ -194,3 +194,38 @@ test('Bangun Ruang can back up built-in furniture, interior templates, exteriors
  assert.match(drive,/bangun-ruang-asset-library-v1/);
  assert.match(driveUI,/A newer Drive version|all\.length|nativeCount/);
 });
+
+
+test('Google Drive auto reconciliation retains device conflicts and autosaves named city and Bangun buildings',()=>{
+ const cloud=read('world-builder/drive-ui.js');
+ const sync=read('world-builder/drive-sync.js');
+ const city=read('world-builder/builder.js');
+ const bangun=read('world-builder/bangun-ruang/index.html');
+ for(const snippet of ['async function syncOnConnect()','await syncOnConnect()',
+  'async function importRemoteQuiet','async function uploadRecord','markSynced',
+  'prior.modifiedTime!==file.modifiedTime','syncNotes.conflicts++'])
+  if(snippet==='async function importRemoteQuiet')assert.ok(city.includes('async importRemoteQuiet('));
+  else assert.ok(cloud.includes(snippet),snippet);
+ assert.match(city,/function scheduleCloudCitySave\(/);
+ assert.match(city,/function persistWorkingCityForCloud\(/);
+ assert.match(city,/async prepareLocalSync\(/);
+ assert.match(bangun,/function scheduleBuildingAutosave\(/);
+ assert.match(bangun,/function editableBuildingSignature\(/);
+ assert.match(bangun,/async prepareLocalSync\(/);
+ assert.match(bangun,/async importRemoteQuiet\(/);
+ assert.match(sync,/CONFLICT|A newer Drive version/);
+ assert.doesNotThrow(()=>new(require('node:vm').Script)(cloud));
+});
+test('Emotion Studio auto-reconciles local emotions and Drive versions and retains conflict copies',()=>{
+ const html=read('emotion-studio/index.html');
+ const drive=read('emotion-studio/drive-sync.js');
+ assert.match(html,/async function refreshDrive\(/);
+ assert.match(html,/function emotionConflictCopy\(/);
+ assert.match(html,/function scheduleEmotionAutosave\(/);
+ assert.match(html,/function emotionHash\(/);
+ assert.match(html,/cloudSyncHash/);
+ assert.match(html,/AUTO SAVE PENDING/);
+ assert.match(html,/await D\.save\(entry,\{expectedModifiedTime:remoteVersion\|\|ownVersion\}\)/);
+ assert.match(drive,/oldJson&&\(!opts\.expectedModifiedTime\|\|oldJson\.modifiedTime!==opts\.expectedModifiedTime\)/);
+ assert.match(drive,/delete clean\.cloudSyncHash/);
+});
