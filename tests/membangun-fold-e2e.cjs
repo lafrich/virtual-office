@@ -43,9 +43,37 @@ const assert=require('node:assert/strict');
   await page.setViewportSize({width:480,height:920});
   await page.locator('#rotate90').click();
   assert.equal(await page.locator('body').evaluate(x=>x.classList.contains('rotated')),true);
-  await page.locator('#padMode').click();
+  // Keyboard and touchpad coexist, as on a physical mini laptop.
+  assert.equal(await page.locator('#keyboardPage').isVisible(),true);
+  assert.equal(await page.locator('#touchpad').isVisible(),true);
+  assert.equal(await page.locator('#keyboard .key-row').count(),5);
+  assert.equal(await page.locator('#leftClick,#rightClick').count(),0);
+  const panelHeight=await page.locator('.control-area').evaluate(el=>el.getBoundingClientRect().height);
+  const keyboardHeight=await page.locator('#keyboardPage').evaluate(el=>el.getBoundingClientRect().height);
+  assert.ok(keyboardHeight/panelHeight<.57,'Keyboard must leave room for touchpad');
+  // Real two-touch swipe on the pad must scroll a panel inside the app iframe.
+  const scrollState=await page.evaluate(async()=>{
+   const doc=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none').contentDocument;
+   const pad=document.querySelector('#touchpad');
+   const cur=document.querySelector('#cursor');
+   const k=Number(document.querySelector('#appFrame').style.transform.match(/scale\\(([^)]+)\\)/)?.[1]||1);
+   const x=Number.parseFloat(cur.style.left)/k, y=Number.parseFloat(cur.style.top)/k;
+   const box=doc.createElement('div');
+   box.style.cssText='position:fixed;z-index:2147483647;left:'+(x-75)+'px;top:'+(y-65)+'px;width:150px;height:130px;overflow-y:auto;background:yellow';
+   const inner=doc.createElement('div');inner.style.height='1800px';inner.textContent='scroll test';box.appendChild(inner);doc.body.appendChild(box);
+   let wheelCount=0;box.addEventListener('wheel',()=>wheelCount++);
+   function event(type,yy){
+    const touches=[1,2].map(i=>new Touch({identifier:i,target:pad,clientX:110+i*30,clientY:yy}));
+    pad.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,touches,targetTouches:touches,changedTouches:touches}));
+   }
+   event('touchstart',180);event('touchmove',100);event('touchmove',65);
+   pad.dispatchEvent(new TouchEvent('touchend',{bubbles:true,cancelable:true,touches:[],targetTouches:[],changedTouches:[]}));
+   const result={scrollTop:box.scrollTop,wheelCount};box.remove();return result;
+  });
+  console.log('TWO_FINGER_SCROLL',scrollState);
+  assert.ok(scrollState.scrollTop>0,'Two-finger touchpad swipe must scroll app panel');
+  assert.ok(scrollState.wheelCount>0,'Wheel must be dispatched inside iframe');
   await page.screenshot({path:'membangun-laptop-rotated.png'});
-  await page.locator('#keyMode').click();
   await page.screenshot({path:'membangun-laptop-keyboard.png'});
   console.log('APP_SWITCH_AND_ROTATE_OK');
   if(errors.filter(x=>/is not defined|Cannot read properties/.test(x)).length>3)throw Error('Runtime errors: '+errors.join('; ').slice(0,700));
