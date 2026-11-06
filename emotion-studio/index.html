@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#234d94">
-<title>EMOTION STUDIO.EXE — Standalone Pixel Emotion Editor</title>
+<title>EMOSI.EXE — Emotion Database &amp; Pixel Editor</title>
 
 
 
@@ -474,19 +474,20 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 
 </style></head>
 <body><div class="window emotion-window">
-<header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOTION STUDIO <em>.EXE</em></b><small>UNIVERSAL DATABASE</small></div><div class="title-actions"><span class="led"></span><span id="online">LOCAL LIBRARY</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
-<nav class="menubar"><button id="reload">↻ RELOAD LIBRARY</button><button id="new">＋ NEW EMOTION</button><label class="importbtn">↑ IMPORT 4-VIEW PNG<input id="import" type="file" accept="image/png,.png"></label><button id="export">↓ EXPORT PNG</button><button id="exportProject">↓ PROJECT JSON</button><label class="importbtn">↑ IMPORT PROJECT<input id="importProject" type="file" accept=".json,application/json"></label><span class="push"></span><span class="tiny">MAHLUK HIDUP 2.0 FORMAT · NO LIVE SYNC</span><span class="tiny">64×112 / VIEW · 4 DIR · MAX 48F</span></nav>
-<nav class="emotion-mobile-tabs" aria-label="Emotion Studio mobile workspace">
+<header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOSI<em>.EXE</em></b><small>EMOTION DATABASE STUDIO</small></div><div class="title-actions"><span class="led"></span><span id="online">LOCAL LIBRARY</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
+<nav class="menubar"><div class="nav-action-group"><span class="nav-group-label">DATABASE</span><button id="new" class="menu-primary">＋ NEW BLANK</button><button id="duplicateEmotion">⧉ DUPLICATE</button><button id="saveAsNewTop">▣ SAVE AS NEW</button><button id="reload">↻ REFRESH</button></div><span class="nav-divider"></span><div class="nav-action-group"><span class="nav-group-label">FILES</span><label class="importbtn">↑ IMPORT 4-VIEW PNG<input id="import" type="file" accept="image/png,.png"></label><button id="export">↓ EXPORT PNG</button><button id="exportProject">↓ PROJECT JSON</button><label class="importbtn">↑ IMPORT PROJECT<input id="importProject" type="file" accept=".json,application/json"></label></div><span class="push"></span><span class="tiny">MAHLUK HIDUP 2.0 FORMAT · NO LIVE SYNC</span><span class="tiny">64×112 / VIEW · 4 DIR · MAX 48F</span></nav>
+<nav class="emotion-mobile-tabs" aria-label="Emosi.exe workspace tabs">
   <button type="button" data-mobile-panel="library" aria-pressed="false">▦ DATABASE</button>
-  <button type="button" data-mobile-panel="preview" aria-pressed="true" class="active">▶ PREVIEW</button>
-  <button type="button" data-mobile-panel="properties" aria-pressed="false">⚙ PROPERTIES</button>
+  <button type="button" data-mobile-panel="preview" aria-pressed="true" class="active">▦ EDITOR</button>
+  <button type="button" data-mobile-panel="properties" aria-pressed="false">⚙ DETAILS</button>
 </nav>
 <div class="emotion-workspace" id="emotionWorkspace" data-mobile-panel="preview">
 <aside class="emotion-library panel"><div class="panelhead"><strong>EMOTION DATABASE</strong><small id="count">0</small></div>
+<div class="library-actions"><button id="libraryNew" type="button">＋ NEW DATABASE</button><button id="libraryDuplicate" type="button">⧉ COPY SELECTED</button></div>
 <label class="filterbox">⌕ <input id="filter" type="search" placeholder="Find an emotion..." aria-label="Search emotions"></label>
 <div id="cards" class="emotion-list" aria-label="Universal emotion assets"></div>
-<div class="library-bottom">GOOGLE DRIVE + LOCAL LIBRARY<br>Drive-authored emotions can be opened from PC and HP with the same Google account. Native 64×112 four-view format.</div></aside>
-<main class="emotion-main"><div class="viewbar"><div class="viewtitle"><strong>EMOTION PREVIEW</strong><span>TRANSPARENT ALPHA PLANE</span></div><div class="viewcontrols"><button id="play">▶ PLAY</button><button id="edit" class="primary">▦ PIXEL EDITOR</button></div></div>
+<div class="library-bottom">Select an emotion → DUPLICATE to create an independent editable copy. Entries are saved locally and can sync through Google Drive. <strong>The original stays intact.</strong></div></aside>
+<main class="emotion-main"><div class="viewbar"><div class="viewtitle"><strong>EMOTION / FRAME EDITOR</strong><span>TRANSPARENT RGBA · 4 VIEWS</span></div><div class="viewcontrols"><button id="play">▶ PLAY</button><button id="edit" class="primary">▦ PIXEL EDITOR</button></div></div>
 <div class="preview-stage"><div class="preview-card"><div class="checker"><canvas id="maleGuidePreview" width="64" height="112" aria-label="Native Human Male Base head overlay for alignment only"></canvas><canvas id="preview" width="64" height="112" aria-label="Pixel emotion preview, transparent"></canvas></div><span id="previewInfo">SE · FRAME 1</span></div><div class="preview-side"><b>CAMERA VIEW</b><div id="directions" class="direction-picks"><button data-dir="se" class="active">SE</button><button data-dir="sw">SW</button><button data-dir="ne">NE</button><button data-dir="nw">NW</button></div><div class="male-overlay-tools">
   <label class="check"><input id="showMaleGuide" type="checkbox" checked> HUMAN MALE BASE / FACE PLACEMENT</label>
   <label>OVERLAY OPACITY <input id="maleGuideOpacity" type="range" min="5" max="100" step="5" value="55"><span id="maleGuideOpacityLabel">55%</span></label>
@@ -497,11 +498,12 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 <div class="timeline-actions"><button id="duplicateFrame">＋ DUPLICATE FRAME</button><button id="deleteFrame">− DELETE FRAME</button><button id="frameMoveLeft" title="Move selected frame earlier">← MOVE LEFT</button><button id="frameMoveRight" title="Move selected frame later">MOVE RIGHT →</button><span class="push"></span><span>Drag frame / ⠿ handle to change order · click to edit</span></div>
 </main>
 <aside class="emotion-inspector panel"><div class="panelhead"><strong>PROPERTIES</strong><small>EMOTION PLANE</small></div>
-<div class="ins-body"><label>EMOTION NAME<input id="name" maxlength="90" placeholder="Emotion name"></label>
+<div class="ins-body"><div class="ins-intro"><strong>DATABASE ENTRY</strong><small id="entryKind">STARTER TEMPLATE</small><span id="entryId">Select a database emotion</span></div><label>EMOTION NAME<input id="name" maxlength="90" placeholder="Emotion name"></label>
 <label>APPLY TO<select id="base"><option value="universal">UNIVERSAL / ALL BASES</option><option value="male">HUMAN MALE</option><option value="female">HUMAN FEMALE</option><option value="original">V6B ORIGINAL</option></select></label>
 <label>ANIMATION FPS<input id="fps" type="number" min="1" max="30" value="6"></label>
-<div class="small-note">RGBA frame atlas: 64 × frame count wide, 448 px high. Each column contains SE, SW, NE and NW.</div>
-<div class="sectionhead">GOOGLE DRIVE / CROSS-DEVICE SYNC</div>
+<div class="small-note">64 × 112 RGBA per view · SE/SW/NE/NW · max 48 frames. Each database entry has its own ID.</div>
+<div class="entry-actions"><button class="save" id="save">▣ SAVE EMOTION</button><button class="save-as-new" id="saveAsNew" type="button">⧉ SAVE AS NEW EMOTION</button><button id="duplicateEmotionDetails" type="button">＋ DUPLICATE / EDIT COPY</button></div>
+<details class="cloud-details" id="cloudDetails"><summary>☁ GOOGLE DRIVE / CROSS-DEVICE SYNC</summary>
  <p class="hint">AUTO SYNC: Setelah Connect Google, emosi dari Drive otomatis masuk library. Edit pixel/frame/nama lalu diamkan sebentar—tersimpan otomatis secara lokal dan ke Drive. Versi konflik disimpan sebagai salinan lokal terpisah, bukan ditimpa.</p>
  <label>GOOGLE OAUTH WEB CLIENT ID<input id="driveClientId" type="text" autocomplete="off" spellcheck="false" placeholder="123456789-xxxx.apps.googleusercontent.com"></label>
  <button id="driveConfigure" type="button">⚙ SAVE CLIENT ID</button>
@@ -511,14 +513,26 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
  <button class="save" id="driveSave" type="button">☁ SYNC NOW (OPTIONAL)</button>
  <a id="driveFolder" href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="noopener noreferrer">OPEN MY GOOGLE DRIVE</a>
  <div class="small-note">Setup awal: Google Cloud → enable Google Drive API → OAuth Web Client ID, authorized JavaScript origin <code>https://lafrich.github.io</code>. Jangan masukkan Client Secret. Drive API scope: drive.file (file yang dibuat aplikasi saja).</div>
- <div class="sectionhead">LOCAL / OFFLINE BACKUP</div>
- <p class="hint">Save lokal tetap tersedia untuk offline. Untuk pindah perangkat, gunakan Google Drive setelah connect.</p>
- <button class="save" id="save">▣ SAVE LOCALLY</button>
+ </details><div class="sectionhead">LOCAL / OFFLINE BACKUP</div>
+ <p class="hint">Save keeps the current emotion ID. Save as New creates another ID without replacing the original. Connect Drive for cross-device access.</p>
  <button id="deleteLocal" type="button">✕ DELETE SAVED EMOTION (LOCAL)</button>
  <div class="small-note">Local Save stays on this device. Google Drive Save writes the editable JSON and PNG atlas to a Drive folder. No sync with Mahluk Hidup 2 / Semesta yet.</div>
 </div></aside>
-</div><footer class="status"><span id="status">FETCHING UNIVERSAL CATALOG ...</span><span class="push"></span><span id="dirty">LOCAL / READY</span><span>EMOTION STUDIO / MAHLUK 2</span></footer>
+</div><footer class="status"><span id="status">FETCHING UNIVERSAL CATALOG ...</span><span class="push"></span><span id="dirty">LOCAL / READY</span><span>EMOSI.EXE / MAHLUK 2 FORMAT</span></footer>
 </div>
+<dialog id="newEmotionDialog" class="emotion-create-dialog" aria-labelledby="newEmotionTitle">
+ <form id="newEmotionForm" class="emotion-create-form">
+  <div class="create-titlebar"><strong id="newEmotionTitle">⧉ NEW EMOTION DATABASE</strong><button id="cancelCreateTop" type="button" aria-label="Close">×</button></div>
+  <div class="create-body">
+   <p id="newEmotionDescription">Create an independent copy of this emotion. Existing database entries will not be overwritten.</p>
+   <label>NEW EMOTION NAME<input id="newEmotionName" type="text" maxlength="90" autocomplete="off" required placeholder="e.g. Happy / Variant 02"></label>
+   <label>APPLY TO<select id="newEmotionBase"><option value="universal">UNIVERSAL / ALL BASES</option><option value="male">HUMAN MALE</option><option value="female">HUMAN FEMALE</option><option value="original">V6B ORIGINAL</option></select></label>
+   <div class="create-source-info"><strong>SOURCE</strong><span id="newEmotionSource">Selected emotion / all frames / four views</span></div>
+   <div class="create-help">New ID · original remains untouched · all SE/SW/NE/NW pixels and frame order are copied.</div>
+  </div>
+  <div class="create-footer"><button id="cancelCreate" type="button">CANCEL</button><button id="confirmCreate" type="submit" class="menu-primary">＋ CREATE NEW DATABASE</button></div>
+ </form>
+</dialog>
 <div id="pixelOverlay" class="pixel-overlay" hidden>
  <section class="pixel-dialog" role="dialog" aria-modal="true" aria-labelledby="pixelTitle">
   <header class="pixel-dialog-header"><strong id="pixelTitle">PIXEL EDITOR / SELECTED PLANE</strong><button id="pixelClose" title="Close editor">×</button></header>
@@ -1400,10 +1414,11 @@ return Object.freeze({FORMAT,PATH,API,DIR,TEMPLATES,validEntry,validateCatalog,r
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./drive-sync.js?v=auto-conflict-safe-20261106"></script>
 <script src="./frame-order.js?v=emotion-reorder-20261106"></script>
+<script src="./database-fork.js?v=emosi-fork-v1"></script>
 <script>
 /* Standalone Emotion Studio. Optional Google Drive cross-device sync, no game integration. */
 (function(){"use strict";
-const U=window.MH2UniversalEmotions,P=window.MH2PlanePixelEditor,F=window.EmotionFrameOrder;
+const U=window.MH2UniversalEmotions,P=window.MH2PlanePixelEditor,F=window.EmotionFrameOrder,DB=window.EmosiDatabase;
 const $=id=>document.getElementById(id),DIR=U.DIR;
 let catalog=null,selected=null,atlas=null,frame=0,direction="se",dirty=false,playing=false,saving=false,editor=null;
 const D=window.EmotionDrive;
