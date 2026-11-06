@@ -18,7 +18,8 @@ button:disabled{opacity:.4}
 button:focus-visible{outline:2px solid #f5b450;outline-offset:2px}
 a{color:inherit}
 [hidden]{display:none!important}
-.laptop{display:grid;grid-template-rows:minmax(0,1fr) 9px minmax(0,1fr);height:100dvh;max-height:100dvh;overflow:hidden}
+.laptop{display:grid;grid-template-rows:minmax(0,1fr) 9px minmax(0,1fr);width:100dvw;height:100dvh;max-height:100dvh;overflow:hidden}
+body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw;max-height:none;transform-origin:top left;transform:rotate(90deg)}
 .display{background:#ece9d8;display:flex;flex-direction:column;min-height:0;overflow:hidden;border:2px solid #183d86}
 .topbar{background:linear-gradient(180deg,#5aafff,#1a70d5 22%,#083f9f 75%,#0b3990);color:white;display:flex;align-items:center;gap:8px;padding:4px 8px;height:36px;flex:none}
 .brand{font-size:13px;font-weight:bold;letter-spacing:.025em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -32,7 +33,7 @@ a{color:inherit}
 .screen-shell{flex:1;position:relative;min-height:0;overflow:hidden;background:#b1b8c2}
 .screen-scroll{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;scrollbar-width:thin}
 .frame-wrap{position:relative;transform-origin:0 0}
-#appFrame{display:block;position:absolute;top:0;left:0;transform-origin:0 0;border:0;background:#fff}
+.embedded-frame{display:block;position:absolute;top:0;left:0;transform-origin:0 0;border:0;background:#fff}
 #cursor{position:absolute;left:50%;top:50%;width:22px;height:27px;pointer-events:none;z-index:6;filter:drop-shadow(1px 2px 1px #101c3290)}
 #cursor svg{width:100%;height:100%}
 .placeholder{position:absolute;inset:0;z-index:4;display:grid;place-items:center;background:#eff3fa;color:#42556e;padding:20px;text-align:center}
@@ -50,6 +51,9 @@ a{color:inherit}
 .controlsbar .spacer{flex:1}
 .controlsbar .mode{border-color:#6e84a4}
 .controlsbar .mode.active{background:#8eace1;color:#0a306f}
+.quick-apps{height:39px;flex:none;display:flex;gap:3px;padding:4px 5px;align-items:stretch;overflow-x:auto;background:#bac9de;border-bottom:1px solid #91a4c2;scrollbar-width:none}
+.quick-apps button{flex:1;min-width:92px;padding:3px 6px;font-size:10px;font-weight:bold}
+.quick-apps button.active{background:#8eace1;color:#102d61;border-color:#42699f}
 .control-area{position:relative;flex:1;min-height:0;overflow:hidden}
 .pad-page{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 50px;gap:7px;padding:7px}
 .pad-main{display:flex;flex-direction:column;min-height:0;gap:6px}
@@ -85,13 +89,14 @@ a{color:inherit}
    <div class="right">
     <button id="zoomOut" title="Perkecil tampilan">−</button><span id="zoomText" aria-label="Zoom">FIT</span>
     <button id="zoomIn" title="Perbesar tampilan">＋</button>
+    <button id="rotate90" title="Putar 90 derajat jika browser tidak mau landscape">↻90°</button>
     <button id="fullscreen" title="Mode layar penuh">⛶</button>
     <button class="close" id="exit" title="Kembali ke Membangun">×</button>
    </div>
   </header>
   <nav class="apps" id="appTabs" aria-label="Pindah aplikasi"></nav>
   <div class="screen-shell" id="screenShell">
-   <div class="screen-scroll" id="screenScroll"><div class="frame-wrap" id="frameWrap"><iframe id="appFrame" title="Aplikasi desktop" referrerpolicy="no-referrer" allow="clipboard-read; clipboard-write; fullscreen"></iframe></div></div>
+   <div class="screen-scroll" id="screenScroll"><div class="frame-wrap" id="frameWrap"><iframe id="appFrame" class="embedded-frame" title="Aplikasi desktop" allow="clipboard-read; clipboard-write; fullscreen"></iframe></div></div>
    <div id="cursor" aria-hidden="true"><svg viewBox="0 0 24 29"><path d="M2 1v24l6-7 4 9 5-3-5-9h9z" fill="#fff" stroke="#162037" stroke-width="2" stroke-linejoin="round"/></svg></div>
    <div class="placeholder" id="placeholder"><div><strong>MEMBANGUN / MINI LAPTOP</strong><span id="placeholderText">Memuat aplikasi desktop...</span><div><a id="externalFallback" href="#" target="_blank" rel="noopener">Buka aplikasi di tab baru</a></div></div></div>
    <div class="toast" id="toast" hidden></div>
@@ -108,6 +113,7 @@ a{color:inherit}
    <button class="small" id="escapeKey" title="Esc">ESC</button>
    <button class="small" id="external" title="Buka aplikasi secara langsung">↗ APP</button>
   </div>
+  <nav id="quickApps" class="quick-apps" aria-label="Buka aplikasi dari layar touchpad"></nav>
   <div class="control-area">
    <div class="pad-page" id="padPage">
     <div class="pad-main">
@@ -147,10 +153,10 @@ const apps=[
 ];
 const params=new URLSearchParams(location.search);
 let selected=apps.find(a=>a.id===params.get('app'))?.id || 'semesta';
-let mode='pad',zoom=1,scale=1,frameWidth=1180,frameHeight=660;
+let mode='pad',zoom=1,scale=1,frameWidth=1180,frameHeight=660,rotated=false;
 let cx=0,cy=0,pressed=false,dragLock=false,dragTarget=null,shift=false,symbols=false,ctrl=false;
 let canBridge=false,lastFocus=null,toastTimer=null,gesture=null,longPressTimer=null,scrollGesture=null;
-const frame=$('appFrame'),shell=$('screenShell'),scroller=$('screenScroll'),cursor=$('cursor');
+let frame=$('appFrame');const liveFrames=new Map(), loadedFrames=new Set(),shell=$('screenShell'),scroller=$('screenScroll'),cursor=$('cursor');
 const getApp=()=>apps.find(a=>a.id===selected);
 const getUrl=(id)=>{const def=apps.find(a=>a.id===id)?.url||'';try{return localStorage.getItem('membangun-link-'+id)||def}catch{return def}};
 function message(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,2100)}
@@ -167,9 +173,11 @@ function layout(){
  frameHeight=Math.max(620,Math.ceil(shellHeight/scale));
  $('frameWrap').style.width=(frameWidth*scale)+'px';
  $('frameWrap').style.height=(frameHeight*scale)+'px';
- frame.style.width=frameWidth+'px';
- frame.style.height=frameHeight+'px';
- frame.style.transform='scale('+scale+')';
+ for(const f of [frame,...liveFrames.values()]){
+  f.style.width=frameWidth+'px';
+  f.style.height=frameHeight+'px';
+  f.style.transform='scale('+scale+')';
+ }
  $('zoomText').textContent=Math.round(zoom*100)+'%';
  if(oldWidth!==frameWidth||cx===0)setCursor(shellWidth*.5,shellHeight*.45);
  else setCursor(cx,cy);
@@ -331,16 +339,39 @@ function setMode(next){
 }
 function setZoom(z){zoom=Math.max(.7,Math.min(1.7,Math.round(z*10)/10));layout();try{localStorage.setItem('membangun-laptop-zoom',String(zoom))}catch{}}
 function setApp(id){
- if(!apps.some(a=>a.id===id))return;
+ const picked=apps.find(a=>a.id===id);if(!picked)return;
  if(selected!==id&&pressed)releaseMouse();
- selected=id;lastFocus=null;canBridge=false;setDragLock(false);
- $('currentApp').textContent=getApp().label+'.EXE';
- $('bridgeStatus').textContent='Memuat aplikasi...';
- $('placeholder').hidden=false;$('placeholderText').textContent='Membuka '+getApp().label+'...';
- const url=getUrl(id);
- $('externalFallback').href=url;
- frame.src=url;
- document.querySelectorAll('#appTabs button').forEach(b=>b.classList.toggle('active',b.dataset.app===id));
+ if(selected!==id)setDragLock(false);
+ selected=id;lastFocus=null;canBridge=false;
+ $('currentApp').textContent=picked.label+'.EXE';
+ const url=getUrl(id);$('externalFallback').href=url;
+ // Each tool has its own persistent embedded viewport. Switching should not reload
+ // or lose unsaved editing state in the other applications.
+ if(!liveFrames.has(id)){
+  let next;
+  if(!liveFrames.size)next=$('appFrame');
+  else{
+   next=document.createElement('iframe');next.className='embedded-frame';
+   next.title=picked.label+'.EXE';next.setAttribute('allow','clipboard-read; clipboard-write; fullscreen');
+   $('frameWrap').appendChild(next);
+  }
+  liveFrames.set(id,next);
+  const appId=id;
+  next.addEventListener('load',()=>{
+   loadedFrames.add(appId);
+   if(selected===appId)onLoad();
+  });
+  next.addEventListener('error',()=>{if(selected===appId){$('bridgeStatus').textContent='Gagal memuat, gunakan ↗ APP';$('placeholderText').textContent='Aplikasi gagal dimuat. Buka di browser eksternal.';$('placeholder').hidden=false}});
+  next.src=url;
+ }
+ for(const [key,f] of liveFrames)f.style.display=key===id?'block':'none';
+ frame=liveFrames.get(id);
+ layout();
+ $('placeholder').hidden=loadedFrames.has(id);
+ $('placeholderText').textContent='Membuka '+picked.label+'...';
+ $('bridgeStatus').textContent=loadedFrames.has(id)?'Siap':'Memuat '+picked.label+'...';
+ document.querySelectorAll('[data-app]').forEach(b=>b.classList.toggle('active',b.dataset.app===id));
+ if(loadedFrames.has(id))onLoad();
  const u=new URL(location.href);u.searchParams.set('app',id);history.replaceState(null,'',u);
  try{localStorage.setItem('membangun-laptop-app',id)}catch{}
 }
@@ -366,7 +397,11 @@ function configure(){
   const m=localStorage.getItem('membangun-laptop-mode');if(m==='keyboard')mode='keyboard';
  }catch{}
  for(const app of apps){
-  const b=document.createElement('button');b.type='button';b.dataset.app=app.id;b.textContent=app.label+'.EXE';b.addEventListener('click',()=>setApp(app.id));$('appTabs').appendChild(b);
+  for(const id of ['appTabs','quickApps']){
+   const b=document.createElement('button');b.type='button';b.dataset.app=app.id;
+   b.textContent=app.label+(id==='appTabs'?'.EXE':'');
+   b.addEventListener('click',()=>setApp(app.id));$(id).appendChild(b);
+  }
  }
  renderKeyboard();setMode(mode);layout();setApp(selected);
 }
@@ -457,8 +492,20 @@ $('copyKey').addEventListener('click',async()=>{
  if(!str){message('Seleksi teks dulu');return}
  try{await navigator.clipboard.writeText(str);message('Teks tersalin')}catch{message('Izin copy ditolak browser')}
 });
-frame.addEventListener('load',onLoad);
-window.addEventListener('resize',layout);
+function setRotation(on){
+ rotated=!!on&&window.innerHeight>window.innerWidth;
+ document.body.classList.toggle('rotated',rotated);
+ $('rotate90').classList.toggle('active',rotated);
+ $('rotate90').title=rotated?'Kembali ke orientasi layar':'Putar tampilan 90 derajat';
+ try{localStorage.setItem('membangun-laptop-rotate90',rotated?'1':'0')}catch{}
+ requestAnimationFrame(()=>{layout();requestAnimationFrame(layout)});
+}
+$('rotate90').addEventListener('click',()=>setRotation(!rotated));
+try{if(localStorage.getItem('membangun-laptop-rotate90')==='1')setRotation(true)}catch{}
+window.addEventListener('resize',()=>{
+ if(rotated&&window.innerWidth>window.innerHeight)setRotation(false);
+ else layout();
+});
 if(window.visualViewport)window.visualViewport.addEventListener('resize',layout);
 document.addEventListener('keydown',e=>{
  if(e.target===$('nativeInput'))return;
