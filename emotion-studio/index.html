@@ -555,6 +555,14 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
  .emotion-create-dialog .create-body{padding:12px}
 }
 
+
+/* EMOSI.EXE desktop maximized canvas: remove old 1680/2400px caps. */
+@media(min-width:751px){
+ html,body{width:100%;min-height:100%;margin:0}
+ .window,.emotion-window{width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box}
+ .emotion-window{min-height:100dvh!important}
+ .emotion-workspace{width:100%;box-sizing:border-box}
+}
 </style></head>
 <body><div class="window emotion-window">
 <header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOSI<em>.EXE</em></b><small>EMOTION DATABASE STUDIO</small></div><div class="title-actions"><span class="led"></span><span id="online">LOCAL LIBRARY</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
@@ -2122,5 +2130,5 @@ function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas
 wire();reload({force:true});
 })();
 </script>
-<script src="./convo-editor.js?v=convo-select-scroll-20261106c"></script>
+<script src="./convo-editor.js?v=convo-inline-fullpage-20261107"></script>
 </body></html>
