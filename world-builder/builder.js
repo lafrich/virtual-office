@@ -1651,7 +1651,7 @@ function updateSelection(){
   $('vehicleFlipDirection').disabled=!traffic.flipDirection(
    traffic.config(cur).direction,agent?.route,agent?.distance);
  }else{
-  $('scale').min='.85';$('scale').max='1.15';
+  $('scale').min='.1';$('scale').max='1.15';
  }
  const dynamic=cur&&automaticType(cur.type);
  $('motionControls').hidden=!dynamic;
@@ -2330,11 +2330,11 @@ $('rotateL').onclick=()=>{if(item()&&!actorType(item().type)&&item().type!=='veh
 $('rotateR').onclick=()=>{if(item()&&!actorType(item().type)&&item().type!=='vehicle')edit(o=>{o.rotation=(o.rotation+90)%360;});};
 $('scaleDown').onclick=()=>{
  if(item()?.type==='vehicle')editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(o.scale-.05);});
- else if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale-.05),.85,1.15);});
+ else if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale-.05),.1,1.15);});
 };
 $('scaleUp').onclick=()=>{
  if(item()?.type==='vehicle')editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(o.scale+.05);});
- else if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale+.05),.85,1.15);});
+ else if(item()&&!actorType(item().type))edit(o=>{o.scale=clamp(round(o.scale+.05),.1,1.15);});
 };
 $('duplicate').onclick=duplicate;$('delete').onclick=remove;
 for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('change',()=>{
@@ -2345,7 +2345,7 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
  if(prop==='scale'&&item().type==='vehicle'){
   editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(v);});return;
  }
- edit(o=>{o[prop]=prop==='scale'?clamp(v,.85,1.15):prop==='rotation'?((v%360)+360)%360:clamp(v,-1000000,1000000);});
+ edit(o=>{o[prop]=prop==='scale'?clamp(v,.1,1.15):prop==='rotation'?((v%360)+360)%360:clamp(v,-1000000,1000000);});
 });
 // Vehicle size and art offsets do not affect road route, footprint, or
 // existing instance motion. Position C/X and R/Z above remains the spawn.
