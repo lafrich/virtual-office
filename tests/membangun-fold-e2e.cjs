@@ -47,7 +47,8 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('#keyboardPage').isVisible(),true);
   assert.equal(await page.locator('#touchpad').isVisible(),true);
   assert.equal(await page.locator('#keyboard .key-row').count(),5);
-  assert.equal(await page.locator('#leftClick,#rightClick').count(),2);
+  assert.equal(await page.locator('#leftClick,#rightClick').count(),0);
+  assert.equal(await page.locator('#holdClick').count(),1);
   const panelHeight=await page.locator('.control-area').evaluate(el=>el.offsetHeight);
   const keyboardHeight=await page.locator('#keyboardPage').evaluate(el=>el.offsetHeight);
   console.log('KEYBOARD_RATIO',keyboardHeight,panelHeight,(keyboardHeight/panelHeight).toFixed(2));
@@ -136,48 +137,59 @@ const assert=require('node:assert/strict');
   assert.ok(pinchState.inWheels.every(w=>w.deltaY>0&&w.ctrlKey&&w.target==='world'),
      'Pinch-in must send Semesta zoom-out wheels');
 
-  // Single tap must be a left click. Two quick taps must be contextmenu only.
-  const tapState=await page.evaluate(async()=>{
+  // Double tap holds mouse down, and later moving a finger must deliver drag
+  // events to Semesta canvas; double tap again releases without right-click.
+  const holdState=await page.evaluate(async()=>{
    const doc=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none').contentDocument;
+   const world=doc.getElementById('world');
+   const pan=doc.getElementById('panMode');
+   const hold=document.getElementById('holdClick');
    const pad=document.getElementById('touchpad');
-   let left=0,right=0;
-   const onLeft=()=>left++,onRight=e=>{e.preventDefault();right++};
-   doc.addEventListener('click',onLeft,true);
-   doc.addEventListener('contextmenu',onRight,true);
-   const send=(type)=>{
-    const t=new Touch({identifier:4,target:pad,clientX:110,clientY:100});
+   const events=[];
+   const handlers={};
+   for(const type of ['pointerdown','pointermove','pointerup','click','contextmenu']){
+     handlers[type]=e=>events.push({type,buttons:e.buttons,button:e.button,target:e.target.id,
+        pointerId:e.pointerId||0,prevented:e.defaultPrevented});
+     world.addEventListener(type,handlers[type],true);
+   }
+   const send=(type,x=110,y=100)=>{
+    const t=new Touch({identifier:4,target:pad,clientX:x,clientY:y});
     pad.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,
       touches:type==='touchend'?[]:[t],targetTouches:type==='touchend'?[]:[t],changedTouches:[t]}));
    };
-   send('touchstart');send('touchend');
-   await new Promise(ok=>setTimeout(ok,85));
-   send('touchstart');send('touchend');
-   await new Promise(ok=>setTimeout(ok,410));
-   const result={left,right};doc.removeEventListener('click',onLeft,true);doc.removeEventListener('contextmenu',onRight,true);return result;
+   const tap=()=>{send('touchstart');send('touchend')};
+   const beforePan=pan.getAttribute('aria-pressed');
+   tap();await new Promise(ok=>setTimeout(ok,85));tap();
+   await new Promise(ok=>setTimeout(ok,100));
+   const afterLock=hold.getAttribute('aria-pressed');
+   const duringPan=pan.getAttribute('aria-pressed');
+   send('touchstart',110,100);send('touchmove',150,145);send('touchmove',190,160);send('touchend',190,160);
+   const afterDrag=hold.getAttribute('aria-pressed');
+   tap();await new Promise(ok=>setTimeout(ok,85));tap();
+   await new Promise(ok=>setTimeout(ok,90));
+   const afterUnlock=hold.getAttribute('aria-pressed');
+   const afterPan=pan.getAttribute('aria-pressed');
+   const afterDouble=[...events];
+   hold.click();const buttonOn=hold.getAttribute('aria-pressed');
+   hold.click();const buttonOff=hold.getAttribute('aria-pressed');
+   const result={beforePan,duringPan,afterPan,afterLock,afterDrag,afterUnlock,
+      buttonOn,buttonOff,events:afterDouble,extraEvents:events.slice(afterDouble.length)};
+   for(const [type,handler] of Object.entries(handlers))world.removeEventListener(type,handler,true);
+   return result;
   });
-  console.log('DOUBLE_TAP_RIGHT',tapState);
-  assert.equal(tapState.right,1,'Double tap should trigger one contextmenu event');
-  assert.equal(tapState.left,0,'Double tap should not trigger a left click');
-  // Dedicated mouse buttons must be adjacent, not at opposite sides of the pad.
-  const buttonState=await page.evaluate(()=>{
-   const left=document.getElementById('leftClick'),right=document.getElementById('rightClick');
-   const sameGroup=left.parentNode===right.parentNode;
-   const gap=right.offsetLeft-(left.offsetLeft+left.offsetWidth);
-   const doc=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none').contentDocument;
-   let clicks=0,contexts=0;
-   const lc=()=>clicks++,rc=e=>{e.preventDefault();contexts++};
-   doc.addEventListener('click',lc,true);
-   doc.addEventListener('contextmenu',rc,true);
-   left.click();right.click();
-   doc.removeEventListener('click',lc,true);
-   doc.removeEventListener('contextmenu',rc,true);
-   return {sameGroup,gap,clicks,contexts};
-  });
-  console.log('ADJACENT_MOUSE_BUTTONS',buttonState);
-  assert.equal(buttonState.sameGroup,true);
-  assert.ok(buttonState.gap>=0&&buttonState.gap<=12,'Mouse buttons must be side by side');
-  assert.equal(buttonState.clicks,1,'Left button should click inside the app');
-  assert.equal(buttonState.contexts,1,'Right button should trigger context menu inside app');
+  console.log('DOUBLE_TAP_HOLD_PAN',holdState);
+  assert.equal(holdState.afterLock,'true','Double tap must lock left mouse down');
+  assert.equal(holdState.afterDrag,'true','Dragging on touchpad keeps HOLD locked');
+  assert.equal(holdState.afterUnlock,'false','Another double tap releases HOLD');
+  assert.equal(holdState.duringPan,'true','Semesta Pan tool must be activated while HOLD is locked');
+  assert.equal(holdState.afterPan,holdState.beforePan,'Previous Semesta mode should be restored');
+  assert.ok(holdState.events.some(e=>e.type==='pointerdown'&&e.target==='world'&&e.buttons===1),'Semesta receives pointerdown');
+  assert.ok(holdState.events.some(e=>e.type==='pointermove'&&e.target==='world'&&e.buttons===1),'Semesta receives held pointermove');
+  assert.ok(holdState.events.some(e=>e.type==='pointerup'&&e.target==='world'),'Semesta receives pointerup');
+  assert.ok(!holdState.events.some(e=>e.type==='contextmenu'),'Double tap is no longer right click');
+  assert.equal(holdState.buttonOn,'true','HOLD button can also lock');
+  assert.equal(holdState.buttonOff,'false','HOLD button can also unlock');
+
   await page.screenshot({path:'membangun-laptop-rotated.png'});
   await page.screenshot({path:'membangun-laptop-keyboard.png'});
   console.log('APP_SWITCH_AND_ROTATE_OK');
