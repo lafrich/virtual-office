@@ -9,6 +9,7 @@ on:
       - "membangun/**"
       - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/faceless-v6b-cross-app.test.cjs"
       - "tests/semesta-base-human-gameplay.test.cjs"
       - "tests/semesta-custom-wardrobe-depth.test.cjs"
       - "tests/jiwa-base-human-gameplay.test.cjs"
@@ -42,6 +43,7 @@ on:
       - "membangun/**"
       - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/faceless-v6b-cross-app.test.cjs"
       - "tests/semesta-base-human-gameplay.test.cjs"
       - "tests/semesta-custom-wardrobe-depth.test.cjs"
       - "tests/jiwa-base-human-gameplay.test.cjs"
@@ -103,6 +105,8 @@ jobs:
           node tests/semesta-custom-wardrobe-depth.test.cjs
           node tests/semesta-base-human-gameplay.test.cjs
           node tests/semesta-mahluk-sync.test.cjs
+          node --test tests/faceless-v6b-cross-app.test.cjs
+          node --check jiwa/character-link.js
           node tests/mahluk-action-frame-sync.test.cjs
           node --test tests/mahluk-universal-hygiene.test.cjs
           node tests/mahluk-template-runtime.test.cjs
