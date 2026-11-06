@@ -83,6 +83,28 @@ const assert=require('node:assert/strict');
   console.log('TWO_FINGER_SCROLL',scrollState);
   assert.ok(scrollState.scrollTop>0,'Two-finger touchpad swipe must scroll app panel');
   assert.ok(scrollState.wheelCount>0,'Wheel must be dispatched inside iframe');
+  // Single tap must be a left click. Two quick taps must be contextmenu only.
+  const tapState=await page.evaluate(async()=>{
+   const doc=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none').contentDocument;
+   const pad=document.getElementById('touchpad');
+   let left=0,right=0;
+   const onLeft=()=>left++,onRight=e=>{e.preventDefault();right++};
+   doc.addEventListener('click',onLeft,true);
+   doc.addEventListener('contextmenu',onRight,true);
+   const send=(type)=>{
+    const t=new Touch({identifier:4,target:pad,clientX:110,clientY:100});
+    pad.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,
+      touches:type==='touchend'?[]:[t],targetTouches:type==='touchend'?[]:[t],changedTouches:[t]}));
+   };
+   send('touchstart');send('touchend');
+   await new Promise(ok=>setTimeout(ok,85));
+   send('touchstart');send('touchend');
+   await new Promise(ok=>setTimeout(ok,410));
+   const result={left,right};doc.removeEventListener('click',onLeft,true);doc.removeEventListener('contextmenu',onRight,true);return result;
+  });
+  console.log('DOUBLE_TAP_RIGHT',tapState);
+  assert.equal(tapState.right,1,'Double tap should trigger one contextmenu event');
+  assert.equal(tapState.left,0,'Double tap should not trigger a left click');
   await page.screenshot({path:'membangun-laptop-rotated.png'});
   await page.screenshot({path:'membangun-laptop-keyboard.png'});
   console.log('APP_SWITCH_AND_ROTATE_OK');
