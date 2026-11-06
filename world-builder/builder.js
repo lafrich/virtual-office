@@ -1577,6 +1577,7 @@ function updateSelection(){
    (cur?.type==='vehicle'&&k==='rotation');
  }
  $('tools').querySelectorAll('button').forEach(b=>b.disabled=!cur);
+ $('replaceAsset').disabled=!cur||actorType(cur.type)||automaticType(cur.type);
  for(const id of ['rotateL','rotateR','scaleDown','scaleUp'])
    $(id).disabled=!cur||actorType(cur.type)||(cur.type==='vehicle'&&id.startsWith('rotate'));
  // Vehicle artwork is camera-facing: regular 90° object rotation cannot
@@ -2630,6 +2631,35 @@ function setAssetViewMode(view){
 $('assetViewList').onclick=()=>setAssetViewMode('list');
 $('assetViewGrid').onclick=()=>setAssetViewMode('grid');
 setAssetViewMode('list');
+// Change only the selected instance, not every object sharing its source art.
+// Preserve world coordinates, rotation, scale and stable ID for Jiwa bindings.
+function replacePlacedAsset(id,file){
+ const old=documentMap.objects.find(o=>o.id===id),spec=assetByName.get(file);
+ if(!old||!spec||spec.published===false){tell('Asset pengganti tidak tersedia');return false;}
+ if(actorType(old.type)||automaticType(old.type)){
+  tell('Replace khusus objek statis; NPC dan kendaraan menggunakan sistem terpisah');return false;
+ }
+ const previous=clone(old);
+ Object.assign(old,{type:'sprite',asset:file,name:spec.label,collision:spec.collision!==false,replaceable:true,
+  w:undefined,d:undefined,h:undefined,sizeClass:undefined,width:spec.width,height:spec.height,
+  interactive:spec.interactive===true,enterable:spec.enterable===true,
+  entrance:spec.entrance?clone(spec.entrance):null,
+  interior:spec.interior?clone(spec.interior):null,
+  actionSlots:spec.actionSlots?clone(spec.actionSlots):[],
+  interactions:spec.interactions?clone(spec.interactions):[],
+  entranceFacing:spec.entranceFacing||'',npcProfiles:undefined,npcPassengers:undefined,
+  npcDisabled:undefined,npcAnimation:undefined});
+ style.normalize(old,assetByName);schema.normalize(old,assetByName,style);
+ const collision=style.reason(old,documentMap.objects,documentMap.map,assetByName);
+ if(collision){
+  Object.keys(old).forEach(k=>delete old[k]);Object.assign(old,previous);
+  tell('Replace gagal: '+collision);updateSelection();return false;
+ }
+ undoStack.push(JSON.stringify({...documentMap,objects:documentMap.objects.map(o=>o.id===id?previous:o)}));
+ redoStack.length=0;rebuild();saved();select(id);
+ tell('Replaced '+previous.name+' → '+spec.label+' (Undo tersedia)');
+ return true;
+}
 function renderAssetList(){
  const q=$('searchAsset').value.trim().toLowerCase(),cat=$('assetCategory').value;
  const assets=[
@@ -2737,22 +2767,7 @@ function renderAssetList(){
     $('terrainLabel').textContent=activeTerrain.toUpperCase();
     setMode('paint');tell('Paint '+activeTerrain+' · drag on canvas');
    }else if(replaceTarget&&a.tag.startsWith('sprite:')){
-    const idToReplace=replaceTarget,old=documentMap.objects.find(o=>o.id===idToReplace);
-    const file=a.tag.slice(7),spec=assetByName.get(file);
-    if(old&&spec){
-     const previous=clone(old);
-     Object.assign(old,{type:'sprite',asset:file,name:spec.label,collision:spec.collision!==false,replaceable:true,
-      w:undefined,d:undefined,h:undefined,sizeClass:undefined,width:spec.width,height:spec.height,
-      interactive:spec.interactive===true,enterable:spec.enterable===true,
-      entrance:spec.entrance?clone(spec.entrance):null,
-      interior:spec.interior?clone(spec.interior):null,
-      actionSlots:spec.actionSlots?clone(spec.actionSlots):[],
-      interactions:spec.interactions||[],entranceFacing:spec.entranceFacing||''});
-     style.normalize(old,assetByName);schema.normalize(old,assetByName,style);
-     const collision=style.reason(old,documentMap.objects,documentMap.map,assetByName);
-     if(collision){Object.assign(old,previous);tell('Replace gagal: '+collision);}
-     else {undoStack.push(JSON.stringify({...documentMap,objects:documentMap.objects.map(o=>o.id===idToReplace?previous:o)}));rebuild();saved();tell('Asset replaced');}
-    }
+    replacePlacedAsset(replaceTarget,a.tag.slice(7));
     replaceTarget=null;setMode('select');
    }else{
     placementType=a.tag;setMode('place');placementType=a.tag;
@@ -2955,13 +2970,14 @@ for(const [input,field] of [['buildingW','w'],['buildingD','d'],['buildingH','h'
 }
 $('replaceAsset').onclick=()=>{
  const current=item();
- if(!current||!['building','shop'].includes(current.type))return;
+ if(!current||actorType(current.type)||automaticType(current.type))return;
  replaceTarget=current.id;
- $('assetCategory').value='building';$('searchAsset').value='';
+ $('assetCategory').value=['building','shop'].includes(current.type)?'building':'all';
+ $('searchAsset').value='';
  renderAssetList();
  $('assetsPanel').classList.add('mobile-open');
  $('inspector').classList.remove('mobile-open');
- tell('Pilih asset dari BUILDINGS untuk mengganti placeholder');
+ tell('REPLACE '+current.name+' · pilih asset pengganti (posisi dan ID tetap)');
 };
 $('exportShortcut').onclick=()=>$('export').click();
 renderAssetList();
@@ -2973,6 +2989,14 @@ const assetLibrary=window.VLSemestaAssetLibrary?.mount({
  thumbnail:spec=>assetThumbnails?.sourceFor?.(spec)||null,
  vehicleImage:(id,dir)=>trafficArt?.vehiclePreviewAsync?.(id,dir)||null,
  characterImage:(id,dir)=>window.VLCharacterRig?.characterPreview?.(id,dir)||null,
+ replace:spec=>{
+  const current=item();
+  if(!current||!assetByName.has(spec.file)||spec.published===false)return false;
+  const success=replacePlacedAsset(current.id,spec.file);
+  if(success){replaceTarget=null;setMode('select');closeMobileSheets();}
+  return success;
+ },
+ replaceTarget:()=>{const o=item();return o&&!actorType(o.type)&&!automaticType(o.type)?o:null;},
  place:spec=>{
   if(!assetByName.has(spec.file)||spec.published===false)return false;
   placementType='sprite:'+spec.file;
