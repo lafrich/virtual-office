@@ -1,0 +1,32 @@
+name: Emotion Studio — Cross View Copy Pixels
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'emotion-studio/index.html'
+      - 'tests/emotion-copy-view.browser.cjs'
+      - '.github/workflows/emotion-copy-view.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chrome driver and PNG decoder
+        run: npm install --no-save playwright@1.56.1 pngjs@7.0.0
+      - name: Serve Emotion Studio
+        run: python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/emotion-copy-view.log 2>&1 &
+      - name: Verify selection, cross-view mirror, drag, save and reload
+        run: node virtual-office/tests/emotion-copy-view.browser.cjs
