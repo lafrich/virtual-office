@@ -549,9 +549,9 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
      <button data-pixel-swatch="#5b718d" style="--swatch:#5b718d" title="Blue"></button>
      <button data-pixel-swatch="#b28ec3" style="--swatch:#b28ec3" title="Lilac"></button>
     </div>
-    <label class="check"><input type="checkbox" id="pixelSync" checked> SYNC BRUSH · ALL 4 VIEWS</label>
+    <label class="check"><input type="checkbox" id="pixelSync"> SYNC BRUSH · ALL 4 VIEWS (OPTIONAL)</label>
     <button id="pixelSyncExisting" type="button" title="Transfer this view\u0027s existing pixel changes to other camera directions while preserving each native silhouette">↻ SYNC CURRENT EDITS TO 4 VIEWS</button>
-    <p class="hint">Brush / eraser edits map to all camera directions while retaining each native silhouette. Disable for angle-specific details.</p>
+    <p class="hint">DEFAULT: EDIT ACTIVE VIEW ONLY. SE, SW, NE &amp; NW stay independent. Turn on Sync Brush only if you intentionally want pencil, eraser and fill edits to affect other views.</p>
     <div class="pixel-reference-controls">
      <div class="sectionhead">VIEW OVERLAY / REDRAW GUIDE</div>
      <label>REFERENCE PLANE
@@ -1035,7 +1035,11 @@ window.EMOTION_STUDIO_STANDALONE=true;
    }));
    ctx.putImageData(original,0,targetDir*H);
    dir=targetDir;els.dir.value=DIR[dir];ref=refs?.[DIR[dir]]||ref;
-   if(switching&&fromView>=0)els.refView.value=DIR[fromView];
+   // A copy-to-view must never leave a previously enabled all-views brush
+   // active: subsequent drawing on the pasted side would alter the original.
+   if(switching)els.sync.checked=false;
+   // Ghost/reference overlays are purely optional; do not enable them here.
+   // Otherwise the source can appear painted in the destination canvas.
    selection={x:dx,y:dy,w:Math.min(stamp.w,W-dx),h:Math.min(stamp.h,H-dy)};
    // Keep the unmodified destination beneath pasted pixels while adjusting
    // their position. Normal Move Pixels would erase underlying target art.
@@ -1104,7 +1108,8 @@ window.EMOTION_STUDIO_STANDALONE=true;
   els.dir.onchange=()=>{
    dir=DIR.indexOf(els.dir.value);ref=refs?.[DIR[dir]]||ref;
    selection=null;moveStart=null;floatingPaste=null;
-   // Default destination is the opposite angle for fast copy/mirror work.
+   // Changing angles always re-enters isolated view mode.
+   els.sync.checked=false;
    els.copyTarget.value=DIR[dir^1];draw();updateHistory();
   };
   const updateRef=()=>{
@@ -1114,7 +1119,12 @@ window.EMOTION_STUDIO_STANDALONE=true;
    el.addEventListener(el===els.refOpacity?"input":"change",updateRef);
   els.onion.onchange=draw;els.grid.onchange=draw;els.gridType.onchange=draw;
   els.headOpacity.oninput=()=>{els.headOpacityLabel.textContent=els.headOpacity.value+"%";draw()};
-  els.sync.onchange=updateHistory;
+  els.sync.onchange=()=>{
+   updateHistory();
+   els.status.textContent=els.sync.checked?
+    "WARNING · SYNC ON: DRAWING WILL ALSO CHANGE OTHER VIEWS · UNCHECK FOR INDEPENDENT EDITS":
+    "VIEW-ONLY EDITING · OTHER DIRECTIONS ARE PROTECTED";
+  };
   els.syncExisting.onclick=()=>{
    if(!source)return;
    const native=document.createElement("canvas");native.width=W;native.height=H*4;
@@ -1302,7 +1312,8 @@ window.EMOTION_STUDIO_STANDALONE=true;
    bone=id;dir=Math.max(0,DIR.indexOf(direction));source=originalAtlas||null;
    refs=referenceImages||null;ref=refs?.[DIR[dir]]||referenceImage||null;
    history=[];redo=[];dirty=false;active=null;selection=null;moveStart=null;floatingPaste=null;
-   els.refView.value=dir===0?"off":"se";
+   els.sync.checked=false; // Always start every edit in isolated-view mode.
+   els.refView.value="off"; // Reference ghost is opt-in, not actual pixels.
    els.refOpacity.value="40";els.refOpacityLabel.textContent="40%";
    els.refFlip.checked=true;els.refX.value="0";els.refY.value="0";
    ctx.clearRect(0,0,W,H*4);
