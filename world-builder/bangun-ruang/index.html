@@ -1106,6 +1106,8 @@ window.addEventListener('focus',()=>scaleController?.refreshProfiles?.(false));
 <label>GOOGLE OAUTH WEB CLIENT ID <input id="mbCloudClient" spellcheck="false" autocomplete="off" placeholder="Client ID"></label>
 <div class="mb-cloud-actions"><button id="mbCloudConnect" type="button">☁ CONNECT GOOGLE DRIVE</button><button id="mbCloudDisconnect" type="button">DISCONNECT</button></div>
 <div class="mb-cloud-actions"><button id="mbCloudSave" type="button">↑ SAVE CURRENT TO DRIVE</button><button id="mbCloudBackup" type="button">↑ BACKUP LOCAL LIBRARY</button></div>
+<div class="mb-cloud-actions"><button id="mbCloudAssetBackup" type="button">☁ SAVE ALL ASSET LIBRARY</button><button id="mbCloudAssetRestore" type="button">↓ RESTORE ASSET LIBRARY</button></div>
+<p class="mb-cloud-note">Includes already-published furniture, interior room templates, exterior references and every saved building/Pixel Creator PNG. Built-in sources are indexed for regeneration; custom artwork is copied in full.</p>
 <label>CLOUD PROJECTS <select id="mbCloudFiles" size="5" aria-label="Saved Google Drive projects"></select></label>
 <div class="mb-cloud-actions"><button id="mbCloudRefresh" type="button">↻ REFRESH DRIVE</button><button id="mbCloudLoad" type="button">↓ OPEN SELECTED FROM DRIVE</button></div>
 <output id="mbCloudStatus" role="status">NOT CONNECTED · Login through Google required.</output>
