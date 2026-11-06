@@ -480,13 +480,13 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 <label>ANIMATION FPS<input id="fps" type="number" min="1" max="30" value="6"></label>
 <div class="small-note">RGBA frame atlas: 64 × frame count wide, 448 px high. Each column contains SE, SW, NE and NW.</div>
 <div class="sectionhead">GOOGLE DRIVE / CROSS-DEVICE SYNC</div>
- <p class="hint">Simpan emosi ke Google Drive agar bisa dibuka dari PC dan HP. Sign in dilakukan langsung oleh Google, bukan GitHub token.</p>
+ <p class="hint">AUTO SYNC: Setelah Connect Google, emosi dari Drive otomatis masuk library. Edit pixel/frame/nama lalu diamkan sebentar—tersimpan otomatis secara lokal dan ke Drive. Versi konflik disimpan sebagai salinan lokal terpisah, bukan ditimpa.</p>
  <label>GOOGLE OAUTH WEB CLIENT ID<input id="driveClientId" type="text" autocomplete="off" spellcheck="false" placeholder="123456789-xxxx.apps.googleusercontent.com"></label>
  <button id="driveConfigure" type="button">⚙ SAVE CLIENT ID</button>
  <button id="driveConnect" type="button">☁ CONNECT GOOGLE DRIVE</button>
  <span id="driveLabel" class="auth-label">NOT CONNECTED · GOOGLE LOGIN REQUIRED</span>
- <button id="driveRefresh" type="button">↻ LOAD FROM GOOGLE DRIVE</button>
- <button class="save" id="driveSave" type="button">☁ SAVE TO GOOGLE DRIVE</button>
+ <button id="driveRefresh" type="button">↻ REFRESH DRIVE NOW</button>
+ <button class="save" id="driveSave" type="button">☁ SYNC NOW (OPTIONAL)</button>
  <a id="driveFolder" href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="noopener noreferrer">OPEN MY GOOGLE DRIVE</a>
  <div class="small-note">Setup awal: Google Cloud → enable Google Drive API → OAuth Web Client ID, authorized JavaScript origin <code>https://lafrich.github.io</code>. Jangan masukkan Client Secret. Drive API scope: drive.file (file yang dibuat aplikasi saja).</div>
  <div class="sectionhead">LOCAL / OFFLINE BACKUP</div>
@@ -1561,7 +1561,7 @@ function removeFrame(){if(selected.frames<=1){status("ONE FRAME MUST REMAIN",tru
  atlas=next;selected.frames--;frame=Math.min(frame,selected.frames-1);mark()}
 async function applyFrame(png){const im=await new Promise((resolve,reject)=>{const x=new Image();x.onload=()=>resolve(x);x.onerror=()=>reject(Error("Frame PNG invalid"));x.src=png});
  if(im.width!==64||im.height!==448)throw Error("Frame must be 64×448");
- const ctx=atlas.getContext("2d");ctx.clearRect(frame*64,0,64,448);ctx.drawImage(im,frame*64,0);mark();status("FRAME "+(frame+1)+" APPLIED · CLICK SAVE EMOTION TO KEEP")}
+ const ctx=atlas.getContext("2d");ctx.clearRect(frame*64,0,64,448);ctx.drawImage(im,frame*64,0);mark();status("FRAME "+(frame+1)+" APPLIED · AUTO SAVE PENDING")}
 function openEditor(){if(!atlas)return;const img=stageImage();
  $("pixelOnion").checked=$("showMaleGuide").checked;
  $("pixelMaleOpacity").value=$("maleGuideOpacity").value;
