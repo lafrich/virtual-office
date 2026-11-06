@@ -49,6 +49,11 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
 #contextEditor .card h4{margin:14px 0 8px;color:#2a5879;font:700 11px "Courier New",monospace}
 #contextEditor .controls{margin:8px 0}#contextEditor textarea{font-size:11px;resize:vertical}
 @media(max-width:520px){.context-grid{grid-template-columns:1fr}.context-row{grid-template-columns:1fr 1fr 30px}.tabs button{min-width:0;flex:1;padding:6px 4px}}
+
+.jiwa-actor-picker{display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:12px;align-items:start}
+.jiwa-actor-picker canvas{width:90px;aspect-ratio:64 / 112;height:auto;background:repeating-conic-gradient(#e8eef3 0 25%,#cdd8e6 0 50%) 0 0/16px 16px;image-rendering:pixelated;border:1px solid #93a9bb}
+.jiwa-actor-picker button{font-size:11px}
+@media(max-width:480px){.jiwa-actor-picker{grid-template-columns:minmax(0,1fr) 75px}.jiwa-actor-picker canvas{width:75px}}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -75,6 +80,16 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
     <div class="card"><h3>MECHANICS REGISTRY</h3><p>Rules menggunakan <b>WHEN → IF → THEN</b>. Template reusable dipakai sebagai default, sementara setiap objek Semesta bisa mempunyai override masing-masing.</p><div id="registryInfo" class="subtle"></div></div>
    </div></div>
    <div id="testView" class="view" hidden><div class="viewport-scroll">
+    <div class="card"><h3>CHARACTER ROOT / MAHLUK HIDUP 2</h3>
+     <p class="subtle">Pilih karakter untuk preview Play Test. Referensi V6B ini sama dengan yang dibaca Semesta dan Bangun Ruang. Jiwa tidak mengubah pixel, rig, atau aturan game saat kamu memilihnya.</p>
+     <div class="jiwa-actor-picker">
+      <div><label>CHARACTER ROOT (SHARED STORAGE)<select id="jiwaActor"><option value="">NO CHARACTER / TEST SYSTEM ONLY</option></select></label>
+       <button id="jiwaSyncActors" type="button">↻ REFRESH MAHLUK 2</button>
+       <p class="subtle" id="jiwaActorStatus">Waiting for character roots...</p>
+      </div>
+      <canvas id="jiwaActorPreview" width="128" height="224" aria-label="Pixel character root SE-direction preview"></canvas>
+     </div>
+    </div>
     <div class="card"><h3>PLAY TEST — ISOLATED SANDBOX</h3><p class="subtle">Menguji conditions, ekonomi, inventory, dan needs. Tidak mengubah akun/multiplayer.</p><div class="stats-grid" id="testStats"></div><div class="controls" style="margin-top:10px"><button id="runSelected" class="primary">▶ RUN SELECTED ACTION</button><button id="resetTest">↻ RESET TEST</button></div></div>
     <div class="card"><h3>EVENT LOG</h3><div id="testLog" role="log" aria-live="polite">Play Test ready.</div></div>
    </div></div>
@@ -106,5 +121,6 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
 <script src="/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1"></script>
 <script src="./foundation-engine.js"></script>
 <script src="./jiwa.js"></script>
+<script src="./character-link.js?v=faceless-nude-v6b-v1"></script>
 <script src="./context-editor.js"></script>
 </body></html>
