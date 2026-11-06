@@ -1,0 +1,98 @@
+name: Bangun Ruang UI — Generate and Drag Smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'world-builder/bangun-ruang/index.html'
+      - 'world-builder/bangun-ruang/studio-interior-ui.js'
+      - 'world-builder/bangun-ruang/procedural-generator.js'
+      - '.github/workflows/bangun-ruang-ui-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser driver
+        run: npm install --no-save playwright@1.56.1
+      - name: Start same-origin static app server
+        run: python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/bangun-generator-smoke.log 2>&1 &
+      - name: Open Rich generator and drag editable interior object
+        run: |
+          node <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+           const browser=await chromium.launch({headless:true,channel:'chrome',
+             args:['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader']});
+           try{
+            const page=await browser.newPage({viewport:{width:1450,height:980}});
+            const failures=[];
+            page.on('pageerror',e=>failures.push(e.message));
+            await page.goto('http://127.0.0.1:8091/virtual-office/world-builder/bangun-ruang/',
+              {waitUntil:'domcontentloaded',timeout:90000});
+            await page.waitForFunction(()=>!!window.VLBangunGenerator&&!!window.VLStudioInteriors,null,{timeout:60000});
+            await page.locator('#openBuildingGenerator').click();
+            await page.locator('#brgType').selectOption('ruko');
+            await page.locator('#brgW').fill('10');
+            await page.locator('#brgD').fill('10');
+            await page.locator('#brgSeed').fill('53');
+            await page.locator('#brgDetail').selectOption('rich');
+            await page.locator('#brgAfter').selectOption('interior');
+            await page.locator('#brgCreate').click();
+            await page.waitForFunction(()=>!document.getElementById('brGenDialog').open,null,{timeout:45000});
+            const level=await page.locator('#detailLevel').inputValue();
+            if(level!=='rich')throw Error('Rich detail not handed off: '+level);
+            if(await page.locator('#interiorCanvas').isHidden())throw Error('Interior not opened after generation');
+            const cards=await page.locator('#interiorItemList button').count();
+            if(!cards)throw Error('Generated building interior template has no furniture');
+            await page.locator('#interiorViewPlan').click();
+            await page.locator('#interiorItemList button').first().click();
+            const first=async()=>({
+             c:Number(await page.locator('#interiorItemC').inputValue()),
+             r:Number(await page.locator('#interiorItemR').inputValue())
+            });
+            const start=await first();
+            const canvas=page.locator('#interiorCanvas');
+            const box=await canvas.boundingBox();
+            const native=await canvas.evaluate(c=>({w:c.width,h:c.height}));
+            if(!box||!native.w||!native.h)throw Error('Interior canvas not measurable');
+            const pt=(c,r)=>({
+             x:box.x+(c+.5)*28*box.width/native.w,
+             y:box.y+(r+.5)*28*box.height/native.h
+            });
+            const from=pt(start.c,start.r);
+            let moved=null;
+            for(const [dc,dr] of [[4,0],[0,4],[-3,0],[0,-3],[2,2],[-2,-2]]){
+             const to=pt(start.c+dc,start.r+dr);
+             await page.mouse.move(from.x,from.y);
+             await page.mouse.down();
+             await page.mouse.move(to.x,to.y,{steps:6});
+             await page.mouse.up();
+             moved=await first();
+             if(moved.c!==start.c||moved.r!==start.r)break;
+            }
+            if(moved.c===start.c&&moved.r===start.r)throw Error(
+             'Furniture cannot be moved via direct canvas drag '+JSON.stringify({start,moved}));
+            const undo=page.locator('#actionUndo');
+            if(await undo.isDisabled())throw Error('Direct drag did not record undo');
+            await undo.click();
+            const undone=await first();
+            if(undone.c!==start.c||undone.r!==start.r)throw Error(
+             'Undo did not restore original tile '+JSON.stringify({start,undone}));
+            if(failures.length)throw Error('Browser page errors: '+JSON.stringify(failures));
+            console.log(JSON.stringify({result:'PASS',detailLevel:level,interiorObjects:cards,start,moved,undone}));
+           }finally{await browser.close();}
+          })().catch(error=>{console.error(error.stack||error);process.exit(1)});
+          JS
