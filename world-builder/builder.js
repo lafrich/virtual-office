@@ -3305,6 +3305,28 @@ function loadReferencePreset(){
  }catch(error){tell('Reference City gagal: '+error.message);}
 }
 $('referenceCity').onclick=loadReferencePreset;
+async function loadJakartaCity(){
+ if(!window.VLJakartaCity||!window.VLCityDrafts){tell('Jakarta preset belum tersedia');return;}
+ if(!confirm('Create Jakarta City as a NEW saved city? Current unsaved canvas will be replaced. Save it first if needed.'))return;
+ try{
+  const jakarta=window.VLJakartaCity.create(defaultSeed,assetByName,style,schema);
+  const upgraded=window.VLKebonSirihStyle?.upgrade(jakarta,assetCatalog)?.map||jakarta;
+  const fresh=sanitize(upgraded);
+  fresh.map.name='Jakarta City';
+  const record=await window.VLCityDrafts.save({id:null,name:'Jakarta City',document:clone(fresh)});
+  if(cameraFollowId)leaveCharacterCamera(false);
+  undoPoint();documentMap=fresh;restoreCityClock();selectedId=null;
+  activeDraftId=record.id;draftDirty=false;
+  try{localStorage.setItem(ACTIVE_DRAFT_KEY,activeDraftId);}catch{}
+  closeMobileSheets();setMode('select');
+  rebuild();rebuildTerrain();resetCamera();saved();
+  draftDirty=false;
+  await refreshDraftPicker(activeDraftId);
+  tell('Jakarta City saved in My Cities · browser-local draft');
+ }catch(error){console.error('Jakarta City',error);tell('Jakarta City gagal: '+error.message);}
+}
+$('jakartaCity').onclick=loadJakartaCity;
+
 function makeCityExample(){
  const city=clone(defaultSeed);
  city.objects=[];
