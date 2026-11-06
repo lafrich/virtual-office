@@ -91,6 +91,7 @@ async function syncOnConnect(){
  syncBusy=true;syncNotes={imported:0,uploaded:0,conflicts:0,failed:0};
  try{
   info("AUTO SYNC · Comparing local projects with Google Drive ...");
+  if(a.prepareLocalSync)await a.prepareLocalSync();
   const meta=readSyncMeta();
   let locals=await a.localRecords()||[];
   if(a.assetLocalRecords)locals.push(...(await a.assetLocalRecords()||[]));
