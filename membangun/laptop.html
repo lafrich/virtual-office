@@ -529,18 +529,21 @@ let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0,scrol
 function clearLongPress(){clearTimeout(longPressTimer);longPressTimer=null}
 function recordTap(){
  const now=Date.now();
- if(tapTimer&&lastTap&&now-lastTap.time<340&&
-    Math.hypot(cx-lastTap.x,cy-lastTap.y)<50){
+ // A pan can move the cursor far away: detect double taps from timing,
+ // not from the last synthetic mouse coordinate.
+ if(lastTap&&now-lastTap.time<420){
   clearTimeout(tapTimer);tapTimer=null;lastTap=null;
-  setHold(!holdLocked);
- }else{
-  if(tapTimer){clearTimeout(tapTimer);if(!holdLocked)clickMouse(0)}
-  const position={x:cx,y:cy,time:now};lastTap=position;
-  tapTimer=setTimeout(()=>{
-   tapTimer=null;
-   if(lastTap===position){lastTap=null;if(!holdLocked)clickMouse(0)}
-  },280);
+  setHold(!holdLocked);return;
  }
+ clearTimeout(tapTimer);
+ const tap={time:now};lastTap=tap;
+ tapTimer=setTimeout(()=>{
+  tapTimer=null;
+  if(lastTap===tap){
+   lastTap=null;
+   if(!holdLocked)clickMouse(0);
+  }
+ },320);
 }
 const pad=$('touchpad');
 function pairTouch(touches){
