@@ -48,8 +48,9 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('#touchpad').isVisible(),true);
   assert.equal(await page.locator('#keyboard .key-row').count(),5);
   assert.equal(await page.locator('#leftClick,#rightClick').count(),0);
-  const panelHeight=await page.locator('.control-area').evaluate(el=>el.getBoundingClientRect().height);
-  const keyboardHeight=await page.locator('#keyboardPage').evaluate(el=>el.getBoundingClientRect().height);
+  const panelHeight=await page.locator('.control-area').evaluate(el=>el.offsetHeight);
+  const keyboardHeight=await page.locator('#keyboardPage').evaluate(el=>el.offsetHeight);
+  console.log('KEYBOARD_RATIO',keyboardHeight,panelHeight,(keyboardHeight/panelHeight).toFixed(2));
   assert.ok(keyboardHeight/panelHeight<.57,'Keyboard must leave room for touchpad');
   // Real two-touch swipe on the pad must scroll a panel inside the app iframe.
   const scrollState=await page.evaluate(async()=>{
