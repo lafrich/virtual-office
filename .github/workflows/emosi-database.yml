@@ -1,0 +1,48 @@
+name: Emosi.exe — Database and Tabs
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'emotion-studio/index.html'
+      - 'emotion-studio/database-fork.js'
+      - 'membangun/index.html'
+      - 'tests/emosi-database.test.cjs'
+      - 'tests/emosi-database.browser.cjs'
+      - '.github/workflows/emosi-database.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify unique IDs, source safety, HTML and JS
+        run: |
+          node --check emotion-studio/database-fork.js
+          node --check tests/emosi-database.browser.cjs
+          node --test tests/emosi-database.test.cjs
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright and PNG reader
+        run: npm install --no-save playwright@1.56.1 pngjs@7.0.0
+      - name: Start app server
+        run: python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/emosi-database-server.log 2>&1 &
+      - name: Test duplicate, pixel edit, Save as New, reload, blank and mobile tabs
+        run: node virtual-office/tests/emosi-database.browser.cjs
