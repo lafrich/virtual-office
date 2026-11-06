@@ -204,6 +204,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
  <div class="colors"><div><label>WALL PALETTE<select id="wall"><option value="cream">Cream</option><option value="concrete">Concrete</option><option value="blue">Sky Blue</option><option value="green">Mint Green</option><option value="pink">Warm Pink</option></select></label></div><div><label>ROOF PALETTE<select id="roof"><option value="terracotta">Terracotta</option><option value="slate">Slate</option><option value="navy">Navy</option><option value="green">Green</option></select></label></div></div>
  <label>ROOF SHAPE<select id="roofShape"><option value="gable">Gable / Atap Pelana</option><option value="flat">Flat / Dak</option></select></label>
  <label>FACADE DETAILS<select id="detail"><option value="simple">Simple</option><option value="awning">Awning / Kanopi</option><option value="storefront">Glass Storefront</option></select></label>
+ <div class="dual"><label>DETAIL LEVEL<select id="detailLevel"><option value="simple">Simple / Blockout</option><option value="standard" selected>Standard</option><option value="rich">Rich / High Detail</option></select></label><label>FACADE VARIATION<input id="facadeSeed" type="number" min="1" max="999999" step="1" value="1"></label></div>
  <div class="section" style="margin-top:12px">MODULAR PARTS / LIKE MAHLUK HIDUP</div>
  <div class="dual"><label>DOOR<select id="doorStyle"><option value="wood">Solid Wood</option><option value="glass">Glass Panel</option><option value="metal">Rolling Door</option></select></label><label>WINDOW<select id="windowStyle"><option value="square">Classic</option><option value="wide">Wide Shop</option><option value="narrow">Narrow Vertical</option></select></label></div>
  <label>BALCONY / SECOND FLOOR<select id="balcony"><option value="no">No Balcony</option><option value="yes">Add Balcony Rail</option></select></label>
@@ -418,7 +419,7 @@ const PXFONT={
 const semesta=window.VLSemestaBuildingSpecs;
 const sources=semesta?.all||[];
 const defaultBase='semesta:small';
-const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
+const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','detailLevel','facadeSeed','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
 let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null,cityBrowser=null,importSourceAsset=null,buildingAutoTimer=null,generationRecipe=null;
 const exteriorGuides=window.VLBuildingGuides?.mount();
@@ -434,10 +435,12 @@ const config=()=>{
  c.interactive=$('buildingMode').value==='interactive';
  c.w=Math.round(clamp(c.w,2,24)*10)/10;c.d=Math.round(clamp(c.d,2,24)*10)/10;
  c.floors=clamp(Math.round(c.floors),1,12);c.windows=clamp(Math.round(c.windows),0,6);
+ c.facadeSeed=clamp(Math.round(c.facadeSeed||1),1,999999);
+ if(!['simple','standard','rich'].includes(c.detailLevel))c.detailLevel='standard';
  c.name=safe(c.name||'Untitled Building');c.sign=safe(c.sign||'').toUpperCase().slice(0,14);
  c.actions=safe(c.actions||'enter');return c;
 };
-const artFingerprint=c=>JSON.stringify(['baseId','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','doorStyle','windowStyle','balcony'].map(k=>c[k]));
+const artFingerprint=c=>JSON.stringify(['baseId','kind','w','d','floors','windows','wall','roof','roofShape','detail','detailLevel','facadeSeed','sign','doorStyle','windowStyle','balcony'].map(k=>c[k]));
 function updateBaseSummary(c){
  const spec=semesta?.byId(c.baseId),size=spec?.footprint||[c.w,c.d];
  $('sourceId').value=c.baseId||'Custom';
@@ -457,7 +460,7 @@ function preset(baseId=defaultBase){
  const kind=spec.kind,cc={name:spec.label,baseId:spec.id,kind,
   w:spec.footprint[0],d:spec.footprint[1],floors:spec.floors,
   windows:kind==='kantor'?4:kind==='rumah'?2:1,wall:spec.wall,roof:spec.roof,
-  roofShape:spec.roofShape,detail:spec.detail,sign:'',
+  roofShape:spec.roofShape,detail:spec.detail,detailLevel:'standard',facadeSeed:1,sign:'',
   doorStyle:spec.detail==='storefront'?'glass':'wood',windowStyle:kind==='kantor'?'wide':'square',
   balcony:'no',front:'sw',actions:['warung','ruko'].includes(kind)?'enter,buy':'enter',collision:'yes'};
  current=null;manualOverrides={};manualSignature=artFingerprint(cc);importSourceAsset=null;
@@ -496,6 +499,9 @@ function makeView(c,dir){
  const P=(x,z,y)=>[ox+Math.round((x-z)*32),oy+Math.round((x+z)*16-y)];
  const wall=palette[c.wall]||palette.cream,roof=palette[c.roof]||palette.terracotta;
  const shade=wall[4],glass=['#c4e8f4','#89b9cf','#567f99','#37556c'];
+ const rich=c.detailLevel==='rich',enhanced=rich||c.detailLevel==='standard';
+ const facadeSeed=Math.max(1,Math.floor(Number(c.facadeSeed)||1));
+ const variation=(n)=>((Math.imul((facadeSeed+83)^Math.floor(n*97),2654435761)>>>0)%11);
  const A=P(-W/2,-D/2,0),B=P(W/2,-D/2,0),C=P(W/2,D/2,0),D0=P(-W/2,D/2,0);
  const At=P(-W/2,-D/2,H),Bt=P(W/2,-D/2,H),Ct=P(W/2,D/2,H),Dt=P(-W/2,D/2,H);
  // Exact flat alpha shadow (0/56/255 only), no blur.
@@ -515,29 +521,83 @@ function makeView(c,dir){
     [P(W/2+offset,u0,y0),P(W/2+offset,u1,y0),P(W/2+offset,u1,y1),P(W/2+offset,u0,y1)];
   shape(ctx,pts,col);
  }
- function window(side,axis,y){
-  const windowWidth=c.windowStyle==='wide'?.46:c.windowStyle==='narrow'?.18:.31;
-  faceRect(side,axis-windowWidth,axis+windowWidth,y,y+29,wall[4]);
-  faceRect(side,axis-windowWidth+.06,axis+windowWidth-.06,y+3,y+26,glass[1]);
-  faceRect(side,axis-.25,axis-.02,y+15,y+25,glass[0]);
-  faceRect(side,axis+.02,axis+.25,y+3,y+14,glass[2]);
-  faceRect(side,axis-.02,axis+.02,y+3,y+26,wall[3]);
-  faceRect(side,axis-.34,axis+.34,y-2,y+1,wall[1]);
+ function window(side,axis,y,floor,index){
+  const ww=c.windowStyle==='wide'?.46:c.windowStyle==='narrow'?.22:.32;
+  const tint=variation(floor*31+index*17+(side==='sw'?0:109));
+  // Recess + independent reveals; no hard black outlines.
+  faceRect(side,axis-ww-.095,axis+ww+.095,y-3,y+34,wall[4]);
+  faceRect(side,axis-ww-.04,axis+ww+.04,y,y+30,wall[1]);
+  faceRect(side,axis-ww+.025,axis+ww-.025,y+3,y+27,tint<4?glass[1]:glass[2]);
+  faceRect(side,axis-ww+.065,axis-.035,y+15,y+26,glass[0]);
+  faceRect(side,axis+.04,axis+ww-.06,y+3,y+14,glass[tint>8?1:2]);
+  faceRect(side,axis-.022,axis+.022,y+2,y+29,wall[3]);
+  faceRect(side,axis-ww-.13,axis+ww+.13,y-4,y-1,wall[1]);
+  if(!enhanced)return;
+  // Frames, transoms, drip ledges, reflected pixels and ventilation.
+  faceRect(side,axis-ww-.12,axis-ww-.065,y-2,y+32,wall[2]);
+  faceRect(side,axis+ww+.065,axis+ww+.12,y-2,y+32,wall[3]);
+  faceRect(side,axis-ww-.10,axis+ww+.10,y+29,y+33,wall[1]);
+  faceRect(side,axis-ww+.03,axis+ww-.03,y+14,y+16,wall[3]);
+  faceRect(side,axis-ww+.08,axis-ww+.15,y+20,y+25,glass[0]);
+  if(!rich)return;
+  faceRect(side,axis-ww-.19,axis+ww+.20,y-5,y-2,wall[0]);
+  faceRect(side,axis-ww-.12,axis+ww+.12,y+32,y+34,roof[2]);
+  if(floor>0&&tint%3===0){
+   faceRect(side,axis-ww+.09,axis+ww-.09,y+35,y+39,wall[3]);
+   for(let q=0;q<3;q++)faceRect(side,axis-ww+.12,axis+ww-.12,y+35+q*1.5,y+35+q*1.5+.5,wall[1]);
+  }
  }
  function frontage(side,axisLen,isFront){
   const visible=isFront;const windowCount=Math.min(c.windows,Math.max(1,Math.floor(axisLen/1.0)));
+  const floorH=(window.VLGameProportions?.building.wallHeight||128);
+  if(enhanced){
+   // Real facade rhythm with corner columns and non-floating structural bands.
+   for(const u of [-axisLen/2+.11,axisLen/2-.17]){
+    faceRect(side,u,u+.095,7,H-9,wall[1]);
+    faceRect(side,u+.095,u+.13,7,H-9,wall[3]);
+   }
+  }
   for(let floor=0;floor<c.floors;floor++){
-   const yy=35+floor*(window.VLGameProportions?.building.wallHeight||128);
+   const yy=35+floor*floorH;
+   if(rich){
+    // Floor slab lip + dark recess and two-tone datum before window overlays.
+    const band=floor*floorH+floorH-9;
+    faceRect(side,-axisLen/2+.08,axisLen/2-.08,band-5,band-2,wall[4]);
+    faceRect(side,-axisLen/2+.08,axisLen/2-.08,band-2,band+2,wall[0]);
+    faceRect(side,-axisLen/2+.07,axisLen/2-.07,band+2,band+4,wall[2]);
+    if(c.kind==='kantor'||c.kind==='kost'){
+     // Vertical mullion blades on larger commercial facades.
+     for(let u=-axisLen/2+1;u<axisLen/2-.6;u+=1.25){
+      faceRect(side,u,u+.055,yy-24,Math.min(yy+58,H-15),wall[1]);
+     }
+    }
+   }
    for(let i=0;i<windowCount;i++){
-    let u=-axisLen/2+axisLen*(i+.5)/windowCount;
+    const u=-axisLen/2+axisLen*(i+.5)/windowCount;
     if(visible&&floor===0&&Math.abs(u)<.65)continue;
     if(c.kind==='warung'&&floor===0&&visible)continue;
-    window(side,u,yy);
+    window(side,u,yy,floor,i);
    }
    if(floor>0){
     faceRect(side,-axisLen/2+.12,axisLen/2-.12,yy-11,yy-8,wall[1]);
-    if(c.balcony==='yes'&&floor===1)for(let p=-axisLen/2+.25;p<axisLen/2-.2;p+=.5)
-      faceRect(side,p,p+.05,yy-6,yy+13,shade);
+    if(c.balcony==='yes'&&floor===1){
+     if(rich){
+      faceRect(side,-axisLen/2+.25,axisLen/2-.25,yy-11,yy-5,roof[2]);
+      faceRect(side,-axisLen/2+.25,axisLen/2-.25,yy+10,yy+13,wall[3]);
+     }
+     for(let p=-axisLen/2+.25;p<axisLen/2-.2;p+=.5)
+      faceRect(side,p,p+(rich?.075:.05),yy-6,yy+13,shade);
+    }
+   }
+   if(rich&&floor<c.floors-1&&axisLen>3){
+    // Sparse air-conditioner / service grille for Jakarta shop-houses.
+    const ac=axisLen/2-.65;
+    if(variation(floor+side.length)%3!==0){
+     faceRect(side,ac-.27,ac+.27,yy+41,yy+65,wall[4]);
+     faceRect(side,ac-.23,ac+.23,yy+44,yy+61,wall[1]);
+     for(let line=0;line<4;line++)faceRect(side,ac-.19,ac+.19,yy+46+line*4,yy+47+line*4,wall[3]);
+     faceRect(side,ac-.30,ac+.30,yy+39,yy+41,wall[2]);
+    }
    }
   }
   if(!visible)return;
@@ -557,6 +617,34 @@ function makeView(c,dir){
   if(c.doorStyle==='metal')for(let j=10;j<doorTop;j+=8)
    faceRect(side,-.47,.47,j,j+1,wall[2]);
   faceRect(side,.26,.31,31,34,roof[0]);
+  if(enhanced){
+   // Door jamb, threshold, transom and facade skirting.
+   faceRect(side,-.65,-.55,0,doorTop+5,wall[1]);
+   faceRect(side,.55,.65,0,doorTop+5,wall[3]);
+   faceRect(side,-.69,.69,doorTop+2,doorTop+7,wall[0]);
+   faceRect(side,-.54,.54,0,4,roof[2]);
+   faceRect(side,-axisLen/2+.12,-.75,6,13,wall[3]);
+   faceRect(side,.75,axisLen/2-.12,6,13,wall[3]);
+  }
+  if(rich){
+   if(c.kind==='ruko'||c.kind==='warung'||c.kind==='kantor'){
+    // Service-side storefront modules, metal shop-frame and awning brackets.
+    for(const u of [-axisLen/2+.35,axisLen/2-.42]){
+     faceRect(side,u,u+.08,15,98,roof[3]);
+     for(let l=0;l<6;l++)faceRect(side,u+.01,u+.065,22+l*11,23+l*11,wall[1]);
+    }
+    faceRect(side,-axisLen/2+.18,axisLen/2-.18,99,106,roof[3]);
+    faceRect(side,-axisLen/2+.22,axisLen/2-.22,93,96,wall[0]);
+   }
+   if(c.kind==='rumah'||c.kind==='kost'){
+    // Indonesian house facade: lower wall wainscot + vent blocks.
+    faceRect(side,-axisLen/2+.14,-.78,14,25,wall[3]);
+    faceRect(side,.78,axisLen/2-.14,14,25,wall[3]);
+    for(const u of [-axisLen/2+.55,axisLen/2-.65]){
+     for(let v=0;v<3;v++)faceRect(side,u,u+.17,77+v*6,80+v*6,wall[v%2?4:1]);
+    }
+   }
+  }
   if(c.detail!=='simple'||c.kind==='warung'){
    // Awnings are polygon planes in native iso, never a rotated bitmap.
    const ext=.37,ey=108,lo=-axisLen/2+.08,hi=axisLen/2-.08;
@@ -565,6 +653,13 @@ function makeView(c,dir){
      [P(W/2,lo,ey+7),P(W/2,hi,ey+7),P(W/2+ext,hi,ey),P(W/2+ext,lo,ey)];
    shape(ctx,aw,roof[2]);
    faceRect(side,lo,hi,ey-2,ey+2,roof[1],ext);
+   if(rich){
+    // Thin ribs follow the isometric awning plane.
+    for(let u=lo+.15;u<hi-.10;u+=.72){
+     faceRect(side,u,u+.055,ey+2,ey+8,roof[0],ext-.06);
+    }
+    for(const u of [lo+.18,hi-.24])faceRect(side,u,u+.06,94,109,roof[3],ext*.72);
+   }
   }
   if(c.sign&&axisLen>=2.5){
    const txt=c.sign.toUpperCase().slice(0,Math.min(12,Math.floor((axisLen-.3)/.38)));
@@ -599,6 +694,24 @@ function makeView(c,dir){
   shape(ctx,[P(-W/2,D/2,H+lip),P(W/2,D/2,H+lip),Ct,Dt],roof[3]);
   shape(ctx,[P(W/2,-D/2,H+lip),P(W/2,D/2,H+lip),Ct,Bt],roof[4]);
   shape(ctx,[P(-W/2,-D/2,H+lip),P(W/2,-D/2,H+lip),P(W/2,D/2,H+lip),P(-W/2,D/2,H+lip)],roof[0]);
+  if(rich){
+   // Rooftop service units are drawn as native iso prisms, not pasted symbols.
+   function rooftopBox(x,z,w,d,h,colors){
+    const y=H+5;
+    const a=P(x,z,y),b=P(x+w,z,y),c0=P(x+w,z+d,y),d0=P(x,z+d,y);
+    const at=P(x,z,y+h),bt=P(x+w,z,y+h),ct=P(x+w,z+d,y+h),dt=P(x,z+d,y+h);
+    shape(ctx,[dt,ct,c0,d0],colors[1]);
+    shape(ctx,[bt,ct,c0,b],colors[2]);
+    shape(ctx,[at,bt,ct,dt],colors[0]);
+   }
+   if(W>=4&&D>=4){
+    rooftopBox(-W/2+.5,-D/2+.4,.65,.60,13,[wall[1],wall[2],wall[4]]);
+    rooftopBox(W/2-1.6,-D/2+.45,.9,.75,20,[roof[0],roof[2],roof[4]]);
+    if(c.floors>=3&&W>=6){
+     rooftopBox(W/2-2.7,D/2-1.9,.7,.65,16,[wall[0],wall[2],wall[4]]);
+    }
+   }
+  }
  }
  return {url:can.toDataURL('image/png'),size:[width,height],pivot:[ox,oy]};
 }
