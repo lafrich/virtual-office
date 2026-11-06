@@ -365,9 +365,20 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 .direction-note{margin-top:16px;border-left:2px solid #7598c9;padding-left:9px}
 .timeline-head{display:flex;justify-content:space-between;background:#d2dff0;border-top:1px solid #9ab2cc;padding:8px 11px;font-size:10px}
 .emotion-timeline{display:flex;overflow-x:auto;gap:6px;padding:9px;min-height:96px;background:#e8edf5}
-.frame-cell{flex:0 0 64px;border:1px solid #9cadc0;background:white;padding:3px;cursor:pointer;font-size:9px;color:#576885}
+.frame-cell{position:relative;flex:0 0 72px;border:1px solid #9cadc0;background:white;padding:3px;cursor:grab;font-size:9px;color:#576885;display:flex;flex-direction:column;align-items:center;gap:2px;user-select:none;-webkit-user-select:none}
+.frame-cell:active{cursor:grabbing}
 .frame-cell.active{border-color:#1158ad;background:#cbddfa;outline:1px solid #246ebf}
-.frame-cell canvas{width:56px;height:70px;object-fit:contain;image-rendering:pixelated}
+.frame-cell canvas{width:56px;height:70px;object-fit:contain;image-rendering:pixelated;pointer-events:none}
+.frame-cell .frame-caption{display:flex;width:100%;justify-content:space-between;align-items:center;gap:3px;font:700 10px Consolas,monospace}
+.frame-cell .frame-handle{display:inline-flex;align-items:center;justify-content:center;min-width:24px;min-height:23px;background:#d4e4f6;color:#285b96;border:1px solid #92b0d5;border-radius:2px;cursor:grab;font-size:16px;touch-action:none}
+.frame-cell .frame-handle:active{cursor:grabbing}
+.frame-cell.dragging-frame{opacity:.42}
+.frame-cell.drop-before::before,.frame-cell.drop-after::after{content:"";position:absolute;top:-5px;bottom:-5px;width:4px;background:#156dd2;border-radius:3px;z-index:2;pointer-events:none}
+.frame-cell.drop-before::before{left:-6px}
+.frame-cell.drop-after::after{right:-6px}
+.emotion-timeline.drag-ordering{background:#d8e7fa}
+.timeline-actions #frameMoveLeft,.timeline-actions #frameMoveRight{min-width:56px}
+.frame-cell:focus-visible{outline:3px solid #1779cb;outline-offset:2px}
 .timeline-actions{display:flex;gap:7px;align-items:center;padding:10px;border-top:1px solid #b4c7da;font-size:10px;color:#63728d}
 .emotion-inspector .ins-body{padding:11px;display:flex;flex-direction:column;gap:10px;overflow:auto}
 .ins-body label{display:flex;flex-direction:column;gap:4px;color:#334662;font-size:10px;font-weight:700}
@@ -470,9 +481,9 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
   <label>OVERLAY OPACITY <input id="maleGuideOpacity" type="range" min="5" max="100" step="5" value="55"><span id="maleGuideOpacityLabel">55%</span></label>
   <small>Source: original Human Male Base, idle frame 0, four native camera views. Display-only reference.</small>
  </div><p>Emotion only. Head, hair, body and glasses remain separate.</p><div class="direction-note">Back views normally remain transparent — no floating face behind the head.</div></div></div>
-<div class="timeline-head"><strong>FRAME-BY-FRAME TIMELINE</strong><span id="frameInfo">1 FRAME</span></div>
-<div id="timeline" class="emotion-timeline" aria-label="Editable emotion animation frames"></div>
-<div class="timeline-actions"><button id="duplicateFrame">＋ DUPLICATE FRAME</button><button id="deleteFrame">− DELETE FRAME</button><span class="push"></span><span>Click a frame → Pixel Editor</span></div>
+<div class="timeline-head"><strong>FRAME-BY-FRAME TIMELINE · DRAG TO REORDER</strong><span id="frameInfo" aria-live="polite">1 FRAME</span></div>
+<div id="timeline" class="emotion-timeline" aria-label="Editable emotion animation frames. Drag thumbnails or hold the grip handle to reorder."></div>
+<div class="timeline-actions"><button id="duplicateFrame">＋ DUPLICATE FRAME</button><button id="deleteFrame">− DELETE FRAME</button><button id="frameMoveLeft" title="Move selected frame earlier">← MOVE LEFT</button><button id="frameMoveRight" title="Move selected frame later">MOVE RIGHT →</button><span class="push"></span><span>Drag frame / ⠿ handle to change order · click to edit</span></div>
 </main>
 <aside class="emotion-inspector panel"><div class="panelhead"><strong>PROPERTIES</strong><small>EMOTION PLANE</small></div>
 <div class="ins-body"><label>EMOTION NAME<input id="name" maxlength="90" placeholder="Emotion name"></label>
@@ -1285,10 +1296,11 @@ return Object.freeze({FORMAT,PATH,API,DIR,TEMPLATES,validEntry,validateCatalog,r
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./drive-sync.js?v=auto-conflict-safe-20261106"></script>
+<script src="./frame-order.js?v=emotion-reorder-20261106"></script>
 <script>
 /* Standalone Emotion Studio. Optional Google Drive cross-device sync, no game integration. */
 (function(){"use strict";
-const U=window.MH2UniversalEmotions,P=window.MH2PlanePixelEditor;
+const U=window.MH2UniversalEmotions,P=window.MH2PlanePixelEditor,F=window.EmotionFrameOrder;
 const $=id=>document.getElementById(id),DIR=U.DIR;
 let catalog=null,selected=null,atlas=null,frame=0,direction="se",dirty=false,playing=false,saving=false,editor=null;
 const D=window.EmotionDrive;
@@ -1510,11 +1522,111 @@ function stageImage(index=frame){const c=document.createElement("canvas");c.widt
 function drawTile(target,index,dir="se"){const ctx=target.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,target.width,target.height);
  if(!atlas)return;const sy=DIR.indexOf(dir)*112;ctx.drawImage(atlas,index*64,sy,64,112,0,0,target.width,target.height)}
 function drawPreview(){drawTile($("preview"),frame,direction);drawMalePreview();$("previewInfo").textContent=direction.toUpperCase()+" · FRAME "+(frame+1)+" / "+selected.frames}
+let dragOrigin=null,dragSlot=null,pointerReorder=null;
+function stopTimelinePlayback(){if(playing){playing=false;$("play").textContent="▶ PLAY";animationTick.prev=0}}
+function clearDropIndicator(){
+ for(const node of $("timeline").querySelectorAll(".frame-cell"))
+  node.classList.remove("drop-before","drop-after","dragging-frame");
+ $("timeline").classList.remove("drag-ordering");
+ dragSlot=null;
+}
+function highlightSlot(slot){
+ clearDropIndicator();
+ if(slot===null||!selected||slot<0||slot>selected.frames)return;
+ const cards=$("timeline").querySelectorAll(".frame-cell");
+ if(!cards.length)return;
+ const index=Math.min(selected.frames-1,slot);
+ const cell=cards[index];
+ cell.classList.add(slot===selected.frames?"drop-after":"drop-before");
+ $("timeline").classList.add("drag-ordering");
+ dragSlot=slot;
+}
+function reorderFrameBySlot(source,slot){
+ if(!atlas||!selected||source===null||slot===null)return false;
+ try{
+  const order=F.fromSlot(selected.frames,source,slot);
+  const index=order.indexOf(source);
+  if(index===source)return false;
+  atlas=F.compose(atlas,order,()=>document.createElement("canvas"));
+  frame=index;
+  stopTimelinePlayback();
+  mark();
+  $("timeline").querySelector(".frame-cell.active")?.scrollIntoView({block:"nearest",inline:"nearest"});
+  status("✓ FRAME "+(source+1)+" → "+(frame+1)+" · ALL 4 VIEWS MOVED · AUTO SAVE PENDING");
+  return true;
+ }catch(error){status("REORDER FAILED: "+error.message,true);return false}
+}
+function frameDragSlot(element,x){
+ if(!element)return null;
+ const index=Number(element.dataset.frameIndex);
+ if(!Number.isInteger(index)||index<0||index>=selected.frames)return null;
+ return index+(x>element.getBoundingClientRect().left+element.getBoundingClientRect().width/2?1:0);
+}
 function renderFrames(){const t=$("timeline");t.replaceChildren();
- for(let i=0;i<selected.frames;i++){const b=document.createElement("button");b.className="frame-cell"+(i===frame?" active":"");
+ for(let i=0;i<selected.frames;i++){
+  const b=document.createElement("button");b.type="button";
+  b.className="frame-cell"+(i===frame?" active":"");
+  b.dataset.frameIndex=String(i);b.draggable=selected.frames>1;
+  b.setAttribute("aria-label","Frame "+(i+1)+" of "+selected.frames+". Drag to reorder, or use Move Left and Move Right.");
   const c=document.createElement("canvas");c.width=64;c.height=112;drawTile(c,i,"se");
-  const num=document.createElement("span");num.textContent="◆ "+String(i+1).padStart(2,"0");b.append(c,num);b.title="Edit frame "+(i+1);b.onclick=()=>{frame=i;renderFrames();drawPreview()};t.append(b)}
+  const caption=document.createElement("span");caption.className="frame-caption";
+  const num=document.createElement("span");num.textContent="◆ "+String(i+1).padStart(2,"0");
+  const handle=document.createElement("span");handle.className="frame-handle";
+  handle.textContent="⠿";handle.title="Drag frame "+(i+1)+" to change order";
+  caption.append(num,handle);b.append(c,caption);
+  b.title="Click to select or drag to change frame order";
+  b.onclick=e=>{if(e.target.closest(".frame-handle"))return;frame=i;renderFrames();drawPreview()};
+  b.addEventListener("dragstart",e=>{
+   if(selected.frames<2){e.preventDefault();return}
+   stopTimelinePlayback();dragOrigin=i;
+   e.dataTransfer.effectAllowed="move";
+   e.dataTransfer.setData("text/plain","emotion-frame/"+i);
+   b.classList.add("dragging-frame");
+  });
+  b.addEventListener("dragover",e=>{
+   if(dragOrigin===null)return;
+   e.preventDefault();e.dataTransfer.dropEffect="move";
+   highlightSlot(frameDragSlot(b,e.clientX));
+  });
+  b.addEventListener("drop",e=>{
+   if(dragOrigin===null)return;
+   e.preventDefault();
+   const source=dragOrigin,slot=frameDragSlot(b,e.clientX);
+   dragOrigin=null;clearDropIndicator();reorderFrameBySlot(source,slot);
+  });
+  b.addEventListener("dragend",()=>{dragOrigin=null;clearDropIndicator()});
+  // Touch and pen: drag the visible grip, preserving swipe-scroll on thumbnails.
+  handle.addEventListener("pointerdown",e=>{
+   if(selected.frames<2||(e.pointerType==="mouse"&&e.button!==0))return;
+   stopTimelinePlayback();e.preventDefault();e.stopPropagation();
+   pointerReorder={id:e.pointerId,source:i,slot:i,startX:e.clientX,startY:e.clientY};
+   handle.setPointerCapture?.(e.pointerId);
+  });
+  handle.addEventListener("pointermove",e=>{
+   if(!pointerReorder||pointerReorder.id!==e.pointerId)return;
+   e.preventDefault();
+   const t=$("timeline"),rect=t.getBoundingClientRect();
+   if(e.clientX<rect.left+22)t.scrollLeft-=16;
+   else if(e.clientX>rect.right-22)t.scrollLeft+=16;
+   const at=document.elementFromPoint(e.clientX,e.clientY)?.closest(".frame-cell");
+   const slot=frameDragSlot(at,e.clientX);
+   if(slot!==null){pointerReorder.slot=slot;highlightSlot(slot)}
+  });
+  const finishPointer=e=>{
+   if(!pointerReorder||pointerReorder.id!==e.pointerId)return;
+   e.preventDefault();e.stopPropagation();
+   const task=pointerReorder;pointerReorder=null;clearDropIndicator();
+   try{handle.releasePointerCapture?.(e.pointerId)}catch{}
+   if(e.type!=="pointercancel"&&Math.hypot(e.clientX-task.startX,e.clientY-task.startY)>=5)
+    reorderFrameBySlot(task.source,task.slot);
+  };
+  handle.addEventListener("pointerup",finishPointer);
+  handle.addEventListener("pointercancel",finishPointer);
+  t.append(b);
+ }
  $("frameInfo").textContent=selected.frames+" FRAME(S) · "+selected.fps+" FPS";
+ $("frameMoveLeft").disabled=frame<=0||selected.frames<2;
+ $("frameMoveRight").disabled=frame>=selected.frames-1;
 }
 function render(){if(!selected||!atlas)return;$("name").value=selected.name;$("base").value=selected.base;$("fps").value=selected.fps||6;
  for(const b of document.querySelectorAll("[data-dir]"))b.classList.toggle("active",b.dataset.dir===direction);
@@ -1552,9 +1664,24 @@ async function reload({force=false}={}){
 }
 function mark(){setDirty();renderFrames();drawPreview()}
 function addFrame(){if(selected.frames>=48){status("MAXIMUM 48 FRAMES",true);return}
- const next=document.createElement("canvas");next.width=(selected.frames+1)*64;next.height=448;
- const ctx=next.getContext("2d");ctx.drawImage(atlas,0,0);ctx.drawImage(atlas,frame*64,0,64,448,selected.frames*64,0,64,448);
- atlas=next;frame=selected.frames++;mark()}
+ stopTimelinePlayback();
+ // Duplicate IMMEDIATELY AFTER the selected frame, so adjacent transition
+ // poses can be edited without jumping to the end of a long animation.
+ const source=frame;
+ atlas=F.compose(atlas,F.duplicateAfter(selected.frames,source),()=>document.createElement("canvas"));
+ selected.frames++;frame=source+1;mark();
+ $("timeline").querySelector(".frame-cell.active")?.scrollIntoView({block:"nearest",inline:"nearest"});
+ status("✓ DUPLICATED AFTER FRAME "+(source+1)+" · EDIT FRAME "+(frame+1)+" OR DRAG TO REORDER");
+}
+function nudgeFrame(delta){
+ if(!atlas||!selected)return;
+ const next=frame+delta;if(next<0||next>=selected.frames)return;
+ stopTimelinePlayback();
+ const source=frame,order=F.move(selected.frames,frame,next);
+ atlas=F.compose(atlas,order,()=>document.createElement("canvas"));frame=next;mark();
+ $("timeline").querySelector(".frame-cell.active")?.scrollIntoView({block:"nearest",inline:"nearest"});
+ status("✓ FRAME "+(source+1)+" → "+(next+1)+" · ALL 4 VIEWS MOVED");
+}
 function removeFrame(){if(selected.frames<=1){status("ONE FRAME MUST REMAIN",true);return}
  const next=document.createElement("canvas");next.width=(selected.frames-1)*64;next.height=448;const ctx=next.getContext("2d");
  let x=0;for(let f=0;f<selected.frames;f++)if(f!==frame){ctx.drawImage(atlas,f*64,0,64,448,x*64,0,64,448);x++}
@@ -1661,6 +1788,7 @@ function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas
  $("exportProject").onclick=exportProject;
  $("importProject").onchange=e=>{importProject(e.target.files?.[0]);e.target.value=""};
  $("duplicateFrame").onclick=addFrame;$("deleteFrame").onclick=removeFrame;$("edit").onclick=openEditor;
+ $("frameMoveLeft").onclick=()=>nudgeFrame(-1);$("frameMoveRight").onclick=()=>nudgeFrame(1);
  $("play").onclick=()=>{playing=!playing;$("play").textContent=playing?"Ⅱ PAUSE":"▶ PLAY";animationTick.prev=0};
  for(const b of document.querySelectorAll("[data-dir]"))b.onclick=()=>{direction=b.dataset.dir;render()};
  $("name").oninput=()=>{if(selected){selected.name=$("name").value;setDirty();renderList()}};
