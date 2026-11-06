@@ -45,40 +45,36 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
 .hinge{background:linear-gradient(180deg,#354052,#181e2d 35%,#7e8490 51%,#151e2d 70%,#354052);position:relative}
 .hinge:after{content:"";width:17%;position:absolute;left:41.5%;top:3px;height:3px;border-radius:4px;background:#a5aab4}
 .controls{min-height:0;display:flex;flex-direction:column;background:#c8d3e4;overflow:hidden;border:2px solid #183d86;border-top:0}
-.controlsbar{flex:none;min-height:41px;background:linear-gradient(#eaf3ff,#cbd7e8);border-bottom:1px solid #90a1ba;display:flex;align-items:center;gap:6px;padding:5px 8px;overflow-x:auto;scrollbar-width:none}
-.controlsbar button{min-height:29px;font-weight:bold;font-size:10px}
+.controlsbar{flex:none;min-height:33px;background:linear-gradient(#eaf3ff,#cbd7e8);border-bottom:1px solid #90a1ba;display:flex;align-items:center;gap:6px;padding:5px 8px;overflow-x:auto;scrollbar-width:none}
+.controlsbar button{min-height:25px;font-weight:bold;font-size:10px}
 .controlsbar .small{padding:5px 7px}
 .controlsbar .spacer{flex:1}
 .controlsbar .mode{border-color:#6e84a4}
-.controlsbar .mode.active{background:#8eace1;color:#0a306f}
-.quick-apps{height:39px;flex:none;display:flex;gap:3px;padding:4px 5px;align-items:stretch;overflow-x:auto;background:#bac9de;border-bottom:1px solid #91a4c2;scrollbar-width:none}
+.controlsbar .controls-label{font-size:10px;font-weight:bold;color:#23456f;white-space:nowrap}.controlsbar .mode.active{background:#8eace1;color:#0a306f}
+.quick-apps{height:32px;flex:none;display:flex;gap:3px;padding:4px 5px;align-items:stretch;overflow-x:auto;background:#bac9de;border-bottom:1px solid #91a4c2;scrollbar-width:none}
 .quick-apps button{flex:1;min-width:92px;padding:3px 6px;font-size:10px;font-weight:bold}
 .quick-apps button.active{background:#8eace1;color:#102d61;border-color:#42699f}
-.control-area{position:relative;flex:1;min-height:0;overflow:hidden}
-.pad-page{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 50px;gap:7px;padding:7px}
-.pad-main{display:flex;flex-direction:column;min-height:0;gap:6px}
-.touchpad{position:relative;flex:1;min-height:90px;touch-action:none;background:linear-gradient(125deg,#c8d3df,#eef2f7 62%,#ced9e6);border:1px solid #71869f;box-shadow:inset 2px 2px 6px #7c8da347;overflow:hidden}
-.touchpad:before{content:"";position:absolute;inset:9px;border:1px solid #a3b1c1;pointer-events:none}
-.touchpad:after{content:"";position:absolute;top:48%;left:48%;width:15px;height:15px;border-right:1px solid #99a9b9;border-bottom:1px solid #99a9b9;transform:rotate(45deg);opacity:.35;pointer-events:none}
-.pad-hint{position:absolute;left:12px;top:10px;color:#76879a;font:10px/1.5 "Courier New",monospace;user-select:none;pointer-events:none}
-.pad-buttons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;height:36px;flex:none}
-.pad-buttons button{font-size:11px;min-width:0}
-.scroll-zone{border:1px solid #72849b;background:linear-gradient(#e9eff5,#acbfd6);display:flex;align-items:center;justify-content:space-around;flex-direction:column;touch-action:none;color:#526e8e;font-weight:bold}
-.scroll-zone span{font-size:11px;writing-mode:vertical-rl;letter-spacing:2px;opacity:.75}
-.keyboard-page{height:100%;display:flex;flex-direction:column;padding:5px 6px;gap:5px;background:#c8d2e0}
-.key-toolbar{display:flex;align-items:center;gap:5px;height:25px;flex:none}
-.key-toolbar span{font-size:10px;color:#50627a;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.key-toolbar button{font-size:10px;padding:3px 8px}
-.keyboard{display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:4px;flex:1;min-height:0}
-.key-row{display:flex;justify-content:center;gap:4px;min-height:0}
-.key{flex:1;min-width:0;min-height:0;padding:1px;box-shadow:0 2px 0 #7889a3;font-size:clamp(11px,2.2vw,18px);font-weight:bold;touch-action:manipulation;background:linear-gradient(#f9fcff,#e4e9f0);border:1px solid #8c9cb3}
-.key.special{flex:1.4;font-size:clamp(9px,1.4vw,12px);background:linear-gradient(#e1ebfa,#cad9ef)}
+.control-area{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.keyboard-page{order:0;display:flex;flex-direction:column;flex:none;height:clamp(145px,45%,260px);min-height:0;padding:4px 6px 6px;gap:3px;background:#c7d1df;border-bottom:1px solid #7188a6}
+.key-toolbar{display:flex;align-items:center;gap:4px;height:18px;flex:none}
+.key-toolbar span{font-size:9px;font-weight:bold;color:#50627a;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.key-toolbar button{font-size:9px;padding:1px 8px;height:19px}
+.keyboard{display:grid;grid-template-rows:repeat(5,minmax(0,1fr));gap:3px;flex:1;min-height:0}
+.key-row{display:flex;justify-content:center;gap:3px;min-height:0}
+.key{flex:1;min-width:0;min-height:0;padding:0 1px;box-shadow:0 1px 0 #7889a3;font-size:clamp(10px,1.7vw,16px);font-weight:bold;touch-action:manipulation;background:linear-gradient(#f9fcff,#e0e8f2);border:1px solid #899bb4;border-radius:3px}
+.key.special{flex:1.45;font-size:clamp(8px,1.05vw,11px);background:linear-gradient(#e1ebfa,#cad9ef)}
 .key.space{flex:5}
 .key.active{background:#7a9fd1}
+.pad-page{order:1;flex:1;min-height:0;display:block;padding:5px 7px 7px}
+.pad-main{height:100%;display:flex;min-height:0}
+.touchpad{position:relative;flex:1;min-height:0;touch-action:none;background:linear-gradient(125deg,#c8d3df,#eef2f7 62%,#ced9e6);border:1px solid #71869f;border-radius:8px;box-shadow:inset 2px 2px 6px #7c8da347;overflow:hidden}
+.touchpad:before{content:"";position:absolute;inset:7px;border:1px solid #a3b1c1;border-radius:5px;pointer-events:none}
+.touchpad:after{content:"";position:absolute;top:44%;left:48%;width:13px;height:13px;border-right:1px solid #99a9b9;border-bottom:1px solid #99a9b9;transform:rotate(45deg);opacity:.24;pointer-events:none}
+.pad-hint{position:absolute;left:13px;top:10px;color:#637a99;font:10px/1.5 "Courier New",monospace;user-select:none;pointer-events:none}
 #nativeInput{width:1px;height:1px;position:absolute;opacity:0;pointer-events:none}
 .toast{position:absolute;z-index:8;bottom:9px;left:50%;transform:translateX(-50%);background:#203d6b;color:#fff;padding:7px 12px;border-radius:4px;max-width:90%;text-align:center;font:11px Tahoma,sans-serif;box-shadow:0 2px 7px #0006;pointer-events:none}
 @media (orientation:portrait){.laptop{grid-template-rows:minmax(0,1fr) 7px minmax(0,1fr)}.brand small{display:none}.apps button{min-width:100px}}
-@media(max-width:470px){.topbar{gap:3px;padding:3px}.brand{font-size:11px}.topbar button{padding:4px 6px}.controlsbar{gap:3px;padding:4px}.controlsbar button{padding:3px 5px}.key-row{gap:2px}.key{font-size:11px}.pad-page{grid-template-columns:minmax(0,1fr) 34px}.pad-buttons{height:33px}.scroll-zone span{font-size:8px}}
+@media(max-width:470px){.topbar{gap:3px;padding:3px}.brand{font-size:11px}.topbar button{padding:4px 6px}.controlsbar{gap:3px;padding:4px}.controlsbar button{padding:3px 5px}.key-row{gap:2px}.key{font-size:10px}.keyboard-page{height:45%;min-height:0}.pad-hint{font-size:9px}}
 </style>
 </head>
 <body>
@@ -106,35 +102,28 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
  <div class="hinge" aria-hidden="true"></div>
  <section class="controls" aria-label="Touchpad dan keyboard virtual">
   <div class="controlsbar">
-   <button class="mode active" id="padMode">▣ TOUCHPAD</button>
-   <button class="mode" id="keyMode">⌨ KEYBOARD</button>
+   <span class="controls-label">⌨ MINI LAPTOP · QWERTY + TOUCHPAD</span>
    <span class="spacer"></span>
    <button class="small" id="undoKey" title="Ctrl+Z">↶ UNDO</button>
    <button class="small" id="escapeKey" title="Esc">ESC</button>
-   <button class="small" id="external" title="Buka aplikasi secara langsung">↗ APP</button>
+   <button class="small" id="external" title="Buka aplikasi langsung">↗ APP</button>
   </div>
   <nav id="quickApps" class="quick-apps" aria-label="Buka aplikasi dari layar touchpad"></nav>
   <div class="control-area">
-   <div class="pad-page" id="padPage">
-    <div class="pad-main">
-     <div class="touchpad" id="touchpad" aria-label="Geser untuk mengontrol mouse; ketuk untuk klik; dua jari untuk scroll" role="application">
-      <div class="pad-hint">DRAG 1 JARI = KURSOR<br>TAP = KLIK · TAHAN = DRAG<br>2 JARI = SCROLL</div>
-     </div>
-     <div class="pad-buttons">
-      <button id="leftClick">◩ LEFT CLICK</button>
-      <button id="dragLock" aria-pressed="false">✥ DRAG OFF</button>
-      <button id="rightClick">◪ RIGHT CLICK</button>
-     </div>
-    </div>
-    <div class="scroll-zone" id="scrollZone" aria-label="Usap untuk scroll"><strong>▲</strong><span>SCROLL</span><strong>▼</strong></div>
-   </div>
-   <div class="keyboard-page" id="keyboardPage" hidden>
+   <div class="keyboard-page" id="keyboardPage">
     <div class="key-toolbar">
-     <span>⌨ VIRTUAL KEYBOARD · TAP UNTUK KETIK</span>
+     <span>ESC · 1–0 · QWERTY · SHIFT · CTRL · SPACE · ↵</span>
      <button id="pasteKey" title="Paste dari clipboard">PASTE</button>
      <button id="copyKey" title="Copy selection">COPY</button>
     </div>
-    <div class="keyboard" id="keyboard" aria-label="Keyboard virtual"></div>
+    <div class="keyboard" id="keyboard" aria-label="Keyboard laptop virtual"></div>
+   </div>
+   <div class="pad-page" id="padPage">
+    <div class="pad-main">
+     <div class="touchpad" id="touchpad" aria-label="Satu tap klik kiri, dua tap klik kanan, usap dua jari untuk scroll, tahan lalu geser untuk drag" role="application">
+      <div class="pad-hint">TAP: LEFT · DOUBLE TAP: RIGHT<br>2 FINGERS: SCROLL · HOLD + MOVE: DRAG</div>
+     </div>
+    </div>
    </div>
    <textarea id="nativeInput" aria-label="Input keyboard sistem" autocomplete="off"></textarea>
   </div>
@@ -153,9 +142,9 @@ const apps=[
 ];
 const params=new URLSearchParams(location.search);
 let selected=apps.find(a=>a.id===params.get('app'))?.id || 'semesta';
-let mode='pad',zoom=1,scale=1,frameWidth=1180,frameHeight=660,rotated=false;
-let cx=0,cy=0,pressed=false,dragLock=false,dragTarget=null,shift=false,symbols=false,ctrl=false;
-let canBridge=false,lastFocus=null,toastTimer=null,gesture=null,longPressTimer=null,scrollGesture=null;
+let zoom=1,scale=1,frameWidth=1180,frameHeight=660,rotated=false;
+let cx=0,cy=0,pressed=false,dragTarget=null,shift=false,symbols=false,ctrl=false;
+let canBridge=false,lastFocus=null,toastTimer=null,longPressTimer=null,tapTimer=null,lastTap=null;
 let frame=$('appFrame');const liveFrames=new Map(), loadedFrames=new Set(),shell=$('screenShell'),scroller=$('screenScroll'),cursor=$('cursor');
 const getApp=()=>apps.find(a=>a.id===selected);
 const getUrl=(id)=>{const def=apps.find(a=>a.id===id)?.url||'';try{return localStorage.getItem('membangun-link-'+id)||def}catch{return def}};
@@ -238,20 +227,40 @@ function clickMouse(button=0){
 function scrollContent(deltaY,deltaX=0){
  const doc=currentDocument();if(!doc)return;
  const target=targetAt(),w=doc.defaultView,pt=pointInFrame();
- let canceled=false;
- if(target&&typeof w.WheelEvent==='function')canceled=!target.dispatchEvent(new w.WheelEvent('wheel',{bubbles:true,cancelable:true,clientX:pt.x,clientY:pt.y,deltaY,deltaX,deltaMode:0}));
- if(canceled)return;
- let n=target;
- while(n&&n!==doc.documentElement){
+ // A synthetic WheelEvent does not trigger the browser's default scrolling.
+ // Existing editors can listen to wheel (canvas zoom/pan), but normal HTML
+ // scroll containers must also be scrolled explicitly.
+ let handledByApp=false;
+ if(target&&typeof w.WheelEvent==='function'){
+  try{
+   const ev=new w.WheelEvent('wheel',{bubbles:true,cancelable:true,composed:true,view:w,clientX:pt.x,clientY:pt.y,deltaY,deltaX,deltaMode:0});
+   handledByApp=!target.dispatchEvent(ev);
+  }catch(err){console.warn('wheel dispatch',err)}
+ }
+ let scrollable=null,n=target;
+ while(n&&n!==doc){
   if(n.nodeType===1){
    const style=w.getComputedStyle(n);
    const vertical=/(auto|scroll|overlay)/.test(style.overflowY)&&n.scrollHeight>n.clientHeight+2;
    const horizontal=/(auto|scroll|overlay)/.test(style.overflowX)&&n.scrollWidth>n.clientWidth+2;
-   if(vertical||horizontal){n.scrollBy({top:vertical?deltaY:0,left:horizontal?deltaX:0,behavior:'instant'});return}
+   if(vertical||horizontal){scrollable=n;break}
   }
-  n=n.parentElement;
+  n=n.parentNode;
  }
- w.scrollBy({top:deltaY,left:deltaX,behavior:'instant'});
+ if(scrollable){
+  // Do not stop just because a custom handler called preventDefault.
+  // The untrusted WheelEvent will not perform native scrolling itself.
+  scrollable.scrollTop+=deltaY;
+  scrollable.scrollLeft+=deltaX;
+  return;
+ }
+ if(handledByApp)return; // Preserve canvas zoom / wheel-based editor tools.
+ const root=doc.scrollingElement||doc.documentElement;
+ if(root&&root.scrollHeight>root.clientHeight+2){
+  root.scrollTop+=deltaY;root.scrollLeft+=deltaX;
+ }else if(doc.body&&doc.body.scrollHeight>doc.body.clientHeight+2){
+  doc.body.scrollTop+=deltaY;doc.body.scrollLeft+=deltaX;
+ }
 }
 function focusDoc(){
  const doc=currentDocument();if(!doc)return null;
@@ -295,6 +304,7 @@ function applyKey(key){
  if(key==='SHIFT'){shift=!shift;renderKeyboard();return}
  if(key==='SYM'){symbols=!symbols;renderKeyboard();return}
  if(key==='CTRL'){ctrl=!ctrl;renderKeyboard();return}
+ if(key==='ALT')return
  const target=focusDoc();
  const down=keyEvent('keydown',normalized,normalized.length===1?'Key'+normalized.toUpperCase():normalized);
  if(!down)return;
@@ -305,9 +315,9 @@ function applyKey(key){
    if(target&&target.tagName==='TEXTAREA')putText(target,'\n');
    else if(target&&target.tagName==='INPUT'&&target.form){try{target.form.requestSubmit()}catch{}}
   }
-  else if(normalized==='ArrowLeft'||normalized==='ArrowRight'){
+  else if(normalized.startsWith('Arrow')){
    if(target&&typeof target.selectionStart==='number'){
-    let n=target.selectionStart+(normalized==='ArrowLeft'?-1:1);n=Math.max(0,Math.min(target.value.length,n));target.setSelectionRange(n,n);
+    let n=target.selectionStart+(normalized==='ArrowLeft'?-1:normalized==='ArrowRight'?1:0);n=Math.max(0,Math.min(target.value.length,n));target.setSelectionRange(n,n);
    }
   }
   else if(normalized.length===1)putText(target,shift?normalized.toUpperCase():normalized);
@@ -316,15 +326,27 @@ function applyKey(key){
  if(shift&&key!=='SHIFT'){shift=false;renderKeyboard()}
  if(ctrl){ctrl=false;renderKeyboard()}
 }
-const letterRows=[['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['SHIFT','z','x','c','v','b','n','m','BACKSPACE'],['SYM','CTRL',',','SPACE','.','ArrowLeft','ArrowRight','ENTER']];
-const symbolRows=[['1','2','3','4','5','6','7','8','9','0'],['@','#','$','%','&','-','+','(',')','/'],['SHIFT','*','"',"'",':',';','!','?','BACKSPACE'],['SYM','CTRL','_','SPACE','=','ArrowLeft','ArrowRight','ENTER']];
+const letterRows=[
+ ['ESC','1','2','3','4','5','6','7','8','9','0','BACKSPACE'],
+ ['q','w','e','r','t','y','u','i','o','p'],
+ ['a','s','d','f','g','h','j','k','l','ENTER'],
+ ['SHIFT','z','x','c','v','b','n','m',',','.','ArrowUp'],
+ ['CTRL','ALT','SYM','SPACE','ArrowLeft','ArrowDown','ArrowRight']
+];
+const symbolRows=[
+ ['ESC','1','2','3','4','5','6','7','8','9','0','BACKSPACE'],
+ ['!','@','#','$','%','^','&','*','(',')'],
+ ['-','_','+','=','[',']','{','}','/','ENTER'],
+ ['SHIFT',';',':',"'",'"','?','<','>',',','.','ArrowUp'],
+ ['CTRL','ALT','SYM','SPACE','ArrowLeft','ArrowDown','ArrowRight']
+];
 function renderKeyboard(){
  $('keyboard').replaceChildren();
  (symbols?symbolRows:letterRows).forEach(row=>{
   const host=document.createElement('div');host.className='key-row';
   row.forEach(key=>{
    const btn=document.createElement('button');btn.type='button';btn.className='key'+(key.length>1?' special':'')+(key==='SPACE'?' space':'');
-   btn.textContent=key==='BACKSPACE'?'⌫':key==='ENTER'?'↵ ENTER':key==='SPACE'?'SPACE':key==='ArrowLeft'?'←':key==='ArrowRight'?'→':key==='SHIFT'?'⇧ SHIFT':key==='SYM'?'123':key==='CTRL'?'CTRL':shift?key.toUpperCase():key;
+   btn.textContent=key==='BACKSPACE'?'⌫':key==='ENTER'?'↵ ENTER':key==='SPACE'?'SPACE':key==='ArrowLeft'?'←':key==='ArrowRight'?'→':key==='SHIFT'?'⇧ SHIFT':key==='SYM'?'123':key==='CTRL'?'CTRL':key==='ESC'?'ESC':key==='ALT'?'ALT':key==='ArrowUp'?'↑':key==='ArrowDown'?'↓':shift?key.toUpperCase():key;
    if((key==='SHIFT'&&shift)||(key==='SYM'&&symbols)||(key==='CTRL'&&ctrl))btn.classList.add('active');
    btn.addEventListener('pointerdown',e=>e.preventDefault());
    btn.addEventListener('click',()=>applyKey(key));host.appendChild(btn);
@@ -332,16 +354,11 @@ function renderKeyboard(){
   $('keyboard').appendChild(host);
  });
 }
-function setMode(next){
- mode=next;$('padPage').hidden=next!=='pad';$('keyboardPage').hidden=next!=='keyboard';
- $('padMode').classList.toggle('active',next==='pad');$('keyMode').classList.toggle('active',next==='keyboard');
- try{localStorage.setItem('membangun-laptop-mode',next)}catch{}
-}
 function setZoom(z){zoom=Math.max(.7,Math.min(1.7,Math.round(z*10)/10));layout();try{localStorage.setItem('membangun-laptop-zoom',String(zoom))}catch{}}
 function setApp(id){
  const picked=apps.find(a=>a.id===id);if(!picked)return;
  if(selected!==id&&pressed)releaseMouse();
- if(selected!==id)setDragLock(false);
+ if(selected!==id)releaseMouse();
  selected=id;lastFocus=null;canBridge=false;
  $('currentApp').textContent=picked.label+'.EXE';
  const url=getUrl(id);$('externalFallback').href=url;
@@ -375,10 +392,6 @@ function setApp(id){
  const u=new URL(location.href);u.searchParams.set('app',id);history.replaceState(null,'',u);
  try{localStorage.setItem('membangun-laptop-app',id)}catch{}
 }
-function setDragLock(value){
- dragLock=value;$('dragLock').classList.toggle('active',dragLock);$('dragLock').textContent=dragLock?'✥ DRAG ON':'✥ DRAG OFF';$('dragLock').setAttribute('aria-pressed',String(dragLock));
- if(!dragLock)releaseMouse();else pressMouse(0);
-}
 function onLoad(){
  canBridge=!!currentDocument();
  $('placeholder').hidden=true;
@@ -394,7 +407,6 @@ function onLoad(){
 function configure(){
  try{
   const z=Number(localStorage.getItem('membangun-laptop-zoom'));if(z>=.7&&z<=1.7)zoom=z;
-  const m=localStorage.getItem('membangun-laptop-mode');if(m==='keyboard')mode='keyboard';
  }catch{}
  for(const app of apps){
   for(const id of ['appTabs','quickApps']){
@@ -403,31 +415,53 @@ function configure(){
    b.addEventListener('click',()=>setApp(app.id));$(id).appendChild(b);
   }
  }
- renderKeyboard();setMode(mode);layout();setApp(selected);
+ renderKeyboard();layout();setApp(selected);
 }
-let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0;
+// Touch gestures: 1 tap = left click, double tap = right click.
+// Press and hold then move = drag; 2-finger swipe = scroll in selected editor.
+let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0,scrolling=false;
 function clearLongPress(){clearTimeout(longPressTimer);longPressTimer=null}
+function recordTap(){
+ const now=Date.now();
+ if(tapTimer&&lastTap&&now-lastTap.time<340&&
+    Math.hypot(cx-lastTap.x,cy-lastTap.y)<50){
+  clearTimeout(tapTimer);tapTimer=null;lastTap=null;
+  clickMouse(2);
+ }else{
+  if(tapTimer){clearTimeout(tapTimer);clickMouse(0)}
+  const position={x:cx,y:cy,time:now};lastTap=position;
+  tapTimer=setTimeout(()=>{
+   tapTimer=null;
+   if(lastTap===position){lastTap=null;clickMouse(0)}
+  },280);
+ }
+}
 const pad=$('touchpad');
 pad.addEventListener('touchstart',e=>{
- e.preventDefault();clearLongPress();
+ e.preventDefault();
  if(e.touches.length>=2){
-  prevTouches={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+  clearLongPress();scrolling=true;moved=true;
+  prevTouches={x:(e.touches[0].clientX+e.touches[1].clientX)/2,
+               y:(e.touches[0].clientY+e.touches[1].clientY)/2};
   if(longHeld){releaseMouse();longHeld=false}
   return;
  }
- touching=true;moved=false;longHeld=false;startTime=Date.now();
+ clearLongPress();touching=true;scrolling=false;moved=false;longHeld=false;startTime=Date.now();
  prevTouches={x:e.touches[0].clientX,y:e.touches[0].clientY};
- longPressTimer=setTimeout(()=>{if(touching&&!moved&&!pressed){pressMouse();longHeld=true}},460);
+ longPressTimer=setTimeout(()=>{
+  if(touching&&!scrolling&&!moved&&!pressed){pressMouse();longHeld=true}
+ },360);
 },{passive:false});
 pad.addEventListener('touchmove',e=>{
  e.preventDefault();
  if(e.touches.length>=2){
   clearLongPress();
-  const x=(e.touches[0].clientX+e.touches[1].clientX)/2,y=(e.touches[0].clientY+e.touches[1].clientY)/2;
-  if(prevTouches)scrollContent((prevTouches.y-y)*2,(prevTouches.x-x)*2);
-  prevTouches={x,y};moved=true;return;
+  const x=(e.touches[0].clientX+e.touches[1].clientX)/2,
+        y=(e.touches[0].clientY+e.touches[1].clientY)/2;
+  if(scrolling&&prevTouches)scrollContent((prevTouches.y-y)*2.3,(prevTouches.x-x)*2.3);
+  prevTouches={x,y};moved=true;scrolling=true;return;
  }
- if(!e.touches.length)return;
+ if(!e.touches.length||scrolling)return;
  const t=e.touches[0];
  if(prevTouches){
   const dx=t.clientX-prevTouches.x,dy=t.clientY-prevTouches.y;
@@ -439,11 +473,14 @@ pad.addEventListener('touchmove',e=>{
 pad.addEventListener('touchend',e=>{
  e.preventDefault();clearLongPress();
  if(e.touches.length){prevTouches=null;return}
- if(longHeld&&!dragLock){releaseMouse()}
- else if(!moved&&Date.now()-startTime<430&&!dragLock)clickMouse(0);
- touching=false;prevTouches=null;longHeld=false;
+ if(longHeld)releaseMouse();
+ else if(!scrolling&&!moved&&Date.now()-startTime<350)recordTap();
+ touching=false;prevTouches=null;longHeld=false;scrolling=false;
 },{passive:false});
-pad.addEventListener('touchcancel',()=>{clearLongPress();if(longHeld&&!dragLock)releaseMouse();touching=false;prevTouches=null});
+pad.addEventListener('touchcancel',()=>{
+ clearLongPress();if(longHeld)releaseMouse();
+ touching=false;prevTouches=null;longHeld=false;scrolling=false;
+});
 let pointerGesture=null;
 pad.addEventListener('pointerdown',e=>{
  if(e.pointerType==='touch')return;
@@ -459,22 +496,10 @@ pad.addEventListener('pointermove',e=>{
 });
 pad.addEventListener('pointerup',e=>{
  if(e.pointerType==='touch'||!pointerGesture)return;
- if(!pointerGesture.moved)clickMouse(0);
+ if(!pointerGesture.moved)recordTap();
  pointerGesture=null;
 });
-const scrollZone=$('scrollZone');
-scrollZone.addEventListener('touchstart',e=>{e.preventDefault();scrollGesture=e.touches[0].clientY},{passive:false});
-scrollZone.addEventListener('touchmove',e=>{
- e.preventDefault();if(scrollGesture===null)return;
- const y=e.touches[0].clientY;scrollContent((scrollGesture-y)*2.8);scrollGesture=y;
-},{passive:false});
-scrollZone.addEventListener('touchend',()=>scrollGesture=null);
-scrollZone.addEventListener('wheel',e=>{e.preventDefault();scrollContent(e.deltaY)},{passive:false});
-$('leftClick').addEventListener('click',()=>clickMouse(0));
-$('rightClick').addEventListener('click',()=>clickMouse(2));
-$('dragLock').addEventListener('click',()=>setDragLock(!dragLock));
-$('padMode').addEventListener('click',()=>setMode('pad'));
-$('keyMode').addEventListener('click',()=>setMode('keyboard'));
+pad.addEventListener('wheel',e=>{e.preventDefault();scrollContent(e.deltaY,e.deltaX)},{passive:false});
 $('escapeKey').addEventListener('click',()=>applyKey('ESC'));
 $('undoKey').addEventListener('click',()=>{ctrl=true;keyEvent('keydown','Control','ControlLeft');keyEvent('keydown','z','KeyZ');keyEvent('keyup','z','KeyZ');keyEvent('keyup','Control','ControlLeft');ctrl=false;try{currentDocument()?.execCommand('undo')}catch{}});
 $('zoomOut').addEventListener('click',()=>setZoom(zoom-.1));
