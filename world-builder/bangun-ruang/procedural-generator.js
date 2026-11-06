@@ -136,7 +136,8 @@
    const result=make($('brgType').value,options);
    $('brgCreate').disabled=true;$('brgStatus').textContent='CREATING EDITABLE BUILDING DRAFT…';
    try{
-    await host.generate(result,$('brgAfter').value);
+    const created=await host.generate(result,$('brgAfter').value);
+    if(created===false){$('brgStatus').textContent='GENERATION CANCELLED · EXISTING EDITOR PRESERVED';return;}
     $('brgStatus').textContent='✓ DRAFT READY · EDIT AND SAVE WHEN APPROVED';
     dialog.close();
    }catch(err){
