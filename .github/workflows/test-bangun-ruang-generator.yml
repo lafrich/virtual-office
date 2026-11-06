@@ -1,0 +1,25 @@
+name: Test Bangun Ruang Building Generator
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'world-builder/bangun-ruang/procedural-generator.js'
+      - 'world-builder/bangun-ruang/index.html'
+      - 'tests/bangun-ruang-generator.test.cjs'
+      - '.github/workflows/test-bangun-ruang-generator.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-generator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check generator syntax
+        run: node --check world-builder/bangun-ruang/procedural-generator.js
+      - name: Verify deterministic presets and editor handoff
+        run: node --test tests/bangun-ruang-generator.test.cjs
