@@ -777,6 +777,13 @@ window.EMOTION_STUDIO_STANDALONE=true;
    copy:overlay.querySelector("#pixelCopySelection"),
    paste:overlay.querySelector("#pixelPasteSelection"),
    pasteMirror:overlay.querySelector("#pixelPasteMirrored"),
+   toolbarCopy:overlay.querySelector("#pixelToolbarCopy"),
+   toolbarPaste:overlay.querySelector("#pixelToolbarPaste"),
+   toolbarPasteFlip:overlay.querySelector("#pixelToolbarPasteFlip"),
+   copyTarget:overlay.querySelector("#pixelCopyTarget"),
+   autoMirror:overlay.querySelector("#pixelCopyAutoMirror"),
+   copyToView:overlay.querySelector("#pixelCopyToView"),
+   pasteToView:overlay.querySelector("#pixelPasteToView"),
    pasteReplace:overlay.querySelector("#pixelPasteReplace"),
    clipboardInfo:overlay.querySelector("#pixelClipboardInfo"),
    selectAll:overlay.querySelector("#pixelSelectAll"),
@@ -797,7 +804,7 @@ window.EMOTION_STUDIO_STANDALONE=true;
   const ctx=atlas.getContext("2d",{willReadFrequently:true});
   const out=canvas.getContext("2d");
   let bone="",tool="pencil",dir=0,active=null,history=[],redo=[],dirty=false,source=null,ref=null,refs=null;
-  let zoom=5,pan=null,pinch=null,selection=null,moveStart=null;
+  let zoom=5,pan=null,pinch=null,selection=null,moveStart=null,floatingPaste=null;
   const touches=new Map();
   // Shared by the Mahluk 2 and Emotion Studio editors on the same GitHub Pages
   // origin. Clipboard is not part of character/master-rig saves or GitHub.
@@ -815,6 +822,8 @@ window.EMOTION_STUDIO_STANDALONE=true;
    const saved=currentClipboard();
    const available=!!saved;
    els.paste.disabled=!available;els.pasteMirror.disabled=!available;
+   els.toolbarPaste.disabled=!available;els.toolbarPasteFlip.disabled=!available;
+   els.pasteToView.disabled=!available;
    els.clipboardInfo.textContent=available?
     "READY · "+(saved.bone||"PLANE").toUpperCase()+" / "+(saved.direction||"SE").toUpperCase()+
     " · "+saved.w+"×"+saved.h+" PX · COPY BETWEEN VIEWS / PARTS":
@@ -843,6 +852,7 @@ window.EMOTION_STUDIO_STANDALONE=true;
   }
   function historyStep(from,to){
    if(!from.length)return;
+   floatingPaste=null;
    to.push(ctx.getImageData(0,0,W,H*4));
    ctx.putImageData(from.pop(),0,0);dirty=true;draw();updateHistory();
   }
@@ -982,7 +992,9 @@ window.EMOTION_STUDIO_STANDALONE=true;
    selectTool("pencil");
   }
   function selectTool(name){
-   tool=name;controls.forEach(b=>b.classList.toggle("active",b.dataset.pixelTool===name));
+   tool=name;
+   if(name!=="move-pixels")floatingPaste=null;
+   controls.forEach(b=>b.classList.toggle("active",b.dataset.pixelTool===name));
   }
   controls.forEach(b=>b.addEventListener("click",()=>selectTool(b.dataset.pixelTool)));
   overlay.querySelectorAll("[data-pixel-swatch]").forEach(el=>el.addEventListener("click",()=>{
@@ -1004,26 +1016,59 @@ window.EMOTION_STUDIO_STANDALONE=true;
    els.status.textContent="COPIED "+clipboard.w+"×"+clipboard.h+" PIXELS · "+
     bone.toUpperCase()+" / "+DIR[dir].toUpperCase()+" · SWITCH VIEW THEN PASTE";
   }
-  function pasteSelection(mirror=false){
+  // A true four-view transfer: the copied region is saved once and can be
+  // composited directly on any native direction, with automatic opposite-angle
+  // mirroring. No on-screen canvas resizing, no overlay pixels in the export.
+  function pasteSelection(mirror=false,targetDir=dir){
    const stamp=currentClipboard();
-   if(!stamp){els.status.textContent="NO COPIED PIXELS · SELECT + COPY FIRST";return;}
-   const destX=selection?selection.x:(mirror?W-stamp.x-stamp.w:stamp.x);
-   const destY=selection?selection.y:stamp.y;
+   if(!stamp){els.status.textContent="NO COPIED PIXELS · SELECT + COPY FIRST";return false;}
+   if(!Number.isInteger(targetDir)||targetDir<0||targetDir>=DIR.length)return false;
+   const fromView=DIR.indexOf(stamp.direction),switching=targetDir!==dir;
+   const destX=selection&&!switching?selection.x:(mirror?W-stamp.x-stamp.w:stamp.x);
+   const destY=selection&&!switching?selection.y:stamp.y;
    const dx=clamp(destX,0,W-1),dy=clamp(destY,0,H-1);
+   const original=ctx.getImageData(0,targetDir*H,W,H);
+   const background=original.data.slice(),replace=els.pasteReplace.checked;
    saveHistory();
-   replaceFrame(S.paste(frameImage().data,W,H,stamp,{
-    x:dx,y:dy,mirror,replace:els.pasteReplace.checked
+   original.data.set(S.paste(background,W,H,stamp,{
+    x:dx,y:dy,mirror,replace
    }));
+   ctx.putImageData(original,0,targetDir*H);
+   dir=targetDir;els.dir.value=DIR[dir];ref=refs?.[DIR[dir]]||ref;
+   if(switching&&fromView>=0)els.refView.value=DIR[fromView];
    selection={x:dx,y:dy,w:Math.min(stamp.w,W-dx),h:Math.min(stamp.h,H-dy)};
+   // Keep the unmodified destination beneath pasted pixels while adjusting
+   // their position. Normal Move Pixels would erase underlying target art.
+   floatingPaste={stamp,mirror,replace,background,x:dx,y:dy,direction:dir};
    selectTool("move-pixels");
    draw();updateHistory();
    els.status.textContent="PASTED "+stamp.w+"×"+stamp.h+" RGBA · "+
-    (mirror?"HORIZONTAL MIRROR · ":"")+DIR[dir].toUpperCase()+
-    " · DRAG TO ALIGN · UNDO AVAILABLE";
+    (mirror?"AUTO MIRRORED · ":"")+DIR[dir].toUpperCase()+
+    " · DRAG TO POSITION · UNDO AVAILABLE";
+   return true;
+  }
+  function pasteToView(copyCurrent=false){
+   const dest=DIR.indexOf(els.copyTarget.value);
+   if(dest<0)return;
+   if(copyCurrent)copySelection();
+   const stamp=currentClipboard();if(!stamp)return;
+   const sourceDir=DIR.indexOf(stamp.direction);
+   const mirror=els.autoMirror.checked&&sourceDir>=0&&
+    ((sourceDir===1||sourceDir===3)!==(dest===1||dest===3));
+   if(pasteSelection(mirror,dest)){
+    els.status.textContent=(copyCurrent?"COPIED & ":"")+"PASTED TO "+
+     DIR[dest].toUpperCase()+(mirror?" · AUTO MIRROR":" · ORIGINAL ORIENTATION")+
+     " · DRAG TO ADJUST, THEN APPLY FRAME";
+   }
   }
   els.copy.onclick=copySelection;
+  els.toolbarCopy.onclick=copySelection;
   els.paste.onclick=()=>pasteSelection(false);
+  els.toolbarPaste.onclick=()=>pasteSelection(false);
   els.pasteMirror.onclick=()=>pasteSelection(true);
+  els.toolbarPasteFlip.onclick=()=>pasteSelection(true);
+  els.copyToView.onclick=()=>pasteToView(true);
+  els.pasteToView.onclick=()=>pasteToView(false);
   function flipSelection(axis){
    saveHistory();const image=frameImage();
    replaceFrame(S.flip(image.data,W,H,selection,axis));
@@ -1031,10 +1076,21 @@ window.EMOTION_STUDIO_STANDALONE=true;
   }
   function moveSelectionFrom(sourcePixels,rect,dx,dy){
    const x=clamp(dx,-W,W),y=clamp(dy,-H,H);
-   replaceFrame(S.translate(sourcePixels,W,H,rect,x,y));
-   selection={x:clamp(rect.x+x,0,W-1),y:clamp(rect.y+y,0,H-1),
-    w:Math.min(rect.w,W-clamp(rect.x+x,0,W-1)),
-    h:Math.min(rect.h,H-clamp(rect.y+y,0,H-1))};
+   if(moveStart?.floating&&moveStart.floating.direction===dir){
+    const layer=moveStart.floating;
+    const left=clamp(layer.x+x,0,W-1),top=clamp(layer.y+y,0,H-1);
+    replaceFrame(S.paste(layer.background,W,H,layer.stamp,{
+     x:left,y:top,mirror:layer.mirror,replace:layer.replace
+    }));
+    floatingPaste={...layer,x:left,y:top};
+    selection={x:left,y:top,
+     w:Math.min(layer.stamp.w,W-left),h:Math.min(layer.stamp.h,H-top)};
+   }else{
+    replaceFrame(S.translate(sourcePixels,W,H,rect,x,y));
+    selection={x:clamp(rect.x+x,0,W-1),y:clamp(rect.y+y,0,H-1),
+     w:Math.min(rect.w,W-clamp(rect.x+x,0,W-1)),
+     h:Math.min(rect.h,H-clamp(rect.y+y,0,H-1))};
+   }
    draw();updateSelection();
   }
   els.selectAll.onclick=()=>{selection={x:0,y:0,w:W,h:H};selectTool("select");draw();updateSelection()};
@@ -1047,7 +1103,9 @@ window.EMOTION_STUDIO_STANDALONE=true;
   };
   els.dir.onchange=()=>{
    dir=DIR.indexOf(els.dir.value);ref=refs?.[DIR[dir]]||ref;
-   selection=null;moveStart=null;draw();updateHistory();
+   selection=null;moveStart=null;floatingPaste=null;
+   // Default destination is the opposite angle for fast copy/mirror work.
+   els.copyTarget.value=DIR[dir^1];draw();updateHistory();
   };
   const updateRef=()=>{
    els.refOpacityLabel.textContent=els.refOpacity.value+"%";draw();
@@ -1144,7 +1202,7 @@ window.EMOTION_STUDIO_STANDALONE=true;
    const point=coords(e);
    if(tool==="picker"){pipette(point);return}
    if(tool==="select"){
-    selection=S.rectFromPoints(point,point,W,H);
+    floatingPaste=null;selection=S.rectFromPoints(point,point,W,H);
     active={id:e.pointerId,at:point,origin:point,mode:"select",painted:true};
     capture(e);draw();updateSelection();return;
    }
@@ -1154,7 +1212,8 @@ window.EMOTION_STUDIO_STANDALONE=true;
      els.status.textContent="DRAG FROM INSIDE SELECTED PIXELS";return;
     }
     saveHistory();
-    moveStart={rect:{...selection},pixels:frameImage().data.slice(),from:point};
+    moveStart={rect:{...selection},pixels:frameImage().data.slice(),from:point,
+     floating:floatingPaste?{...floatingPaste}:null};
     active={id:e.pointerId,at:point,mode:"move-pixels",painted:true};
     capture(e);return;
    }
@@ -1242,7 +1301,7 @@ window.EMOTION_STUDIO_STANDALONE=true;
    if(!id)throw Error("Select an editable plane");
    bone=id;dir=Math.max(0,DIR.indexOf(direction));source=originalAtlas||null;
    refs=referenceImages||null;ref=refs?.[DIR[dir]]||referenceImage||null;
-   history=[];redo=[];dirty=false;active=null;selection=null;moveStart=null;
+   history=[];redo=[];dirty=false;active=null;selection=null;moveStart=null;floatingPaste=null;
    els.refView.value=dir===0?"off":"se";
    els.refOpacity.value="40";els.refOpacityLabel.textContent="40%";
    els.refFlip.checked=true;els.refX.value="0";els.refY.value="0";
@@ -1250,7 +1309,8 @@ window.EMOTION_STUDIO_STANDALONE=true;
    if(initialAtlas)ctx.drawImage(initialAtlas,0,0,W,H*4);
    else if(source)ctx.drawImage(source,0,0,W,H*4);
    els.heading.textContent="PIXEL EDITOR / "+id.replaceAll("_"," ").toUpperCase();
-   els.dir.value=DIR[dir];selectTool("pencil");overlay.hidden=false;
+   els.dir.value=DIR[dir];els.copyTarget.value=DIR[dir^1];
+   selectTool("pencil");overlay.hidden=false;
    draw();zoomFit();updateHistory();
    canvas.focus({preventScroll:true});
   }
