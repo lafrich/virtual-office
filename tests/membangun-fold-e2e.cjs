@@ -52,37 +52,39 @@ const assert=require('node:assert/strict');
   const keyboardHeight=await page.locator('#keyboardPage').evaluate(el=>el.offsetHeight);
   console.log('KEYBOARD_RATIO',keyboardHeight,panelHeight,(keyboardHeight/panelHeight).toFixed(2));
   assert.ok(keyboardHeight/panelHeight<.57,'Keyboard must leave room for touchpad');
-  // Real two-touch swipe on the pad must scroll a panel inside the app iframe.
-  const scrollState=await page.evaluate(async()=>{
-   const doc=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none').contentDocument;
-   const pad=document.querySelector('#touchpad');
-   const cur=document.querySelector('#cursor');
-   const transform=document.querySelector('#appFrame').style.transform;
-   const k=Number.parseFloat(transform.replace('scale(','').replace(')',''))||1;
-   const x=Number.parseFloat(cur.style.left)/k, y=Number.parseFloat(cur.style.top)/k;
-   const box=doc.createElement('div');
-   box.style.cssText='position:fixed;z-index:2147483647;left:'+(x-75)+'px;top:'+(y-65)+'px;width:150px;height:130px;overflow-y:auto;background:yellow';
-   const inner=doc.createElement('div');inner.style.height='1800px';inner.textContent='scroll test';box.appendChild(inner);doc.body.appendChild(box);
-   let wheelCount=0;box.addEventListener('wheel',()=>wheelCount++);
-   let documentWheelCount=0;doc.addEventListener('wheel',()=>documentWheelCount++);
-   const hit=doc.elementFromPoint(x,y);
-   const metrics={k,x,y,bodyClientHeight:doc.body.clientHeight,innerHeight:doc.defaultView.innerHeight,
-       frameHeight:document.querySelector('#appFrame').style.height,
-       boxRect:{x:box.getBoundingClientRect().x,y:box.getBoundingClientRect().y,w:box.clientWidth,h:box.clientHeight},
-       hit:hit?.tagName,hitId:hit?.id||'',hitClass:String(hit?.className||'').slice(0,80),
-       bridgeText:document.getElementById('bridgeStatus').textContent,
-       scrollableBox:box.scrollHeight>box.clientHeight};
-   function event(type,yy){
-    const touches=[1,2].map(i=>new Touch({identifier:i,target:pad,clientX:110+i*30,clientY:yy}));
+  // User wants to move the whole clipped desktop image, NOT the app's inner tabs.
+  const scrollState=await page.evaluate(()=>{
+   const scroll=document.getElementById('screenScroll');
+   const pad=document.getElementById('touchpad');
+   const frame=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none');
+   const before=scroll.scrollTop;
+   const maxY=scroll.scrollHeight-scroll.clientHeight;
+   function swipe(type,x){
+    const touches=[1,2].map(i=>new Touch({identifier:i,target:pad,clientX:x+i*12,clientY:140}));
     pad.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,touches,targetTouches:touches,changedTouches:touches}));
    }
-   event('touchstart',180);event('touchmove',100);event('touchmove',65);
+   swipe('touchstart',90);
+   swipe('touchmove',140);
+   swipe('touchmove',190);
    pad.dispatchEvent(new TouchEvent('touchend',{bubbles:true,cancelable:true,touches:[],targetTouches:[],changedTouches:[]}));
-   const result={scrollTop:box.scrollTop,wheelCount,documentWheelCount,metrics};box.remove();return result;
+   const afterSwipe=scroll.scrollTop;
+   const afterProgress=document.getElementById('screenProgress').textContent;
+   pad.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:90}));
+   const afterWheel=scroll.scrollTop;
+   document.getElementById('screenDown').click();
+   const afterDown=scroll.scrollTop;
+   document.getElementById('screenUp').click();
+   const afterUp=scroll.scrollTop;
+   return {before,maxY,afterSwipe,afterProgress,afterWheel,afterDown,afterUp,
+       frameHeight:frame.style.height,scrollHeight:scroll.scrollHeight,clientHeight:scroll.clientHeight};
   });
-  console.log('TWO_FINGER_SCROLL',scrollState);
-  assert.ok(scrollState.scrollTop>0,'Two-finger touchpad swipe must scroll app panel');
-  assert.ok(scrollState.wheelCount>0,'Wheel must be dispatched inside iframe');
+  console.log('OUTER_SCREEN_PAN',scrollState);
+  assert.ok(scrollState.maxY>100,'Virtual desktop image must exceed Fold display height');
+  assert.ok(scrollState.afterSwipe>scrollState.before+50,'Two-finger pad scroll must move the desktop viewport');
+  assert.ok(scrollState.afterWheel>scrollState.afterSwipe,'Wheel over touchpad must move desktop viewport');
+  assert.ok(scrollState.afterDown>scrollState.afterWheel,'Down arrow moves screen image');
+  assert.ok(scrollState.afterUp<scrollState.afterDown,'Up arrow moves screen image');
+  assert.notEqual(scrollState.afterProgress,'FIT','Progress should indicate clipped screen');
   // Single tap must be a left click. Two quick taps must be contextmenu only.
   const tapState=await page.evaluate(async()=>{
    const doc=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none').contentDocument;
@@ -105,6 +107,26 @@ const assert=require('node:assert/strict');
   console.log('DOUBLE_TAP_RIGHT',tapState);
   assert.equal(tapState.right,1,'Double tap should trigger one contextmenu event');
   assert.equal(tapState.left,0,'Double tap should not trigger a left click');
+  // Dedicated mouse buttons must be adjacent, not at opposite sides of the pad.
+  const buttonState=await page.evaluate(()=>{
+   const left=document.getElementById('leftClick'),right=document.getElementById('rightClick');
+   const sameGroup=left.parentNode===right.parentNode;
+   const gap=right.offsetLeft-(left.offsetLeft+left.offsetWidth);
+   const doc=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none').contentDocument;
+   let clicks=0,contexts=0;
+   const lc=()=>clicks++,rc=e=>{e.preventDefault();contexts++};
+   doc.addEventListener('click',lc,true);
+   doc.addEventListener('contextmenu',rc,true);
+   left.click();right.click();
+   doc.removeEventListener('click',lc,true);
+   doc.removeEventListener('contextmenu',rc,true);
+   return {sameGroup,gap,clicks,contexts};
+  });
+  console.log('ADJACENT_MOUSE_BUTTONS',buttonState);
+  assert.equal(buttonState.sameGroup,true);
+  assert.ok(buttonState.gap>=0&&buttonState.gap<=12,'Mouse buttons must be side by side');
+  assert.equal(buttonState.clicks,1,'Left button should click inside the app');
+  assert.equal(buttonState.contexts,1,'Right button should trigger context menu inside app');
   await page.screenshot({path:'membangun-laptop-rotated.png'});
   await page.screenshot({path:'membangun-laptop-keyboard.png'});
   console.log('APP_SWITCH_AND_ROTATE_OK');
