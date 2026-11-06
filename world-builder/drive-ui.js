@@ -292,5 +292,5 @@ function init(){
  update();
 }
 document.addEventListener("DOMContentLoaded",init);
-window.MembangunCloudUI=Object.freeze({open,close});
+window.MembangunCloudUI=Object.freeze({open,close,connectAndSync:connect,syncOnConnect});
 })(window);
