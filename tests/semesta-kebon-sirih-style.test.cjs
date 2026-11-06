@@ -13,7 +13,7 @@ test('all terrain types have pipeline-native tile URLs and source metadata',()=>
  assert.ok(Object.keys(theme.TILES).length>=13,"Jakarta pack must retain drains and river, in addition to original terrain");
  for(const terrainId of ['drain','river','water','grass','road_asphalt','road_concrete'])
   assert.ok(theme.TILES[terrainId],terrainId);
- for(const kind of terrain.types)assert.match(theme.tileUrl(kind==='road'?'road_asphalt':kind),/^https:\/\/raw\.githubusercontent\.com\/lafrich\/virtual-life-asset-pipeline\/main\/assets\/kebon_sirih\/terrain\/[^/]+\.png$/);
+ for(const kind of terrain.types)assert.match(theme.tileUrl(kind==='road'?'road_asphalt':kind),/^https:\/\/raw\.githubusercontent\.com\/lafrich\/virtual-life-asset-pipeline\/main\/assets\/kebon_sirih\/terrain\/[^/]+\.png(?:\?v=[A-Za-z0-9_-]+)?$/);
  assert.equal(theme.tile('road',{surface:'concrete'}),'road_concrete');
  assert.equal(theme.tile('road',{}),'road_asphalt');
  const index=new Map([['3,2','sidewalk'],['3,1','road']]);
