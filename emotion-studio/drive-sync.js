@@ -114,7 +114,7 @@ function safeId(entry){
 function documentFor(entry){
  const id=safeId(entry);
  const clean={...entry};
- delete clean.template;delete clean.driveFileId;delete clean.driveModifiedTime;
+ delete clean.template;delete clean.driveFileId;delete clean.driveModifiedTime;delete clean.cloudSyncHash;
  return {format:FORMAT,cell:[64,112],directions:DIRECTIONS,entries:[clean]};
 }
 function multipartBody(meta,contents,type){
