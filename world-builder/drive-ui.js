@@ -206,8 +206,11 @@ async function backupEntireAssetLibrary(){
    const item=all[i];if(!item?.record?.id){failed.push("Missing asset ID");continue}
    const name=D.filename(item.kind,item.record.id);
    try{
-    const result=await D.save(app,item.kind,item.record,knownByName.get(name)||null);
-    knownByName.set(name,result.file);success++;
+    const existing=knownByName.get(name),base=readSyncMeta()[name];
+    if(existing&&(!base||base.id!==existing.id||base.modifiedTime!==existing.modifiedTime))
+     throw Error("CONFLICT: refresh and reconcile this library asset before overwriting Drive");
+    const result=await D.save(app,item.kind,item.record,base?{id:base.id,modifiedTime:base.modifiedTime}:null);
+    knownByName.set(name,result.file);markSynced(name,result.file,item.record);success++;
    }catch(e){failed.push(item.kind+":"+item.record.id+" "+e.message)}
    info("ASSET LIBRARY "+(i+1)+"/"+all.length+" · "+success+" SAVED · "+
      failed.length+" FAILED");
@@ -293,5 +296,5 @@ function init(){
  update();
 }
 document.addEventListener("DOMContentLoaded",init);
-window.MembangunCloudUI=Object.freeze({open,close,connectAndSync:connect,syncOnConnect});
+window.MembangunCloudUI=Object.freeze({open,close,connectAndSync:connect,syncOnConnect,markSynced,readSyncMeta});
 })(window);
