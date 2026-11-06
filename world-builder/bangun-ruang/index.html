@@ -82,7 +82,7 @@ dialog::backdrop{background:#001c4d90}dialog header{background:#0d5cba;color:#ff
 <div id="app">
 <header class="titlebar"><div class="mark" aria-hidden="true">✳</div><div class="window-title"><strong>BANGUN RUANG</strong><span class="title-extra">.PNT — Building Studio</span></div><div class="win" aria-hidden="true"><span>_</span><span>□</span><span class="close-mark">×</span></div></header>
 <nav>
- <button id="newBtn">▤ New</button><button id="saveBtn" class="primary">💾 Save Asset</button><button id="mbCloudOpen" type="button">☁ Drive</button><button id="mobileMenuBtn" type="button" aria-expanded="false">☰ Menu</button>
+ <button id="newBtn">▤ New</button><button id="openBuildingGenerator" class="primary" type="button" title="Procedural buildings and landmark sources without AI">⚙ Generate Building</button><button id="saveBtn" class="primary">💾 Save Asset</button><button id="mbCloudOpen" type="button">☁ Drive</button><button id="mobileMenuBtn" type="button" aria-expanded="false">☰ Menu</button>
  <button id="openObjectPixelCreator" type="button" class="primary" onclick="window.openBangunPixelCreator(event)">✎ Pixel Creator</button>
   <button id="exportBtn">↓ Export Package</button><button id="importBtn">↑ Import</button>
  <a class="button" href="../../membangun/?app=bangun" title="Back to Membangun launcher">⌂ Membangun</a>
@@ -392,6 +392,7 @@ window.openBangunPixelCreator=async function(event){
 <script src="../city-drafts.js?v=city-building-sync-v1"></script>
 <script src="../city-building-link.js?v=city-building-sync-v1"></script>
 <script src="./city-browser.js?v=city-building-sync-v1"></script>
+<script src="./procedural-generator.js?v=integrated-v1"></script>
 <script>
 (function(){
 'use strict';
@@ -419,7 +420,7 @@ const sources=semesta?.all||[];
 const defaultBase='semesta:small';
 const ids=['name','kind','w','d','floors','windows','wall','roof','roofShape','detail','sign','front','actions','collision','doorStyle','windowStyle','balcony'];
 const dirs=['sw','se','ne','nw'];
-let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null,cityBrowser=null,importSourceAsset=null,buildingAutoTimer=null;
+let current=null,view='sw',saved=[],manualOverrides={},manualSignature='',interiorUi=null,scaleController=null,cityBrowser=null,importSourceAsset=null,buildingAutoTimer=null,generationRecipe=null;
 const exteriorGuides=window.VLBuildingGuides?.mount();
 try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))saved=v.filter(x=>x&&typeof x.id==='string'&&x.config&&x.views).slice(0,75);}catch{}
 // Adopt saved old per-item alignments as global per-type defaults once,
@@ -450,6 +451,7 @@ function apply(c){
  updateBaseSummary(config());render();
 }
 function preset(baseId=defaultBase){
+ generationRecipe=null;
  const spec=semesta?.byId(baseId)||semesta?.byId(defaultBase);
  if(!spec){status('Semesta spec failed to load');return;}
  const kind=spec.kind,cc={name:spec.label,baseId:spec.id,kind,
@@ -640,6 +642,7 @@ function buildAsset(){
   baseHeight:base?.height||null,format:'virtual-life-building-asset-v1',
   // Preserve specialized Warteg 3D mesh metadata when editing an existing city instance.
   assetPipeline:current?.assetPipeline||null,
+  generationRecipe:generationRecipe||current?.generationRecipe||null,
   projection:{type:'iso-2:1',tilePixels:[64,32],groundCoordinates:'c/r',directions:dirs},
   footprint:[c.w,c.d],entranceFacing:inter.interactive?c.front:null,
   blocking:c.collision,interactions:combined.slice(0,20),
@@ -721,7 +724,7 @@ function exportAsset(){
 }
 function openSavedAsset(asset,{resume=true}={}){
  if(!asset?.id||!asset.config||!asset.views)return false;
- current=asset;manualOverrides={...(asset.editedViews||{})};
+ current=asset;generationRecipe=asset.generationRecipe||null;manualOverrides={...(asset.editedViews||{})};
  manualSignature=artFingerprint(asset.config);importSourceAsset=asset.originSource||null;
  $('assetDescription').value=asset.description||'';
  apply(asset.config);
@@ -771,7 +774,7 @@ function importFile(file){
    const a=JSON.parse(r.result);
    if(a.format!=='virtual-life-building-asset-v1'||!a.config||!a.views)throw Error('Invalid building package');
    if(!dirs.every(d=>/^data:image\/png;base64,/.test(a.views[d]?.url||'')))throw Error('Missing four PNG sprite views');
-   current=null;apply(a.config);manualOverrides={...(a.editedViews||{})};
+   current=null;generationRecipe=a.generationRecipe||null;apply(a.config);manualOverrides={...(a.editedViews||{})};
    manualSignature=artFingerprint(a.config);interiorUi?.load(a);
    const draft=buildAsset();
    const rebuilt={...draft,views:a.views,id:/^br-[a-z0-9-]{1,72}$/.test(a.id||'')?a.id:draft.id};
@@ -937,6 +940,40 @@ interiorUi=window.VLStudioInteriors?.init({getConfig:config,
  status,exportAsset,saveAsset,getScaleController:()=>scaleController,showExterior:on=>exteriorGuides?.setVisible(on),
  onFloorClick:(c,r,hit)=>scaleController?.placeAt(c,r,'interior')||false});
 interiorUi?.reset();
+// Generator lives inside Bangun Ruang; a generated draft stays editable in
+// the existing 4-view exterior pixel editor and per-floor interior editor.
+const buildingGenerator=window.VLBangunGenerator?.mount({
+ async generate(result,after){
+  if(!result?.config||!result?.recipe)throw Error('Invalid generator recipe');
+  if((current||Object.keys(manualOverrides).length)&&
+     !confirm('Generate a NEW building draft? Save your current edits first.'))return false;
+  if(result.nativeId){
+   // Landmark source pixels are imported to a NEW copy, never overwritten.
+   const source=window.VLPipelineAssets?.prefabs?.find(x=>x.id===result.nativeId);
+   if(!source)throw Error('Landmark source not present in official pipeline catalog');
+   const native=await openBuildingCopyFromSemesta(source);
+   if(!native?.loaded?.length)throw Error('No native landmark source PNG could be imported');
+   apply({...config(),name:result.config.name,interactive:result.config.interactive});
+  }else{
+   cityBrowser?.clearTarget?.();
+   preset(result.config.baseId);
+   apply(result.config);
+   $('saveBtn').disabled=false;
+  }
+  interiorUi?.load({interactive:result.config.interactive});
+  if(result.config.interactive&&window.VLBuildingInterior?.templates?.[result.roomTemplate]){
+   $('interiorTemplate').value=result.roomTemplate;
+   $('applyInteriorTemplate').click();
+  }
+  generationRecipe=result.recipe;
+  interiorUi?.selectTab(after==='interior'&&result.config.interactive?'interior':'exterior');
+  render();drawLibrary();
+  status('✓ '+result.config.name+' draft generated · edit EXTERIOR / INTERIOR · Save Asset or Save to Semesta when ready'+
+   (result.nativeId?' · landmark missing views use procedural fallback':''));
+  return true;
+ }
+});
+$('openBuildingGenerator').onclick=()=>buildingGenerator?.open();
 scaleController=window.VLCharacterScale?.mount({
  getConfig:config,getBuildingId:()=>current?.id||null,getExterior:()=>viewResult(config(),view),
  getFacing:()=>view,getInterior:()=>interiorUi?.getScene(),
