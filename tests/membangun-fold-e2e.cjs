@@ -85,12 +85,18 @@ const assert=require('node:assert/strict');
   assert.ok(scrollState.afterDown>scrollState.afterWheel,'Down arrow moves screen image');
   assert.ok(scrollState.afterUp<scrollState.afterDown,'Up arrow moves screen image');
   assert.notEqual(scrollState.afterProgress,'FIT','Progress should indicate clipped screen');
-  // Regression: moving two fingers together pans the cropped screen,
-  // while changing the distance between them pinches the desktop zoom.
+  // Regression: pinch reaches Semesta's map CANVAS as a wheel zoom event.
+  // It MUST NOT touch the outer laptop zoom, while two-finger pan still works.
   const pinchState=await page.evaluate(()=>{
    const pad=document.getElementById('touchpad');
    const scroll=document.getElementById('screenScroll');
    const zoomText=document.getElementById('zoomText');
+   const doc=[...document.querySelectorAll('#frameWrap iframe')].find(f=>f.style.display!=='none').contentDocument;
+   const canvas=doc.getElementById('world');
+   if(!canvas)throw Error('Semesta map canvas #world missing');
+   const programWheels=[];
+   const capture=e=>programWheels.push({deltaY:e.deltaY,ctrlKey:e.ctrlKey,target:e.target.id});
+   canvas.addEventListener('wheel',capture,{capture:true});
    const getZoom=()=>Number.parseInt(zoomText.textContent,10);
    const send=(type,a,b)=>{
     const touches=[new Touch({identifier:1,target:pad,clientX:a,clientY:120}),
@@ -103,24 +109,32 @@ const assert=require('node:assert/strict');
     }));
    };
    const original=getZoom(),beforePan=scroll.scrollTop;
-   // Same-direction movement must pan without changing zoom.
    send('touchstart',100,200);send('touchmove',135,235);send('touchmove',165,265);
    send('touchend',165,265);
    const afterPan=getZoom(),scrolled=scroll.scrollTop-beforePan;
-   // Spreading the same two fingertips apart should zoom in.
+   const beforePinchScroll=scroll.scrollTop;
    send('touchstart',110,210);send('touchmove',90,230);send('touchmove',70,250);
    send('touchend',70,250);
-   const afterOut=getZoom();
-   // Pinching them back together should zoom out.
+   const afterOut=getZoom(),outWheels=programWheels.slice(),afterOutScroll=scroll.scrollTop;
    send('touchstart',70,250);send('touchmove',95,225);send('touchmove',120,200);
    send('touchend',120,200);
-   return {original,afterPan,afterOut,afterIn:getZoom(),scrolled};
+   canvas.removeEventListener('wheel',capture,true);
+   return {original,afterPan,afterOut,afterIn:getZoom(),scrolled,
+      beforePinchScroll,afterOutScroll,outWheels,
+      inWheels:programWheels.slice(outWheels.length)};
   });
-  console.log('PINCH_ZOOM_AND_PAN',pinchState);
-  assert.equal(pinchState.afterPan,pinchState.original,'Two-finger pan must not change zoom');
-  assert.ok(pinchState.scrolled>10,'Two-finger movement must still pan the desktop');
-  assert.ok(pinchState.afterOut>pinchState.original+10,'Pinch-out must enlarge the desktop');
-  assert.ok(pinchState.afterIn<pinchState.afterOut-10,'Pinch-in must reduce the desktop');
+  console.log('PROGRAM_PINCH_AND_PAN',pinchState);
+  assert.equal(pinchState.afterPan,pinchState.original,'Two-finger pan must not alter laptop zoom');
+  assert.ok(pinchState.scrolled>10,'Two-finger swipe must still pan clipped desktop');
+  assert.equal(pinchState.afterOut,pinchState.original,'Pinch-out must not zoom laptop page');
+  assert.equal(pinchState.afterIn,pinchState.original,'Pinch-in must not zoom laptop page');
+  assert.equal(pinchState.beforePinchScroll,pinchState.afterOutScroll,'Pinch must not scroll laptop page');
+  assert.ok(pinchState.outWheels.length>0,'Pinch-out must reach Semesta canvas');
+  assert.ok(pinchState.outWheels.every(w=>w.deltaY<0&&w.ctrlKey&&w.target==='world'),
+     'Pinch-out must send Semesta zoom-in wheels');
+  assert.ok(pinchState.inWheels.length>0,'Pinch-in must reach Semesta canvas');
+  assert.ok(pinchState.inWheels.every(w=>w.deltaY>0&&w.ctrlKey&&w.target==='world'),
+     'Pinch-in must send Semesta zoom-out wheels');
 
   // Single tap must be a left click. Two quick taps must be contextmenu only.
   const tapState=await page.evaluate(async()=>{
