@@ -91,8 +91,8 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
   <header class="topbar">
    <div class="brand">✳ MEMBANGUN.EXE <small>MINI LAPTOP MODE</small></div>
    <div class="right">
-    <button id="zoomOut" title="Perkecil tampilan">−</button><span id="zoomText" aria-label="Zoom">FIT</span>
-    <button id="zoomIn" title="Perbesar tampilan">＋</button>
+    <button id="zoomOut" title="Perkecil seluruh viewport laptop (bukan zoom denah)">−</button><span id="zoomText" aria-label="Zoom">FIT</span>
+    <button id="zoomIn" title="Perbesar seluruh viewport laptop (bukan zoom denah)">＋</button>
     <button id="rotate90" title="Putar 90 derajat jika browser tidak mau landscape">↻90°</button>
     <button id="fullscreen" title="Mode layar penuh">⛶</button>
     <button class="close" id="exit" title="Kembali ke Membangun">×</button>
@@ -134,7 +134,7 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
    <div class="pad-page" id="padPage">
     <div class="pad-main">
      <div class="touchpad" id="touchpad" aria-label="Satu tap klik kiri, dua tap klik kanan, dua jari geser layar aplikasi, tahan lalu geser untuk drag" role="application">
-      <div class="pad-hint">1 JARI: MOUSE · 2 JARI: SCROLL<br>PINCH: ZOOM · TAHAN: DRAG</div>
+      <div class="pad-hint">1 JARI: MOUSE · 2 JARI: GESER LAYAR<br>PINCH: ZOOM DALAM APP · TAHAN: DRAG</div>
      </div>
      <div class="mouse-buttons" role="group" aria-label="Tombol mouse">
       <button type="button" id="leftClick" aria-label="Klik kiri mouse">◩ LEFT</button>
@@ -294,6 +294,33 @@ function scrollContent(deltaY,deltaX=0){
  }else if(doc.body&&doc.body.scrollHeight>doc.body.clientHeight+2){
   doc.body.scrollTop+=deltaY;doc.body.scrollLeft+=deltaX;
  }
+}
+// Bridge pinch from the physical touchpad to the ACTIVE app's own zoom
+// handler. Never scale the laptop iframe when pinching.
+// Semesta listens for wheel on canvas#world; other studios can handle
+// ctrl+wheel on their hovered canvas/editor surface.
+function zoomInsideApp(direction){
+ const doc=currentDocument();if(!doc)return false;
+ const w=doc.defaultView,pt=pointInFrame();
+ let target=targetAt();
+ if(selected==='semesta'){
+  target=doc.getElementById('world')||target;
+ }else if(target){
+  target=target.closest?.('canvas,svg,[data-zoom-canvas],[data-editor-viewport]')||target;
+ }
+ if(!target||typeof w.WheelEvent!=='function')return false;
+ const rect=target.getBoundingClientRect();
+ const onSurface=pt.x>=rect.left&&pt.x<=rect.right&&pt.y>=rect.top&&pt.y<=rect.bottom;
+ const x=selected==='semesta'&&!onSurface?rect.left+rect.width/2:pt.x;
+ const y=selected==='semesta'&&!onSurface?rect.top+rect.height/2:pt.y;
+ const deltaY=direction>0?-80:80; // fingers apart = zoom in
+ try{
+  target.dispatchEvent(new w.WheelEvent('wheel',{
+   bubbles:true,cancelable:true,composed:true,view:w,clientX:x,clientY:y,
+   deltaX:0,deltaY,deltaMode:0,ctrlKey:true
+  }));
+  return true;
+ }catch(err){console.warn('App pinch bridge',err);return false}
 }
 function focusDoc(){
  const doc=currentDocument();if(!doc)return null;
@@ -494,7 +521,7 @@ pad.addEventListener('touchstart',e=>{
   clearLongPress();scrolling=true;moved=true;
   // Reinitialize on the second finger; one-finger long-press must not remain held.
   const pair=pairTouch(e.touches);
-  twoFinger={start:pair,prev:pair,startZoom:zoom,kind:'pending'};
+  twoFinger={start:pair,prev:pair,zoomDistance:pair.distance,kind:'pending'};
   prevTouches={x:pair.x,y:pair.y};
   if(longHeld){releaseMouse();longHeld=false}
   return;
@@ -511,7 +538,7 @@ pad.addEventListener('touchmove',e=>{
  if(e.touches.length>=2){
   clearLongPress();
   const pair=pairTouch(e.touches);
-  if(!twoFinger)twoFinger={start:pair,prev:pair,startZoom:zoom,kind:'pending'};
+  if(!twoFinger)twoFinger={start:pair,prev:pair,zoomDistance:pair.distance,kind:'pending'};
   const g=twoFinger;
   if(g.kind==='pending'){
    const pinchChange=Math.abs(pair.distance-g.start.distance);
@@ -521,7 +548,14 @@ pad.addEventListener('touchmove',e=>{
    else if(centerTravel>5&&centerTravel>pinchChange*.8)g.kind='pan';
   }
   if(g.kind==='pinch'){
-   setZoom(g.startZoom*(pair.distance/g.start.distance));
+   // Send discrete mouse-wheel zoom steps to the editor, not the outer page.
+   // A threshold avoids runaway zoom at high Android touch sample rates.
+   const spacing=14;
+   const ticks=Math.max(-4,Math.min(4,Math.trunc((pair.distance-g.zoomDistance)/spacing)));
+   if(ticks){
+    for(let i=0;i<Math.abs(ticks);i++)zoomInsideApp(Math.sign(ticks));
+    g.zoomDistance+=ticks*spacing;
+   }
   }else if(g.kind==='pan'){
    const d=gestureDelta(pair.x-g.prev.x,pair.y-g.prev.y);
    panScreen(-d.dy*2.3,-d.dx*2.3);
