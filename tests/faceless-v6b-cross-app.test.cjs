@@ -21,7 +21,9 @@ const reset={
 };
 const window={VLCharacterReferenceReset:reset,VLPipelineAssets:{characters:[]}};
 const context=vm.createContext({window,location:{origin:'https://lafrich.github.io'},
- localStorage:{getItem:k=>storage.get(k)||null},URL,AbortController,Map,console});
+ localStorage:{getItem:k=>storage.get(k)||null},URL,AbortController,Map,console,
+ fetch:async()=>({ok:true,json:async()=>({version:1,build_version:'abc123456',
+  characters:[]})})});
 vm.runInContext(fs.readFileSync('world-builder/mahluk-hidup-bridge.js','utf8'),context);
 vm.runInContext(fs.readFileSync('world-builder/pipeline-character-rig.js','utf8'),context);
 test('Semesta and Bangun Ruang share installed V6B male/female roots even under legacy reset policy',async()=>{
@@ -54,7 +56,7 @@ test('JiWA reads the same canonical root storage without modifying mechanics',()
  assert.match(link,/mahluk-2-library-v1/);
  assert.match(link,/jiwa-sandbox-actor-v1/);
  assert.match(link,/e\.key===SOURCE/);
- assert.match(link,/row\.sprite/);
+ assert.match(link,/record\.sprite/);
  assert.doesNotThrow(()=>new Function(link));
 });
 test('EMOSI.EXE remains the only editor for face assets, shared bridge carries asset ID not duplicate atlas',()=>{
