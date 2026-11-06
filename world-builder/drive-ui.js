@@ -6,7 +6,7 @@ function adapter(){return window.MembangunCloudAdapter}
 function info(t,error=false){const el=$("mbCloudStatus");if(el){el.textContent=t;el.style.color=error?"#b5272f":"#174d8e"}}
 function update(){
  const connected=!!D?.connected();
- for(const id of ["mbCloudRefresh","mbCloudSave","mbCloudBackup","mbCloudLoad","mbCloudDisconnect"])
+ for(const id of ["mbCloudRefresh","mbCloudSave","mbCloudBackup","mbCloudLoad","mbCloudDisconnect","mbCloudAssetBackup","mbCloudAssetRestore"])
   if($(id))$(id).disabled=!connected;
  if($("mbCloudConnect"))$("mbCloudConnect").textContent=connected?"✓ DRIVE CONNECTED / RECONNECT":"☁ CONNECT GOOGLE DRIVE";
 }
@@ -74,6 +74,74 @@ async function backupLocal(){
  info("✓ BACKUP "+count+"/"+missing.length+" LOCAL PROJECT(S) · "+(missing.length-count)+" FAILED",count!==missing.length);
  busy=false;$("mbCloudBackup").disabled=false;
 }
+
+async function backupEntireAssetLibrary(){
+ if(!D.connected()||busy)return;
+ const a=adapter();
+ if(!a?.assetCatalogSnapshot)throw Error("Built-in Asset Library adapter unavailable");
+ busy=true;
+ if($("mbCloudAssetBackup"))$("mbCloudAssetBackup").disabled=true;
+ if($("mbCloudAssetRestore"))$("mbCloudAssetRestore").disabled=true;
+ let success=0,failed=[],catalogCount=0;
+ try{
+  const snapshot=await a.assetCatalogSnapshot();
+  catalogCount=snapshot.record?.entries?.length||0;
+  const all=[snapshot,...(await a.localRecords?.()||[])];
+  const folderFiles=(await Promise.all(["assetCatalog"].map(kind=>D.list(app,kind)))).flat();
+  const mainFiles=await D.list(app);
+  const knownByName=new Map([...folderFiles,...mainFiles].map(x=>[x.name,x]));
+  info("BACKING UP "+catalogCount+" NATIVE ASSETS AND "+(all.length-1)+" SAVED CUSTOM RECORDS ...");
+  for(let i=0;i<all.length;i++){
+   const item=all[i];if(!item?.record?.id){failed.push("Missing asset ID");continue}
+   const name=D.filename(item.kind,item.record.id);
+   try{
+    const result=await D.save(app,item.kind,item.record,knownByName.get(name)||null);
+    knownByName.set(name,result.file);success++;
+   }catch(e){failed.push(item.kind+":"+item.record.id+" "+e.message)}
+   info("ASSET LIBRARY "+(i+1)+"/"+all.length+" · "+success+" SAVED · "+
+     failed.length+" FAILED");
+  }
+  info("✓ DRIVE ASSET LIBRARY "+success+"/"+all.length+
+   " FILES · "+catalogCount+" NATIVE FURNITURE / INTERIOR / EXTERIOR INDEX ENTRIES"+
+   (failed.length?" · ERRORS: "+failed.slice(0,2).join("; "):""),!!failed.length);
+ }catch(error){info("ASSET LIBRARY BACKUP FAILED: "+error.message,true)}
+ finally{busy=false;if($("mbCloudAssetBackup"))$("mbCloudAssetBackup").disabled=false;
+  if($("mbCloudAssetRestore"))$("mbCloudAssetRestore").disabled=false}
+}
+async function restoreEntireAssetLibrary(){
+ if(!D.connected()||busy)return;
+ const a=adapter();if(!a?.assetCatalogSnapshot)return;
+ busy=true;
+ if($("mbCloudAssetRestore"))$("mbCloudAssetRestore").disabled=true;
+ try{
+  const native=await D.list(app,"assetCatalog");
+  const remote=await D.list(app);
+  const custom=remote.filter(f=>/^(?:building|object)--/.test(f.name));
+  if(!native.length&&!custom.length){info("NO ASSET LIBRARY BACKUP FOUND. SAVE ASSET LIBRARY ON PC FIRST.",true);return}
+  if(!window.confirm("Restore "+custom.length+" custom Bangun Ruang assets from Drive? "+
+    "Existing local IDs are skipped; built-in furniture, interiors and exteriors already load from the published sources."))return;
+  const local=await a.localRecords();
+  const seen=new Set(local.map(x=>x.kind+":"+x.record.id));
+  let added=0,skipped=0,failed=0;
+  for(let i=0;i<custom.length;i++){
+   const f=custom[i];
+   try{
+    const doc=await D.load(f),key=doc.kind+":"+doc.id;
+    if(seen.has(key)){skipped++;continue}
+    await a.importRemote(doc);seen.add(key);added++;
+   }catch(e){failed++;console.warn("Bangun asset restore failure",f.name,e)}
+   info("RESTORE "+(i+1)+"/"+custom.length+" · "+added+" ADDED, "+
+    skipped+" ALREADY HERE, "+failed+" ERRORS");
+  }
+  const index=native[0]?await D.load(native[0]):null;
+  const nativeCount=index?.record?.entries?.length||0;
+  info("✓ ASSET LIBRARY RESTORED · "+added+" CUSTOM ASSETS · "+nativeCount+
+   " BUILT-IN REFERENCES / TEMPLATES AVAILABLE FROM PUBLISHED LIBRARY · "+
+   skipped+" SKIPPED · "+failed+" FAILED",failed>0);
+ }catch(e){info("LIBRARY RESTORE FAILED: "+e.message,true)}
+ finally{busy=false;if($("mbCloudAssetRestore"))$("mbCloudAssetRestore").disabled=false}
+}
+
 async function loadSelected(){
  if(!D.connected()||busy)return;
  const file=files.find(f=>f.id===$("mbCloudFiles").value);
@@ -103,6 +171,8 @@ function init(){
  $("mbCloudSave").onclick=saveCurrent;
  $("mbCloudBackup").onclick=()=>backupLocal().catch(e=>{busy=false;info(e.message,true)});
  $("mbCloudLoad").onclick=loadSelected;
+ if($("mbCloudAssetBackup"))$("mbCloudAssetBackup").onclick=()=>backupEntireAssetLibrary().catch(e=>info(e.message,true));
+ if($("mbCloudAssetRestore"))$("mbCloudAssetRestore").onclick=()=>restoreEntireAssetLibrary().catch(e=>info(e.message,true));
  window.addEventListener("membangun:local-saved",event=>{
   if(!D.connected()||event.detail?.app!==app)return;
   // Fire-and-forget only when local saving already succeeded. Report actual cloud status separately.
