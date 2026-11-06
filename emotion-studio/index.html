@@ -324,6 +324,17 @@ select:focus,input:focus-visible,button:focus-visible{outline:1px dotted #163773
 .pixel-clipboard-actions{display:flex;gap:4px;flex-wrap:wrap}
 .pixel-clipboard-actions button{flex:1 1 58px;min-width:0;white-space:normal}
 #pixelClipboardInfo{min-height:29px;overflow-wrap:anywhere;color:#264d83}
+.pixel-toolbar .pixel-quick-copy,.pixel-toolbar .pixel-quick-paste{background:#b9dafb;border-color:#fff #6d83a2 #6d83a2 #fff;color:#14457d;font-weight:700}
+.pixel-toolbar .pixel-quick-copy:hover,.pixel-toolbar .pixel-quick-paste:hover{background:#95c4f8}
+.pixel-toolbar .pixel-quick-copy:disabled,.pixel-toolbar .pixel-quick-paste:disabled{opacity:.38}
+.pixel-copy-to-view{border:1px solid #9eacbd;background:#d3e1f2;padding:6px 5px;margin:5px 0;display:flex;flex-direction:column;gap:6px}
+.pixel-copy-to-view .sectionhead{margin:-6px -5px 0;background:#aac9ef;color:#123f72}
+.pixel-copy-to-view>label{display:flex;flex-direction:column;gap:3px;font:700 10px "Courier New",monospace;color:#204b7f}
+.pixel-copy-to-view>label.check{flex-direction:row;align-items:center}
+.pixel-copy-to-view select{background:#fff;color:#253f5d;width:100%;padding:6px;min-height:32px}
+.pixel-copy-to-view button{background:#b3d2f9;color:#17436e;border:1px solid #8aaccd;font-weight:700;white-space:normal}
+.pixel-copy-to-view .hint{margin:0}
+.pixel-copy-to-view button:disabled{opacity:.45}
 .pixel-selection-controls>.check{padding:3px 0;font:10px "Courier New",monospace}
 @media(max-width:750px){.pixel-clipboard-actions button{min-height:34px}}
 
@@ -514,7 +525,11 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
   <div class="pixel-toolbar">
    <label>DIRECTION <select id="pixelDirection"><option value="se">SE / FRONT RIGHT</option><option value="sw">SW / FRONT LEFT</option><option value="ne">NE / BACK RIGHT</option><option value="nw">NW / BACK LEFT</option></select></label>
    <button data-pixel-tool="pencil" class="active">✎ PENCIL</button>
-   <button data-pixel-tool="eraser">⌫ ERASER</button><button data-pixel-tool="select" title="Draw a rectangle around pixels to select them / S">▣ SELECT</button><button data-pixel-tool="move-pixels" title="Move selected pixels / M">✣ MOVE PIXELS</button>
+   <button data-pixel-tool="eraser">⌫ ERASER</button><button data-pixel-tool="select" title="Draw a rectangle around pixels to select them / S">▣ SELECT</button>
+   <button id="pixelToolbarCopy" class="pixel-quick-copy" type="button" title="Copy selection from current view / Ctrl+C">⧉ COPY</button>
+   <button id="pixelToolbarPaste" class="pixel-quick-paste" type="button" title="Paste pixels into current view / Ctrl+V">▣ PASTE</button>
+   <button id="pixelToolbarPasteFlip" class="pixel-quick-paste" type="button" title="Mirror and paste into current view / Ctrl+Shift+V">⇆ PASTE FLIP</button>
+   <button data-pixel-tool="move-pixels" title="Move selected pixels / M">✣ MOVE PIXELS</button>
    <button data-pixel-tool="fill">▤ FILL</button>
    <button data-pixel-tool="picker">◎ PICK</button><button data-pixel-tool="hand" title="Pan canvas by dragging / H">✥ HAND</button>
    <label>COLOR <input id="pixelColor" type="color" value="#211d22"></label>
@@ -561,7 +576,24 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
       <button id="pixelPasteSelection" type="button" title="Paste to active view without changing other views / Ctrl+V">▣ PASTE</button>
       <button id="pixelPasteMirrored" type="button" title="Paste flipped horizontally, at mirrored X position / Ctrl+Shift+V">⇆ PASTE FLIP</button>
      </div>
-     <label class="check"><input id="pixelPasteReplace" type="checkbox"> REPLACE TRANSPARENT PIXELS</label>
+     <div class="pixel-copy-to-view">
+      <div class="sectionhead">COPY PIXELS TO ANOTHER VIEW</div>
+      <label>DESTINATION VIEW
+       <select id="pixelCopyTarget" aria-label="Destination camera view for copied pixels">
+        <option value="se">SE · FRONT RIGHT</option>
+        <option value="sw">SW · FRONT LEFT</option>
+        <option value="ne">NE · BACK RIGHT</option>
+        <option value="nw">NW · BACK LEFT</option>
+       </select>
+      </label>
+      <label class="check"><input id="pixelCopyAutoMirror" type="checkbox" checked> AUTO MIRROR OPPOSITE SIDE</label>
+      <div class="plane-buttons">
+       <button id="pixelCopyToView" type="button" title="Copy selected pixels directly to the chosen view">⧉ COPY → VIEW</button>
+       <button id="pixelPasteToView" type="button" title="Paste saved clipboard onto the chosen view">▣ PASTE → VIEW</button>
+      </div>
+      <p class="hint">Select an area on SE/SW/NE/NW, then Copy → View. The target opens automatically for pixel-level adjustment. Only this frame is modified.</p>
+     </div>
+     <label class="check"><input id="pixelPasteReplace" type="checkbox"> REPLACE TRANSPARENT PIXELS (erase under transparent source)</label>
      <p class="hint" id="pixelClipboardInfo" aria-live="polite">CLIPBOARD EMPTY · SELECT + COPY (CTRL+C)</p>
      <div class="plane-buttons"><button id="pixelSelectAll" type="button">▣ SELECT ALL</button><button id="pixelDeselect" type="button">◇ DESELECT</button></div>
      <div class="plane-buttons"><button id="pixelFlipH" type="button">⇆ FLIP H</button><button id="pixelFlipV" type="button">⇅ FLIP V</button></div>
