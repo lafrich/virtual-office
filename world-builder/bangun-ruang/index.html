@@ -1022,6 +1022,37 @@ window.addEventListener('storage',event=>{
  */
 window.MembangunCloudAdapter=Object.freeze({
  app:'bangun',
+ async assetCatalogSnapshot(){
+  // Include every built-in furniture sprite (including real generated 4-view PNG
+  // where available), all 66+ interior room templates, exterior sources,
+  // procedural factories and the same native asset catalog used in Semesta.
+  const interior=window.VLIndonesiaInteriorPack||{};
+  const builtins=window.VLBangunObjects?.builtins||[];
+  const sources=window.VLAssetCatalog||[];
+  const furniture=builtins.map(x=>({family:'furniture',data:x}));
+  const props=Object.entries(interior.types||{}).map(([id,data])=>({
+   family:'interior-prop',id,data
+  }));
+  const templates=Object.entries(interior.templates||{}).map(([id,data])=>({
+   family:'interior-template',id,data
+  }));
+  const exteriors=sources.filter(x=>x?.id&&x?.file).map(x=>({
+   family:'exterior-or-source',id:x.id,file:x.file,label:x.label,category:x.objectCategory||x.group,
+   source:x.source,variants:x.variants||null,relativeFile:x.relativeFile||null,
+   // Private encrypted game assets are indexed only, never copied.
+   protectedReference:x.source==='gpt-original'
+  }));
+  const warteg=window.VLWartegKharismaTemplate;
+  const generators=warteg?[{family:'exterior-generator',id:warteg.id,label:warteg.label,
+   sourceVersion:warteg.sourceVersion,footprint:warteg.footprint}]:[];
+  return {kind:'assetCatalog',record:{
+   id:'bangun-native-library-v1',name:'Bangun Ruang / Furniture, Interior & Exterior',
+   format:'bangun-ruang-asset-library-v1',savedAt:new Date().toISOString(),
+   counts:{furniture:furniture.length,interiorProps:props.length,interiorTemplates:templates.length,
+    exteriors:exteriors.length,generators:generators.length},
+   entries:[...furniture,...props,...templates,...exteriors,...generators]
+  }};
+ },
  async currentRecord(){
   const row=current?.id?saved.find(x=>x.id===current.id):null;
   return row?{kind:'building',record:row}:null;
