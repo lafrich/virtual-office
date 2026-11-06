@@ -1292,7 +1292,7 @@ const U=window.MH2UniversalEmotions,P=window.MH2PlanePixelEditor;
 const $=id=>document.getElementById(id),DIR=U.DIR;
 let catalog=null,selected=null,atlas=null,frame=0,direction="se",dirty=false,playing=false,saving=false,editor=null;
 const D=window.EmotionDrive;
-let driveEntries=new Map(),driveBusy=false;
+let driveEntries=new Map(),driveBusy=false,autoSaveTimer=null;
 
 // Original 64x112 RGBA Human Male Base idle frame 0 head reference,
 // extracted from media/human-male-base-guide.png in the official asset build.
@@ -1376,6 +1376,26 @@ function mergeCatalog(){
  for(const [id,entry] of driveEntries)merged.set(id,entry);
  catalog={...starter,entries:[...merged.values()]};
 }
+
+function emotionHash(entry){
+ const v=JSON.stringify([entry.id,entry.name,entry.base,entry.frames,entry.fps,entry.png]);
+ let h=2166136261;for(let i=0;i<v.length;i++)h=Math.imul(h^v.charCodeAt(i),16777619);
+ return String(h>>>0)+":"+v.length;
+}
+function emotionConflictCopy(local){
+ const suffix="-local-"+Date.now().toString(36);
+ return {...local,id:String(local.id).slice(0,64-suffix.length)+suffix,
+  name:String(local.name+" / LOCAL CONFLICT COPY").slice(0,80),
+  driveFileId:undefined,driveModifiedTime:undefined,cloudSyncHash:undefined};
+}
+function scheduleEmotionAutosave(){
+ if(autoSaveTimer)clearTimeout(autoSaveTimer);
+ autoSaveTimer=setTimeout(()=>{
+  autoSaveTimer=null;
+  if(dirty&&!saving&&!driveBusy&&!editor?.isOpen())void save();
+ },2800);
+}
+
 function driveStatus(message,error=false){
  $("driveLabel").textContent=message;
  $("driveLabel").style.color=error?"#b62230":"#276744";
@@ -1407,16 +1427,52 @@ async function connectDrive(){
 }
 async function refreshDrive({force=false}={}){
  if(!D?.connected()){status("CONNECT GOOGLE DRIVE FIRST TO LOAD CROSS-DEVICE EMOTIONS",true);return}
- if(dirty&&!force&&!window.confirm("You have unsaved changes. Load Drive library anyway? Existing edits will stay in the current canvas."))return;
+ if(dirty&&!force&&!window.confirm("Unsaved edits are still on your canvas. Refresh cloud list?"))return;
  $("driveRefresh").disabled=true;
  try{
-  const result=await D.loadAll((n,total)=>driveStatus("LOADING "+n+" / "+total+" FROM DRIVE"));
-  driveEntries=new Map(result.entries.filter(U.validEntry).map(e=>[e.id,e]));
-  mergeCatalog();await renderList();
-  driveStatus("✓ GOOGLE DRIVE · "+driveEntries.size+" PROJECT(S)"+(result.errors.length?" · "+result.errors.length+" READ ERROR(S)":""));
-  if(result.folderId)$("driveFolder").href="https://drive.google.com/drive/folders/"+encodeURIComponent(result.folderId);
-  status("GOOGLE DRIVE LIBRARY LOADED · "+driveEntries.size+" EMOTION(S) · CHOOSE FROM LEFT");
- }catch(e){driveStatus("DRIVE LOAD FAILED: "+e.message,true);status("DRIVE LOAD FAILED: "+e.message,true)}
+  const response=await D.loadAll((n,total)=>driveStatus("AUTO LOAD "+n+"/"+total+" EMOTIONS..."));
+  const remote=new Map(response.entries.filter(U.validEntry).map(e=>[e.id,e]));
+  driveEntries=remote;
+  let imported=0,uploaded=0,conflicts=0,failed=0;
+  for(const [id,cloud] of remote){
+   const local=savedEntries.get(id),remoteHash=emotionHash(cloud);
+   if(!local||emotionHash(local)===remoteHash||
+      (local.cloudSyncHash&&local.cloudSyncHash===emotionHash(local)&&local.driveModifiedTime!==cloud.driveModifiedTime)){
+    await persistSaved({...cloud,cloudSyncHash:remoteHash});imported++;continue;
+   }
+   if(local?.driveModifiedTime===cloud.driveModifiedTime){
+    try{
+     const sent=await D.save(local,{expectedModifiedTime:cloud.driveModifiedTime});
+     const next={...local,driveFileId:sent.project.id,
+      driveModifiedTime:sent.project.modifiedTime,cloudSyncHash:emotionHash(local)};
+     await persistSaved(next);driveEntries.set(id,next);uploaded++;continue;
+    }catch(error){failed++;console.warn("Emotion upload during sync",id,error);continue}
+   }
+   // Both sides changed, or there is no trustworthy shared version.
+   // Keep the entire local PNG under a unique ID before loading the Drive edition.
+   await persistSaved(emotionConflictCopy(local));
+   await persistSaved({...cloud,cloudSyncHash:remoteHash});
+   imported++;conflicts++;
+  }
+  for(const [id,local] of [...savedEntries]){
+   if(remote.has(id))continue;
+   try{
+    const sent=await D.save(local);
+    const next={...local,driveFileId:sent.project.id,
+     driveModifiedTime:sent.project.modifiedTime,cloudSyncHash:emotionHash(local)};
+    await persistSaved(next);driveEntries.set(id,next);uploaded++;
+   }catch(error){failed++;console.warn("Emotion new cloud upload",id,error)}
+  }
+  mergeCatalog();
+  if(!dirty){
+   const current=catalog.entries.find(x=>x.id===selected?.id);
+   if(current)await choose(current,{force:true});
+   else await renderList();
+  }else await renderList();
+  if(response.folderId)$("driveFolder").href="https://drive.google.com/drive/folders/"+encodeURIComponent(response.folderId);
+  driveStatus("AUTO SYNC: "+imported+" LOADED, "+uploaded+" UPLOADED, "+conflicts+" CONFLICT COPIES, "+failed+" ERRORS",!!(conflicts||failed));
+  status("✓ DRIVE SYNC COMPLETE · EMOTION AUTO-SAVES AFTER EDITING"+(conflicts?" · LOCAL CONFLICT BACKUPS PRESERVED":""));
+ }catch(error){driveStatus("DRIVE SYNC FAILED: "+error.message,true);status("DRIVE SYNC FAILED: "+error.message,true)}
  finally{$("driveRefresh").disabled=false}
 }
 async function saveToDrive(){
@@ -1441,7 +1497,7 @@ async function saveToDrive(){
 }
 
 function status(s,error=false){$("status").textContent=s;$("status").style.color=error?"#b62230":""}
-function setDirty(value=true){dirty=value;$("dirty").textContent=dirty?"● UNSAVED CHANGES":savedEntries.has(selected?.id)?"✓ SAVED ON THIS DEVICE":"○ STARTER / NOT SAVED";$("dirty").style.color=dirty?"#b62230":"#276744"}
+function setDirty(value=true){dirty=value;$("dirty").textContent=dirty?"● AUTO SAVE PENDING":savedEntries.has(selected?.id)?"✓ SAVED ON THIS DEVICE":"○ STARTER / NOT SAVED";$("dirty").style.color=dirty?"#b62230":"#276744";if(value)scheduleEmotionAutosave();else if(autoSaveTimer){clearTimeout(autoSaveTimer);autoSaveTimer=null}}
 function stageImage(index=frame){const c=document.createElement("canvas");c.width=64;c.height=448;
  if(atlas)c.getContext("2d").drawImage(atlas,index*64,0,64,448,0,0,64,448);return c}
 function drawTile(target,index,dir="se"){const ctx=target.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,target.width,target.height);
