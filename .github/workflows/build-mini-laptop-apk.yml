@@ -24,8 +24,11 @@ jobs:
           gradle-version: '8.9'
       - name: Install Android SDK 35
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          SDK_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SDK_MANAGER="$(find "$SDK_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -1)"
+          test -x "$SDK_MANAGER" || { echo "SDK Manager unavailable in $SDK_HOME"; find "$SDK_HOME" -maxdepth 3 -type f -name sdkmanager; exit 1; }
+          yes | "$SDK_MANAGER" --licenses > /dev/null || true
+          "$SDK_MANAGER" "platforms;android-35" "build-tools;35.0.0"
       - name: Build installable APK
         run: gradle -p android-mini-laptop --no-daemon assembleDebug
       - name: Rename Android package
