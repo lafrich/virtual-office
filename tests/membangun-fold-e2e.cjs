@@ -63,13 +63,21 @@ const assert=require('node:assert/strict');
    box.style.cssText='position:fixed;z-index:2147483647;left:'+(x-75)+'px;top:'+(y-65)+'px;width:150px;height:130px;overflow-y:auto;background:yellow';
    const inner=doc.createElement('div');inner.style.height='1800px';inner.textContent='scroll test';box.appendChild(inner);doc.body.appendChild(box);
    let wheelCount=0;box.addEventListener('wheel',()=>wheelCount++);
+   let documentWheelCount=0;doc.addEventListener('wheel',()=>documentWheelCount++);
+   const hit=doc.elementFromPoint(x,y);
+   const metrics={k,x,y,bodyClientHeight:doc.body.clientHeight,innerHeight:doc.defaultView.innerHeight,
+       frameHeight:document.querySelector('#appFrame').style.height,
+       boxRect:{x:box.getBoundingClientRect().x,y:box.getBoundingClientRect().y,w:box.clientWidth,h:box.clientHeight},
+       hit:hit?.tagName,hitId:hit?.id||'',hitClass:String(hit?.className||'').slice(0,80),
+       bridgeText:document.getElementById('bridgeStatus').textContent,
+       scrollableBox:box.scrollHeight>box.clientHeight};
    function event(type,yy){
     const touches=[1,2].map(i=>new Touch({identifier:i,target:pad,clientX:110+i*30,clientY:yy}));
     pad.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,touches,targetTouches:touches,changedTouches:touches}));
    }
    event('touchstart',180);event('touchmove',100);event('touchmove',65);
    pad.dispatchEvent(new TouchEvent('touchend',{bubbles:true,cancelable:true,touches:[],targetTouches:[],changedTouches:[]}));
-   const result={scrollTop:box.scrollTop,wheelCount};box.remove();return result;
+   const result={scrollTop:box.scrollTop,wheelCount,documentWheelCount,metrics};box.remove();return result;
   });
   console.log('TWO_FINGER_SCROLL',scrollState);
   assert.ok(scrollState.scrollTop>0,'Two-finger touchpad swipe must scroll app panel');
