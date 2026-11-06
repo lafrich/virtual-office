@@ -105,6 +105,11 @@ const assert=require('node:assert/strict');
 
   // New blank is an independent 64x448 transparent database emotion.
   await page.locator('#new').click();
+  await page.waitForFunction(ids=>{
+   const label=document.getElementById('entryId')?.textContent||'';
+   const id=label.match(/ID \/ ([a-z0-9_-]+)/)?.[1];
+   return !!id&&!ids.includes(id);
+  },[sourceId,copyId,variantId],{timeout:20000});
   const blankId=await currentId();
   assert.ok(![sourceId,copyId,variantId].includes(blankId));
   const blank=await exportPng();
