@@ -133,14 +133,17 @@ function mount(options={}){
  '<div class="sal-toolbar"><input id="salSearch" type="search" placeholder="Cari nama, kategori, sumber..." aria-label="Cari aset">',
  '<select id="salCategory" aria-label="Kategori aset">',
  ...Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+v+'</option>'),
- '</select><span id="salCount" class="sal-count">0 ASSETS</span></div>',
+ '</select><span id="salCount" class="sal-count">0 ASSETS</span>', 
+  '<button id="salSaveDrive" type="button" title="Backup full asset index plus custom PNG artwork to Google Drive">☁ SAVE ALL ASSETS</button>',
+  '<button id="salLoadDrive" type="button" title="Restore custom building and Pixel Creator assets from Google Drive">↓ RESTORE LIBRARY</button>',
+  '<small id="salCloudStatus" class="sal-cloud-status" role="status">BUILT-IN ASSETS: GITHUB · CUSTOM: LOCAL / DRIVE</small></div>',
  '<div class="sal-body"><div class="sal-gallery" id="salGallery" role="list"></div><section class="sal-detail" aria-label="Detail aset">',
  '<div class="sal-hero" id="salHero"></div><h2 id="salName">Pilih aset</h2><div id="salSource" class="sal-source"></div>',
  '<div class="sal-views" id="salViews" aria-label="Sudut tampilan"></div><dl id="salData" class="sal-data"></dl>',
  '<p id="salDescription" class="sal-description"></p>',
  '<div class="sal-actions"><button id="salPlace" class="sal-primary" type="button">＋ Place in Semesta</button>',
  '<button id="salEdit" type="button">✎ Edit in Bangun Ruang</button></div>',
- '<small class="sal-help">Save di Bangun Ruang membuat aset baru pada browser ini; original tidak diubah. Export package untuk backup / pindah perangkat.</small>',
+ '<small class="sal-help">SAVE ALL ASSETS menyimpan indeks seluruh katalog + custom PNG ke Google Drive. Aset bawaan GitHub tetap menggunakan file asli di pipeline; original game encrypted hanya direferensikan, tidak disalin.</small>',
  '</section></div>'
  ].join('');
  document.body.append(dlg);
@@ -284,6 +287,116 @@ function mount(options={}){
   if(!selected&&found.length)selected=found[0];
   detail();
  }
+
+// Archive all Semesta library entries, not merely placed city assets.
+// Built-in/published assets are indexed with source URLs that are available on every device;
+// the editable local Bangun Ruang / Pixel Creator assets include actual PNG image bytes.
+const cloudState={busy:false,folder:"Membangun / Semesta / Asset Library"};
+function cloudMessage(value,error=false){
+ const el=$('salCloudStatus');
+ el.textContent=value;el.style.color=error?'#a52e33':'#285b83';
+}
+async function driveLogin(){
+ const drive=g.MembangunCloudDrive;
+ if(!drive)throw Error("Google Drive connector missing. Reload Semesta.");
+ if(!drive.connected())await drive.connect();
+ return drive;
+}
+function localAssets(){
+ let buildings=[];
+ try{
+  const rows=JSON.parse(localStorage.getItem("virtual-life-bangun-ruang-v1")||"[]");
+  if(Array.isArray(rows))buildings=rows.filter(x=>x&&/^br-[a-z0-9-]{1,72}$/.test(x.id)&&x.config&&x.views);
+ }catch{}
+ const objects=(g.VLBangunObjects?.read?.()||[]).filter(x=>g.VLBangunObjects.valid(x));
+ return {buildings,objects};
+}
+function assetIndex(){
+ const all=entries(options.catalog?.()||[],options.vehicles?.()||[],options.characters?.()||[]);
+ return {
+  id:"semesta-all-v1",format:"semesta-asset-library-v1",name:"Semesta Asset Library",
+  createdAt:new Date().toISOString(),source:"Semesta + Bangun Ruang + Character Stock",
+  entries:JSON.parse(JSON.stringify(all.map(x=>({
+   id:x.id,file:x.file,label:x.label||x.name||x.id,category:x.category,
+   source:x.source,kind:x.kind,group:x.group||null,
+   published:x.published!==false,pack:x.pack||null,
+   footprint:x.footprint||null,variants:x.variants||null,
+   // Canonical published paths remain in GitHub; do not copy encrypted game files.
+   protectedReference:x.source==="gpt-original"
+  }))))
+ };
+}
+async function archiveLibrary(){
+ if(cloudState.busy)return;
+ cloudState.busy=true;$('salSaveDrive').disabled=true;$('salLoadDrive').disabled=true;
+ const errors=[];let saved=0;
+ try{
+  const drive=await driveLogin();
+  const manifest=assetIndex(),local=localAssets();
+  const tasks=[{kind:"assetCatalog",record:manifest},
+   ...local.buildings.map(record=>({kind:"assetBuilding",record})),
+   ...local.objects.map(record=>({kind:"assetObject",record}))];
+  const remote=(await Promise.all(["assetCatalog","assetBuilding","assetObject"].map(kind=>drive.list("semesta",kind)))).flat();
+  const byFile=new Map(remote.map(file=>[file.name,file]));
+  for(let i=0;i<tasks.length;i++){
+   const item=tasks[i],fileName=drive.filename(item.kind,item.record.id);
+   cloudMessage("SAVING "+(i+1)+"/"+tasks.length+" · "+(item.record.name||item.record.id));
+   try{
+    const done=await drive.save("semesta",item.kind,item.record,byFile.get(fileName)||null);
+    byFile.set(fileName,done.file);saved++;
+   }catch(e){errors.push(item.kind+":"+item.record.id+" — "+e.message)}
+  }
+  cloudMessage("✓ DRIVE LIBRARY: "+saved+"/"+tasks.length+" files; "+manifest.entries.length+
+   " catalog assets, "+local.buildings.length+" custom buildings, "+local.objects.length+
+   " Pixel Creator objects"+(errors.length?" · ERROR: "+errors.slice(0,2).join("; "):""),!!errors.length);
+ }catch(error){cloudMessage("LIBRARY BACKUP FAILED: "+error.message,true)}
+ finally{cloudState.busy=false;$('salSaveDrive').disabled=false;$('salLoadDrive').disabled=false}
+}
+async function restoreLibrary(){
+ if(cloudState.busy)return;
+ cloudState.busy=true;$('salLoadDrive').disabled=true;$('salSaveDrive').disabled=true;
+ try{
+  const drive=await driveLogin();
+  cloudMessage("READING SAVED ASSET LIBRARY FROM DRIVE...");
+  const b=await drive.list("semesta","assetBuilding"),o=await drive.list("semesta","assetObject");
+  if(!b.length&&!o.length){
+   const index=await drive.list("semesta","assetCatalog");
+   cloudMessage(index.length?"INDEX RESTORED BY GITHUB SOURCES · NO CUSTOM PNGS IN DRIVE":
+    "NO ASSET LIBRARY BACKUP FOUND · SAVE ALL ASSETS ON PC FIRST");
+   return;
+  }
+  const confirm="Restore "+(b.length+o.length)+" custom assets from Drive into this device? "+
+   "Existing local assets will be kept; conflicting names are skipped. Built-in assets already load from GitHub.";
+  if(!g.confirm(confirm))return;
+  const existing=localAssets(),buildMap=new Map(existing.buildings.map(x=>[x.id,x]));
+  const objectMap=new Map(existing.objects.map(x=>[x.id,x]));
+  let added=0,skipped=0,failed=0;
+  for(const file of b){
+   try{
+    const item=await drive.load(file),record=item.record;
+    if(item.kind!=="assetBuilding"||buildMap.has(record.id)){skipped++;continue}
+    buildMap.set(record.id,record);added++;
+   }catch(e){failed++;console.warn("Unable to restore custom building",file.name,e)}
+  }
+  if(buildMap.size>75)throw Error("Bangun Ruang only supports 75 buildings. Export older data first.");
+  // Write once: no partial save of buildings if quota overflows.
+  localStorage.setItem("virtual-life-bangun-ruang-v1",JSON.stringify([...buildMap.values()]));
+  for(const file of o){
+   try{
+    const item=await drive.load(file),record=item.record;
+    if(item.kind!=="assetObject"||objectMap.has(record.id)){skipped++;continue}
+    g.VLBangunObjects.save(record);objectMap.set(record.id,record);added++;
+   }catch(e){failed++;console.warn("Unable to restore custom pixel object",file.name,e)}
+  }
+  options.refreshCustom?.();
+  cloudMessage("✓ RESTORED "+added+" CUSTOM ASSETS · "+skipped+" ALREADY LOCAL · "+
+   failed+" FAILED · BUILT-INS ALREADY AVAILABLE FROM GITHUB",failed>0);
+ }catch(error){cloudMessage("LIBRARY RESTORE FAILED: "+error.message,true)}
+ finally{cloudState.busy=false;$('salLoadDrive').disabled=false;$('salSaveDrive').disabled=false}
+}
+$('salSaveDrive').onclick=archiveLibrary;
+$('salLoadDrive').onclick=restoreLibrary;
+
  $('salClose').onclick=()=>dlg.close();
  $('salSearch').oninput=e=>{query=e.target.value.trim().toLowerCase();draw();};
  $('salCategory').onchange=e=>{filter=e.target.value;selected=null;draw();};
