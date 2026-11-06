@@ -5,6 +5,7 @@ on:
     paths:
       - 'emotion-studio/index.html'
       - 'tests/emotion-copy-view.browser.cjs'
+      - 'tests/emotion-view-isolation.browser.cjs'
       - '.github/workflows/emotion-copy-view.yml'
   workflow_dispatch:
 permissions:
@@ -30,3 +31,5 @@ jobs:
         run: python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/emotion-copy-view.log 2>&1 &
       - name: Verify selection, cross-view mirror, drag, save and reload
         run: node virtual-office/tests/emotion-copy-view.browser.cjs
+      - name: Verify isolated SE/SW pixel edits and safe view switches
+        run: node virtual-office/tests/emotion-view-isolation.browser.cjs
