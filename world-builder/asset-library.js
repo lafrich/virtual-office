@@ -299,7 +299,11 @@ function cloudMessage(value,error=false){
 async function driveLogin(){
  const drive=g.MembangunCloudDrive;
  if(!drive)throw Error("Google Drive connector missing. Reload Semesta.");
- if(!drive.connected())await drive.connect();
+ if(!drive.connected()){
+  if(g.MembangunCloudUI?.connectAndSync)await g.MembangunCloudUI.connectAndSync();
+  else await drive.connect();
+  if(!drive.connected())throw Error("Google login belum berhasil. Buka panel Drive untuk melihat detail error.");
+ }
  return drive;
 }
 function localAssets(){
