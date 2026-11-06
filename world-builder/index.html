@@ -187,6 +187,7 @@
     <button id="duplicate" title="Duplicate">Duplicate</button>
     <button id="scaleDown" title="Scale down">− Size</button><button id="scaleUp" title="Scale up">+ Size</button>
     <button id="delete" class="danger" title="Delete selected">Delete</button>
+    <button id="replaceAsset" type="button" title="Ganti objek terpilih tanpa mengubah posisinya">⇄ Replace</button>
     <button id="enterBuilding" type="button" title="Preview inside authored Bangun Ruang building" hidden>🚪 Enter Building</button>
    </div>
    <div class="tabs" role="tablist">
@@ -206,7 +207,7 @@
     <div id="buildingControls" hidden>
       <div class="section-label">BUILDING FOOTPRINT · PLACEHOLDER</div>
       <div class="building-dims"><label>Width / C <input id="buildingW" type="number" min="2" max="20" step="1"></label><label>Depth / R <input id="buildingD" type="number" min="2" max="20" step="1"></label><label>Height <input id="buildingH" type="number" min="2" max="20" step="1"></label></div>
-      <button id="replaceAsset" type="button">⇄ Replace with asset...</button>
+
     </div>
     <div id="vehicleControls" hidden>
      <div class="section-label">KENDARAAN / DIRECTION</div>
@@ -446,7 +447,7 @@
 <script src="./bangun-ruang/object-bridge.js?v=object-library-1&amp;asset-library=v1"></script>
 <script src="./vegetation-catalog.js?v=tree-ratio-20261106"></script>
 <script src="./asset-thumbnails.js?v=indonesia-200-quality-v3"></script>
-<script src="./asset-library.js?v=cloud-autosync-20261106"></script>
+<script src="./asset-library.js?v=replace-selected-20261107"></script>
 <script src="./tree-replacement.js?v=batch-trees-v1"></script>
 <script src="./placeholder-replacement.js?v=placeholder-category-v2"></script>
 <script src="/virtual-life-asset-pipeline/universal-sleep.js?v=correct-four-view-rot90-20261104"></script>
@@ -487,6 +488,6 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./drive-sync.js?v=cloud-autosync-20261106"></script>
 <script src="./drive-ui.js?v=cloud-autosync-v3-20261106" defer></script>
-<script type="module" src="./builder.js?v=trees-grounded-v1&amp;warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1&amp;kebon-sirih-city-v2&amp;city-building-sync-v1&amp;native-pixel-depth-v3&amp;asset-thumbnails-v1&amp;indonesia-pack=v1&amp;asset-library=v1&amp;preview-parity=20261105&amp;native-riders=v3-20261105&amp;native-cars=20261105&amp;indonesia-200=20261105&amp;quality-v3=20261105&amp;quality-v4=20261105&amp;quality-v5=20261105&amp;quality-v6=20261105&amp;vegetation-hifi=20261105&amp;transport-npc=20261105&amp;mahluk2-approved-v1&amp;cloud-auto-v3&amp;jakarta-city=v6-bus-tree-depth&amp;scale-small-v1"></script>
+<script type="module" src="./builder.js?v=trees-grounded-v1&amp;warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1&amp;kebon-sirih-city-v2&amp;city-building-sync-v1&amp;native-pixel-depth-v3&amp;asset-thumbnails-v1&amp;indonesia-pack=v1&amp;asset-library=v1&amp;preview-parity=20261105&amp;native-riders=v3-20261105&amp;native-cars=20261105&amp;indonesia-200=20261105&amp;quality-v3=20261105&amp;quality-v4=20261105&amp;quality-v5=20261105&amp;quality-v6=20261105&amp;vegetation-hifi=20261105&amp;transport-npc=20261105&amp;mahluk2-approved-v1&amp;cloud-auto-v3&amp;jakarta-city=v6-bus-tree-depth&amp;scale-small-v1&amp;replace-selected=20261107"></script>
 <script src="./jiwa-link.js?v=jiwa-launch-v1" defer></script>
 </body></html>
