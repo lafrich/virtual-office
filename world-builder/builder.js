@@ -2939,6 +2939,7 @@ const assetLibrary=window.VLSemestaAssetLibrary?.mount({
  catalog:()=>assetCatalog,
  vehicles:()=>trafficCatalog?.vehicles||[],
  characters:()=>mahluk?.list?.()||[],
+ refreshCustom:()=>refreshBangunRuang(),
  thumbnail:spec=>assetThumbnails?.sourceFor?.(spec)||null,
  vehicleImage:(id,dir)=>trafficArt?.vehiclePreviewAsync?.(id,dir)||null,
  characterImage:(id,dir)=>window.VLCharacterRig?.characterPreview?.(id,dir)||null,
