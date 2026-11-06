@@ -1988,7 +1988,11 @@ function paintAt(point,fill=false){
 }
 function onDown(e){
  if(e.button!==0&&e.pointerType==='mouse')return;
- e.preventDefault();canvas.setPointerCapture(e.pointerId);
+ e.preventDefault();
+ // A remote Fold touchpad dispatches synthetic PointerEvents into this canvas.
+ // Chromium rejects setPointerCapture for synthetic pointer IDs, so preserve
+ // the pan gesture instead of aborting the handler on NotFoundError.
+ try{canvas.setPointerCapture(e.pointerId)}catch{}
  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
  if(pointers.size===2){
   const pts=[...pointers.values()],mid={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
