@@ -472,6 +472,89 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
  .emotion-window .pixel-dialog-foot button{min-height:36px}
 }
 
+
+/* EMOSI.EXE / usable Windows XP-inspired workspace with clear creation actions. */
+.emotion-window{max-width:1680px}
+.emotion-workspace{grid-template-columns:250px minmax(0,1fr) 288px;gap:4px;padding:4px}
+.emotion-window>.menubar{height:auto;min-height:48px;flex-wrap:wrap;gap:6px;padding:6px 9px}
+.emotion-window .nav-action-group{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.emotion-window .nav-group-label{font:700 9px Consolas,monospace;color:#9dbad9;padding:0 5px;letter-spacing:.1em}
+.emotion-window .nav-divider{height:24px;border-left:1px solid #72839c;margin:0 4px}
+.emotion-window .menubar button,.emotion-window .menubar .importbtn{white-space:nowrap;border:1px solid #657d98;border-radius:2px;padding:6px 9px;background:#d5e3f6;color:#1e436d;font-weight:600}
+.emotion-window .menubar button:hover,.emotion-window .menubar .importbtn:hover{background:#a9ccf6}
+.emotion-window .menubar button.menu-primary{background:#a4cffb;border-color:#4486c9;color:#143c72}
+.emotion-window .menubar .tiny{white-space:nowrap}
+.emotion-library .library-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:7px 8px;background:#d4e3f5;border-bottom:1px solid #a5bdd9}
+.emotion-library .library-actions button{min-width:0;font-size:10px;font-weight:700;padding:8px 5px;color:#1e4775;background:#fff;border:1px solid #abc2dc;white-space:normal}
+.emotion-library .library-actions button:first-child{background:#b7d9fe;border-color:#679ed6}
+.emotion-library .library-actions button:hover{background:#d6ebff}
+.emotion-library .emotion-card{border-left:3px solid #c0cee1;transition:background .1s;align-items:center}
+.emotion-library .emotion-card.active{border-left:3px solid #165cae}
+.emotion-library .library-bottom{font-size:10px;line-height:1.6;background:#dfe9f6}
+.emotion-main .viewbar{padding:8px 10px}
+.emotion-main .viewcontrols .primary{width:auto;margin:0;white-space:nowrap}
+.emotion-inspector .ins-body{gap:8px}
+.emotion-inspector .ins-intro{display:flex;flex-direction:column;gap:5px;padding:10px;background:#d3e4f8;border:1px solid #a1bfdd;color:#225084;font:10px Consolas,monospace}
+.emotion-inspector .ins-intro strong{font-size:12px;color:#143d6a}
+.emotion-inspector .ins-intro small{font-weight:700;color:#2468ab}
+.emotion-inspector .ins-intro span{overflow-wrap:anywhere;font-size:9px;color:#607893}
+.emotion-inspector .entry-actions{display:flex;flex-direction:column;gap:6px;border:1px solid #b0c4dd;padding:8px;background:#e3edf9}
+.emotion-inspector .entry-actions button{width:100%;margin:0;padding:9px 7px;font-size:11px;font-weight:700;white-space:normal}
+.emotion-inspector .entry-actions .save-as-new{background:#b8d8fb;color:#14477b;border:1px solid #568ac5}
+.emotion-inspector .entry-actions button:last-child{color:#365c82;background:#f7fbff;border:1px solid #a6b9ce}
+.emotion-inspector .cloud-details{border:1px solid #adbfd7;background:#e4edf8;color:#254665}
+.emotion-inspector .cloud-details>summary{font:700 11px Consolas,monospace;padding:12px 9px;background:#c4d8f0;cursor:pointer;list-style-position:inside}
+.emotion-inspector .cloud-details[open]>summary{border-bottom:1px solid #a1b7d4}
+.emotion-inspector .cloud-details>p,.emotion-inspector .cloud-details>label{margin:8px 9px}
+.emotion-inspector .cloud-details>button,.emotion-inspector .cloud-details>a,.emotion-inspector .cloud-details>.auth-label{display:block;width:calc(100% - 18px);margin:7px 9px;max-width:none;text-align:center}
+.emotion-inspector .cloud-details>button{padding:9px;font-size:10px}
+.emotion-inspector .cloud-details>.auth-label{overflow-wrap:anywhere;font-size:9px}
+.emotion-inspector .cloud-details>a{overflow-wrap:anywhere}
+.emotion-create-dialog{padding:0;width:min(460px,calc(100vw - 18px));max-height:calc(100dvh - 24px);overflow-y:auto;background:#e5edf6;color:#273c53;border:2px solid #7199c8;box-shadow:0 12px 40px #0b1a39aa}
+.emotion-create-dialog::backdrop{background:#071b37a8}
+.emotion-create-form{margin:0}
+.emotion-create-dialog .create-titlebar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;background:linear-gradient(#3279c3,#155199);color:#fff;font:700 12px Consolas,monospace}
+.emotion-create-dialog .create-titlebar button{border:1px solid #96a4b4;background:#e0e0dd;color:#27374a;padding:3px 9px}
+.emotion-create-dialog .create-body{display:flex;flex-direction:column;gap:13px;padding:15px}
+.emotion-create-dialog .create-body p{margin:0;color:#4b6582;font-size:12px}
+.emotion-create-dialog .create-body label{display:flex;flex-direction:column;gap:5px;font:700 10px Consolas,monospace;color:#35587c}
+.emotion-create-dialog .create-body input,.emotion-create-dialog .create-body select{height:38px;width:100%;padding:7px;background:white;color:#1d314c;border:1px solid #8cabc9;font-size:12px}
+.emotion-create-dialog .create-source-info{display:flex;flex-direction:column;gap:4px;background:#cfdfef;padding:9px;border:1px solid #a8bfd4;font:10px Consolas,monospace;overflow-wrap:anywhere}
+.emotion-create-dialog .create-help{font:10px/1.5 Consolas,monospace;color:#4f769c}
+.emotion-create-dialog .create-footer{display:flex;justify-content:flex-end;gap:8px;padding:10px 13px;background:#d0ddec;border-top:1px solid #abc1dc}
+.emotion-create-dialog .create-footer button{min-height:36px;padding:7px 12px;font-weight:700}
+.emotion-create-dialog .create-footer .menu-primary{color:#143d71;background:#afd2fb;border:1px solid #6399d4}
+.emotion-mobile-tabs{gap:3px;border-bottom:2px solid #829fba;background:#bdcde1;padding:5px 8px}
+.emotion-mobile-tabs button{padding:10px 4px!important;min-height:42px;border:1px solid #94aac6;border-bottom-color:#6e89ac;border-radius:2px;background:#e9eff8;color:#244967;font:700 11px Consolas,monospace}
+.emotion-mobile-tabs button.active{background:#fff;color:#0a4e93;border-color:#377bb7;box-shadow:inset 0 3px #2a79ce}
+@media(max-width:980px){
+ .emotion-window{width:100%!important;height:auto!important;min-height:100dvh!important;margin:0!important;overflow:visible!important}
+ .emotion-window>.menubar{display:flex!important;flex-wrap:nowrap!important;align-items:center;overflow-x:auto!important;overscroll-behavior-x:contain;scrollbar-width:thin}
+ .emotion-window .nav-action-group{flex:0 0 auto;flex-wrap:nowrap}
+ .emotion-window .nav-group-label{display:none}
+ .emotion-window .nav-divider{display:none}
+ .emotion-window .menubar .push,.emotion-window .menubar .tiny{display:none!important}
+ .emotion-mobile-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));position:sticky;top:0;z-index:18}
+ .emotion-workspace{display:block!important;min-height:calc(100dvh - 165px);padding:6px!important}
+ .emotion-workspace>.emotion-library,.emotion-workspace>.emotion-main,.emotion-workspace>.emotion-inspector{display:none!important}
+ .emotion-workspace[data-mobile-panel="library"]>.emotion-library{display:flex!important;min-height:calc(100dvh - 200px);max-height:none!important}
+ .emotion-workspace[data-mobile-panel="preview"]>.emotion-main{display:flex!important;min-height:calc(100dvh - 200px)}
+ .emotion-workspace[data-mobile-panel="properties"]>.emotion-inspector{display:flex!important;min-height:calc(100dvh - 200px);max-height:none!important}
+ .emotion-workspace .emotion-list{display:flex!important;flex-direction:column!important;overflow-y:auto!important;overflow-x:hidden!important;max-height:none}
+ .emotion-workspace .emotion-card{width:100%;flex:0 0 auto}
+ .emotion-workspace .emotion-inspector .ins-body{display:flex!important;flex-direction:column!important;overflow-y:visible!important}
+ .emotion-workspace .emotion-inspector .ins-body>*{min-width:0}
+ .emotion-main .timeline-actions{flex-wrap:wrap;gap:5px}
+ .emotion-main .timeline-actions button{min-height:34px}
+}
+@media(max-width:650px){
+ .emotion-window>.titlebar .brand{font-size:12px}
+ .emotion-window>.menubar{gap:8px}
+ .emotion-window .menubar .nav-action-group button{padding:7px 8px!important;min-height:35px}
+ .emotion-mobile-tabs{top:0}
+ .emotion-create-dialog .create-body{padding:12px}
+}
+
 </style></head>
 <body><div class="window emotion-window">
 <header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOSI<em>.EXE</em></b><small>EMOTION DATABASE STUDIO</small></div><div class="title-actions"><span class="led"></span><span id="online">LOCAL LIBRARY</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
