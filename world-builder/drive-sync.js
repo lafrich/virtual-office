@@ -10,6 +10,8 @@ const API="https://www.googleapis.com/drive/v3/files",UPLOAD="https://www.google
 const FOLDER="application/vnd.google-apps.folder",ROOT="Membangun",FORMAT="membangun-cloud-1";
 const APPS={semesta:{folder:"Semesta",kind:"city"},bangun:{folder:"Bangun Ruang",kind:"building"}};
 const KEY="membangun-google-client-id-v1";
+const ASSET_KINDS=new Set(["assetCatalog","assetBuilding","assetObject"]);
+const ASSET_FORMAT="semesta-asset-library-v1";
 let client=CLIENT_ID,token="",expires=0,folders={};
 try{const id=root?.localStorage?.getItem(KEY);if(id)client=id}catch{}
 function getClient(){return client}
@@ -63,9 +65,14 @@ async function ensureFolder(parent,name){
   body:JSON.stringify({name,mimeType:FOLDER,parents:[parent]})});
  return (await r.json()).id;
 }
-async function folder(app){
- if(folders[app])return folders[app];
+async function folder(app,kind=null){
  if(!APPS[app])throw Error("Unknown app: "+app);
+ if(app==="semesta"&&ASSET_KINDS.has(kind)){
+  if(folders.semestaAssets)return folders.semestaAssets;
+  folders.semestaAssets=await ensureFolder(await folder("semesta"),"Asset Library");
+  return folders.semestaAssets;
+ }
+ if(folders[app])return folders[app];
  const top=await ensureFolder("root",ROOT);
  folders[app]=await ensureFolder(top,APPS[app].folder);
  return folders[app];
@@ -78,21 +85,38 @@ function safeId(value){
 function filename(kind,id){return kind+"--"+encodeURIComponent(safeId(id))+".json"}
 function validateRecord(app,kind,record){
  if(!APPS[app])throw Error("Unknown app");
- if(!["city","building","object"].includes(kind))throw Error("Unsupported document kind");
- if(app==="semesta"&&(kind!=="city"||record?.format!=="vl-city-draft-1"||!Array.isArray(record.document?.objects)))throw Error("Invalid Semesta city");
- if(app==="bangun"&&kind==="building"&&(!record?.config||!record?.views))throw Error("Invalid Bangun Ruang building");
- if(app==="bangun"&&kind==="object"&&(!record?.variants&&!record?.views))throw Error("Invalid Bangun Ruang pixel object");
- const id=safeId(record?.id);
  if(!record||typeof record!=="object")throw Error("Missing asset");
- return id;
+ if(!["city","building","object",...ASSET_KINDS].includes(kind))throw Error("Unsupported document kind");
+ if(app==="semesta"){
+  if(kind==="city"){
+   if(record.format!=="vl-city-draft-1"||!Array.isArray(record.document?.objects))throw Error("Invalid Semesta city");
+  }else if(kind==="assetCatalog"){
+   if(record.format!==ASSET_FORMAT||!Array.isArray(record.entries)||record.entries.length>6000||
+      record.entries.some(x=>!x||typeof x.file!=="string"||typeof x.id!=="string"||
+       typeof x.source!=="string"))throw Error("Invalid Semesta Asset Library index");
+  }else if(kind==="assetBuilding"){
+   if(!/^br-[a-z0-9-]{1,72}$/.test(record.id)||!record.config||!record.views||
+      !Object.values(record.views).some(v=>/^data:image\/png;base64,/.test(v?.url||"")))
+    throw Error("Invalid custom building (missing native PNG views)");
+  }else if(kind==="assetObject"){
+   if(!/^obj-[a-z0-9-]{3,66}$/.test(record.id)||
+      !["sw","se","ne","nw"].every(d=>/^data:image\/png;base64,/.test(record.views?.[d]?.url||"")))
+    throw Error("Invalid custom Pixel Creator object");
+  }else throw Error("Semesta cannot store this kind of asset");
+ }else if(app==="bangun"){
+  if(!["building","object"].includes(kind))throw Error("Invalid Bangun Ruang asset kind");
+  if(kind==="building"&&(!record.config||!record.views))throw Error("Invalid Bangun Ruang building");
+  if(kind==="object"&&(!record.variants&&!record.views))throw Error("Invalid Bangun Ruang pixel object");
+ }
+ return safeId(record.id);
 }
 async function list(app,kind=null){
- const base=await folder(app);
+ const base=await folder(app,kind);
  const files=await search(base);
  return files.filter(f=>f.name.endsWith(".json")&&(!kind||f.name.startsWith(kind+"--")));
 }
 async function save(app,kind,record,knownFile=null){
- const id=validateRecord(app,kind,record),folderId=await folder(app);
+ const id=validateRecord(app,kind,record),folderId=await folder(app,kind);
  const name=filename(kind,id),existing=(await search(folderId,"name = '"+quote(name)+"'"))[0]||null;
  if(existing&&(!knownFile?.id||knownFile.id!==existing.id||knownFile.modifiedTime!==existing.modifiedTime))
   throw Error("A newer Drive version exists. Reload Drive before overwriting "+record.name);
@@ -115,11 +139,11 @@ async function save(app,kind,record,knownFile=null){
 async function load(file){
  if(!file?.id)throw Error("Select a Drive file");
  const payload=await(await request(API+"/"+encodeURIComponent(file.id)+"?alt=media")).json();
- if(payload?.format!==FORMAT||!APPS[payload.app]||!payload.id||!["city","building","object"].includes(payload.kind))
+ if(payload?.format!==FORMAT||!APPS[payload.app]||!payload.id||!["city","building","object",...ASSET_KINDS].includes(payload.kind))
   throw Error("Unknown cloud format");
  validateRecord(payload.app,payload.kind,payload.record);
  if(payload.record.id!==payload.id)throw Error("Record identifier mismatch");
  return payload;
 }
-return Object.freeze({CLIENT_ID,SCOPE,APPS,FORMAT,connected,getClient,configure,disconnect,connect,folder,list,save,load,filename,validateRecord});
+return Object.freeze({CLIENT_ID,SCOPE,APPS,FORMAT,ASSET_FORMAT,ASSET_KINDS,connected,getClient,configure,disconnect,connect,folder,list,save,load,filename,validateRecord});
 });
