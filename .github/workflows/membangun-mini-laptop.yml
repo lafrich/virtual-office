@@ -1,0 +1,23 @@
+name: Membangun Mini Laptop Smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'membangun/laptop.html'
+      - 'membangun/index.html'
+      - 'tests/membangun-laptop.test.cjs'
+      - '.github/workflows/membangun-mini-laptop.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate launcher and mini laptop
+        run: node --test tests/membangun-laptop.test.cjs
