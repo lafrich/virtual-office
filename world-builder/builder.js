@@ -3141,6 +3141,25 @@ async function saveNamedCity(asNew=false){
 // Cloud imports are validated, backed up locally and explicitly opened in this editor.
 window.MembangunCloudAdapter=Object.freeze({
  app:'semesta',
+ async assetCatalogSnapshot(){return assetLibrary?.assetCatalogSnapshot?.()||null;},
+ async assetLocalRecords(){return assetLibrary?.assetLocalRecords?.()||[];},
+ async importRemoteQuiet(payload){
+  if(payload?.app!=='semesta'||!payload.record)throw Error('Not a Semesta cloud record');
+  if(payload.kind==='assetBuilding'||payload.kind==='assetObject'){
+   if(!assetLibrary?.importRemoteQuiet)throw Error('Asset Library unavailable');
+   await assetLibrary.importRemoteQuiet(payload);return;
+  }
+  if(payload.kind!=='city'||payload.record.format!=='vl-city-draft-1'||
+     !Array.isArray(payload.record.document?.objects))throw Error('Invalid remote city document');
+  const record=payload.record,db=window.VLCityDrafts;
+  let old=null;try{old=await db.load(record.id)}catch{}
+  if(old&&JSON.stringify(old.document)!==JSON.stringify(record.document)){
+   await db.save({id:null,name:old.name+' · Before Cloud Sync',document:old.document});
+  }
+  await db.save({id:record.id,name:record.name,document:record.document});
+  await refreshDraftPicker(activeDraftId);
+  // No camera jumps, city placement or scene replacement during background sync.
+ },
  async currentRecord(){
   if(!activeDraftId)return null;
   return {kind:'city',record:await window.VLCityDrafts.load(activeDraftId)};
