@@ -346,8 +346,12 @@ async function archiveLibrary(){
    const item=tasks[i],fileName=drive.filename(item.kind,item.record.id);
    cloudMessage("SAVING "+(i+1)+"/"+tasks.length+" · "+(item.record.name||item.record.id));
    try{
-    const done=await drive.save("semesta",item.kind,item.record,byFile.get(fileName)||null);
-    byFile.set(fileName,done.file);saved++;
+    const old=byFile.get(fileName),base=g.MembangunCloudUI?.readSyncMeta?.()[fileName];
+    if(old&&(!base||base.id!==old.id||base.modifiedTime!==old.modifiedTime))
+     throw Error("CONFLICT: newer Drive version exists, refresh/reconcile before Save All");
+    const done=await drive.save("semesta",item.kind,item.record,base?{id:base.id,modifiedTime:base.modifiedTime}:null);
+    byFile.set(fileName,done.file);
+    g.MembangunCloudUI?.markSynced?.(fileName,done.file,item.record);saved++;
    }catch(e){errors.push(item.kind+":"+item.record.id+" — "+e.message)}
   }
   cloudMessage("✓ DRIVE LIBRARY: "+saved+"/"+tasks.length+" files; "+manifest.entries.length+
