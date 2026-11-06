@@ -71,10 +71,9 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
 .key.active{background:#7a9fd1}
 .pad-page{order:1;flex:1;min-height:0;display:block;padding:4px 7px 5px}
 .pad-main{height:100%;display:flex;flex-direction:column;gap:3px;min-height:0}
-.mouse-buttons{display:flex;flex:none;justify-content:center;gap:5px;height:27px}
-.mouse-buttons button{width:min(90px,23vw);min-width:58px;padding:1px 8px;font-size:11px;font-weight:bold;border-radius:4px}
-.mouse-buttons button:first-child{background:linear-gradient(#e9f4ff,#c2d5ed)}
-.mouse-buttons button:active{background:#88aee4}
+.hold-controls{display:flex;flex:none;justify-content:center;align-items:center;height:29px;gap:5px}
+.hold-controls button{min-width:140px;max-width:210px;height:26px;padding:2px 10px;font-size:11px;font-weight:bold;border-radius:4px;background:linear-gradient(#e9f4ff,#c2d5ed)}
+.hold-controls button.active{background:linear-gradient(#8ac1ff,#4c86d5);color:white;border-color:#184580}
 .touchpad{position:relative;flex:1;min-height:0;touch-action:none;background:linear-gradient(125deg,#c8d3df,#eef2f7 62%,#ced9e6);border:1px solid #71869f;border-radius:8px;box-shadow:inset 2px 2px 6px #7c8da347;overflow:hidden}
 .touchpad:before{content:"";position:absolute;inset:7px;border:1px solid #a3b1c1;border-radius:5px;pointer-events:none}
 .touchpad:after{content:"";position:absolute;top:44%;left:48%;width:13px;height:13px;border-right:1px solid #99a9b9;border-bottom:1px solid #99a9b9;transform:rotate(45deg);opacity:.24;pointer-events:none}
@@ -133,12 +132,11 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
    </div>
    <div class="pad-page" id="padPage">
     <div class="pad-main">
-     <div class="touchpad" id="touchpad" aria-label="Satu tap klik kiri, dua tap klik kanan, dua jari geser layar aplikasi, tahan lalu geser untuk drag" role="application">
-      <div class="pad-hint">1 JARI: MOUSE · 2 JARI: GESER LAYAR<br>PINCH: ZOOM DALAM APP · TAHAN: DRAG</div>
+     <div class="touchpad" id="touchpad" aria-label="Tap sekali klik kiri, tap dua kali untuk mengunci atau melepas tahan klik, geser satu jari untuk pan saat HOLD menyala" role="application">
+      <div class="pad-hint">1 TAP: KLIK · 2 TAP: HOLD ON/OFF<br>HOLD + GESER: PAN · PINCH: ZOOM DENAH</div>
      </div>
-     <div class="mouse-buttons" role="group" aria-label="Tombol mouse">
-      <button type="button" id="leftClick" aria-label="Klik kiri mouse">◩ LEFT</button>
-      <button type="button" id="rightClick" aria-label="Klik kanan mouse">◪ RIGHT</button>
+     <div class="hold-controls">
+      <button type="button" id="holdClick" aria-pressed="false" aria-label="Aktifkan atau lepas tahan klik untuk pan">✥ HOLD OFF · 2× TAP</button>
      </div>
     </div>
    </div>
@@ -160,7 +158,7 @@ const apps=[
 const params=new URLSearchParams(location.search);
 let selected=apps.find(a=>a.id===params.get('app'))?.id || 'semesta';
 let zoom=1,scale=1,frameWidth=1180,frameHeight=660,rotated=false;
-let cx=0,cy=0,pressed=false,dragTarget=null,shift=false,symbols=false,ctrl=false;
+let cx=0,cy=0,pressed=false,dragTarget=null,holdLocked=false,restoreSemestaMode=null,shift=false,symbols=false,ctrl=false;
 let canBridge=false,lastFocus=null,toastTimer=null,longPressTimer=null,tapTimer=null,lastTap=null;
 let frame=$('appFrame');const liveFrames=new Map(), loadedFrames=new Set(),shell=$('screenShell'),scroller=$('screenScroll'),cursor=$('cursor');
 const getApp=()=>apps.find(a=>a.id===selected);
@@ -226,22 +224,57 @@ function sendPointer(type,element,button=0,buttons=0){
 }
 function movePointer(){
  if(!canBridge)return;
- const target=targetAt();
+ // Keep pointermove aimed at the original pressed surface while dragging.
+ // Synthetic events cannot rely on native pointer capture across an iframe.
+ const target=pressed&&dragTarget?dragTarget:targetAt();
  sendPointer('pointermove',target,0,pressed?1:0);
 }
 function pressMouse(button=0){
  if(!canBridge){message('Mouse hanya tersedia untuk aplikasi dari lafrich.github.io');return}
  if(pressed)return;
- const t=targetAt();if(!t)return;
+ const doc=currentDocument();
+ const t=holdLocked&&selected==='semesta'?(doc?.getElementById('world')||targetAt()):targetAt();
+ if(!t)return;
  pressed=true;dragTarget=t;
  sendPointer('pointerdown',t,button,button===2?2:1);
  if(t.focus&&button===0)try{t.focus({preventScroll:true})}catch{}
 }
 function releaseMouse(button=0){
  if(!pressed)return;
- const target=targetAt()||dragTarget;
+ const target=dragTarget||targetAt();
  sendPointer('pointerup',target,button,0);
  pressed=false;dragTarget=null;
+}
+function setHold(value){
+ const next=!!value;
+ if(holdLocked===next)return;
+ if(next){
+  if(!canBridge){message('Buka aplikasi terlebih dahulu');return}
+  holdLocked=true;
+  // Semesta's Pan tool accepts drags even above existing placed objects.
+  // Temporarily activate it only for the duration of HOLD.
+  if(selected==='semesta'){
+   const doc=currentDocument();
+   const pan=doc?.getElementById('panMode');
+   const prior=[...doc?.querySelectorAll('[id$="Mode"][aria-pressed="true"]')||[]]
+      .find(b=>b.id!=='panMode');
+   restoreSemestaMode=pan&&!pan.classList.contains('active')?prior?.id||'selectMode':null;
+   if(pan&&!pan.classList.contains('active'))pan.click();
+  }
+  pressMouse(0);
+  if(!pressed){holdLocked=false;restoreSemestaMode=null;return}
+ }else{
+  // Release at the same canvas where the drag began.
+  releaseMouse(0);holdLocked=false;
+  if(selected==='semesta'&&restoreSemestaMode){
+   currentDocument()?.getElementById(restoreSemestaMode)?.click();
+  }
+  restoreSemestaMode=null;
+ }
+ $('holdClick').classList.toggle('active',holdLocked);
+ $('holdClick').setAttribute('aria-pressed',String(holdLocked));
+ $('holdClick').textContent=holdLocked?'✥ HOLD ON · 2× TAP':'✥ HOLD OFF · 2× TAP';
+ $('holdClick').title=holdLocked?'Gerakkan kursor untuk pan. Double tap untuk melepas.':'Double tap pada touchpad untuk mengunci klik kiri.';
 }
 function clickMouse(button=0){
  if(!canBridge){message('Gunakan tombol ↗ APP untuk aplikasi eksternal');return}
@@ -429,8 +462,8 @@ function setZoom(z,anchorX=shell.clientWidth/2,anchorY=shell.clientHeight/2){
 }
 function setApp(id){
  const picked=apps.find(a=>a.id===id);if(!picked)return;
- if(selected!==id&&pressed)releaseMouse();
- if(selected!==id)releaseMouse();
+ if(selected!==id&&holdLocked)setHold(false);
+ else if(selected!==id&&pressed)releaseMouse();
  selected=id;lastFocus=null;canBridge=false;
  $('currentApp').textContent=picked.label+'.EXE';
  const url=getUrl(id);$('externalFallback').href=url;
@@ -499,13 +532,13 @@ function recordTap(){
  if(tapTimer&&lastTap&&now-lastTap.time<340&&
     Math.hypot(cx-lastTap.x,cy-lastTap.y)<50){
   clearTimeout(tapTimer);tapTimer=null;lastTap=null;
-  clickMouse(2);
+  setHold(!holdLocked);
  }else{
-  if(tapTimer){clearTimeout(tapTimer);clickMouse(0)}
+  if(tapTimer){clearTimeout(tapTimer);if(!holdLocked)clickMouse(0)}
   const position={x:cx,y:cy,time:now};lastTap=position;
   tapTimer=setTimeout(()=>{
    tapTimer=null;
-   if(lastTap===position){lastTap=null;clickMouse(0)}
+   if(lastTap===position){lastTap=null;if(!holdLocked)clickMouse(0)}
   },280);
  }
 }
@@ -602,8 +635,7 @@ pad.addEventListener('pointerup',e=>{
  pointerGesture=null;
 });
 pad.addEventListener('wheel',e=>{e.preventDefault();panScreen(e.deltaY,e.deltaX)},{passive:false});
-$('leftClick').addEventListener('click',()=>clickMouse(0));
-$('rightClick').addEventListener('click',()=>clickMouse(2));
+$('holdClick').addEventListener('click',()=>setHold(!holdLocked));
 $('screenUp').addEventListener('click',()=>panScreen(-Math.max(120,scroller.clientHeight*.8)));
 $('screenDown').addEventListener('click',()=>panScreen(Math.max(120,scroller.clientHeight*.8)));
 scroller.addEventListener('scroll',updateScreenProgress,{passive:true});
