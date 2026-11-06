@@ -134,7 +134,7 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
    <div class="pad-page" id="padPage">
     <div class="pad-main">
      <div class="touchpad" id="touchpad" aria-label="Satu tap klik kiri, dua tap klik kanan, dua jari geser layar aplikasi, tahan lalu geser untuk drag" role="application">
-      <div class="pad-hint">1 JARI: MOUSE · 2 JARI: GESER LAYAR<br>TAHAN + GESER: DRAG</div>
+      <div class="pad-hint">1 JARI: MOUSE · 2 JARI: SCROLL<br>PINCH: ZOOM · TAHAN: DRAG</div>
      </div>
      <div class="mouse-buttons" role="group" aria-label="Tombol mouse">
       <button type="button" id="leftClick" aria-label="Klik kiri mouse">◩ LEFT</button>
@@ -387,7 +387,19 @@ function renderKeyboard(){
   $('keyboard').appendChild(host);
  });
 }
-function setZoom(z){zoom=Math.max(.7,Math.min(1.7,Math.round(z*10)/10));layout();try{localStorage.setItem('membangun-laptop-zoom',String(zoom))}catch{}}
+function setZoom(z,anchorX=shell.clientWidth/2,anchorY=shell.clientHeight/2){
+ const target=Math.max(.55,Math.min(2.5,Math.round(z*100)/100));
+ if(Math.abs(target-zoom)<.005)return;
+ // Keep the point under the user's pinch anchored in the visible app viewport.
+ const oldScale=scale||1;
+ const pointX=(scroller.scrollLeft+anchorX)/oldScale;
+ const pointY=(scroller.scrollTop+anchorY)/oldScale;
+ zoom=target;layout();
+ scroller.scrollLeft=pointX*scale-anchorX;
+ scroller.scrollTop=pointY*scale-anchorY;
+ updateScreenProgress();
+ try{localStorage.setItem('membangun-laptop-zoom',String(zoom))}catch{}
+}
 function setApp(id){
  const picked=apps.find(a=>a.id===id);if(!picked)return;
  if(selected!==id&&pressed)releaseMouse();
@@ -440,7 +452,7 @@ function onLoad(){
 }
 function configure(){
  try{
-  const z=Number(localStorage.getItem('membangun-laptop-zoom'));if(z>=.7&&z<=1.7)zoom=z;
+  const z=Number(localStorage.getItem('membangun-laptop-zoom'));if(z>=.55&&z<=2.5)zoom=z;
  }catch{}
  for(const app of apps){
   for(const id of ['appTabs','quickApps']){
@@ -453,7 +465,7 @@ function configure(){
 }
 // Touch gestures: 1 tap = left click, double tap = right click.
 // Press and hold then move = drag; 2-finger swipe = scroll in selected editor.
-let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0,scrolling=false;
+let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0,scrolling=false,twoFinger=null;
 function clearLongPress(){clearTimeout(longPressTimer);longPressTimer=null}
 function recordTap(){
  const now=Date.now();
@@ -471,15 +483,23 @@ function recordTap(){
  }
 }
 const pad=$('touchpad');
+function pairTouch(touches){
+ const a=touches[0],b=touches[1];
+ return {x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2,
+         distance:Math.max(1,Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY))};
+}
 pad.addEventListener('touchstart',e=>{
  e.preventDefault();
  if(e.touches.length>=2){
   clearLongPress();scrolling=true;moved=true;
-  prevTouches={x:(e.touches[0].clientX+e.touches[1].clientX)/2,
-               y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+  // Reinitialize on the second finger; one-finger long-press must not remain held.
+  const pair=pairTouch(e.touches);
+  twoFinger={start:pair,prev:pair,startZoom:zoom,kind:'pending'};
+  prevTouches={x:pair.x,y:pair.y};
   if(longHeld){releaseMouse();longHeld=false}
   return;
  }
+ if(scrolling)return; // A remaining finger after pinch should not trigger a click.
  clearLongPress();touching=true;scrolling=false;moved=false;longHeld=false;startTime=Date.now();
  prevTouches={x:e.touches[0].clientX,y:e.touches[0].clientY};
  longPressTimer=setTimeout(()=>{
@@ -490,13 +510,24 @@ pad.addEventListener('touchmove',e=>{
  e.preventDefault();
  if(e.touches.length>=2){
   clearLongPress();
-  const x=(e.touches[0].clientX+e.touches[1].clientX)/2,
-        y=(e.touches[0].clientY+e.touches[1].clientY)/2;
-  if(scrolling&&prevTouches){
-   const d=gestureDelta(x-prevTouches.x,y-prevTouches.y);
+  const pair=pairTouch(e.touches);
+  if(!twoFinger)twoFinger={start:pair,prev:pair,startZoom:zoom,kind:'pending'};
+  const g=twoFinger;
+  if(g.kind==='pending'){
+   const pinchChange=Math.abs(pair.distance-g.start.distance);
+   const centerTravel=Math.hypot(pair.x-g.start.x,pair.y-g.start.y);
+   // Ratio-based pinch detection avoids confusing a two-finger swipe with zoom.
+   if(pinchChange>Math.max(6,g.start.distance*.055)&&pinchChange>centerTravel*.65)g.kind='pinch';
+   else if(centerTravel>5&&centerTravel>pinchChange*.8)g.kind='pan';
+  }
+  if(g.kind==='pinch'){
+   setZoom(g.startZoom*(pair.distance/g.start.distance));
+  }else if(g.kind==='pan'){
+   const d=gestureDelta(pair.x-g.prev.x,pair.y-g.prev.y);
    panScreen(-d.dy*2.3,-d.dx*2.3);
   }
-  prevTouches={x,y};moved=true;scrolling=true;return;
+  g.prev=pair;
+  prevTouches={x:pair.x,y:pair.y};moved=true;scrolling=true;return;
  }
  if(!e.touches.length||scrolling)return;
  const t=e.touches[0];
@@ -512,11 +543,11 @@ pad.addEventListener('touchend',e=>{
  if(e.touches.length){prevTouches=null;return}
  if(longHeld)releaseMouse();
  else if(!scrolling&&!moved&&Date.now()-startTime<350)recordTap();
- touching=false;prevTouches=null;longHeld=false;scrolling=false;
+ touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
 },{passive:false});
 pad.addEventListener('touchcancel',()=>{
  clearLongPress();if(longHeld)releaseMouse();
- touching=false;prevTouches=null;longHeld=false;scrolling=false;
+ touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
 });
 let pointerGesture=null;
 pad.addEventListener('pointerdown',e=>{
