@@ -10,7 +10,9 @@ const theme=w.VLKebonSirihStyle,terrain=w.VLMapTerrain,catalog=w.VLAssetCatalog;
 const buildings=catalog.filter(x=>x.source==='pipeline-street'&&x.published===true);
 const trees=catalog.filter(x=>x.source==='pipeline-vegetation'&&x.group==='Vegetation • trees'&&x.published===true);
 test('all terrain types have pipeline-native tile URLs and source metadata',()=>{
- assert.equal(Object.keys(theme.TILES).length,11);
+ assert.ok(Object.keys(theme.TILES).length>=13,"Jakarta pack must retain drains and river, in addition to original terrain");
+ for(const terrainId of ['drain','river','water','grass','road_asphalt','road_concrete'])
+  assert.ok(theme.TILES[terrainId],terrainId);
  for(const kind of terrain.types)assert.match(theme.tileUrl(kind==='road'?'road_asphalt':kind),/^https:\/\/raw\.githubusercontent\.com\/lafrich\/virtual-life-asset-pipeline\/main\/assets\/kebon_sirih\/terrain\/[^/]+\.png$/);
  assert.equal(theme.tile('road',{surface:'concrete'}),'road_concrete');
  assert.equal(theme.tile('road',{}),'road_asphalt');
