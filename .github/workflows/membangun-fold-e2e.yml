@@ -1,0 +1,42 @@
+name: Membangun Fold Browser E2E
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'membangun/laptop.html'
+      - 'tests/membangun-fold-e2e.cjs'
+      - '.github/workflows/membangun-fold-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Set up browser smoke dependencies
+        run: |
+          npm install --no-save playwright@1.56.1
+          which google-chrome || which google-chrome-stable
+      - name: Serve local launcher and 5 apps
+        run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 >/tmp/membangun-fold.log 2>&1 &
+          sleep 2
+      - name: Verify app switching and 90 degree rotation
+        run: node virtual-office/tests/membangun-fold-e2e.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Membangun-Fold-browser-screenshots
+          path: membangun-laptop-*.png
+          if-no-files-found: ignore
