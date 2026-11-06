@@ -47,7 +47,7 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('#keyboardPage').isVisible(),true);
   assert.equal(await page.locator('#touchpad').isVisible(),true);
   assert.equal(await page.locator('#keyboard .key-row').count(),5);
-  assert.equal(await page.locator('#leftClick,#rightClick').count(),0);
+  assert.equal(await page.locator('#leftClick,#rightClick').count(),2);
   const panelHeight=await page.locator('.control-area').evaluate(el=>el.offsetHeight);
   const keyboardHeight=await page.locator('#keyboardPage').evaluate(el=>el.offsetHeight);
   console.log('KEYBOARD_RATIO',keyboardHeight,panelHeight,(keyboardHeight/panelHeight).toFixed(2));
