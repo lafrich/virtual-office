@@ -29,10 +29,15 @@ test('launcher mini laptop entry and five apps are wired', () => {
 });
 
 test('desktop, virtual mouse and virtual keyboard are present', () => {
-  for (const id of ['appFrame','touchpad','leftClick','rightClick','dragLock','scrollZone','keyboard','keyMode','padMode','zoomOut','zoomIn']) {
+  for (const id of ['appFrame','touchpad','keyboard','keyboardPage','padPage','zoomOut','zoomIn']) {
     assert.match(laptop, new RegExp('id="'+id+'"'));
   }
   assert.match(laptop, /touch-action:none/);
   assert.match(laptop, /dispatchEvent\(new w\.MouseEvent/);
   assert.match(laptop, /new w\.KeyboardEvent/);
+  assert.match(laptop, /function recordTap\(/);
+  assert.match(laptop, /e\.touches\.length>=2/);
+  assert.match(laptop, /scrollable\.scrollTop\+=deltaY/);
+  assert.doesNotMatch(laptop, /id="leftClick"|id="rightClick"/);
+  assert.match(laptop, /repeat\(5,minmax\(0,1fr\)\)/);
 });
