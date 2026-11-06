@@ -9,7 +9,7 @@ test('Membangun is the entry point with five current .EXE programs',()=>{
  const s=read('membangun/index.html');
  assert.ok(s.includes("const ids=['mahluk2','emotion','bangun','semesta','jiwa'];"));
  for(const [id,name] of [
-  ['mahluk2','MAHLUK HIDUP 2.0.EXE'],['emotion','EMOTION STUDIO.EXE'],['bangun','BANGUN RUANG.EXE'],
+  ['mahluk2','MAHLUK HIDUP 2.0.EXE'],['emotion','EMOSI.EXE'],['bangun','BANGUN RUANG.EXE'],
   ['semesta','SEMESTA.EXE'],['jiwa','JIWA.EXE']
  ]){
   assert.ok(s.includes('data-app="'+id+'"'),'launcher missing '+id+' button');
