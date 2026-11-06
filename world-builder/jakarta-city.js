@@ -136,12 +136,12 @@ function create(base,catalog,style,schema){
   city.objects.push(o);placed++;artworks++;return true;
  }
  const looks={
-  kampung:{w:[1.7,2,2.2],d:[1.7,2.1],h:[2.5,3.3,4.1,4.6],colors:['#bc9d81','#d3b49d','#b2ad9e','#c7a293']},
-  ruko:{w:[2,2.25,2.55],d:[2.25,2.6],h:[4.1,5.4,6.8,7.2],colors:['#bd9784','#c6b59b','#9baeb2','#a99a8b']},
-  market:{w:[2.25,2.5,2.8],d:[2.2,2.6],h:[3.8,4.7,5.6],colors:['#9fa49b','#c8aa8f','#aa9c82','#bcae91']},
-  mixed:{w:[2.2,2.55,2.8],d:[2.2,2.6],h:[4,5.4,6.3,8.1],colors:['#b4a995','#a3abb1','#c4a48d','#b9b7a7']},
-  midrise:{w:[2.6,3,3.3],d:[2.8,3.1],h:[6.2,7.9,9.6,11],colors:['#96a9b8','#a7a89d','#b8aaa0','#b4bec8']},
-  cbd:{w:[3,3.5,4],d:[3,3.5],h:[10.1,12.2,15.4,19],colors:['#91a3b3','#b5c3ca','#9b9f9a','#c0b5aa']}
+  kampung:{w:[1.25,1.45,1.6],d:[1.35,1.55],h:[2.5,3.3,4.1,4.6],colors:['#bc9d81','#d3b49d','#b2ad9e','#c7a293']},
+  ruko:{w:[1.45,1.65,1.8],d:[1.65,1.85],h:[4.1,5.4,6.8,7.2],colors:['#bd9784','#c6b59b','#9baeb2','#a99a8b']},
+  market:{w:[1.6,1.75,1.9],d:[1.65,1.85],h:[3.8,4.7,5.6],colors:['#9fa49b','#c8aa8f','#aa9c82','#bcae91']},
+  mixed:{w:[1.55,1.75,1.95],d:[1.65,1.9],h:[4,5.4,6.3,8.1],colors:['#b4a995','#a3abb1','#c4a48d','#b9b7a7']},
+  midrise:{w:[1.85,2.1,2.4],d:[1.9,2.2],h:[6.2,7.9,9.6,11],colors:['#96a9b8','#a7a89d','#b8aaa0','#b4bec8']},
+  cbd:{w:[2.15,2.5,2.9],d:[2.15,2.5],h:[10.1,12.2,15.4,19],colors:['#91a3b3','#b5c3ca','#9b9f9a','#c0b5aa']}
  };
  function proxyObject(x,z,zone){
   const k=looks[zone],w=choose(k.w),d=choose(k.d);
@@ -170,7 +170,8 @@ function create(base,catalog,style,schema){
  }
  // Main fill: small irregular parcels; native published buildings are preferred
  // but only if collision validation proves they fit the existing street graph.
- for(let r=-5;r<=108;r+=2.55)for(let c=-46;c<=70;c+=2.55){
+ for(let r=-5;r<=108;r+=1.92)for(let c=-46;c<=70;c+=1.92){
+  if(placed>=950)break;
   if(rand()<.045)continue;
   const x=c+.5+(rand()-.5)*.18,z=r+.5+(rand()-.5)*.18;
   const district=zone(c,r);if(!district)continue;
@@ -186,8 +187,9 @@ function create(base,catalog,style,schema){
   if(!built)proxyObject(x,z,district);
  }
  // Additional narrow infill along surviving corridors and service alleys.
- for(let r=-4;r<=107;r+=4.8)for(let c=-45;c<=69;c+=4.8){
-  if(rand()<.22)continue;
+ for(let r=-4;r<=107;r+=3.2)for(let c=-45;c<=69;c+=3.2){
+  if(placed>=1120)break;
+  if(rand()<.10)continue;
   const district=zone(c,r);if(!district)continue;
   proxyObject(c+1.55,r+1.4,district==='cbd'?'midrise':district);
  }
@@ -200,9 +202,10 @@ function create(base,catalog,style,schema){
  for(const r of [20,46,76,102])for(let c=-43;c<=68;c+=12){
   const a=choose(pools.drain);if(a&&terrainAt(c,r)==='sidewalk')nativeObject(a,c+.5,r+.5,'drain-grill',true);
  }
- city.map.preset='jakarta-city-central-v3';
- city.map.notes+=' Density v3: varied compact housing, attached ruko, market blocks, midrise and office towers with working river and drain terrain. Geometry proxies remain marked for replacement.';
+ city.map.preset='jakarta-city-central-v4';
+ city.map.notes+=' Density v4: very dense miniature lots and more layered blocks; varied compact housing, attached ruko, market blocks, midrise and office towers with working river and drain terrain. Geometry proxies remain marked for replacement.';
  city.map.densityAdditions=placed;
+ city.map.densityTarget=1120;
  city.map.nativeAdditions=artworks;
  city.map.proxyAdditions=proxy;
  city.map.presetObjectCount=city.objects.length;
