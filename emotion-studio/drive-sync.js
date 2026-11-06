@@ -144,8 +144,8 @@ async function save(entry,opts={}){
  const jsonName=id+".emotion.json",pngName=id+".png";
  const oldJson=assets.find(x=>x.name===jsonName);
  const oldPng=assets.find(x=>x.name===pngName);
- if(opts.expectedModifiedTime&&oldJson&&oldJson.modifiedTime!==opts.expectedModifiedTime)
-  throw Error("Versi Drive berubah di perangkat lain. Reload Drive dan periksa perubahan sebelum menimpa.");
+ if(oldJson&&(!opts.expectedModifiedTime||oldJson.modifiedTime!==opts.expectedModifiedTime))
+  throw Error("CONFLICT: Emotion ini sudah ada atau diubah di Drive. Connect/Refresh Drive untuk membandingkan versi sebelum menimpa.");
  // Upload PNG first, and only declare success once the editable JSON also persists.
  const pngBlob=await (await fetch(entry.png)).blob();
  const png=await saveFile({existing:oldPng,folder,name:pngName,mime:"image/png",
