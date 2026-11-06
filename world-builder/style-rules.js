@@ -96,7 +96,7 @@ function normalize(o,catalog){
  // Published prefab dimensions must remain comparable to the native world;
  // no freeform squashing, and scaling is always uniform.
  const authoredLargeTree=o.type==='sprite'&&s?.source==='pipeline-vegetation'&&Array.isArray(o.tags)&&o.tags.includes('large-canopy');
- o.scale=Math.max(.85,Math.min(authoredLargeTree?2.65:1.15,Math.round((Number(o.scale)||1)*100)/100));
+ o.scale=Math.max(.1,Math.min(authoredLargeTree?2.65:1.15,Math.round((Number(o.scale)||1)*100)/100));
  if(s){o.width=Number(s.width||o.width||2);o.height=Number(s.height||o.height||2);}
  return o;
 }
