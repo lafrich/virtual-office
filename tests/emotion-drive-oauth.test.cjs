@@ -35,3 +35,17 @@ test('Emotion Studio loads Drive module before its editor script',()=>{
  assert.ok(html.indexOf('src="./drive-sync.js')<html.lastIndexOf('/* Standalone Emotion Studio.'));
  assert.ok(html.includes('id="driveConnect"'));
 });
+
+test('Emosi.exe mobile exposes the same Drive actions as desktop without switching to Details',()=>{
+ for(const id of ['mobileDriveConnect','mobileDriveRefresh','mobileDriveSave','mobileDriveState']){
+  assert.ok(html.includes('id="'+id+'"'),id+' mobile control must exist');
+ }
+ const mobilePos=html.indexOf('class="emotion-mobile-drivebar"');
+ const workspacePos=html.indexOf('class="emotion-workspace"');
+ assert.ok(mobilePos>0&&mobilePos<workspacePos,'Drive toolbar must be outside hidden mobile workspace panels');
+ assert.match(html,/\.emotion-mobile-drivebar\{display:block!important/);
+ assert.match(html,/\$\("mobileDriveConnect"\)\.onclick=connectDrive/);
+ assert.match(html,/\$\("mobileDriveRefresh"\)\.onclick=\(\)=>refreshDrive\(\)/);
+ assert.match(html,/\$\("mobileDriveSave"\)\.onclick=saveToDrive/);
+ assert.match(html,/mobile\.textContent=message/);
+});
