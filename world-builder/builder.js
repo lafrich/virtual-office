@@ -414,7 +414,9 @@ let cameraFollowId=null,mapCameraBeforeFollow=null;
 const activeAssetCamera=window.VLActiveAssetCamera;
 let activeAssetAimId=null,activeAssetTracking=false,activeAssetListKey='';
 function resetCamera(){
- if(documentMap.map?.preset==='reference-city-v1'){
+ if(documentMap.map?.preset?.startsWith('jakarta-city-')){
+  cameraFocus.set(10,0,49);viewSize=145;
+ }else if(documentMap.map?.preset==='reference-city-v1'){
   cameraFocus.set(14,0,49);viewSize=140;
  }else if(documentMap.map?.name?.includes('City Sample')){
   cameraFocus.set(4,0,37);viewSize=78;
@@ -3322,7 +3324,7 @@ async function loadJakartaCity(){
   rebuild();rebuildTerrain();resetCamera();saved();
   draftDirty=false;
   await refreshDraftPicker(activeDraftId);
-  tell('Jakarta City saved in My Cities · browser-local draft');
+  tell('Jakarta City · '+fresh.objects.length+' objects / '+fresh.map.terrain.cells.filter(c=>c.type==='drain').length+' drain tiles / '+fresh.map.terrain.cells.filter(c=>c.type==='river').length+' river tiles · saved');
  }catch(error){console.error('Jakarta City',error);tell('Jakarta City gagal: '+error.message);}
 }
 $('jakartaCity').onclick=loadJakartaCity;
