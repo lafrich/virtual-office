@@ -563,6 +563,21 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
  .emotion-window{min-height:100dvh!important}
  .emotion-workspace{width:100%;box-sizing:border-box}
 }
+/* Mobile Drive actions must be visible on every workspace tab. */
+.emotion-mobile-drivebar{display:none}
+@media(max-width:980px){
+ .emotion-mobile-drivebar{display:block!important;position:sticky;top:52px;z-index:17;padding:7px 9px;background:#dfeaf7;color:#23415f;border-bottom:2px solid #7b9dbc;box-shadow:0 2px 4px #18385822}
+ .mobile-drive-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:6px;font:700 10px Consolas,monospace}
+ .mobile-drive-top strong{white-space:nowrap}
+ #mobileDriveState{font:10px/1.3 Consolas,monospace;overflow-wrap:anywhere;text-align:right}
+ .mobile-drive-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ .mobile-drive-buttons button{min-width:0;min-height:40px;padding:8px 3px;border:1px solid #5981b4;border-radius:2px;background:#fff;color:#164579;font:700 10px Consolas,monospace;touch-action:manipulation;white-space:normal}
+ .mobile-drive-buttons #mobileDriveConnect{background:#d0e3fe}
+ .mobile-drive-buttons #mobileDriveSave{background:#d2e9da;border-color:#659a7e;color:#24583c}
+ .mobile-drive-buttons button:disabled{opacity:.45}
+ .mobile-drive-hint{margin:5px 0 0;color:#536982;font:9px/1.4 Consolas,monospace}
+}
+@media(max-width:380px){.emotion-mobile-drivebar{top:50px;padding:6px}.mobile-drive-buttons button{font-size:9px}.mobile-drive-hint{font-size:8px}}
 </style></head>
 <body><div class="window emotion-window">
 <header class="titlebar"><div class="brand"><span class="appicon">☺</span><b>EMOSI<em>.EXE</em></b><small>EMOTION DATABASE STUDIO</small></div><div class="title-actions"><span class="led"></span><span id="online">LOCAL LIBRARY</span><a href="https://lafrich.github.io/virtual-office/membangun/?app=emotion">⌂ MEMBANGUN</a><span class="window-buttons">_ □ ×</span></div></header>
@@ -572,6 +587,15 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
   <button type="button" data-mobile-panel="preview" aria-pressed="true" class="active">▦ EDITOR</button>
   <button type="button" data-mobile-panel="properties" aria-pressed="false">⚙ DETAILS</button>
 </nav>
+<section class="emotion-mobile-drivebar" aria-label="EMOSI.EXE Google Drive sync" role="region">
+ <div class="mobile-drive-top"><strong>☁ GOOGLE DRIVE</strong><span id="mobileDriveState" role="status" aria-live="polite">Checking connection...</span></div>
+ <div class="mobile-drive-buttons">
+  <button type="button" id="mobileDriveConnect">CONNECT</button>
+  <button type="button" id="mobileDriveRefresh">↻ LOAD DRIVE</button>
+  <button type="button" id="mobileDriveSave">☁ SYNC NOW</button>
+ </div>
+ <p class="mobile-drive-hint">Connect membuka ekspresi dari akun Drive yang sama. Load mengambil versi terbaru; Sync Now menyimpan emosi aktif.</p>
+</section>
 <div class="emotion-workspace" id="emotionWorkspace" data-mobile-panel="preview">
 <aside class="emotion-library panel"><div class="panelhead"><strong>EMOTION DATABASE</strong><small id="count">0</small></div>
 <div class="library-actions"><button id="libraryNew" type="button">＋ NEW DATABASE</button><button id="libraryDuplicate" type="button">⧉ COPY SELECTED</button></div>
@@ -1713,6 +1737,8 @@ function scheduleEmotionAutosave(){
 function driveStatus(message,error=false){
  $("driveLabel").textContent=message;
  $("driveLabel").style.color=error?"#b62230":"#276744";
+ const mobile=$("mobileDriveState");
+ if(mobile){mobile.textContent=message;mobile.style.color=error?"#a32133":D?.connected()?"#246d48":"#536982"}
 }
 function driveConfigured(){
  if(!D){driveStatus("DRIVE MODULE UNAVAILABLE",true);return}
@@ -2123,6 +2149,10 @@ function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas
  $("driveConnect").onclick=connectDrive;
  $("driveRefresh").onclick=()=>refreshDrive();
  $("driveSave").onclick=saveToDrive;
+ // Reuse the same real Drive handlers and storage in the compact mobile toolbar.
+ $("mobileDriveConnect").onclick=connectDrive;
+ $("mobileDriveRefresh").onclick=()=>refreshDrive();
+ $("mobileDriveSave").onclick=saveToDrive;
  driveConfigured();
  window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
  requestAnimationFrame(animationTick);
