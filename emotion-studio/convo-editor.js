@@ -56,6 +56,20 @@ const styles=`
 #convoPixelCanvas.select-mode{cursor:crosshair}
 @media(max-width:820px){#convoPanel{padding:8px}.convo-layout{grid-template-columns:1fr}.convo-box{padding:10px}#convoCanvas{width:min(360px,100%)}#convoPixelCanvas{width:min(420px,90vw)}}
 
+/* Full-screen desktop workspace and inline conversation pixel workbench */
+#convoPanel{width:100%;box-sizing:border-box;padding:14px 18px;overflow:auto}
+.convo-layout{max-width:none;width:100%;margin:0;grid-template-columns:minmax(310px,.8fr) minmax(540px,1.2fr);align-items:start;gap:14px}
+.convo-box{min-width:0}
+#convoCanvas{width:min(530px,100%);max-height:none;cursor:move;touch-action:none}
+#convoPixelOverlay{position:static!important;inset:auto!important;z-index:auto!important;background:transparent!important;display:block;overflow:visible!important;padding:8px 0!important;margin-top:12px}
+#convoPixelOverlay[hidden]{display:none!important}
+.convo-pixel-window{box-sizing:border-box;width:100%!important;padding:12px!important;box-shadow:none!important}
+.convo-pixel-layout{display:grid;grid-template-columns:minmax(230px,1fr) minmax(160px,.7fr);gap:12px}
+#convoPixelCanvas{width:100%!important;max-width:520px;height:auto}
+#convoPixelTools{min-width:0}
+@media(max-width:1050px){.convo-layout{grid-template-columns:1fr}.convo-pixel-layout{grid-template-columns:minmax(0,1fr) minmax(160px,.65fr)}}
+@media(max-width:650px){.convo-pixel-layout{grid-template-columns:1fr}}
+
 `;
 const style=document.createElement('style');style.textContent=styles;document.head.append(style);
 const nav=document.querySelector('.emotion-window>.menubar');
@@ -100,7 +114,7 @@ const pixelOverlay=document.createElement('div');pixelOverlay.id='convoPixelOver
 <button id="convoPixelReset">↺ RESET THIS SHAPE</button><button id="convoPixelSave" style="background:#2674a7;border-color:#b1dfff">▣ SAVE GENERAL GUIDE</button><button id="convoPixelCancel">× CLOSE WITHOUT SAVING</button>
 <small style="color:#a6c5df">16 × 12 pixels. Drag to draw. Use SE/SW/NE/NW to create a reusable mouth guide for every camera view.</small>
 </div></div></div>`;
-document.body.append(pixelOverlay);
+panel.querySelector('.convo-box:last-child').append(pixelOverlay);
 const $=id=>document.getElementById(id);
 let project=null,at=0,view='se',playing=false,clock=0,raf=0,baseImage=null,headImage=null,guide=null,guideDraft=null,brush=1,painting=false,copied=null,toolMode='draw',selection=null,selectionStart=null,selectionMoving=false,moveOrigin=null,moveBackup=null,clipboard=null;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||a));
@@ -197,7 +211,7 @@ function endPointer(){
  if(selectionMoving&&moveBackup&&selection)pasteRect(activePixels(),moveBackup,selection.x,selection.y);
  selectionMoving=false;selectionStart=null;moveBackup=null;moveOrigin=null;renderPixels();
 }
-function openPixelEditor(){stop();guideDraft=JSON.parse(JSON.stringify(guide));$('convoPixelShape').value=frame().viseme;$('convoPixelDir').value=view;pixelOverlay.hidden=false;selection=null;setTool('draw');renderPixels()}
+function openPixelEditor(){stop();guideDraft=JSON.parse(JSON.stringify(guide));$('convoPixelShape').value=frame().viseme;$('convoPixelDir').value=view;pixelOverlay.hidden=false;selection=null;setTool('draw');renderPixels();pixelOverlay.scrollIntoView({block:'nearest',behavior:'smooth'});}
 function setBrush(value){brush=value;setTool('draw')}
 function downloadJSON(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 
@@ -289,6 +303,13 @@ $('convoBase').onchange=()=>{capture();loadBase()};
 document.querySelectorAll('[data-convo-dir]').forEach(b=>b.onclick=()=>{view=b.dataset.convoDir;document.querySelectorAll('[data-convo-dir]').forEach(n=>n.classList.toggle('active',n===b));renderPreview()});
 $('convoShowHead').onchange=renderPreview;
 $('convoHeadOpacity').oninput=renderPreview;
+// Place mouth directly on the character preview; positions remain in 64×112 sprite pixels.
+let draggingMouth=false;
+const moveMouth=e=>{const r=$('convoCanvas').getBoundingClientRect();project.x=clamp(Math.round((e.clientX-r.left)*64/r.width-8*project.scale),0,63);project.y=clamp(Math.round((e.clientY-r.top)*112/r.height-6*project.scale),0,111);$('convoX').value=project.x;$('convoY').value=project.y;renderPreview()};
+$('convoCanvas').addEventListener('pointerdown',e=>{if(e.button!==0)return;stop();draggingMouth=true;$('convoCanvas').setPointerCapture(e.pointerId);moveMouth(e)});
+$('convoCanvas').addEventListener('pointermove',e=>{if(draggingMouth)moveMouth(e)});
+const endMouth=()=>{draggingMouth=false};$('convoCanvas').addEventListener('pointerup',endMouth);$('convoCanvas').addEventListener('pointercancel',endMouth);
+for(const id of ['convoX','convoY','convoScale'])$(id).addEventListener('input',()=>{capture();renderPreview()});
 $('convoOpenPixels').onclick=openPixelEditor;
 $('convoPixelShape').onchange=()=>{selection=null;renderPixels()};
 $('convoPixelDir').onchange=()=>{selection=null;renderPixels()};
