@@ -408,7 +408,40 @@ $('salLoadDrive').onclick=restoreLibrary;
  };
  opener.onclick=()=>{if(!dlg.open)dlg.showModal();void draw();};
  return Object.freeze({open(){opener.click();},refresh(){if(dlg.open)void draw();},
-  get count(){return all.length;},get hidden(){return hiddenAssets;}});
+  get count(){return all.length;},get hidden(){return hiddenAssets;},
+  assetCatalogSnapshot(){return {kind:"assetCatalog",record:assetIndex()};},
+  assetLocalRecords(){
+   const items=localAssets();
+   return [...items.buildings.map(record=>({kind:"assetBuilding",record})),
+    ...items.objects.map(record=>({kind:"assetObject",record}))];
+  },
+  async importRemoteQuiet(payload){
+   if(payload?.app!=="semesta"||!payload.record?.id)throw Error("Not a Semesta custom asset");
+   const item=payload.record;
+   if(payload.kind==="assetBuilding"){
+    if(!/^br-[a-z0-9-]{1,72}$/.test(item.id)||!item.config||!item.views)
+     throw Error("Invalid building asset");
+    const current=localAssets().buildings;
+    const next=[item,...current.filter(x=>x.id!==item.id)];
+    if(next.length>75)throw Error("Building library at maximum capacity (75)");
+    const existing=current.find(x=>x.id===item.id);
+    if(existing&&JSON.stringify(existing)!==JSON.stringify(item)){
+     // Do not overwrite the sole local version without a durable backup.
+     localStorage.setItem("membangun-before-cloud-building:"+item.id,JSON.stringify(existing));
+    }
+    localStorage.setItem("virtual-life-bangun-ruang-v1",JSON.stringify(next));
+    options.refreshCustom?.();
+   }else if(payload.kind==="assetObject"){
+    if(!g.VLBangunObjects?.valid(item))throw Error("Invalid custom object or four-view PNG");
+    const prior=g.VLBangunObjects.read().find(x=>x.id===item.id);
+    if(prior&&JSON.stringify(prior)!==JSON.stringify(item))
+     localStorage.setItem("membangun-before-cloud-object:"+item.id,JSON.stringify(prior));
+    g.__mbCloudRestoring=true;
+    try{g.VLBangunObjects.save(item)}finally{g.__mbCloudRestoring=false}
+    options.refreshCustom?.();
+   }else throw Error("Not a custom Semesta Asset Library record");
+  }
+ });
 }
 g.VLSemestaAssetLibrary=Object.freeze({mount,category,canEdit,route,entries,CATS,assetHealthy,validGeometry,checkImage});
 })(typeof window!=='undefined'?window:globalThis);
