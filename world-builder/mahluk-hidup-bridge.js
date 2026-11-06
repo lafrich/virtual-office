@@ -112,6 +112,20 @@ function localSync(){
    category:"human",template_category:"human",template:false,custom:true,
    bodyType:row.base==="female"?"female":"male",gender:row.base==="female"?"female":"male",
    v2:true,v2Sheet:row.sprite,v2Clips:clips,
+   // Keep the same canonical root identity across Semesta / Bangun Ruang.
+   // Jiwa can consume the V6B bone identity; EMOSI.EXE continues owning
+   // face RGBA frames. These metadata are read-only here.
+   v2RigSystem:row.rigSystem==='v6b'?'v6b':'modular-v2',
+   v2FacelessBase:['male','female'].includes(row.facelessBase)?row.facelessBase:null,
+   v2EmotionPlane:typeof row.emotionPlane?.asset==='string'?{
+    asset:row.emotionPlane.asset,
+    placement:row.emotionPlane.placement||null
+   }:null,
+   v2EditableBones:row.facelessBase?[
+    'head','neck','torso','pelvis',
+    'shoulder_l','elbow_l','wrist_l','shoulder_r','elbow_r','wrist_r',
+    'hip_l','knee_l','ankle_l','hip_r','knee_r','ankle_r'
+   ]:null,
    motions:Object.entries(clips).map(([id,c])=>({id,frames:c.frames,available:true,
     frame_ms:c.frame_ms,source:"mahluk2"})),
    expressions:[],sheet:"media/human-male-base-sheet.png"});
