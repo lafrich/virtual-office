@@ -29,7 +29,7 @@ test('launcher mini laptop entry and five apps are wired', () => {
 });
 
 test('desktop, virtual mouse and virtual keyboard are present', () => {
-  for (const id of ['appFrame','touchpad','keyboard','keyboardPage','padPage','zoomOut','zoomIn','leftClick','rightClick','screenScroll','screenUp','screenDown','screenProgress']) {
+  for (const id of ['appFrame','touchpad','keyboard','keyboardPage','padPage','zoomOut','zoomIn','holdClick','screenScroll','screenUp','screenDown','screenProgress']) {
     assert.match(laptop, new RegExp('id="'+id+'"'));
   }
   assert.match(laptop, /touch-action:none/);
@@ -38,7 +38,9 @@ test('desktop, virtual mouse and virtual keyboard are present', () => {
   assert.match(laptop, /function recordTap\(/);
   assert.match(laptop, /e\.touches\.length>=2/);
   assert.match(laptop, /scrollable\.scrollTop\+=deltaY/);
-  assert.match(laptop, /class="mouse-buttons"/);
+  assert.match(laptop, /class="hold-controls"/);
+  assert.match(laptop, /function setHold\(/);
+  assert.doesNotMatch(laptop, /id="leftClick"|id="rightClick"/);
   assert.match(laptop, /function panScreen\(/);
   assert.match(laptop, /scroller\.scrollTop/);
   assert.match(laptop, /overflow:auto;overscroll-behavior:contain/);
