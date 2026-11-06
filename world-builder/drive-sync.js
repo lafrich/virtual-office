@@ -67,10 +67,11 @@ async function ensureFolder(parent,name){
 }
 async function folder(app,kind=null){
  if(!APPS[app])throw Error("Unknown app: "+app);
- if(app==="semesta"&&ASSET_KINDS.has(kind)){
-  if(folders.semestaAssets)return folders.semestaAssets;
-  folders.semestaAssets=await ensureFolder(await folder("semesta"),"Asset Library");
-  return folders.semestaAssets;
+ if(ASSET_KINDS.has(kind)){
+  const key=app+"Assets";
+  if(folders[key])return folders[key];
+  folders[key]=await ensureFolder(await folder(app),"Asset Library");
+  return folders[key];
  }
  if(folders[app])return folders[app];
  const top=await ensureFolder("root",ROOT);
@@ -104,7 +105,10 @@ function validateRecord(app,kind,record){
     throw Error("Invalid custom Pixel Creator object");
   }else throw Error("Semesta cannot store this kind of asset");
  }else if(app==="bangun"){
-  if(!["building","object"].includes(kind))throw Error("Invalid Bangun Ruang asset kind");
+  if(kind==="assetCatalog"){
+   if(record.format!=="bangun-ruang-asset-library-v1"||!Array.isArray(record.entries)||
+      record.entries.length>6000)throw Error("Invalid Bangun Ruang built-in asset catalog");
+  }else if(!["building","object"].includes(kind))throw Error("Invalid Bangun Ruang asset kind");
   if(kind==="building"&&(!record.config||!record.views))throw Error("Invalid Bangun Ruang building");
   if(kind==="object"&&(!record.variants&&!record.views))throw Error("Invalid Bangun Ruang pixel object");
  }
