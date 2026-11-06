@@ -36,7 +36,26 @@ const styles=`
 #convoOverlayControls{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:4px 0}
 #convoOverlayControls label{display:flex;gap:5px;align-items:center;font-size:11px}
 #convoGuideInfo{font-size:10px;color:#a5bed4}
-@media(max-width:820px){.convo-layout{grid-template-columns:1fr}#convoPanel{padding:7px}}
+
+/* Desktop studio: large vertical stacking; generous viewport, each section full width. */
+#convoPanel{padding:18px 22px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable}
+.convo-layout{grid-template-columns:minmax(0,1fr);max-width:1540px;gap:16px}
+.convo-box{padding:18px 22px}
+.convo-box h3{font-size:15px}
+.convo-field{font-size:12px}
+.convo-actions{gap:9px}
+.convo-actions button{font-size:12px;padding:10px 14px}
+#convoCanvas{width:min(460px,90%);max-height:500px;object-fit:contain}
+#convoFrames{min-height:93px;max-width:100%;overscroll-behavior-x:contain}
+#convoFrames button{min-width:58px;font-size:11px;padding:7px}
+.convo-pixel-window{width:min(1200px,100%);padding:20px}
+#convoPixelCanvas{width:min(620px,65vw)}
+#convoPixelTools{min-width:260px}
+#convoPixelOverlay{align-items:start;overscroll-behavior:contain}
+#convoSelectionInfo{color:#a9d8ff;font:11px Consolas,monospace;margin-top:5px}
+#convoPixelCanvas.select-mode{cursor:crosshair}
+@media(max-width:820px){#convoPanel{padding:8px}.convo-layout{grid-template-columns:1fr}.convo-box{padding:10px}#convoCanvas{width:min(360px,100%)}#convoPixelCanvas{width:min(420px,90vw)}}
+
 `;
 const style=document.createElement('style');style.textContent=styles;document.head.append(style);
 const nav=document.querySelector('.emotion-window>.menubar');
@@ -75,14 +94,15 @@ const pixelOverlay=document.createElement('div');pixelOverlay.id='convoPixelOver
 <div id="convoPixelTools">
 <label class="convo-field">VISEME <select id="convoPixelShape">${Object.keys(mouth).map(x=>`<option value="${x}">${x.toUpperCase()}</option>`).join('')}</select></label>
 <label class="convo-field">VIEW <select id="convoPixelDir">${DIR.map(x=>`<option value="${x}">${x.toUpperCase()}</option>`).join('')}</select></label>
-<button id="convoPixelInk" class="active">✎ DARK PIXEL</button><button id="convoPixelPink">✎ TONGUE / PINK</button><button id="convoPixelErase">⌫ ERASE PIXEL</button>
-<button id="convoPixelCopy">⧉ COPY VIEW</button><button id="convoPixelPaste">▣ PASTE TO VIEW</button>
+<button id="convoPixelSelect">▧ RECT SELECT</button><button id="convoPixelInk" class="active">✎ DARK PIXEL</button><button id="convoPixelPink">✎ TONGUE / PINK</button><button id="convoPixelErase">⌫ ERASE PIXEL</button>
+<button id="convoPixelCopy">⧉ COPY SELECTION</button><button id="convoPixelPaste">▣ PASTE SELECTION</button>
+<button id="convoPixelFlipH">⇋ FLIP HORIZONTAL</button><button id="convoPixelFlipV">⇅ FLIP VERTICAL</button><button id="convoPixelClearSelection">□ DESELECT</button><div id="convoSelectionInfo">Select area, then copy/paste or drag to move.</div>
 <button id="convoPixelReset">↺ RESET THIS SHAPE</button><button id="convoPixelSave" style="background:#2674a7;border-color:#b1dfff">▣ SAVE GENERAL GUIDE</button><button id="convoPixelCancel">× CLOSE WITHOUT SAVING</button>
 <small style="color:#a6c5df">16 × 12 pixels. Drag to draw. Use SE/SW/NE/NW to create a reusable mouth guide for every camera view.</small>
 </div></div></div>`;
 document.body.append(pixelOverlay);
 const $=id=>document.getElementById(id);
-let project=null,at=0,view='se',playing=false,clock=0,raf=0,baseImage=null,headImage=null,guide=null,guideDraft=null,brush=1,painting=false,copied=null;
+let project=null,at=0,view='se',playing=false,clock=0,raf=0,baseImage=null,headImage=null,guide=null,guideDraft=null,brush=1,painting=false,copied=null,toolMode='draw',selection=null,selectionStart=null,selectionMoving=false,moveOrigin=null,moveBackup=null,clipboard=null;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||a));
 const uid=()=>('convo-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6));
 const message=t=>{$('convoStatus').textContent=t};
@@ -106,22 +126,79 @@ function mouthPixels(ctx,shape,dir,x,y,scale){
  const pixels=guide?.shapes?.[dir]?.[shape]||[];
  for(let i=0;i<pixels.length;i++){if(!pixels[i])continue;ctx.fillStyle=pixels[i]===2?'#ac5c63':'#38262a';ctx.fillRect(x+(i%16)*scale,y+Math.floor(i/16)*scale,scale,scale)}
 }
+
+function activePixels(){return guideDraft.shapes[$('convoPixelDir').value][$('convoPixelShape').value]}
+function rectFromPoints(a,b){
+ const x=Math.max(0,Math.min(15,Math.min(a.x,b.x))),y=Math.max(0,Math.min(11,Math.min(a.y,b.y)));
+ return {x,y,w:Math.max(1,Math.min(16-x,Math.abs(a.x-b.x)+1)),h:Math.max(1,Math.min(12-y,Math.abs(a.y-b.y)+1))};
+}
+function pixelAt(e){
+ const r=$('convoPixelCanvas').getBoundingClientRect();
+ return {x:Math.max(0,Math.min(15,Math.floor((e.clientX-r.left)*16/r.width))),
+ y:Math.max(0,Math.min(11,Math.floor((e.clientY-r.top)*12/r.height)))};
+}
+function insideSelection(p){return selection&&p.x>=selection.x&&p.x<selection.x+selection.w&&p.y>=selection.y&&p.y<selection.y+selection.h}
+function extractRect(pixels,r){const data=[];for(let y=0;y<r.h;y++)for(let x=0;x<r.w;x++)data.push(pixels[(r.y+y)*16+r.x+x]);return {w:r.w,h:r.h,data}}
+function pasteRect(pixels,clip,x,y){for(let j=0;j<clip.h;j++)for(let i=0;i<clip.w;i++)if(x+i>=0&&x+i<16&&y+j>=0&&y+j<12)pixels[(y+j)*16+x+i]=clip.data[j*clip.w+i]}
+function flipClip(clip,vertical=false){
+ const data=Array(clip.w*clip.h).fill(0);
+ for(let y=0;y<clip.h;y++)for(let x=0;x<clip.w;x++)data[y*clip.w+x]=clip.data[(vertical?clip.h-1-y:y)*clip.w+(vertical?x:clip.w-1-x)];
+ return {w:clip.w,h:clip.h,data};
+}
 function renderPixels(){
- const c=$('convoPixelCanvas'),ctx=c.getContext('2d'),pixels=guideDraft.shapes[$('convoPixelDir').value][$('convoPixelShape').value];
+ const c=$('convoPixelCanvas'),ctx=c.getContext('2d'),pixels=activePixels();
  ctx.clearRect(0,0,256,192);ctx.imageSmoothingEnabled=false;
  for(let i=0;i<GUIDE_SIZE;i++){ctx.fillStyle=pixels[i]===1?'#38262a':pixels[i]===2?'#ac5c63':'#b5c8d9';ctx.fillRect((i%16)*16,Math.floor(i/16)*16,16,16)}
  ctx.strokeStyle='#51647a';ctx.lineWidth=1;
  for(let x=0;x<=16;x++){ctx.beginPath();ctx.moveTo(x*16+.5,0);ctx.lineTo(x*16+.5,192);ctx.stroke()}
  for(let y=0;y<=12;y++){ctx.beginPath();ctx.moveTo(0,y*16+.5);ctx.lineTo(256,y*16+.5);ctx.stroke()}
+ if(selection){ctx.save();ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.strokeRect(selection.x*16+1,selection.y*16+1,selection.w*16-2,selection.h*16-2);ctx.restore()}
+ $('convoSelectionInfo').textContent=selection?'SELECTED '+selection.w+'×'+selection.h+' at '+selection.x+','+selection.y+' · drag inside selection to move':'Select rectangle; copy, paste, flip or drag to move';
 }
-function paintPixel(e){
- const rect=$('convoPixelCanvas').getBoundingClientRect();
- const x=Math.floor((e.clientX-rect.left)*16/rect.width),y=Math.floor((e.clientY-rect.top)*12/rect.height);
- if(x<0||x>15||y<0||y>11)return;
- guideDraft.shapes[$('convoPixelDir').value][$('convoPixelShape').value][y*16+x]=brush;renderPixels();
+function paintPixel(e){const p=pixelAt(e);activePixels()[p.y*16+p.x]=brush;renderPixels()}
+function copySelection(){const r=selection||{x:0,y:0,w:16,h:12};clipboard=extractRect(activePixels(),r);copied=[...clipboard.data];message('Copied '+r.w+'×'+r.h+' mouth pixels')}
+function pasteSelection(){
+ if(!clipboard){message('Nothing copied yet');return}
+ const x=selection?.x??0,y=selection?.y??0;pasteRect(activePixels(),clipboard,x,y);
+ selection={x,y,w:Math.min(clipboard.w,16-x),h:Math.min(clipboard.h,12-y)};renderPixels();
 }
-function openPixelEditor(){stop();guideDraft=JSON.parse(JSON.stringify(guide));$('convoPixelShape').value=frame().viseme;$('convoPixelDir').value=view;pixelOverlay.hidden=false;renderPixels()}
-function setBrush(value){brush=value;for(const [id,n] of [['convoPixelInk',1],['convoPixelPink',2],['convoPixelErase',0]])$(id).classList.toggle('active',brush===n)}
+function flipSelection(vertical=false){
+ const r=selection||{x:0,y:0,w:16,h:12},pixels=activePixels(),flipped=flipClip(extractRect(pixels,r),vertical);
+ pasteRect(pixels,flipped,r.x,r.y);renderPixels();
+}
+function setTool(mode){toolMode=mode;
+ $('convoPixelCanvas').classList.toggle('select-mode',mode==='select');
+ $('convoPixelSelect').classList.toggle('active',mode==='select');
+ for(const [id,n] of [['convoPixelInk',1],['convoPixelPink',2],['convoPixelErase',0]])$(id).classList.toggle('active',mode==='draw'&&brush===n);
+}
+function beginPointer(e){
+ const c=$('convoPixelCanvas');painting=true;c.setPointerCapture(e.pointerId);const p=pixelAt(e);
+ if(toolMode==='draw'){paintPixel(e);return}
+ if(insideSelection(p)){
+   selectionMoving=true;moveOrigin=p;moveBackup=extractRect(activePixels(),selection);
+   const pixels=activePixels();for(let j=0;j<selection.h;j++)for(let i=0;i<selection.w;i++)pixels[(selection.y+j)*16+selection.x+i]=0;
+ }else{selectionMoving=false;selectionStart=p;selection=rectFromPoints(p,p)}
+ renderPixels();
+}
+function movePointer(e){
+ if(!painting)return;
+ if(toolMode==='draw'){paintPixel(e);return}
+ const p=pixelAt(e);
+ if(selectionMoving&&moveBackup){
+  const dx=p.x-moveOrigin.x,dy=p.y-moveOrigin.y;
+  const old=selection;
+  selection={x:Math.max(0,Math.min(16-old.w,old.x+dx)),y:Math.max(0,Math.min(12-old.h,old.y+dy)),w:old.w,h:old.h};
+  moveOrigin=p;
+ }else if(selectionStart)selection=rectFromPoints(selectionStart,p);
+ renderPixels();
+}
+function endPointer(){
+ if(!painting)return;painting=false;
+ if(selectionMoving&&moveBackup&&selection)pasteRect(activePixels(),moveBackup,selection.x,selection.y);
+ selectionMoving=false;selectionStart=null;moveBackup=null;moveOrigin=null;renderPixels();
+}
+function openPixelEditor(){stop();guideDraft=JSON.parse(JSON.stringify(guide));$('convoPixelShape').value=frame().viseme;$('convoPixelDir').value=view;pixelOverlay.hidden=false;selection=null;setTool('draw');renderPixels()}
+function setBrush(value){brush=value;setTool('draw')}
 function downloadJSON(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 
 function readProjects(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
@@ -150,7 +227,7 @@ function renderTimeline(){
  const sh=document.createElement('small');sh.textContent=f.viseme;b.append(strong,small,sh);
  b.onclick=()=>{at=i;renderTimeline();renderPreview()};root.append(b)});
  $('convoPosition').textContent='FRAME '+(at+1)+' / '+project.frames.length;
- const active=root.querySelector('button.active');active?.scrollIntoView({block:'nearest',inline:'nearest'});
+ // Never scroll the document or timeline during playback.
 }
 function renderPreview(){
  const canvas=$('convoCanvas'),ctx=canvas.getContext('2d');ctx.clearRect(0,0,64,112);ctx.imageSmoothingEnabled=false;
@@ -184,7 +261,16 @@ function safeImport(p){
 }
 function capture(){project.name=$('convoName').value.trim()||'Untitled Conversation';project.text=$('convoText').value;project.fps=clamp($('convoFps').value,4,24);project.speed=clamp($('convoSpeed').value,1,6);project.baseId=$('convoBase').value;project.x=clamp($('convoX').value,0,63);project.y=clamp($('convoY').value,0,111);project.scale=clamp($('convoScale').value,1,4)}
 function stop(){playing=false;$('convoPlay').textContent='▶ PLAY';cancelAnimationFrame(raf)}
-function tick(now){if(!playing)return;if(now-clock>=1000/project.fps){at=(at+1)%project.frames.length;clock=now;renderTimeline();renderPreview()}raf=requestAnimationFrame(tick)}
+function tick(now){
+ if(!playing)return;
+ if(now-clock>=1000/project.fps){
+   at=(at+1)%project.frames.length;clock=now;
+   const buttons=$('convoFrames').children;
+   for(let i=0;i<buttons.length;i++)buttons[i].classList.toggle('active',i===at);
+   renderPreview();
+ }
+ raf=requestAnimationFrame(tick);
+}
 tab.onclick=()=>{const open=panel.hidden;panel.hidden=!open;workspace.hidden=open;workspace.style.display=open?'none':'';tab.classList.toggle('active',open);if(open){loadBases();renderPreview()}else stop()};
 $('convoGenerate').onclick=()=>{capture();stop();project.frames=generate(project.text,project.speed);at=0;renderTimeline();renderPreview();message('Generated '+project.frames.length+' frames. Select frame to adjust mouth shape.')};
 $('convoSave').onclick=()=>{try{capture();const xs=readProjects(),i=xs.findIndex(x=>x.id===project.id);if(i>=0)xs[i]=project;else xs.push(project);persistAll(xs);refreshSaved();message('Saved in this browser · export JSON for another device')}catch(e){message('SAVE FAILED: '+e.message)}};
@@ -204,19 +290,29 @@ document.querySelectorAll('[data-convo-dir]').forEach(b=>b.onclick=()=>{view=b.d
 $('convoShowHead').onchange=renderPreview;
 $('convoHeadOpacity').oninput=renderPreview;
 $('convoOpenPixels').onclick=openPixelEditor;
-$('convoPixelShape').onchange=renderPixels;
-$('convoPixelDir').onchange=renderPixels;
+$('convoPixelShape').onchange=()=>{selection=null;renderPixels()};
+$('convoPixelDir').onchange=()=>{selection=null;renderPixels()};
 $('convoPixelInk').onclick=()=>setBrush(1);
 $('convoPixelPink').onclick=()=>setBrush(2);
 $('convoPixelErase').onclick=()=>setBrush(0);
-$('convoPixelCopy').onclick=()=>{copied=[...guideDraft.shapes[$('convoPixelDir').value][$('convoPixelShape').value]];message('Mouth pixels copied')};
-$('convoPixelPaste').onclick=()=>{if(!copied)return;guideDraft.shapes[$('convoPixelDir').value][$('convoPixelShape').value]=[...copied];renderPixels()};
+$('convoPixelCopy').onclick=copySelection;
+$('convoPixelPaste').onclick=pasteSelection;
+$('convoPixelSelect').onclick=()=>setTool('select');
+$('convoPixelFlipH').onclick=()=>flipSelection(false);
+$('convoPixelFlipV').onclick=()=>flipSelection(true);
+$('convoPixelClearSelection').onclick=()=>{selection=null;renderPixels()};
+pixelOverlay.addEventListener('keydown',e=>{
+ if(pixelOverlay.hidden||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'){e.preventDefault();copySelection()}
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'){e.preventDefault();pasteSelection()}
+ if(e.key==='Escape'){e.preventDefault();selection=null;renderPixels()}
+});
 $('convoPixelReset').onclick=()=>{guideDraft.shapes[$('convoPixelDir').value][$('convoPixelShape').value]=defaultMouthGuide().shapes[$('convoPixelDir').value][$('convoPixelShape').value];renderPixels()};
-$('convoPixelSave').onclick=()=>{try{localStorage.setItem(GUIDE_KEY,JSON.stringify(guideDraft));guide=guideDraft;pixelOverlay.hidden=true;renderPreview();message('✓ GENERAL MOUTH GUIDE SAVED · ALL CONVERSATIONS USE THESE PIXELS')}catch(e){message('GUIDE SAVE FAILED: '+e.message)}};
+$('convoPixelSave').onclick=()=>{try{endPointer();localStorage.setItem(GUIDE_KEY,JSON.stringify(guideDraft));guide=guideDraft;pixelOverlay.hidden=true;renderPreview();message('✓ GENERAL MOUTH GUIDE SAVED · ALL CONVERSATIONS USE THESE PIXELS')}catch(e){message('GUIDE SAVE FAILED: '+e.message)}};
 $('convoPixelCancel').onclick=()=>{pixelOverlay.hidden=true;guideDraft=null};
-$('convoPixelCanvas').onpointerdown=e=>{painting=true;$('convoPixelCanvas').setPointerCapture(e.pointerId);paintPixel(e)};
-$('convoPixelCanvas').onpointermove=e=>{if(painting)paintPixel(e)};
-$('convoPixelCanvas').onpointerup=()=>{painting=false};$('convoPixelCanvas').onpointercancel=()=>{painting=false};
+$('convoPixelCanvas').onpointerdown=beginPointer;
+$('convoPixelCanvas').onpointermove=movePointer;
+$('convoPixelCanvas').onpointerup=endPointer;$('convoPixelCanvas').onpointercancel=endPointer;
 $('convoGuideExport').onclick=()=>downloadJSON('emosi-general-convo-mouth-guide.json',guide);
 $('convoGuideImport').onclick=()=>$('convoGuideFile').click();
 $('convoGuideFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>100000)throw Error('Guide too large');const parsed=JSON.parse(await file.text());if(!validGuide(parsed))throw Error('Invalid 16×12 4-view guide');localStorage.setItem(GUIDE_KEY,JSON.stringify(parsed));guide=parsed;renderPreview();message('General mouth guide imported and saved')}catch(err){message('GUIDE IMPORT FAILED: '+err.message)}e.target.value=''};
