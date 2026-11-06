@@ -440,7 +440,7 @@ const config=()=>{
  c.name=safe(c.name||'Untitled Building');c.sign=safe(c.sign||'').toUpperCase().slice(0,14);
  c.actions=safe(c.actions||'enter');return c;
 };
-const artFingerprint=c=>JSON.stringify(['baseId','kind','w','d','floors','windows','wall','roof','roofShape','detail','detailLevel','facadeSeed','sign','doorStyle','windowStyle','balcony'].map(k=>c[k]));
+const artFingerprint=c=>JSON.stringify(['baseId','kind','w','d','floors','windows','wall','roof','roofShape','detail','detailLevel','facadeSeed','sign','doorStyle','windowStyle','balcony'].map(k=>k==='detailLevel'?(c.detailLevel||'standard'):k==='facadeSeed'?(Number(c.facadeSeed)||1):c[k]));
 function updateBaseSummary(c){
  const spec=semesta?.byId(c.baseId),size=spec?.footprint||[c.w,c.d];
  $('sourceId').value=c.baseId||'Custom';
@@ -448,8 +448,9 @@ function updateBaseSummary(c){
  $('specSummary').textContent=spec?'SEMESTA / '+spec.label+' · FOOTPRINT '+size.join('×')+' · SOURCE HEIGHT '+spec.height+' · '+(spec.source||'native placeholder'):'No linked source';
 }
 function apply(c){
- $('baseSelect').value=c.baseId||defaultBase;
- for(const k of ids)if(Object.hasOwn(c,k))$(k).value=c[k];
+ const next={detailLevel:'standard',facadeSeed:1,...c};
+ $('baseSelect').value=next.baseId||defaultBase;
+ for(const k of ids)if(Object.hasOwn(next,k))$(k).value=next[k];
  $('buildingMode').value=c.interactive===true?'interactive':'decorative';
  updateBaseSummary(config());render();
 }
