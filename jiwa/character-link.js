@@ -1,74 +1,68 @@
-/* Jiwa.exe — same-origin character-root selector.
- * Reads Mahluk Hidup 2's published V6B characters in the same storage that
- * Semesta and Bangun Ruang already use. Does NOT edit game mechanics.
+/* Jiwa.exe — read-only selection from the Mahluk Hidup 1 V6B catalog.
+ * Preserves custom V1 characters and existing game mechanics.
+ * V2 projects are not surfaced, but no browser data is deleted.
  */
-(function(g){
- 'use strict';
- const SOURCE='mahluk-2-library-v1',ACTIVE='jiwa-sandbox-actor-v1';
- const $=id=>document.getElementById(id);
- let rows=[],selection='';
- const valid=r=>r?.format==='mahluk-2-character-v1'&&
-  /^mh2_[a-z0-9]+$/.test(r.id||'')&&typeof r.name==='string'&&
-  typeof r.sprite==='string'&&/^data:image\/png;base64,[a-zA-Z0-9+/=]+$/.test(r.sprite)&&
-  r.sprite.length<1250000;
- const read=()=>{
-  try{const v=JSON.parse(localStorage.getItem(SOURCE)||'[]');
-   return Array.isArray(v)?v.filter(valid).slice(-40):[];
-  }catch{return []}
+(function(g){"use strict";
+const BASE=new URL("/virtual-life-asset-pipeline/",location.origin);
+const CUSTOM="virtual-life-character-storage-v1",ACTIVE="jiwa-sandbox-actor-v1";
+const $=id=>document.getElementById(id),ASSET=/^media\/[a-z0-9_.-]+\.png$/i;
+let rows=[],selection="",loadError="";
+function local(){try{const d=JSON.parse(localStorage.getItem(CUSTOM)||"[]");return Array.isArray(d)?d:[]}catch{return []}}
+function draw(record){
+ const canvas=$("jiwaActorPreview");if(!canvas)return;
+ const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,canvas.width,canvas.height);
+ if(!record)return;
+ const img=new Image(),id=record.id;
+ img.onload=()=>{
+  if(selection===id&&img.naturalWidth>=64&&img.naturalHeight>=(record.row+1)*112)
+   ctx.drawImage(img,0,record.row*112,64,112,0,0,canvas.width,canvas.height);
  };
- function draw(record){
-  const canvas=$('jiwaActorPreview');if(!canvas)return;
-  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  if(!record)return;
-  const img=new Image();
-  img.onload=()=>{
-   if(selection===record.id&&img.naturalWidth>=64&&img.naturalHeight>=448)
-    ctx.drawImage(img,0,0,64,112,0,0,canvas.width,canvas.height);
-  };
-  img.src=record.sprite;
- }
- function refresh(){
-  rows=read();const select=$('jiwaActor'),status=$('jiwaActorStatus');
-  if(!select)return;
-  const old=selection||select.value;
-  select.replaceChildren();
-  const empty=document.createElement('option');empty.value='';empty.textContent='NO CHARACTER / TEST SYSTEM ONLY';
-  select.append(empty);
-  for(const r of rows){
-   const opt=document.createElement('option');opt.value=r.id;
-   opt.textContent=r.name+' / '+(r.facelessBase||r.base||'HUMAN').toUpperCase();
-   select.append(opt);
+ img.src=new URL(record.sprite,BASE).href;
+}
+async function refresh(){
+ const control=$("jiwaActor"),status=$("jiwaActorStatus");if(!control)return 0;
+ const previous=selection||control.value;
+ try{
+  const resp=await fetch(new URL("catalog.json",BASE),{cache:"no-store"});
+  if(!resp.ok)throw Error("HTTP "+resp.status);
+  const catalog=await resp.json();if(!Array.isArray(catalog.characters))throw Error("Invalid catalog");
+  const native=catalog.characters.filter(a=>a?.id&&ASSET.test(a.sheet||"")&&!/^(?:legacy_)?otis$/.test(a.id))
+   .slice(0,200).map(a=>({id:a.id,name:a.name||a.id,base:a.id,
+     sprite:a.sheet,row:Math.max(0,Math.min(43,Number(a.row_starts?.idle??4))),
+     category:a.template_category||"npc"}));
+  const byId=new Map(native.map(r=>[r.id,r]));
+  for(const saved of local().slice(0,60)){
+   if(!/^custom_(astro|human)_[a-z0-9-]+$/.test(saved.id||""))continue;
+   const parent=byId.get(saved.base);if(parent)
+    native.push({...parent,id:saved.id,base:saved.base,name:String(saved.name||saved.id).slice(0,50)});
   }
-  selection=rows.some(x=>x.id===old)?old:'';
-  select.value=selection;
-  if(status)status.textContent=rows.length?
-   rows.length+' SHARED CHARACTER ROOT(S) · SOURCE MAHLUK HIDUP 2 · SE PREVIEW':
-   'NO SAVED ROOTS · INSTALL MALE/FEMALE IN MAHLUK HIDUP 2 FIRST';
-  draw(rows.find(r=>r.id===selection));
-  return rows.length;
- }
- function select(id){
-  if(!rows.some(r=>r.id===id))id='';
-  selection=id;
-  const control=$('jiwaActor');if(control)control.value=id;
-  try{localStorage.setItem(ACTIVE,id)}catch{}
-  draw(rows.find(r=>r.id===id));
- }
- if($('jiwaActor')){
-  try{selection=localStorage.getItem(ACTIVE)||''}catch{}
-  $('jiwaActor').onchange=e=>select(e.target.value);
-  $('jiwaSyncActors').onclick=refresh;
-  window.addEventListener('storage',e=>{
-   if(e.key===SOURCE)refresh();
-  });
-  window.addEventListener('focus',refresh);
-  refresh();
- }
- g.JiwaActorLink=Object.freeze({
-  get id(){return selection},
-  get record(){return rows.find(r=>r.id===selection)||null},
-  list:()=>rows.slice(),
-  refresh
- });
+  rows=native;loadError="";
+ }catch(e){loadError=String(e.message||e)}
+ control.replaceChildren();
+ const empty=document.createElement("option");empty.value="";empty.textContent="NO CHARACTER / TEST SYSTEM ONLY";control.append(empty);
+ for(const r of rows){const opt=document.createElement("option");opt.value=r.id;
+  opt.textContent=r.name+" / "+r.category.toUpperCase();control.append(opt)}
+ selection=rows.some(r=>r.id===previous)?previous:"";control.value=selection;
+ if(status)status.textContent=loadError?"MAHLUK HIDUP 1 SYNC GAGAL · "+loadError:
+  rows.length+" V6B CHARACTERS · PUBLISHED + LOCAL CUSTOM";
+ draw(rows.find(r=>r.id===selection));return rows.length;
+}
+function select(id){
+ selection=rows.some(r=>r.id===id)?id:"";
+ const control=$("jiwaActor");if(control)control.value=selection;
+ try{localStorage.setItem(ACTIVE,selection)}catch{}
+ draw(rows.find(r=>r.id===selection));
+}
+if($("jiwaActor")){
+ try{selection=localStorage.getItem(ACTIVE)||""}catch{}
+ $("jiwaActor").onchange=e=>select(e.target.value);
+ $("jiwaSyncActors").onclick=()=>void refresh();
+ window.addEventListener("storage",e=>{if(e.key===CUSTOM)void refresh()});
+ window.addEventListener("focus",()=>void refresh());
+ void refresh();
+}
+g.JiwaActorLink=Object.freeze({
+ get id(){return selection},get record(){return rows.find(r=>r.id===selection)||null},
+ list:()=>rows.slice(),refresh
+});
 })(window);

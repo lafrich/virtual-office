@@ -46,16 +46,16 @@ test('Semesta and Bangun Ruang share installed V6B male/female roots even under 
  }
  assert.equal(window.VLMahlukHidup.list().filter(x=>x.v2).length,2);
 });
-test('JiWA reads the same canonical root storage without modifying mechanics',()=>{
+test('JiWA reads Mahluk 1 V6B catalog without modifying mechanics',()=>{
  const html=fs.readFileSync('jiwa/index.html','utf8');
  const link=fs.readFileSync('jiwa/character-link.js','utf8');
  assert.match(html,/id="jiwaActor"/);
  assert.match(html,/id="jiwaActorPreview"/);
  assert.match(html,/id="jiwaSyncActors"/);
  assert.match(html,/character-link\.js\?v=/);
- assert.match(link,/mahluk-2-library-v1/);
+ assert.match(link,/virtual-life-character-storage-v1/);
  assert.match(link,/jiwa-sandbox-actor-v1/);
- assert.match(link,/e\.key===SOURCE/);
+ assert.match(link,/e\.key===CUSTOM/);
  assert.match(link,/record\.sprite/);
  assert.doesNotThrow(()=>new Function(link));
 });
