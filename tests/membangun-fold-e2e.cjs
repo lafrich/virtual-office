@@ -85,6 +85,43 @@ const assert=require('node:assert/strict');
   assert.ok(scrollState.afterDown>scrollState.afterWheel,'Down arrow moves screen image');
   assert.ok(scrollState.afterUp<scrollState.afterDown,'Up arrow moves screen image');
   assert.notEqual(scrollState.afterProgress,'FIT','Progress should indicate clipped screen');
+  // Regression: moving two fingers together pans the cropped screen,
+  // while changing the distance between them pinches the desktop zoom.
+  const pinchState=await page.evaluate(()=>{
+   const pad=document.getElementById('touchpad');
+   const scroll=document.getElementById('screenScroll');
+   const zoomText=document.getElementById('zoomText');
+   const getZoom=()=>Number.parseInt(zoomText.textContent,10);
+   const send=(type,a,b)=>{
+    const touches=[new Touch({identifier:1,target:pad,clientX:a,clientY:120}),
+                   new Touch({identifier:2,target:pad,clientX:b,clientY:120})];
+    pad.dispatchEvent(new TouchEvent(type,{
+      bubbles:true,cancelable:true,
+      touches:type==='touchend'?[]:touches,
+      targetTouches:type==='touchend'?[]:touches,
+      changedTouches:touches
+    }));
+   };
+   const original=getZoom(),beforePan=scroll.scrollTop;
+   // Same-direction movement must pan without changing zoom.
+   send('touchstart',100,200);send('touchmove',135,235);send('touchmove',165,265);
+   send('touchend',165,265);
+   const afterPan=getZoom(),scrolled=scroll.scrollTop-beforePan;
+   // Spreading the same two fingertips apart should zoom in.
+   send('touchstart',110,210);send('touchmove',90,230);send('touchmove',70,250);
+   send('touchend',70,250);
+   const afterOut=getZoom();
+   // Pinching them back together should zoom out.
+   send('touchstart',70,250);send('touchmove',95,225);send('touchmove',120,200);
+   send('touchend',120,200);
+   return {original,afterPan,afterOut,afterIn:getZoom(),scrolled};
+  });
+  console.log('PINCH_ZOOM_AND_PAN',pinchState);
+  assert.equal(pinchState.afterPan,pinchState.original,'Two-finger pan must not change zoom');
+  assert.ok(pinchState.scrolled>10,'Two-finger movement must still pan the desktop');
+  assert.ok(pinchState.afterOut>pinchState.original+10,'Pinch-out must enlarge the desktop');
+  assert.ok(pinchState.afterIn<pinchState.afterOut-10,'Pinch-in must reduce the desktop');
+
   // Single tap must be a left click. Two quick taps must be contextmenu only.
   const tapState=await page.evaluate(async()=>{
    const doc=[...document.querySelectorAll('#frameWrap iframe')].find(x=>x.style.display!=='none').contentDocument;
