@@ -17,6 +17,7 @@ function init(api){
    adjustmentDraft=null,adjustmentKey='',lastAdjusted=null,actionTapTarget=null,
    objectGizmoActive=false,objectDrag=null,undoStack=[];
  const canvas=$('interiorCanvas'),ctx=canvas.getContext('2d');
+ canvas.style.touchAction='none';canvas.style.cursor='grab';
  ctx.imageSmoothingEnabled=false;
  const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
  const group=$('interiorCategory'),asset=$('interiorAsset');
@@ -81,11 +82,23 @@ function init(api){
    before:snapshot(),changed:false};
   canvas.setPointerCapture?.(e.pointerId);e.preventDefault();return true;
  }
+ function beginFreeDrag(e,item){
+  const p=pointOnCanvas(e);if(!p||!item)return;
+  objectDrag={id:e.pointerId,itemId:item.id,handle:'free',start:p,
+   base:{c:item.c,r:item.r},before:snapshot(),changed:false,started:false};
+  canvas.setPointerCapture?.(e.pointerId);
+ }
  function dragObject(e){
   const d=objectDrag;if(!d||d.id!==e.pointerId)return;
   const p=pointOnCanvas(e);if(!p)return;
-  const item=scene().items.find(x=>x.id===selected);if(!item)return;
+  const item=scene().items.find(x=>x.id===(d.itemId||selected));if(!item)return;
   const dx=p.x-d.start.x,dy=p.y-d.start.y;
+  if(d.handle==='free'){
+   // Semesta-style direct grab: no prior selection, axis gizmo or second tap.
+   // Pointer's initial offset stays fixed, so furniture cannot jump on grab.
+   if(!d.started&&Math.hypot(dx,dy)<4)return;
+   d.started=true;canvas.style.cursor='grabbing';
+  }
   let c=d.base.c,r=d.base.r;
   if(interiorView==='iso'){
    if(d.handle==='x'){
@@ -110,10 +123,17 @@ function init(api){
  function endObjectDrag(e){
   if(!objectDrag||objectDrag.id!==e.pointerId)return;
   const d=objectDrag;objectDrag=null;
+  canvas.style.cursor='grab';
   try{canvas.releasePointerCapture?.(e.pointerId)}catch{}
-  const item=scene().items.find(x=>x.id===selected);
+  const item=scene().items.find(x=>x.id===(d.itemId||selected));
+  if(item&&e.type==='pointercancel'){
+   if(item.c!==d.base.c||item.r!==d.base.r)model.move(scene(),item.id,d.base.c,d.base.r);
+   draw();e.preventDefault();return;
+  }
   if(d.changed&&item&&(item.c!==d.base.c||item.r!==d.base.r)){
    recordUndo(d.before);renderObjects();renderActions();
+   onStatus('Moved '+item.name+' → '+item.c+','+item.r+
+    ' · snapped to tile · Save Asset to keep changes');
   }
   draw();e.preventDefault();
  }
@@ -330,8 +350,8 @@ function init(api){
    g.VLBuildingPreviewScale?.interior([canvas.width,canvas.height],'iso');
    $('placementHint').textContent=placing?
     'Tap an empty diamond tile to place '+(model.types[placing]?.label||placing)+'. Door tile stays clear.':
-    selected?'Tap furniture to edit, or tap an empty diamond to move it. Switch to Plan for precise placement.':
-    'Isometric 2:1 · tap furniture to edit its action, or choose Plan to arrange tiles.';
+    selected?'Drag furniture directly to move it · snaps to free tiles. Tap twice for optional precision handles.':
+    'Isometric 2:1 · drag any furniture to move it; tap to select for actions.';
    return;
   }
   lastIso=null;drawPlan();
@@ -384,8 +404,8 @@ function init(api){
   g.VLBuildingPreviewScale?.interior([canvas.width,canvas.height],'plan');
   $('placementHint').textContent=placing?
    'Tap an empty tile to place '+(model.types[placing]?.label||placing)+'. Entrance is kept clear.':
-   selected?'Tap a free tile to move the selected object. Tap another object to select it.':
-   'Tap an interior object to edit its trigger, animation and position.';
+   selected?'Drag the selected furniture to move it; empty tiles deselect.':
+   'Drag furniture directly on the floor plan; tap to edit its actions.';
  }
  function hitItem(c,r){
   return [...scene().items].reverse().find(item=>model.occupied(item).includes(c+','+r));
@@ -677,22 +697,17 @@ function init(api){
   }
   const hit=hitItem(c,r);
   if(hit){
-   const same=selected===hit.id;
-   selected=hit.id;objectGizmoActive=same?!objectGizmoActive:false;
+   const same=selected===hit.id;selected=hit.id;
+   // Optional precision gizmo remains on the second tap; never required to move.
+   objectGizmoActive=same?!objectGizmoActive:false;
    renderObjects();renderActions();draw();return;
   }
-  if(selected){
-   const before=snapshot();
-   if(!objectGizmoActive){objectGizmoActive=false;selected=null;renderObjects();renderActions();draw();return;}
-   if(model.move(s,selected,c,r,undefined)){recordUndo(before);renderObjects();draw();onStatus('Moved interior prop to '+c+','+r);}
-   else onStatus('Cannot move: occupied or outside floor plan');
-  }
+  if(selected){selected=null;objectGizmoActive=false;renderObjects();renderActions();draw();}
  }
  canvas.addEventListener('pointerdown',e=>{
-  if(!enabled||preview!=='interior')return;
-  const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
-  // IMPORTANT: gizmo handles often sit beyond the furniture polygon or floor.
-  // Detect handles BEFORE tile hit tests, otherwise the editor ignores clicks.
+  if(!enabled||preview!=='interior'||(e.pointerType==='mouse'&&e.button!==0))return;
+  const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
+  // Optional precision handles remain available; normal move needs no gizmo.
   if(objectGizmoActive&&beginObjectDrag(e))return;
   let c,z,hit=null;
   if(interiorView==='iso'&&iso){
@@ -700,16 +715,26 @@ function init(api){
    if(!hit)return;
    ({c,r:z}=hit);
   }else{
-   c=Math.floor((e.clientX-r.left)*canvas.width/r.width/CELL);
-   z=Math.floor((e.clientY-r.top)*canvas.height/r.height/CELL);
+   c=Math.floor((e.clientX-rect.left)*canvas.width/rect.width/CELL);
+   z=Math.floor((e.clientY-rect.top)*canvas.height/rect.height/CELL);
   }
   if(c<0||z<0||c>=scene().width||z>=scene().depth)return;
   e.preventDefault();
   if(tab==='actions'&&!placing){tapActionObject(e);return;}
   if(api.onFloorClick?.(c,z,hit)===true)return;
-  // Route all furniture selections through the same two-tap gizmo state.
-  // The previous short-circuit made the second tap do nothing in isometric view.
-  moveSelectedTo(c,z);
+  if(placing){moveSelectedTo(c,z);return;}
+  // Isometric sprite polygons can extend outside their own floor tile:
+  // use the actual hit item ID, not a second ground-cell lookup.
+  const item=hit?.itemId?scene().items.find(x=>x.id===hit.itemId):hitItem(c,z);
+  if(item){
+   const same=selected===item.id;
+   selected=item.id;
+   objectGizmoActive=same?!objectGizmoActive:false;
+   renderObjects();renderActions();draw();
+   beginFreeDrag(e,item);
+   return;
+  }
+  selected=null;objectGizmoActive=false;renderObjects();renderActions();draw();
  });
  for(const [key,[button]] of Object.entries(names))$(button).onclick=()=>selectTab(key);
  $('showExterior').onclick=()=>setPreview('exterior');
