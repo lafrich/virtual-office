@@ -170,8 +170,8 @@ function create(base,catalog,style,schema){
  }
  // Main fill: small irregular parcels; native published buildings are preferred
  // but only if collision validation proves they fit the existing street graph.
- for(let r=-5;r<=108;r+=1.92)for(let c=-46;c<=70;c+=1.92){
-  if(placed>=950)break;
+ for(let r=-5;r<=108;r+=1.58)for(let c=-46;c<=70;c+=1.58){
+  if(placed>=1450)break;
   if(rand()<.045)continue;
   const x=c+.5+(rand()-.5)*.18,z=r+.5+(rand()-.5)*.18;
   const district=zone(c,r);if(!district)continue;
@@ -187,9 +187,9 @@ function create(base,catalog,style,schema){
   if(!built)proxyObject(x,z,district);
  }
  // Additional narrow infill along surviving corridors and service alleys.
- for(let r=-4;r<=107;r+=3.2)for(let c=-45;c<=69;c+=3.2){
-  if(placed>=1120)break;
-  if(rand()<.10)continue;
+ for(let r=-4;r<=107;r+=2.6)for(let c=-45;c<=69;c+=2.6){
+  if(placed>=1700)break;
+  if(rand()<.045)continue;
   const district=zone(c,r);if(!district)continue;
   proxyObject(c+1.55,r+1.4,district==='cbd'?'midrise':district);
  }
@@ -202,10 +202,59 @@ function create(base,catalog,style,schema){
  for(const r of [20,46,76,102])for(let c=-43;c<=68;c+=12){
   const a=choose(pools.drain);if(a&&terrainAt(c,r)==='sidewalk')nativeObject(a,c+.5,r+.5,'drain-grill',true);
  }
- city.map.preset='jakarta-city-central-v4';
- city.map.notes+=' Density v4: very dense miniature lots and more layered blocks; varied compact housing, attached ruko, market blocks, midrise and office towers with working river and drain terrain. Geometry proxies remain marked for replacement.';
+
+ // Jakarta v5 foliage. Published native vegetation, not fake colored props.
+ // Roots remain outside road/water; large canopies may overhang neighboring lots.
+ const treeAssets=[...catalog.values()].filter(a=>a?.source==='pipeline-vegetation'&&a.published===true&&a.group?.includes('trees')&&a.file);
+ const bigTrees=treeAssets.filter(a=>/_(?:L|M)$|beringin|flamboyan|ketapang_kencana|kiara_payung/.test(a.id||''));
+ const shrubs=all.filter(a=>/semak_kota|rumput_kota|pot_tanaman/i.test([a.id,a.label].join(' ')));
+ let treesPlaced=0,plantsPlaced=0;
+ function foliage(spec,x,z,isTree){
+  if(!spec||city.objects.length>=4200)return false;
+  const t=terrainAt(Math.floor(x),Math.floor(z));
+  if(['road','water','river','drain'].includes(t)||occupied(x,z,isTree?.38:.04))return false;
+  const scale=isTree?+(1.42+rand()*1.20).toFixed(2):+(0.90+rand()*.25).toFixed(2);
+  const obj={id:'jakarta-green-v5-'+(++serial),type:'sprite',
+   name:(spec.label||spec.id)+(isTree?' · Big Canopy':' · Dense Plant'),
+   asset:spec.file,assetSource:spec.source,assetPublished:true,
+   x,z,y:0,rotation:0,scale,layer:'vegetation',subtype:spec.id,
+   collision:false,blocking:'no',replaceable:true,
+   tags:['jakarta-city','dense-v5','vegetation',isTree?'large-canopy':'understory'],
+   interactions:[],notes:'Nonblocking native vegetation. Keep trunk on safe ground; canopy can overhang.'};
+  style.normalize(obj,catalog);schema.normalize(obj,catalog,style);
+  // Allow specifically authored large foliage beyond the generic placement scale clamp.
+  obj.scale=scale;
+  city.objects.push(obj);if(isTree)treesPlaced++;else plantsPlaced++;return true;
+ }
+ // Shade canopy along main blocks, courtyards and planted sidewalk edges.
+ for(let r=-4;r<=107;r+=2.45)for(let c=-46;c<=71;c+=2.45){
+  if(treesPlaced>=420)break;
+  if(rand()<.47)continue;
+  const x=c+.5+(rand()-.5)*.5,z=r+.5+(rand()-.5)*.5;
+  foliage(choose(bigTrees.length?bigTrees:treeAssets),x,z,true);
+ }
+ // Monas green surroundings and riverbanks get a second denser canopy pass.
+ for(let r=12;r<=105;r+=2)for(let c=-58;c<=73;c+=2){
+  if(treesPlaced>=620)break;
+  const riverSide=c>=-59&&c<=-48;
+  const park=c>=23&&c<=44&&r>=48&&r<=69;
+  const greenPocket=riverSide||park||((c+Math.floor(r/5))%17===0);
+  if(!greenPocket||rand()<.24)continue;
+  foliage(choose(bigTrees.length?bigTrees:treeAssets),c+.5,r+.5,true);
+ }
+ // Multi-species understory: shrubs, grasses and planter clusters.
+ for(let r=-4;r<=107;r+=1.9)for(let c=-46;c<=71;c+=2.05){
+  if(plantsPlaced>=700)break;
+  if(rand()<.42)continue;
+  foliage(choose(shrubs),c+.5+(rand()-.5)*.5,r+.5+(rand()-.5)*.5,false);
+ }
+ city.map.presetTreeCount=treesPlaced;
+ city.map.presetPlantCount=plantsPlaced;
+
+ city.map.preset='jakarta-city-central-v5';
+ city.map.notes+=' Density v5: extra compact buildings plus massive native tree canopy and layered shrubs; very dense miniature lots and more layered blocks; varied compact housing, attached ruko, market blocks, midrise and office towers with working river and drain terrain. Geometry proxies remain marked for replacement.';
  city.map.densityAdditions=placed;
- city.map.densityTarget=1120;
+ city.map.densityTarget=1700;
  city.map.nativeAdditions=artworks;
  city.map.proxyAdditions=proxy;
  city.map.presetObjectCount=city.objects.length;
