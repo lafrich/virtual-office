@@ -168,6 +168,17 @@ function doAction(config,previous,action,args={}){
   return reject('Masih bed rest / menjalani hukuman. Majukan waktu terlebih dahulu.');
  if(s.detained&&!['fine','community_service','advance_time'].includes(action))return reject('Ditahan hansip: bayar denda atau bersihkan gorong-gorong.');
  switch(action){
+ case 'set_identity':{
+  const religion=String(args.religion||'');
+  const zodiac=String(args.zodiac||'');
+  if(religion&&(!RELIGIONS.includes(religion)||religion==='satanis'))
+   return reject('Pilihan agama tidak tersedia di V1.');
+  if(zodiac&&!ZODIACS.includes(zodiac))return reject('Zodiak tidak dikenal.');
+  if(!religion&&!zodiac)return reject('Pilih agama atau zodiak.');
+  if(religion){s.identity.religion=religion;changes.push('agama '+religion);}
+  if(zodiac){s.identity.zodiac=zodiac;changes.push('zodiak '+zodiac);}
+  s.identityChosen=true;break;
+ }
  case 'walk': {
   const units=number(args.units,1,20,1);
   stat('energy',-units);clock(units);break;
