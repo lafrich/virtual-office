@@ -50,27 +50,41 @@ function replaceInstance(original,asset){
  for(const key of ['sizeClass','w','d','h','assetPath','assetCategory'])delete updated[key];
  return updated;
 }
-function updateDocument(document,objectId,asset){
+// Interior-only edits must not replace the original building sprite/mesh,
+// transform or collision. This is the default for Semesta's context action.
+function replaceInterior(original,asset){
+ if(!original?.id||!asset?.interior?.floors?.length||asset.interactive!==true)
+  throw Error('Enable Interactive and save at least one interior floor');
+ const actions=[...new Set([...(Array.isArray(original.interactions)?original.interactions:[]),
+  ...(Array.isArray(asset.interactions)?asset.interactions:[]),'enter'])];
+ return {...clone(original),interactive:true,enterable:true,
+  interior:clone(asset.interior),actionSlots:clone(asset.actionSlots||[]),
+  entrance:asset.entrance?clone(asset.entrance):original.entrance||null,
+  entranceFacing:asset.entranceFacing||original.entranceFacing||'sw',
+  interactions:actions.slice(0,30),
+  tags:[...new Set([...(Array.isArray(original.tags)?original.tags:[]),'bangun-ruang','interior'])]};
+}
+function updateDocument(document,objectId,asset,{interiorOnly=false}={}){
  if(!document||!Array.isArray(document.objects))throw Error('Invalid City Draft document');
  let found=false;
  const next={...document,objects:document.objects.map(o=>{
   if(o.id!==objectId)return o;
-  found=true;return replaceInstance(o,asset);
+  found=true;return interiorOnly?replaceInterior(o,asset):replaceInstance(o,asset);
  })};
  if(!found)throw Error('Building no longer exists in the saved city');
  return next;
 }
-function patchWorkingCopy(cityId,objectId,asset){
+function patchWorkingCopy(cityId,objectId,asset,options={}){
  try{
   if(localStorage.getItem(ACTIVE_KEY)!==cityId)return false;
   const original=JSON.parse(localStorage.getItem(WORKING_KEY)||'null');
   if(!original?.objects?.some(x=>x.id===objectId))return false;
-  localStorage.setItem(WORKING_KEY,JSON.stringify(updateDocument(original,objectId,asset)));
+  localStorage.setItem(WORKING_KEY,JSON.stringify(updateDocument(original,objectId,asset,options)));
   return true;
  }catch(e){console.warn('Could not patch live working copy',e);return false;}
 }
-function publishSignal(cityId,objectId,assetId){
- const event={draftId:cityId,objectId,assetId,
+function publishSignal(cityId,objectId,assetId,{interiorOnly=false}={}){
+ const event={draftId:cityId,objectId,assetId,interiorOnly,
   nonce:Date.now()+'-'+Math.random().toString(36).slice(2)};
  localStorage.setItem(UPDATE_KEY,JSON.stringify(event));
  try{g.VLHub&&g.VLHub.publish('cityBuilding',event);}catch{}
@@ -84,7 +98,7 @@ function getAsset(id){
 }
 g.VLSemestaCityBuildings=Object.freeze({
  UPDATE_KEY,WORKING_KEY,ACTIVE_KEY,ASSET_KEY,
- isBuilding,inventory,replaceInstance,updateDocument,
+ isBuilding,inventory,replaceInstance,replaceInterior,updateDocument,
  patchWorkingCopy,publishSignal,getAsset
 });
 })(window);
