@@ -101,9 +101,9 @@ function worldBounds(){
 }
 function findLanding(x,z){
  if(!bridge||!bridge.canStand)return {x,z};
- for(let radius=0;radius<=5;radius++){
-  for(let step=0;step<16;step++){
-   const angle=step*Math.PI/8;
+ for(let radius=0;radius<=3;radius++){
+  for(let step=0;step<8;step++){
+   const angle=step*Math.PI/4;
    const nx=Math.round((x+Math.cos(angle)*radius)*2)/2,nz=Math.round((z+Math.sin(angle)*radius)*2)/2;
    if(bridge.canStand(nx,nz))return {x:nx,z:nz};
   }
@@ -196,6 +196,7 @@ function placeMarkers(){
  const geo=new T.CylinderGeometry(.19,.25,.82,6);
  const baseGeo=new T.CircleGeometry(.45,20);
  for(const n of sites){
+  if(!n.placeholder)continue; // Original Semesta assets remain visible without duplicate signboards.
   const color=PLACEHOLDER_COLORS[n.id]||0x7eabc4;
   const marker=new T.Mesh(geo,new T.MeshBasicMaterial({color,transparent:true,opacity:.85,depthTest:true}));
   marker.position.set(n.x,0.51,n.z);marker.userData={semestaLifeSite:n.id,placeholder:n.placeholder};
@@ -277,7 +278,9 @@ function nodeButtons(n){
    button('buy_token','⚡ Beli Token'),button('buy_fridge','🧊 Beli Kulkas'),
    '<select id="slpFurniture"><option value="bed">Kasur</option><option value="chair">Kursi</option><option value="stove">Kompor</option><option value="wardrobe">Lemari</option></select>',
    button('buy_furniture','🛒 Beli Furnitur'),'<select id="slpItem">'+itemOptions('fish')+'</select>',
-   button('cook','🍳 Masak Ikan'),button('store_fridge','🧊 Simpan Kulkas')]:
+   button('cook','🍳 Masak Ikan'),button('store_fridge','🧊 Simpan Kulkas'),
+   '<select id="slpFridgeItem">'+(state.fridge||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
+   button('take_fridge','📦 Ambil dari Kulkas')]:
    [button('buy_room','🏠 Beli Akses Kost (1×)')];
  if(id==='tent')entries=[button('sleep','💤 Tidur Tenda')];
  if(id==='prayer')entries=[button('worship','🤲 Ibadah',{placeReligion:config.identity?.religion||'islam'})];
@@ -300,6 +303,7 @@ function paintPanel(){
    '<button data-life-action="fine">Bayar Denda</button><button data-life-action="community_service">Bersihkan Gorong-gorong</button>':
    nodeButtons(n))+'</div>'+
   '<div class="slp-actions"><button data-life-action="course">📱 KURSUS HP</button><button data-life-action="respawn">↻ Respawn</button><button data-life-action="rest">💤 Istirahat +15</button><button data-life-action="advance_time" data-args="{&quot;minutes&quot;:30}">⏩ +30 Menit</button></div>'+
+  '<details><summary>📱 HP • BERITA / PETUNJUK</summary><small>BERITA: Warga sering mendapatkan ikan sapu-sapu dari sungai. Bang Siomay/Batagor menerima ikan sapu-sapu, tetapi Pasar Ikan menolaknya. Untuk pekerjaan premium perlu kebersihan 70+. Friends / Sosial / Jalur Antagonis Satanis terkunci sampai V2.</small></details>'+ 
   '<details><summary>🧭 TEST: PINDAH LOKASI / INVENTORI</summary><div class="slp-goto"><select id="slpDestination">'+options+'</select><button id="slpTravel" type="button">PINDAH</button></div>'+
   '<div><b>Tas:</b> '+esc((state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id).join(', ')||'kosong')+'</div>'+
   '<div><b>Kost:</b> '+esc(state.housing?.room?'Aktif':'Belum')+' · <b>Token:</b> '+state.powerTokens+
@@ -323,6 +327,7 @@ function click(ev){
  }
  if(el.dataset.lifeAction){
   let args={};try{args=JSON.parse(el.dataset.args||'{}');}catch{}
+  if(el.dataset.lifeAction==='take_fridge')args.itemId=outer.querySelector('#slpFridgeItem')?.value||'';
   if(['sell_fish','sell_loak','cook','store_fridge'].includes(el.dataset.lifeAction)){
    args.itemId=outer.querySelector('#slpItem')?.value||'';
   }
@@ -362,7 +367,7 @@ function runAction(action,args={}){
   fish:'fish',sell_fish:args.buyerId,work:args.premium?'premium_job':'job',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
   eat:'warung',coffee:'coffee',public_toilet:'public_wc',public_shower:'public_bath',
   buy_room:'kost',home_toilet:'kost',home_shower:'kost',sleep:ownsRoom()?'kost':'tent',
-  buy_token:'kost',buy_fridge:'kost',buy_furniture:'kost',cook:'kost',store_fridge:'kost',
+  buy_token:'kost',buy_fridge:'kost',buy_furniture:'kost',cook:'kost',store_fridge:'kost',take_fridge:'kost',
   worship:'prayer'
  }[action];
  if(required&&node?.id!==required){
@@ -434,7 +439,7 @@ function actorMoved(dt){
  }
 }
 function checkHansip(){
- if(!active||!state||state.detained||state.moral>=config.settings.arrestMoralThreshold)return;
+ if(!active||!state||state.detained||state.arrestGraceMinutes>0||state.moral>=config.settings.arrestMoralThreshold)return;
  const p=getPos();
  const witness=(getWorld().objects||[]).find(o=>/hansip|satpam|security.guard/i.test(name(o))&&
   Math.hypot((Number(o.x)||0)-p.x,(Number(o.z)||0)-p.z)<4)||
