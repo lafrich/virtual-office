@@ -22,6 +22,8 @@ test('Published runtime never exposes legacy jobs or auto-enables name matching'
  assert.match(world,/publishedCatalog\?\[\]:SITES\.map\(/);
  assert.match(world,/publishedCatalog=!!(?:gameCatalog|catalog)\?\.updatedAt/);
  assert.match(world,/rule\.selectionMode!=='directory'/);
+ assert.match(world,/function authoredAt\(node\)/);
+ assert.match(world,/const siblings=authoredAt\(nearestNode\)/);
  assert.match(world,/if\(publishedCatalog&&\['pee_outside'/);
  const life=fs.readFileSync('jiwa/life-economy.js','utf8');
  assert.equal((life.match(/base\.worldEntities=/g)||[]).length,1);

@@ -286,11 +286,21 @@ function nearest(){
  const p=getPos();let found=null,dist=2.5;
  for(const s of sites){
   const d=Math.hypot(p.x-s.x,p.z-s.z);
-  // Authored Jiwa activity wins if it shares a building with a legacy NPC,
-  // otherwise its Action would never be reachable.
+  // Same-object actions share one physical spot; prefer an authored
+  // activity as the default Action, with every sibling available in panel.
   if(d<dist-(s.activityId?-.04:0)){found=s;dist=d;}
  }
  return found;
+}
+// Several Jiwa activities and world rules can legitimately use one real
+// Semesta object. They must all remain actionable, not just whichever
+// duplicate site happened to win the nearest() ordering.
+function authoredAt(node){
+ if(!node)return [];
+ if(!publishedCatalog||!node.sourceId||node.placeholder)return [node];
+ const peers=sites.filter(s=>!s.placeholder&&s.sourceId===node.sourceId&&
+  (s.activityId||s.worldRuleId)&&Math.hypot(s.x-node.x,s.z-node.z)<0.25);
+ return peers.length?peers:[node];
 }
 function message(text){
  statusText=String(text||'').slice(0,320);
@@ -349,6 +359,18 @@ function nodeButtons(n){
  if(!n)return '<small>Berjalan ke pin di kota untuk berinteraksi (WASD / panah). Tombol Action di HUD dipakai untuk aksi terdekat.</small>';
  const id=n.id;let entries=[];
  const button=(action,label,args={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(args))+'">'+label+'</button>';
+ const siblings=authoredAt(n);
+ if(siblings.length>1){
+  const actions=siblings.map(s=>{
+   if(s.worldRuleId){
+    const kind=s.operation==='ambient'?'world_ambient':s.operation==='enter'?'world_enter':'world_quest';
+    const icon=s.operation==='ambient'?'▶ ':s.operation==='enter'?'🚪 ':'❗ ';
+    return button(kind,icon+esc(s.label),{ruleId:s.worldRuleId});
+   }
+   return button('configured_activity','▶ '+esc(s.label),{activityId:s.activityId});
+  });
+  return '<small>Pilih interaksi pada objek ini:</small>'+actions.join('');
+ }
  if(n.worldRuleId){
   if(n.operation==='ambient')entries=[button('world_ambient','▶ '+esc(n.label),{ruleId:n.worldRuleId}),
    '<small>NON-QUEST · '+esc(n.actionAsset||'Aksi objek')+'</small>'];
@@ -525,7 +547,20 @@ function runAction(action,args={}){
  if(action==='respawn'){
   bridge?.respawn?.();return {ok:true,reason:'respawn'};
  }
- const node=nearest();
+ const nearestNode=nearest();
+ let node=nearestNode;
+ // Resolve the explicitly chosen sibling instead of accidentally applying
+ // nearest() to a different rule on the same exact placed entity.
+ if(publishedCatalog&&nearestNode?.sourceId){
+  const siblings=authoredAt(nearestNode);
+  if(['world_ambient','world_enter','world_quest'].includes(action)){
+   const target=siblings.find(s=>s.worldRuleId===String(args.ruleId||''));
+   if(target)node=target;
+  }else if(action==='configured_activity'){
+   const target=siblings.find(s=>s.activityId===String(args.activityId||'')&&!s.worldRuleId);
+   if(target)node=target;
+  }
+ }
  if(['world_ambient','world_enter','world_quest'].includes(action)){
   const ruleId=String(args.ruleId||'');
   if(node?.worldRuleId!==ruleId||node.placeholder)
