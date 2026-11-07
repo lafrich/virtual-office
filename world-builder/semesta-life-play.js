@@ -478,7 +478,7 @@ function runAction(action,args={}){
   if(['fish','work','scavenge','catch_fruit'].includes(action)&&!state.detained){
    const luck=RULES.run(config,state,'luck_find',{roll:Math.random()});
    if(luck.ok)state=luck.state;
-   if(luck.ok&&luck.changes.some(x=>x.includes('+Rp')))result.changes.push(...luck.changes);
+   if(luck.ok&&luck.changes.some(x=>x.includes('+Rp')||x.includes('NASIB BURUK')))result.changes.push(...luck.changes);
   }
   persist();
   if(action==='buy_room')message('🏠 Kost dibeli! Respawn berikutnya pindah ke kamar. WC dan mandi pribadi aktif.');
