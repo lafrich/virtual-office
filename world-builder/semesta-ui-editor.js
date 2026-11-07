@@ -134,7 +134,7 @@ function relativeToSlot(before,id,x,y,w,h){
  const ox=u==='right'?b.width-w-left:u==='center'?left-(b.width-w)/2:left;
  const oy=v==='bottom'?b.height-h-top:v==='center'?top-(b.height-h)/2:top;
  return {anchor:before.anchor,scale:before.scale,
-  x:Math.round(cap(ox,-480,480)),y:Math.round(cap(oy,-480,480))};
+  x:Math.round(cap(ox,-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT)),y:Math.round(cap(oy,-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT))};
 }
 function pointerStart(ev,id){
  if(!active||ev.button!==0)return;
@@ -248,7 +248,7 @@ function init(){
  $('suiAnchor').addEventListener('change',e=>changeSlot({anchor:e.target.value}));
  for(const [id,key] of [['suiX','x'],['suiY','y']]){
   $(id).addEventListener('change',e=>{
-   if(valid(e.target.value))changeSlot({[key]:cap(Math.round(Number(e.target.value)),-480,480)});
+   if(valid(e.target.value))changeSlot({[key]:cap(Math.round(Number(e.target.value)),-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT)});
   });
  }
  $('suiScale').addEventListener('input',e=>changeSlot({scale:Number(e.target.value)}));
