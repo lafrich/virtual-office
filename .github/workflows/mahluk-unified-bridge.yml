@@ -1,0 +1,38 @@
+name: Mahluk Unified Bridge — Non-destructive Regression
+on:
+  push:
+    branches:
+      - feature/mahluk-unified-launcher-20261107
+    paths:
+      - "membangun/index.html"
+      - "membangun/laptop.html"
+      - "shared/mahluk-hub-bridge.js"
+      - "shared/hub-registry.js"
+      - "jiwa/index.html"
+      - "world-builder/index.html"
+      - "world-builder/bangun-ruang/index.html"
+      - "tests/mahluk-unified-bridge.test.cjs"
+      - "tests/membangun-launcher.test.cjs"
+      - ".github/workflows/mahluk-unified-bridge.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Parse shared bridge and Membangun pages
+        run: |
+          node --check shared/mahluk-hub-bridge.js
+          node --check shared/hub-registry.js
+          node --check tests/mahluk-unified-bridge.test.cjs
+      - name: Membangun, Mahluk bridge and existing Semesta-Jiwa smoke
+        run: |
+          node --test tests/mahluk-unified-bridge.test.cjs
+          node --test tests/hub-registry.test.cjs
+          node --test tests/membangun-launcher.test.cjs
+          node --test tests/semesta-mahluk-sync.test.cjs

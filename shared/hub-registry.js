@@ -20,7 +20,7 @@
  const STAMP_KEY='virtual-life-hub-stamp-v1';
  const GAMEPLAY_KEY='virtual-life-gameplay-v1';
  const PROJECT_NAME='Namanya Juga Hidup: The Game';
- const TOPICS=Object.freeze(['world','rooms','objects','characters','accessories','emotions','gameplay','cityBuilding']);
+ const TOPICS=Object.freeze(['world','rooms','objects','characters','accessories','emotions','gameplay','cityBuilding','actions','animations']);
  const KEY_TO_TOPIC=Object.freeze({
   'virtual-life-active-city-draft':'world',
   'virtual-life-city-building-update-v1':'cityBuilding',
@@ -35,7 +35,11 @@
   'emosi-convo-mouth-guide-v1':'emotions',
   'jiwa-project-change':'gameplay',
   'virtual-life-gameplay-v1':'gameplay',
-  'jiwa-sandbox-actor-v1':'characters'
+  'jiwa-sandbox-actor-v1':'characters',
+  'mahluk-action-situations-v1':'actions',
+  'vl-v6p-act-clips-v1':'animations',
+  'vl-v6p-part-overrides-v1':'characters',
+  'vl-v6p-project-catalog-v1':'accessories'
  });
  const copy=o=>{try{return JSON.parse(JSON.stringify(o));}catch{return o;}};
  function summarize(payload){
