@@ -36,8 +36,14 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.ok(target,'Semesta must contain at least one placeable map object');
  await jiwa.locator('#activityList .activity-row').first().click();
  assert.equal(await jiwa.locator('#activityHeading').textContent().then(x=>x.includes('Money')),true);
- await jiwa.locator('[data-activity-field="buildingQuery"]').fill(target.id);
- await jiwa.locator('[data-activity-field="buildingQuery"]').dispatchEvent('change');
+ assert.equal(await jiwa.locator('.premise-tier').count(),3,'Tier choices precede activity detail');
+ await jiwa.locator('#presetKeep').click();
+ // A global editor can have no city loaded. Simulate a city object becoming
+ // available in its binding dropdown without changing gameplay rules.
+ await jiwa.locator('#activityObject').evaluate((el,id)=>{
+  if(![...el.options].some(o=>o.value===id))el.add(new Option(id,id));
+ },target.id);
+ await jiwa.locator('#activityObject').selectOption(target.id);
  await jiwa.locator('[data-activity-field="minExp"]').fill('0');
  await jiwa.locator('[data-activity-field="minExp"]').dispatchEvent('change');
  await jiwa.locator('[data-activity-field="moneyDelta"]').fill('7200');
