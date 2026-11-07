@@ -258,7 +258,10 @@ function lifeSpawnHints(){
  const bounds={minX:xs.length?Math.min(...xs)-5:-24,maxX:xs.length?Math.max(...xs)+5:24,
   minZ:zs.length?Math.min(...zs)-5:-24,maxZ:zs.length?Math.max(...zs)+5:24};
  const name=o=>[o.name,o.label,o.asset,o.subtype,...(o.tags||[])].filter(Boolean).join(' ');
- const tents=coords.filter(o=>/tenda|tent|hobo_camp|camping/i.test(name(o))).map(o=>({id:o.id,x:Number(o.x),z:Number(o.z),placeholder:false}));
+ const edgeX=(bounds.maxX-bounds.minX)*.25,edgeZ=(bounds.maxZ-bounds.minZ)*.25;
+ const tents=coords.filter(o=>/tenda|tent|hobo_camp|camping/i.test(name(o)))
+  .filter(o=>Number(o.x)<bounds.minX+edgeX||Number(o.x)>bounds.maxX-edgeX||Number(o.z)<bounds.minZ+edgeZ||Number(o.z)>bounds.maxZ-edgeZ)
+  .map(o=>({id:o.id,x:Number(o.x),z:Number(o.z),placeholder:false}));
  const rooms=coords.filter(o=>/kost|kos_|cove|kamar|boarding.?room/i.test(name(o)));
  const room=rooms[0];
  const roomSpawn=room?{id:room.id,x:Number(room.x),z:Number(room.z),placeholder:false}:
