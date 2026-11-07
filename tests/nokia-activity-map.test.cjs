@@ -54,7 +54,7 @@ test('live map renders game activities and updates its real player position',()=
 test('Semesta exports city-wide activity coordinates to Nokia and has no 3D floating marker geometry',()=>{
  assert.match(gameplaySource,/function nokiaSnapshot\(\)/);
  assert.match(gameplaySource,/map:\{/);
- assert.match(gameplaySource,/player:getPos\(\),bounds:cachedMapOverview\.bounds,terrain:cachedMapOverview\.terrain/);
+ assert.match(gameplaySource,/player:\{x:Number\(getPos\(\)\.x\)\|\|0,z:Number\(getPos\(\)\.z\)\|\|0\},bounds:cachedMapOverview\.bounds,terrain:cachedMapOverview\.terrain/);
  assert.match(gameplaySource,/sites:sites\.map\(/);
  assert.match(gameplaySource,/root\.VLPhoneEllen\.setGameProvider\(nokiaSnapshot\)/);
  assert.match(gameplaySource,/root\.VLPhoneEllen\.setGameProvider\(null\)/);
