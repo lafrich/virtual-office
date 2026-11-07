@@ -119,6 +119,71 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 }
 
 
+
+/* Activity-first JIWA UX; archive technical editors under Advanced. */
+.jiwa-activity-nav{display:grid;grid-template-columns:repeat(8,minmax(0,1fr)) minmax(92px,.85fr);
+ gap:3px;padding:7px;border-bottom:1px solid #91a0af;background:linear-gradient(#eff4fa,#d3dce7);overflow-x:auto;flex-shrink:0}
+.jiwa-activity-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;min-height:69px;
+ padding:6px 3px!important;gap:4px;line-height:1.1;font:bold 9px Tahoma;color:#243b54;border:1px solid #a7b4c4;border-radius:3px}
+.jiwa-activity-nav button .jiwa-tab-icon{font-size:23px;line-height:1.2}
+.jiwa-activity-nav button.active{background:linear-gradient(#dceeff,#a6c8ff);box-shadow:inset 0 0 0 2px #8cafe3;border-color:#2a68b3;color:#11366c}
+.jiwa-activity-nav button#activityAdvanced{background:#e2e4e5;color:#405568}
+.jiwa-tech-tabs{display:flex;gap:3px;align-items:center;flex-wrap:wrap;padding:5px 8px;background:#d9e1e9;border-bottom:1px solid #8ba3bb}
+.jiwa-tech-tabs[hidden]{display:none!important}
+.jiwa-tech-tabs button{font-size:10px}
+.activity-scroll{padding:12px;min-height:0}
+.activity-app{max-width:1700px;margin:0 auto;display:flex;flex-direction:column;gap:11px}
+.activity-topline{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+ border-bottom:1px solid #9aafc2;padding-bottom:10px}
+.activity-topline h2{margin:4px 0 2px;color:#134280;font:bold 22px Tahoma}
+.activity-topline p{font-size:11px;color:#5c6e7c;margin:0}
+.activity-topline small{font:9px 'Courier New',monospace;color:#526575;letter-spacing:1px}
+.activity-top-actions,.activity-cloud-buttons{display:flex;gap:6px;flex-wrap:wrap}
+.activity-top-actions button{min-height:33px;font-weight:bold}
+.activity-global{color:#1c4b77;background:#dfe9f7;border:1px solid #aec1d5;padding:8px 10px;font:10px Tahoma}
+.activity-workspace{display:grid;grid-template-columns:minmax(230px,28%) minmax(0,1fr);gap:11px;align-items:start}
+.activity-side{background:#ebeff3;border:1px solid #b2c4d4;min-width:0}
+.activity-list-head{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(#456fa3,#194784);
+ color:white;padding:10px;gap:5px;font-size:10px}
+.activity-list{padding:6px;display:flex;flex-direction:column;gap:4px;max-height:calc(100dvh - 310px);min-height:230px;overflow:auto}
+.activity-row{display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;padding:10px;
+ border:1px solid #bdc9d2;background:#fff;white-space:normal}
+.activity-row b{font-size:11px}.activity-row span{font-size:9px;color:#63758c}
+.activity-row.selected{border:1px solid #2d70c8;background:#daebff;box-shadow:inset 3px 0 #245baf}
+.activity-edit-form{min-width:0;display:flex;flex-direction:column;gap:10px}
+.activity-head{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#edf2f9;
+ border:1px solid #adbdc9;padding:11px}
+.activity-head strong{font-size:15px;color:#1c4679}.activity-head small{display:block;color:#758498;font:10px 'Courier New',monospace;margin-top:4px}
+.activity-state{font:700 10px Tahoma;white-space:nowrap;padding:6px 8px;border-radius:3px}
+.activity-state.draft{background:#e1e5e9;color:#5a6877}.activity-state.ready{background:#cfe9d6;color:#236944}
+.activity-switch{border:1px solid #b4c5d1;padding:10px;background:#fcfdfd}
+.activity-switch label{display:flex;align-items:center;gap:8px;font-weight:bold}
+.activity-switch small{display:block;margin-top:5px;color:#5c6b79}
+.activity-fieldset{border:1px solid #adbfce;padding:12px;background:#fff;display:flex;flex-direction:column;gap:10px}
+.activity-fieldset h4{margin:-12px -12px 4px;padding:8px 10px;background:#dbe7f6;color:#214b80;font:bold 11px Tahoma;border-bottom:1px solid #aec1d5}
+.activity-fieldset label{display:flex;flex-direction:column;gap:4px;color:#345272;font:bold 10px Tahoma}
+.activity-fieldset label input,.activity-fieldset label select,.activity-fieldset label textarea{width:100%;min-width:0;
+ padding:8px;border:1px solid #a7bbce;background:#fafcfe;color:#1e334c;font:11px/1.4 Tahoma}
+.activity-fieldset textarea{resize:vertical;min-height:65px}
+.activity-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.activity-help{font:10px/1.5 Tahoma;color:#6b7684;margin:0}.activity-validate{font:10px/1.5 Tahoma;color:#8a5c1b;background:#fff9e8;border:1px solid #e5d5aa;padding:7px}
+.activity-validate span{display:block;margin-bottom:3px}
+.activity-bottom{display:flex;gap:6px;flex-wrap:wrap}
+.activity-cloud{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid #adc5e1;background:#e8f0ff;padding:12px}
+.activity-cloud b{font-size:11px;color:#214c85}.activity-cloud p{font-size:10px;color:#536d89;max-width:670px;line-height:1.5;margin:5px 0}
+.activity-cloud button{font-size:10px;min-height:32px}
+.activity-status{font:10px/1.5 'Courier New',monospace;background:#fff5d7;border:1px solid #bdad7c;padding:10px}
+.activity-status[data-ok=true]{background:#e2f1e6;border-color:#91baa2;color:#225943}
+.activity-empty{border:1px dashed #8a9aa9;background:#f6f8fa;padding:35px;color:#6c7885;text-align:center}
+@media(max-width:1100px){.jiwa-activity-nav{grid-template-columns:repeat(9,minmax(84px,1fr))}
+ .activity-workspace{grid-template-columns:220px minmax(0,1fr)}}
+@media(max-width:760px){.jiwa-activity-nav{display:flex;gap:4px;min-height:73px;overflow-x:auto;padding:5px}
+ .jiwa-activity-nav button{flex:0 0 76px;min-height:65px}.activity-scroll{padding:7px}
+ .activity-workspace{grid-template-columns:1fr}.activity-list{max-height:185px;min-height:120px}
+ .activity-topline h2{font-size:19px}.activity-fieldset{padding:9px}.activity-fieldset h4{margin:-9px -9px 4px}
+ .activity-pair{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .activity-cloud{flex-direction:column}
+}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -138,8 +203,25 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
    <div class="system-links"><button id="toSystems">⚙ GAME SYSTEMS</button><button id="toTest">▶ PLAY TEST</button></div>
   </aside>
   <section class="middle">
-   <div class="tabs"><button class="active" data-tab="map">◈ WORLD</button><button data-tab="context">◉ CONTEXT</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button><button data-tab="play">🎮 GAME PREVIEW</button></div>
-   <div id="mapView" class="view"><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
+   <div class="tabs jiwa-activity-nav" aria-label="Jiwa mechanics categories"><button type="button" data-activity-tab="money" aria-pressed="true" class="active" title="MONEY"><span class="jiwa-tab-icon">💰</span><span>MONEY</span></button><button type="button" data-activity-tab="energy" aria-pressed="false" class="" title="ENERGY"><span class="jiwa-tab-icon">⚡</span><span>ENERGY</span></button><button type="button" data-activity-tab="moral" aria-pressed="false" class="" title="MORAL"><span class="jiwa-tab-icon">🤲</span><span>MORAL</span></button><button type="button" data-activity-tab="immoral" aria-pressed="false" class="" title="IMMORAL"><span class="jiwa-tab-icon">😈</span><span>IMMORAL</span></button><button type="button" data-activity-tab="exp" aria-pressed="false" class="" title="EXP"><span class="jiwa-tab-icon">📚</span><span>EXP</span></button><button type="button" data-activity-tab="cooking" aria-pressed="false" class="" title="COOKING"><span class="jiwa-tab-icon">🍳</span><span>COOKING</span></button><button type="button" data-activity-tab="buying" aria-pressed="false" class="" title="BUYING"><span class="jiwa-tab-icon">🛒</span><span>BUYING</span></button><button type="button" data-activity-tab="punishment" aria-pressed="false" class="" title="PUNISHMENT"><span class="jiwa-tab-icon">⚖️</span><span>PUNISHMENT</span></button><button type="button" id="activityAdvanced" aria-expanded="false" title="World preview and advanced mechanics tools">⚙<span>ADVANCED</span></button></div>
+   <div id="jiwaAdvancedTabs" class="jiwa-tech-tabs" hidden><button data-tab="map">◈ WORLD</button><button data-tab="context">◉ CONTEXT</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button><button data-tab="play">🎮 PREVIEW</button></div>
+   <div id="activityView" class="view"><div class="viewport-scroll activity-scroll">
+ <div class="activity-app">
+  <div class="activity-topline"><div><small>JIWA.EXE / ACTIVITY SYSTEM / GAME-WIDE</small>
+   <h2 id="activityHeading">💰 Money</h2><p id="activitySubheading">Kerja, mulung, jual beli</p></div>
+   <div class="activity-top-actions"><button id="activityAdd" type="button">＋ ADD ACTIVITY</button>
+   <button id="activitySave" class="primary" type="button">💾 SAVE GAME RULES</button></div></div>
+  <div id="activityGlobalNotice" class="activity-global">GLOBAL · Satu katalog aktivitas untuk semua map Semesta</div>
+  <div class="activity-workspace">
+   <aside class="activity-side"><div class="activity-list-head"><b>ACTIVITIES</b><span id="activityCount">0 activities</span></div>
+    <div id="activityList" class="activity-list"></div></aside>
+   <section id="activityEditor" class="activity-edit-form" aria-label="Activity premise and mechanics editor"></section>
+  </div>
+  <div class="activity-cloud"><div><b>GOOGLE DRIVE / JIWA</b><p>Save lokal dipakai langsung di Semesta (browser sama). Hubungkan Drive untuk backup dan pemulihan lintas perangkat. Sync memerlukan izin Google.</p></div>
+   <div class="activity-cloud-buttons"><button id="activityDriveConnect" type="button">🔗 CONNECT DRIVE</button><button id="activityDrivePush" type="button">☁ SAVE TO DRIVE</button><button id="activityDrivePull" type="button">↓ LOAD DRIVE</button></div></div>
+  <div id="activityStatus" class="activity-status" aria-live="polite" role="status">Mulai dari template. Edit premis, target, durasi, dan efek. SAVE saat sudah siap.</div>
+ </div></div></div>
+   <div id="mapView" class="view" hidden><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
    <div id="contextView" class="view" hidden><div class="viewport-scroll" id="contextEditor"><div class="card">Loading contextual foundation...</div></div></div>
    <div id="playView" class="view" hidden><div class="viewport-scroll"><div id="gamePreview"></div><div id="lifeEditor"></div></div></div>
    <div id="systemsView" class="view" hidden><div class="viewport-scroll">
@@ -199,9 +281,13 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 <script src="/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1"></script>
 <script src="./foundation-engine.js"></script>
 <script src="./life-economy.js"></script>
+<script src="./activity-catalog.js?v=activity-premise-v1"></script>
+<script src="../world-builder/drive-sync.js?v=jiwa-catalog-cloud-v1"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./jiwa.js?v=global-game-ui-v2-precision-20261108"></script>
 <script src="./character-link.js?v=mahluk1-v6b-20261107"></script>
 <script src="./context-editor.js"></script>
 <script src="./mechanics-panel.js"></script>
 <script src="./life-editor.js"></script>
+<script src="./activity-editor.js?v=activity-premise-v1"></script>
 </body></html>
