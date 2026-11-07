@@ -22,7 +22,7 @@ function defaults(){return {
  version:1,identity:{religion:'islam',zodiac:'capricorn'},
  gates:{friendsV2:false,socialV2:false,satanicEvilRouteV2:false},
  settings:{bagSlots:8,homeStorageSlots:24,fishEnergy:8,fishMinutes:12,coffeePrice:2000,roomPrice:30000,
- fridgePrice:8000,tokenPrice:1000,tokenUnits:5,fridgeExtraMinutes:600,
+ fridgePrice:8000,tokenPrice:1000,tokenUnits:5,fridgeCoolingMultiplier:2,
  faintRestMinutes:30,arrestMoralThreshold:15,
  publicShowerFee:500,publicShowerRecovery:35,homeShowerRecovery:70,
  publicToiletPenalty:5,hoboSleepRecovery:30,homeSleepRecovery:65,
@@ -109,7 +109,7 @@ function doAction(config,previous,action,args={}){
   const before=s.elapsedMinutes,wasFaint=s.restMinutes>0;
   if(s.housing.fridge&&s.fridge.length&&s.powerTokens>0){
    const powered=Math.min(m,Math.max(0,s.powerTokens*setting.tokenDurationMinutes-s.tokenUseMinutes));
-   for(const id of s.fridge){const meta=s.itemMeta[id];if(meta)meta.expiresAt+=powered*2;}
+   for(const id of s.fridge){const meta=s.itemMeta[id];if(meta)meta.expiresAt+=powered*setting.fridgeCoolingMultiplier;}
    s.tokenUseMinutes+=powered;
    while(s.tokenUseMinutes>=setting.tokenDurationMinutes&&s.powerTokens>0){
     s.powerTokens--;s.tokenUseMinutes-=setting.tokenDurationMinutes;
