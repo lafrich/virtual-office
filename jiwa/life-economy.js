@@ -71,6 +71,7 @@ function stateFrom(existing,config){
  s.detained=s.detained===true;
  s.arrestGraceMinutes=number(s.arrestGraceMinutes,0,100000,0);
  s.luckClaims=number(s.luckClaims,0,1e9,0);
+ s.luckCooldownUntil=number(s.luckCooldownUntil,0,1e9,0);
  s.restMinutes=number(s.restMinutes,0,1e9,0);
  s.detentionMinutes=number(s.detentionMinutes,0,1e9,0);
  for(const [k,def] of Object.entries({wallet:6000,energy:80,hygiene:75,bladder:20,fullness:70,moral:50,experience:0})){
@@ -182,9 +183,9 @@ function doAction(config,previous,action,args={}){
   changes.push('masak dan makan '+info.fish.label);break;
  }
  case 'luck_find':{
-  if(s.luckClaims>=5)return reject('Kesempatan rezeki dalam sesi ini sudah habis.');
+  if(s.elapsedMinutes<s.luckCooldownUntil)return reject('Belum ada kesempatan rezeki baru.');
   const roll=Number.isFinite(Number(args.roll))?Math.max(0,Math.min(1,Number(args.roll))):Math.random();
-  s.luckClaims++;
+  s.luckClaims++;s.luckCooldownUntil=s.elapsedMinutes+40;
   const threshold=Math.min(.35,.05+s.moral/1000*2);
   if(roll<threshold){s.wallet+=500;changes.push('rezeki tak terduga +Rp500');}
   else changes.push('tidak menemukan rezeki');
@@ -269,7 +270,9 @@ function doAction(config,previous,action,args={}){
  }
  case 'sleep':{
   if(s.restMinutes>0)return reject('Sedang bed rest akibat pingsan. Lanjutkan waktu istirahat.');
-  clock(60);stat('energy',s.housing.room?setting.homeSleepRecovery:setting.hoboSleepRecovery);
+  const beforeSleepEnergy=s.energy;
+  clock(60);s.energy=beforeSleepEnergy;
+  stat('energy',s.housing.room?setting.homeSleepRecovery:setting.hoboSleepRecovery);
   stat('hygiene',s.housing.room?-8:-15);
   changes.push(s.housing.room?'tidur di kost':'tidur di tenda pinggiran kota');break;
  }
@@ -289,7 +292,7 @@ function doAction(config,previous,action,args={}){
    if(!home)stat('hygiene',-setting.publicToiletPenalty);
    changes.push(home?'WC kost pribadi':'WC umum');break;
  }
- case 'pee_outside':clock(3);stat('bladder',-100);stat('hygiene',-20);stat('moral',-10);break;
+ case 'pee_outside':clock(3);stat('bladder',-100);stat('hygiene',-20);stat('moral',-10);changes.push('pipis sembarangan berisiko ketahuan');break;
  case 'work': {
   if(s.energy<10)return reject('Energi tidak cukup untuk bekerja.');
   if(args.premium&&s.hygiene<70)return reject('Pekerjaan premium membutuhkan kebersihan 70.');
@@ -362,7 +365,7 @@ function doAction(config,previous,action,args={}){
   s.bladder=0;s.hygiene=Math.max(0,s.hygiene-20);s.moral=Math.max(0,s.moral-5);
   changes.push('KENCING DI CELANA · hygiene -20 · moral -5');
  }
- if(s.energy<=0&&s.restMinutes===0&&!['advance_time','rest','respawn'].includes(action)){
+ if(s.energy<=0&&s.restMinutes===0&&!['rest','respawn'].includes(action)){
   s.restMinutes=setting.faintRestMinutes;s.faintCount++;
   changes.push('PINGSAN · bed rest '+s.restMinutes+'m');
  }
