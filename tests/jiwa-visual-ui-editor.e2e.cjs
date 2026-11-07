@@ -30,6 +30,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
    phone:g.modules.hudLayout.phone.money};
  });
  const money=jiwa.locator('.jui-node[data-id="money"]');
+ await money.scrollIntoViewIfNeeded();
  const box=await money.boundingBox();
  assert.ok(box&&box.width>15,'Money HUD preview must be visible and draggable');
  await jiwa.mouse.move(box.x+box.width/2,box.y+box.height/2);
