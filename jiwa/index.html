@@ -54,6 +54,7 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
 .jiwa-actor-picker canvas{width:90px;aspect-ratio:64 / 112;height:auto;background:repeating-conic-gradient(#e8eef3 0 25%,#cdd8e6 0 50%) 0 0/16px 16px;image-rendering:pixelated;border:1px solid #93a9bb}
 .jiwa-actor-picker button{font-size:11px}
 @media(max-width:480px){.jiwa-actor-picker{grid-template-columns:minmax(0,1fr) 75px}.jiwa-actor-picker canvas{width:75px}}
+.life-table-scroll{width:100%;overflow:auto}.life-table{width:100%;border-collapse:collapse;min-width:615px;background:#fff}.life-table th,.life-table td{border:1px solid #c4ced3;padding:7px;text-align:left;font-size:10px}.life-table th{background:#dce8f7}.life-table input[type=number]{min-width:50px;width:95px}.life-table input[type=checkbox]{flex:none}.life-preview-toolbar{display:flex;gap:6px;align-items:end;flex-wrap:wrap;margin:8px 0}.life-preview-toolbar label{min-width:140px;flex:1}.life-preview-toolbar button{flex:none}.life-status{display:flex;flex-wrap:wrap;gap:6px;padding:9px;background:#e9f1f6;border:1px solid #b4c4cc}.life-status span{padding:4px 8px;border:1px solid #bdcbd4;background:white}#lifeCanvas{display:block;width:100%;height:auto;max-height:410px;aspect-ratio:860/410;border:2px solid #56748e;background:#cfdfe7;image-rendering:pixelated;touch-action:pan-y}#lifeFeedback{padding:8px;min-height:30px;background:#f6f0d9}.tabs{flex-wrap:wrap}@media(max-width:760px){.tabs button{min-width:78px}}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -72,9 +73,10 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
    <div class="system-links"><button id="toSystems">⚙ GAME SYSTEMS</button><button id="toTest">▶ PLAY TEST</button></div>
   </aside>
   <section class="middle">
-   <div class="tabs"><button class="active" data-tab="map">◈ WORLD</button><button data-tab="context">◉ CONTEXT</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button></div>
+   <div class="tabs"><button class="active" data-tab="map">◈ WORLD</button><button data-tab="context">◉ CONTEXT</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button><button data-tab="play">🎮 GAME PREVIEW</button></div>
    <div id="mapView" class="view"><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
    <div id="contextView" class="view" hidden><div class="viewport-scroll" id="contextEditor"><div class="card">Loading contextual foundation...</div></div></div>
+   <div id="playView" class="view" hidden><div class="viewport-scroll"><div id="gamePreview"></div><div id="lifeEditor"></div></div></div>
    <div id="systemsView" class="view" hidden><div class="viewport-scroll">
     <div class="card"><h3>WORLD SYSTEMS</h3><p class="subtle">Nilai awal untuk Play Test JIWA. Tidak mengubah game online atau City Draft.</p><div class="pair"><label>Start Wallet (Rp)<input id="sys-wallet" type="number" min="0" step="1000"></label><label>Start Time (HH:MM)<input id="sys-time" type="time"></label></div><div class="pair"><label>Fullness<input id="sys-fullness" type="number" min="0" max="100"></label><label>Energy<input id="sys-energy" type="number" min="0" max="100"></label><label>Hygiene<input id="sys-hygiene" type="number" min="0" max="100"></label><label>Bladder<input id="sys-bladder" type="number" min="0" max="100"></label></div></div>
     <div class="card"><h3>MECHANICS REGISTRY</h3><p>Rules menggunakan <b>WHEN → IF → THEN</b>. Template reusable dipakai sebagai default, sementara setiap objek Semesta bisa mempunyai override masing-masing.</p><div id="registryInfo" class="subtle"></div></div>
@@ -131,8 +133,10 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
 <script src="../shared/loak-play.js"></script>
 <script src="/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1"></script>
 <script src="./foundation-engine.js"></script>
+<script src="./life-economy.js"></script>
 <script src="./jiwa.js"></script>
 <script src="./character-link.js?v=mahluk1-v6b-20261107"></script>
 <script src="./context-editor.js"></script>
 <script src="./mechanics-panel.js"></script>
+<script src="./life-editor.js"></script>
 </body></html>
