@@ -65,6 +65,11 @@
  function injectHudScripts(doc){
   const base=hudBase(doc);
   for(const file of JS_FILES){
+   // Semesta already preloads the original handset + adapter. Loading a second
+   // copy after LifePlay.start() overwrites VLPhoneEllen and deletes the
+   // setGameProvider() connection: real Nokia would show demo money/map.
+   if(file==='phone_ellen.js'&&root?.VLPhoneEllen?.setGameProvider)continue;
+   if(file==='nokia-play.js'&&root?.VLNokiaPlay?.open)continue;
    const id='ptHud_'+file.replace(/\W+/g,'_');
    if(doc.getElementById(id))continue;
    const s=doc.createElement('script');
