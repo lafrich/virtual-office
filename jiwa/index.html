@@ -95,12 +95,76 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
 .jui-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px}.jui-actions #juiOpenSemesta{grid-column:1/-1}.jui-actions button{font-size:10px;padding:7px 2px}
 .jui-stage[data-profile=phone] .jui-node-caption{font-size:8px}.jui-stage[data-profile=phone] .jui-node-mock{font-size:8px}
 @media(max-width:950px){.jui-workspace{grid-template-columns:minmax(0,1fr)}.jui-side{display:block}.jui-elements{grid-template-columns:repeat(4,minmax(0,1fr))}.jui-actions{margin:10px 0}}
+
+/* Jiwa full-viewport workspace, matching the current fullscreen Semesta app.
+   All scrolling belongs to the individual editor panes, not the document. */
+html,body{width:100%;height:100%;min-height:0;overflow:hidden}
+.window{width:100%;max-width:none;height:100dvh;min-height:0;margin:0;border:0;outline:0;box-shadow:none;overflow:hidden}
+.titlebar,.menubar,.footer{flex-shrink:0}
+.workspace{min-height:0;min-width:0;overflow:hidden;
+ grid-template-columns:clamp(205px,15vw,310px) minmax(0,1fr) clamp(280px,21vw,400px)}
+.middle,.panel,.view{min-height:0;min-width:0}
+.viewport-scroll,.inside,.tree{overscroll-behavior:contain}
+.tabs{flex-wrap:nowrap;overflow-x:auto;flex-shrink:0;scrollbar-width:thin}
+.tabs button{white-space:nowrap;flex-shrink:0}
+.jiwa-mobile-nav{display:none}
+/* A dedicated full-width canvas for UI Editor; its own properties panel stays visible. */
+.window[data-jiwa-tab="ui"] .workspace{grid-template-columns:minmax(0,1fr)}
+.window[data-jiwa-tab="ui"] .workspace>.tree-panel,
+.window[data-jiwa-tab="ui"] .workspace>.inspector{display:none}
+#uiView .viewport-scroll{padding:12px;min-height:0}
+#juiEditor{min-height:100%;display:flex;flex-direction:column;margin:0}
+#juiEditor>.subtle{max-width:1080px}
+#juiEditor .jui-workspace{grid-template-columns:minmax(0,1fr) clamp(245px,18vw,320px);flex:1;min-height:0}
+#juiEditor .jui-canvas-scroll{justify-content:center;min-height:0}
+#juiEditor .jui-stage{width:min(100%,1400px,calc((100dvh - 270px)*1280/720));max-width:none}
+#juiEditor .jui-stage[data-profile="phone"]{width:min(100%,390px,calc((100dvh - 270px)*390/844))}
+#juiEditor .jui-side{min-height:0;max-height:calc(100dvh - 198px);overflow:auto}
+@media(max-width:950px){
+ .workspace{grid-template-columns:190px minmax(0,1fr) 275px}
+ #juiEditor .jui-workspace{grid-template-columns:minmax(0,1fr)}
+ #juiEditor .jui-stage{width:min(100%,calc((100dvh - 355px)*1280/720))}
+ #juiEditor .jui-stage[data-profile="phone"]{width:min(100%,310px,calc((100dvh - 355px)*390/844))}
+ #juiEditor .jui-side{max-height:none}
+}
+@media(max-width:760px){
+ html,body{overflow:hidden}
+ .window{width:100%;height:100dvh;min-height:0;margin:0}
+ .titlebar{height:38px}
+ .menubar{max-height:110px;overflow:auto;flex-shrink:0}
+ .jiwa-mobile-nav{display:flex;flex:1 1 100%;gap:4px;min-width:0}
+ .jiwa-mobile-nav button{flex:1;min-width:0;font-size:10px;padding:6px 4px}
+ .workspace{display:flex;flex:1;flex-direction:column;min-height:0;overflow:hidden}
+ .workspace>.tree-panel,.workspace>.inspector{display:none;flex:1;min-height:0;max-height:none}
+ .workspace>.middle{display:flex;flex:1;min-height:0;height:auto;overflow:hidden}
+ .window[data-mobile-pane="objects"] .workspace>.middle,
+ .window[data-mobile-pane="inspector"] .workspace>.middle{display:none}
+ .window[data-mobile-pane="objects"] .workspace>.tree-panel{display:flex}
+ .window[data-mobile-pane="inspector"] .workspace>.inspector{display:flex}
+ .window[data-mobile-pane="objects"] .workspace>.tree-panel,
+ .window[data-mobile-pane="inspector"] .workspace>.inspector{width:100%;min-height:0}
+ .tree{flex:1;min-height:0;overflow:auto}
+ .inside{flex:1;min-height:0;max-height:none;overflow:auto}
+ .tabs{flex-wrap:nowrap;overflow:auto}
+ .tabs button{min-width:90px;flex:0 0 auto}
+ .view{height:100%;flex:1;min-height:0}
+ .viewport-scroll{min-height:0;overflow:auto;padding:10px}
+ .window[data-jiwa-tab="ui"] .workspace>.middle{min-height:0}
+ #uiView .viewport-scroll{padding:7px}
+ #juiEditor .jui-workspace{display:flex;flex-direction:column}
+ #juiEditor .jui-stage{width:min(100%,calc((100dvh - 350px)*1280/720));min-width:0}
+ #juiEditor .jui-stage[data-profile="phone"]{width:min(100%,310px,calc((100dvh - 350px)*390/844))}
+ #juiEditor .jui-side{flex:none}
+ .footer{height:26px}
+}
+
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
  <nav class="menubar">
   <label style="margin:0">CITY <select id="cityPicker" aria-label="Saved Semesta city"><option value="">Loading cities...</option></select></label>
   <button id="refresh">↻ REFRESH</button>
+  <div id="jiwaMobileNav" class="jiwa-mobile-nav" aria-label="Jiwa mobile panels"><button type="button" data-jiwa-pane="main" class="primary" aria-pressed="true">◈ WORKSPACE</button><button type="button" data-jiwa-pane="objects" aria-pressed="false">▤ OBJECTS</button><button type="button" data-jiwa-pane="inspector" aria-pressed="false">⚙ INSPECTOR</button></div>
   <button id="save" class="primary">💾 SAVE RULES</button>
   <button id="export">EXPORT</button><button id="import">IMPORT</button><input type="file" id="importFile" accept=".json,application/json" hidden>
   <span class="right"></span><a class="button" id="openSemesta" target="_blank" rel="noopener" href="../world-builder/">◈ SEMESTA</a><a class="button" href="../membangun/?app=jiwa">⌂ MEMBANGUN</a>
