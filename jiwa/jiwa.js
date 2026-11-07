@@ -199,7 +199,9 @@ function renderTree(){
  }
  if(!shown){const el=document.createElement('div');el.className='empty';el.textContent=search?'No matching objects.':state.record?.id===GLOBAL_CITY?'Global core contexts: no map required. Choose a saved city to bind individual objects.':'No placed objects in city.';root.append(el);}
 }
-function selectObject(id,focus=false){state.selected=id;state.action=0;if(focus){const o=selectedObject();if(o){const p=iso(Number(o.x)||0,Number(o.z)||0);state.panX+=canvas.clientWidth/2-p.x;state.panY+=canvas.clientHeight/2-p.y;}}renderTree();renderInspector();draw();}
+function selectObject(id,focus=false){state.selected=id;state.action=0;if(focus){const o=selectedObject();if(o){const p=iso(Number(o.x)||0,Number(o.z)||0);state.panX+=canvas.clientWidth/2-p.x;state.panY+=canvas.clientHeight/2-p.y;}}renderTree();renderInspector();draw();
+ if(focus&&window.matchMedia('(max-width:760px)').matches)mobilePane('inspector');
+}
 function renderInspector(){
  const o=selectedObject();$('noSelection').hidden=!!o;$('objectInspector').hidden=!o;
  if(!o){$('inspectorState').textContent='NO SELECTION';return;}
@@ -252,8 +254,21 @@ function renderSystems(){
  const bound=Object.keys(state.project.bindings).length;
  $('registryInfo').textContent=Object.keys(allTemplates()).length+' reusable templates · '+bound+' object overrides · '+state.entities.length+' Semesta objects · '+(state.project.foundation?.contexts?.length||0)+' foundational contexts';
 }
+function mobilePane(which){
+ const win=document.querySelector('.window');if(!win)return;
+ if(!['main','objects','inspector'].includes(which))which='main';
+ win.dataset.mobilePane=which;
+ document.querySelectorAll('[data-jiwa-pane]').forEach(b=>{
+  const on=b.dataset.jiwaPane===which;b.classList.toggle('primary',on);
+  b.setAttribute('aria-pressed',String(on));
+ });
+ if(which==='main'&&state.tab==='map')requestAnimationFrame(resizeCanvas);
+}
 function tab(which){
  state.tab=which;
+ const shell=document.querySelector('.window');
+ if(shell)shell.dataset.jiwaTab=which;
+ mobilePane('main');
  for(const b of document.querySelectorAll('[data-tab]'))b.classList.toggle('active',b.dataset.tab===which);
  for(const name of ['map','systems','test','context','play','ui'])$(name+'View').hidden=which!==name;
  if(which==='map')resizeCanvas();
@@ -424,6 +439,7 @@ $('objectSearch').addEventListener('input',renderTree);
 $('save').onclick=save;
 $('toSystems').onclick=()=>tab('systems');$('toTest').onclick=()=>tab('test');
 for(const b of document.querySelectorAll('[data-tab]'))b.onclick=()=>tab(b.dataset.tab);
+for(const b of document.querySelectorAll('[data-jiwa-pane]'))b.onclick=()=>mobilePane(b.dataset.jiwaPane);
 $('template').onchange=ev=>{const o=selectedObject();if(!o)return;const key=ev.target.value;if(!confirm('Replace this object actions with '+allTemplates()[key].label+' template?')){renderInspector();return;}state.project.bindings[o.id]={template:key,rules:fromTemplate(key)};state.action=0;markDirty();renderInspector();renderSystems();};
 $('addRule').onclick=()=>{const b=ensureBinding();if(!b||b.rules.length>=80)return;b.rules.push(rule('action_'+Date.now().toString(36),'New Action','idle',[],[e('message','Action triggered')]));state.action=b.rules.length-1;markDirty();renderInspector();};
 $('saveTemplate').onclick=saveCurrentAsTemplate;
