@@ -93,7 +93,17 @@ const outdoor=[
  ['potted-plant','Tanaman Pot','plant',[1,1],'plant',false,[]],
  ['small-tree','Pohon Kecil','plant',[2,2],'tree',true,[]]
 ].map(([id,name,category,footprint,kind,collision,interactions])=>({id,name,category,footprint,kind,collision,interactions}));
-const builtins=Object.freeze([...fixtures,...outdoor]);
+// Proposed Grok sprites are independent archive-prefabs, never replacements for
+// the existing editable fixture renderers or existing placed building IDs.
+const grokFurniture=(Array.isArray(g.VLGrokAssetReview?.items)?g.VLGrokAssetReview.items:[])
+ .filter(item=>item?.category==='furniture'&&item?.state==='review-preview'&&
+  ['sw','se','ne','nw'].every(d=>item.views?.[d]?.url&&item.views[d].size&&item.views[d].pivot))
+ .map(item=>({
+  id:'grok-'+item.id,name:'Grok · '+item.label,category:'furniture',kind:'grok-native',
+  footprint:item.footprint.slice(),collision:true,interactions:[],grok:item,
+  description:'Preview dari arsip '+item.batch+'; artwork empat arah asli, ukuran/pivot asli. Placement tersedia sebagai objek statis; action anchors dan gameplay belum divalidasi.'
+ }));
+const builtins=Object.freeze([...fixtures,...outdoor,...grokFurniture]);
 function drawOutdoor(row,dir){
  const tall=row.kind==='tree'?122:row.kind==='lamp'?142:row.kind==='plant'?82:82;
  const wide=row.kind==='bench'||row.kind==='table'?108:row.kind==='tree'?102:64;
@@ -144,7 +154,8 @@ function imageForBuiltin(id,dir){
  if(!cache.has(key)){
   const row=builtins.find(b=>b.id===id);
   if(!row)return null;
-  cache.set(key,row.kind==='fixture'?drawFixture(row,dir):drawOutdoor(row,dir));
+  cache.set(key,row.kind==='grok-native'?{url:row.grok.views[dir]?.url||null}:
+   row.kind==='fixture'?drawFixture(row,dir):drawOutdoor(row,dir));
  }
  return cache.get(key)||null;
 }
@@ -179,20 +190,22 @@ function specs(){
 }
 function makeSpec(row,isBuiltIn){
  const id=isBuiltIn?row.id:row.id;
- const view=isBuiltIn?dimensions(id,'sw'):row.views.sw;
+ const isGrok=isBuiltIn&&row.kind==='grok-native';
+ const view=isGrok?row.grok.views.sw:isBuiltIn?dimensions(id,'sw'):row.views.sw;
  const dim=view?.size||[64,96],pivot=view?.pivot||[32,90],category=CATEGORY[row.category];
  const placement=placementDimensions(row,dim,pivot,isBuiltIn);
  return Object.freeze({
  id,file:'object:'+id,label:row.name,group:category.group,source:'bangun-object',
  description:String(row.description||'').slice(0,600),
+ pack:isGrok?'grok-v6b-review':undefined,sourceBatch:isGrok?row.grok.batch:undefined,
  objectCategory:row.category,layer:category.layer,published:true,builtIn:isBuiltIn,
  collision:row.collision!==false,footprint:row.footprint.slice(),size:dim,pivot,
  width:placement.width,height:placement.height,
  worldHeight:placement.height*(pivot[1]/dim[1]), // Visible height above shared foot pivot
  characterHeight:CHARACTER_HEIGHT,
  interactions:row.interactions||[],blocking:row.collision===false?'no':'yes',
- variants:Object.fromEntries(DIR.map(d=>[d,{size:(isBuiltIn?dimensions(id,d):row.views[d])?.size||dim,
-  pivot:(isBuiltIn?dimensions(id,d):row.views[d])?.pivot||pivot}]))
+ variants:Object.fromEntries(DIR.map(d=>[d,{size:(isGrok?row.grok.views[d]:isBuiltIn?dimensions(id,d):row.views[d])?.size||dim,
+  pivot:(isGrok?row.grok.views[d]:isBuiltIn?dimensions(id,d):row.views[d])?.pivot||pivot}]))
  });
 }
 function image(id,dir='sw'){
