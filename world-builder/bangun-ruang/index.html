@@ -1215,6 +1215,36 @@ window.addEventListener('storage',event=>{
  */
 window.MembangunCloudAdapter=Object.freeze({
  app:'bangun',
+ // The Semesta and Bangun Ruang cloud folders are distinct. Restore native
+ // furniture PNGs from Semesta / Asset Library into the shared local object
+ // store before the normal Bangun Ruang sync runs. Never overwrite conflicts.
+ async importSemestaFurniture(){
+  const drive=window.MembangunCloudDrive,objects=window.VLBangunObjects;
+  if(!drive?.connected()||!objects)return {imported:0,conflicts:0,failed:0};
+  const files=await drive.list('semesta','assetObject');
+  const local=new Map(objects.read().map(row=>[row.id,row]));
+  let imported=0,conflicts=0,failed=0;
+  for(const file of files){
+   try{
+    const payload=await drive.load(file),row=payload.record;
+    if(payload.app!=='semesta'||payload.kind!=='assetObject'||
+       row?.category!=='furniture'||!objects.valid(row))continue;
+    const prior=local.get(row.id);
+    if(prior){
+     if(JSON.stringify(prior)!==JSON.stringify(row))conflicts++;
+     continue;
+    }
+    window.__mbCloudRestoring=true;
+    try{objects.save(row)}finally{window.__mbCloudRestoring=false}
+    local.set(row.id,row);imported++;
+   }catch(error){failed++;console.warn('Semesta furniture import skipped',file.name,error)}
+  }
+  if(imported){
+   window.VLBuildingInterior?.refreshExternal?.();
+   window.dispatchEvent(new Event('semesta:furniture-library-updated'));
+  }
+  return {imported,conflicts,failed};
+ },
  async prepareLocalSync(){
   if(!current?.id)return;
   // Capture in-progress edits to an existing saved building before comparing
