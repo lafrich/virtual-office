@@ -261,7 +261,12 @@ function placeMarkers(){
 }
 function nearest(){
  const p=getPos();let found=null,dist=2.5;
- for(const s of sites){const d=Math.hypot(p.x-s.x,p.z-s.z);if(d<dist){found=s;dist=d;}}
+ for(const s of sites){
+  const d=Math.hypot(p.x-s.x,p.z-s.z);
+  // Authored Jiwa activity wins if it shares a building with a legacy NPC,
+  // otherwise its Action would never be reachable.
+  if(d<dist-(s.activityId?-.04:0)){found=s;dist=d;}
+ }
  return found;
 }
 function message(text){
@@ -604,7 +609,10 @@ const NOKIA_ICONS={
 };
 function nokiaSnapshot(){
  if(!active||!state)return null;
- const iconFor=n=>n.id.startsWith('prayer_')?'prayer':NOKIA_ICONS[n.id]||'peta';
+ const ACTIVITY_ICONS={money:'office',energy:'cup',moral:'prayer',
+  immoral:'hansip',exp:'kursus',cooking:'stall',buying:'market',punishment:'hansip'};
+ const iconFor=n=>n.id.startsWith('prayer_')?'prayer':
+  n.activityId?(ACTIVITY_ICONS[n.category]||'peta'):(NOKIA_ICONS[n.id]||'peta');
  return {
   wallet:state.wallet,experience:state.experience,energy:state.energy,
   moral:state.moral,hygiene:state.hygiene,bladder:state.bladder,fullness:state.fullness,
