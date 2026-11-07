@@ -2,6 +2,24 @@
 
 Written 2026-11-07 (Asia/Jakarta). Cloudflare Worker and secrets were not changed.
 
+## This deploy (sleep clip + grass_v2)
+
+- Previous live `main`: `66d584f4c41f7e367044fc357df2217d18d4bec5`
+- Feature commit: `0bd30872af5fa69f924d429b99c9c06a7cf49bd0`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 0bd30872af5fa69f924d429b99c9c06a7cf49bd0
+git push origin main
+```
+
+That restores `lie`-only clip consumption, `terrain/grass.png`, `sw.js` v6, and the previous kebon-sirih cache tag. It does not revert the earlier hub or cleanup commits. Keep `grass.png`; it was never overwritten.
+
+
 ## SHAs
 
 | Step | SHA | Subject |
