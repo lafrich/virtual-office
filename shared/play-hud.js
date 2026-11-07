@@ -214,7 +214,8 @@
   const energy=g&&g.modules&&g.modules.energy;
   const on=!(!energy||energy.enabled===false);
   const needs=$('vs-needs');
-  if(needs)needs.style.opacity=on?'1':'0.85';
+  if(needs&&opts.hideLegacyNeeds){needs.style.display='none';return;}
+  if(needs){needs.style.display='';needs.style.opacity=on?'1':'0.85';}
   const bars={vsNeedHunger:70,vsNeedEnergy:on?80:64,vsNeedHygiene:62,vsNeedFun:58};
   for(const id of Object.keys(bars)){
    const el=$(id);if(!el)continue;
