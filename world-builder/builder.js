@@ -2559,10 +2559,11 @@ function clearWalk(){
 function setMode(m){
  if(mode==='walk'&&m!=='walk'){
   window.SemestaLifePlay?.stop?.();
+  const savedCamera=lifeAutoCamera?mapCameraBeforeFollow:null;
   clearWalk();
   if(lifeAutoCamera){
    cameraFollowId=null;lifeAutoCamera=false;
-   if(mapCameraBeforeFollow){cameraFocus.copy(mapCameraBeforeFollow.focus);viewSize=mapCameraBeforeFollow.size;}
+   if(savedCamera){cameraFocus.copy(savedCamera.focus);viewSize=savedCamera.size;}
    mapCameraBeforeFollow=null;fitCamera();updateCharacterCameraUI();
   }
  }
