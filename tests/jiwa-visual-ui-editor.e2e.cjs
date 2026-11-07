@@ -35,6 +35,13 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  await jiwa.mouse.move(box.x+box.width/2,box.y+box.height/2);
  await jiwa.mouse.down();await jiwa.mouse.move(box.x+box.width/2-44,box.y+box.height/2-25,{steps:7});await jiwa.mouse.up();
  const after=await jiwa.evaluate(()=>window.JiwaGameplayBridge.get().modules.hudLayout.desktop.money);
+ const debugDrag=await jiwa.evaluate(()=>({
+  stage:document.getElementById('juiStage').getBoundingClientRect().toJSON(),
+  node:document.querySelector('.jui-node[data-id="money"]')?.getBoundingClientRect().toJSON(),
+  snap:document.getElementById('juiSnapGrid')?.checked,
+  pointer:window.JiwaUIVisualEditor?.debug?.()||null
+ }));
+ console.log('JIWA_DRAG_TELEMETRY',JSON.stringify({before,after,debugDrag}));
  assert.notEqual(after.x,before.desktop.x,'drag in preview must change desktop money x offset');
  assert.equal(after.anchor,before.desktop.anchor);
  const phoneUnchanged=await jiwa.evaluate(()=>window.JiwaGameplayBridge.get().modules.hudLayout.phone.money.x);
