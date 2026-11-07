@@ -7,6 +7,7 @@ if(!A||!$('activityView'))return;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const copy=x=>JSON.parse(JSON.stringify(x));
 let draft=A.readLocal(localStorage),category='money',selected='bank_teller',dirty=false,cloudFile=null,remoteLoaded=false,busy=false;
+let stage='preset',creating=false,chosenTier='menengah';
 const current=()=>draft.activities.find(a=>a.id===selected)||draft.activities.find(a=>a.category===category)||null;
 const selectedEntity=()=>B()?.selectedObject?.();
 const entities=()=>B()?.entities?.()||[];
@@ -16,10 +17,9 @@ function notify(text,ok=false){
 const setDirty=()=>{dirty=true;notify('UNSAVED · Tekan SAVE GAME RULES agar Semesta membaca perubahan.');};
 function chooseCategory(id){
  if(!A.CATEGORIES.some(c=>c.id===id))return;
- category=id;selected=draft.activities.find(a=>a.category===id)?.id||null;
- render();
+ category=id;selected=draft.activities.find(a=>a.category===id)?.id||null;creating=false;stage='preset';chosenTier=current()?.tier||'sepele';render();
 }
-function choose(id){if(!draft.activities.some(a=>a.id===id))return;selected=id;category=current().category;render();}
+function choose(id){if(!draft.activities.some(a=>a.id===id))return;selected=id;category=current().category;creating=false;stage='preset';chosenTier=current().tier;render();}
 function list(){
  const list=$('activityList');if(!list)return;
  list.replaceChildren();
@@ -29,7 +29,7 @@ function list(){
   const btn=document.createElement('button');
   btn.type='button';btn.className='activity-row'+(a.id===selected?' selected':'');
   const t=document.createElement('b');t.textContent=a.label;
-  const info=document.createElement('span');info.textContent=(a.enabled?'● LIVE':'○ DRAFT')+' · '+(a.buildingQuery||'Belum ada bangunan');
+  const info=document.createElement('span');info.textContent=(a.enabled?'● LIVE':'○ DRAFT')+' · '+a.tier.toUpperCase()+' · '+(a.buildingQuery||'Belum ada bangunan');
   btn.append(t,info);btn.onclick=()=>choose(a.id);list.append(btn);
  }
  const tabs=document.querySelectorAll('[data-activity-tab]');
@@ -133,14 +133,7 @@ function render(){
  $('activitySubheading').textContent=cat?.hint||'';
  $('activityGlobalNotice').textContent='GLOBAL · Satu katalog aktivitas untuk semua map Semesta · Preview city: '+(B()?.city?.()?.name||'Global');
 }
-function add(){
- const id=prompt('ID aktivitas baru (huruf/angka, mis. kerja_bank)');if(!id)return;
- const key=id.trim().toLowerCase().replace(/[^a-z0-9_-]+/g,'_').slice(0,64);
- if(!key)return;
- if(draft.activities.some(a=>a.id===key)){notify('ID sudah digunakan: '+key);return;}
- const a=A.activity({id:key,category,label:'Aktivitas baru',enabled:false});
- draft.activities.push(a);selected=a.id;setDirty();render();
-}
+function add(){creating=true;stage='preset';chosenTier='sepele';render();}
 function save(){
  try{draft=A.saveLocal(draft,localStorage);dirty=false;
   root.VLHub?.publish?.('gameplay',{scope:'global-activities',at:draft.updatedAt});
@@ -208,7 +201,10 @@ function initialize(){
  render();
  B()?.navigate?.('activities');
 }
-root.JiwaActivityEditor=Object.freeze({render,chooseCategory,save,get:()=>A.normalize(draft),dirty:()=>dirty});
+root.JiwaActivityEditor=Object.freeze({render,chooseCategory,save,get:()=>A.normalize(draft),
+ setWorldRules:next=>{draft.worldEntities=(Array.isArray(next)?next:[]).map(A.PREMISES.worldRule);
+  setDirty();return true;},
+ dirty:()=>dirty});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
 else initialize();
 })(window);
