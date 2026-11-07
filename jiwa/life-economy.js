@@ -21,7 +21,7 @@ const FISH=[
 function defaults(){return {
  version:1,identity:{religion:'islam',zodiac:'capricorn'},
  gates:{friendsV2:false,socialV2:false,satanicEvilRouteV2:false},
- settings:{bagSlots:8,fishEnergy:8,fishMinutes:12,coffeePrice:2000,roomPrice:30000,
+ settings:{bagSlots:8,homeStorageSlots:24,fishEnergy:8,fishMinutes:12,coffeePrice:2000,roomPrice:30000,
  fridgePrice:8000,tokenPrice:1000,tokenUnits:5,fridgeExtraMinutes:600,
  faintRestMinutes:30,arrestMoralThreshold:15,
  publicShowerFee:500,publicShowerRecovery:35,homeShowerRecovery:70,
@@ -34,7 +34,7 @@ function defaults(){return {
 function normalize(raw){
  const base=defaults(),source=raw&&typeof raw==='object'?raw:{},s=source.settings||{};
  for(const key of Object.keys(base.settings)){
-   if(key==='bagSlots')continue;
+   if(key==='bagSlots'||key==='homeStorageSlots')continue;
    base.settings[key]=number(s[key],key==='arrestMoralThreshold'?0:1,100000,base.settings[key]);
  }
  base.settings.arrestMoralThreshold=number(s.arrestMoralThreshold,0,50,15);
@@ -57,6 +57,7 @@ function normalize(raw){
 function stateFrom(existing,config){
  const s=copy(existing||{}),c=normalize(config);
  s.inventory=Array.isArray(s.inventory)?s.inventory:[];
+ s.homeStorage=Array.isArray(s.homeStorage)?s.homeStorage:[];
  s.itemMeta=s.itemMeta&&typeof s.itemMeta==='object'?s.itemMeta:{};
  s.fridge=Array.isArray(s.fridge)?s.fridge:[];
  s.housing=s.housing&&typeof s.housing==='object'?s.housing:{room:false,fridge:false};
@@ -234,6 +235,22 @@ function doAction(config,previous,action,args={}){
   add(f.id,f.label,f.spoilMinutes);
   changes.push('hasil mancing di '+String(args.spotId).slice(0,60));
   break;
+ }
+ case 'store_home':{
+  if(!s.housing.room)return reject('Perlu akses kost untuk menyimpan barang.');
+  const id=String(args.itemId||'');
+  if(!s.inventory.includes(id))return reject('Barang tidak ada di tas.');
+  if(s.homeStorage.length>=setting.homeStorageSlots)return reject('Penyimpanan kost penuh.');
+  s.inventory.splice(s.inventory.indexOf(id),1);s.homeStorage.push(id);
+  changes.push('simpan barang di kost');break;
+ }
+ case 'take_home':{
+  if(!s.housing.room)return reject('Perlu akses kost.');
+  const id=String(args.itemId||'');
+  if(!s.homeStorage.includes(id))return reject('Barang tidak ada di penyimpanan kost.');
+  if(s.inventory.length>=setting.bagSlots)return reject('Tas penuh.');
+  s.homeStorage.splice(s.homeStorage.indexOf(id),1);s.inventory.push(id);
+  changes.push('ambil barang dari kost');break;
  }
  case 'eat_item':{
   const id=String(args.itemId||'');
