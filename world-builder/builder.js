@@ -2420,7 +2420,7 @@ function applyPlayPickupVisibility(){
 function mapForPersist(){
  const copy=JSON.parse(JSON.stringify(documentMap));
  if(Array.isArray(copy.objects)){
-  copy.objects=copy.objects.filter(o=>o.id!==LIFE_TEST_ACTOR_ID);
+  copy.objects=copy.objects.filter(o=>o.id!=='__semesta_life_temporary_player__');
   for(const o of copy.objects){delete o._pickedPreview;delete o._playHidden;}
  }
  return copy;
@@ -2850,11 +2850,12 @@ function beginSpawnRespawn(actor,trigger){
  const holder=actor&&rigs.get(actor.id);
  if(!holder)return null;
  const lifePlayer=window.SemestaLifePlay?.spawnEntitlement?.();
- const decision=SR.resolve({
+ const rawDecision=SR.resolve({
   homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
   ownedRoom:lifePlayer?lifePlayer.ownedRoom:mod.ownedRoom,
   profile:actor.profile
  },mod,spawnWorldAdapter(),Math.random);
+ const decision=rawDecision?.ok?rawDecision:(!lifePlayer?.homeAccess?window.SemestaLifePlay?.fallbackSpawn?.()||rawDecision:rawDecision);
  window.__semestaLastSpawn=decision;
  window.SemestaLifePlay?.onSpawn?.(decision);
  if(!decision||!decision.ok||!decision.point){
@@ -2898,8 +2899,9 @@ function spawnRespawnApi(){
    if(window.VLSpawnHobo)window.VLSpawnHobo.dispose();
    const lifePlayer=window.SemestaLifePlay?.spawnEntitlement?.();
    const mod=window.SemestaLifePlay?.spawnModule?.(spawnModule(),spawnWorldAdapter())||spawnModule();
-   const decision=SR.resolve({homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
+   const rawDecision=SR.resolve({homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
     ownedRoom:lifePlayer?lifePlayer.ownedRoom:mod.ownedRoom,profile:actor.profile},mod,spawnWorldAdapter(),opts.rand);
+   const decision=rawDecision?.ok?rawDecision:(!lifePlayer?.homeAccess?window.SemestaLifePlay?.fallbackSpawn?.()||rawDecision:rawDecision);
    window.__semestaLastSpawn=decision;
    window.SemestaLifePlay?.onSpawn?.(decision);
    const holder=rigs.get(actor.id);
