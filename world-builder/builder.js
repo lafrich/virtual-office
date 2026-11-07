@@ -1848,6 +1848,11 @@ function updateSelection(){
  const enterAvailable=cur?.type==='sprite'&&cur.enterable===true&&
   (cur?.interior?.floors?.length||assetByName.get(cur.asset)?.interior?.floors?.length);
  $('quickEnterBuilding').hidden=!enterAvailable;
+ const canEditInterior=!!cur&&window.VLSemestaCityBuildings?.isBuilding(cur,assetCatalog)===true;
+ $('editInBangunRuang').hidden=!canEditInterior;
+ $('editInBangunRuang').disabled=!canEditInterior;
+ $('quickEditBuilding').hidden=!canEditInterior;
+ $('quickEditBuilding').disabled=!canEditInterior;
  if(highlight&&highlight.userData.selected===cur?.id){
    highlight.update();
  }else{
@@ -1871,6 +1876,30 @@ function select(id,options={}){
  if(id)tell(owners.get(id)?.userData?.pendingPipelineImage?'Preview sementara: PNG sumber belum dipublikasikan.':'Selected: '+item()?.name+'. Pilih Move lalu drag.');
  renderer.render(scene,camera);
 }
+// Contextual Semesta -> Bangun Ruang editor: a city instance is identified by
+// its stable City Draft ID and object ID. Unsaved working cities receive an ID
+// before navigation so edits never target the wrong building.
+async function editSelectedBuildingInterior(){
+ const target=item();
+ if(!target||!window.VLSemestaCityBuildings?.isBuilding(target,assetCatalog))return;
+ const targetId=target.id;
+ try{
+  if(!activeDraftId||draftDirty){
+   $('draftName').value=documentMap.map?.name||'Semesta City';
+   await saveNamedCity(false);
+  }
+  if(!activeDraftId)throw Error('Save City first');
+  if(!documentMap.objects.some(o=>o.id===targetId))throw Error('Building selection changed');
+  // Finish the existing conflict-aware cloud reconciliation before leaving
+  // this app, when the Google login is active in the current tab.
+  if(window.MembangunCloudDrive?.connected()&&window.MembangunCloudUI?.syncOnConnect)
+   await window.MembangunCloudUI.syncOnConnect();
+  const params=new URLSearchParams({cityId:activeDraftId,objectId:targetId,editor:'interior'});
+  window.location.assign('./bangun-ruang/?'+params.toString());
+ }catch(error){tell('⚠ Cannot open Bangun Ruang: '+error.message);}
+}
+$('editInBangunRuang').onclick=editSelectedBuildingInterior;
+$('quickEditBuilding').onclick=editSelectedBuildingInterior;
 function edit(fn,validatePosition=true){
  if(!item())return;
  const before=clone(item());undoPoint();fn(item());
