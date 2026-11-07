@@ -6,6 +6,7 @@
 const ROOT='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/';
 const CHARACTER=ROOT+'assets/npc_aladdin_sane/sprites/aladdin_sane_v6b_sheet.png';
 const SILVER='https://lafrich.github.io/virtual-life-asset-pipeline/launcher-assets/manusia_silver_idle_4views_4x.gif';
+const EARTH='https://lafrich.github.io/virtual-life-asset-pipeline/launcher-assets/semesta_earth_rotate_v6b_4x.gif';
 const ids=['mahluk','semesta','jiwa'];
 const canvases=new Map();
 function nodes(id){return [...document.querySelectorAll('.file[data-app="'+id+'"] .file-thumb, .art[data-art="'+id+'"]')]}
@@ -49,7 +50,9 @@ function globe(){
  </g><path d="M25 25h20v5H25zM63 78h22v4H63z" fill="#9DE5F5" opacity=".55"/>
  </g><path d="M20 54c0-19 9-33 23-39" fill="none" stroke="#A4D9F2" stroke-width="5" opacity=".65"/>
  </svg>`;
- nodes('semesta').forEach(node=>{const host=document.createElement('div');host.className='mb-globe';host.innerHTML=svg;node.replaceChildren(host)});
+ nodes('semesta').forEach(node=>{const host=document.createElement('div');host.className='mb-globe';host.innerHTML=svg;node.replaceChildren(host);
+  const gif=new Image();gif.alt='Native V6B Semesta rotating Earth';gif.className='mb-globe-native';gif.onload=()=>node.replaceChildren(gif);gif.onerror=()=>{};gif.src=EARTH;
+ });
 }
 function silver(){
  // Only use an authored V6B Manusia Silver GIF if it really loads.
