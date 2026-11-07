@@ -33,7 +33,7 @@ function mount(api){
  const fmt=p=>Number.isFinite(Number(p))?Math.round(Number(p)*100)/100:'?';
  const report=message=>{$('brCitySummary').textContent=message;api.status(message);};
  const uid=()=>('br-city-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9)).slice(0,65);
- function setTab(next){
+ function setTab(next,skipRefresh=false){
   tab=next;
   const isCity=next==='cities';
   content.style.display=isCity?'none':'contents';
@@ -44,7 +44,7 @@ function mount(api){
   $('brAssetsTab').setAttribute('aria-selected',String(!isCity));
   $('brCitiesTab').setAttribute('aria-selected',String(isCity));
   if(!isCity){target=null;$('brCitySave').disabled=true;}
-  else void refresh();
+  else if(!skipRefresh)void refresh();
  }
  async function refresh(selectCity){
   try{
@@ -104,11 +104,11 @@ function mount(api){
   $('brCitySave').disabled=!target;
   $('brCityTarget').hidden=!target;
  }
- function open(obj){
+ function open(obj,{interiorOnly=false}={}){
   if(!record)return;
   const spec=findSpec(obj),ref=String(obj.asset||''),oldId=ref.startsWith('studio:')?ref.slice(7):'';
   const fromSaved=api.getSaved().find(a=>a.id===oldId);
-  target={cityId:record.id,cityName:record.name,objectId:obj.id,sourceName:obj.name};
+  target={cityId:record.id,cityName:record.name,objectId:obj.id,sourceName:obj.name,interiorOnly};
   if(fromSaved){
    // Fork a shared saved prefab on first city edit, making this instance
    // independent of other instances using the same studio asset.
@@ -117,6 +117,11 @@ function mount(api){
    if(!own){asset.id=uid();asset.name=String(obj.name||asset.name).slice(0,60);
     asset.config={...asset.config,name:asset.name};}
    asset.cityBinding={cityId:record.id,objectId:obj.id};
+   if(interiorOnly&&obj.interior?.floors?.length){
+    asset.interactive=true;asset.enterable=true;asset.interior=JSON.parse(JSON.stringify(obj.interior));
+    asset.actionSlots=JSON.parse(JSON.stringify(obj.actionSlots||[]));
+    asset.entrance=obj.entrance?JSON.parse(JSON.stringify(obj.entrance)):null;
+   }
    api.openAsset(asset);
   }else{
    // The original pipeline PNG is read-only. Its Semesta metadata is the
@@ -130,9 +135,10 @@ function mount(api){
    const footprint=spec?.footprint||[obj.w||base?.footprint?.[0]||3,obj.d||base?.footprint?.[1]||3];
    api.openPrefab(obj,base?.id||'semesta:small',footprint);
   }
+  if(interiorOnly)api.ensureInterior?.();
   const box=$('brCityTarget');
   box.textContent='EDITING: '+obj.name+'\nCity: '+record.name+' · Instance '+obj.id+
-   '\nSave & Replace untuk memperbarui bangunan ini saja di Semesta.';
+   '\n'+(interiorOnly?'Interior only: fasad, posisi dan asset asli Semesta tetap sama.':'Save & Replace untuk memperbarui bangunan ini saja di Semesta.');
   box.hidden=false;
   $('brCitySave').disabled=false;
   draw();
@@ -147,12 +153,33 @@ function mount(api){
   const latest=await drafts.load(editTarget.cityId);
   if(!latest.document.objects.some(o=>o.id===editTarget.objectId))
    throw Error('Building was deleted in Semesta. No city changes applied.');
-  const document=link.updateDocument(latest.document,editTarget.objectId,asset);
-  await drafts.save({id:latest.id,name:latest.name,document});
-  link.patchWorkingCopy(latest.id,editTarget.objectId,asset);
-  link.publishSignal(latest.id,editTarget.objectId,asset.id);
+  const options={interiorOnly:editTarget.interiorOnly===true};
+  const document=link.updateDocument(latest.document,editTarget.objectId,asset,options);
+  const cityRecord=await drafts.save({id:latest.id,name:latest.name,document});
+  link.patchWorkingCopy(latest.id,editTarget.objectId,asset,options);
+  link.publishSignal(latest.id,editTarget.objectId,asset.id,options);
+  // When Bangun Ruang has an active Drive authorization, push BOTH the
+  // saved building and its updated Semesta City Draft. Verify the remote
+  // pre-edit snapshot first; never overwrite an independent phone edit.
+  const drive=g.MembangunCloudDrive;
+  let cloud='Drive belum terhubung di Bangun Ruang; perubahan tersimpan lokal.';
+  if(drive?.connected()){
+   try{
+    const entries=await drive.list('semesta','city');
+    const file=entries.find(x=>x.name===drive.filename('city',latest.id));
+    if(file){
+     const remote=await drive.load(file);
+     if(remote.app!=='semesta'||remote.kind!=='city'||
+        JSON.stringify(remote.record.document)!==JSON.stringify(latest.document))
+      throw Error('CONFLICT: City di Drive sudah berbeda. Buka Semesta, sync/reconcile terlebih dahulu.');
+    }
+    await drive.save('semesta','city',await drafts.load(cityRecord.id),
+     file?{id:file.id,modifiedTime:file.modifiedTime}:null);
+    cloud='✓ City Draft tersimpan di Google Drive.';
+   }catch(error){cloud='⚠ City tersimpan lokal, Drive belum tersinkron: '+error.message;}
+  }
   if(tab==='cities'&&$('brCitySelect').value===latest.id)await refresh(latest.id);
-  api.status('✓ '+asset.name+' replaced in City Draft '+latest.name+' · Semesta updated');
+  api.status('✓ '+asset.name+' · City Draft '+latest.name+' updated · '+cloud);
  }
  function afterSave(asset){
   if(!target)return Promise.resolve(false);
@@ -182,6 +209,21 @@ function mount(api){
  function clearTarget(){
   target=null;$('brCitySave').disabled=true;$('brCityTarget').hidden=true;
   if(record)draw();
+ }
+ // Direct edit route from a selected Semesta building. IDs are looked up in
+ // the actual saved city; URL parameters never import arbitrary building data.
+ const params=new URLSearchParams(g.location.search);
+ const cityId=params.get('cityId'),objectId=params.get('objectId');
+ if(cityId&&objectId&&cityId.length<=160&&objectId.length<=160){
+  void (async()=>{
+   setTab('cities',true);
+   await refresh(cityId);
+   if(record?.id!==cityId)throw Error('City not found in this browser');
+   const obj=link.inventory(record.document,catalog()).find(o=>o.id===objectId);
+   if(!obj)throw Error('Selected building no longer exists in the city');
+   open(obj,{interiorOnly:params.get('editor')==='interior'});
+   api.status('Editing '+obj.name+' · Semesta city '+record.name+' · preserve exterior and position');
+  })().catch(error=>report('⚠ Cannot open selected Semesta building: '+error.message));
  }
  return {afterSave,activeTarget:()=>target,clearTarget,setTab,refresh};
 }
