@@ -1,0 +1,95 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+const E=require('../jiwa/life-economy.js');
+const builder=fs.readFileSync('world-builder/builder.js','utf8');
+const html=fs.readFileSync('world-builder/index.html','utf8');
+const play=fs.readFileSync('world-builder/semesta-life-play.js','utf8');
+const c=()=>E.defaults();
+const fresh=()=>E.stateFrom({wallet:6000,energy:80,hygiene:75,bladder:20,moral:50},c());
+
+test('Semesta loads V1 life runtime before builder module and hooks Action/HUD/movement',()=>{
+ const lifeScript=html.indexOf('../jiwa/life-economy.js');
+ const playScript=html.indexOf('./semesta-life-play.js');
+ const builderScript=html.indexOf('./builder.js');
+ assert.ok(lifeScript>0&&playScript>lifeScript&&builderScript>playScript);
+ assert.match(html,/id="walkMode".*PLAY GAME/);
+ assert.match(builder,/SemestaLifePlay\.attach\(/);
+ assert.match(builder,/SemestaLifePlay\?\.start\?\.\(/);
+ assert.match(builder,/SemestaLifePlay\?\.stop\?\.\(/);
+ assert.match(builder,/SemestaLifePlay\?\.tick\?\.\(dt\)/);
+ assert.match(builder,/SemestaLifePlay\?\.handleAction\?\.\(\)/);
+ assert.match(builder,/SemestaLifePlay\.money\(\)/);
+ assert.match(builder,/SemestaLifePlay\.bag\(\)/);
+ assert.match(builder,/SemestaLifePlay\.speedFactor\(\)/);
+});
+test('No assets? Placeholder actor and interaction markers exist only in test, never City Draft',()=>{
+ assert.match(builder,/makeTemporaryLifePlayer\(\)/);
+ assert.match(builder,/clearTemporaryLifePlayer\(\)/);
+ assert.match(builder,/copy\.objects=copy\.objects\.filter\(o=>o\.id!=='__semesta_life_temporary_player__'\)/);
+ assert.match(builder,/id:asNew\?null:activeDraftId,name,document:mapForPersist\(\)/);
+ assert.match(play,/jiwa-play-temporary-interactions/);
+ assert.match(play,/disposeMarkers\(\)/);
+ assert.match(play,/fallbackSpawn\(\)/);
+});
+test('Jiwa data and persistent local play session keyed per saved city',()=>{
+ assert.match(play,/jiwa-mechanics-v1/);
+ assert.match(play,/semesta-life-play-v1:/);
+ assert.match(play,/projectFromJiwa/);
+ assert.match(play,/lifeEconomy/);
+ assert.match(play,/localStorage\.setItem\(dataKey\(\)/);
+ assert.match(play,/cityId:.*__working_copy__/);
+});
+test('Core flow: hobo edge spawn -> work and forage -> save -> buy room -> private needs -> home respawn',()=>{
+ const conf=c();
+ let player=fresh();
+ let r=E.run(conf,player,'respawn',{roll:0,bounds:{minX:0,maxX:50,minZ:0,maxZ:50}});
+ assert.ok(r.ok);assert.equal(r.state.spawn,'hobo');assert.match(r.state.spawnPosition.id,/hobo_tent/);
+ player=r.state;
+ const first=E.run(conf,player,'work');
+ assert.ok(first.ok);assert.equal(first.state.wallet,8500);assert.equal(first.state.experience,7);
+ const forage=E.run(conf,first.state,'scavenge');
+ assert.ok(forage.ok);assert.equal(forage.state.inventory.length,1);
+ const sold=E.run(conf,forage.state,'sell_loak',{itemId:forage.state.inventory[0]});
+ assert.ok(sold.ok);assert.equal(sold.state.wallet,9500);
+ const wealthy={...sold.state,wallet:45000};
+ const home=E.run(conf,wealthy,'buy_room',{roomSpawn:{id:'kost_unit',x:12,z:15,placeholder:true}});
+ assert.ok(home.ok);assert.equal(home.state.homeAccess,true);
+ assert.equal(E.run(conf,home.state,'buy_room').ok,false);
+ const spawn=E.run(conf,home.state,'respawn',{roll:0});
+ assert.ok(spawn.ok);assert.equal(spawn.state.spawn,'home');assert.equal(spawn.state.spawnPosition.id,'kost_unit');
+ const bath=E.run(conf,spawn.state,'home_shower');
+ assert.ok(bath.ok);assert.equal(bath.state.wallet,15000);assert.equal(bath.state.hygiene,100);
+ const wc=E.run(conf,bath.state,'home_toilet');assert.ok(wc.ok);assert.equal(wc.state.bladder,0);
+});
+test('Fishing chances and buyer rules are executable, inventory proof prevents double-sale',()=>{
+ const cfg=c(),s=fresh();
+ const fishing=E.run(cfg,s,'fish',{spotId:'river',roll:.02});
+ assert.ok(fishing.ok);const id=fishing.state.inventory[0];
+ const refuse=E.run(cfg,fishing.state,'sell_fish',{itemId:id,buyerId:'pasar_ikan'});
+ assert.equal(refuse.ok,false);assert.equal(refuse.state.wallet,fishing.state.wallet);
+ const sell=E.run(cfg,fishing.state,'sell_fish',{itemId:id,buyerId:'siomay_batagor'});
+ assert.equal(sell.ok,true);assert.equal(sell.state.wallet,s.wallet+450);
+ assert.equal(E.run(cfg,sell.state,'sell_fish',{itemId:id,buyerId:'siomay_batagor'}).ok,false);
+});
+test('Faintness, public baths, charity, witnessed hansip, and release grace are simulated',()=>{
+ const cfg=c(),p=fresh();p.energy=1;p.blader=100;
+ const exhausted=E.run(cfg,p,'walk',{units:1});
+ assert.ok(exhausted.ok);assert.ok(exhausted.state.restMinutes>0);assert.equal(E.speedFactor(exhausted.state),0);
+ const camp=E.run(cfg,fresh(),'public_shower',{facilityId:'wc_umum'});
+ assert.ok(camp.ok);assert.equal(camp.state.wallet,5500);
+ assert.equal(camp.state.hygiene,100);
+ const bad=fresh();bad.moral=10;
+ assert.equal(E.run(cfg,bad,'arrest',{witnessed:false}).ok,false);
+ const caught=E.run(cfg,bad,'arrest',{witnessed:true});assert.ok(caught.ok);
+ const done=E.run(cfg,caught.state,'community_service');assert.ok(done.ok);
+ assert.equal(done.state.detained,false);assert.ok(done.state.arrestGraceMinutes>0);
+ assert.equal(E.run(cfg,done.state,'arrest',{witnessed:true}).ok,false);
+});
+test('V2 gates stay locked while premium job needs hygiene threshold',()=>{
+ const cfg=c();assert.equal(cfg.gates.socialV2,false);assert.equal(cfg.gates.satanicEvilRouteV2,false);
+ const poor=fresh();poor.hygiene=20;
+ assert.equal(E.run(cfg,poor,'work',{premium:true}).ok,false);
+ const bath=E.run(cfg,poor,'public_shower',{facilityId:'wc_umum'});
+ assert.ok(bath.ok);assert.ok(bath.state.hygiene>poor.hygiene);
+ assert.equal(E.run(cfg,{...bath.state,hygiene:75},'work',{premium:true}).ok,true);
+});
