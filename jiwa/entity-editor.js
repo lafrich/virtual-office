@@ -9,7 +9,8 @@ let kind='building',id='building_enter',phase='preset',pending=false,chosenTier=
 let pendingCategory='moral',error='';
 const catalog=()=>root.JiwaActivityEditor?.get?.()||A.seed();
 const records=()=>catalog().worldEntities||[];
-const entities=()=>root.JiwaContextBridge?.entities?.()||[];
+const entities=()=>root.JiwaContextBridge?.directoryEntities?.()||root.JiwaContextBridge?.entities?.()||[];
+const city=()=>root.JiwaContextBridge?.city?.()||null;
 const selected=()=>records().find(x=>x.id===id)||records().find(x=>x.kind===kind)||null;
 const status=(s,success=false)=>{const el=$('entityStatus');el.textContent=s;el.dataset.ok=success?'true':'false';};
 function kindSelect(value){
@@ -86,10 +87,57 @@ function presetForm(){
  area.querySelector('#worldKeep')?.addEventListener('click',()=>next(true));
  $('worldContinue').onclick=()=>next(false);
 }
+// Mark individual placed Semesta directory entries. One world rule may be
+// attached to multiple object IDs; these references remain scoped to the city.
+function renderDirectoryPanel(){
+ const list=$('worldDirectoryList'),counter=$('worldDirectoryCount'),rule=selected(),activeCity=city();
+ if(!list||!counter||!rule)return;
+ const cityId=activeCity?.id||'',term=String($('worldDirectorySearch')?.value||'').trim().toLowerCase();
+ const all=entities().filter(o=>o?.id&&A.kindOf(o)===rule.kind);
+ const marked=new Set((rule.targets||[]).filter(x=>x.cityId===cityId).map(x=>x.objectId));
+ const matches=all.filter(o=>!term||[o.id,o.name,o.label,o.type,o.asset,o.assetId,o.subtype]
+  .filter(Boolean).join(' ').toLowerCase().includes(term));
+ const showing=matches.slice(0,300);
+ counter.textContent=activeCity?.id==='__jiwa_global__'?'Pilih city Semesta dahulu':
+  marked.size+' ditandai · '+all.length+' '+rule.kind.toUpperCase()+
+  ' ditemukan di '+(activeCity?.name||'city')+(rule.enabled?' · RULE ENABLED':' · RULE DISABLED');
+ list.replaceChildren();
+ if(!activeCity||cityId==='__jiwa_global__'||!all.length){
+  list.textContent=cityId==='__jiwa_global__'?'Pilih city tersimpan melalui CITY di atas.':
+   'Tidak ada '+rule.kind+' di directory city ini. Save city di Semesta lalu REFRESH SYNC.';
+  return;
+ }
+ if(!showing.length){list.textContent='Tidak ada hasil pencarian.';return;}
+ const mark=(rows,enabled)=>{
+  const targetMap=new Map((selected()?.targets||[]).map(x=>[x.cityId+'::'+x.objectId,x]));
+  for(const o of rows){
+   const key=cityId+'::'+o.id;
+   if(enabled)targetMap.set(key,{cityId,objectId:String(o.id)});
+   else targetMap.delete(key);
+  }
+  if(update({targets:[...targetMap.values()]}))renderDirectoryPanel();
+ };
+ for(const o of showing){
+  const line=document.createElement('label');line.className='activity-directory-row';
+  const check=document.createElement('input');check.type='checkbox';check.checked=marked.has(String(o.id));
+  check.onchange=()=>mark([o],check.checked);
+  const content=document.createElement('span');
+  const name=document.createElement('b');name.textContent=o.name||o.label||o.asset||o.id;
+  const detail=document.createElement('small');
+  detail.textContent='ID: '+o.id+' · '+(o.type||o.layer||o.subtype||'asset');
+  content.append(name,detail);line.append(check,content);list.append(line);
+ }
+ const limit=document.createElement('div');limit.className='activity-help';
+ limit.textContent='Menampilkan '+showing.length+' dari '+matches.length+
+  ' hasil. Centang beberapa directory yang boleh berinteraksi; kemudian Enable + SAVE WORLD RULES.';
+ list.append(limit);
+ $('worldDirectoryMarkAll').onclick=()=>mark(showing,true);
+ $('worldDirectoryUnmarkAll').onclick=()=>mark(showing,false);
+}
 function detailForm(){
  const area=$('entityEditor'),r=selected();
  if(!r){area.innerHTML='<div class="activity-empty">Pilih atau buat World Entity rule.</div>';return;}
- const matches=entities(),match=P.matchWorld(r,matches),available=!!match;
+ const matches=entities().filter(o=>A.kindOf(o)===r.kind),match=P.matchWorld(r,matches,city()?.id),available=!!match;
  const opts=Array.from(new Set([r.query,...matches.map(v=>r.matchMode==='asset'?v.asset||v.assetId:
   r.matchMode==='id'?v.id:r.matchMode==='type'?v.type:v.name||v.label).filter(Boolean)]));
  const allActions=[...new Set([r.actionAsset,...catalog().activities.map(a=>a.actionAsset),
@@ -116,7 +164,15 @@ function detailForm(){
   '<p id="worldBindingStatus" class="activity-validate">'+(available?
     '✓ Match objek nyata: '+esc(match.name||match.asset||match.id):
     '⚠ Belum ada objek cocok di kota preview. Tidak akan muncul di gameplay.')+'</p></div>'+
-  '<div class="activity-fieldset"><h4>02 · OPERATION & FLOW</h4>'+
+  '<div class="activity-fieldset"><h4>02 · DIRECTORY SEMESTA / MARK INTERAKTIF</h4>'+
+  '<p class="activity-help">Pilih beberapa ID dari directory city yang boleh memakai rule ini. Tidak otomatis menandai seluruh bangunan, NPC atau asset. Marking disimpan per city.</p>'+
+  '<div class="activity-pair"><label>Cari Directory<input id="worldDirectorySearch" type="search" placeholder="Cari nama / ID / asset..."></label>'+
+  '<button id="worldDirectoryRefresh" type="button">↻ REFRESH SYNC SEMESTA</button></div>'+
+  '<p id="worldDirectoryCount" class="activity-help"></p>'+
+  '<div class="activity-pair"><button type="button" id="worldDirectoryMarkAll">✓ MARK HASIL TAMPIL</button>'+
+  '<button type="button" id="worldDirectoryUnmarkAll">− UNMARK HASIL TAMPIL</button></div>'+
+  '<div id="worldDirectoryList" class="activity-directory-list"></div></div>'+
+  '<div class="activity-fieldset"><h4>03 · OPERATION & FLOW</h4>'+
   '<label>Jenis interaksi<select id="worldOperation">'+options(
     r.kind==='building'?['enter','ambient','none']:
     r.kind==='npc'?['npc_quest','ambient','none']:['ambient','none'],r.operation,
@@ -149,7 +205,7 @@ function detailForm(){
  $('worldLabel').onchange=e=>patch({label:e.target.value},true);
  $('worldEntityType').onchange=e=>{
   const k=e.target.value;
-  patch({kind:k,operation:k==='building'?'enter':k==='npc'?'npc_quest':'ambient',enterable:k==='building'},true);
+  patch({kind:k,operation:k==='building'?'enter':k==='npc'?'npc_quest':'ambient',enterable:k==='building',targets:[]},true);
   kind=k;
  };
  $('worldMatchMode').onchange=e=>patch({matchMode:e.target.value,query:''},true);
@@ -159,6 +215,14 @@ function detailForm(){
  if($('worldActivity'))$('worldActivity').onchange=e=>patch({activityId:e.target.value});
  $('worldAction').onchange=e=>patch({actionAsset:e.target.value});
  $('worldDescription').onchange=e=>patch({description:e.target.value});
+ $('worldDirectorySearch').oninput=renderDirectoryPanel;
+ $('worldDirectoryRefresh').onclick=async()=>{
+  try{
+   const result=await root.JiwaContextBridge?.refreshDirectory?.();
+   render();status('DIRECTORY REFRESHED ✓ '+result.count+' objek dari '+result.name+'. Marking yang sudah dibuat tidak dihapus.',true);
+  }catch(e){status('REFRESH FAILED · '+e.message);}
+ };
+ renderDirectoryPanel();
  for(const el of area.querySelectorAll('[data-world-field]')){
   el.onchange=e=>{
    const key=e.target.dataset.worldField,n=Number(e.target.value);
