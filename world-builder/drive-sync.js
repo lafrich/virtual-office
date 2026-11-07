@@ -8,7 +8,7 @@ const CLIENT_ID="369223065433-idbuhhj6akuf2cmo6vpbiblkhu019csn.apps.googleuserco
 const SCOPE="https://www.googleapis.com/auth/drive.file";
 const API="https://www.googleapis.com/drive/v3/files",UPLOAD="https://www.googleapis.com/upload/drive/v3/files";
 const FOLDER="application/vnd.google-apps.folder",ROOT="Membangun",FORMAT="membangun-cloud-1";
-const APPS={semesta:{folder:"Semesta",kind:"city"},bangun:{folder:"Bangun Ruang",kind:"building"}};
+const APPS={semesta:{folder:"Semesta",kind:"city"},bangun:{folder:"Bangun Ruang",kind:"building"},jiwa:{folder:"Jiwa",kind:"activities"}};
 const KEY="membangun-google-client-id-v1";
 const ASSET_KINDS=new Set(["assetCatalog","assetBuilding","assetObject"]);
 const ASSET_FORMAT="semesta-asset-library-v1";
@@ -87,7 +87,7 @@ function filename(kind,id){return kind+"--"+encodeURIComponent(safeId(id))+".jso
 function validateRecord(app,kind,record){
  if(!APPS[app])throw Error("Unknown app");
  if(!record||typeof record!=="object")throw Error("Missing asset");
- if(!["city","building","object",...ASSET_KINDS].includes(kind))throw Error("Unsupported document kind");
+ if(!["city","building","object","activities",...ASSET_KINDS].includes(kind))throw Error("Unsupported document kind");
  if(app==="semesta"){
   if(kind==="city"){
    if(record.format!=="vl-city-draft-1"||!Array.isArray(record.document?.objects))throw Error("Invalid Semesta city");
@@ -104,6 +104,12 @@ function validateRecord(app,kind,record){
       !["sw","se","ne","nw"].every(d=>/^data:image\/png;base64,/.test(record.views?.[d]?.url||"")))
     throw Error("Invalid custom Pixel Creator object");
   }else throw Error("Semesta cannot store this kind of asset");
+ }else if(app==="jiwa"){
+  if(kind!=="activities"||record.id!=="global-game-activities"||
+     record.format!=="jiwa-activity-catalog-v1"||!Array.isArray(record.activities)||
+     record.activities.length>300||
+     record.activities.some(a=>!a||typeof a.id!=='string'||typeof a.category!=='string'))
+   throw Error("Invalid global Jiwa activities");
  }else if(app==="bangun"){
   if(kind==="assetCatalog"){
    if(record.format!=="bangun-ruang-asset-library-v1"||!Array.isArray(record.entries)||
@@ -143,7 +149,7 @@ async function save(app,kind,record,knownFile=null){
 async function load(file){
  if(!file?.id)throw Error("Select a Drive file");
  const payload=await(await request(API+"/"+encodeURIComponent(file.id)+"?alt=media")).json();
- if(payload?.format!==FORMAT||!APPS[payload.app]||!payload.id||!["city","building","object",...ASSET_KINDS].includes(payload.kind))
+ if(payload?.format!==FORMAT||!APPS[payload.app]||!payload.id||!["city","building","object","activities",...ASSET_KINDS].includes(payload.kind))
   throw Error("Unknown cloud format");
  validateRecord(payload.app,payload.kind,payload.record);
  if(payload.record.id!==payload.id)throw Error("Record identifier mismatch");
