@@ -79,6 +79,8 @@ function normalize(raw){
  // wages/jobs. Only published enabled activities can be executed by Semesta.
  base.worldEntities=(Array.isArray(source.worldEntities)?source.worldEntities:[])
   .slice(0,300).map(v=>PREMISES.worldRule(v)).filter(v=>v.enabled);
+ base.worldEntities=(Array.isArray(source.worldEntities)?source.worldEntities:[]).slice(0,300)
+  .map(PREMISES.worldRule).filter(r=>r.enabled===true);
  base.activities=(Array.isArray(source.activities)?source.activities:[]).slice(0,300)
   .filter(a=>a&&/^[a-z0-9_-]{1,64}$/.test(a.id)&&a.enabled===true)
   .map(a=>({
@@ -198,6 +200,26 @@ function doAction(config,previous,action,args={}){
    riskPercent:rule.riskPercent,statEffects:rule.statEffects,ingredients:[]};
   const invalid=PREMISES.violations(staged);
   if(invalid.length)return reject('Aturan '+rule.label+' tidak sesuai level: '+invalid[0].key);
+  if(s.experience<rule.minExp)return reject('Perlu EXP '+rule.minExp);
+  if(s.wallet<Math.max(0,-rule.moneyDelta))return reject('Uang tidak cukup');
+  if(rule.moneyDelta<0)spend(-rule.moneyDelta);
+  else if(rule.moneyDelta>0){s.wallet+=rule.moneyDelta;changes.push('uang +Rp'+rule.moneyDelta);}
+  clock(rule.durationMinutes);
+  for(const [key,amount] of Object.entries(rule.statEffects||{}))if(amount)stat(key,amount);
+  if(rule.riskPercent>0){
+   const roll=Number.isFinite(Number(args.riskRoll))?Number(args.riskRoll):Math.random();
+   if(roll<rule.riskPercent/100){
+    s.detained=true;s.detentionMinutes=Math.max(s.detentionMinutes,60);
+    changes.push('tertangkap akibat '+rule.label);
+   }
+  }
+  changes.push('aksi objek: '+rule.label);break;
+ }
+ case 'world_ambient': {
+  const rule=c.worldEntities.find(r=>r.id===String(args.ruleId||'')&&r.operation==='ambient');
+  if(!rule)return reject('Interaksi objek belum diaktifkan di Jiwa.');
+  const invalid=PREMISES.violations({...rule,ingredients:[]});
+  if(invalid.length)return reject('Aturan '+rule.label+' tidak sesuai batas tier: '+invalid[0].key);
   if(s.experience<rule.minExp)return reject('Perlu EXP '+rule.minExp);
   if(s.wallet<Math.max(0,-rule.moneyDelta))return reject('Uang tidak cukup');
   if(rule.moneyDelta<0)spend(-rule.moneyDelta);
