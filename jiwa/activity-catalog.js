@@ -5,6 +5,8 @@
 })(typeof window!=='undefined'?window:null,function(){
 'use strict';
 const KEY='jiwa-activities-global-v1',FORMAT='jiwa-activity-catalog-v1';
+const PREMISES=(typeof module!=='undefined'&&module.exports)?
+ require('./interaction-rules.js'):window.JiwaPremises;
 const CATEGORIES=[
  {id:'money',icon:'wallet',emoji:'💰',label:'Money',hint:'Kerja, mulung, jual beli'},
  {id:'energy',icon:'zap',emoji:'⚡',label:'Energy',hint:'Kopi, makan, tidur, snack'},
@@ -27,7 +29,8 @@ function activity(raw={}){
  const category=CATEGORY_IDS.includes(raw.category)?raw.category:'money';
  const stats=raw.statEffects||{},required=raw.requirements||{};
  return {
-  id,category,label:str(raw.label||'Aktivitas baru',96),
+  id,category,tier:PREMISES?.cfg(category,raw.tier||PREMISES.infer(category,raw)).tier.id||'sepele',
+  label:str(raw.label||'Aktivitas baru',96),
   premise:str(raw.premise||'Apa yang sedang dialami karakter?',600),
   steps:str(raw.steps||'Dekati lokasi → tekan Action → lakukan aktivitas → terima hasil.',850),
   buildingQuery:str(raw.buildingQuery,110),objectId:str(raw.objectId,110),
@@ -88,7 +91,8 @@ function seed(){
  const steal=entries.find(x=>x.id==='mencuri');steal.riskPercent=30;steal.detentionMinutes=60;
  const prison=entries.find(x=>x.id==='penjara');prison.detentionMinutes=180;prison.punishment='penjara';
 
- return {id:'global-game-activities',format:FORMAT,version:1,updatedAt:null,activities:entries};
+ return {id:'global-game-activities',format:FORMAT,version:2,updatedAt:null,activities:entries,
+   worldEntities:PREMISES.seedWorld()};
 }
 function normalize(raw){
  const source=raw&&typeof raw==='object'?raw:{};
@@ -97,8 +101,14 @@ function normalize(raw){
  for(const r of existing.slice(0,300)){
   const a=activity(r);if(seen.has(a.id))continue;seen.add(a.id);activities.push(a);
  }
- return {id:'global-game-activities',format:FORMAT,version:1,
-  updatedAt:typeof source.updatedAt==='string'?source.updatedAt:null,activities};
+ const seenEntities=new Set(),worldEntities=[];
+ for(const item of (Array.isArray(source.worldEntities)?source.worldEntities:PREMISES.seedWorld()).slice(0,300)){
+  const rule=PREMISES.worldRule(item);if(seenEntities.has(rule.id))continue;
+  seenEntities.add(rule.id);worldEntities.push(rule);
+ }
+ return {id:'global-game-activities',format:FORMAT,version:2,
+  updatedAt:typeof source.updatedAt==='string'?source.updatedAt:null,
+  activities,worldEntities};
 }
 function readLocal(storage){
  try{const raw=JSON.parse(storage?.getItem(KEY)||'null');return normalize(raw||seed());}
@@ -109,7 +119,7 @@ function saveLocal(raw,storage){
  if(!storage?.setItem)throw Error('Storage tidak tersedia');
  storage.setItem(KEY,JSON.stringify(cfg));
  const check=readLocal(storage);
- if(check.updatedAt!==cfg.updatedAt||check.activities.length!==cfg.activities.length)
+ if(check.updatedAt!==cfg.updatedAt||check.activities.length!==cfg.activities.length||check.worldEntities.length!==cfg.worldEntities.length)
   throw Error('Gagal memverifikasi hasil save aktivitas');
  return cfg;
 }
@@ -128,7 +138,9 @@ function validation(a,objects=[]){
  if(!a?.buildingQuery&&!a?.objectId)errors.push('Pilih bangunan/asset target');
  if(!a?.actionAsset)errors.push('Pilih Action Asset Mahluk Hidup');
  if(!matchBuilding(a,objects))errors.push('Bangunan belum ditemukan di map aktif');
+ const limit=PREMISES.violations(a);
+ for(const f of limit)errors.push('Tier '+a.tier+' membatasi '+f.key+' ke '+f.min+'–'+f.max+' (sekarang '+f.value+')');
  return errors;
 }
-return Object.freeze({KEY,FORMAT,CATEGORIES,STAT_KEYS,STAT_ZERO,activity,seed,normalize,readLocal,saveLocal,matchBuilding,validation});
+return Object.freeze({KEY,FORMAT,CATEGORIES,STAT_KEYS,STAT_ZERO,PREMISES,activity,seed,normalize,readLocal,saveLocal,matchBuilding,validation});
 });
