@@ -137,6 +137,8 @@ test('Nokia cannot invent a balance from unowned purchases, and Jiwa owns produc
 });
 test('Nokia screen remains open across HUD redraws and active game rules never show demo wallet',()=>{
  assert.match(hudSource,/if\(!root\.VLNokiaPlay\.isOpen\?\.\(\)\)root\.VLNokiaPlay\.open\(\)/);
+ assert.match(hudSource,/if\(file==='phone_ellen\.js'&&root\?\.VLPhoneEllen\?\.setGameProvider\)continue/);
+ assert.match(hudSource,/if\(file==='nokia-play\.js'&&root\?\.VLNokiaPlay\?\.open\)continue/);
  assert.match(phoneSource,/saldo:0,/);
  assert.match(phoneSource,/liveData\(\)\?\.wallet/);
  assert.match(phoneSource,/transactions/);
