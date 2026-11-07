@@ -56,46 +56,6 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
 @media(max-width:480px){.jiwa-actor-picker{grid-template-columns:minmax(0,1fr) 75px}.jiwa-actor-picker canvas{width:75px}}
 .life-table-scroll{width:100%;overflow:auto}.life-table{width:100%;border-collapse:collapse;min-width:615px;background:#fff}.life-table th,.life-table td{border:1px solid #c4ced3;padding:7px;text-align:left;font-size:10px}.life-table th{background:#dce8f7}.life-table input[type=number]{min-width:50px;width:95px}.life-table input[type=checkbox]{flex:none}.life-preview-toolbar{display:flex;gap:6px;align-items:end;flex-wrap:wrap;margin:8px 0}.life-preview-toolbar label{min-width:140px;flex:1}.life-preview-toolbar button{flex:none}.life-status{display:flex;flex-wrap:wrap;gap:6px;padding:9px;background:#e9f1f6;border:1px solid #b4c4cc}.life-status span{padding:4px 8px;border:1px solid #bdcbd4;background:white}#lifeCanvas{display:block;width:100%;height:auto;max-height:410px;aspect-ratio:860/410;border:2px solid #56748e;background:#cfdfe7;image-rendering:pixelated;touch-action:pan-y}#lifeFeedback{padding:8px;min-height:30px;background:#f6f0d9}.tabs{flex-wrap:wrap}@media(max-width:760px){.tabs button{min-width:78px}}
 
-/* JIWA visual HUD editor / XP chrome */
-.jui-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:12px 0}
-.jui-toolbar span{font-size:10px;color:#566b7b;font-weight:bold;margin-left:8px}
-.jui-toolbar button{font-size:11px;padding:6px 9px}
-.jui-workspace{display:grid;grid-template-columns:minmax(0,1fr) 225px;gap:12px;align-items:start}
-.jui-canvas-scroll{min-width:0;display:flex;flex-direction:column;align-items:center}
-.jui-canvas-scroll .subtle{align-self:stretch;text-align:center}
-.jui-stage{position:relative;width:min(100%,850px);aspect-ratio:1280/720;border:3px ridge #8b9fb4;box-shadow:0 2px 14px #1e384c34;background:#becfdc;overflow:hidden;user-select:none;touch-action:none}
-.jui-stage[data-profile="phone"]{width:min(100%,310px);aspect-ratio:390/844}
-.jui-map-surface{position:absolute;inset:0;background:repeating-linear-gradient(25deg,#a0b4ae 0 24px,#a9b8a3 24px 46px);opacity:.7;overflow:hidden;pointer-events:none}
-.jui-map-surface>span{position:absolute;top:49%;left:15%;font-size:clamp(7px,1.1vw,12px);color:#314c5b;letter-spacing:2px;font-weight:bold}
-.jui-road{position:absolute;width:130%;height:15%;left:-12%;top:44%;background:#6a7980;transform:rotate(-22deg);border-top:5px solid #aab3b2;border-bottom:5px solid #aab3b2}
-.jui-block{position:absolute;width:17%;height:27%;background:#798d80;border:2px solid #cad7cb;transform:rotate(-22deg)}
-.jui-block.b1{top:11%;left:14%}.jui-block.b2{bottom:12%;right:17%}.jui-block.b3{top:12%;right:9%}
-.jui-node-layer{position:absolute;inset:0;pointer-events:none}
-.jui-node{position:absolute;box-sizing:border-box;border:1.5px dashed #405c80;background:#d4dfedaa;color:#142c47;cursor:move;pointer-events:auto;overflow:visible;touch-action:none;min-width:8px;min-height:8px}
-.jui-node.selected{border:2px solid #eec35c;outline:1px solid #273f60;z-index:20;box-shadow:0 0 0 2px #172c4260}
-.jui-node-caption{position:absolute;left:0;top:0;transform:translateY(-100%);background:#103e78;color:white;white-space:nowrap;font-size:9px;padding:2px 4px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-.jui-node-mock{width:100%;height:100%;overflow:hidden;pointer-events:none;display:flex;flex-direction:column;font-size:clamp(7px,1vw,11px)}
-.jui-resizer{position:absolute;right:-5px;bottom:-5px;width:13px;height:13px;background:#f7de80;border:2px solid #173c72;cursor:nwse-resize;z-index:25}
-.jui-title{background:linear-gradient(90deg,#16449d,#76a7dd);color:white;padding:4px;font-weight:bold;white-space:nowrap}
-.jui-mock-body{background:#eee;padding:5px;height:100%;overflow:hidden}
-.jui-mock-body hr{margin:3px 0}.jui-meter{font-size:9px;margin:3px 0;white-space:nowrap}
-.jui-dock{background:#314c77dd;color:white;border-radius:18px;display:flex;align-items:center;justify-content:space-around;width:100%;height:100%;padding:4px;white-space:nowrap}
-.jui-money{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:white;background:#273e5b;border-radius:13px;font-size:11px;font-weight:bold}.jui-hp-btn,.jui-bag-btn{width:100%;height:100%;border-radius:50%;border:2px solid #a1c2e0;background:linear-gradient(130deg,#d7edff,#3169a9);color:#0b2d63;font-weight:bold;display:flex;align-items:center;justify-content:center}
-.jui-orb{border-radius:50%;width:100%;height:100%;background:radial-gradient(circle at 35% 27%,#d1efc0,#34814a 65%,#17402a);border:3px solid #5fa963;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;box-shadow:0 0 3px #000}
-.jui-run{background:#49658b;color:white;border-radius:25px;padding:6px;text-align:center;font-weight:bold}
-.jui-phone{height:100%;width:100%;background:#333a40;border:4px solid #131f28;border-radius:12% / 7%;padding:9px 5px;color:#dfe7e5;text-align:center;display:flex;flex-direction:column}
-.jui-nokiabrand{font-weight:bold;letter-spacing:2px}.jui-lcd{background:#9ab47d;color:#162817;border:3px inset #556f54;flex:1;font-weight:bold;padding:3px;font-size:11px}.jui-lcd small{display:block;text-align:left;font-size:10px;line-height:2}.jui-keys{font-size:12px;padding:5px}.jui-keys div{margin-top:7px}
-.jui-bag{background:#f0f0ea;flex:1;padding:12px;font-size:18px;letter-spacing:5px}.jui-toast{padding:5px;background:#fff8da;border:1px solid #987}
-.jui-side{border:1px solid #abbcca;background:#eef2f5;padding:10px;display:flex;flex-direction:column;gap:8px}
-.jui-side-title{background:linear-gradient(90deg,#244b92,#6f91ca);color:white;font-size:10px;padding:5px;font-weight:bold}
-.jui-elements{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.jui-elements button{font-size:10px;padding:5px 3px;overflow:hidden}
-#juiInspector{font-size:11px}#juiInspector h4{margin:2px 0}#juiInspector p{font-size:10px;color:#637280}
-#juiInspector label{display:block;margin:9px 0 4px}#juiInspector label input,#juiInspector label select{display:block;width:100%;margin:3px 0;min-width:0}
-#juiInspector label input[type=range]{width:100%}.jui-numbers{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.jui-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px}.jui-actions #juiOpenSemesta{grid-column:1/-1}.jui-actions button{font-size:10px;padding:7px 2px}
-.jui-stage[data-profile=phone] .jui-node-caption{font-size:8px}.jui-stage[data-profile=phone] .jui-node-mock{font-size:8px}
-@media(max-width:950px){.jui-workspace{grid-template-columns:minmax(0,1fr)}.jui-side{display:block}.jui-elements{grid-template-columns:repeat(4,minmax(0,1fr))}.jui-actions{margin:10px 0}}
-
 /* Jiwa full-viewport workspace, matching the current fullscreen Semesta app.
    All scrolling belongs to the individual editor panes, not the document. */
 html,body{width:100%;height:100%;min-height:0;overflow:hidden}
@@ -159,25 +119,6 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 }
 
 
-/* UI Editor pixel grid / center guides. All distances are design-space px. */
-.jui-gridbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:7px 8px;margin:0 0 10px;
- background:#e1eaf5;border:1px solid #a7b7cb;box-shadow:inset 1px 1px #fff;font:11px Tahoma,Arial,sans-serif}
-.jui-gridbar button{white-space:nowrap;min-height:29px;font-size:11px}
-.jui-gridbar label{display:inline-flex;align-items:center;gap:4px;margin:0;font-size:11px}
-.jui-gridbar input[type=checkbox]{height:15px;width:15px;margin:0;accent-color:#215da8}
-.jui-gridbar .jui-grid-size select{width:auto;min-width:82px;margin:0;height:29px;padding:2px 5px}
-.jui-grid-spacer{flex:1;min-width:0}
-.jui-grid{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:.65;
- background-image:linear-gradient(to right,rgba(32,60,91,.28) 1px,transparent 1px),
- linear-gradient(to bottom,rgba(32,60,91,.28) 1px,transparent 1px);
- background-repeat:repeat;box-sizing:border-box}
-.jui-grid[hidden]{display:none!important}
-.jui-center-guide{position:absolute;z-index:4;pointer-events:none;opacity:.85}
-.jui-guide-x{top:0;bottom:0;left:50%;width:1px;background:#f8db65;box-shadow:1px 0 #1b4a8f}
-.jui-guide-y{left:0;right:0;top:50%;height:1px;background:#f8db65;box-shadow:0 1px #1b4a8f}
-.jui-node-layer{z-index:5}
-@media(max-width:760px){.jui-gridbar{gap:5px}.jui-gridbar button{flex:1;font-size:10px;min-height:31px}.jui-grid-spacer{flex-basis:100%;width:100%}}
-.jui-global-tag{display:inline-block;margin-left:8px;padding:3px 7px;background:#23558d;color:#fff;font:700 10px "Courier New",monospace;vertical-align:middle;border:1px solid #092b63}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -197,48 +138,9 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
    <div class="system-links"><button id="toSystems">⚙ GAME SYSTEMS</button><button id="toTest">▶ PLAY TEST</button></div>
   </aside>
   <section class="middle">
-   <div class="tabs"><button class="active" data-tab="map">◈ WORLD</button><button data-tab="context">◉ CONTEXT</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button><button data-tab="play">🎮 GAME PREVIEW</button><button data-tab="ui">▣ UI EDITOR</button></div>
+   <div class="tabs"><button class="active" data-tab="map">◈ WORLD</button><button data-tab="context">◉ CONTEXT</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button><button data-tab="play">🎮 GAME PREVIEW</button></div>
    <div id="mapView" class="view"><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
-   <div id="uiView" class="view" hidden><div class="viewport-scroll">
- <section class="card" id="juiEditor">
-  <h3>UI EDITOR · GLOBAL GAME UI <span class="jui-global-tag">ALL CITIES</span></h3>
-  <p class="subtle">Satu UI untuk seluruh game, tidak mengikuti kota yang dipilih di atas. Layout Desktop dan Phone independen. Nokia asli tetap. Edit dan klik SAVE &amp; SYNC agar dipakai di semua kota Semesta pada browser ini.</p>
-  <div class="jui-toolbar">
-   <span>Perangkat</span>
-   <button id="juiDesktop" class="primary" type="button">🖥 Desktop 1280×720</button>
-   <button id="juiPhone" type="button">▯ Phone 390×844</button>
-   <span>Preview</span>
-   <button id="juiView_game" class="primary" type="button">Gameplay</button>
-   <button id="juiView_phone" type="button">Nokia</button>
-   <button id="juiView_bag" type="button">Tas</button>
-  </div>
-  <div class="jui-gridbar" aria-label="Layout grid and alignment">
-   <label class="jui-grid-toggle"><input id="juiShowGrid" type="checkbox" checked> Show Grid</label>
-   <label class="jui-grid-toggle"><input id="juiSnapGrid" type="checkbox" checked> Snap to Grid</label>
-   <label class="jui-grid-size">Grid <select id="juiGridSize" aria-label="Grid spacing">
-    <option value="8">8 px</option><option value="16" selected>16 px</option><option value="24">24 px</option><option value="32">32 px</option><option value="48">48 px</option>
-   </select></label>
-   <span class="jui-grid-spacer"></span>
-   <button id="juiAlignHorizontal" type="button" title="Align selected element to horizontal center of gameplay screen">⇔ Center X</button>
-   <button id="juiAlignVertical" type="button" title="Align selected element to vertical center of gameplay screen">⇕ Center Y</button>
-   <button id="juiAlignBoth" type="button" title="Align both axes to center">⊞ Center Both</button>
-  </div>
-  <div class="jui-workspace">
-   <div class="jui-canvas-scroll"><div id="juiStage" class="jui-stage" data-profile="desktop" aria-label="Interactive drag and resize gameplay HUD preview">
-    <div class="jui-map-surface"><i class="jui-road"></i><i class="jui-block b1"></i><i class="jui-block b2"></i><i class="jui-block b3"></i><span>SEMESTA · UI PREVIEW</span></div>
-    <div id="juiGrid" class="jui-grid" aria-hidden="true"></div>
-    <div class="jui-center-guide jui-guide-x" aria-hidden="true"></div>
-    <div class="jui-center-guide jui-guide-y" aria-hidden="true"></div>
-    <div id="juiNodes" class="jui-node-layer"></div>
-   </div><p class="subtle">Klik elemen untuk select · drag untuk pindah · tarik kotak kecil di kanan bawah untuk resize.</p></div>
-   <aside class="jui-side"><div class="jui-side-title">ELEMENTS</div><div id="juiElements" class="jui-elements"></div>
-    <div class="jui-side-title">PROPERTIES</div><div id="juiInspector"></div>
-    <div class="jui-actions"><button id="juiReset" type="button">↶ RESET PROFIL</button><button id="juiSave" class="primary" type="button">💾 SAVE GLOBAL UI &amp; SYNC</button><button id="juiOpenSemesta" type="button">▶ TEST SEMESTA</button></div>
-    <div id="juiNotice" class="subtle" role="status" aria-live="polite">GLOBAL GAME UI · Berlaku untuk semua kota. Klik SAVE &amp; SYNC untuk menyimpan.</div>
-   </aside>
-  </div>
- </section></div></div>
- <div id="contextView" class="view" hidden><div class="viewport-scroll" id="contextEditor"><div class="card">Loading contextual foundation...</div></div></div>
+   <div id="contextView" class="view" hidden><div class="viewport-scroll" id="contextEditor"><div class="card">Loading contextual foundation...</div></div></div>
    <div id="playView" class="view" hidden><div class="viewport-scroll"><div id="gamePreview"></div><div id="lifeEditor"></div></div></div>
    <div id="systemsView" class="view" hidden><div class="viewport-scroll">
     <div class="card"><h3>WORLD SYSTEMS</h3><p class="subtle">Nilai awal untuk Play Test JIWA. Tidak mengubah game online atau City Draft.</p><div class="pair"><label>Start Wallet (Rp)<input id="sys-wallet" type="number" min="0" step="1000"></label><label>Start Time (HH:MM)<input id="sys-time" type="time"></label></div><div class="pair"><label>Fullness<input id="sys-fullness" type="number" min="0" max="100"></label><label>Energy<input id="sys-energy" type="number" min="0" max="100"></label><label>Hygiene<input id="sys-hygiene" type="number" min="0" max="100"></label><label>Bladder<input id="sys-bladder" type="number" min="0" max="100"></label></div></div>
@@ -302,5 +204,4 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 <script src="./context-editor.js"></script>
 <script src="./mechanics-panel.js"></script>
 <script src="./life-editor.js"></script>
-<script src="./ui-layout-editor.js?v=global-game-ui-v2-precision-20261108"></script>
 </body></html>
