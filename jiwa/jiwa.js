@@ -13,6 +13,7 @@ const EFFECTS=['wallet_delta','stat_fullness','stat_energy','stat_hygiene','stat
 const TRIGGERS=['interact','enter','proximity','job_complete','time'];
 const STAT=['fullness','energy','hygiene','bladder'];
 const JF=window.JiwaFoundation;
+const JLE=window.JiwaLifeEconomy;
 const JG=window.JiwaGameplay||{defaultGameplay:()=>({}),normalizeGameplay:x=>x||{}};
 const oldCharacter=o=>['avatar','npc','pedestrian','crowd','quest_npc'].includes(o?.type)||
  o?.layer==='character';
@@ -95,7 +96,7 @@ function currentTemplate(o){return binding(o)?.template||templateFor(o);}
 function rules(o){return binding(o)?.rules||fromTemplate(currentTemplate(o));}
 function ensureBinding(){const o=selectedObject();if(!o)return null;if(!state.project.bindings[o.id])state.project.bindings[o.id]={template:templateFor(o),rules:fromTemplate(templateFor(o))};return state.project.bindings[o.id];}
 function selectedObject(){return visibleEntities().find(o=>o.id===state.selected)||null;}
-function newProject(id){return {version:2,cityId:id,updatedAt:null,systems:defaults(),bindings:{},templates:{},foundation:JF.defaultFoundation(),gameplay:JG.defaultGameplay()};}
+function newProject(id){return {version:2,cityId:id,updatedAt:null,systems:defaults(),bindings:{},templates:{},foundation:JF.defaultFoundation(),gameplay:JG.defaultGameplay(),lifeEconomy:JLE.defaults()};}
 function dbOpen(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window))return reject(Error('IndexedDB unavailable'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(TABLE))r.result.createObjectStore(TABLE,{keyPath:'cityId'});};r.onerror=()=>reject(r.error);r.onsuccess=()=>resolve(r.result);});}
 async function dbOperation(op,val){
  const db=await dbOpen();return new Promise((resolve,reject)=>{const t=db.transaction(TABLE,op==='get'?'readonly':'readwrite'),r=t.objectStore(TABLE)[op](val);r.onerror=()=>reject(r.error);r.onsuccess=()=>resolve(r.result);t.oncomplete=()=>db.close();});
@@ -130,6 +131,7 @@ function validateProject(input,cityId){
  }
  result.foundation=JF.normalizeFoundation(input.foundation);
  result.gameplay=JG.normalizeGameplay(input.gameplay);
+ result.lifeEconomy=JLE.normalize(input.lifeEconomy);
  return result;
 }
 async function save(){
@@ -170,6 +172,7 @@ async function loadCity(id){
   state.selected=(params.get('city')===id&&params.get('object')&&shown.some(o=>o.id===params.get('object')))?params.get('object'):(state.selected&&shown.some(o=>o.id===state.selected)?state.selected:shown[0]?.id||null);
   state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(visibleEntities().length);
   window.dispatchEvent(new Event('jiwa:context:render'));
+  window.dispatchEvent(new Event('jiwa:life:render'));
   $('mapInfo').textContent=record.name+' · '+visibleEntities().length+' OBJECTS';
   notice('City loaded: '+record.name+' · edit mechanics only, placement read-only');
  }catch(e){emptyCity('Load failed: '+e.message);}
@@ -242,11 +245,12 @@ function renderSystems(){
 function tab(which){
  state.tab=which;
  for(const b of document.querySelectorAll('[data-tab]'))b.classList.toggle('active',b.dataset.tab===which);
- for(const name of ['map','systems','test','context'])$(name+'View').hidden=which!==name;
+ for(const name of ['map','systems','test','context','play'])$(name+'View').hidden=which!==name;
  if(which==='map')resizeCanvas();
  if(which==='systems')renderSystems();
  if(which==='test')renderTest();
  if(which==='context')window.dispatchEvent(new Event('jiwa:context:render'));
+ if(which==='play')window.dispatchEvent(new Event('jiwa:life:render'));
 }
 function resetTest(){
  const s=state.project?.systems||defaults();state.test=JF.newTestState(s,state.project?.foundation);state.testLines=['Sandbox reset · player wallet Rp '+Number(s.wallet||0).toLocaleString('id-ID')];
@@ -442,6 +446,15 @@ window.JiwaContextBridge=Object.freeze({
   tab('test');return result;
  },
  sandbox:()=>state.test,
+ city:()=>state.record,
+ entities:()=>visibleEntities(),
+ lifeRun:(action,payload)=>{
+   if(!state.project||!state.test)return {ok:false,reason:'City not loaded'};
+   const result=JLE.run(state.project.lifeEconomy,state.test,action,payload||{});
+   if(result.ok)state.test=result.state;
+   logTest((result.ok?'OK · ':'BLOCKED · ')+action+' · '+(result.ok?result.changes.join(' · '):result.reason));
+   return result;
+  },
  nextDay:()=>{if(!state.test)return;state.test=JF.nextDay(state.test);logTest('New game day '+state.test.gameDay+' · daily quotas reset');tab('test');},
  reset:resetTest,
  navigate:tab
