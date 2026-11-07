@@ -145,6 +145,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .file-thumb .v6b-emotion-crop{transform:scale(.33)}
 .art .v6b-emotion-crop{transform:scale(2.7)}
 @media(max-width:700px){.art .v6b-emotion-crop{transform:scale(1.45)}}
+
+/* Launcher preview legibility: match other native sprites' light paper background. */
+.file-thumb.v6b-native-asset,.art.v6b-native-asset{background:#f8f6f0!important}
+.art.v6b-native-asset{background:transparent!important}
+.art .v6b-native-preview{background:transparent!important;filter:none!important}
+.art .v6b-native-preview[src$=".gif"]{mix-blend-mode:normal}
+.file-list{grid-auto-flow:row}
 </style>
 </head>
 <body>
@@ -207,17 +214,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <div class="panel-heading"><strong>FILES</strong><small>05</small></div>
 <div class="file-list" role="group" aria-label="Pilih aplikasi">
 <button class="file active" data-app="mahluk" aria-pressed="true"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP.EXE</span><span class="file-kind">MAHLUK HIDUP</span></span></button>
-<button class="file" data-app="emotion" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-emotion"/></svg></span><span class="file-txt"><span class="file-name">EMOSI.EXE</span><span class="file-kind">UNIVERSAL / FRAME EDITOR</span></span></button>
 <button class="file" data-app="bangun" aria-pressed="false"><span class="file-thumb"><img class="warteg-thumb" alt="Warteg Kharisma Bahari" hidden></span><span class="file-txt"><span class="file-name">BANGUN RUANG.EXE</span><span class="file-kind">BUILDING STUDIO</span></span></button>
 <button class="file" data-app="semesta" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-semesta"/></svg></span><span class="file-txt"><span class="file-name">SEMESTA.EXE</span><span class="file-kind">WORLD BUILDER</span></span></button><button class="file" data-app="jiwa" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-jiwa"/></svg></span><span class="file-txt"><span class="file-name">JIWA.EXE</span><span class="file-kind">MECHANICS STUDIO</span></span></button>
 </div>
 <div class="file-hint">DOUBLE CLICK TO OPEN</div>
 </aside>
 <section class="canvas-panel" aria-label="Preview">
-<div class="canvas-header"><strong>PREVIEW</strong><span>1 / 5</span></div>
+<div class="canvas-header"><strong>PREVIEW</strong><span>1 / 4</span></div>
 <div class="canvas-space" id="canvas">
 <div class="art active" data-art="mahluk"><svg role="img" aria-label="Mahluk Hidup 2.0 modular pixel character"><use href="#icon-mahluk"/></svg></div>
-<div class="art" data-art="emotion"><svg role="img" aria-label="Emosi.exe universal facial animation editor"><use href="#icon-emotion"/></svg></div>
 <div class="art" data-art="bangun"><img class="warteg-thumb" role="img" alt="Warteg Kharisma Bahari — aset bangunan isometrik dari Bangun Ruang" hidden></div>
 <div class="art" data-art="semesta"><svg role="img" aria-label="Pixel art isometric world"><use href="#icon-semesta"/></svg></div><div class="art" data-art="jiwa"><svg role="img" aria-label="Pixel-art node based mechanics editor"><use href="#icon-jiwa"/></svg></div>
 <div class="canvas-corner">MEMBANGUN® / STUDIO</div>
@@ -261,7 +266,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <header class="titlebar"><div class="window-icon">✳</div><div class="window-title"><strong>LINK SETTINGS</strong></div></header>
 <form class="modal-body" id="linkForm">
 <label>MAHLUK HIDUP<input id="url-mahluk" type="url" placeholder="https://..."></label>
-<label>EMOSI.EXE<input id="url-emotion" type="url" placeholder="https://..."></label>
 <label>BANGUN RUANG<input id="url-bangun" type="url" placeholder="https://..."></label>
 <label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label><label>JIWA<input id="url-jiwa" type="url" placeholder="https://..."></label>
 <div class="modal-error" id="urlError" role="alert"></div>
@@ -290,12 +294,11 @@ const $=id=>document.getElementById(id);
   });
  }catch(error){console.warn('Warteg preview unavailable.',error);}
 })();
-const ids=['mahluk','emotion','bangun','semesta','jiwa'];
+const ids=['mahluk','bangun','semesta','jiwa'];
 // Deep links only select a program; opening it remains a deliberate user action.
 const requestedApp=new URLSearchParams(location.search).get('app');
 const data={
 mahluk:{name:'MAHLUK HIDUP.EXE',type:'MAHLUK HIDUP',desc:'Satu aplikasi: Emosi, Character, Action dan Animation. Pixel Editor tetap lengkap, termasuk empat arah, frame timeline dan sinkronisasi Drive.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/mahluk-hidup.html'},
-emotion:{name:'EMOSI.EXE',type:'FACIAL ANIMATION',desc:'Shortcut ke tab EMOSI di MAHLUK HIDUP.EXE. Database emosi, lip-sync dialog dan Pixel Editor aslinya tetap utuh.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/mahluk-hidup.html?tab=emotion'},
 bangun:{name:'BANGUN RUANG.EXE',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
 semesta:{name:'SEMESTA.EXE',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'},jiwa:{name:'JIWA.EXE',type:'MECHANICS',desc:'Atur rules dan Play Test dari kota Semesta.',url:'https://lafrich.github.io/virtual-office/jiwa/'}
 };
@@ -363,6 +366,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=t
 render();
 })();
 </script>
-<script src="./v6b-thumbnails.js?v=native-20261108"></script>
+<script src="./v6b-thumbnails.js?v=launcher-four-20261108"></script>
 </body>
 </html>
