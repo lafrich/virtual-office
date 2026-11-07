@@ -32,6 +32,7 @@ function activity(raw={}){
   id,category,tier:PREMISES?.cfg(category,raw.tier||PREMISES.infer(category,raw)).tier.id||'sepele',
   label:str(raw.label||'Aktivitas baru',96),
   premise:str(raw.premise||'Apa yang sedang dialami karakter?',600),
+  flowPattern:['tap','hold','talk','buy','sell','collect','enter','craft'].includes(raw.flowPattern)?raw.flowPattern:'tap',
   steps:str(raw.steps||'Dekati lokasi → tekan Action → lakukan aktivitas → terima hasil.',850),
   buildingQuery:str(raw.buildingQuery,110),objectId:str(raw.objectId,110),
   actionAsset:str(raw.actionAsset,110),actionSource:'mahluk-hidup',
