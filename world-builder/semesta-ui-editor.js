@@ -24,18 +24,35 @@ const cap=(v,a,b)=>Math.max(a,Math.min(b,v));
 const valid=n=>Number.isFinite(Number(n));
 const sn=n=>grid.snap?Math.round(n/grid.size)*grid.size:n;
 let active=false,draft=null,selected='action',drag=null,overlay=null,raf=0,lastStamp=0;
-let staleTimeout=0,dirty=false,profile='desktop';
-const hud=()=>root.SemestaPlay?.hud?.()||null;
-const host=()=>$('vlPlayHud');
+let dirty=false,profile='desktop',externalDraft=null,previewFrame=null,previewFrameReady=false;
+const onlySelected={desktop:false,phone:true};
 const play=()=>root.SemestaPlay?.gameplay?.()||null;
+function environment(){
+ const frame=$('semestaDeviceFrame'),stage=$('semestaDeviceStage');
+ const phone=!!frame&&!!stage&&!stage.hidden&&root.SemestaPlay?.devicePref?.().mode==='phone';
+ if(!phone)return {phone:false,doc:document,win:root,frame:null,
+  host:$('vlPlayHud'),scaleX:1,scaleY:1};
+ let doc=null,win=null;
+ try{doc=frame.contentDocument;win=frame.contentWindow;}catch(_e){}
+ const rect=frame.getBoundingClientRect();
+ return {phone:true,doc,win,frame,host:doc?.getElementById('vlPlayHud')||null,
+  scaleX:rect.width/Math.max(1,frame.clientWidth||parseFloat(frame.style.width)||390),
+  scaleY:rect.height/Math.max(1,frame.clientHeight||parseFloat(frame.style.height)||844)};
+}
+const hud=()=>environment().win?.SemestaPlay?.hud?.()||null;
+const host=()=>environment().host;
 const currentLayout=()=>HL.resolveSavedLayout(null,localStorage)?.layout||HL.defaults();
 const currentSlot=()=>draft?.[profile]?.[selected]||null;
 const status=(message,success=false)=>{
  const el=$('suiStatus');if(!el)return;el.textContent=message;el.dataset.success=success?'true':'false';
 };
-function visibleElement(id){
+const GHOST_SIZES={lifePanel:[275,200],money:[84,30],hpButton:[44,44],
+ bagButton:[44,44],phone:[182,320],bag:[225,245],action:[70,70],
+ run:[66,44],needs:[155,80],toast:[192,42],dock:[255,65]};
+function visibleElement(id,env=environment()){
+ if(!env.doc)return null;
  for(const selector of HL.SELECTORS[id]||[]){
-  const el=document.querySelector(selector);
+  const el=env.doc.querySelector(selector);
   if(!el||el.hidden||!el.isConnected)continue;
   if(id==='bag'&&el.id==='ptWindow'&&el.dataset.kind!=='bag')continue;
   if(id==='phone'&&el.id==='ptWindow'&&el.dataset.kind!=='phone'&&!el.querySelector('.vs-nk'))continue;
@@ -46,19 +63,41 @@ function visibleElement(id){
  return null;
 }
 function geometry(id){
- const found=visibleElement(id);
- if(!found||!host())return null;
- const stage=host().getBoundingClientRect();
- return {el:found.el,x:found.rect.left-stage.left,y:found.rect.top-stage.top,
-  w:found.rect.width,h:found.rect.height,stage};
+ const env=environment(),h=env.host;
+ if(!h)return null;
+ const found=visibleElement(id,env),stage=h.getBoundingClientRect(),wrap=$('canvas-wrap').getBoundingClientRect();
+ let lx,ly,lw,lh;
+ if(found){
+  lx=found.rect.left-stage.left;ly=found.rect.top-stage.top;
+  lw=found.rect.width;lh=found.rect.height;
+ }else{
+  // Not every HUD is visible during play (legacy Needs, collapsed tips,
+  // closed popups). The selected item still has a drag/resize handle.
+  const slot=draft?.[profile]?.[id];
+  if(!slot||id!==selected)return null;
+  const [bw,bh]=GHOST_SIZES[id]||[80,56];
+  lw=bw*slot.scale;lh=bh*slot.scale;
+  const [v,u]=slot.anchor.split('-');
+  lx=u==='right'?stage.width-lw-slot.x:u==='center'?(stage.width-lw)/2+slot.x:slot.x;
+  ly=v==='bottom'?stage.height-lh-slot.y:v==='center'?(stage.height-lh)/2+slot.y:slot.y;
+ }
+ const screenLeft=stage.left+lx,screenTop=stage.top+ly;
+ const scaleX=env.phone?env.scaleX:1,scaleY=env.phone?env.scaleY:1;
+ const outerX=env.phone?env.frame.getBoundingClientRect().left+screenLeft*scaleX:screenLeft;
+ const outerY=env.phone?env.frame.getBoundingClientRect().top+screenTop*scaleY:screenTop;
+ return {el:found?.el||null,ghost:!found,
+  x:outerX-wrap.left,y:outerY-wrap.top,w:lw*scaleX,h:lh*scaleY,
+  logical:{x:lx,y:ly,w:lw,h:lh,stageW:stage.width,stageH:stage.height},
+  scaleX,scaleY,stage};
 }
 function openPopupFor(id){
  const h=hud();
+ if(!h)return;
  if(id==='phone'||id==='bag'){
-  if(h?.getOpenWindow?.()!==id)h?.toggleWindow?.(id);
- }else if(['action','run','hpButton','bagButton','dock','lifePanel','money'].includes(id)){
-  // Leave the popup open only when the user is editing its position.
-  if(h?.getOpenWindow?.())h.toggleWindow(null);
+  if(h.getOpenWindow?.()!==id)h.toggleWindow?.(id);
+ }else if(h.getOpenWindow?.() && id!=='toast'){
+  // Only show a popup while placing that popup.
+  h.toggleWindow?.(null);
  }
 }
 function ensureOverlay(){
