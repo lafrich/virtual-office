@@ -9,6 +9,7 @@
  const ELEMENTS=['lifePanel','money','hpButton','bagButton','phone','bag','action','run','needs','toast','dock'];
  const ANCHORS=['top-left','top-center','top-right','center-left','center-center','center-right','bottom-left','bottom-center','bottom-right'];
  const MIN_SCALE=0.5, MAX_SCALE=1.5, MIN_TAP=40;
+ const OFFSET_LIMIT=4096;
  const SELECTORS={
   lifePanel:['#semestaLifePlayPanel'],
   money:['#vs-money'],
@@ -72,8 +73,8 @@
   return {
    scale,
    anchor,
-   x:num(raw&&raw.x,-480,480,base.x),
-   y:num(raw&&raw.y,-480,480,base.y)
+   x:num(raw&&raw.x,-OFFSET_LIMIT,OFFSET_LIMIT,base.x),
+   y:num(raw&&raw.y,-OFFSET_LIMIT,OFFSET_LIMIT,base.y)
   };
  }
  function normalizeProfile(raw, kind){
@@ -410,7 +411,7 @@
   host.addEventListener('pointercancel',end);
  }
  return {
-  ELEMENTS,ANCHORS,MIN_SCALE,MAX_SCALE,MIN_TAP,SELECTORS,
+  ELEMENTS,ANCHORS,MIN_SCALE,MAX_SCALE,MIN_TAP,OFFSET_LIMIT,SELECTORS,
   defaults,normalize,normalizeProfile,normalizeSlot,detectProfile,pick,
   applyTo,measure,bindPreview,desktopProfile,phoneProfile,placedRect,resolveSavedLayout,saveGlobalLayout,GLOBAL_LAYOUT_KEY
  };
