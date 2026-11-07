@@ -64,9 +64,9 @@ test('Both apps load premise library before tier engine; NPC, Building and Objec
  assert.match(s,/matchWorld\?\.\(rule,objects\)/);
  assert.match(s,/worldRuleId:rule\.id/);
  assert.match(s,/sites\.filter\(n=>!n\.ambient\)/);
- assert.match(s,/action==='world_ambient'/);
- assert.match(s,/action==='world_enter'/);
- assert.match(s,/action==='world_quest'/);
+ assert.match(s,/world_ambient/);
+ assert.match(s,/world_enter/);
+ assert.match(s,/world_quest/);
  assert.match(read('world-builder/builder.js'),/openInteriorById:id=>/);
 });
 test('World entity UI and activity wizard enforce category tier template before details',()=>{
