@@ -77,7 +77,7 @@ function stateFrom(existing,config){
  for(const [k,def] of Object.entries({wallet:6000,energy:80,hygiene:75,bladder:20,fullness:70,moral:50,experience:0})){
   s[k]=number(s[k],0,k==='wallet'?1e9:100,def);
  }
- s.identity={...c.identity,...(s.identity&&typeof s.identity==='object'?s.identity:{})};
+ s.identity=s.identityChosen===true?{...c.identity,...(s.identity&&typeof s.identity==='object'?s.identity:{})}:copy(c.identity);
  if(!RELIGIONS.includes(s.identity.religion)||s.identity.religion==='satanis')s.identity.religion=c.identity.religion;
  if(!ZODIACS.includes(s.identity.zodiac))s.identity.zodiac=c.identity.zodiac;
  return s;
