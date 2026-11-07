@@ -17,8 +17,10 @@ const SITES=[
  {id:'fish',label:'Mancing',icon:'🎣',pattern:/sungai|river|danau|kolam|fishing|mancing/i,action:'fish',offset:[5,-5]},
  {id:'siomay_batagor',label:'Bang Siomay / Batagor',icon:'🥟',pattern:/siomay|batagor/i,action:'sell_fish',offset:[7,0]},
  {id:'pasar_ikan',label:'Pasar Ikan',icon:'🐟',pattern:/pasar.?ikan|fish.?market/i,action:'sell_fish',offset:[-7,3]},
- {id:'job',label:'Manusia Silver / Pak Ogah',icon:'💼',pattern:/manusia.?silver|pak.?ogah|kang.?parkir|job.npc|street.performer/i,action:'work',offset:[-5,4]},
- {id:'premium_job',label:'Kerja Premium / Kantor',icon:'🏢',pattern:/kantor.?premium|premium.?job|office.?job/i,action:'work',offset:[-2,5]},
+ {id:'job_silver',jobId:'manusia_silver',label:'Kerja Manusia Silver',icon:'🪙',pattern:/manusia.?silver|street.performer/i,action:'work',offset:[-5,4]},
+ {id:'job_pak_ogah',jobId:'pak_ogah',label:'Kerja Pak Ogah',icon:'🚦',pattern:/pak.?ogah/i,action:'work',offset:[-3,6]},
+ {id:'job_kang_parkir',jobId:'kang_parkir',label:'Kerja Kang Parkir',icon:'🅿️',pattern:/kang.?parkir|parking.attendant/i,action:'work',offset:[-7,5]},
+ {id:'premium_job',jobId:'kantor_premium',label:'Kerja Premium / Kantor',icon:'🏢',pattern:/kantor.?premium|premium.?job|office.?job/i,action:'work',offset:[-2,5]},
  {id:'loak',label:'Toko Loak',icon:'♻',pattern:/toko.?loak|babeh|pawnshop/i,action:'sell_loak',offset:[8,5]},
  {id:'scavenge',label:'Titik Mulung',icon:'📦',pattern:/botol|kardus|sampah|trash|barang.?bekas|scavenge/i,action:'scavenge',offset:[-8,-3]},
  {id:'tree',label:'Pohon Buah',icon:'🌳',pattern:/pohon|tree|mangga|jambu/i,action:'catch_fruit',offset:[-4,-8]},
@@ -42,7 +44,7 @@ const SITES=[
  {id:'bench',label:'Bangku Istirahat',icon:'🪑',pattern:/bench|kursi.?taman|bangku/i,action:'rest',offset:[2,5]},
  {id:'course',label:'Kursus HP',icon:'📱',pattern:/kursus|course|school/i,action:'course',offset:[-3,9]}
 ];
-const PLACEHOLDER_COLORS={help:0x63a1a2,charity:0xd3a6c0,bench:0x9b825c,premium_job:0x9579ba,hansip:0xc66766,fish:0x5596be,siomay_batagor:0xe0a94a,pasar_ikan:0x4baf9d,job:0xd18e3a,
+const PLACEHOLDER_COLORS={job_silver:0xa2a9b5,job_pak_ogah:0xa49b5c,job_kang_parkir:0x739e91,help:0x63a1a2,charity:0xd3a6c0,bench:0x9b825c,premium_job:0x9579ba,hansip:0xc66766,fish:0x5596be,siomay_batagor:0xe0a94a,pasar_ikan:0x4baf9d,job:0xd18e3a,
  loak:0x839758,scavenge:0x9d9c84,tree:0x519a64,warung:0xd5aa53,coffee:0x856649,
  public_wc:0x77aec0,public_bath:0x77aec0,kost:0xb18cd3,tent:0x9a9d77,prayer:0x81c69f,prayer_islam_a:0x81c69f,prayer_islam_b:0x81c69f,prayer_islam_c:0x81c69f,
  prayer_kristen:0x81c69f,prayer_katolik:0x81c69f,prayer_hindu:0x81c69f,prayer_buddha:0x81c69f,
@@ -287,7 +289,7 @@ function nodeButtons(n){
  const button=(action,label,args={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(args))+'">'+label+'</button>';
  if(id==='fish')entries=[button('fish','🎣 Mancing',{spotId:n.sourceId||'water_placeholder'})];
  if(['siomay_batagor','pasar_ikan'].includes(id))entries=['<select id="slpItem">'+itemOptions('fish')+'</select>',button('sell_fish','💰 Jual Ikan',{buyerId:id})];
- if(id==='job'||id==='premium_job')entries=['<button id="slpWork" type="button">🛠 TAHAN UNTUK KERJA'+(id==='premium_job'?' PREMIUM':'')+'</button>','<div class="slp-work-progress"><span id="slpWorkFill"></span></div>'];
+ if(n.jobId)entries=['<button id="slpWork" type="button">🛠 TAHAN ACTION UNTUK '+esc(n.label.toUpperCase())+'</button>','<div class="slp-work-progress"><span id="slpWorkFill"></span></div>'];
  if(id==='loak')entries=['<select id="slpItem">'+itemOptions('loak')+'</select>',button('sell_loak','💰 Jual Barang')];
  if(id==='scavenge')entries=[button('scavenge','📦 Mulung')];
  if(id==='tree')entries=[button('catch_fruit','🌳 Ambil Buah')];
@@ -406,17 +408,20 @@ function click(ev){
 function workDown(ev){
  if(!['slpWork','ptActionBtn'].includes(ev.target.id)||!active||progress)return;
  const n=nearest();
- if(!n||!['job','premium_job'].includes(n.id))return;
+ if(!n||!n.jobId)return;
  if(state.detained||state.restMinutes>0||state.energy<10){message('Tidak bisa bekerja: perlu energi 10 dan bebas dari hukuman.');return;}
- if(n.id==='premium_job'&&state.hygiene<70){message('Kerja premium membutuhkan kebersihan minimum 70.');return;}
+ const job=config.jobs?.find(j=>j.id===n.jobId);
+ if(job&&state.hygiene<job.minHygiene){message('Pekerjaan '+job.label+' butuh kebersihan '+job.minHygiene+'.');return;}
  ev.preventDefault();
- workHoldStart=performance.now();progress={started:workHoldStart,needed:Math.max(850,2300-(state?.experience||0)*10)};
+ workHoldStart=performance.now();
+ const jobMinutes=job?.minutes||30;
+ progress={started:workHoldStart,needed:Math.max(850,jobMinutes*90/(1+(state?.experience||0)/100))};
  const button=ev.target;try{button.setPointerCapture(ev.pointerId);}catch{}
  const animate=()=>{
   if(!progress||!active)return;
   const pct=clamp((performance.now()-progress.started)/progress.needed,0,1);
   const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width=(pct*100)+'%';
-  if(pct>=1){progress=null;workAnimation=0;justWorkedAt=performance.now();runAction('work',{premium:nearest()?.id==='premium_job'});return;}
+  if(pct>=1){progress=null;workAnimation=0;justWorkedAt=performance.now();runAction('work',{jobId:nearest()?.jobId});return;}
   workAnimation=requestAnimationFrame(animate);
  };
  workAnimation=requestAnimationFrame(animate);
@@ -461,7 +466,7 @@ function runAction(action,args={}){
  if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','eat_item','discard_item'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
-  fish:'fish',sell_fish:args.buyerId,work:args.premium?'premium_job':'job',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
+  fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
   eat:'warung',coffee:'coffee',public_toilet:'public_wc',public_shower:'public_bath',
   buy_room:'kost',home_toilet:'kost',home_shower:'kost',sleep:ownsRoom()?'kost':'tent',
   cook:'kost',store_fridge:'kost',take_fridge:'kost',store_home:'kost',take_home:'kost',rest:'bench',help:'help',charity:'charity',
@@ -495,7 +500,7 @@ function handleAction(){
  if(!active)return false;
  const node=nearest();
  if(!node)return false;
- if(node.id==='job'||node.id==='premium_job'){
+ if(node.jobId){
   if(performance.now()-justWorkedAt<550)return true;
   message('TAHAN tombol Action (atau tombol KERJA di panel) sampai progress penuh.');
   paintPanel();return true;
