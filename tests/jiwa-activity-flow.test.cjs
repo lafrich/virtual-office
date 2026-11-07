@@ -87,7 +87,8 @@ test('Jiwa icon UX, Semesta runtime binding and Google Drive wiring are present'
  const html=read('jiwa/index.html'),ui=read('jiwa/activity-editor.js'),semesta=read('world-builder/semesta-life-play.js');
  for(const cat of A.CATEGORIES)assert.match(html,new RegExp('data-activity-tab="'+cat.id+'"'));
  for(const id of ['activityView','activitySave','activityDrivePush','activityDrivePull','activityHeading',
-  'activityEditor','activityObject','activityList'])assert.match(html,new RegExp('id="'+id+'"'));
+  'activityEditor','activityList'])assert.match(html,new RegExp('id="'+id+'"'));
+ assert.match(ui,/id="activityObject"/);
  assert.match(ui,/function chooseCategory/);
  assert.match(ui,/function editor\(/);
  assert.match(ui,/D\(\)/);
