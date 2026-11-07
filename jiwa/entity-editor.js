@@ -115,7 +115,13 @@ function renderDirectoryPanel(){
    if(enabled)targetMap.set(key,{cityId,objectId:String(o.id)});
    else targetMap.delete(key);
   }
-  if(update({targets:[...targetMap.values()],selectionMode:'directory',enabled:enabled||selected().enabled}))render();
+  if(update({targets:[...targetMap.values()],selectionMode:'directory',enabled:enabled||selected().enabled})){
+   $('worldEnabled').checked=selected().enabled;
+   const match=P.matchWorld(selected(),entities().filter(o=>A.kindOf(o)===selected().kind),cityId);
+   $('worldBindingStatus').textContent=match?'✓ Match objek nyata: '+(match.name||match.asset||match.id):
+    '⚠ Belum ada directory yang ditandai di city ini.';
+   renderDirectoryPanel();
+  }
  };
  for(const o of showing){
   const line=document.createElement('label');line.className='activity-directory-row';
