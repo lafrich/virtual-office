@@ -176,7 +176,9 @@ async function loadCity(id){
   }
   state.project=validateProject({...newProject(id),...raw,cityId:id},id);
   try{localStorage.setItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1',JSON.stringify(state.project.gameplay));}catch{}
-  saveHudLayoutCache(id,state.project.gameplay);
+  // Loading a city is not a user layout edit. Do NOT overwrite a newer
+  // Global Foundation layout just because the user browsed another city.
+  // Only explicit editing or SAVE RULES updates the cross-app layout cache.
   const shown=visibleEntities();
   state.selected=(params.get('city')===id&&params.get('object')&&shown.some(o=>o.id===params.get('object')))?params.get('object'):(state.selected&&shown.some(o=>o.id===state.selected)?state.selected:shown[0]?.id||null);
   state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(visibleEntities().length);
