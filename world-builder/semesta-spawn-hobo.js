@@ -120,15 +120,88 @@ function dispose(){
 
 function busy(){return !!(state&&state.playing);}
 
+function crawlProgress(){
+ if(!state)return 0;
+ const crawlStart=PHASES[0].ms.length,crawlCount=PHASES[1].ms.length;
+ if(state.index<crawlStart)return 0;
+ if(state.index>=crawlStart+crawlCount)return 1;
+ const step=state.frames[state.index];
+ const frac=step&&step.ms?Math.min(1,state.elapsed/step.ms):0;
+ return (state.index-crawlStart+frac)/crawlCount;
+}
+function openingAnchor(backImg,frontImg){
+ const w=backImg&&(backImg.naturalWidth||backImg.width);
+ const h=backImg&&(backImg.naturalHeight||backImg.height);
+ if(!w||!h||!frontImg)return null;
+ const c=document.createElement('canvas');
+ c.width=w;c.height=h;
+ const ctx=c.getContext('2d',{willReadFrequently:true});
+ ctx.drawImage(backImg,0,0);
+ const back=ctx.getImageData(0,0,w,h).data;
+ ctx.clearRect(0,0,w,h);
+ ctx.drawImage(frontImg,0,0);
+ const front=ctx.getImageData(0,0,w,h).data;
+ let sx=0,sy=0,n=0;
+ for(let y=0;y<h;y++){
+  for(let x=0;x<w;x++){
+   const i=(y*w+x)*4+3;
+   if(back[i]>56&&front[i]<=56){sx+=x;sy+=y;n++;}
+  }
+ }
+ return n?{c:sx/n,r:sy/n}:null;
+}
+function silhouetteMask(backImg,frontImg){
+ const w=backImg&&(backImg.naturalWidth||backImg.width);
+ const h=backImg&&(backImg.naturalHeight||backImg.height);
+ if(!w||!h)return null;
+ const c=document.createElement('canvas');
+ c.width=w;c.height=h;
+ const ctx=c.getContext('2d');
+ ctx.drawImage(backImg,0,0);
+ if(frontImg)ctx.drawImage(frontImg,0,0);
+ return c;
+}
+function restPixel(spec,backImg,frontImg){
+ const hole=openingAnchor(backImg,frontImg);
+ if(!hole)return {c:spec.tidur[0],r:spec.tidur[1]+14};
+ // Body center in the painted opening, tucked toward `tidur` so the
+ // character reads as inside the tent, not under the opaque tarp and
+ // not lying out in front of the door. Foot is +14 (lying mass at y 86).
+ const bodyC=hole.c+(spec.tidur[0]-hole.c)*0.25;
+ const bodyR=hole.r+(spec.tidur[1]-hole.r)*0.15;
+ return {c:bodyC,r:bodyR+14};
+}
+function tentPixelAt(spec,progress){
+ const t=Math.min(1,Math.max(0,progress));
+ const start=(state&&state.restPixel)||{c:spec.tidur[0],r:spec.tidur[1]+14};
+ return {
+  c:start.c+(spec.keluar[0]-start.c)*t,
+  r:start.r+(spec.keluar[1]-start.r)*t
+ };
+}
+function placeInTent(){
+ if(!state||!state.overlay||!state.spec)return;
+ const spec=state.spec,p=tentPixelAt(spec,crawlProgress());
+ const wT=spec.size[0]*PIXEL_WORLD,hT=spec.size[1]*PIXEL_WORLD*VERTICAL_COMP;
+ const hC=112*PIXEL_WORLD*VERTICAL_COMP;
+ // Overlay is parented to the back plane, so these are tent-sprite local pixels.
+ // Foot pivot (32,100) lands on the inside / keluar pixel, not on a separate world XZ.
+ state.overlay.position.x=(p.c/spec.size[0]-.5)*wT;
+ state.overlay.position.y=(.5-p.r/spec.size[1])*hT+hC*(100/112-.5);
+ state.overlay.position.z=0;
+ if(state.actorRoot&&state.group){
+  const off=pxToWorld(p.c-spec.pivot[0],p.r-spec.pivot[1]);
+  state.actorRoot.position.set(state.group.position.x+off.x,0,state.group.position.z+off.z);
+ }
+}
+
 function faceCamera(camera){
  if(!state||!camera)return;
  const root=state.group;
  const yaw=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z);
  state.group.children.forEach(plane=>{if(plane.isMesh)plane.rotation.y=yaw-root.rotation.y;});
- if(state.overlay){
-  const actor=state.actorRoot;
-  state.overlay.rotation.y=Math.atan2(camera.position.x-actor.position.x,camera.position.z-actor.position.z)-actor.rotation.y;
- }
+ // Overlay inherits the back plane's billboard rotation; do not add a second yaw
+ // or it leaves the tent layers and reads as lying in front of the door.
 }
 
 function paintFrame(){
@@ -137,20 +210,27 @@ function paintFrame(){
  const ctx=state.ctx;
  ctx.clearRect(0,0,64,112);
  ctx.drawImage(state.sheet,step.col*64,step.row*112,64,112,0,0,64,112);
+ // While inside, clip the body to the tent silhouette so limbs do not
+ // read as lying on the sidewalk in front of the door. Depan still
+ // occludes the tarp; the opening stays visible. Clip lifts as they crawl out.
+ const p=tentPixelAt(state.spec,crawlProgress());
+ if(state.mask&&crawlProgress()<0.4){
+  ctx.globalCompositeOperation='destination-in';
+  ctx.drawImage(state.mask,32-p.c,100-p.r);
+  ctx.globalCompositeOperation='source-over';
+ }
  state.tex.needsUpdate=true;
  const depth=insideDepth(state.index);
  // Stay between belakang (3) and depan (5) while inside; never lift in Y
  // or the sprite sits on the roof instead of at ground inside the opening.
  state.overlay.renderOrder=depth>0.5?4:6;
  if(state.front)state.front.visible=true;
+ placeInTent();
 }
 
 function applyCrawl(step,dtMs){
- if(!step.crawl||!state||!state.actorRoot)return;
- const dir=CRAWL[state.facing]||CRAWL.se;
- const t=Math.min(1,dtMs/step.ms);
- state.actorRoot.position.x+=dir.x*step.crawl*t;
- state.actorRoot.position.z+=dir.z*step.crawl*t;
+ // World XZ is driven by placeInTent() from the painted tidur→keluar path.
+ if(state)placeInTent();
 }
 
 async function play(opts){
@@ -208,10 +288,19 @@ async function play(opts){
  tex.colorSpace=THREE.SRGBColorSpace||tex.colorSpace;tex.needsUpdate=true;
  const overlay=makePlane(THREE,canvas,[64,112],[32,100],4);
  overlay.material.map=tex;
- (opts.actorRoot||group).add(overlay);
+ overlay.material.depthTest=false;
+ overlay.material.depthWrite=false;
+ // Share the tent billboard so bangun sits in the painted interior. Front
+ // layer (renderOrder 5) then occludes the body except through the opening.
+ back.add(overlay);
 
- Object.assign(state,{back,front,overlay,tex,ctx,sheet:sheetImg,contactY,tentLift:tentLift(spec,contactY)});
+ Object.assign(state,{
+  spec,back,front,overlay,tex,ctx,sheet:sheetImg,contactY,tentLift:tentLift(spec,contactY),
+  restPixel:restPixel(spec,backImg,frontImg),
+  mask:silhouetteMask(backImg,frontImg)
+ });
  hideMesh(actorMesh);
+ placeInTent();
  paintFrame();
  return state;
 }
@@ -253,7 +342,7 @@ function snapshot(){
 }
 
 g.VLSpawnHobo=Object.freeze({
- BASE,PHASES,TENTS,sheetFor,tentUrl,pxToWorld,lowestOpaqueRow,tentLift,frameList,insideDepth,
- play,tick,dispose,busy,snapshot
+ BASE,PHASES,TENTS,sheetFor,tentUrl,pxToWorld,lowestOpaqueRow,tentLift,openingAnchor,silhouetteMask,restPixel,tentPixelAt,placeInTent,
+ frameList,insideDepth,play,tick,dispose,busy,snapshot
 });
 })(window);

@@ -12,13 +12,10 @@ function worldFrom(tiles,objects=[]){
 }
 
 const demo=worldFrom([
- [0,41,'sidewalk'],[12,41,'sidewalk'],[28,41,'sidewalk'],
- [0,46,'sidewalk'],[16,46,'sidewalk'],[32,46,'sidewalk'],
- [17,30,'sidewalk'],[22,55,'sidewalk'],
- [0,42,'road'],[12,42,'road'],[28,42,'road'],
- [0,47,'road'],[16,47,'road'],[32,47,'road'],
- [17,31,'road'],[22,56,'road'],
- [5,10,'water'],[6,10,'road']
+ [3,41,'sidewalk'],[7,41,'sidewalk'],[16,41,'sidewalk'],[28,41,'sidewalk'],[39,41,'sidewalk'],
+ [10,46,'sidewalk'],[24,46,'sidewalk'],[36,46,'sidewalk'],
+ [0,41,'sidewalk'],[12,41,'sidewalk'],
+ [0,42,'road'],[12,42,'road'],[5,10,'water'],[6,10,'road']
 ],[{id:'shop-1',type:'building',name:'Ruko',x:12.5,z:41.5,w:4,d:4}]);
 
 test('defaults are generic: no Ichsan/Noor keys and several roadside points',()=>{
@@ -96,5 +93,10 @@ test('Ellen spawn_hobo art is present for tent layers and exit-tent sheets',()=>
  assert.match(rt,/tenda_buka_.*__depan/);
  assert.match(rt,/lowestOpaqueRow/);
  assert.match(rt,/contactY/);
+ assert.match(rt,/placeInTent/);
+ assert.match(rt,/back.add\(overlay\)/);
+ assert.match(rt,/openingAnchor/);
+ assert.match(rt,/silhouetteMask/);
+ assert.match(rt,/destination-in/);
 
 });

@@ -10,15 +10,18 @@
  'use strict';
  const FORBIDDEN_TILES=['road','water','river','drain'];
  const FACINGS=['se','sw'];
+ // Kebon Sirih sidewalks only: north curb z=41.5 and south curb z=46.5.
+ // Spaced away from lamp iso-columns (poles at x=-18.5,5.5,17.5,29.5,41.5
+ // z≈47.4) and the house billboards along z=49. Still editable in Jiwa.
  const DEFAULT_POOL=[
-  {id:'roadside-a',x:0.5,z:41.5,facing:'se'},
-  {id:'roadside-b',x:12.5,z:41.5,facing:'se'},
-  {id:'roadside-c',x:28.5,z:41.5,facing:'sw'},
-  {id:'roadside-d',x:0.5,z:46.5,facing:'se'},
-  {id:'roadside-e',x:16.5,z:46.5,facing:'sw'},
-  {id:'roadside-f',x:32.5,z:46.5,facing:'se'},
-  {id:'roadside-g',x:17.5,z:30.5,facing:'se'},
-  {id:'roadside-h',x:22.5,z:55.5,facing:'sw'}
+  {id:'roadside-a',x:3.5,z:41.5,facing:'se'},
+  {id:'roadside-b',x:7.5,z:41.5,facing:'se'},
+  {id:'roadside-c',x:16.5,z:41.5,facing:'se'},
+  {id:'roadside-d',x:28.5,z:41.5,facing:'sw'},
+  {id:'roadside-e',x:39.5,z:41.5,facing:'se'},
+  {id:'roadside-f',x:10.5,z:46.5,facing:'se'},
+  {id:'roadside-g',x:24.5,z:46.5,facing:'sw'},
+  {id:'roadside-h',x:36.5,z:46.5,facing:'se'}
  ];
  const num=(v,min,max,fallback)=>{
   const n=Number(v);
