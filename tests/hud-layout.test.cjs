@@ -15,7 +15,7 @@ test('defaults ship separate Phone and Desktop profiles and clamp scale',()=>{
  const n=HL.normalize({phone:{action:{scale:9,anchor:'nope',x:-9999},run:{scale:0.1}}});
  assert.equal(n.phone.action.scale,1.5);
  assert.equal(n.phone.action.anchor,'bottom-right');
- assert.equal(n.phone.action.x,-480);
+ assert.equal(n.phone.action.x,-4096);
  assert.equal(n.phone.run.scale,0.5);
 });
 
@@ -35,9 +35,11 @@ test('play-hud and Jiwa load the module and expose sliders plus reset',()=>{
  const html=fs.readFileSync(path.resolve(__dirname,'../world-builder/index.html'),'utf8');
  assert.match(hud,/applyHudLayout/);
  assert.match(hud,/VLHudLayout/);
- assert.match(panel,/HUD LAYOUT/);
- assert.match(panel,/hudLayoutReset/);
- assert.match(panel,/Phone profile/);
+ assert.doesNotMatch(panel,/card\('HUD LAYOUT'/);
+ assert.match(jiwa,/GAME PREVIEW/);
+ assert.doesNotMatch(panel,/hudLayoutReset/);
+ assert.match(html,/id="tabUIEditor"/);
  assert.match(jiwa,/hud-layout\.js/);
+ assert.doesNotMatch(jiwa,/id="uiView"/);
  assert.match(html,/hud-layout\.js/);
 });
