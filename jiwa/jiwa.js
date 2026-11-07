@@ -7,12 +7,33 @@ const $=id=>document.getElementById(id), clone=x=>JSON.parse(JSON.stringify(x));
 const DB='jiwa-mechanics-v1',TABLE='projects',FALLBACK='jiwa-local-project:',CHANGE='jiwa-project-change';
 const ACTIVE='virtual-life-active-city-draft';
 const GLOBAL_CITY='__jiwa_global__';
-const HUD_LAYOUT_PREFIX='jiwa-hud-layout-city-v1:';
-const saveHudLayoutCache=(cityId,gameplay)=>{
- try{const HL=window.VLHudLayout;if(!cityId||!HL)return;
-  localStorage.setItem(HUD_LAYOUT_PREFIX+cityId,JSON.stringify({layout:HL.normalize(gameplay?.modules?.hudLayout),at:Date.now()}));
- }catch(_e){}
-};
+// HUD placement is one game-level artifact, independent of the selected city.
+let globalUiDraft=null,globalUiDirty=false;
+function gameUILayout(){
+ const HL=window.VLHudLayout;
+ if(!HL)return null;
+ if(!globalUiDraft)
+  globalUiDraft=HL.resolveSavedLayout(null,localStorage)?.layout||HL.defaults();
+ return HL.normalize(globalUiDraft);
+}
+function editGameUILayout(layout){
+ const HL=window.VLHudLayout;if(!HL)return false;
+ globalUiDraft=HL.normalize(layout);
+ globalUiDirty=true;
+ window.dispatchEvent(new Event('jiwa:ui-layout:render'));
+ return true;
+}
+function saveGameUILayout(){
+ const HL=window.VLHudLayout;
+ if(!HL)return {ok:false,reason:'HUD Layout belum siap'};
+ const result=HL.saveGlobalLayout(gameUILayout(),localStorage);
+ if(result.ok){
+  globalUiDirty=false;
+  try{window.VLHub?.publish('gameplay',{scope:'global-game-ui',at:result.at});}catch(_e){}
+  window.dispatchEvent(new Event('jiwa:ui-layout:render'));
+ }
+ return result;
+}
 const params=new URLSearchParams(location.search);
 const KINDS=['wallet_min','stat_min','stat_max','has_item','quest_active','time_start','time_end'];
 const EFFECTS=['wallet_delta','stat_fullness','stat_energy','stat_hygiene','stat_bladder','inventory_add','quest_start','quest_complete','message','animation'];
@@ -144,7 +165,10 @@ async function save(){
  if(!state.project)return notice('No city selected');
  try{const p=validateProject(state.project,state.record.id);p.updatedAt=new Date().toISOString();const where=await writeProject(p);state.project=p;markSaved();notice('Rules saved · '+where+' · city unchanged');try{localStorage.setItem(CHANGE,JSON.stringify({cityId:p.cityId,at:p.updatedAt}));}catch{}
  try{localStorage.setItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1',JSON.stringify(p.gameplay||{}));}catch{}
- saveHudLayoutCache(p.cityId,p.gameplay);
+ if(globalUiDirty){
+  const result=saveGameUILayout();
+  if(!result.ok)notice('Layout global belum tersimpan: '+result.reason);
+ }
  try{window.VLHub&&window.VLHub.publish('gameplay',{cityId:p.cityId,at:p.updatedAt});}catch{}}
  catch(e){notice('SAVE FAILED: '+e.message);}
 }
@@ -508,12 +532,26 @@ window.JiwaContextBridge=Object.freeze({
  navigate:tab
 });
 window.JiwaGameplayBridge=Object.freeze({
- get:()=>state.project?JG.normalizeGameplay(state.project.gameplay):JG.defaultGameplay(),
+ get:()=>{
+  const g=state.project?JG.normalizeGameplay(state.project.gameplay):JG.defaultGameplay();
+  // The other mechanics still belong to the chosen city. Only UI is global.
+  g.modules=g.modules||{};
+  g.modules.hudLayout=gameUILayout();
+  return g;
+ },
+ getUILayout:()=>gameUILayout(),
+ setUILayout:next=>editGameUILayout(next),
+ saveUILayout:()=>saveGameUILayout(),
+ isUILayoutDirty:()=>globalUiDirty,
  set:next=>{
   if(!state.project)return;
-  state.project.gameplay=JG.normalizeGameplay(next);markDirty();
-  try{localStorage.setItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1',JSON.stringify(state.project.gameplay));}catch{}
-  saveHudLayoutCache(state.project.cityId,state.project.gameplay);
+  const oldLayout=gameUILayout(),g=JG.normalizeGameplay(next);
+  // Numeric HUD controls in Systems must edit the very same global UI draft.
+  if(g.modules?.hudLayout&&JSON.stringify(g.modules.hudLayout)!==JSON.stringify(oldLayout))
+   editGameUILayout(g.modules.hudLayout);
+  g.modules=g.modules||{};g.modules.hudLayout=gameUILayout();
+  state.project.gameplay=g;markDirty();
+  try{localStorage.setItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1',JSON.stringify(g));}catch{}
   try{window.VLHub&&window.VLHub.publish('gameplay',{cityId:state.project.cityId,live:true});}catch{}
   window.dispatchEvent(new Event('jiwa:gameplay'));
   renderSystems();renderTest();
