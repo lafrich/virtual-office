@@ -77,6 +77,33 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.equal(linked.a.placeholder,false);
  assert.equal(linked.a.activityId,'bank_teller');
  assert.ok(linked.mapQuest,'New activity must appear on live Nokia quest map');
+ // Entity rules use the SAME tier wizard and can bind an actual Semesta object.
+ await jiwa.locator('#entityTab').click();
+ await jiwa.locator('[data-entity-kind="object"]').click();
+ assert.equal(await jiwa.locator('.premise-tier').count(),3,'Object actions also use tier indicators');
+ await jiwa.locator('#worldKeep').click();
+ assert.equal(await jiwa.locator('#worldOperation').inputValue(),'ambient');
+ await jiwa.locator('#worldMatchMode').selectOption('id');
+ await jiwa.locator('#worldQuery').evaluate((el,id)=>{
+  if(![...el.options].some(o=>o.value===id))el.add(new Option(id,id));
+ },target.id);
+ await jiwa.locator('#worldQuery').selectOption(target.id);
+ await jiwa.locator('#worldEnabled').check();
+ await jiwa.locator('#entitySave').click();
+ const worldSaved=await jiwa.evaluate(()=>{
+  const a=window.JiwaActivities.readLocal(localStorage);
+  return a.worldEntities.find(r=>r.id==='wall_pee');
+ });
+ assert.equal(worldSaved.enabled,true,'Nonquest object rule must be saved');
+ assert.equal(worldSaved.query,target.id);
+ await semesta.waitForFunction(()=>window.SemestaLifePlay?.sites?.().some(s=>s.id==='world:wall_pee'),null,{timeout:30000});
+ const ambient=await semesta.evaluate(()=>{
+  const site=window.SemestaLifePlay.sites().find(x=>x.id==='world:wall_pee');
+  const map=window.VLPhoneEllen.gameSnapshot()?.map?.sites||[];
+  return {site,onNokia:map.some(x=>x.id==='world:wall_pee')};
+ });
+ assert.equal(ambient.site.placeholder,false);
+ assert.equal(ambient.onNokia,false,'Ambient object actions must not appear as Nokia quests');
  await jiwa.locator('[data-activity-tab="cooking"]').click();
  const cooking=await jiwa.evaluate(()=>window.JiwaActivityEditor.get().activities.find(a=>a.id==='nasi_goreng'));
  assert.deepEqual(cooking.ingredients,['nasi','telur','minyak']);
