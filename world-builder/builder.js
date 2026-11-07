@@ -2987,6 +2987,7 @@ if(window.SemestaLifePlay){
    return !['road','water','river','drain'].includes(tile)&&!world.blocked(x,z);
   },
   teleport:(x,z)=>{
+   if(window.VLSpawnHobo?.busy?.())window.VLSpawnHobo.dispose();
    const holder=rigs.get(walkActorId);
    if(!holder||!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return false;
    holder.root.position.set(Number(x),holder.root.position.y||0,Number(z));
