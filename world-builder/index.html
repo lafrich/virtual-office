@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#073a9d"><meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="only light">
 <title>Semesta — City Builder</title>
-<link rel="stylesheet" href="./xp.css?v=fullscreen-viewport-20261107">
+<link rel="stylesheet" href="./xp.css?v=semesta-game-ui-editor-20261108">
 <link rel="stylesheet" href="./asset-library.css?v=sal-v1">
 <link rel="stylesheet" href="./drive-ui.css?v=drive-20261106"></head>
 <body><div id="desktop"><div id="app">
@@ -196,6 +196,7 @@
    <div class="tabs" role="tablist">
     <button class="tab active" id="tabLayout" type="button">LAYOUT</button>
     <button class="tab" id="tabLogic" type="button">LOGIC</button>
+    <button class="tab" id="tabUIEditor" type="button" title="Edit global game HUD directly on Semesta">EDIT UI</button>
    </div>
    <section id="layoutPane">
     <div class="section-label">POSITION / TRANSFORM</div>
@@ -295,6 +296,41 @@
     </div>
     <p class="help">Map logic keeps asset footprints, coordinates, and interaction hooks inside the saved city. No mechanics execute inside the editor.</p>
    </section>
+<section id="semestaUIEditorPane" hidden aria-label="Global game HUD layout editor">
+ <div class="sui-banner">GLOBAL GAME UI · ALL CITIES</div>
+ <p class="sui-help">Edit posisi HUD langsung di layar Semesta. Klik kotak elemen di game lalu drag untuk memindahkan, tarik sudut kuning untuk resize. Save berlaku untuk seluruh kota.</p>
+ <div class="sui-section">ELEMENT</div>
+ <label for="suiElement">Pilih elemen HUD</label>
+ <select id="suiElement" aria-label="Select game HUD element"></select>
+ <p id="suiVisibility" class="sui-hint">Pilih elemen untuk diedit.</p>
+ <div class="sui-section">GRID</div>
+ <div class="sui-checks">
+  <label><input id="suiShowGrid" type="checkbox" checked> Show grid</label>
+  <label><input id="suiSnap" type="checkbox" checked> Snap to grid</label>
+ </div>
+ <label for="suiGridSize">Grid size</label>
+ <select id="suiGridSize"><option value="8">8 px</option><option value="16" selected>16 px</option><option value="24">24 px</option><option value="32">32 px</option><option value="48">48 px</option></select>
+ <div class="sui-section">POSITION / ALIGN</div>
+ <div class="sui-aligns">
+  <button id="suiCenterX" type="button">⇔ Center X</button>
+  <button id="suiCenterY" type="button">⇕ Center Y</button>
+  <button id="suiCenterBoth" type="button">⊞ Center Both</button>
+ </div>
+ <label for="suiAnchor">Anchor</label><select id="suiAnchor"></select>
+ <div class="sui-pair">
+  <label>X offset<input id="suiX" type="number" min="-480" max="480" step="1"></label>
+  <label>Y offset<input id="suiY" type="number" min="-480" max="480" step="1"></label>
+ </div>
+ <label for="suiScale">Size <output id="suiScaleLabel">100%</output></label>
+ <input id="suiScale" type="range" min=".5" max="1.5" step=".01" value="1">
+ <div class="sui-actions">
+  <button id="suiSave" type="button">💾 SAVE GLOBAL UI</button>
+  <button id="suiReset" type="button">↺ RESET</button>
+  <button id="suiCancel" type="button">✕ DONE</button>
+ </div>
+ <p id="suiStatus" class="sui-status" role="status" aria-live="polite">Belum ada perubahan.</p>
+ <p class="sui-hint">Ini menyimpan layout UI game, bukan posisi objek kota. Nokia dan tombol Action tetap berfungsi di Play Mode.</p>
+ </section>
   </div>
  </aside>
 </div>
@@ -508,5 +544,6 @@
 <script src="./drive-sync.js?v=cloud-autosync-20261106"></script>
 <script src="./drive-ui.js?v=semesta-bangun-furniture-cloud-20261107" defer></script>
 <script type="module" src="./builder.js?v=semesta-one-global-game-ui-v2-precision-20261108&amp;semesta-ground-contact-20261107&amp;trees-grounded-v1&amp;warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1&amp;kebon-sirih-city-v2&amp;city-building-sync-v1&amp;native-pixel-depth-v3&amp;asset-thumbnails-v1&amp;indonesia-pack=v1&amp;asset-library=v1&amp;preview-parity=20261105&amp;native-riders=v3-20261105&amp;native-cars=20261105&amp;indonesia-200=20261105&amp;quality-v3=20261105&amp;quality-v4=20261105&amp;quality-v5=20261105&amp;quality-v6=20261105&amp;vegetation-hifi=20261105&amp;transport-npc=20261105&amp;mahluk2-approved-v1&amp;cloud-auto-v3&amp;jakarta-city=v6-bus-tree-depth&amp;scale-small-v1&amp;replace-selected=20261107&amp;loak-visible=20261107&amp;spawn-hobo=noshadow-20261107&amp;bed-lie=20261107"></script>
+<script src="./semesta-ui-editor.js?v=direct-global-edit-20261108" defer></script>
 <script src="./jiwa-link.js?v=jiwa-launch-v1" defer></script>
 </body></html>
