@@ -11,7 +11,7 @@
 "use strict";
 const V2_KEY="mahluk-2-library-v1";
 const V1_KEY="virtual-life-character-storage-v1";
-const CLIP_CONSUMED=/^(idle|walk|talk|sit|lie|sleep|custom)$/;
+const CLIP_CONSUMED=/^(idle|walk|talk|sit|lie|sleep|custom|pushup|yoga_sphinx_idle|yoga_puppy_idle|hip_shake|yoga_happy_baby_idle)$/;
 const TINY="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 function slug(name){
  return String(name||"char").toLowerCase().replace(/[^a-z0-9]+/g,"").slice(0,18)||"char";
@@ -88,7 +88,7 @@ function publish(input,env){
  return {
   ok:true,id:record.id,v1Id:v1.id,record,
   unsupportedBySemestaClips:unsupportedClips(record),
-  note:"Semesta currently consumes idle|walk|talk|sit|lie|sleep|custom clip keys and requires data-URL sheets."
+  note:"Semesta currently consumes idle|walk|talk|sit|lie|sleep|custom|pushup|yoga_sphinx_idle|yoga_puppy_idle|hip_shake|yoga_happy_baby_idle clip keys and requires data-URL sheets."
  };
 }
 return Object.freeze({V1_KEY,V2_KEY,CLIP_CONSUMED,v2Record,v1Record,publish,unsupportedClips});
