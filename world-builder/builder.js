@@ -2548,6 +2548,7 @@ function clearWalk(){
      rec.rig.setProfile(source.profile||'ichsan');
      if(source.pose)rec.rig.setPose(source.pose);
    }
+ }
  clearTemporaryLifePlayer();
 }
 function setMode(m){
