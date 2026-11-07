@@ -91,8 +91,15 @@ function violations(item){
  }
  return failures;
 }
-function matchWorld(rule,objects){
+function matchWorld(rule,objects,cityId){
  if(!rule)return null;
+ // Manual directory selections take precedence: marking is per saved city
+ // and never silently expands to unrelated buildings/NPCs with the same name.
+ if(Array.isArray(rule.targets)&&rule.targets.length){
+  if(!cityId)return null;
+  const ids=new Set(rule.targets.filter(x=>x.cityId===String(cityId)).map(x=>String(x.objectId)));
+  return (objects||[]).find(o=>o&&ids.has(String(o.id)))||null;
+ }
  const query=String(rule.query||'').trim().toLowerCase(),mode=rule.matchMode||'name';
  if(!query)return null;
  return (objects||[]).find(obj=>{
@@ -114,10 +121,16 @@ function worldRule(data={}){
  const kind=ENTITIES.includes(data.kind)?data.kind:'object';
  const op=OPERATIONS.includes(data.operation)?data.operation:
   kind==='building'?'enter':kind==='npc'?'npc_quest':'ambient';
+ const seen=new Set(),targets=[];
+ for(const entry of (Array.isArray(data.targets)?data.targets:[]).slice(0,2500)){
+  const cityId=str(entry?.cityId,110),objectId=str(entry?.objectId||entry?.id,110);
+  if(!cityId||!objectId||seen.has(cityId+'::'+objectId))continue;
+  seen.add(cityId+'::'+objectId);targets.push({cityId,objectId});
+ }
  return {id:slug(data.id)||'world_rule',label:str(data.label||'Interaksi Baru'),
   kind,operation:op,enabled:data.enabled===true,
   matchMode:MATCH_MODES.includes(data.matchMode)?data.matchMode:'name',
-  query:str(data.query),activityId:slug(data.activityId),
+  query:str(data.query),targets,activityId:slug(data.activityId),
   actionAsset:str(data.actionAsset,100),description:str(data.description,300),
   tier:TIERS.includes(data.tier)?data.tier:'sepele',
   category:Object.hasOwn(CATEGORY,data.category)?data.category:
