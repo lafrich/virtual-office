@@ -36,7 +36,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.ok(target,'Semesta must contain at least one placeable map object');
  await jiwa.locator('#activityList .activity-row').first().click();
  assert.equal(await jiwa.locator('#activityHeading').textContent().then(x=>x.includes('Money')),true);
- assert.equal(await jiwa.locator('.premise-tier').count(),3,'Tier choices precede activity detail');
+ assert.equal(await jiwa.locator('#activityEditor .premise-tier').count(),3,'Tier choices precede activity detail');
  await jiwa.locator('#presetKeep').click();
  // A global editor can have no city loaded. Simulate a city object becoming
  // available in its binding dropdown without changing gameplay rules.
@@ -80,7 +80,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  // Entity rules use the SAME tier wizard and can bind an actual Semesta object.
  await jiwa.locator('#entityTab').click();
  await jiwa.locator('[data-entity-kind="object"]').click();
- assert.equal(await jiwa.locator('.premise-tier').count(),3,'Object actions also use tier indicators');
+ assert.equal(await jiwa.locator('#entityEditor .premise-tier').count(),3,'Object actions also use tier indicators');
  await jiwa.locator('#worldKeep').click();
  assert.equal(await jiwa.locator('#worldOperation').inputValue(),'ambient');
  await jiwa.locator('#worldMatchMode').selectOption('id');
