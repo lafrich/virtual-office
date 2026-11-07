@@ -3,7 +3,7 @@
 'use strict';
 const DIR=['sw','se','ne','nw'],BUILD=new Set(['jalan','kampung','loak']);
 const CATS={all:'ALL ASSETS',indo200:'INDONESIA / 200 ASET',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
- interior:'INTERIOR',object:'OBJEK / ITEM',vehicle:'KENDARAAN',character:'KARAKTER',custom:'CUSTOM'};
+ interior:'INTERIOR',object:'OBJEK / ITEM',vehicle:'KENDARAAN',character:'KARAKTER',custom:'CUSTOM',grok:'GROK / NEW ASSETS'};
 function category(spec){
  if(spec?.objectCategory==='vehicle')return 'vehicle';
  if(spec?.source==='custom-building'||(spec?.source==='bangun-object'&&!spec.builtIn))return 'custom';
@@ -20,12 +20,12 @@ function canEdit(spec){
   ['pipeline-street','pipeline-vegetation','custom-building','bangun-object'].includes(spec.source);
 }
 function route(spec){
- if(!canEdit(spec))return null;
+ if(!canEdit(spec)||spec.pack==='grok-v6b-review')return null;
  const id=String(spec.file||'');
  if(!/^(?:pipeline|vegetation|studio|object):[a-z0-9_-]{2,90}$/i.test(id))return null;
  return './bangun-ruang/?sourceAsset='+encodeURIComponent(id);
 }
-function entries(catalog,vehicles=[],characters=[]){
+function entries(catalog,vehicles=[],characters=[],grokVehicles=[]){
  const items=(catalog||[]).filter(s=>s?.id&&s?.file&&s.published!==false).map(s=>({
   ...s,kind:'sprite',category:category(s),editTarget:route(s)
  }));
@@ -36,6 +36,13 @@ function entries(catalog,vehicles=[],characters=[]){
  for(const p of characters||[])if(p?.id)items.push({
   id:p.id,file:'character:'+p.id,label:p.name||p.label||p.id,source:'character',
   category:'character',kind:'character',published:true,editTarget:null
+ });
+ // B4 vehicle artwork appears as four-view preview only, not driveable gameplay.
+ for(const v of grokVehicles||[])if(v?.category==='vehicle'&&v.id&&v.views)items.push({
+  id:'grok-'+v.id,file:'grok-archive:'+v.id,label:'Grok · '+v.label,
+  source:'grok-v6b',pack:'grok-v6b-review',kind:'grok-vehicle',
+  category:'vehicle',views:v.views,published:true,collision:false,
+  description:'Preview kendaraan '+v.batch+' dari PNG Grok asli. Belum menjadi kendaraan yang bisa dikendarai; belum ada NPC atau animasi.'
  });
  return items;
 }
@@ -103,6 +110,10 @@ function checkImage(url,geometry=null){
 }
 async function assetHealthy(spec,imageUrl){
  if(!spec?.id||!spec?.file||spec.published===false)return false;
+ if(spec.kind==='grok-vehicle'){
+  const urls=await Promise.all(DIR.map(d=>imageUrl(spec,d)));
+  return (await Promise.all(urls.map((url,i)=>checkImage(url,spec.views[DIR[i]])))).every(Boolean);
+ }
  if(spec.kind==='vehicle'||spec.kind==='character'){
   // Validate all 4 exposed views, including genuine character pose frames.
   const urls=await Promise.all(DIR.map(d=>imageUrl(spec,d)));
@@ -165,6 +176,7 @@ function mount(options={}){
   'character':'MAHLUK HIDUP / CHARACTER'};
  function imgUrl(s,side='sw'){
   if(!s)return null;
+  if(s.source==='grok-v6b')return s.views?.[side]?.url||null;
   if(s.kind==='vehicle')return options.vehicleImage?.(s.id,side)||null;
   if(s.kind==='character')return options.characterImage?.(s.id,side)||null;
   if(s.source==='pipeline-street'){
@@ -211,8 +223,8 @@ function mount(options={}){
    $('salDescription').textContent='';showImage($('salHero'),null,null);
    $('salPlace').disabled=true;$('salEdit').disabled=true;return;
   }
-  const s=selected,variants=s.variants||{},available=DIR.filter(v=>
-   s.kind==='vehicle'?!!s.views?.[v]:s.kind==='character'||!!variants[v]);
+  const s=selected,variants=s.variants||s.views||{},available=DIR.filter(v=>
+   (s.kind==='vehicle'||s.kind==='grok-vehicle')?!!s.views?.[v]:s.kind==='character'||!!variants[v]);
   $('salName').textContent=s.label||s.id;
   $('salSource').textContent=names[s.source]||s.source||'SEMESTA ASSET';
   if(available.length){
@@ -257,7 +269,7 @@ function mount(options={}){
  }
  async function draw(){
   const revision=++scanRevision;
-  const candidates=entries(options.catalog?.()||[],options.vehicles?.()||[],options.characters?.()||[]);
+  const candidates=entries(options.catalog?.()||[],options.vehicles?.()||[],options.characters?.()||[],options.grokVehicles?.()||[]);
   const gallery=$('salGallery');
   gallery.replaceChildren();
   const progress=document.createElement('p');progress.className='sal-empty';
@@ -281,7 +293,8 @@ function mount(options={}){
   all=candidates.filter((_,i)=>healthy[i]);
   hiddenAssets=candidates.length-all.length;
   const found=all.filter(s=>(filter==='all'||filter===s.category||
-   (filter==='indo200'&&s.pack==='indonesia-200-v1'))&&
+   (filter==='indo200'&&s.pack==='indonesia-200-v1')||
+   (filter==='grok'&&s.pack==='grok-v6b-review'))&&
    (String(s.label||'')+' '+s.id+' '+s.source+' '+(s.group||'')).toLowerCase().includes(query));
   $('salCount').textContent=found.length+' / '+all.length+' VALID · '+hiddenAssets+' HIDDEN';
   $('salGallery').replaceChildren();
@@ -330,7 +343,7 @@ function localAssets(){
  return {buildings,objects};
 }
 function assetIndex(){
- const all=entries(options.catalog?.()||[],options.vehicles?.()||[],options.characters?.()||[]);
+ const all=entries(options.catalog?.()||[],options.vehicles?.()||[],options.characters?.()||[],options.grokVehicles?.()||[]);
  return {
   id:"semesta-all-v1",format:"semesta-asset-library-v1",name:"Semesta Asset Library",
   createdAt:new Date().toISOString(),source:"Semesta + Bangun Ruang + Character Stock",
