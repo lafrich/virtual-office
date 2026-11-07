@@ -116,7 +116,7 @@ function editor(){
   ' · Nilai dibatasi algoritma</span><button id="activityChangeTier" type="button">↶ TEMPLATE</button></div>'+
   '<div class="activity-head"><div><strong>'+esc(a.label)+'</strong><small>ID: '+esc(a.id)+'</small></div>'+
   '<span class="activity-state '+(a.enabled?'ready':'draft')+'">'+(a.enabled?'LIVE / ACTIVE':'DRAFT / INACTIVE')+'</span></div>'+
-  '<div class="activity-switch"><label><input id="activityEnabled" type="checkbox" '+(a.enabled?'checked':'')+'> Enable in Semesta (hanya jika bangunan ada)</label>'+
+  '<div class="activity-switch"><label><input id="activityEnabled" type="checkbox" '+(a.enabled?'checked':'')+'> Enable in Semesta (jika target interaktif tersedia)</label>'+
   '<small>Aktivitas hanya muncul jika target di-marking dalam tab Entities dan ditemukan di city.</small></div>'+
   '<div class="activity-fieldset"><h4>01 · PREMISE & FLOW</h4>'+
   input('Nama aktivitas','label')+
