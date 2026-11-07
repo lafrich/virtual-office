@@ -158,6 +158,25 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
  .footer{height:26px}
 }
 
+
+/* UI Editor pixel grid / center guides. All distances are design-space px. */
+.jui-gridbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:7px 8px;margin:0 0 10px;
+ background:#e1eaf5;border:1px solid #a7b7cb;box-shadow:inset 1px 1px #fff;font:11px Tahoma,Arial,sans-serif}
+.jui-gridbar button{white-space:nowrap;min-height:29px;font-size:11px}
+.jui-gridbar label{display:inline-flex;align-items:center;gap:4px;margin:0;font-size:11px}
+.jui-gridbar input[type=checkbox]{height:15px;width:15px;margin:0;accent-color:#215da8}
+.jui-gridbar .jui-grid-size select{width:auto;min-width:82px;margin:0;height:29px;padding:2px 5px}
+.jui-grid-spacer{flex:1;min-width:0}
+.jui-grid{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:.65;
+ background-image:linear-gradient(to right,rgba(32,60,91,.28) 1px,transparent 1px),
+ linear-gradient(to bottom,rgba(32,60,91,.28) 1px,transparent 1px);
+ background-repeat:repeat;box-sizing:border-box}
+.jui-grid[hidden]{display:none!important}
+.jui-center-guide{position:absolute;z-index:4;pointer-events:none;opacity:.85}
+.jui-guide-x{top:0;bottom:0;left:50%;width:1px;background:#f8db65;box-shadow:1px 0 #1b4a8f}
+.jui-guide-y{left:0;right:0;top:50%;height:1px;background:#f8db65;box-shadow:0 1px #1b4a8f}
+.jui-node-layer{z-index:5}
+@media(max-width:760px){.jui-gridbar{gap:5px}.jui-gridbar button{flex:1;font-size:10px;min-height:31px}.jui-grid-spacer{flex-basis:100%;width:100%}}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -192,9 +211,23 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
    <button id="juiView_phone" type="button">Nokia</button>
    <button id="juiView_bag" type="button">Tas</button>
   </div>
+  <div class="jui-gridbar" aria-label="Layout grid and alignment">
+   <label class="jui-grid-toggle"><input id="juiShowGrid" type="checkbox" checked> Show Grid</label>
+   <label class="jui-grid-toggle"><input id="juiSnapGrid" type="checkbox" checked> Snap to Grid</label>
+   <label class="jui-grid-size">Grid <select id="juiGridSize" aria-label="Grid spacing">
+    <option value="8">8 px</option><option value="16" selected>16 px</option><option value="24">24 px</option><option value="32">32 px</option><option value="48">48 px</option>
+   </select></label>
+   <span class="jui-grid-spacer"></span>
+   <button id="juiAlignHorizontal" type="button" title="Align selected element to horizontal center of gameplay screen">⇔ Center X</button>
+   <button id="juiAlignVertical" type="button" title="Align selected element to vertical center of gameplay screen">⇕ Center Y</button>
+   <button id="juiAlignBoth" type="button" title="Align both axes to center">⊞ Center Both</button>
+  </div>
   <div class="jui-workspace">
    <div class="jui-canvas-scroll"><div id="juiStage" class="jui-stage" data-profile="desktop" aria-label="Interactive drag and resize gameplay HUD preview">
     <div class="jui-map-surface"><i class="jui-road"></i><i class="jui-block b1"></i><i class="jui-block b2"></i><i class="jui-block b3"></i><span>SEMESTA · UI PREVIEW</span></div>
+    <div id="juiGrid" class="jui-grid" aria-hidden="true"></div>
+    <div class="jui-center-guide jui-guide-x" aria-hidden="true"></div>
+    <div class="jui-center-guide jui-guide-y" aria-hidden="true"></div>
     <div id="juiNodes" class="jui-node-layer"></div>
    </div><p class="subtle">Klik elemen untuk select · drag untuk pindah · tarik kotak kecil di kanan bawah untuk resize.</p></div>
    <aside class="jui-side"><div class="jui-side-title">ELEMENTS</div><div id="juiElements" class="jui-elements"></div>
