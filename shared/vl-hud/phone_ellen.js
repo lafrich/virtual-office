@@ -404,10 +404,22 @@ function PetaSemesta(){
   title(item?.label||'Peta Aktivitas',item?(s.sel+1)+'/'+rows.length:'');
   dots(16);
   const b=boundsOf(m);
-  // Simple city-block/grid motif retained from the original Nokia map.
-  for(let x=4;x<=91;x+=4)for(let y=20;y<=48;y+=4)ps(x,y);
-  for(const x of [26,53,78]){fr(x,19,2,30,0);fr(x,19,1,30)}
-  fr(4,32,88,3,0);fr(4,33,88,1);
+  // This is the actual Semesta terrain projected to the Nokia LCD.
+  // The old six-landmark demo map is retained only outside active Play Mode.
+  const terrain=Array.isArray(m.terrain)?m.terrain:[];
+  if(terrain.length){
+   for(const t of terrain){
+    const x=4+Math.round(t.u||0),y=19+Math.round(t.v||0);
+    if(x<4||x>91||y<19||y>48)continue;
+    if(t.type==='road')ps(x,y);
+    else if(t.type==='sidewalk'){if((x+y)%3===0)ps(x,y)}
+    else if(t.type==='water'||t.type==='river'){ps(x,y);if(y<48)ps(x,y+1)}
+    else if(t.type==='drain'){if(y<48)ps(x,y+1);ps(x,y)}
+   }
+  }else{
+   // Unpainted city: only a faint reference grid, never fake roads.
+   for(let x=4;x<=91;x+=6)for(let y=20;y<=48;y+=6)ps(x,y);
+  }
   // Category markers use short 1-bit symbols in one map, no 3D labels.
   rows.forEach((site,i)=>{
    const p=coords(site,b),focus=i===s.sel,marked=ST.mark===site.id;
