@@ -182,7 +182,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <aside class="file-panel">
 <div class="panel-heading"><strong>FILES</strong><small>05</small></div>
 <div class="file-list" role="group" aria-label="Pilih aplikasi">
-<button class="file active" data-app="mahluk" aria-pressed="true"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP.EXE</span><span class="file-kind">V6B / CHARACTER STUDIO</span></span></button>
+<button class="file active" data-app="mahluk" aria-pressed="true"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP.EXE</span><span class="file-kind">MAHLUK HIDUP</span></span></button>
 <button class="file" data-app="emotion" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-emotion"/></svg></span><span class="file-txt"><span class="file-name">EMOSI.EXE</span><span class="file-kind">UNIVERSAL / FRAME EDITOR</span></span></button>
 <button class="file" data-app="bangun" aria-pressed="false"><span class="file-thumb"><img class="warteg-thumb" alt="Warteg Kharisma Bahari" hidden></span><span class="file-txt"><span class="file-name">BANGUN RUANG.EXE</span><span class="file-kind">BUILDING STUDIO</span></span></button>
 <button class="file" data-app="semesta" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-semesta"/></svg></span><span class="file-txt"><span class="file-name">SEMESTA.EXE</span><span class="file-kind">WORLD BUILDER</span></span></button><button class="file" data-app="jiwa" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-jiwa"/></svg></span><span class="file-txt"><span class="file-name">JIWA.EXE</span><span class="file-kind">MECHANICS STUDIO</span></span></button>
@@ -236,7 +236,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <div class="modal">
 <header class="titlebar"><div class="window-icon">✳</div><div class="window-title"><strong>LINK SETTINGS</strong></div></header>
 <form class="modal-body" id="linkForm">
-<label>MAHLUK HIDUP 1<input id="url-mahluk" type="url" placeholder="https://..."></label>
+<label>MAHLUK HIDUP<input id="url-mahluk" type="url" placeholder="https://..."></label>
 <label>EMOSI.EXE<input id="url-emotion" type="url" placeholder="https://..."></label>
 <label>BANGUN RUANG<input id="url-bangun" type="url" placeholder="https://..."></label>
 <label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label><label>JIWA<input id="url-jiwa" type="url" placeholder="https://..."></label>
@@ -270,7 +270,7 @@ const ids=['mahluk','emotion','bangun','semesta','jiwa'];
 // Deep links only select a program; opening it remains a deliberate user action.
 const requestedApp=new URLSearchParams(location.search).get('app');
 const data={
-mahluk:{name:'MAHLUK HIDUP.EXE',type:'V6B CHARACTER',desc:'Buat karakter dari Human Male/Female Nude Base asli, edit body parts dan frame dengan pixel editor lengkap, install motion v6b, sinkronkan wajah via Emosi.exe.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/v6p-studio.html'},
+mahluk:{name:'MAHLUK HIDUP.EXE',type:'MAHLUK HIDUP',desc:'Buat karakter dari Human Male/Female Nude Base asli, edit body parts dan frame dengan pixel editor lengkap, install motion v6b, sinkronkan wajah via Emosi.exe.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/v6p-studio.html'},
 emotion:{name:'EMOSI.EXE',type:'FACIAL ANIMATION',desc:'Database emosi 4-view: buat baru, duplicate emosi, Save as New, pixel editor, dan timeline frame-by-frame. Format RGBA 4 arah kompatibel dengan tab FACE Mahluk Hidup 1; gameplay tetap di Jiwa.',url:'https://lafrich.github.io/virtual-office/emotion-studio/'},
 bangun:{name:'BANGUN RUANG.EXE',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
 semesta:{name:'SEMESTA.EXE',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'},jiwa:{name:'JIWA.EXE',type:'MECHANICS',desc:'Atur rules dan Play Test dari kota Semesta.',url:'https://lafrich.github.io/virtual-office/jiwa/'}
