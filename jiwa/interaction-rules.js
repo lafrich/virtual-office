@@ -110,7 +110,7 @@ function matchWorldAll(rule,objects,cityId){
   if(mode==='asset')return asset===query;
   if(mode==='type')return String(obj.type||'').toLowerCase()===query;
   return name.includes(query)||asset.includes(query);
- });
+ }).slice(0,1);
 }
 function matchWorld(rule,objects,cityId){return matchWorldAll(rule,objects,cityId)[0]||null;}
 const ENTITIES=['building','npc','object'];
