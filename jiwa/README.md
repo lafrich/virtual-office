@@ -20,3 +20,14 @@ JIWA is the fourth Membangun program. It reads **saved Semesta City Drafts** fro
 
 Integration files: `jiwa/index.html`, `jiwa/jiwa.js`, `world-builder/jiwa-link.js`, `membangun/index.html`.
 Context files: `jiwa/foundation-engine.js` (pure rule logic), `jiwa/context-editor.js` (Windows XP style editor), `tests/jiwa-foundation-runtime.test.cjs` (state invariants), `jiwa/FUNDAMENTAL_FLOW_V2.md` (design contract). To run local tests: `node --test tests/jiwa-foundation-runtime.test.cjs`.
+
+## Life Economy V1: hobo, kost, fasilitas umum, dan fishing
+
+- **GAME PREVIEW** membaca City Draft Semesta yang dipilih (titik dan terrain kota yang tersimpan). Jika tidak ada aset tertentu, muncul pin **PLACEHOLDER** untuk tenda hobo, kost, WC umum, mandi umum, titik mancing, dan pembeli ikan. Ini hanya *sandbox* 2D isometrik, bukan renderer atau gameplay server Semesta.
+- Player tanpa kost otomatis **HOBO** ketika reset test. Respawn memilih satu tenda di tepi wilayah kota secara acak. Jiwa menggunakan objek tenda Semesta yang benar-benar berada dekat perimeter; bila tidak ada, dibuat 4 kandidat tenda virtual di sisi barat/timur/utara/selatan **tanpa menambah objek ke City Draft**. Menekan RESPAWN memilih ulang, bukan mengubah layout kota.
+- Kost dibuka dengan **satu kali pembayaran** di sandbox (default Rp30.000; tidak ada sewa periodik). Setelah aktif, homeAccess menjadi true dan respawn diarahkan ke kamar yang terhubung, atau placeholder kost untuk uji. Akses kamar pemain lain tidak otomatis berlaku.
+- Fasilitas **WC umum**: bladder -100, kebersihan -5; **mandi umum**: biaya Rp500, kebersihan +35. Perlu mendatangi pin/objek yang sesuai.
+- Fasilitas **WC kost**: bladder -100 tanpa penalti; **mandi kost**: kebersihan +70 tanpa biaya per aksi. Hanya tersedia dengan akses kost. **Tidur tenda**: energi +30 / kebersihan -15; **tidur kost**: energi +65 / kebersihan -8. Semua angka merupakan default *tuning* editable di Jiwa.
+- **Fishing loot table**: sapu-sapu paling sering (weight 60), disusul lele (20), nila (12), mujair (8). **Bang Siomay/Batagor** menerima semua jenis dengan harga berbeda. **Pasar ikan** menolak sapu-sapu. Bobot, harga, penolakan pembeli, dan durasi busuk dapat diedit per kota dalam GAME PREVIEW.
+- Identitas keyakinan dan zodiak bisa disetel di editor; **Friends/social**, **referral**, dan **jalur antagonis fiksi V2** tetap dikunci. Aturan ini tidak mengubah animasi Mahluk Hidup.
+- Data project tetap tersimpan lokal per kota via **SAVE RULES**, bukan akun multiplayer / Google Drive. Pengujian: node --test tests/jiwa-life-economy.test.cjs.
