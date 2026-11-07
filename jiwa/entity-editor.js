@@ -14,7 +14,7 @@ const selected=()=>records().find(x=>x.id===id)||records().find(x=>x.kind===kind
 const status=(s,success=false)=>{const el=$('entityStatus');el.textContent=s;el.dataset.ok=success?'true':'false';};
 function kindSelect(value){
  kind=value;const next=records().find(x=>x.kind===value);
- id=next?.id||'';chosenTier=next?.tier||'sepele';pendingCategory=next?.category||kind==='object'?'immoral':'moral';
+ id=next?.id||'';chosenTier=next?.tier||'sepele';pendingCategory=next?.category||(kind==='object'?'immoral':'moral');
  phase='preset';pending=false;render();
 }
 function select(value){const row=records().find(x=>x.id===value);if(!row)return;
