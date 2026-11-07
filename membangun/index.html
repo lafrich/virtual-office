@@ -168,6 +168,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .mb-globe-native{display:block;image-rendering:pixelated;object-fit:contain;max-width:100%;max-height:100%;width:min(75%,350px);height:auto;aspect-ratio:1}
 .file-thumb .mb-globe-native{width:90%}
 @media(prefers-reduced-motion:reduce){.mb-globe-native{animation-play-state:paused}}
+.v6b-silver-crop{position:relative;overflow:hidden;aspect-ratio:64/112;height:min(82%,420px);max-height:100%;width:auto;max-width:80%;flex:none}
+.v6b-silver-crop .v6b-silver-image{display:block;position:absolute;top:0;left:0;width:400%;height:100%;max-width:none!important;max-height:none!important;object-fit:fill;image-rendering:pixelated}
+.file-thumb .v6b-silver-crop{height:44px}
+@media(max-width:700px){.art .v6b-silver-crop{height:min(85%,280px)}}
 </style>
 </head>
 <body>
@@ -382,6 +386,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=t
 render();
 })();
 </script>
-<script src="./v6b-thumbnails.js?v=pipeline-native-20261108"></script>
+<script src="./v6b-thumbnails.js?v=pipeline-crop-20261108"></script>
 </body>
 </html>
