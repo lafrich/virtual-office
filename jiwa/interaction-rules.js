@@ -95,7 +95,7 @@ function matchWorld(rule,objects,cityId){
  if(!rule)return null;
  // Manual directory selections take precedence: marking is per saved city
  // and never silently expands to unrelated buildings/NPCs with the same name.
- if(Array.isArray(rule.targets)&&rule.targets.length){
+ if(rule.selectionMode==='directory'||(Array.isArray(rule.targets)&&rule.targets.length)){
   if(!cityId)return null;
   const ids=new Set(rule.targets.filter(x=>x.cityId===String(cityId)).map(x=>String(x.objectId)));
   return (objects||[]).find(o=>o&&ids.has(String(o.id)))||null;
@@ -130,7 +130,7 @@ function worldRule(data={}){
  return {id:slug(data.id)||'world_rule',label:str(data.label||'Interaksi Baru'),
   kind,operation:op,enabled:data.enabled===true,
   matchMode:MATCH_MODES.includes(data.matchMode)?data.matchMode:'name',
-  query:str(data.query),targets,activityId:slug(data.activityId),
+  query:str(data.query),targets,selectionMode:(data.selectionMode==='directory'||targets.length)?'directory':'query',activityId:slug(data.activityId),
   actionAsset:str(data.actionAsset,100),description:str(data.description,300),
   tier:TIERS.includes(data.tier)?data.tier:'sepele',
   category:Object.hasOwn(CATEGORY,data.category)?data.category:
