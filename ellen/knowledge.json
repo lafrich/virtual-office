@@ -1,0 +1,175 @@
+{
+  "format": "ellen-knowledge-seed-v1",
+  "updatedAt": "2026-11-08",
+  "description": "Project knowledge curated from owner discussions. Facts describe intent and constraints, not verified live deploy status.",
+  "facts": [
+    {
+      "id": "seed-vision",
+      "topic": "Premis game",
+      "text": "Namanya Juga Hidup adalah life-sim multiplayer berlatar Indonesia; pemain hidup di kota isometrik, punya kamar privat/respawn, interaksi NPC dan bangunan, kondisi tubuh, ekonomi, moral, dan pilihan tindakan. Visual pixel art V6B. Prototipe kota virtual dan game berkembang melalui beberapa editor.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-ownership",
+      "topic": "Ownership aplikasi",
+      "text": "Membangun adalah launcher/orchestrator. Semesta memiliki kota/map, object placement, directory dan entity ID. Bangun Ruang mengurus building/interior/furniture/anchor. Mahluk Hidup mengurus base karakter, pakaian, rig dan animasi. Emosi.exe mengurus ekspresi, viseme/dialogue lip sync. Jiwa.exe mengurus activity, economy, energy, moral/immoral, dampak/peraturan. Dapur Aset V6B mengurus generator aset dan metadata.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-repos",
+      "topic": "Repository aktif",
+      "text": "GitHub: lafrich/virtual-office berisi Membangun, Semesta (world-builder), Jiwa dan aplikasi pendamping. lafrich/virtual-life-asset-pipeline berisi Python/NumPy/Pillow code-drawn sprite generators, V6B, asset families, dan site. Jangan mengasumsikan semua pekerjaan user ada di repo lain yang belum terlihat.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-protect",
+      "topic": "JANGAN ganggu Mahluk Hidup",
+      "text": "Mahluk Hidup masih dikerjakan owner secara terpisah. Jangan ubah karakter, base body, rig, animasi, Ichsan, pipeline ekspresi, dan jangan memigrasikan ulang hingga owner meminta eksplisit. Jangan menghidupkan Mahluk Hidup 2, Emotion Studio lama, atau konsep character nude yang sudah ditinggalkan.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-v6b",
+      "topic": "Aturan V6B",
+      "text": "Generator kode nyata (NumPy/Pillow) harus dipertahankan, bukan ilustrasi AI generik. Grid iso tile 64×32; frame karakter 64×112, pivot (32,100), 4 arah SE/SW/NE/NW. Tanpa black outline/antialias, light top-left, ramp 4–5 tones, shadow hitam alpha 56, piksel alpha 0/56/255, palette yang ada. Baca AGENTS.md/STYLE.md di repo pipeline sebelum kerja.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-asset",
+      "topic": "Preview dulu, baru integrasi",
+      "text": "Pembuatan aset menggunakan renderer asli dan keluarga template terdekat. Keluarkan 1x sprite, preview 4x nearest, contact sheet, mock in context, manifest, ukuran/pivot, audit warna. Tunjukkan preview kepada owner; integrasi ke game/deploy hanya setelah persetujuan. Detail referensi kualitas: ojol V3, kendaraan, furniture, environmental assets.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-pipeline",
+      "topic": "Pipeline belajar dari approval",
+      "text": "Setiap aset yang DISETUJUI owner ditulis sebagai lesson family docs/asset-lessons/<family>.json dan logika reusable diuji; output lama yang sudah diapprove jangan berubah diam-diam. Keberhasilan generator bukan persetujuan artistik.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-jiwa-tabs",
+      "topic": "Jiwa.exe: tab utama",
+      "text": "UX Jiwa memakai icon tab untuk Money (jual, beli, mulung, pekerjaan), Energy (kopi, makan, tidur, snack), Moral (ibadah, pekerjaan tanpa uang, membantu NPC), Immoral (pipis sembarangan, mencuri/vandal dan efek), serta tab mekanik lain sesuai implementasi. Semua form lebih mekanis berbasis pilihan/template, minim mengetik angka bebas.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-jiwa-tiers",
+      "topic": "Template indikator",
+      "text": "Aktivitas Jiwa harus punya template kelas level: pekerjaan sepele, menengah, prestige dan kategori lain. Setiap tier memiliki default angka dan rentang batas; custom di luar rentang ditolak/harus pindah tier. Ini berlaku lintas tab agar rules algoritma konsisten.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-jiwa-entity",
+      "topic": "Jiwa Entities = penanda interaktif",
+      "text": "Di tab Entities, owner menandai DIRECTORY Semesta mana yang interaktif: building, NPC, object. Aktivitas Jiwa hanya boleh memilih entity yang sudah ditandai, bukan semua bangunan/aset. Klasifikasi bangunan/NPC/aset tersedia di pilihan aktivitas. Tombol Refresh/Sync merekonsiliasi directory City di Semesta dengan entitas yang diizinkan Jiwa. NPC dapat menjadi quest; objek nonquest bisa animasi/kencing/vandal, building bisa dimasuki.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-world-data",
+      "topic": "Semesta & Bangun Ruang",
+      "text": "Semesta memiliki entity placement, editing, replace object, skalasi, pan, layering/depth dan Asset Library; Bangun Ruang mengedit interior dan furniture dari bangunan yang diklik di kota. Saat save perubahan sinkron ke Semesta via mekanisme bridge dan Drive. Hindari mengganti id, pivot, ground plane, depth-sort tanpa test.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-drive",
+      "topic": "Drive bukan otomatis universal",
+      "text": "Ada adapter Drive terpisah untuk Semesta, Bangun Ruang, Jiwa, Emosi dan asset recipe; beberapa data bisa masih localStorage browser. Jangan mengklaim cross-device sync bekerja sebelum diuji login + readback di perangkat lain. Hindari overwrite konflik; Google OAuth token tidak disimpan permanen.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-launcher",
+      "topic": "Membangun Mini Laptop",
+      "text": "Membangun memakai UI retro Windows XP/98. Mini Laptop mode untuk fold Android: bagian atas layar app, bawah touchpad dan keyboard, UI 90°; pan via hold gesture, pinch disalurkan ke area canvas app, bukan zoom halaman. UI app harus hemat tab/fungsi duplikat dan dapat discroll.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-player",
+      "topic": "Interaksi player",
+      "text": "Aksi player termasuk walk, talk, sit, sleep, fart, pee, shower, eat, drink coffee. Satu tombol Action contextual menurut objek (chair=sit, wall=pee). Player otomatis stand saat bergerak. Status hunger, sleep, cleanliness, bladder; wallet, tas inventory terpisah dari phone.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-economy",
+      "topic": "Pekerjaan & ekonomi",
+      "text": "Income dari aktivitas pekerjaan berbayar via NPC hold-to-progress dengan progress bar, mulung/jual barang temuan ke pegadaian, pedagang nasi kuning, jual beli barang bekas. Skill diperoleh lewat sekolah/kursus di phone, memengaruhi kecepatan/pembayaran. Sistem absen karyawan lama telah ditinggalkan.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-spawn",
+      "topic": "Kamar & respawn",
+      "text": "Tiap pemain memiliki kamar pribadi, hanya owner yang dapat masuk; pemain respawn di kamar ketika login. Interior dapat dikustomisasi lewat Bangun Ruang / phone shop.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-transport",
+      "topic": "Transport & kota Indonesia",
+      "text": "Lingkungan bernuansa kota Indonesia dengan ojol, bus TransJakarta, warteg, kios, selokan, trotoar, lampu, tanaman dan city attributes. Asset positioning harus konsisten dengan layer, scale, shadow, pivot. Jakarta City ditargetkan padat, beragam, dengan pohon besar.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-emotion",
+      "topic": "Emosi.exe",
+      "text": "Emosi menyimpan database ekspresi, pixel editor, convo editor, overlay karakter, mouth guide viseme/text speech, dan sync Drive. Jangan mengganti dengan Emotion Studio lama. Mahluk Hidup hanya perlu memutar preview ekspresi yang disync, bukan duplikasi editor.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-character",
+      "topic": "Karakter V6B baru",
+      "text": "Ide terbaru: edit pakaian dengan gambar empat sisi pada template tee asli; warna/pattern diterapkan ke frame animasi menggunakan koordinat V6B. Jangan terus mengulang sistem nude/redraw otomatis yang gagal. Status implementasi belum bisa diasumsikan selesai.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-cityshift",
+      "topic": "Kota Shift tidak diperlukan",
+      "text": "Owner meminta Kota Shift dihapus karena redundant. Tetapi penghapusan di repo tidak boleh dianggap berhasil tanpa memeriksa versi kode. Fungsi yang dipakai aplikasi aktif harus dijaga.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-safety",
+      "topic": "Aturan kerja Ellen",
+      "text": "Sebelum membuat patch, audit file terbaru di GitHub, baca modul pemilik, cari dependensi lintas aplikasi, uji regresi, buat branch dan PR, jangan auto-merge/main/deploy. Jelaskan apa yang dicek, apa yang belum, risiko, dan jika ada blocker. Jangan klaim deploy, Drive sync, atau visual sudah benar tanpa verifikasi.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-memory",
+      "topic": "Cara Ellen belajar",
+      "text": "Memori dasar ini adalah rangkuman percakapan dan keputusan owner, bukan status deploy live. Instruction yang owner ketik di Teach diprioritaskan atas seed dan tidak otomatis menghapus memori sebelumnya. Chat boleh disimpan tetapi tidak boleh disimpulkan sebagai aturan baru tanpa koreksi eksplisit.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-app-status",
+      "topic": "Status harus dibedakan",
+      "text": "Pisahkan PLANNED, IMPLEMENTED, VERIFIED, OWNER APPROVED, dan DEPLOYED. Pengalaman dialog lama maupun output AI lain bukan bukti implementasi terkini. Lihat source dan GitHub Actions untuk status aktual.",
+      "source": "owner-project-context",
+      "priority": "base"
+    },
+    {
+      "id": "seed-project-names",
+      "topic": "Istilah aplikasi",
+      "text": "Gunakan nama: Ellen.exe, Membangun, Semesta, Bangun Ruang, Mahluk Hidup, Emosi.exe, Jiwa.exe, Dapur Aset V6B. Jangan menambah sistem baru yang menduplikasi owner lama.",
+      "source": "owner-project-context",
+      "priority": "base"
+    }
+  ]
+}

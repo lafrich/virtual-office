@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#114b9e">
+<title>Ellen.exe — AI Project Companion</title>
+<style>
+:root{font:13px Tahoma,"MS Sans Serif",Verdana,sans-serif;color:#172337;--border:#7083a1;--xp:#ece9d8;--blue:#1653a6}
+*{box-sizing:border-box}html,body{margin:0;min-width:310px;height:100%;overflow:hidden}body{background:#b4c8e8}button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;background:linear-gradient(#fff,#d8e0eb);border:1px solid #8394aa;border-top-color:#fff;border-left-color:#fff;border-radius:3px;padding:7px 11px}button:active{background:#c8dcf3}button:disabled{opacity:.55;cursor:not-allowed}textarea,input{background:#fff;border:1px solid #8799b2;border-radius:2px;padding:8px;min-width:0}textarea{resize:vertical}a{color:#1450a2}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #e59b2b;outline-offset:1px}
+.window{height:100dvh;display:flex;flex-direction:column;border:2px solid #4b6fa7;background:var(--xp)}
+.titlebar{background:linear-gradient(#69b9fb 0%,#205dc0 23%,#16428e 90%);color:white;min-height:40px;display:flex;align-items:center;gap:9px;padding:5px 11px}.titlebar strong{font-size:16px}.titlebar span{opacity:.9;font-size:11px}.titlebar a{margin-left:auto;background:linear-gradient(#fdfdfd,#cfd7e7);color:#183e78;text-decoration:none;border:1px solid white;padding:5px 9px;border-radius:3px}
+.tabs{display:flex;align-items:center;background:#d4dde9;border-bottom:1px solid #9aa8b8;gap:3px;padding:6px 7px 0;overflow:auto;flex:none}.tabs button{border-radius:5px 5px 0 0;white-space:nowrap;font-weight:bold}.tabs button.active{background:#fff;border-bottom-color:#fff;color:#143f90}
+main{flex:1;min-height:0;display:flex;flex-direction:column}.view{flex:1;min-height:0;display:flex;flex-direction:column}.view[hidden]{display:none!important}
+.chat{flex:1;min-height:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:linear-gradient(#f6f9ff,#e5ebf4)}.message{max-width:min(82%,720px);padding:10px 13px;border:1px solid #a3b0c3;border-radius:8px;background:#fff;box-shadow:0 1px 1px #24496a10;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}.message.user{align-self:flex-end;background:#dceaff;border-color:#80a7d9}.message.ellen{align-self:flex-start}.message .name{font-size:10px;font-weight:700;color:#2451a0;margin-bottom:5px}.message .body{white-space:pre-wrap}.message .time{font-size:10px;color:#728196;margin-top:5px}
+.composer{flex:none;padding:9px;display:flex;gap:8px;align-items:end;border-top:1px solid #a5b3c4;background:#e1e8f2}.composer textarea{flex:1;min-height:62px;max-height:150px}.composer button{background:linear-gradient(#eaf7ff,#8dbcf0);border-color:#668fc0;font-weight:bold;min-height:48px}
+.panel{padding:15px;overflow:auto;display:flex;flex-direction:column;gap:12px;background:#f5f6f1;height:100%}.panel h2{font-size:17px;margin:0}.panel p{margin:0;line-height:1.5;color:#526078}.field{display:flex;flex-direction:column;gap:5px}.field label{font-weight:bold;font-size:12px}.field textarea{min-height:95px}.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.primary{background:linear-gradient(#d8efff,#87b3e9);border-color:#4d87c3;font-weight:bold}.mini{font-size:11px;color:#5a6d84}.list{display:flex;flex-direction:column;gap:6px}.fact{background:#fff;border:1px solid #c3ccd5;padding:10px;border-radius:4px}.fact strong{font-size:12px}.fact p{margin:5px 0 0;color:#344456}.fact .note{font-size:10px;color:#697c8d;margin-top:4px}.fact button{float:right;padding:2px 7px;font-size:11px}.pills{display:flex;gap:6px;flex-wrap:wrap}.pill{font-size:11px;padding:4px 7px;background:#e5effd;border:1px solid #b3c5da;border-radius:20px}.settings{max-width:780px}.statusbar{flex:none;background:#e8edf1;border-top:1px solid #9baab8;padding:5px 10px;font:11px "Courier New",monospace;display:flex;gap:12px;align-items:center}.statusbar #status{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.statusbar .state{color:#234b8f;font-weight:bold}.warn{border:1px solid #d6c29a;background:#fff7e3;padding:10px;border-radius:3px;font-size:12px}.secret{font-family:Consolas,monospace}
+@media(max-width:600px){.message{max-width:93%}.panel{padding:11px}.titlebar strong{font-size:14px}.titlebar span{display:none}.composer textarea{min-height:54px}.statusbar{font-size:10px}}
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="./ellen.js" defer></script>
+</head>
+<body>
+<div class="window">
+<header class="titlebar"><strong>✦ ELLEN.EXE</strong><span>AI PROJECT COMPANION · NAMANYA JUGA HIDUP</span><a href="../membangun/" title="Kembali ke launcher">⌂ Membangun</a></header>
+<nav class="tabs" aria-label="Ellen menu">
+<button type="button" data-tab="chat" class="active">💬 CHAT</button>
+<button type="button" data-tab="teach">📝 TEACH</button>
+<button type="button" data-tab="memory">📚 MEMORY</button>
+<button type="button" data-tab="settings">⚙ SYNC & AI</button>
+</nav>
+<main>
+<section class="view" id="view-chat">
+<div id="chat" class="chat" role="log" aria-live="polite"></div>
+<form id="chatForm" class="composer"><textarea id="prompt" placeholder="Tanya Ellen tentang Semesta, Jiwa, V6B, atau minta rencana perubahan kode…" rows="3" maxlength="5000" aria-label="Pesan untuk Ellen" required></textarea><button id="send" type="submit">KIRIM ↵</button></form>
+</section>
+<section class="view" id="view-teach" hidden>
+<div class="panel settings">
+<h2>Ajari Ellen</h2>
+<p>Koreksi, keputusan, dan aturan baru disimpan sebagai memori terpisah. Ellen tidak menganggap dugaan atau jawaban lama sebagai fakta tanpa persetujuanmu.</p>
+<form id="teachForm" class="field">
+<label for="topic">Topik / judul</label><input id="topic" placeholder="Contoh: Jiwa — Entities & Directory" maxlength="140" required>
+<label for="lesson">Pengetahuan / instruksi yang benar</label><textarea id="lesson" rows="7" maxlength="8000" placeholder="Tulis aturan atau koreksi yang perlu Ellen ikuti." required></textarea>
+<div class="actions"><button type="submit" class="primary">+ SIMPAN KE MEMORY</button><button type="button" id="teachFromLast">GUNAKAN CHAT TERAKHIR</button></div>
+</form>
+<div class="warn">Memori bawaan dari diskusi proyek bersifat referensi. Memori yang kamu ajarkan sendiri diprioritaskan. Ellen hanya mengubah kode melalui PR/review, bukan diam-diam.</div>
+</div>
+</section>
+<section class="view" id="view-memory" hidden>
+<div class="panel">
+<h2>Project Knowledge</h2>
+<div class="actions"><span class="pill" id="memoryCount">0 memories</span><button id="refreshMemory" type="button">↻ REFRESH</button><button id="exportMemory" type="button">↓ EXPORT JSON</button></div>
+<div class="field"><label for="memorySearch">Cari pengetahuan</label><input id="memorySearch" placeholder="Semesta, Mahluk Hidup, Drive, V6B…"></div>
+<div class="list" id="memoryList"></div>
+</div>
+</section>
+<section class="view" id="view-settings" hidden>
+<div class="panel settings">
+<h2>Google Drive Memory</h2>
+<p>Disimpan di <b>Membangun / Ellen / ellen-memory-v1.json</b>. Data lokal tetap ada saat offline. Drive butuh login sekali per sesi dan sync mendeteksi konflik, bukan menimpa diam-diam.</p>
+<div class="actions"><button id="connectDrive" class="primary">☁ CONNECT GOOGLE DRIVE</button><button id="syncDrive" disabled>↻ SYNC NOW</button><button id="disconnectDrive" disabled>DISCONNECT</button></div>
+<p id="driveStatus" class="mini">DRIVE: belum terhubung</p>
+<hr style="border:0;border-top:1px solid #c9ccd0;width:100%">
+<h2>AI Engine</h2>
+<p>Agar Ellen bisa menjawab secara generatif, gunakan backend AI privat dengan kunci di server, bukan di browser atau Google Drive. Tanpa backend, mode lokal tetap bisa mencari dan menjelaskan knowledge yang tersimpan.</p>
+<div class="field"><label for="endpoint">Secure AI endpoint (Cloudflare Worker)</label><input id="endpoint" class="secret" type="url" placeholder="https://ellen-agent.example.workers.dev/chat" autocomplete="off"></div>
+<div class="actions"><button id="saveEndpoint" class="primary">SIMPAN ENDPOINT</button><button id="clearEndpoint">HAPUS ENDPOINT</button></div>
+<div class="warn">Backend memerlukan konfigurasi rahasia <code>OPENAI_API_KEY</code>, <code>GOOGLE_CLIENT_ID</code>, dan <code>ALLOWED_EMAIL</code>. Chat AI tidak aktif sampai endpoint siap dan Google login berhasil. Jangan masukkan API key ke kolom di atas.</div>
+<p class="mini">Repo kode: lafrich/virtual-office + lafrich/virtual-life-asset-pipeline. Read-only GitHub context pada backend; perubahan melalui review.</p>
+</div>
+</section>
+</main>
+<footer class="statusbar"><span class="state" id="mode">LOCAL KNOWLEDGE</span><span id="status">Ellen siap · memori tersimpan lokal</span></footer>
+</div>
+</body>
+</html>

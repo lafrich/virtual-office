@@ -5,12 +5,12 @@ const fs=require('node:fs');
 const path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 
-test('Membangun is the entry point with four current .EXE programs',()=>{
+test('Membangun is the entry point with five current .EXE programs',()=>{
  const s=read('membangun/index.html');
- assert.ok(s.includes("const ids=['mahluk','bangun','semesta','jiwa'];"));
+ assert.ok(s.includes("const ids=['mahluk','bangun','semesta','jiwa','ellen'];"));
  for(const [id,name] of [
   ['mahluk','MAHLUK HIDUP.EXE'],['bangun','BANGUN RUANG.EXE'],
-  ['semesta','SEMESTA.EXE'],['jiwa','JIWA.EXE']
+  ['semesta','SEMESTA.EXE'],['jiwa','JIWA.EXE'],['ellen','ELLEN.EXE']
  ]){
   assert.ok(s.includes('data-app="'+id+'"'),'launcher missing '+id+' button');
   assert.ok(s.includes('data-art="'+id+'"'),'launcher missing '+id+' preview');
@@ -21,6 +21,8 @@ test('Membangun is the entry point with four current .EXE programs',()=>{
   assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/jiwa/'));
+ assert.ok(s.includes('https://lafrich.github.io/virtual-office/ellen/'));
+ assert.ok(!s.includes('data-app="emotion"'),'Emosi remains inside Mahluk Hidup');
  assert.ok(s.includes("requestedApp=new URLSearchParams(location.search).get('app')"));
  assert.ok(s.includes("let selected=ids.includes(requestedApp)?requestedApp:'mahluk';"));
  assert.ok(s.includes("window.open(url,'_blank','noopener,noreferrer')"));
