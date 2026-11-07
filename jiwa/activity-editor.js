@@ -84,34 +84,41 @@ function editor(){
   '<div class="activity-bottom"><button id="activityDuplicate" type="button">⧉ DUPLICATE</button>'+
   '<button id="activityDelete" type="button">🗑 DELETE</button>'+
   '<button id="activityPreview" type="button">▶ PREVIEW FLOW</button></div>';
+ // Each field resolves the latest activity by stable ID. Replacing a
+ // normalized object must not invalidate the other field handlers.
+ const update=(patch,redraw=false)=>{
+  const index=draft.activities.findIndex(row=>row.id===selected);
+  if(index<0)return;
+  const prev=draft.activities[index];
+  draft.activities[index]=A.activity({...prev,...patch});
+  setDirty();
+  if(redraw)render();else renderValidation();
+ };
  area.querySelectorAll('[data-activity-field]').forEach(el=>el.addEventListener('change',()=>{
   const key=el.dataset.activityField,raw=el.type==='number'?Number(el.value):el.value;
-  a[key]=raw;
-  const index=draft.activities.indexOf(a);draft.activities[index]=A.activity(a);
-  if(key==='label'||key==='buildingQuery')render();else{setDirty();renderValidation();}
-  setDirty();
+  update({[key]:raw},key==='label'||key==='buildingQuery');
  }));
  area.querySelectorAll('[data-activity-stat]').forEach(el=>el.addEventListener('change',()=>{
-  a.statEffects[el.dataset.activityStat]=Number(el.value);
-  draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();renderValidation();
+  const prev=current();update({statEffects:{...prev.statEffects,[el.dataset.activityStat]:Number(el.value)}});
  }));
- $('activityEnabled').onchange=e=>{a.enabled=e.target.checked;draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();render();};
- $('activityObject').onchange=e=>{a.objectId=e.target.value;draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();render();};
- $('activityGrantType').onchange=e=>{a.grantType=e.target.value;draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();};
- $('activityIngredients').onchange=e=>{a.ingredients=e.target.value.split(',').map(s=>s.trim()).filter(Boolean);draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();};
+ $('activityEnabled').onchange=e=>update({enabled:e.target.checked},true);
+ $('activityObject').onchange=e=>update({objectId:e.target.value},true);
+ $('activityGrantType').onchange=e=>update({grantType:e.target.value});
+ $('activityIngredients').onchange=e=>update({ingredients:e.target.value.split(',').map(s=>s.trim()).filter(Boolean)});
  $('activityDuplicate').onclick=()=>{
-  const n=copy(a);let id=n.id+'_copy',i=2;while(draft.activities.some(x=>x.id===id))id=n.id+'_copy_'+i++;
+  const n=copy(current());let id=n.id+'_copy',i=2;while(draft.activities.some(x=>x.id===id))id=n.id+'_copy_'+i++;
   n.id=id;n.label+=' (Copy)';n.enabled=false;draft.activities.push(A.activity(n));selected=id;setDirty();render();
  };
  $('activityDelete').onclick=()=>{
-  if(!confirm('Hapus '+a.label+' dari katalog global?'))return;
-  draft.activities=draft.activities.filter(x=>x.id!==a.id);
+  const row=current();
+  if(!confirm('Hapus '+row.label+' dari katalog global?'))return;
+  draft.activities=draft.activities.filter(x=>x.id!==row.id);
   selected=draft.activities.find(x=>x.category===category)?.id||null;setDirty();render();
  };
  $('activityPreview').onclick=()=>{
-  const e=A.validation(a,entities());
-  notify('PREVIEW · '+a.steps+' · '+(e.length?'Binding: '+e.join('; '):'Target ditemukan')+
-   ' · Rp '+a.moneyDelta+' · EXP '+a.statEffects.experience);
+  const row=current(),e=A.validation(row,entities());
+  notify('PREVIEW · '+row.steps+' · '+(e.length?'Binding: '+e.join('; '):'Target ditemukan')+
+   ' · Rp '+row.moneyDelta+' · EXP '+row.statEffects.experience);
  };
 }
 function renderValidation(){
