@@ -146,3 +146,25 @@ test('Nokia screen remains open across HUD redraws and active game rules never s
  assert.match(phoneSource,/setGameProvider/);
  assert.match(gameplaySource,/transactions:\(state\.transactions\|\|\[\]\)\.slice\(\)\.reverse\(\)/);
 });
+
+test('every unselected quest draws its distinct icon directly on Nokia map',()=>{
+ const E=handset();
+ const data={wallet:4000,map:{bounds:{minX:0,maxX:100,minZ:0,maxZ:100},
+  terrain:[],player:{x:50,z:55},
+  sites:[
+   {id:'job',label:'Pak Ogah',x:10,z:10,icon:'office',placeholder:false},
+   {id:'toilet',label:'WC Umum',x:85,z:70,icon:'wc',placeholder:true}
+  ]}};
+ E.setGameProvider(()=>data);
+ E.ST.fakeNow=1000; // freeze player blink; only the unselected quest icon changes
+ E.press('OK');E.press('6');
+ assert.equal(E.depth(),3);
+ const first=E.draw();
+ data.map.sites[1].icon='tree'; // still unselected; should visibly change on LCD
+ const second=E.draw();
+ let changed=0;
+ for(let i=0;i<first.data.length;i++)if(first.data[i]!==second.data[i])changed++;
+ assert.ok(changed>0,'unselected location must render its actual category symbol');
+ assert.match(phoneSource,/rows\.forEach\(\(site,i\)=>\{if\(i!==s\.sel\)drawQuestPin\(site,false\)\}/);
+ assert.match(phoneSource,/MAP_QUEST_ICON/);
+});
