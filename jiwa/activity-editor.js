@@ -40,9 +40,53 @@ function list(){
   tab.title=(A.CATEGORIES.find(c=>c.id===tab.dataset.activityTab)?.hint||'')+' · '+n+' aktivitas';
  });
 }
+function presetStep(){
+ const area=$('activityEditor'),a=current(),P=A.PREMISES,config=P.CATEGORY[category];
+ if(!area||!config)return;
+ const format=(v,metric)=>metric==='moneyDelta'?'Rp'+Number(v).toLocaleString('id-ID'):
+  metric==='ingredients.length'?v+' bahan':metric==='durationMinutes'?v+' menit':v+' poin';
+ const currentTier=P.cfg(category,chosenTier).tier;
+ area.innerHTML='<div class="activity-head"><strong>01 · PILIH TEMPLATE PREMISE</strong><span class="activity-state draft">ALGORITHM RULES</span></div>'+
+  '<p class="activity-help">Semua sistem memakai level yang sama: tier → angka default → batas maksimum. Pilih template terlebih dahulu, lalu atur detail.</p>'+
+  (creating?'<label>Nama aktivitas baru<input id="presetNewName" value="Aktivitas Baru" maxlength="96" placeholder="Contoh: Kerja di Bank"></label>':
+    '<div class="activity-global">Mengedit: <b>'+esc(a?.label||'')+'</b> · Tier tersimpan: '+esc(a?.tier||'sepele')+'</div>')+
+  '<div class="premise-tiers">'+config.tiers.map(t=>'<button type="button" data-tier="'+t.id+'" class="premise-tier'+(chosenTier===t.id?' selected':'')+'">'+
+    '<strong>'+esc(t.label.toUpperCase())+'</strong><span>'+esc(config.metric)+': '+
+     format(t.range[0],config.metric)+' – '+format(t.range[1],config.metric)+'</span>'+
+    '<small>Durasi '+t.duration[0]+'–'+t.duration[1]+' menit · Syarat EXP '+t.exp[0]+'–'+t.exp[1]+'</small></button>').join('')+'</div>'+
+  '<div class="premise-preview"><b>DEFAULT: '+esc(currentTier.label)+'</b> · Durasi '+currentTier.defaultDuration+
+   ' menit · '+esc(config.metric)+' default '+format(currentTier.defaultValue,config.metric)+
+   ' · Upah/biaya '+Number(currentTier.defaultMoney??(config.metric==='moneyDelta'?currentTier.defaultValue:0)).toLocaleString('id-ID')+
+   '<br><b>Custom hanya di dalam range tier.</b> Melebihi batas? Pilih tier berikutnya.</div>'+
+  '<div class="premise-stage-actions">'+(creating?'':'<button id="presetKeep" type="button">LANJUT TANPA RESET</button>')+
+   '<button id="presetContinue" type="button" class="primary">'+(creating?'BUAT & LANJUT':'APPLY TEMPLATE & DETAIL')+' ▶</button></div>';
+ for(const button of area.querySelectorAll('[data-tier]'))
+  button.onclick=()=>{chosenTier=button.dataset.tier;presetStep();};
+ const proceed=keep=>{
+  if(creating){
+   const label=area.querySelector('#presetNewName')?.value.trim()||'Aktivitas Baru';
+   const rootId=label.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,50)||'aktivitas';
+   let id=rootId,n=2;while(draft.activities.some(x=>x.id===id))id=rootId+'_'+n++;
+   const defaults=P.preset(category,chosenTier);
+   draft.activities.push(A.activity({...defaults,id,label,category,enabled:false,
+    premise:'Karakter melakukan '+label.toLowerCase()+' sebagai bagian dari kehidupannya.'}));
+   selected=id;creating=false;setDirty();
+  }else if(!keep){
+   const index=draft.activities.findIndex(x=>x.id===selected),old=draft.activities[index];
+   if(old){const defaults=P.preset(category,chosenTier);
+    draft.activities[index]=A.activity({...old,...defaults,statEffects:defaults.statEffects});
+    setDirty();
+   }
+  }
+  stage='details';render();
+ };
+ area.querySelector('#presetKeep')?.addEventListener('click',()=>proceed(true));
+ area.querySelector('#presetContinue').onclick=()=>proceed(false);
+}
 function editor(){
  const area=$('activityEditor'),a=current();
  if(!area)return;
+ if(stage==='preset')return presetStep();
  if(!a){area.innerHTML='<div class="activity-empty">Belum ada aktivitas. Klik ＋ ADD ACTIVITY untuk membuat satu.</div>';return;}
  const currentObjects=entities().slice(0,1500);
  const status=A.validation(a,currentObjects);
