@@ -165,6 +165,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .v6b-silver-image{max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated}
 .art .v6b-silver-image{height:min(82%,400px);max-width:75%}
 @media(prefers-reduced-motion:reduce){.mb-globe-lands{animation:none!important}}
+.mb-globe-native{display:block;image-rendering:pixelated;object-fit:contain;max-width:100%;max-height:100%;width:min(75%,350px);height:auto;aspect-ratio:1}
+.file-thumb .mb-globe-native{width:90%}
+@media(prefers-reduced-motion:reduce){.mb-globe-native{animation-play-state:paused}}
 </style>
 </head>
 <body>
@@ -379,6 +382,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=t
 render();
 })();
 </script>
-<script src="./v6b-thumbnails.js?v=silver-globe-20261108"></script>
+<script src="./v6b-thumbnails.js?v=pipeline-native-20261108"></script>
 </body>
 </html>
