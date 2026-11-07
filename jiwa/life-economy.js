@@ -77,15 +77,13 @@ function normalize(raw){
  });
  // Editable activity catalog is global and stored separately from legacy
  // wages/jobs. Only published enabled activities can be executed by Semesta.
- base.worldEntities=(Array.isArray(source.worldEntities)?source.worldEntities:[])
-  .slice(0,300).map(v=>PREMISES.worldRule(v)).filter(v=>v.enabled);
  base.worldEntities=(Array.isArray(source.worldEntities)?source.worldEntities:[]).slice(0,300)
   .map(PREMISES.worldRule).filter(r=>r.enabled===true);
  base.activities=(Array.isArray(source.activities)?source.activities:[]).slice(0,300)
   .filter(a=>a&&/^[a-z0-9_-]{1,64}$/.test(a.id)&&a.enabled===true)
   .map(a=>({
    ...a,tier:PREMISES.cfg(a.category,a.tier||PREMISES.infer(a.category,a)).tier.id,
-   minExp:number(a.minExp,0,100000,0),
+   minExp:number(a.minExp,0,100,0),
    minEnergy:number(a.minEnergy,0,100,0),
    minHygiene:number(a.minHygiene,0,100,0),
    durationMinutes:number(a.durationMinutes,1,4320,20),

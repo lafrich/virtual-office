@@ -106,6 +106,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
   const ambient=sites.find(s=>s.id.startsWith('world:wall_pee:'));
   const map=window.VLPhoneEllen.gameSnapshot()?.map?.sites||[];
   return {a,ambient,mapActivity:map.some(s=>s.id==='act:bank_teller'),
+   demoSites:sites.filter(s=>['job_silver','job_pak_ogah','warung','public_wc','tent','kost'].includes(s.id)).map(s=>s.id),
    ambientOnMap:map.some(s=>s.id.startsWith('world:wall_pee:'))};
  });
  assert.equal(linked.a.sourceId,target.id);
@@ -114,6 +115,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.ok(linked.ambient,'marked ambient asset appears as own interaction site');
  assert.equal(linked.ambient.sourceId,target.id);
  assert.equal(linked.ambientOnMap,false,'ambient actions do not become quest pins');
+ assert.deepEqual(linked.demoSites,[],'Published Jiwa authoring cannot coexist with legacy placeholder and job sites');
  await jiwa.locator('[data-activity-tab="cooking"]').click();
  const cooking=await jiwa.evaluate(()=>window.JiwaActivityEditor.get().activities.find(a=>a.id==='nasi_goreng'));
  assert.deepEqual(cooking.ingredients,['nasi','telur','minyak']);

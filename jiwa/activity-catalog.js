@@ -36,7 +36,7 @@ function activity(raw={}){
   steps:str(raw.steps||'Dekati lokasi → tekan Action → lakukan aktivitas → terima hasil.',850),
   buildingQuery:str(raw.buildingQuery,110),objectId:str(raw.objectId,110),
   actionAsset:str(raw.actionAsset,110),actionSource:'mahluk-hidup',
-  minExp:num(raw.minExp,0,100000,0),
+  minExp:num(raw.minExp,0,100,0),
   minEnergy:num(raw.minEnergy,0,100,0),
   minHygiene:num(raw.minHygiene,0,100,0),
   durationMinutes:num(raw.durationMinutes,1,4320,20),
@@ -166,13 +166,13 @@ function eligibleTargets(objects=[],rules=[],cityId=''){
  return [...registered.values()];
 }
 function matchBuilding(entry,objects){
- const a=activity(entry),needle=a.buildingQuery.toLowerCase();
- if(!needle&&!a.objectId)return null;
- return (objects||[]).find(o=>{
-  if(a.objectId&&String(o.id)===a.objectId)return true;
-  if(!needle)return false;
-  return [o.id,o.name,o.label,o.asset,o.assetId,o.subtype,...(o.tags||[])].filter(Boolean).join(' ').toLowerCase().includes(needle);
- })||null;
+ const a=activity(entry),rows=objects||[];
+ // An exact selection must never fall back to another same-name object.
+ if(a.objectId)return rows.find(o=>String(o?.id)===a.objectId)||null;
+ const needle=a.buildingQuery.toLowerCase();
+ if(!needle)return null;
+ return rows.find(o=>[o.id,o.name,o.label,o.asset,o.assetId,o.subtype,...(o.tags||[])]
+  .filter(Boolean).join(' ').toLowerCase().includes(needle))||null;
 }
 function matchActivityTarget(entry,objects=[],rules=[],cityId=''){
  const a=activity(entry),available=eligibleTargets(objects,rules,cityId);

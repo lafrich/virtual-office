@@ -56,6 +56,7 @@ const name=o=>[o.name,o.label,o.asset,o.subtype,o.questId,...(Array.isArray(o.ta
 let bridge=null,active=false,projectId='',config=RULES?RULES.defaults():null;
 let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',progress=null;
 let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
+let publishedCatalog=false; // Separate unconfigured sandbox demo from Jiwa-authored rules
 let bagOpen=false,justWorkedAt=0,lastFaintCount=0;
 let navSelect=null,workHoldStart=0,workAnimation=0;
 let cachedMapOverview={bounds:{minX:-20,maxX:20,minZ:-20,maxZ:20},terrain:[]};
@@ -104,8 +105,10 @@ async function reloadRules(revision){
   const globalRules=city&&city.lifeEconomy?city:await projectFromJiwa('__jiwa_global__');
   if(!active||revision!==sessionRevision)return;
   const catalog=root.JiwaActivities?.readLocal?.(localStorage);
+  publishedCatalog=!!catalog?.updatedAt;
   config=RULES.normalize({...globalRules?.lifeEconomy,activities:catalog?.activities||[],worldEntities:catalog?.worldEntities||[]});
-  configSource=globalRules?.lifeEconomy?(city?.lifeEconomy?'JIWA CITY':'JIWA GLOBAL'):'DEFAULT V1';
+  configSource=(globalRules?.lifeEconomy?(city?.lifeEconomy?'JIWA CITY':'JIWA GLOBAL'):'DEFAULT V1')+
+   (publishedCatalog?' / AUTHORING':' / DEMO');
   if(state){const previous=state;state=RULES.stateFrom(previous,config);}
   buildSites();
   paintPanel();
@@ -132,7 +135,8 @@ function buildSites(){
  const world=getWorld(),objects=world.objects||[],bounds=worldBounds();
  const center={x:(bounds.minX+bounds.maxX)/2,z:(bounds.minZ+bounds.maxZ)/2};
  const maxRange=Math.min(28,Math.max(8,(bounds.maxX-bounds.minX+bounds.maxZ-bounds.minZ)/5));
- sites=SITES.map((d,i)=>{
+ // Prototype sites and imaginary placeholder jobs are strictly demo-only.
+ sites=publishedCatalog?[]:SITES.map((d,i)=>{
   const matches=objects.filter(o=>d.pattern.test(name(o)));
   const prayerIndex=d.id==='prayer_islam_b'?1:d.id==='prayer_islam_c'?2:0;
   const found=matches[prayerIndex]||(!d.id.startsWith('prayer_')?matches[0]:null);
@@ -172,7 +176,8 @@ function buildSites(){
  // Ambient interactions never create a quest marker in Nokia.
  const worldPremises=root.JiwaPremises;
  for(const rule of config.worldEntities||[]){
-  if(!rule.enabled||rule.operation==='none')continue;
+  // Historical name/asset queries remain editable, never executable.
+  if(!rule.enabled||rule.operation==='none'||rule.selectionMode!=='directory')continue;
   const candidates=objects.filter(o=>catalog?.kindOf?.(o)===rule.kind);
   const matches=worldPremises?.matchWorldAll?.(rule,candidates,projectId)||[];
   for(const found of matches.slice(0,300)){
@@ -405,8 +410,10 @@ function paintPanel(){
   optsButton('fine','💰 Bayar Denda Rp2.000')+optsButton('community_service','🧹 Bersihkan Gorong-gorong'):
   (state.restMinutes>0?optsButton('advance_time','⏩ Lewati 15 menit bed rest',{minutes:15}):
    bagOpen?bagMarkup():nodeButtons(n));
- const nextGoal=ownsRoom()?('🏠 Hidup mandiri: gunakan WC/kamar, beli furnitur lewat HP, dan kelola token listrik.'):
-  ('🎯 SURVIVAL: Kumpulkan '+money(config.settings.roomPrice)+' untuk akses kost (sekarang '+money(state.wallet)+'). Bekerja, mulung, atau mancing sambil menjaga energi & kebersihan.');
+ const nextGoal=publishedCatalog?
+  ('🏙️ JIWA AUTHORING · Hanya NPC, gedung, dan aset yang di-marking dalam World Entities untuk kota ini yang dapat berinteraksi. Tidak ada pekerjaan demo atau placeholder otomatis.'):
+  ownsRoom()?('🏠 Hidup mandiri: gunakan WC/kamar, beli furnitur lewat HP, dan kelola token listrik.'):
+  ('🎯 SANDBOX DEMO · Kumpulkan '+money(config.settings.roomPrice)+' untuk kost (sekarang '+money(state.wallet)+'). Aktivitas contoh hilang setelah katalog Jiwa disimpan.');
  el.innerHTML='<div class="slp-summary"><b>'+(ownsRoom()?'🏠 KOST':'⛺ HOBO')+'</b><b>'+money(state.wallet)+'</b><b>🎒 '+(state.inventory?.length||0)+'/'+(config.settings.bagSlots||8)+'</b><span>👥 Friends 🔒 V2</span></div>'+
   '<div class="slp-goal">'+nextGoal+'</div>'+
   '<div class="slp-stats">'+drawStats()+'</div>'+
@@ -415,7 +422,7 @@ function paintPanel(){
   (state.bladder>=80?'<div class="slp-alert">🚾 Kebelet pipis! Cari WC sebelum terlambat.</div>':'')+
   '<div class="slp-spot">📍 '+(bagOpen?'TAS / INVENTORI':n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')+'</div>'+
   '<div class="slp-actions" id="slpActions">'+result+'</div>'+
-  (state.bladder>=65&&!state.detained&&state.restMinutes===0?'<div class="slp-actions">'+optsButton('pee_outside','⚠ Pipis sembarangan (moral turun)')+'</div>':'')+
+  (!publishedCatalog&&state.bladder>=65&&!state.detained&&state.restMinutes===0?'<div class="slp-actions">'+optsButton('pee_outside','⚠ Pipis sembarangan (moral turun)')+'</div>':'')+
   '<div class="slp-actions"><button id="slpPhone" type="button">📱 NOKIA · PETA AKTIVITAS</button><button id="slpBag" type="button">'+(bagOpen?'← Kembali':'🎒 Tas')+'</button></div>'+  
   '<details><summary>🧪 ALAT TES (bukan aksi gameplay)</summary><p><small>Untuk mengecek skenario tanpa memodifikasi kota asli.</small></p>'+
   '<div class="slp-goto"><select id="slpDestination">'+options+'</select><button id="slpTravel" type="button">TELEPORT TEST</button></div>'+
@@ -509,6 +516,12 @@ function afterLifeTransition(previous){
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
+ // Also guard the public runAction API, not only the visible action menu.
+ if(publishedCatalog&&['pee_outside','fish','sell_fish','work','scavenge','sell_loak',
+  'catch_fruit','eat','coffee','public_toilet','public_shower','buy_room',
+  'home_toilet','home_shower','sleep','cook','store_fridge','take_fridge',
+  'store_home','take_home','rest','help','charity','worship'].includes(action))
+  return {ok:false,reason:'Aksi demo tidak berlaku setelah katalog Jiwa disimpan. Tandai objek dan atur aktivitas di Jiwa Entities.'};
  if(action==='respawn'){
   bridge?.respawn?.();return {ok:true,reason:'respawn'};
  }
@@ -617,6 +630,8 @@ function actorMoved(dt){
  }
 }
 function checkHansip(){
+ // Demo automatic arrest is not a substitute for authored Jiwa punishments.
+ if(publishedCatalog)return;
  if(!active||!state||state.detained||state.arrestGraceMinutes>0||state.moral>=config.settings.arrestMoralThreshold)return;
  const p=getPos();
  const witness=(getWorld().objects||[]).find(o=>/hansip|satpam|security.guard/i.test(name(o))&&
@@ -699,9 +714,10 @@ function start(){
  if(active)stop();
  projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;bagOpen=false;
  const gameCatalog=root.JiwaActivities?.readLocal?.(localStorage);
+ publishedCatalog=!!gameCatalog?.updatedAt;
  config=RULES.normalize({...defaults(),activities:gameCatalog?.activities||[],
   worldEntities:gameCatalog?.worldEntities||[]});
- configSource='DEFAULT V1';restore();buildSites();makeRoot();attachNokia();
+ configSource=publishedCatalog?'JIWA AUTHORING':'SANDBOX DEMO';restore();buildSites();makeRoot();attachNokia();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
  message('🎮 Play Mode aktif. '+(ownsRoom()?'Respawn di kost':'Mulai sebagai hobo; respawn dari tenda pinggiran kota')+'.');

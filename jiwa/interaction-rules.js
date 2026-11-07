@@ -9,42 +9,42 @@ const CATEGORY={
  money:{label:'Pekerjaan / Uang',metric:'moneyDelta',tiers:[
   {id:'sepele',label:'Sepele',range:[0,3000],duration:[1,30],exp:[0,19],money:[0,3000],defaultValue:1200,defaultDuration:12,defaultExp:0},
   {id:'menengah',label:'Menengah',range:[3001,10000],duration:[15,120],exp:[0,59],money:[3001,10000],defaultValue:5500,defaultDuration:50,defaultExp:25},
-  {id:'prestige',label:'Prestige',range:[10001,100000],duration:[60,480],exp:[40,100000],money:[10001,100000],defaultValue:20000,defaultDuration:180,defaultExp:70}
+  {id:'prestige',label:'Prestige',range:[10001,100000],duration:[60,480],exp:[40,100],money:[10001,100000],defaultValue:20000,defaultDuration:180,defaultExp:70}
  ]},
  energy:{label:'Kebutuhan Energi',metric:'statEffects.energy',tiers:[
-  {id:'sepele',label:'Ringan',range:[0,24],duration:[1,60],exp:[0,100000],money:[-25000,0],defaultValue:12,defaultDuration:8,defaultMoney:-1500},
-  {id:'menengah',label:'Standar',range:[25,65],duration:[10,260],exp:[0,100000],money:[-25000,0],defaultValue:42,defaultDuration:35,defaultMoney:-6000},
-  {id:'prestige',label:'Intensif',range:[66,100],duration:[20,480],exp:[0,100000],money:[-150000,0],defaultValue:85,defaultDuration:120,defaultMoney:-35000}
+  {id:'sepele',label:'Ringan',range:[0,24],duration:[1,60],exp:[0,100],money:[-25000,0],defaultValue:12,defaultDuration:8,defaultMoney:-1500},
+  {id:'menengah',label:'Standar',range:[25,65],duration:[10,260],exp:[0,100],money:[-25000,0],defaultValue:42,defaultDuration:35,defaultMoney:-6000},
+  {id:'prestige',label:'Intensif',range:[66,100],duration:[20,480],exp:[0,100],money:[-150000,0],defaultValue:85,defaultDuration:120,defaultMoney:-35000}
  ]},
  moral:{label:'Kebaikan / Kontribusi',metric:'statEffects.moral',tiers:[
-  {id:'sepele',label:'Kecil',range:[0,6],duration:[1,35],exp:[0,100000],money:[-2000,0],defaultValue:4,defaultDuration:12},
-  {id:'menengah',label:'Sosial',range:[7,15],duration:[10,150],exp:[0,100000],money:[-10000,0],defaultValue:10,defaultDuration:45},
-  {id:'prestige',label:'Pengabdian',range:[16,50],duration:[30,480],exp:[0,100000],money:[-50000,0],defaultValue:25,defaultDuration:160}
+  {id:'sepele',label:'Kecil',range:[0,6],duration:[1,35],exp:[0,100],money:[-2000,0],defaultValue:4,defaultDuration:12},
+  {id:'menengah',label:'Sosial',range:[7,15],duration:[10,150],exp:[0,100],money:[-10000,0],defaultValue:10,defaultDuration:45},
+  {id:'prestige',label:'Pengabdian',range:[16,50],duration:[30,480],exp:[0,100],money:[-50000,0],defaultValue:25,defaultDuration:160}
  ]},
  immoral:{label:'Pelanggaran / Risiko',metric:'statEffects.moral',tiers:[
-  {id:'sepele',label:'Ringan',range:[-8,-1],duration:[1,35],exp:[0,100000],money:[-2000,3000],risk:[0,25],defaultValue:-5,defaultDuration:5,defaultRisk:10},
-  {id:'menengah',label:'Serius',range:[-20,-9],duration:[5,120],exp:[0,100000],money:[-10000,15000],risk:[0,60],defaultValue:-14,defaultDuration:20,defaultRisk:30},
-  {id:'prestige',label:'Berat',range:[-100,-21],duration:[15,480],exp:[0,100000],money:[-100000,50000],risk:[0,100],defaultValue:-35,defaultDuration:80,defaultRisk:70}
+  {id:'sepele',label:'Ringan',range:[-8,-1],duration:[1,35],exp:[0,100],money:[-2000,3000],risk:[0,25],defaultValue:-5,defaultDuration:5,defaultRisk:10},
+  {id:'menengah',label:'Serius',range:[-20,-9],duration:[5,120],exp:[0,100],money:[-10000,15000],risk:[0,60],defaultValue:-14,defaultDuration:20,defaultRisk:30},
+  {id:'prestige',label:'Berat',range:[-100,-21],duration:[15,480],exp:[0,100],money:[-100000,50000],risk:[0,100],defaultValue:-35,defaultDuration:80,defaultRisk:70}
  ]},
  exp:{label:'Pendidikan / Keterampilan',metric:'statEffects.experience',tiers:[
-  {id:'sepele',label:'Pemula',range:[0,6],duration:[1,35],exp:[0,100000],money:[-2000,0],defaultValue:4,defaultDuration:20},
-  {id:'menengah',label:'Menengah',range:[7,16],duration:[15,150],exp:[0,100000],money:[-12000,0],defaultValue:11,defaultDuration:50},
-  {id:'prestige',label:'Mahir',range:[17,60],duration:[45,480],exp:[0,100000],money:[-100000,0],defaultValue:27,defaultDuration:180}
+  {id:'sepele',label:'Pemula',range:[0,6],duration:[1,35],exp:[0,100],money:[-2000,0],defaultValue:4,defaultDuration:20},
+  {id:'menengah',label:'Menengah',range:[7,16],duration:[15,150],exp:[0,100],money:[-12000,0],defaultValue:11,defaultDuration:50},
+  {id:'prestige',label:'Mahir',range:[17,60],duration:[45,480],exp:[0,100],money:[-100000,0],defaultValue:27,defaultDuration:180}
  ]},
  cooking:{label:'Masakan / Resep',metric:'ingredients.length',tiers:[
-  {id:'sepele',label:'Rumahan',range:[0,2],duration:[1,20],exp:[0,100000],money:[-2000,0],defaultValue:2,defaultDuration:10},
-  {id:'menengah',label:'Warung',range:[3,4],duration:[12,90],exp:[0,100000],money:[-12000,0],defaultValue:3,defaultDuration:25},
-  {id:'prestige',label:'Profesional',range:[5,12],duration:[25,240],exp:[0,100000],money:[-60000,0],defaultValue:6,defaultDuration:75}
+  {id:'sepele',label:'Rumahan',range:[0,2],duration:[1,20],exp:[0,100],money:[-2000,0],defaultValue:2,defaultDuration:10},
+  {id:'menengah',label:'Warung',range:[3,4],duration:[12,90],exp:[0,100],money:[-12000,0],defaultValue:3,defaultDuration:25},
+  {id:'prestige',label:'Profesional',range:[5,12],duration:[25,240],exp:[0,100],money:[-60000,0],defaultValue:6,defaultDuration:75}
  ]},
  buying:{label:'Belanja / Aset',metric:'moneyDelta',tiers:[
-  {id:'sepele',label:'Murah',range:[-5000,0],duration:[1,30],exp:[0,100000],money:[-5000,0],defaultValue:-2500,defaultDuration:6},
-  {id:'menengah',label:'Standar',range:[-50000,-5001],duration:[5,90],exp:[0,100000],money:[-50000,-5001],defaultValue:-20000,defaultDuration:12},
-  {id:'prestige',label:'Premium',range:[-1000000,-50001],duration:[10,300],exp:[0,100000],money:[-1000000,-50001],defaultValue:-150000,defaultDuration:30}
+  {id:'sepele',label:'Murah',range:[-5000,0],duration:[1,30],exp:[0,100],money:[-5000,0],defaultValue:-2500,defaultDuration:6},
+  {id:'menengah',label:'Standar',range:[-50000,-5001],duration:[5,90],exp:[0,100],money:[-50000,-5001],defaultValue:-20000,defaultDuration:12},
+  {id:'prestige',label:'Premium',range:[-1000000,-50001],duration:[10,300],exp:[0,100],money:[-1000000,-50001],defaultValue:-150000,defaultDuration:30}
  ]},
  punishment:{label:'Hukuman / Konsekuensi',metric:'durationMinutes',tiers:[
-  {id:'sepele',label:'Ringan',range:[1,30],duration:[1,30],exp:[0,100000],money:[-2000,0],defaultValue:12,defaultDuration:12},
-  {id:'menengah',label:'Sedang',range:[31,120],duration:[31,120],exp:[0,100000],money:[-10000,0],defaultValue:70,defaultDuration:70},
-  {id:'prestige',label:'Berat',range:[121,4320],duration:[121,4320],exp:[0,100000],money:[-100000,0],defaultValue:180,defaultDuration:180}
+  {id:'sepele',label:'Ringan',range:[1,30],duration:[1,30],exp:[0,100],money:[-2000,0],defaultValue:12,defaultDuration:12},
+  {id:'menengah',label:'Sedang',range:[31,120],duration:[31,120],exp:[0,100],money:[-10000,0],defaultValue:70,defaultDuration:70},
+  {id:'prestige',label:'Berat',range:[121,4320],duration:[121,4320],exp:[0,100],money:[-100000,0],defaultValue:180,defaultDuration:180}
  ]}
 };
 const TIERS=['sepele','menengah','prestige'];
@@ -141,7 +141,7 @@ function worldRule(data={}){
   statEffects:Object.fromEntries(['energy','fullness','hygiene','bladder','moral','experience']
    .map(k=>[k,Math.max(-100,Math.min(100,Math.round(Number(data.statEffects?.[k])||0)))])),
   enterable:data.enterable===true,riskPercent:Math.max(0,Math.min(100,Math.round(Number(data.riskPercent)||0))),
-  minExp:Math.max(0,Math.min(100000,Math.round(Number(data.minExp)||0)))};
+  minExp:Math.max(0,Math.min(100,Math.round(Number(data.minExp)||0)))};
 }
 function seedWorld(){
  return [
