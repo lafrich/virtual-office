@@ -62,7 +62,11 @@ test('old 6x6 interior migrates to 3x3 without losing WC action or blocking entr
 test('Semesta also normalizes old interior floors without rewriting map data',()=>{
  const code=read('bangun-ruang/semesta-interior-preview.js');
  assert.ok(code.includes('model.normalize(original,active.cfg)'));
- assert.ok(code.includes('spec?.footprint||item?.footprint'));
+ // The floor's own saved footprint must take priority over the generic
+ // exterior sprite metadata (which can be a {w,d} object, not an array).
+ assert.ok(code.includes('raw.floors[0]?.sourceFootprint'));
+ assert.ok(code.includes('item?.footprint.w'));
+ assert.ok(code.includes('model.refreshExternal?.()'));
  const studio=read('bangun-ruang/index.html');
  // These files deliberately receive new cache-bust versions on deployment.
  // Assert the actual loaded modules, not obsolete query parameters.
