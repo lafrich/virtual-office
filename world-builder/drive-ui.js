@@ -92,6 +92,15 @@ async function syncOnConnect(){
  try{
   info("AUTO SYNC · Comparing local projects with Google Drive ...");
   if(a.prepareLocalSync)await a.prepareLocalSync();
+  if(app==='bangun'&&a.importSemestaFurniture){
+   try{
+    info('AUTO SYNC · Loading Semesta furniture into Bangun Ruang…');
+    const result=await a.importSemestaFurniture();
+    syncNotes.imported+=result?.imported||0;
+    syncNotes.conflicts+=result?.conflicts||0;
+    syncNotes.failed+=result?.failed||0;
+   }catch(error){syncNotes.failed++;console.warn('Semesta furniture bridge',error)}
+  }
   const meta=readSyncMeta();
   let locals=await a.localRecords()||[];
   if(a.assetLocalRecords)locals.push(...(await a.assetLocalRecords()||[]));
