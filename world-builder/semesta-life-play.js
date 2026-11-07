@@ -534,7 +534,7 @@ function checkHansip(){
   sites.find(n=>n.id==='hansip'&&Math.hypot(n.x-p.x,n.z-p.z)<4);
  if(!witness)return;
  const result=RULES.run(config,state,'arrest',{witnessed:true});
- if(result.ok){state=result.state;persist();message('🚨 Hansip menangkapmu! Bayar denda atau kerja sosial.');}
+ if(result.ok){state=result.state;persist();message('🚨 Hansip menangkapmu! Bayar denda atau kerja sosial.');notifyHud();paintPanel();}
 }
 function tick(dt){
  if(!active||!state)return;
