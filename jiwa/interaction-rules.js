@@ -91,27 +91,28 @@ function violations(item){
  }
  return failures;
 }
-function matchWorld(rule,objects,cityId){
- if(!rule)return null;
- // Manual directory selections take precedence: marking is per saved city
- // and never silently expands to unrelated buildings/NPCs with the same name.
+function matchWorldAll(rule,objects,cityId){
+ if(!rule)return [];
+ const rows=(objects||[]).filter(Boolean);
+ // Directory mode never falls back to a broad text match, including when
+ // the final marked instance is removed.
  if(rule.selectionMode==='directory'||(Array.isArray(rule.targets)&&rule.targets.length)){
-  if(!cityId)return null;
-  const ids=new Set(rule.targets.filter(x=>x.cityId===String(cityId)).map(x=>String(x.objectId)));
-  return (objects||[]).find(o=>o&&ids.has(String(o.id)))||null;
+  if(!cityId)return [];
+  const ids=new Set((rule.targets||[]).filter(x=>x.cityId===String(cityId)).map(x=>String(x.objectId)));
+  return rows.filter(o=>ids.has(String(o.id)));
  }
  const query=String(rule.query||'').trim().toLowerCase(),mode=rule.matchMode||'name';
- if(!query)return null;
- return (objects||[]).find(obj=>{
-  if(!obj)return false;
+ if(!query)return [];
+ return rows.filter(obj=>{
   const name=String(obj.name||obj.label||obj.subtype||'').toLowerCase();
   const asset=String(obj.asset||obj.assetId||'').toLowerCase();
   if(mode==='id')return String(obj.id||'').toLowerCase()===query;
   if(mode==='asset')return asset===query;
   if(mode==='type')return String(obj.type||'').toLowerCase()===query;
   return name.includes(query)||asset.includes(query);
- })||null;
+ });
 }
+function matchWorld(rule,objects,cityId){return matchWorldAll(rule,objects,cityId)[0]||null;}
 const ENTITIES=['building','npc','object'];
 const OPERATIONS=['enter','npc_quest','ambient','none'];
 const MATCH_MODES=['name','asset','type','id'];
@@ -158,5 +159,5 @@ function seedWorld(){
  ];
 }
 return Object.freeze({CATEGORY,TIERS,cfg,infer,preset,bounds,violations,
- matchWorld,worldRule,seedWorld,ENTITIES,OPERATIONS,MATCH_MODES});
+ matchWorld,matchWorldAll,worldRule,seedWorld,ENTITIES,OPERATIONS,MATCH_MODES});
 });
