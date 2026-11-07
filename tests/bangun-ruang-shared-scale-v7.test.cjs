@@ -65,7 +65,7 @@ test('Semesta also normalizes old interior floors without rewriting map data',()
  // The floor's own saved footprint must take priority over the generic
  // exterior sprite metadata (which can be a {w,d} object, not an array).
  assert.ok(code.includes('raw.floors[0]?.sourceFootprint'));
- assert.ok(code.includes('item?.footprint.w'));
+ assert.ok(code.includes('item.footprint.w'));
  assert.ok(code.includes('model.refreshExternal?.()'));
  const studio=read('bangun-ruang/index.html');
  // These files deliberately receive new cache-bust versions on deployment.
