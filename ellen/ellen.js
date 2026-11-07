@@ -196,7 +196,7 @@ async function answerAI(prompt){
  const endpoint=getEndpoint();
  if(!endpoint||!connected())return {text:localAnswer(prompt),engine:"LOCAL"};
  const facts=allFacts().map(f=>({topic:f.topic,text:f.text,source:f.source||"seed"})).slice(0,230);
- const history=data.messages.slice(-12).map(m=>({role:m.role==="user"?"user":"assistant",content:m.text.slice(0,4500)}));
+ const history=data.messages.slice(0,-1).slice(-12).map(m=>({role:m.role==="user"?"user":"assistant",content:m.text.slice(0,4500)}));
  const res=await fetch(endpoint,{method:"POST",headers:{"Authorization":"Bearer "+bearer(),"Content-Type":"application/json"},
   body:JSON.stringify({message:prompt,history,knowledge:facts,repos:REPOS})});
  let json;try{json=await res.json()}catch{throw Error("AI backend tidak mengembalikan JSON")}
