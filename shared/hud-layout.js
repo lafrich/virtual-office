@@ -6,10 +6,11 @@
  if(root)root.VLHudLayout=api;
 })(typeof window!=='undefined'?window:typeof globalThis!=='undefined'?globalThis:null,function(root){
  'use strict';
- const ELEMENTS=['phone','bag','action','run','needs','toast','dock'];
+ const ELEMENTS=['lifePanel','phone','bag','action','run','needs','toast','dock'];
  const ANCHORS=['top-left','top-right','bottom-left','bottom-right'];
  const MIN_SCALE=0.5, MAX_SCALE=1.5, MIN_TAP=40;
  const SELECTORS={
+  lifePanel:['#semestaLifePlayPanel'],
   phone:['#vs-layer .vs-nk','.vs-nk','#ptWindow'],
   bag:['#ptWindow'],
   action:['#ptActionBtn'],
@@ -19,6 +20,7 @@
   dock:['#y2-dock']
  };
  const ORIGIN={
+  lifePanel:'top left',
   phone:'center center', bag:'top left', action:'center center',
   run:'bottom left', needs:'top left', toast:'top left', dock:'bottom right'
  };
@@ -32,6 +34,7 @@
  }
  function desktopProfile(){
   return {
+   lifePanel:slot(1,'top-left',10,10),
    phone:slot(1,'top-right',16,48),
    bag:slot(1,'top-left',16,48),
    action:slot(1,'bottom-right',12,10),
@@ -45,6 +48,7 @@
   // Smaller chrome on a 390×844 phone: windows shrink the most,
   // action/run stay at or above a 40px tap target.
   return {
+   lifePanel:slot(0.88,'top-left',5,5),
    phone:slot(0.72,'top-right',10,40),
    bag:slot(0.82,'top-left',10,40),
    action:slot(0.72,'bottom-right',10,10),
@@ -152,7 +156,7 @@
   return !(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y);
  }
  function resolveOverlaps(rects, mark){
-  const order=['needs','toast','dock','action','run','phone','bag'];
+  const order=['needs','toast','dock','action','run','phone','bag']; // LifePanel is movable but exempt from automatic HUD nudges.
   const nudged={};
   order.forEach(id=>{
    const cur=rects[id];if(!cur)return;
