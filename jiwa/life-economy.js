@@ -41,7 +41,7 @@ function defaults(){return {
  passiveEnergyMinutes:60,passiveBladderMinutes:20,passiveHygieneMinutes:90,
  passiveFullnessMinutes:35,faintRecoveryEnergy:25,tokenDurationMinutes:60,
  realSecondsPerGameMinute:8,seatRestEnergy:3},
- fish:copy(FISH),jobs:copy(JOBS)
+ fish:copy(FISH),jobs:copy(JOBS),activities:[]
 };}
 function normalize(raw){
  const base=defaults(),source=raw&&typeof raw==='object'?raw:{},s=source.settings||{};
@@ -73,6 +73,20 @@ function normalize(raw){
    minutes:number(next.minutes,1,100000,d.minutes),exp:number(next.exp,0,100,d.exp),
    minHygiene:number(next.minHygiene,0,100,d.minHygiene)};
  });
+ // Editable activity catalog is global and stored separately from legacy
+ // wages/jobs. Only published enabled activities can be executed by Semesta.
+ base.activities=(Array.isArray(source.activities)?source.activities:[]).slice(0,300)
+  .filter(a=>a&&/^[a-z0-9_-]{1,64}$/.test(a.id)&&a.enabled===true)
+  .map(a=>({
+   ...a, minExp:number(a.minExp,0,100000,0),
+   minEnergy:number(a.minEnergy,0,100,0),
+   minHygiene:number(a.minHygiene,0,100,0),
+   durationMinutes:number(a.durationMinutes,1,4320,20),
+   moneyDelta:number(a.moneyDelta,-1e9,1e9,0),
+   statEffects:Object.fromEntries(['energy','fullness','hygiene','bladder','moral','experience']
+    .map(k=>[k,number(a.statEffects?.[k],-100,100,0)])),
+   ingredients:(Array.isArray(a.ingredients)?a.ingredients:[]).slice(0,12)
+  }));
  return base;
 }
 function stateFrom(existing,config){
@@ -168,6 +182,37 @@ function doAction(config,previous,action,args={}){
   return reject('Masih bed rest / menjalani hukuman. Majukan waktu terlebih dahulu.');
  if(s.detained&&!['fine','community_service','advance_time'].includes(action))return reject('Ditahan hansip: bayar denda atau bersihkan gorong-gorong.');
  switch(action){
+ case 'configured_activity': {
+  const id=String(args.activityId||'');
+  const a=c.activities.find(v=>v.id===id);
+  if(!a)return reject('Aktivitas belum diaktifkan dalam Jiwa.');
+  if(s.experience<a.minExp)return reject('Perlu EXP '+a.minExp+' (sekarang '+s.experience+').');
+  if(s.energy<a.minEnergy)return reject('Energi belum memenuhi syarat '+a.minEnergy+'.');
+  if(s.hygiene<a.minHygiene)return reject('Kebersihan belum memenuhi syarat '+a.minHygiene+'.');
+  const cost=Math.max(0,-a.moneyDelta);
+  if(s.wallet<cost)return reject('Uang tidak cukup untuk aktivitas ini.');
+  const parts=[];
+  for(const ingredient of a.ingredients||[]){
+   const id=s.inventory.find(i=>i===ingredient||s.itemMeta?.[i]?.species===ingredient);
+   if(!id||parts.includes(id))return reject('Bahan belum lengkap: '+ingredient);
+   parts.push(id);
+  }
+  if(a.outputItem&&s.inventory.length-parts.length>=setting.bagSlots)
+   return reject('Tas penuh untuk hasil aktivitas.');
+  if(parts.length){
+   for(const id of parts){s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];}
+   changes.push('bahan terpakai: '+a.ingredients.join(', '));
+  }
+  if(a.moneyDelta<0)spend(-a.moneyDelta);
+  else if(a.moneyDelta>0){s.wallet=Math.min(1e9,s.wallet+a.moneyDelta);changes.push('uang +Rp'+a.moneyDelta);}
+  clock(a.durationMinutes);
+  for(const k of ['energy','fullness','hygiene','bladder','moral','experience']){
+   const diff=a.statEffects[k]||0;if(diff)stat(k,diff);
+  }
+  if(a.outputItem)add(a.outputItem,a.outputLabel||a.outputItem,999999);
+  changes.push('aktivitas '+String(a.label||a.id).slice(0,96));
+  break;
+ }
  case 'set_identity':{
   const religion=String(args.religion||'');
   const zodiac=String(args.zodiac||'');
@@ -451,7 +496,7 @@ function doAction(config,previous,action,args={}){
  }
  const delta=s.wallet-beforeWallet;
  if(delta!==0){
-  const names={sell_fish:'Jual ikan',sell_loak:'Jual barang bekas',buy_room:'Akses kost',
+  const names={configured_activity:(c.activities.find(a=>a.id===args.activityId)?.label||'Aktivitas Jiwa'),sell_fish:'Jual ikan',sell_loak:'Jual barang bekas',buy_room:'Akses kost',
    buy_furniture:'Beli furnitur',buy_fridge:'Beli kulkas',buy_token:'Token listrik',
    work:'Upah kerja',public_shower:'Mandi umum',shower:'Mandi',eat:'Makan warung',
    coffee:'Beli kopi',charity:'Sedekah',fine:'Denda hansip',luck_find:'Rezeki / nasib'};
