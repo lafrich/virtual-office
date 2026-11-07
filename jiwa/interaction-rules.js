@@ -12,7 +12,7 @@ const CATEGORY={
   {id:'prestige',label:'Prestige',range:[10001,100000],duration:[60,480],exp:[40,100000],money:[10001,100000],defaultValue:20000,defaultDuration:180,defaultExp:70}
  ]},
  energy:{label:'Kebutuhan Energi',metric:'statEffects.energy',tiers:[
-  {id:'sepele',label:'Ringan',range:[0,24],duration:[1,60],exp:[0,100000],money:[-5000,0],defaultValue:12,defaultDuration:8,defaultMoney:-1500},
+  {id:'sepele',label:'Ringan',range:[0,24],duration:[1,60],exp:[0,100000],money:[-25000,0],defaultValue:12,defaultDuration:8,defaultMoney:-1500},
   {id:'menengah',label:'Standar',range:[25,65],duration:[10,260],exp:[0,100000],money:[-25000,0],defaultValue:42,defaultDuration:35,defaultMoney:-6000},
   {id:'prestige',label:'Intensif',range:[66,100],duration:[20,480],exp:[0,100000],money:[-150000,0],defaultValue:85,defaultDuration:120,defaultMoney:-35000}
  ]},
