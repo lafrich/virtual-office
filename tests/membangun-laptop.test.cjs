@@ -20,10 +20,10 @@ test('all referenced mini laptop control IDs exist', () => {
   for (const id of references) assert.ok(ids.has(id), 'Missing ID '+id);
 });
 
-test('launcher mini laptop entry and five apps are wired', () => {
+test('launcher mini laptop entry and four apps are wired', () => {
   assert.match(launcher, /id="laptopMode"/);
   assert.match(launcher, /laptop\.html\?app=/);
-  for (const name of ['mahluk', 'emotion', 'bangun', 'semesta', 'jiwa']) {
+  for (const name of ['mahluk', 'bangun', 'semesta', 'jiwa']) {
     assert.match(laptop, new RegExp("id:'"+name+"'"));
   }
 });
