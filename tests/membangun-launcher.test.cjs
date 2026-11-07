@@ -16,7 +16,8 @@ test('Membangun is the entry point with five current .EXE programs',()=>{
   assert.ok(s.includes('data-art="'+id+'"'),'launcher missing '+id+' preview');
   assert.ok(s.includes(name),'launcher missing '+name+' label');
  }
- assert.ok(s.includes('https://lafrich.github.io/virtual-life-asset-pipeline/'));
+ assert.ok(s.includes('https://lafrich.github.io/virtual-life-asset-pipeline/v6p-studio.html'));
+ assert.ok(!s.includes('v6b-reset-studio.html'));
   assert.ok(s.includes('https://lafrich.github.io/virtual-office/emotion-studio/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/'));
