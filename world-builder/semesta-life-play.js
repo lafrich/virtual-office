@@ -104,7 +104,7 @@ async function reloadRules(revision){
   const globalRules=city&&city.lifeEconomy?city:await projectFromJiwa('__jiwa_global__');
   if(!active||revision!==sessionRevision)return;
   const catalog=root.JiwaActivities?.readLocal?.(localStorage);
-  config=RULES.normalize({...globalRules?.lifeEconomy,activities:catalog?.activities||[]});
+  config=RULES.normalize({...globalRules?.lifeEconomy,activities:catalog?.activities||[],worldEntities:catalog?.worldEntities||[]});
   configSource=globalRules?.lifeEconomy?(city?.lifeEconomy?'JIWA CITY':'JIWA GLOBAL'):'DEFAULT V1';
   if(state){const previous=state;state=RULES.stateFrom(previous,config);}
   buildSites();
@@ -167,6 +167,21 @@ function buildSites(){
     action:'configured_activity',activityId:a.id,actionAsset:a.actionAsset,
     sourceId:String(found.id||''),placeholder:false,x:pos.x,z:pos.z});
   }
+ }
+ // Buildings, quest-giving NPCs, and ambient props use actual placed objects.
+ // Ambient interactions never create a quest marker in Nokia.
+ const worldPremises=root.JiwaPremises;
+ for(const rule of config.worldEntities||[]){
+  const found=worldPremises?.matchWorld?.(rule,objects);
+  if(!found)continue;
+  const pos=findLanding(Number(found.x)||0,Number(found.z)||0);
+  const opts={id:'world:'+rule.id,label:rule.label,worldRuleId:rule.id,
+   operation:rule.operation,sourceId:String(found.id||''),placeholder:false,
+   actionAsset:rule.actionAsset,activityId:rule.operation==='npc_quest'?rule.activityId:null,
+   ambient:rule.operation==='ambient',x:pos.x,z:pos.z,icon:rule.operation==='npc_quest'?'❗':'🚪'};
+  if(rule.operation==='npc_quest'&&!config.activities.some(a=>a.id===rule.activityId))continue;
+  if(rule.operation==='enter'&&!rule.enterable)continue;
+  sites.push(opts);
  }
  rebuildNokiaMapOverview();
 }
@@ -326,7 +341,13 @@ function nodeButtons(n){
  if(!n)return '<small>Berjalan ke pin di kota untuk berinteraksi (WASD / panah). Tombol Action di HUD dipakai untuk aksi terdekat.</small>';
  const id=n.id;let entries=[];
  const button=(action,label,args={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(args))+'">'+label+'</button>';
- if(n.activityId)entries=[button('configured_activity','▶ '+esc(n.label),{activityId:n.activityId}),
+ if(n.worldRuleId){
+  if(n.operation==='ambient')entries=[button('world_ambient','▶ '+esc(n.label),{ruleId:n.worldRuleId}),
+   '<small>NON-QUEST · '+esc(n.actionAsset||'Aksi objek')+'</small>'];
+  if(n.operation==='enter')entries=[button('world_enter','🚪 '+esc(n.label),{ruleId:n.worldRuleId})];
+  if(n.operation==='npc_quest')entries=[button('world_quest','❗ '+esc(n.label),{ruleId:n.worldRuleId})];
+ }
+ if(n.activityId&&!n.worldRuleId)entries=[button('configured_activity','▶ '+esc(n.label),{activityId:n.activityId}),
   '<small>JiWA · '+esc(n.actionAsset||'Action asset belum dipilih')+' · lokasi: '+esc(n.sourceId)+'</small>'];
  if(id==='fish')entries=[button('fish','🎣 Mancing',{spotId:n.sourceId||'water_placeholder'})];
  if(['siomay_batagor','pasar_ikan'].includes(id))entries=['<select id="slpItem">'+itemOptions('fish')+'</select>',button('sell_fish','💰 Jual Ikan',{buyerId:id})];
@@ -489,6 +510,29 @@ function runAction(action,args={}){
   bridge?.respawn?.();return {ok:true,reason:'respawn'};
  }
  const node=nearest();
+ if(['world_ambient','world_enter','world_quest'].includes(action)){
+  const ruleId=String(args.ruleId||'');
+  if(node?.id!=='world:'+ruleId||node.placeholder)
+   return {ok:false,reason:'Dekati entity interaksi yang cocok di Semesta.'};
+  const rule=config.worldEntities?.find(x=>x.id===ruleId);
+  if(!rule||rule.operation!==({world_ambient:'ambient',world_enter:'enter',world_quest:'npc_quest'}[action]))
+   return {ok:false,reason:'World rule tidak valid atau belum diaktifkan.'};
+  if(action==='world_enter'){
+   if(!rule.enterable||!bridge?.openInteriorById?.(node.sourceId)){
+    message('⛔ Interior Bangun Ruang belum tersedia untuk gedung ini.');
+    return {ok:false,reason:'Interior belum dibuat atau belum dapat dimasuki.'};
+   }
+   message('🚪 Masuk '+rule.label);
+   return {ok:true,reason:'Interior dibuka'};
+  }
+  if(action==='world_quest'){
+   if(!config.activities.some(x=>x.id===rule.activityId))
+    return {ok:false,reason:'Quest NPC belum terhubung ke aktivitas yang aktif.'};
+   message('❗ '+rule.label+' memberi quest: '+(config.activities.find(x=>x.id===rule.activityId)?.label||rule.activityId));
+   return {ok:true,reason:'Quest NPC ditawarkan',activityId:rule.activityId};
+  }
+  action='world_ambient';args={...args,ruleId};
+ }
  if(action==='configured_activity'){
   const expected='act:'+String(args.activityId||'');
   if(node?.id!==expected||node.placeholder)return {ok:false,reason:'Datangi bangunan aktivitas yang sesuai di Semesta.'};
@@ -534,6 +578,10 @@ function handleAction(){
   if(performance.now()-justWorkedAt<550)return true;
   message('TAHAN tombol Action (atau tombol KERJA di panel) sampai progress penuh.');
   paintPanel();return true;
+ }
+ if(node.worldRuleId){
+  runAction(node.operation==='ambient'?'world_ambient':node.operation==='enter'?'world_enter':'world_quest',
+   {ruleId:node.worldRuleId});return true;
  }
  if(node.activityId){runAction('configured_activity',{activityId:node.activityId});return true;}
  if(node.id==='siomay_batagor'||node.id==='pasar_ikan'||node.id==='loak'){
@@ -627,7 +675,7 @@ function nokiaSnapshot(){
   furnitureCatalog:RULES.FURNITURE.map(v=>({...v})),
   map:{
    player:{x:Number(getPos().x)||0,z:Number(getPos().z)||0},bounds:cachedMapOverview.bounds,terrain:cachedMapOverview.terrain,
-   sites:sites.map(n=>({id:n.id,label:n.label,icon:iconFor(n),
+   sites:sites.filter(n=>!n.ambient).map(n=>({id:n.id,label:n.label,icon:iconFor(n),
     x:n.x,z:n.z,placeholder:!!n.placeholder}))
   },
   runAction:(action,args)=>runAction(action,args)
@@ -647,8 +695,9 @@ function start(){
  if(active&&id===projectId)return true;
  if(active)stop();
  projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;bagOpen=false;
- config=RULES.normalize({...defaults(),
-  activities:root.JiwaActivities?.readLocal?.(localStorage)?.activities||[]});
+ const gameCatalog=root.JiwaActivities?.readLocal?.(localStorage);
+ config=RULES.normalize({...defaults(),activities:gameCatalog?.activities||[],
+  worldEntities:gameCatalog?.worldEntities||[]});
  configSource='DEFAULT V1';restore();buildSites();makeRoot();attachNokia();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
