@@ -115,7 +115,7 @@ function renderDirectoryPanel(){
    if(enabled)targetMap.set(key,{cityId,objectId:String(o.id)});
    else targetMap.delete(key);
   }
-  if(update({targets:[...targetMap.values()]}))renderDirectoryPanel();
+  if(update({targets:[...targetMap.values()],selectionMode:'directory',enabled:enabled||selected().enabled}))render();
  };
  for(const o of showing){
   const line=document.createElement('label');line.className='activity-directory-row';
@@ -129,7 +129,7 @@ function renderDirectoryPanel(){
  }
  const limit=document.createElement('div');limit.className='activity-help';
  limit.textContent='Menampilkan '+showing.length+' dari '+matches.length+
-  ' hasil. Centang beberapa directory yang boleh berinteraksi; kemudian Enable + SAVE WORLD RULES.';
+  ' hasil. Mark akan mengaktifkan rule. Tekan SAVE WORLD RULES setelah memilih.';
  list.append(limit);
  $('worldDirectoryMarkAll').onclick=()=>mark(showing,true);
  $('worldDirectoryUnmarkAll').onclick=()=>mark(showing,false);
@@ -165,7 +165,7 @@ function detailForm(){
     '✓ Match objek nyata: '+esc(match.name||match.asset||match.id):
     '⚠ Belum ada objek cocok di kota preview. Tidak akan muncul di gameplay.')+'</p></div>'+
   '<div class="activity-fieldset"><h4>02 · DIRECTORY SEMESTA / MARK INTERAKTIF</h4>'+
-  '<p class="activity-help">Pilih beberapa ID dari directory city yang boleh memakai rule ini. Tidak otomatis menandai seluruh bangunan, NPC atau asset. Marking disimpan per city.</p>'+
+  '<p class="activity-help">Pilih beberapa ID dari directory city yang boleh memakai rule ini. Marking disimpan per city dan mengaktifkan rule; jika semua di-unmark, tidak ada fallback otomatis ke nama umum.</p>'+
   '<div class="activity-pair"><label>Cari Directory<input id="worldDirectorySearch" type="search" placeholder="Cari nama / ID / asset..."></label>'+
   '<button id="worldDirectoryRefresh" type="button">↻ REFRESH SYNC SEMESTA</button></div>'+
   '<p id="worldDirectoryCount" class="activity-help"></p>'+
