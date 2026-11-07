@@ -252,8 +252,23 @@ function tab(which){
  if(which==='context')window.dispatchEvent(new Event('jiwa:context:render'));
  if(which==='play')window.dispatchEvent(new Event('jiwa:life:render'));
 }
+function lifeSpawnHints(){
+ const objects=state.entities||[],coords=objects.filter(o=>Number.isFinite(Number(o.x))&&Number.isFinite(Number(o.z)));
+ const xs=coords.map(o=>Number(o.x)),zs=coords.map(o=>Number(o.z));
+ const bounds={minX:xs.length?Math.min(...xs)-5:-24,maxX:xs.length?Math.max(...xs)+5:24,
+  minZ:zs.length?Math.min(...zs)-5:-24,maxZ:zs.length?Math.max(...zs)+5:24};
+ const name=o=>[o.name,o.label,o.asset,o.subtype,...(o.tags||[])].filter(Boolean).join(' ');
+ const tents=coords.filter(o=>/tenda|tent|hobo_camp|camping/i.test(name(o))).map(o=>({id:o.id,x:Number(o.x),z:Number(o.z),placeholder:false}));
+ const rooms=coords.filter(o=>/kost|kos_|cove|kamar|boarding.?room/i.test(name(o)));
+ const room=rooms[0];
+ const roomSpawn=room?{id:room.id,x:Number(room.x),z:Number(room.z),placeholder:false}:
+  {id:'kost_preview_placeholder',x:(bounds.minX+bounds.maxX)/2+3,z:(bounds.minZ+bounds.maxZ)/2+3,placeholder:true};
+ return {tents,bounds,roomSpawn};
+}
 function resetTest(){
- const s=state.project?.systems||defaults();state.test=JF.newTestState(s,state.project?.foundation);state.testLines=['Sandbox reset · player wallet Rp '+Number(s.wallet||0).toLocaleString('id-ID')];
+ const s=state.project?.systems||defaults();state.test=JF.newTestState(s,state.project?.foundation);
+ if(state.project){const initial=JLE.run(state.project.lifeEconomy,state.test,'respawn',lifeSpawnHints());if(initial.ok)state.test=initial.state;}
+ state.testLines=['Sandbox reset · player wallet Rp '+Number(s.wallet||0).toLocaleString('id-ID')+' · '+(state.test.spawn==='hobo'?'hobo / tenda pinggiran kota':'kost pribadi')];
  renderTest();
 }
 function logTest(message){state.testLines.unshift(new Date().toLocaleTimeString('id-ID')+'  '+message);state.testLines=state.testLines.slice(0,55);renderTest();}
@@ -450,7 +465,8 @@ window.JiwaContextBridge=Object.freeze({
  entities:()=>visibleEntities(),
  lifeRun:(action,payload)=>{
    if(!state.project||!state.test)return {ok:false,reason:'City not loaded'};
-   const result=JLE.run(state.project.lifeEconomy,state.test,action,payload||{});
+   const data=action==='respawn'?{...lifeSpawnHints(),...(payload||{})}:payload||{};
+   const result=JLE.run(state.project.lifeEconomy,state.test,action,data);
    if(result.ok)state.test=result.state;
    logTest((result.ok?'OK · ':'BLOCKED · ')+action+' · '+(result.ok?result.changes.join(' · '):result.reason));
    return result;
