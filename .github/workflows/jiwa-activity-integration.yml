@@ -1,0 +1,54 @@
+name: Jiwa Activity Premise Editor — Integration
+on:
+  push:
+    branches: [main]
+    paths:
+      - "jiwa/index.html"
+      - "jiwa/jiwa.js"
+      - "jiwa/activity-catalog.js"
+      - "jiwa/activity-editor.js"
+      - "jiwa/life-economy.js"
+      - "world-builder/semesta-life-play.js"
+      - "world-builder/index.html"
+      - "world-builder/drive-sync.js"
+      - "tests/jiwa-activity-flow.test.cjs"
+      - "tests/jiwa-activity-editor.e2e.cjs"
+      - ".github/workflows/jiwa-activity-integration.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  economy-and-ux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - name: Checkout virtual-office
+        uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - name: Checkout game asset pipeline
+        uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check activity, engine and Drive scripts
+        run: |
+          cd virtual-office
+          node --check jiwa/activity-catalog.js
+          node --check jiwa/activity-editor.js
+          node --check jiwa/life-economy.js
+          node --check jiwa/jiwa.js
+          node --check world-builder/semesta-life-play.js
+          node --check world-builder/drive-sync.js
+          node --test tests/jiwa-activity-flow.test.cjs
+      - name: Install Playwright
+        run: npm install --no-save playwright@1.56.1
+      - name: Serve game and mechanics
+        run: |
+          python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/jiwa-activity.log 2>&1 &
+          sleep 2
+      - name: "Browser test: eight icon tabs, Save, Semesta bind, Nokia quest map"
+        run: node virtual-office/tests/jiwa-activity-editor.e2e.cjs
