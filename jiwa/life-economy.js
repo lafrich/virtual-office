@@ -189,7 +189,10 @@ function doAction(config,previous,action,args={}){
   s.luckClaims++;s.luckCooldownUntil=s.elapsedMinutes+40;
   const threshold=Math.min(.35,.05+s.moral/1000*2);
   if(roll<threshold){s.wallet+=500;changes.push('rezeki tak terduga +Rp500');}
-  else changes.push('tidak menemukan rezeki');
+  else if(s.moral<25&&roll>.85){
+   const loss=Math.min(200,s.wallet);s.wallet-=loss;s.hygiene=Math.max(0,s.hygiene-3);
+   changes.push('NASIB BURUK · uang -Rp'+loss+' · kebersihan -3');
+  }else changes.push('tidak menemukan rezeki');
   break;
  }
  case 'arrest':{
