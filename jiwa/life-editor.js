@@ -7,7 +7,7 @@
  if(!E||!B||!editor||!game)return;
  const $=(id)=>document.getElementById(id);
  const esc=x=>String(x??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
- let player={x:0,z:0},focusId='fishing',sceneCityId='',sequence=0,viewZoom=1;
+ let player={x:0,z:0},anchor={x:0,z:0},focusId='fishing',sceneCityId='',sequence=0,viewZoom=1;
  function config(){return E.normalize(B.project()?.lifeEconomy);}
  function cash(n){return 'Rp'+Number(n||0).toLocaleString('id-ID');}
  function dispatch(action,payload={}){
@@ -71,6 +71,17 @@
   if(a.length){player.x=Math.round(a.reduce((n,o)=>n+(Number(o.x)||0),0)/a.length);
    player.z=Math.round(a.reduce((n,o)=>n+(Number(o.z)||0),0)/a.length);}
   else {player={x:0,z:0};}
+  anchor={x:player.x,z:player.z};
+  for(const sp of spots){sp.x=anchor.x+sp.dx;sp.z=anchor.z+sp.dz;sp.placeholder=true;}
+  const terrain=cityData().map?.terrain?.cells||[];
+  const water=terrain.filter(t=>['river','water'].includes(t.type))
+    .sort((a,b)=>Math.hypot((Number(a.c)||0)-anchor.x,(Number(a.r)||0)-anchor.z)-Math.hypot((Number(b.c)||0)-anchor.x,(Number(b.r)||0)-anchor.z))[0];
+  if(water){spots[0].x=Number(water.c)||0;spots[0].z=Number(water.r)||0;spots[0].placeholder=false;}
+  const all=entities();
+  for(const [spotId,pattern] of [['siomay_batagor',/siomay|batagor/i],['pasar_ikan',/pasar.*ikan|fish.*market/i],['tree',/pohon|tree/i]]){
+   const match=all.find(o=>pattern.test([o.name,o.asset,o.subtype].join(' ')));
+   if(match){const sp=spots.find(v=>v.id===spotId);sp.x=Number(match.x)||0;sp.z=Number(match.z)||0;sp.placeholder=false;}
+  }
   focusId='fishing';viewZoom=1;
  }
  function actorSprite(){return window.JiwaActorLink&&window.JiwaActorLink.record;}
@@ -105,11 +116,16 @@
   $('lifeRest').onclick=()=>act('rest',{minutes:15});
   $('lifeAdvance').onclick=()=>act('advance_time',{minutes:30});
   game.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>move(b.dataset.move));
-  game.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>{focusId=b.dataset.focus;renderGame();});
+  game.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>{focusId=b.dataset.focus;const sp=spots.find(v=>v.id===focusId);if(sp){player.x=sp.x;player.z=sp.z;}renderGame();});
   game.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{viewZoom=Math.max(.55,Math.min(2.3,viewZoom+(Number(b.dataset.zoom)*.2)));renderGame();});
   draw();
  }
  function act(action,args){
+  const required=action==='fish'?'fishing':action==='catch_fruit'?'tree':action==='sell_fish'?args.buyerId:null;
+  const point=spots.find(v=>v.id===required);
+  if(point&&Math.hypot(player.x-point.x,player.z-point.z)>1.8){
+   if($('lifeFeedback'))$('lifeFeedback').textContent='DEKATI LOKASI: '+point.name+' dahulu (atau pilih pin untuk teleport sandbox).';return;
+  }
   const result=dispatch(action,args);
   const text=(result.ok?'BERHASIL: '+result.changes.join(' · '):'DITOLAK: '+result.reason);
   if($('lifeFeedback'))$('lifeFeedback').textContent=text;
@@ -136,7 +152,7 @@
    for(const t of visible)tile(Number(t.c)||0,Number(t.r)||0,t.type);
   }else for(let x=Math.floor(player.x)-14;x<=player.x+14;x++)for(let z=Math.floor(player.z)-14;z<=player.z+14;z++)tile(x,z,'grass');
   const objs=entities().filter(o=>Math.abs((Number(o.x)||0)-player.x)<19&&Math.abs((Number(o.z)||0)-player.z)<19).slice(0,400);
-  const all=objs.map(o=>({x:Number(o.x)||0,z:Number(o.z)||0,o})).concat(spots.map(sp=>({x:player.x+sp.dx,z:player.z+sp.dz,sp})));
+  const all=objs.map(o=>({x:Number(o.x)||0,z:Number(o.z)||0,o})).concat(spots.map(sp=>({x:sp.x,z:sp.z,sp})));
   all.sort((a,b)=>(a.x+a.z)-(b.x+b.z));
   for(const item of all){
    const p=iso(item.x,item.z);if(p.x<0||p.x>w||p.y<-25||p.y>h+25)continue;
@@ -144,7 +160,7 @@
     ctx.font='25px sans-serif';ctx.textAlign='center';ctx.fillText(item.sp.emoji,p.x,p.y-13);
     ctx.fillStyle=item.sp.id===focusId?'#fff5c4':'#ffffffd9';ctx.fillRect(p.x-58,p.y-10,116,18);
     ctx.font='11px Tahoma';ctx.fillStyle='#1d394e';ctx.fillText(item.sp.name.replace(/^.. /,''),p.x,p.y+2);
-    ctx.font='9px Tahoma';ctx.fillText('PLACEHOLDER',p.x,p.y+12);
+    if(item.sp.placeholder){ctx.font='9px Tahoma';ctx.fillText('PLACEHOLDER',p.x,p.y+12);}
    }else{
     const o=item.o,building=o.layer==='structure'||['building','shop'].includes(o.type);
     ctx.fillStyle=building?'#b77b56':o.type==='vehicle'?'#e2a147':o.layer==='vegetation'?'#57906f':'#6686a6';
