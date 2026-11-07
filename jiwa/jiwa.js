@@ -457,6 +457,7 @@ window.JiwaGameplayBridge=Object.freeze({
   renderSystems();renderTest();
  },
  entities:()=>visibleEntities(),
+ selected:()=>selectedObject(),
  city:()=>state.record,
  inventory:()=>(state.test&&state.test.inventory)||[],
  runAction

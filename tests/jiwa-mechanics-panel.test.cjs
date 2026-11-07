@@ -48,3 +48,10 @@ test('mechanics panel exposes HUD Layout scales and reset',()=>{
  assert.match(panel,/hudLayoutReset/);
  assert.match(panel,/Phone profile/);
 });
+test('mechanics panel exposes Spawn & Respawn settings',()=>{
+ assert.match(panel,/SPAWN & RESPAWN/);
+ assert.match(panel,/exitTentAnimation/);
+ assert.match(panel,/previewOwnsRoom/);
+ assert.match(panel,/Add tent point/);
+ assert.doesNotMatch(panel,/Ichsan always/);
+});

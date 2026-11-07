@@ -58,3 +58,15 @@ test('walkSpeedAt slows when energy preview is enabled',()=>{
  assert.ok(G.walkSpeedAt(g,false,0)<2);
  assert.ok(G.walkSpeedAt(g,true,80)>G.walkSpeedAt(g,false,80));
 });
+test('spawnRespawn module defaults and normalize stay generic',()=>{
+ const g=G.defaultGameplay();
+ assert.equal(g.modules.spawnRespawn.enabled,true);
+ assert.equal(g.modules.spawnRespawn.exitTentAnimation,true);
+ assert.equal(g.modules.spawnRespawn.previewOwnsRoom,false);
+ assert.ok(g.modules.spawnRespawn.pool.length>=6);
+ const n=G.normalizeGameplay({modules:{spawnRespawn:{exitTentAnimation:false,previewOwnsRoom:true,ichsanRoom:1,pool:[{x:1.25,z:2.5,facing:'nw'}]}}});
+ assert.equal(n.modules.spawnRespawn.exitTentAnimation,false);
+ assert.equal(n.modules.spawnRespawn.previewOwnsRoom,true);
+ assert.equal(n.modules.spawnRespawn.pool[0].facing,'se');
+ assert.equal(n.modules.spawnRespawn.ichsanRoom,undefined);
+});

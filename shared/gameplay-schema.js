@@ -19,6 +19,11 @@
   if(typeof require==='function'){try{return require('./hud-layout.js');}catch(_e){}}
   return null;
  }
+ function spawnApi(){
+  if(typeof globalThis!=='undefined'&&globalThis.VLSpawnRespawn)return globalThis.VLSpawnRespawn;
+  if(typeof require==='function'){try{return require('./spawn-respawn.js');}catch(_e){}}
+  return null;
+ }
  function defaultGameplay(){
   return {
    schema:SCHEMA,schemaVersion:1,project:{name:PROJECT_NAME},
@@ -34,6 +39,7 @@
     traffic:{enabled:false,todo:true,densityCycle:'shared_deterministic',busyRatio:0.6,quietRatio:0.3},
     loak:{enabled:false,todo:true,sellPercent:5},
     trafficLights:{enabled:true,cycleSeconds:32},
+    spawnRespawn:spawnApi()?spawnApi().defaultModule():{enabled:true,exitTentAnimation:true,triggers:{playStart:true,spawnRequest:true,reconnect:true},previewOwnsRoom:false,ownedRoom:null,pool:[]},
     hudLayout:(hudLayoutApi()&&hudLayoutApi().defaults)?hudLayoutApi().defaults():{desktop:{},phone:{}}
    }
   };
@@ -96,6 +102,9 @@
   const trafficLights=src.trafficLights&&typeof src.trafficLights==='object'?src.trafficLights:{};
   base.modules.trafficLights.enabled=trafficLights.enabled!==false;
   base.modules.trafficLights.cycleSeconds=int(trafficLights.cycleSeconds,12,120,32);
+  const SR=spawnApi();
+  if(SR&&typeof SR.normalizeModule==='function')base.modules.spawnRespawn=SR.normalizeModule(src.spawnRespawn);
+  else base.modules.spawnRespawn=base.modules.spawnRespawn;
   const HL=hudLayoutApi();
   if(HL&&typeof HL.normalize==='function')base.modules.hudLayout=HL.normalize(src.hudLayout);
   else base.modules.hudLayout=src.hudLayout&&typeof src.hudLayout==='object'?src.hudLayout:{desktop:{},phone:{}};

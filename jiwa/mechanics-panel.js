@@ -159,6 +159,62 @@ function renderPanel(){
   hint.textContent='Drag elements in Play Test to reposition. Semesta Play uses the Phone profile inside the device frame and Desktop otherwise.';
   c.append(hint);
  });
+ card('SPAWN & RESPAWN',c=>{
+  const sr=m.spawnRespawn||{enabled:true,exitTentAnimation:true,triggers:{},pool:[],previewOwnsRoom:false,ownedRoom:null};
+  const note=document.createElement('p');note.className='subtle';
+  note.textContent='Generic for every player: no room uses a random roadside tent and the exit-tent clip. Owning a Cove room later switches spawn to that room.';
+  c.append(note);
+  c.append(field('Enabled',check(sr.enabled!==false,v=>patch(g=>g.modules.spawnRespawn.enabled=v))));
+  c.append(field('Exit-tent animation',check(sr.exitTentAnimation!==false,v=>patch(g=>g.modules.spawnRespawn.exitTentAnimation=v))));
+  c.append(field('Trigger: Play start / Walk Test',check((sr.triggers||{}).playStart!==false,v=>patch(g=>g.modules.spawnRespawn.triggers.playStart=v))));
+  c.append(field('Trigger: SPAWN_REQUEST',check((sr.triggers||{}).spawnRequest!==false,v=>patch(g=>g.modules.spawnRespawn.triggers.spawnRequest=v))));
+  c.append(field('Trigger: Reconnect / enter Play',check((sr.triggers||{}).reconnect!==false,v=>patch(g=>g.modules.spawnRespawn.triggers.reconnect=v))));
+  c.append(field('Preview: this player owns a room',check(sr.previewOwnsRoom===true,v=>patch(g=>g.modules.spawnRespawn.previewOwnsRoom=v))));
+  const room=sr.ownedRoom||{x:0,z:0,facing:'se'};
+  c.append(field('Owned room X',number(room.x,-200,200,0.5,v=>patch(g=>{
+   g.modules.spawnRespawn.ownedRoom=Object.assign({id:'owned-room',x:0,z:0,facing:'se'},g.modules.spawnRespawn.ownedRoom||{},{x:Number(v)});
+  }))));
+  c.append(field('Owned room Z',number(room.z,-200,200,0.5,v=>patch(g=>{
+   g.modules.spawnRespawn.ownedRoom=Object.assign({id:'owned-room',x:0,z:0,facing:'se'},g.modules.spawnRespawn.ownedRoom||{},{z:Number(v)});
+  }))));
+  const hint=document.createElement('p');hint.className='subtle';
+  hint.textContent='Tent pool (sidewalk / roadside only). Edit coordinates here or use a selected city object / a map marker named hobo tent.';
+  c.append(hint);
+  (sr.pool||[]).forEach((pt,idx)=>{
+   const box=document.createElement('div');box.className='spawn-point';box.style.margin='6px 0';
+   const title=document.createElement('strong');title.textContent=(pt.id||('p'+(idx+1)))+' · '+pt.facing;
+   box.append(title);
+   box.append(field('X',number(pt.x,-200,200,0.5,v=>patch(g=>{if(g.modules.spawnRespawn.pool[idx])g.modules.spawnRespawn.pool[idx].x=Number(v);}))));
+   box.append(field('Z',number(pt.z,-200,200,0.5,v=>patch(g=>{if(g.modules.spawnRespawn.pool[idx])g.modules.spawnRespawn.pool[idx].z=Number(v);}))));
+   const fac=document.createElement('select');
+   ['se','sw'].forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f.toUpperCase();if(f===pt.facing)o.selected=true;fac.append(o);});
+   fac.onchange=()=>patch(g=>{if(g.modules.spawnRespawn.pool[idx])g.modules.spawnRespawn.pool[idx].facing=fac.value;});
+   box.append(field('Facing',fac));
+   const del=document.createElement('button');del.type='button';del.textContent='Remove';
+   del.onclick=()=>patch(g=>{g.modules.spawnRespawn.pool=g.modules.spawnRespawn.pool.filter((_,i)=>i!==idx);});
+   box.append(del);
+   c.append(box);
+  });
+  const add=document.createElement('button');add.type='button';add.textContent='＋ Add tent point';
+  add.onclick=()=>patch(g=>{
+   const n=(g.modules.spawnRespawn.pool||[]).length+1;
+   g.modules.spawnRespawn.pool=g.modules.spawnRespawn.pool.concat([{id:'roadside-'+n,x:0.5,z:41.5,facing:'se'}]);
+  });
+  c.append(add);
+  const use=document.createElement('button');use.type='button';use.textContent='＋ Use selected object position';
+  use.onclick=()=>{
+   const list=objects();
+   const sel=list.find(o=>o&&(o._selected||o.selected))||list[0];
+   const bridge=window.JiwaGameplayBridge;
+   const active=(bridge&&bridge.selected&&bridge.selected())||sel;
+   if(!active||!Number.isFinite(Number(active.x))){alert('Select a city object on the World tab first.');return;}
+   patch(g=>{
+    const n=(g.modules.spawnRespawn.pool||[]).length+1;
+    g.modules.spawnRespawn.pool=g.modules.spawnRespawn.pool.concat([{id:'map-'+n,x:Number(active.x),z:Number(active.z),facing:active.facing==='sw'?'sw':'se'}]);
+   });
+  };
+  c.append(use);
+ });
  card('TOKO LOAK (TODO)',c=>{
   c.append(field('Preview params',check(m.loak.enabled,v=>patch(g=>g.modules.loak.enabled=v))));
   c.append(field('Sell percent',number(m.loak.sellPercent,1,100,1,v=>patch(g=>g.modules.loak.sellPercent=v))));

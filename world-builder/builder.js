@@ -2466,6 +2466,7 @@ function syncPlayHud(){
  hud.setVisible(mode==='walk');
 }
 function clearWalk(){
+ try{window.VLSpawnHobo&&window.VLSpawnHobo.dispose();}catch{}
  for(const k of Object.keys(walkInput))walkInput[k]=false;
  for(const [id,rec] of rigs){
    rec.rig.setMoving(0,0,false);
@@ -2499,6 +2500,7 @@ function setMode(m){
    walkActorId=first.id;select(first.id);
    rigs.get(walkActorId)?.rig.setPose(null);
    tell('Walk Test: WASD / arrow keys / touch D-pad. Edits are not saved.');
+   try{beginSpawnRespawn(first,'playStart');}catch(err){console.warn('spawn/respawn preview',err);}
  }
  syncPlayHud();
  applyDevicePreview();
@@ -2737,6 +2739,122 @@ function bootDeviceFrame(){
  setTimeout(()=>{if(mode!=='walk')setMode('walk');},280);
 }
 
+
+function spawnWorldAdapter(){
+ return {
+  map:documentMap.map,
+  objects:documentMap.objects,
+  tileAt(x,z){
+   const terr=documentMap.map&&documentMap.map.terrain;
+   if(!terr)return 'grass';
+   if(window.VLMapTerrain){
+    const cells=window.VLMapTerrain.dict(terr);
+    const hit=cells.get(Math.floor(Number(x))+','+Math.floor(Number(z)));
+    return (hit&&hit.type)||terr.default||'grass';
+   }
+   return window.VLSpawnRespawn?window.VLSpawnRespawn.tileAt({map:documentMap.map},x,z):'grass';
+  },
+  blocked(x,z){
+   const dummy={id:'__hobo-tent__',type:'sprite',name:'Hobo tent',x,z,w:2.45,d:2.45,collision:true};
+   return !!style.reason(dummy,documentMap.objects,documentMap.map,assetByName);
+  }
+ };
+}
+function spawnModule(){
+ const g=currentPlayGameplay()||{};
+ const SR=window.VLSpawnRespawn;
+ const raw=g.modules&&g.modules.spawnRespawn;
+ return SR?SR.normalizeModule(raw):raw||{};
+}
+function beginSpawnRespawn(actor,trigger){
+ const SR=window.VLSpawnRespawn;
+ if(!SR)return null;
+ const mod=spawnModule();
+ if(mod.enabled===false)return null;
+ const triggers=mod.triggers||{};
+ if(trigger==='playStart'&&triggers.playStart===false)return null;
+ if(trigger==='spawnRequest'&&triggers.spawnRequest===false)return null;
+ if(trigger==='reconnect'&&triggers.reconnect===false)return null;
+ const holder=actor&&rigs.get(actor.id);
+ if(!holder)return null;
+ const decision=SR.resolve({
+  homeAccess:!!mod.previewOwnsRoom,
+  ownedRoom:mod.ownedRoom,
+  profile:actor.profile
+ },mod,spawnWorldAdapter(),Math.random);
+ window.__semestaLastSpawn=decision;
+ if(!decision||!decision.ok||!decision.point){
+  tell('Spawn: no valid roadside tent point');
+  return decision;
+ }
+ holder.root.position.set(decision.point.x,holder.root.position.y||0,decision.point.z);
+ if(decision.kind==='home'){
+  tell('Spawn in owned room · '+decision.point.x.toFixed(1)+', '+decision.point.z.toFixed(1));
+  return decision;
+ }
+ const facing=decision.point.facing==='sw'?'sw':'se';
+ holder.rig.setDirection(facing);
+ if(decision.playExitTent&&window.VLSpawnHobo){
+  focusCameraAt(decision.point.x,decision.point.z,14);
+  window.VLSpawnHobo.play({
+   THREE,scene,camera,
+   actorRoot:holder.root,rig:holder.rig,
+   point:decision.point,facing,profile:actor.profile||''
+  }).then(()=>tell('Keluar tenda · '+facing+' @ '+decision.point.x.toFixed(1)+','+decision.point.z.toFixed(1)))
+   .catch(err=>tell('Spawn tent art missing: '+(err&&err.message||err)));
+ }else{
+  tell('Hobo spawn without exit-tent · '+decision.point.x.toFixed(1)+', '+decision.point.z.toFixed(1));
+ }
+ return decision;
+}
+function spawnRespawnApi(){
+ const SR=window.VLSpawnRespawn;
+ return {
+  module:spawnModule,
+  last:()=>window.__semestaLastSpawn||null,
+  playing:()=>!!(window.VLSpawnHobo&&window.VLSpawnHobo.busy()),
+  snapshot:()=>window.VLSpawnHobo&&window.VLSpawnHobo.snapshot&&window.VLSpawnHobo.snapshot(),
+  validate:(point)=>SR?SR.validatePoint(point,spawnWorldAdapter()):{ok:false},
+  pool:()=>SR?SR.collectPool(spawnModule(),spawnWorldAdapter()):[],
+  validPool:()=>SR?SR.validPool(spawnModule(),spawnWorldAdapter()):[],
+  resolve:(rand)=>SR?SR.resolve({homeAccess:!!spawnModule().previewOwnsRoom,ownedRoom:spawnModule().ownedRoom},spawnModule(),spawnWorldAdapter(),rand):null,
+  respawn:(opts={})=>{
+   const actor=documentMap.objects.find(o=>o.id===walkActorId)||documentMap.objects.find(o=>o.type==='avatar')||item();
+   if(!actor)return {ok:false,reason:'no-actor'};
+   if(window.VLSpawnHobo)window.VLSpawnHobo.dispose();
+   const decision=SR.resolve({homeAccess:!!spawnModule().previewOwnsRoom,ownedRoom:spawnModule().ownedRoom,profile:actor.profile},spawnModule(),spawnWorldAdapter(),opts.rand);
+   window.__semestaLastSpawn=decision;
+   const holder=rigs.get(actor.id);
+   if(decision&&decision.ok&&decision.point&&holder){
+    holder.root.position.set(decision.point.x,holder.root.position.y||0,decision.point.z);
+    if(decision.kind==='hobo'&&decision.playExitTent&&window.VLSpawnHobo){
+     focusCameraAt(decision.point.x,decision.point.z,14);
+     window.VLSpawnHobo.play({
+      THREE,scene,camera,actorRoot:holder.root,rig:holder.rig,
+      point:decision.point,facing:decision.point.facing,profile:actor.profile||''
+     }).catch(()=>{});
+    }
+   }
+   return decision;
+  },
+  addPoint:(point)=>{
+   const g=currentPlayGameplay()||{};
+   const next=SR.normalizeModule(g.modules&&g.modules.spawnRespawn);
+   const cleaned=SR.cleanPoint(point,next.pool.length);
+   if(!cleaned)return {ok:false,reason:'bad-point'};
+   next.pool.push(cleaned);
+   try{
+    const raw=JSON.parse(localStorage.getItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1')||'{}');
+    raw.modules=raw.modules||{};raw.modules.spawnRespawn=next;
+    const saved=window.JiwaGameplay?window.JiwaGameplay.normalizeGameplay(raw):raw;
+    localStorage.setItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1',JSON.stringify(saved));
+    window.VLHub&&window.VLHub.publish('gameplay',{live:true,source:'spawn-pool'});
+   }catch{}
+   return {ok:true,point:cleaned,module:next};
+  }
+ };
+}
+
 window.SemestaPlay=Object.freeze({
  gameplay:currentPlayGameplay,
  worldSpeed:playWorldSpeed,
@@ -2747,6 +2865,7 @@ window.SemestaPlay=Object.freeze({
  pickedIds:()=>[...playPickedIds],
  pickupPreview:previewPickupById,
  playObjects:()=>documentMap.objects.map(o=>({id:o.id,type:o.type,asset:o.asset})),
+ spawnRespawn:spawnRespawnApi(),
  devicePref:readDevicePref,
  setDevice:(mode,preset)=>{writeDevicePref({mode,preset});applyDevicePreview();return readDevicePref();},
  isDeviceFrame,
@@ -4008,7 +4127,7 @@ function frame(now){
   clockLastSaved=0;
   try{syncClockToMap();localStorage.setItem(STORE,JSON.stringify(mapForPersist()));}catch{}
  }
- if(mode==='walk'&&walkActorId&&rigs.has(walkActorId)){
+ if(mode==='walk'&&walkActorId&&rigs.has(walkActorId)&&!(window.VLSpawnHobo&&window.VLSpawnHobo.busy())){
    const holder=rigs.get(walkActorId);
    let dx=Number(walkInput.right)-Number(walkInput.left);
    let dz=Number(walkInput.down)-Number(walkInput.up);
@@ -4137,6 +4256,7 @@ function frame(now){
    plane.rotation.y=yaw-root.rotation.y;
  }
  updateLargeOcclusion(dt);
+ try{window.VLSpawnHobo&&window.VLSpawnHobo.tick(dt,camera);}catch{}
  worldEffects.update(elapsedReal,dayClock.solar());
  renderer.render(scene,camera);
 }
