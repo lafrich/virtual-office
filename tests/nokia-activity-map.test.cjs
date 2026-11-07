@@ -71,3 +71,75 @@ test('Semesta HP button invokes the actual Nokia renderer instead of a second ph
  assert.match(phoneSource,/function Kursus\(\)/);
  assert.match(phoneSource,/function Furnitur\(\)/);
 });
+
+test('Nokia wallet, Dompet ledger and course share exactly the Jiwa game state',()=>{
+ const E=require('../jiwa/life-economy.js');
+ const config=E.defaults();
+ let player=E.stateFrom({wallet:50000},config);
+ const room=E.run(config,player,'buy_room',{roomSpawn:{id:'kost',x:7,z:11}});
+ assert.ok(room.ok);player=room.state;
+ const Nokia=handset();
+ const snapshot=()=>({
+  wallet:player.wallet,transactions:player.transactions.slice().reverse(),
+  experience:player.experience,energy:player.energy,fullness:player.fullness,
+  hygiene:player.hygiene,bladder:player.bladder,moral:player.moral,
+  ownsRoom:!!player.housing.room,fridgeOwned:!!player.housing.fridge,
+  powerTokens:player.powerTokens,identity:player.identity,
+  furniture:player.furniture,furnitureCatalog:E.FURNITURE,
+  settings:config.settings,religions:E.RELIGIONS.filter(x=>x!=='satanis'),
+  zodiacs:E.ZODIACS,
+  map:{bounds:{minX:0,maxX:30,minZ:0,maxZ:30},player:{x:2,z:3},sites:[]},
+  runAction:(action,args)=>{
+   const r=E.run(config,player,action,args);
+   if(r.ok)player=r.state;
+   return r;
+  }
+ });
+ Nokia.setGameProvider(snapshot);
+ Nokia.press('OK');Nokia.press('1'); // Menu -> Dompet
+ const before=Nokia.draw();
+ assert.ok(before);
+ assert.equal(player.wallet,20000);
+ Nokia.press('R');Nokia.press('4'); // Marketplace
+ Nokia.press('1');Nokia.press('L');Nokia.press('L'); // Token -> buy -> confirm
+ assert.equal(player.wallet,19000);
+ assert.equal(player.powerTokens,5);
+ assert.equal(player.transactions.length,2);
+ assert.deepEqual(player.transactions.map(t=>t.delta),[-30000,-1000]);
+ Nokia.press('R');Nokia.press('R');Nokia.press('R');Nokia.press('1'); // Dompet
+ const after=Nokia.draw();
+ assert.ok(after);
+ let different=0;
+ for(let i=0;i<before.data.length;i++)if(before.data[i]!==after.data[i])different++;
+ assert.ok(different>0,'Dompet LCD must visibly update after real Jiwa transaction');
+ Nokia.press('R');Nokia.press('3');Nokia.press('1');Nokia.press('L'); // course
+ assert.equal(player.experience,12);
+ assert.equal(player.wallet,19000,'a course with no fee cannot change the money balance');
+});
+test('Nokia cannot invent a balance from unowned purchases, and Jiwa owns product prices',()=>{
+ const E=require('../jiwa/life-economy.js'),cfg=E.defaults();
+ cfg.settings.tokenPrice=1750;
+ let player=E.stateFrom({wallet:50000},cfg);
+ const failed=E.run(cfg,player,'buy_token');
+ assert.equal(failed.ok,false);
+ assert.equal(failed.state.wallet,50000);
+ assert.equal(failed.state.transactions.length,0);
+ const bought=E.run(cfg,player,'buy_room',{roomSpawn:{id:'kost',x:2,z:2}});
+ player=bought.state;
+ const token=E.run(cfg,player,'buy_token');
+ assert.ok(token.ok);
+ assert.equal(token.state.wallet,player.wallet-1750);
+ assert.equal(token.state.transactions.at(-1).delta,-1750);
+ const furniture=E.run(cfg,token.state,'buy_furniture',{itemId:'chair'});
+ assert.ok(furniture.ok);
+ assert.equal(furniture.state.transactions.at(-1).delta,-E.FURNITURE.find(f=>f.id==='chair').price);
+});
+test('Nokia screen remains open across HUD redraws and active game rules never show demo wallet',()=>{
+ assert.match(hudSource,/if\(!root\.VLNokiaPlay\.isOpen\?\.\(\)\)root\.VLNokiaPlay\.open\(\)/);
+ assert.match(phoneSource,/saldo:0,/);
+ assert.match(phoneSource,/liveData\(\)\?\.wallet/);
+ assert.match(phoneSource,/transactions/);
+ assert.match(phoneSource,/furnitureCatalog/);
+ assert.match(phoneSource,/setGameProvider/);
+ assert.match(gameplaySource,/transactions:\(state\.transactions\|\|\[\]\)\.slice\(\)\.reverse\(\)/);
+});
