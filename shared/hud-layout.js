@@ -93,23 +93,69 @@
  // One authoritative saved layout for the active Semesta city. A later
  // Global Foundation edit can intentionally replace an older city cache;
  // opening a city without edits never writes this cache.
+ // Every city uses the *same* authored game UI. City-scoped layout
+ // records from older builds are read only to recover work, never written.
+ const GLOBAL_LAYOUT_KEY='jiwa-game-ui-global-v2';
  const STORAGE_PREFIX='jiwa-hud-layout-city-v1:';
- function resolveSavedLayout(cityId,storage){
-  const id=cityId||'__jiwa_global__';
-  const store=storage||(root&&root.localStorage);
+ function validStored(raw){
+  try{
+   const o=JSON.parse(raw||'null');
+   return o&&o.layout&&typeof o.layout==='object'?{layout:normalize(o.layout),
+    at:Number(o.at)||0,scope:String(o.scope||'global')}:null;
+  }catch(_e){return null;}
+ }
+ function readGlobalLayout(store){
   if(!store||typeof store.getItem!=='function')return null;
-  const read=key=>{
-   try{const obj=JSON.parse(store.getItem(STORAGE_PREFIX+key)||'null');
-    return obj&&obj.layout?obj:null;
-   }catch(_e){return null;}
+  return validStored(store.getItem(GLOBAL_LAYOUT_KEY));
+ }
+ function recoverOldLayout(store){
+  if(!store||typeof store.getItem!=='function')return null;
+  const values=[],add=(key)=>{
+   try{
+    const parsed=validStored(store.getItem(key));
+    if(parsed)values.push({...parsed,scope:key});
+   }catch(_e){}
   };
-  const city=read(id),global=id==='__jiwa_global__'?null:read('__jiwa_global__');
-  if(!city&&!global)return null;
-  const rank=x=>Number.isFinite(Number(x?.at))?Number(x.at):0;
-  const useGlobal=!!global&&(!city||rank(global)>rank(city));
-  const item=useGlobal?global:city;
-  return {layout:normalize(item.layout),scope:useGlobal?'__jiwa_global__':id,
-   at:rank(item)};
+  add(STORAGE_PREFIX+'__jiwa_global__');
+  try{
+   for(let i=0;i<(Number(store.length)||0);i++){
+    const k=store.key(i);
+    if(k&&k.startsWith(STORAGE_PREFIX)&&k!==STORAGE_PREFIX+'__jiwa_global__')add(k);
+   }
+  }catch(_e){}
+  // Some earlier versions wrote an unsaved project HUD to this game-wide
+  // key, before city-specific saving existed.
+  try{
+   const prior=JSON.parse(store.getItem('virtual-life-gameplay-v1')||'null');
+   if(prior?.modules?.hudLayout){
+    const layout=normalize(prior.modules.hudLayout);
+    values.push({layout,scope:'legacy-gameplay',at:0});
+   }
+  }catch(_e){}
+  if(!values.length)return null;
+  const base=JSON.stringify(defaults());
+  const changed=v=>JSON.stringify(v.layout)!==base;
+  values.sort((a,b)=>Number(changed(b))-Number(changed(a))||b.at-a.at);
+  return values[0];
+ }
+ function resolveSavedLayout(_cityId,storage){
+  const store=storage||(root&&root.localStorage);
+  const global=readGlobalLayout(store);
+  if(global)return {...global,scope:'global-game-ui'};
+  const recovered=recoverOldLayout(store);
+  return recovered?{...recovered,scope:'legacy-recovered'}:null;
+ }
+ function saveGlobalLayout(layout,storage){
+  const store=storage||(root&&root.localStorage);
+  if(!store||typeof store.setItem!=='function')return {ok:false,reason:'Storage unavailable'};
+  const item={version:2,scope:'global-game-ui',at:Date.now(),layout:normalize(layout)};
+  try{
+   store.setItem(GLOBAL_LAYOUT_KEY,JSON.stringify(item));
+   const check=readGlobalLayout(store);
+   if(!check||JSON.stringify(check.layout)!==JSON.stringify(item.layout))
+    return {ok:false,reason:'Global layout verification failed'};
+   return {ok:true,...item};
+  }catch(e){return {ok:false,reason:String(e?.message||e)};}
  }
  function detectProfile(doc, hint){
   if(hint==='phone'||hint==='desktop')return hint;
@@ -361,6 +407,6 @@
  return {
   ELEMENTS,ANCHORS,MIN_SCALE,MAX_SCALE,MIN_TAP,SELECTORS,
   defaults,normalize,normalizeProfile,normalizeSlot,detectProfile,pick,
-  applyTo,measure,bindPreview,desktopProfile,phoneProfile,placedRect,resolveSavedLayout
+  applyTo,measure,bindPreview,desktopProfile,phoneProfile,placedRect,resolveSavedLayout,saveGlobalLayout,GLOBAL_LAYOUT_KEY
  };
 });
