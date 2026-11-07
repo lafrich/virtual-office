@@ -1,4 +1,4 @@
-/* sw v9 2026-11-07: generic spawn and respawn at a random roadside hobo tent. Phones pick up the new files.
+/* sw v10 2026-11-07: seat the hobo tent on its real ground-contact row. Phones pick up the new files.
    This worker no longer decrypts the old game page, loads cancelled patches, or redirects to the archive login.
    skipWaiting+clients.claim so visitors who registered the old decrypting SW drop it immediately.
    All same-origin requests pass through to the network. */
