@@ -23,9 +23,9 @@ test('archive login page is gone',()=>{
  assert.equal(fs.existsSync('staging'),false);
 });
 
-test('service worker v6 no longer decrypts or redirects to arsip.html',()=>{
+test('service worker v7 no longer decrypts or redirects to arsip.html',()=>{
  const sw=fs.readFileSync('sw.js','utf8');
- assert.match(sw,/sw v6/);
+ assert.match(sw,/sw v7/);
  assert.doesNotMatch(sw,/arsip\.html/);
  assert.doesNotMatch(sw,/importScripts/);
  assert.doesNotMatch(sw,/office\.html/);

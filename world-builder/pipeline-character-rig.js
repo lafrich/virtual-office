@@ -17,6 +17,17 @@ const legacyIds=Object.fromEntries(
 const bridge=()=>g.VLMahlukHidup;
 const reset=()=>bridge()?.referenceReset===true;
 const approvedV2=id=>typeof id==='string'&&/^mh2_[a-z0-9]+$/.test(id);
+function v2Clip(entry,target){
+ const clips=entry.v2Clips||{};
+ if(clips[target])return clips[target];
+ if(target==="walk")return clips.idle||null;
+ // Bed / sleep actions in Play and Jiwa request "sleep" (sometimes a
+ // sleep_bed_* alias). Prefer the authored sleep clip; fall back to lie
+ // for older published records that only exported lie.
+ if(target==="sleep"||target==="sleep_bed_right"||target==="sleep_bed_left"||
+    target==="sleep_seat"||target==="rest") return clips.sleep||clips.lie||null;
+ return null;
+}
 const sleep=()=>g.VLUniversalSleep;
 const body=()=>g.VLUniversalBodyActions;
 const canonical=id=>bridge()?.has(id)?id:
@@ -56,7 +67,7 @@ function resolve(id,requested,moving){
   // The four native direction rows remain consistent with every fixture in
   // Semesta/Bangun Ruang; never substitute an unrelated NPC body or head.
   const target=moving?"walk":requested||"idle";
-  const own=entry.v2Clips?.[target]||(target==="walk"?entry.v2Clips?.idle:null);
+  const own=v2Clip(entry,target);
   if(!own)return {url:null,mode:target,frames:1,unavailable:true,
    source:"unavailable",loop:false};
   return {url:own.url,mode:target,frames:own.frames,row:0,

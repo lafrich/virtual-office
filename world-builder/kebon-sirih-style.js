@@ -14,7 +14,7 @@ const TILES=Object.freeze({
  sidewalk_edge_s:'terrain/sidewalk_edge_s.png',
  sidewalk_edge_e:'terrain/sidewalk_edge_e.png',
  sidewalk_edge_w:'terrain/sidewalk_edge_w.png',
- grass:'terrain/grass.png',
+ grass:'terrain/grass_v2.png',
  plaza:'terrain/plaza.png',
  water:'terrain/water.png',
  drain:'terrain/drain.png',
@@ -149,7 +149,7 @@ function upgrade(source,catalog){
  return {map,changed,skipped};
 }
 g.VLKebonSirihStyle=Object.freeze({
- VERSION,TILES,ROOT,tileUrl(name){return TILES[name]?ROOT+TILES[name]+(['road_asphalt','grass','water','drain','river'].includes(name)?'?v=jakarta-urban-terrain-v1-20261106':''):null},
+ VERSION,TILES,ROOT,tileUrl(name){return TILES[name]?ROOT+TILES[name]+(['road_asphalt','grass','water','drain','river'].includes(name)?'?v=jakarta-urban-terrain-v2-20261107':''):null},
  tile,category,eligible,pick,upgrade
 });
 })(window);
