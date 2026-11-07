@@ -2,6 +2,25 @@
 
 Written 2026-11-07 (Asia/Jakarta). Cloudflare Worker and secrets were not changed.
 
+## This deploy (native side-lie frames on the bed)
+
+- Previous live `main`: `4ee84ca1f07c69bcf8ebb3c3877531165682651b`
+- Feature commit: `ebc2a4bfde582c5562daa91174436ad39f78de35`
+- Service worker bump: `4308de611e0fed60efa3352e3f45b2e81cc7a4dc`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 4308de611e0fed60efa3352e3f45b2e81cc7a4dc
+git revert --no-edit ebc2a4bfde582c5562daa91174436ad39f78de35
+git push origin main
+```
+
+That restores the unavailable `lie` resolve (Ichsan and other 44-row V6B sheets without a `motions[].lie` entry drew the tiny head-blob silhouette on the mattress) and `sw.js` v13. It does not revert mapping elevated-bed sleep to pose `lie`, the tidy hobo tent exit, generic spawn/respawn, seated-tent ground contact, or Mahluk Hidup v6p launcher commits.
+
 ## This deploy (bed sleep uses the lie pose)
 
 - Previous live `main`: `37d288e439685c2e68ec6b37df333015bd8fae15`
