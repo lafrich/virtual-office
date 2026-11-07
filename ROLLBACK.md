@@ -2,7 +2,26 @@
 
 Written 2026-11-07 (Asia/Jakarta). Cloudflare Worker and secrets were not changed.
 
-## This deploy (additive v6p activity clip consume-list)
+## This deploy (unused-file cleanup and launcher Mahluk Hidup labels)
+
+- Previous live `main`: `ddc8e5b4aa734cc2f0dcdaee8b38011793dab8b1`
+- Feature commit: `666b38b3d3c38c398bc0258a935097787d3d73a8`
+- Service worker bump: `9d8b51c9f6df51b34f55f99e8322301184fec387`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 9d8b51c9f6df51b34f55f99e8322301184fec387
+git revert --no-edit 666b38b3d3c38c398bc0258a935097787d3d73a8
+git push origin main
+```
+
+That restores `world-builder/gpt-character-rig.js` (still unreferenced) and the stale launcher labels (`V6B / CHARACTER STUDIO`, `MAHLUK HIDUP 1`, `V6B CHARACTER`), and returns `sw.js` to v15. It does not revert the additive v6p activity clip consume-list, native bed side-lie frames, tent seating, spawn/respawn, or Mahluk Hidup v6p launcher URL.
+
+## Previous deploy (additive v6p activity clip consume-list)
 
 - Previous live `main`: `47c3105fed3ec6f7bc60c66f8f56b96af252c378`
 - Feature commit: `799a0d7b4ff721eaa1f4fd56a9947ba9f5a229b3`
