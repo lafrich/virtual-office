@@ -23,7 +23,9 @@ function defaults(){return {
  gates:{friendsV2:false,socialV2:false,satanicEvilRouteV2:false},
  settings:{bagSlots:8,fishEnergy:8,fishMinutes:12,coffeePrice:2000,roomPrice:30000,
  fridgePrice:8000,tokenPrice:1000,tokenUnits:5,fridgeExtraMinutes:600,
- faintRestMinutes:30,arrestMoralThreshold:15},
+ faintRestMinutes:30,arrestMoralThreshold:15,
+ publicShowerFee:500,publicShowerRecovery:35,homeShowerRecovery:70,
+ publicToiletPenalty:5,hoboSleepRecovery:30,homeSleepRecovery:65},
  fish:copy(FISH)
 };}
 function normalize(raw){
@@ -55,6 +57,8 @@ function stateFrom(existing,config){
  s.itemMeta=s.itemMeta&&typeof s.itemMeta==='object'?s.itemMeta:{};
  s.fridge=Array.isArray(s.fridge)?s.fridge:[];
  s.housing=s.housing&&typeof s.housing==='object'?s.housing:{room:false,fridge:false};
+ s.homeAccess=s.housing.room===true;
+ s.spawnPosition=s.spawnPosition&&Number.isFinite(Number(s.spawnPosition.x))&&Number.isFinite(Number(s.spawnPosition.z))?s.spawnPosition:null;
  s.elapsedMinutes=number(s.elapsedMinutes,0,1e9,0);
  s.itemSequence=number(s.itemSequence,0,1e9,0);
  s.powerTokens=number(s.powerTokens,0,1e9,0);
@@ -94,9 +98,36 @@ function doAction(config,previous,action,args={}){
   const id='life:'+type+':'+(++s.itemSequence);
   s.inventory.push(id);s.itemMeta[id]={species:type,label,expiresAt:s.elapsedMinutes+minutes,inFridge:false};
   changes.push('dapat '+label);return id;};
- if(!['advance_time','rest'].includes(action)&&(s.restMinutes>0||s.detentionMinutes>0))
+ if(!['advance_time','rest','respawn'].includes(action)&&(s.restMinutes>0||s.detentionMinutes>0))
   return reject('Masih bed rest / menjalani hukuman. Majukan waktu terlebih dahulu.');
  switch(action){
+ case 'respawn':{
+  if(s.housing.room){
+   const room=args.roomSpawn&&Number.isFinite(Number(args.roomSpawn.x))&&Number.isFinite(Number(args.roomSpawn.z))?args.roomSpawn:null;
+   const saved=s.housing.roomPosition;
+   const valid=room||saved;
+   if(!valid)return reject('Kost aktif, tetapi titik kamar belum terhubung. Hubungkan lokasi kost atau placeholder sandbox.');
+   s.spawn='home';s.spawnPosition={x:Number(valid.x),z:Number(valid.z),id:String(valid.id||'owned_room').slice(0,90),placeholder:valid.placeholder===true};
+   changes.push('respawn di kost '+s.spawnPosition.id);
+  }else{
+   const raw=(Array.isArray(args.tents)?args.tents:[]).filter(p=>p&&Number.isFinite(Number(p.x))&&Number.isFinite(Number(p.z))).slice(0,200);
+   const b=args.bounds||{minX:-20,maxX:20,minZ:-20,maxZ:20};
+   const minX=number(b.minX,-1e6,1e6,-20),maxX=Math.max(minX+8,number(b.maxX,-1e6,1e6,20));
+   const minZ=number(b.minZ,-1e6,1e6,-20),maxZ=Math.max(minZ+8,number(b.maxZ,-1e6,1e6,20));
+   const pad=3,midX=(minX+maxX)/2,midZ=(minZ+maxZ)/2;
+   const pool=raw.length?raw:[
+    {id:'hobo_tent_west',x:minX+pad,z:midZ,placeholder:true},
+    {id:'hobo_tent_east',x:maxX-pad,z:midZ,placeholder:true},
+    {id:'hobo_tent_north',x:midX,z:minZ+pad,placeholder:true},
+    {id:'hobo_tent_south',x:midX,z:maxZ-pad,placeholder:true}
+   ];
+   const roll=Number.isFinite(Number(args.roll))?Math.max(0,Math.min(.999999,Number(args.roll))):Math.random();
+   const tent=pool[Math.floor(roll*pool.length)];
+   s.spawn='hobo';s.spawnPosition={id:String(tent.id||'hobo_tent').slice(0,90),x:Number(tent.x),z:Number(tent.z),placeholder:tent.placeholder===true};
+   changes.push('hobo respawn di '+s.spawnPosition.id+(s.spawnPosition.placeholder?' (placeholder)':''));
+  }
+  break;
+ }
  case 'fish': {
   if(!args.spotId)return reject('Perlu titik mancing di perairan.');
   if(s.inventory.length>=setting.bagSlots)return reject('Tas penuh (8 slot).');
@@ -136,9 +167,23 @@ function doAction(config,previous,action,args={}){
   if(!spend(setting.coffeePrice))return reject('Uang tidak cukup.');
   clock(5);stat('energy',20);stat('bladder',25);break;
  }
- case 'sleep':clock(60);stat('energy',65);stat('hygiene',-12);break;
- case 'shower':clock(15);stat('hygiene',60);break;
- case 'toilet':clock(4);stat('bladder',-100);break;
+ case 'sleep':clock(60);stat('energy',s.housing.room?setting.homeSleepRecovery:setting.hoboSleepRecovery);stat('hygiene',s.housing.room?-8:-15);changes.push(s.housing.room?'tidur di kost':'tidur di tenda / fasilitas umum');break;
+ case 'shower':case 'public_shower':case 'home_shower':{
+   const home=action==='home_shower'||(action==='shower'&&s.housing.room);
+   if(home&&!s.housing.room)return reject('Mandi di kost hanya untuk pemilik akses kamar.');
+   if(!home&&!args.facilityId)return reject('Cari lokasi mandi umum di kota.');
+   if(!home&&!spend(setting.publicShowerFee))return reject('Uang tidak cukup untuk mandi umum.');
+   clock(15);stat('hygiene',home?setting.homeShowerRecovery:setting.publicShowerRecovery);
+   changes.push(home?'mandi di kost':'mandi di WC umum');break;
+ }
+ case 'toilet':case 'public_toilet':case 'home_toilet':{
+   const home=action==='home_toilet'||(action==='toilet'&&s.housing.room);
+   if(home&&!s.housing.room)return reject('WC kost hanya untuk pemilik akses kamar.');
+   if(!home&&!args.facilityId)return reject('Cari WC umum dahulu.');
+   clock(4);stat('bladder',-100);
+   if(!home)stat('hygiene',-setting.publicToiletPenalty);
+   changes.push(home?'WC kost pribadi':'WC umum');break;
+ }
  case 'pee_outside':clock(3);stat('bladder',-100);stat('hygiene',-20);stat('moral',-10);break;
  case 'work': {
   if(s.energy<10)return reject('Energi tidak cukup untuk bekerja.');
@@ -162,7 +207,11 @@ function doAction(config,previous,action,args={}){
  case 'buy_room': {
   if(s.housing.room)return reject('Kost sudah dimiliki / diakses.');
   if(!spend(setting.roomPrice))return reject('Uang tidak cukup.');
-  s.housing.room=true;changes.push('kost aktif selamanya (tanpa sewa berkala)');break;
+  s.housing.room=true;s.homeAccess=true;
+  const room=args.roomSpawn;
+  if(room&&Number.isFinite(Number(room.x))&&Number.isFinite(Number(room.z)))
+   s.housing.roomPosition={x:Number(room.x),z:Number(room.z),id:String(room.id||'sandbox_kost').slice(0,90),placeholder:room.placeholder===true};
+  changes.push('kost aktif selamanya (tanpa sewa berkala)');break;
  }
  case 'buy_fridge': {
   if(!s.housing.room)return reject('Perlu kost dahulu.');
