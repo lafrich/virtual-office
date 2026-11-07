@@ -245,6 +245,13 @@ function makeRoot(){
  outer.addEventListener('pointerleave',workUp);
  outer.addEventListener('change',ev=>{
   if(ev.target.id==='slpDestination')navSelect=ev.target.value;
+  if(!state)return;
+  if(ev.target.id==='slpReligion'&&RULES.RELIGIONS.includes(ev.target.value)&&ev.target.value!=='satanis'){
+   state.identity.religion=ev.target.value;persist();message('Pilihan keyakinan: '+ev.target.value);paintPanel();
+  }
+  if(ev.target.id==='slpZodiac'&&RULES.ZODIACS.includes(ev.target.value)){
+   state.identity.zodiac=ev.target.value;persist();message('Zodiak: '+ev.target.value+' (sosial V2 masih terkunci)');paintPanel();
+  }
  });
 }
 function itemOptions(type){
@@ -348,6 +355,7 @@ function click(ev){
   const point=sites.find(s=>s.id===id);if(!point)return;
   bridge.teleport(point.x,point.z);message('Teleport TEST ke '+point.label);paintPanel();return;
  }
+ if(el.id==='slpPhone'){phoneOpen=!phoneOpen;paintPanel();return;}
  if(el.id==='slpReset'){
   if(!confirm('Reset semua uang, inventori, status, dan akses kost untuk test kota ini?'))return;
   state=RULES.stateFrom({wallet:6000},config);persist();bridge.respawn();paintPanel();return;
@@ -363,7 +371,11 @@ function click(ev){
  }
 }
 function workDown(ev){
- if(ev.target.id!=='slpWork'||!active||progress)return;
+ if(!['slpWork','ptActionBtn'].includes(ev.target.id)||!active||progress)return;
+ const n=nearest();
+ if(!n||!['job','premium_job'].includes(n.id))return;
+ if(state.detained||state.restMinutes>0||state.energy<10){message('Tidak bisa bekerja: perlu energi 10 dan bebas dari hukuman.');return;}
+ if(n.id==='premium_job'&&state.hygiene<70){message('Kerja premium membutuhkan kebersihan minimum 70.');return;}
  ev.preventDefault();
  workHoldStart=performance.now();progress={started:workHoldStart,needed:Math.max(850,2300-(state?.experience||0)*10)};
  const button=ev.target;try{button.setPointerCapture(ev.pointerId);}catch{}
@@ -371,7 +383,7 @@ function workDown(ev){
   if(!progress||!active)return;
   const pct=clamp((performance.now()-progress.started)/progress.needed,0,1);
   const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width=(pct*100)+'%';
-  if(pct>=1){progress=null;workAnimation=0;runAction('work',{premium:nearest()?.id==='premium_job'});return;}
+  if(pct>=1){progress=null;workAnimation=0;justWorkedAt=performance.now();runAction('work',{premium:nearest()?.id==='premium_job'});return;}
   workAnimation=requestAnimationFrame(animate);
  };
  workAnimation=requestAnimationFrame(animate);
@@ -381,6 +393,14 @@ function workUp(ev){
  progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
  const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width='0%';
 }
+function openPhone(){
+ if(!active||!outer)return false;
+ phoneOpen=!phoneOpen;
+ const content=outer.querySelector('#slpContent');if(content)content.hidden=false;
+ paintPanel();return true;
+}
+function actionDown(ev){workDown(ev);}
+function actionUp(ev){workUp(ev);}
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
@@ -504,7 +524,7 @@ function stop(){
 }
 function attach(bridgeApi){bridge=bridgeApi||null;return api;}
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
- spawnModule,fallbackSpawn,onSpawn,handleAction,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
+ spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;state=RULES.stateFrom({wallet:6000},config);persist();paintPanel();}});
 return api;
 });
