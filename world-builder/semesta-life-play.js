@@ -54,7 +54,7 @@ const name=o=>[o.name,o.label,o.asset,o.subtype,o.questId,...(Array.isArray(o.ta
 let bridge=null,active=false,projectId='',config=RULES?RULES.defaults():null;
 let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',progress=null;
 let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
-let phoneOpen=false,justWorkedAt=0,lastFaintCount=0;
+let phoneOpen=false,bagOpen=false,justWorkedAt=0,lastFaintCount=0;
 let navSelect=null,workHoldStart=0,workAnimation=0;
 function defaults(){return RULES?RULES.defaults():null;}
 function getWorld(){return bridge&&bridge.getWorld?bridge.getWorld():{objects:[],map:{}};}
@@ -311,6 +311,20 @@ function nodeButtons(n){
  if(id==='bench')entries=[button('rest','🪑 Duduk sebentar',{seatId:n.sourceId||'bangku_preview'})];
  return entries.join('');
 }
+function bagMarkup(){
+ const entries=(state.inventory||[]).map(id=>{
+  const meta=state.itemMeta?.[id];
+  const preview=meta&&RULES.activeItem(config,state,id);
+  const label=(meta?.label||id)+(preview?.ok&&preview.spoiled?' · BUSUK':'');
+  return '<option value="'+esc(id)+'">'+esc(label)+'</option>';
+ });
+ return '<div class="slp-bag"><b>🎒 TAS · '+(state.inventory||[]).length+'/'+(config.settings.bagSlots||8)+'</b>'+
+  '<p><small>Buah bisa dimakan langsung. Ikan perlu dimasak terlebih dahulu. Makanan busuk harus dibuang; menjual ikan busuk akan ditolak.</small></p>'+
+  (entries.length?'<select id="slpBagItem">'+entries.join('')+'</select>'+
+   '<div class="slp-actions"><button data-life-action="eat_item">🍎 Makan Buah</button>'+
+   '<button data-life-action="discard_item">🗑 Buang Barang</button></div>':'<small>Tas kosong. Mulung, mancing, atau panjat pohon untuk mengisi tas.</small>')+
+  '</div>';
+}
 function phoneMarkup(){
  const religion=state.identity?.religion||'islam',zodiac=state.identity?.zodiac||'capricorn';
  const options=(all,current)=>all.map(v=>'<option value="'+v+'" '+(v===current?'selected':'')+'>'+v[0].toUpperCase()+v.slice(1)+'</option>').join('');
@@ -338,16 +352,16 @@ function paintPanel(){
  const result=state.detained?
   optsButton('fine','💰 Bayar Denda Rp2.000')+optsButton('community_service','🧹 Bersihkan Gorong-gorong'):
   (state.restMinutes>0?optsButton('advance_time','⏩ Lewati 15 menit bed rest',{minutes:15}):
-   phoneOpen?phoneMarkup():nodeButtons(n));
+   phoneOpen?phoneMarkup():bagOpen?bagMarkup():nodeButtons(n));
  el.innerHTML='<div class="slp-summary"><b>'+(ownsRoom()?'🏠 KOST':'⛺ HOBO')+'</b><b>'+money(state.wallet)+'</b><b>🎒 '+(state.inventory?.length||0)+'/'+(config.settings.bagSlots||8)+'</b><span>👥 Friends 🔒 V2</span></div>'+
   '<div class="slp-stats">'+drawStats()+'</div>'+
   (state.restMinutes>0?'<div class="slp-alert">⚠ PINGSAN · Bed rest '+state.restMinutes+' menit. Tidak bisa bekerja atau berjalan.</div>':'')+
   (state.detained?'<div class="slp-alert">🚨 DITAHAN HANSIP · Pilih denda atau kerja sosial.</div>':'')+
   (state.bladder>=80?'<div class="slp-alert">🚾 Kebelet pipis! Cari WC sebelum terlambat.</div>':'')+
-  '<div class="slp-spot">📍 '+(phoneOpen?'HP / APLIKASI':n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')+'</div>'+
+  '<div class="slp-spot">📍 '+(phoneOpen?'HP / APLIKASI':bagOpen?'TAS / INVENTORI':n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')+'</div>'+
   '<div class="slp-actions" id="slpActions">'+result+'</div>'+
   (state.bladder>=65&&!state.detained&&state.restMinutes===0?'<div class="slp-actions">'+optsButton('pee_outside','⚠ Pipis sembarangan (moral turun)')+'</div>':'')+
-  '<div class="slp-actions"><button id="slpPhone" type="button">'+(phoneOpen?'← Kembali':'📱 HP')+'</button></div>'+
+  '<div class="slp-actions"><button id="slpPhone" type="button">'+(phoneOpen?'← Kembali':'📱 HP')+'</button><button id="slpBag" type="button">'+(bagOpen?'← Kembali':'🎒 Tas')+'</button></div>'+ 
   '<details><summary>🧪 ALAT TES (bukan aksi gameplay)</summary><p><small>Untuk mengecek skenario tanpa memodifikasi kota asli.</small></p>'+
   '<div class="slp-goto"><select id="slpDestination">'+options+'</select><button id="slpTravel" type="button">TELEPORT TEST</button></div>'+
   '<div class="slp-actions">'+optsButton('respawn','↻ Test Respawn')+
@@ -366,7 +380,8 @@ function click(ev){
   const point=sites.find(s=>s.id===id);if(!point)return;
   bridge.teleport(point.x,point.z);message('Teleport TEST ke '+point.label);paintPanel();return;
  }
- if(el.id==='slpPhone'){phoneOpen=!phoneOpen;paintPanel();return;}
+ if(el.id==='slpPhone'){phoneOpen=!phoneOpen;bagOpen=false;paintPanel();return;}
+ if(el.id==='slpBag'){bagOpen=!bagOpen;phoneOpen=false;paintPanel();return;}
  if(el.id==='slpReset'){
   if(!confirm('Reset semua uang, inventori, status, dan akses kost untuk test kota ini?'))return;
   state=RULES.stateFrom({wallet:6000},config);persist();bridge.respawn();paintPanel();return;
@@ -374,6 +389,7 @@ function click(ev){
  if(el.dataset.lifeAction){
   let args={};try{args=JSON.parse(el.dataset.args||'{}');}catch{}
   if(el.dataset.lifeAction==='take_fridge')args.itemId=outer.querySelector('#slpFridgeItem')?.value||'';
+  if(['eat_item','discard_item'].includes(el.dataset.lifeAction))args.itemId=outer.querySelector('#slpBagItem')?.value||'';
   if(['sell_fish','sell_loak','cook','store_fridge'].includes(el.dataset.lifeAction)){
    args.itemId=outer.querySelector('#slpItem')?.value||'';
   }
@@ -406,7 +422,13 @@ function workUp(ev){
 }
 function openPhone(){
  if(!active||!outer)return false;
- phoneOpen=!phoneOpen;
+ phoneOpen=!phoneOpen;bagOpen=false;
+ const content=outer.querySelector('#slpContent');if(content)content.hidden=false;
+ paintPanel();return true;
+}
+function openBag(){
+ if(!active||!outer)return false;
+ bagOpen=!bagOpen;phoneOpen=false;
  const content=outer.querySelector('#slpContent');if(content)content.hidden=false;
  paintPanel();return true;
 }
@@ -476,7 +498,7 @@ function handleAction(){
   message('Pilih barang dari tas, kemudian klik JUAL di panel.');paintPanel();return true;
  }
  const action=node.action;
- if(node.id==='kost'&&ownsRoom()){phoneOpen=false;message('Pilih WC, mandi, tidur, atau penyimpanan di panel.');paintPanel();return true;}
+ if(node.id==='kost'&&ownsRoom()){phoneOpen=false;bagOpen=false;message('Pilih WC, mandi, tidur, atau penyimpanan di panel.');paintPanel();return true;}
  runAction(action,node.id==='fish'?{spotId:node.sourceId||'river'}:
   node.id==='public_wc'||node.id==='public_bath'?{facilityId:node.sourceId||node.id}:{});return true;
 }
@@ -541,7 +563,7 @@ function start(){
  const id=cityId();
  if(active&&id===projectId)return true;
  if(active)stop();
- projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;phoneOpen=false;
+ projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;phoneOpen=false;bagOpen=false;
  config=defaults();configSource='DEFAULT V1';restore();buildSites();makeRoot();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
@@ -552,11 +574,11 @@ function stop(){
  if(!active)return;
  persist();active=false;cancelAnimationFrame(workAnimation);progress=null;
  disposeMarkers();if(outer)outer.hidden=true;
- actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;phoneOpen=false;
+ actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;phoneOpen=false;bagOpen=false;
 }
 function attach(bridgeApi){bridge=bridgeApi||null;return api;}
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
- spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
+ spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;state=RULES.stateFrom({wallet:6000},config);persist();paintPanel();}});
 return api;
 });
