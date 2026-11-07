@@ -92,12 +92,12 @@ function activeItem(config,s,id){
  const meta=s.itemMeta[id];
  if(!meta)return {ok:false,reason:'Item tidak ditemukan'};
  const fish=normalize(config).fish.find(f=>f.id===meta.species);
- if(!fish)return {ok:false,reason:'Jenis ikan tidak dikenal'};
+ if(!fish&&meta.species!=='buah')return {ok:false,reason:'Barang tidak termasuk makanan segar'};
  const limit=meta.expiresAt;
  return {ok:true,fish,meta,spoiled:s.elapsedMinutes>=limit};
 }
 function speedFactor(s){
- return s.restMinutes>0||s.detentionMinutes>0||s.energy<=0?0:(s.energy>=30?1:.28+.72*s.energy/30);
+ return s.detained||s.restMinutes>0||s.detentionMinutes>0||s.energy<=0?0:(s.energy>=30?1:.28+.72*s.energy/30);
 }
 function doAction(config,previous,action,args={}){
  const c=normalize(config),s=stateFrom(previous,c),setting=c.settings,changes=[];
@@ -176,7 +176,7 @@ function doAction(config,previous,action,args={}){
   if(s.powerTokens<1)return reject('Token listrik habis.');
   const id=String(args.itemId||'');
   if(!s.inventory.includes(id))return reject('Bahan makanan tidak ada di tas.');
-  const info=activeItem(c,s,id);if(!info.ok||info.spoiled)return reject('Ikan sudah busuk / tidak bisa dimasak.');
+  const info=activeItem(c,s,id);if(!info.ok||!info.fish||info.spoiled)return reject('Ikan sudah busuk / tidak bisa dimasak.');
   clock(20);s.powerTokens-=1;
   s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];
   stat('energy',18);stat('fullness',40);stat('bladder',10);
@@ -235,12 +235,30 @@ function doAction(config,previous,action,args={}){
   changes.push('hasil mancing di '+String(args.spotId).slice(0,60));
   break;
  }
+ case 'eat_item':{
+  const id=String(args.itemId||'');
+  if(!s.inventory.includes(id))return reject('Makanan tidak ada di tas.');
+  const info=activeItem(c,s,id);
+  if(!info.ok)return reject(info.reason);
+  if(info.spoiled)return reject('Makanan sudah busuk. Buang dari tas.');
+  if(info.meta.species!=='buah')return reject('Ikan mentah harus dimasak dahulu.');
+  s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];
+  clock(5);stat('energy',8);stat('fullness',20);stat('bladder',5);
+  changes.push('makan buah dari tas');break;
+ }
+ case 'discard_item':{
+  const id=String(args.itemId||'');
+  if(!s.inventory.includes(id))return reject('Barang tidak ada di tas.');
+  const label=s.itemMeta[id]?.label||'barang';
+  s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];
+  changes.push('buang '+label);break;
+ }
  case 'sell_fish': {
   const id=String(args.itemId||''),buyer=String(args.buyerId||'');
   if(!Object.prototype.hasOwnProperty.call(BUYERS,buyer))return reject('Pembeli belum ada.');
   if(!s.inventory.includes(id))return reject('Ikan tidak ada di tas.');
   const info=activeItem(c,s,id);
-  if(!info.ok)return reject(info.reason);
+  if(!info.ok||!info.fish)return reject('Hanya ikan yang bisa dijual ke pembeli ini.');
   if(info.spoiled)return reject('Ikan sudah busuk; pembeli menolak.');
   const price=info.fish.buyers[buyer];
   if(price===null)return reject(BUYERS[buyer]+' tidak menerima '+info.fish.label+'.');
