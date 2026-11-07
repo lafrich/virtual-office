@@ -82,8 +82,8 @@ function seed(){
  const entries=examples.map(([category,id,label,premise,buildingQuery,actionAsset,minExp,durationMinutes,moneyDelta,statEffects])=>
   activity({category,id,label,premise,buildingQuery,actionAsset,minExp,durationMinutes,moneyDelta,statEffects,
    steps:'1. Pastikan syarat terpenuhi → 2. Dekati '+buildingQuery+' → 3. Jalankan animasi '+actionAsset+' → 4. Terima efek.'}));
- const recipe=entries.find(x=>x.id==='nasi_goreng');recipe.ingredients=['nasi','telur','minyak'];recipe.outputItem='nasi_goreng';recipe.outputLabel='Nasi Goreng';recipe.grantType='inventory';
- const drink=entries.find(x=>x.id==='kopi_susu');drink.ingredients=['kopi','susu','gula'];drink.outputItem='kopi_susu';drink.outputLabel='Kopi Susu';
+ const recipe=entries.find(x=>x.id==='nasi_goreng');recipe.ingredients=['nasi','telur','minyak'];recipe.tier='menengah';recipe.outputItem='nasi_goreng';recipe.outputLabel='Nasi Goreng';recipe.grantType='inventory';
+ const drink=entries.find(x=>x.id==='kopi_susu');drink.ingredients=['kopi','susu','gula'];drink.tier='menengah';drink.outputItem='kopi_susu';drink.outputLabel='Kopi Susu';
  drink.grantType='inventory';
  const bed=entries.find(x=>x.id==='beli_kost');bed.grantType='room';
  const furn=entries.find(x=>x.id==='beli_furnitur');furn.grantType='furniture';furn.outputItem='bed';furn.outputLabel='Kasur';
