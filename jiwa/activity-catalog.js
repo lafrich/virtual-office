@@ -155,7 +155,7 @@ function eligibleTargets(objects=[],rules=[],cityId=''){
   if(!o||!o.id||seen.has(String(o.id)))continue;
   const kind=kindOf(o);
   const matches=(rules||[]).filter(r=>r?.enabled===true&&r.operation!=='none'&&
-   r.kind===kind&&PREMISES.matchWorld(r,[o],cityId));
+   r.kind===kind&&r.selectionMode==='directory'&&PREMISES.matchWorld(r,[o],cityId));
   if(!matches.length)continue;
   seen.add(String(o.id));
   eligible.push({...o,jiwaKind:kind,jiwaRuleIds:matches.map(r=>r.id)});
