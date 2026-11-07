@@ -189,6 +189,13 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 .window[data-jiwa-tab="activities"] .workspace>.tree-panel,
 .window[data-jiwa-tab="activities"] .workspace>.inspector{display:none!important}
 .window[data-jiwa-tab="activities"] .workspace>.middle{min-width:0}
+.activity-directory-list{max-height:350px;overflow:auto;border:1px solid #9facba;background:#fff;padding:4px}
+.activity-directory-row{display:flex;gap:9px;align-items:center;padding:7px 8px;border-bottom:1px solid #d8dfe6;cursor:pointer}
+.activity-directory-row:hover{background:#edf5ff}
+.activity-directory-row input{flex:none}
+.activity-directory-row span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.activity-directory-row b{font-weight:600;overflow-wrap:anywhere}
+.activity-directory-row small{font:10px Tahoma;color:#62788b;overflow-wrap:anywhere}
 .window[data-jiwa-tab="activities"] #activityView{display:flex;flex-direction:column;min-height:0}
 .window[data-jiwa-tab="activities"] #activityView>.viewport-scroll{flex:1;overflow:auto}
 
@@ -325,16 +332,16 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 <script src="../shared/loak-play.js"></script>
 <script src="/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1"></script>
 <script src="./foundation-engine.js"></script>
-<script src="./interaction-rules.js?v=premise-tiers-global-v2"></script>
+<script src="./interaction-rules.js?v=jiwa-directory-multi-v1"></script>
 <script src="./life-economy.js?v=premise-tier-engine-v2"></script>
-<script src="./activity-catalog.js?v=premise-tiers-global-v2"></script>
+<script src="./activity-catalog.js?v=jiwa-directory-multi-v1"></script>
 <script src="../world-builder/drive-sync.js?v=jiwa-catalog-cloud-v2"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="./jiwa.js?v=activity-tabs-20261108"></script>
+<script src="./jiwa.js?v=jiwa-directory-multi-v1"></script>
 <script src="./character-link.js?v=mahluk1-v6b-20261107"></script>
 <script src="./context-editor.js"></script>
 <script src="./mechanics-panel.js"></script>
 <script src="./life-editor.js"></script>
-<script src="./activity-editor.js?v=premise-wizard-v1"></script>
-<script src="./entity-editor.js?v=world-entities-tiers-v2"></script>
+<script src="./activity-editor.js?v=jiwa-directory-multi-v1"></script>
+<script src="./entity-editor.js?v=jiwa-directory-multi-v1"></script>
 </body></html>
