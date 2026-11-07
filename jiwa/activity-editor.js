@@ -73,9 +73,13 @@ function editor(){
   '<div class="activity-pair">'+A.STAT_KEYS.map(k=>'<label>'+esc(k.toUpperCase())+' Δ<input data-activity-stat="'+k+'" type="number" min="-100" max="100" value="'+a.statEffects[k]+'"></label>').join('')+'</div></div>'+
   '<div class="activity-fieldset"><h4>05 · ITEMS & OUTCOME</h4>'+
   '<label>Kombinasi bahan (ID, dipisah koma)<input id="activityIngredients" value="'+esc(a.ingredients.join(', '))+'" placeholder="nasi, telur, minyak"></label>'+
+  '<label>Hasil aktivitas<select id="activityGrantType">'+
+  ['none','inventory','furniture','room','prop'].map(x=>'<option value="'+x+'"'+(a.grantType===x?' selected':'')+'>'+esc(x.toUpperCase())+'</option>').join('')+'</select></label>'+
   input('Output item ID (opsional)','outputItem')+
   input('Output nama item (opsional)','outputLabel')+
   input('Konsekuensi / punishment reference','punishment')+
+  '<div class="activity-pair">'+input('Risiko tertangkap (%)','riskPercent','number',0,100)+
+  input('Waktu hukuman / penjara (menit)','detentionMinutes','number',0,4320)+'</div>'+
   areaField('Catatan desain / status asset','notes')+'</div>'+
   '<div class="activity-bottom"><button id="activityDuplicate" type="button">⧉ DUPLICATE</button>'+
   '<button id="activityDelete" type="button">🗑 DELETE</button>'+
@@ -93,6 +97,7 @@ function editor(){
  }));
  $('activityEnabled').onchange=e=>{a.enabled=e.target.checked;draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();render();};
  $('activityObject').onchange=e=>{a.objectId=e.target.value;draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();render();};
+ $('activityGrantType').onchange=e=>{a.grantType=e.target.value;draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();};
  $('activityIngredients').onchange=e=>{a.ingredients=e.target.value.split(',').map(s=>s.trim()).filter(Boolean);draft.activities[draft.activities.indexOf(a)]=A.activity(a);setDirty();};
  $('activityDuplicate').onclick=()=>{
   const n=copy(a);let id=n.id+'_copy',i=2;while(draft.activities.some(x=>x.id===id))id=n.id+'_copy_'+i++;
@@ -194,6 +199,7 @@ function initialize(){
  root.addEventListener('jiwa:world-sync',render);
  root.addEventListener('beforeunload',ev=>{if(dirty){ev.preventDefault();ev.returnValue='';}});
  render();
+ B()?.navigate?.('activities');
 }
 root.JiwaActivityEditor=Object.freeze({render,chooseCategory,save,get:()=>A.normalize(draft),dirty:()=>dirty});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
