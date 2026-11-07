@@ -1,0 +1,27 @@
+name: Ellen Agent — Syntax and Memory Smoke
+on:
+  pull_request:
+    paths:
+      - "ellen/**"
+      - "membangun/index.html"
+      - "membangun/laptop.html"
+      - "tests/ellen-app.test.cjs"
+      - ".github/workflows/ellen-smoke.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ellen-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JavaScript syntax
+        run: |
+          node --check ellen/ellen.js
+          node --check ellen/worker.js
+      - name: Validate memory and app routing
+        run: node --test tests/ellen-app.test.cjs
