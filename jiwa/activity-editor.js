@@ -10,7 +10,7 @@ let draft=A.readLocal(localStorage),category='money',selected='bank_teller',dirt
 let stage='preset',creating=false,chosenTier='menengah';
 const current=()=>draft.activities.find(a=>a.id===selected)||draft.activities.find(a=>a.category===category)||null;
 const selectedEntity=()=>B()?.selectedObject?.();
-const entities=()=>B()?.entities?.()||[];
+const entities=()=>B()?.directoryEntities?.()||B()?.entities?.()||[];
 function notify(text,ok=false){
  const el=$('activityStatus');if(el){el.textContent=text;el.dataset.ok=ok?'true':'false';}
 }
@@ -29,7 +29,7 @@ function list(){
   const btn=document.createElement('button');
   btn.type='button';btn.className='activity-row'+(a.id===selected?' selected':'');
   const t=document.createElement('b');t.textContent=a.label;
-  const info=document.createElement('span');info.textContent=(a.enabled?'● LIVE':'○ DRAFT')+' · '+a.tier.toUpperCase()+' · '+(a.buildingQuery||'Belum ada bangunan');
+  const info=document.createElement('span');info.textContent=(a.enabled?'● LIVE':'○ DRAFT')+' · '+a.tier.toUpperCase()+' · '+(a.buildingQuery||a.objectId||'Belum ada target');
   btn.append(t,info);btn.onclick=()=>choose(a.id);list.append(btn);
  }
  const tabs=document.querySelectorAll('[data-activity-tab]');
@@ -88,13 +88,19 @@ function editor(){
  if(!area)return;
  if(stage==='preset')return presetStep();
  if(!a){area.innerHTML='<div class="activity-empty">Belum ada aktivitas. Klik ＋ ADD ACTIVITY untuk membuat satu.</div>';return;}
- const currentObjects=entities().slice(0,1500);
+ const currentObjects=entities().slice(0,5000);
+ const cityId=B()?.city?.()?.id||'';
+ const registered=A.eligibleTargets(currentObjects,draft.worldEntities,cityId);
+ const chosen=registered.find(x=>String(x.id)===a.objectId);
+ const selectedKind=chosen?A.kindOf(chosen):'all';
  const bounds=A.PREMISES.bounds(category,a.tier);
  const actions=[...new Set([a.actionAsset,...draft.activities.map(x=>x.actionAsset),
   'idle','walk','work','talk','sit','sleep','eat','drink_coffee','pee_wall','vandal_wall','pray','read_book','cook_stir'])].filter(Boolean);
- const placeChoices=[...new Set([a.buildingQuery,...currentObjects.map(x=>x.name||x.asset||x.subtype).filter(Boolean)])];
- const status=A.validation(a,currentObjects);
- const options=currentObjects.map(o=>'<option value="'+esc(o.id)+'"'+(a.objectId===o.id?' selected':'')+'>'+esc(o.name||o.id)+'</option>').join('');
+ const status=A.validation(a,currentObjects,draft.worldEntities,cityId);
+ const options=registered.map(o=>'<option data-kind="'+A.kindOf(o)+'" value="'+esc(o.id)+'"'+
+  (a.objectId===String(o.id)?' selected':'')+'>'+
+  esc((A.kindOf(o)==='building'?'🏢 ':A.kindOf(o)==='npc'?'🧍 ':'🧱 ')+
+  (o.name||o.label||o.asset||o.id))+'</option>').join('');
  const input=(title,key,type='text',min='',max='')=>{
   const cap=key==='durationMinutes'?bounds.durationMinutes:key==='minExp'?bounds.minExp:
    key==='moneyDelta'?bounds.moneyDelta:key==='riskPercent'?bounds.riskPercent:null;
@@ -111,7 +117,7 @@ function editor(){
   '<div class="activity-head"><div><strong>'+esc(a.label)+'</strong><small>ID: '+esc(a.id)+'</small></div>'+
   '<span class="activity-state '+(a.enabled?'ready':'draft')+'">'+(a.enabled?'LIVE / ACTIVE':'DRAFT / INACTIVE')+'</span></div>'+
   '<div class="activity-switch"><label><input id="activityEnabled" type="checkbox" '+(a.enabled?'checked':'')+'> Enable in Semesta (hanya jika bangunan ada)</label>'+
-  '<small>Draft aman; gameplay asli tidak berubah sebelum disimpan dan diaktifkan.</small></div>'+
+  '<small>Aktivitas hanya muncul jika target di-marking dalam tab Entities dan ditemukan di city.</small></div>'+
   '<div class="activity-fieldset"><h4>01 · PREMISE & FLOW</h4>'+
   input('Nama aktivitas','label')+
   areaField('Premis cerita: mengapa karakter melakukannya?','premise')+
@@ -120,17 +126,22 @@ function editor(){
    '<option value="'+v+'"'+(a.flowPattern===v?' selected':'')+'>'+v.toUpperCase()+'</option>').join('')+
   '</select></label>'+
   areaField('Urutan interaksi (player → lokasi → Action → hasil)','steps')+'</div>'+
-  '<div class="activity-fieldset"><h4>02 · WORLD BINDING</h4>'+
-  '<label>Jenis gedung/asset Semesta<select data-activity-field="buildingQuery">'+
-  '<option value="">— Pilih dari city preview —</option>'+placeChoices.map(v=>
-  '<option value="'+esc(v)+'"'+(a.buildingQuery===v?' selected':'')+'>'+esc(v)+'</option>').join('')+
+  '<div class="activity-fieldset"><h4>02 · INTERAKSI TERDAFTAR / SEMESTA</h4>'+
+  '<div class="activity-global"><b>'+registered.length+' TARGET INTERAKTIF</b> tersedia dari Entities di city '+esc(B()?.city?.()?.name||'Global')+'. Hanya target yang sudah ditandai dan aktif yang muncul.</div>'+
+  '<div class="activity-pair"><label>Kategori Target<select id="activityTargetKind">'+
+  [['all','SEMUA'],['building','🏢 BANGUNAN'],['npc','🧍 NPC'],['object','🧱 ASSET']].map(v=>
+    '<option value="'+v[0]+'"'+(selectedKind===v[0]?' selected':'')+'>'+v[1]+'</option>').join('')+
   '</select></label>'+
-  '<label>Bind object spesifik di city yang sedang dipreview<select id="activityObject"><option value="">— Query bangunan berlaku lintas map —</option>'+options+'</select></label>'+
+  '<label>Directory Interaksi Terdaftar<select id="activityObject">'+
+  '<option value="">— Pilih target dari Entities —</option>'+options+'</select></label></div>'+
+  '<div class="activity-pair"><button id="activityRefreshDirectory" type="button">↻ REFRESH SYNC SEMESTA</button>'+
+  '<button id="activityOpenEntities" type="button">⚙ MARKING DI ENTITIES</button></div>'+
+  '<p class="activity-help">Daftar dibaca dari City Draft Semesta yang tersimpan, lalu disaring dengan marking pada World Entities. NPC, gedung dan asset bisa menjadi target aktivitas. Simpan city dahulu di Semesta, kemudian Refresh Sync di sini.</p>'+
+  '<label>Nama / tag fallback lintas city (hanya untuk target yang di-marking)<input data-activity-field="buildingQuery" type="text" value="'+esc(a.buildingQuery)+'" placeholder="Opsional, contoh: bank, warteg, Pak Ogah"></label>'+
   '<label>Action asset Mahluk Hidup<select data-activity-field="actionAsset">'+
   '<option value="">— Pilih action —</option>'+actions.map(v=>
   '<option value="'+esc(v)+'"'+(a.actionAsset===v?' selected':'')+'>'+esc(v)+'</option>').join('')+'</select></label>'+
-  '<p class="activity-help">Binding berdasarkan nama/tag asset dapat digunakan di berbagai kota. ID object spesifik hanya cocok di map yang memuat object itu. Action asset adalah referensi ke database Mahluk Hidup; playback otomatis memerlukan integrasi animation registry.</p>'+
-  '<div class="activity-validate">'+(status.length?status.map(t=>'<span>⚠ '+esc(t)+'</span>').join(''):'✓ Semua field binding terisi dan target ditemukan di city preview')+'</div></div>'+
+  '<div class="activity-validate">'+(status.length?status.map(t=>'<span>⚠ '+esc(t)+'</span>').join(''):'✓ Target telah ditandai di Entities dan tersedia dalam city')+'</div></div>'+
   '<div class="activity-fieldset"><h4>03 · REQUIREMENTS & TIMING</h4><div class="activity-pair">'+
   input('Minimum EXP','minExp','number',0,100000)+input('Durasi (menit in-game)','durationMinutes','number',1,4320)+
   input('Minimum energi','minEnergy','number',0,100)+input('Minimum hygiene','minHygiene','number',0,100)+'</div></div>'+
@@ -188,7 +199,25 @@ function editor(){
   update({statEffects:patch});
  }));
  $('activityEnabled').onchange=e=>update({enabled:e.target.checked},true);
- $('activityObject').onchange=e=>update({objectId:e.target.value},true);
+ $('activityTargetKind').onchange=e=>{
+  const type=e.target.value;
+  for(const option of $('activityObject').options)
+   option.hidden=!!option.value&&type!=='all'&&option.dataset.kind!==type;
+  if($('activityObject').selectedOptions[0]?.hidden)$('activityObject').value='';
+ };
+ $('activityTargetKind').dispatchEvent(new Event('change'));
+ $('activityObject').onchange=e=>{
+  const target=registered.find(o=>String(o.id)===e.target.value);
+  update({objectId:target?String(target.id):'',buildingQuery:target?
+   String(target.name||target.label||target.asset||''):current().buildingQuery},true);
+ };
+ $('activityRefreshDirectory').onclick=async()=>{
+  try{
+   const result=await B()?.refreshDirectory?.();
+   render();notify('DIRECTORY REFRESHED ✓ '+result.count+' object dari '+result.name+' · '+registered.length+' sebelumnya. Marking Entities tetap tersimpan.',true);
+  }catch(error){notify('REFRESH FAILED · '+error.message);}
+ };
+ $('activityOpenEntities').onclick=()=>{B()?.navigate?.('entities');root.dispatchEvent(new Event('jiwa:entity:render'));};
  $('activityGrantType').onchange=e=>update({grantType:e.target.value});
  $('activityIngredients').onchange=e=>{
   const next=e.target.value.split(',').map(s=>s.trim()).filter(Boolean);
@@ -208,7 +237,7 @@ function editor(){
   selected=draft.activities.find(x=>x.category===category)?.id||null;setDirty();render();
  };
  $('activityPreview').onclick=()=>{
-  const row=current(),e=A.validation(row,entities());
+  const row=current(),e=A.validation(row,entities(),draft.worldEntities,B()?.city?.()?.id||'');
   notify('PREVIEW · '+row.steps+' · '+(e.length?'Binding: '+e.join('; '):'Target ditemukan')+
    ' · Rp '+row.moneyDelta+' · EXP '+row.statEffects.experience);
  };
@@ -216,8 +245,8 @@ function editor(){
 function renderValidation(){
  const a=current(),el=$('activityEditor')?.querySelector('.activity-validate');
  if(!a||!el)return;
- const errors=A.validation(a,entities());
- el.textContent=errors.length?'⚠ '+errors.join(' · '):'✓ Target bangunan ditemukan di city preview';
+ const errors=A.validation(a,entities(),draft.worldEntities,B()?.city?.()?.id||'');
+ el.textContent=errors.length?'⚠ '+errors.join(' · '):'✓ Target interaktif ditemukan di city preview';
 }
 function render(){
  list();editor();const cat=A.CATEGORIES.find(x=>x.id===category);
