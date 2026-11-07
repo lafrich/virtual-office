@@ -552,8 +552,15 @@ function nokiaSnapshot(){
  const iconFor=n=>n.id.startsWith('prayer_')?'house':NOKIA_ICONS[n.id]||'peta';
  return {
   wallet:state.wallet,experience:state.experience,energy:state.energy,
-  moral:state.moral,hygiene:state.hygiene,bladder:state.bladder,
-  ownsRoom:ownsRoom(),
+  moral:state.moral,hygiene:state.hygiene,bladder:state.bladder,fullness:state.fullness,
+  identity:{...state.identity},ownsRoom:ownsRoom(),
+  transactions:(state.transactions||[]).slice().reverse(),
+  inventory:(state.inventory||[]).map(id=>({id,label:state.itemMeta?.[id]?.label||id})),
+  furniture:(state.furniture||[]).slice(),
+  fridgeOwned:!!state.housing?.fridge,homeStorageCount:(state.homeStorage||[]).length,
+  powerTokens:state.powerTokens,
+  settings:{...config.settings},
+  furnitureCatalog:RULES.FURNITURE.map(v=>({...v})),
   map:{
    player:getPos(),bounds:worldBounds(),
    sites:sites.map(n=>({id:n.id,label:n.label,icon:iconFor(n),
