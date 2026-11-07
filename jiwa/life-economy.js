@@ -64,6 +64,7 @@ function stateFrom(existing,config){
  s.powerTokens=number(s.powerTokens,0,1e9,0);
  s.furniture=Array.isArray(s.furniture)?s.furniture:[];
  s.detained=s.detained===true;
+ s.arrestGraceMinutes=number(s.arrestGraceMinutes,0,100000,0);
  s.luckClaims=number(s.luckClaims,0,1e9,0);
  s.restMinutes=number(s.restMinutes,0,1e9,0);
  s.detentionMinutes=number(s.detentionMinutes,0,1e9,0);
@@ -95,7 +96,7 @@ function doAction(config,previous,action,args={}){
  const reject=reason=>({ok:false,reason,state:copy(previous||s),changes:[]});
  const stat=(k,v)=>{s[k]=Math.max(0,Math.min(100,s[k]+v));changes.push(k+' '+(v>=0?'+':'')+v);};
  const clock=m=>{m=number(m,0,100000,0);s.elapsedMinutes+=m;s.restMinutes=Math.max(0,s.restMinutes-m);
-  s.detentionMinutes=Math.max(0,s.detentionMinutes-m);changes.push('waktu +'+m+'m');};
+  s.detentionMinutes=Math.max(0,s.detentionMinutes-m);s.arrestGraceMinutes=Math.max(0,s.arrestGraceMinutes-m);changes.push('waktu +'+m+'m');};
  const spend=amount=>{if(s.wallet<amount)return false;s.wallet-=amount;changes.push('uang -Rp'+amount);return true;};
  const add=(type,label,minutes)=>{if(s.inventory.length>=setting.bagSlots)return null;
   const id='life:'+type+':'+(++s.itemSequence);
@@ -156,6 +157,7 @@ function doAction(config,previous,action,args={}){
   if(s.moral>=setting.arrestMoralThreshold)return reject('Tidak ada alasan penahanan.');
   if(!args.witnessed)return reject('Tidak ada hansip yang melihat.');
   if(s.detained)return reject('Sudah ditahan.');
+  if(s.arrestGraceMinutes>0)return reject('Masih masa tenggang setelah hukuman.');
   s.detained=true;changes.push('hansip menangkap pemain');break;
  }
  case 'respawn':{
@@ -300,11 +302,11 @@ function doAction(config,previous,action,args={}){
  case 'fine':{
   if(!s.detained)return reject('Belum ditahan hansip.');
   if(!spend(2000))return reject('Uang tidak cukup untuk denda.');
-  s.detained=false;stat('moral',5);changes.push('denda lunas, bebas');break;
+  s.detained=false;s.arrestGraceMinutes=60;stat('moral',5);changes.push('denda lunas, bebas');break;
  }
  case 'community_service':{
   if(!s.detained)return reject('Belum ditahan hansip.');
-  clock(45);s.detained=false;stat('energy',-15);stat('moral',10);changes.push('kerja sosial membersihkan gorong-gorong; bebas');break;
+  clock(45);s.detained=false;s.arrestGraceMinutes=60;stat('energy',-15);stat('moral',10);changes.push('kerja sosial membersihkan gorong-gorong; bebas');break;
  }
  default:return reject('Aksi belum didukung: '+String(action));
  }
