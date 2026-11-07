@@ -139,12 +139,10 @@ function paintFrame(){
  ctx.drawImage(state.sheet,step.col*64,step.row*112,64,112,0,0,64,112);
  state.tex.needsUpdate=true;
  const depth=insideDepth(state.index);
+ // Stay between belakang (3) and depan (5) while inside; never lift in Y
+ // or the sprite sits on the roof instead of at ground inside the opening.
  state.overlay.renderOrder=depth>0.5?4:6;
  if(state.front)state.front.visible=true;
- if(Number.isFinite(state.overlayBaseY)){
-  const fade=Math.max(0,depth);
-  state.overlay.position.y=state.overlayBaseY+(state.tentLift||0)*fade;
- }
 }
 
 function applyCrawl(step,dtMs){
@@ -198,7 +196,6 @@ async function play(opts){
   return null;
  }
  const contactY=Math.max(lowestOpaqueRow(backImg),lowestOpaqueRow(frontImg));
- const lift=tentLift(spec,contactY);
  const back=makePlane(THREE,backImg,spec.size,spec.pivot,3,contactY);
  const front=makePlane(THREE,frontImg,spec.size,spec.pivot,5,contactY);
  front.material.depthWrite=false;
@@ -211,11 +208,9 @@ async function play(opts){
  tex.colorSpace=THREE.SRGBColorSpace||tex.colorSpace;tex.needsUpdate=true;
  const overlay=makePlane(THREE,canvas,[64,112],[32,100],4);
  overlay.material.map=tex;
- const overlayBaseY=overlay.position.y;
- overlay.position.y=overlayBaseY+lift;
  (opts.actorRoot||group).add(overlay);
 
- Object.assign(state,{back,front,overlay,tex,ctx,sheet:sheetImg,contactY,tentLift:lift,overlayBaseY});
+ Object.assign(state,{back,front,overlay,tex,ctx,sheet:sheetImg,contactY,tentLift:tentLift(spec,contactY)});
  hideMesh(actorMesh);
  paintFrame();
  return state;
