@@ -19,6 +19,34 @@ test('Mahluk Hidup canonical pose bindings for interior furniture',()=>{
  }
  for(const action of ['cook','wash'])assert.equal(m.actions[action].pose,null);
 });
+test('bed sleep uses the lie clip; floor mattress sleep stays sleep',()=>{
+ const m=interiorModel();
+ assert.equal(m.poseFor('bed','sleep'),'lie');
+ assert.equal(m.poseFor('floor_mattress','sleep'),'sleep');
+ assert.equal(m.poseFor('clinic_bed','rest'),'lie');
+ assert.equal(m.actions.sleep.pose,'sleep');
+ const scene=m.preset({w:6,d:6},'bedroom');
+ const bed=scene.items.find(i=>i.assetId==='bed');
+ assert.ok(bed);
+ assert.equal(bed.pose,'lie');
+ m.action(scene,bed.id,'sleep');
+ assert.equal(bed.pose,'lie');
+ if(m.types.clinic_bed){
+  const clinic=m.create({w:8,d:6});
+  const placed=m.add(clinic,'clinic_bed',1,1);
+  assert.ok(placed);
+  assert.equal(placed.pose,'lie');
+  assert.equal(placed.actionId,'rest');
+ }
+ if(m.types.floor_mattress){
+  const floor=m.create({w:6,d:6});
+  const mat=m.add(floor,'floor_mattress',1,1);
+  assert.ok(mat);
+  assert.equal(mat.pose,'sleep');
+ }
+ assert.equal(m.slots(scene).find(x=>x.id===bed.id).characterPose,'lie');
+});
+
 test('interior templates do not overlap furniture or block entrances',()=>{
  const m=interiorModel();
  for(const key of Object.keys(m.templates)){

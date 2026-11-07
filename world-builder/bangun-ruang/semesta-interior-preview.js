@@ -109,8 +109,9 @@ function mount(opts){
    (scene.items||[]).find(obj=>model.occupied(obj).includes(c+','+r))||null;
   if(selected){
    const a=model.actions[selected.actionId],def=model.types[selected.assetId];
+   const pose=model.poseFor?.(selected.assetId,selected.actionId)??a?.pose;
    $('interiorWalkthroughDetail').textContent=(def?.label||selected.assetId)+' / '+(a?.label||selected.actionId)+
-    ' / '+(a?.pose?'Rig preview: '+a.pose:'No authored rig; data trigger only');
+    ' / '+(pose?'Rig preview: '+pose:'No authored rig; data trigger only');
    $('interiorWalkthroughUse').disabled=false;
   }else{
    $('interiorWalkthroughDetail').textContent='Tap a furniture item to select its action.';
@@ -120,10 +121,11 @@ function mount(opts){
  $('interiorWalkthroughUse').onclick=()=>{
   if(!selected)return;
   const a=model.actions[selected.actionId];
-  const result=opts.previewAction?.(selected,a)||false;
+  const pose=model.poseFor?.(selected.assetId,selected.actionId)??a?.pose;
+  const result=opts.previewAction?.(selected,{...a,pose})||false;
   $('interiorWalkthroughDetail').textContent=
    (a?.label||selected.actionId)+' triggered as editor preview. '+
-   (result?'Character rig pose: '+a.pose+'.':'No matching character rig; action metadata only.');
+   (result?'Character rig pose: '+pose+'.':'No matching character rig; action metadata only.');
  };
  return {
   openFor(item){return open(item);},

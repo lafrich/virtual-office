@@ -1,6 +1,7 @@
 /* Bangun Ruang · editable interior authoring, NOT executable multiplayer gameplay.
  * Actor pose names follow Semesta's VLCharacterRig aliases (Mahluk Hidup v6b):
  * toilet -> sit, bathe -> swim, work -> sit_type, sleep -> sleep, sit -> sit.
+ * Elevated beds (assetId/visualAs bed, not floor_mattress) map sleep -> lie (row 36).
  * Non-rigged actions (cook, wash, shop) stay explicit proposed hooks.
  */
 (function(g){
@@ -95,7 +96,7 @@ function add(scene,assetId,c,r){
  if(!canPlace(scene,assetId,x,z))return null;
  const item={id:'prop-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),
   assetId,name:def.label,c:x,r:z,rotation:0,flipX:false,flipY:false,
-  actionId:def.actions[0],pose:ACTIONS[def.actions[0]]?.pose||null,
+  actionId:def.actions[0],pose:poseFor(assetId,def.actions[0]),
   capacity:assetId==='sofa'?2:1,blocking:true,triggerRadius:1.15,
    actionAdjustments:ADJUST?.forType(assetId,def.actions)||{}};
  scene.items.push(item);return item;
@@ -141,10 +142,23 @@ function rotate(scene,id,steps=1){
  }
  return false;
 }
+function isElevatedBed(assetId){
+ const t=TYPES[assetId];
+ if(!t)return false;
+ const vis=t.visualAs||assetId;
+ return vis==='bed'&&assetId!=='floor_mattress';
+}
+// Semesta Play / Bangun Ruang: sleeping ON a bed uses the lie clip
+// (row 36 / v2Clips.lie). Floor mattress and other sleep stay on `sleep`.
+function poseFor(assetId,actionId){
+ const base=ACTIONS[actionId]?.pose||null;
+ if(actionId==='sleep'&&isElevatedBed(assetId))return 'lie';
+ return base;
+}
 function action(scene,id,actionId){
  const item=scene.items.find(x=>x.id===id);if(!item)return false;
  if(!TYPES[item.assetId]?.actions.includes(actionId))return false;
- item.actionId=actionId;item.pose=ACTIONS[actionId]?.pose||null;return true;
+ item.actionId=actionId;item.pose=poseFor(item.assetId,actionId);return true;
 }
 /* A preset is authored in the pipeline as relative anchors, so the same
  * room adapts to different Semesta exterior footprints without stretching.
@@ -273,5 +287,5 @@ function slots(scene){
  }));
 }
 g.VLBuildingInterior=Object.freeze({types:TYPES,actions:ACTIONS,templates:TEMPLATES,
- dimensions,create:layout,preset,normalize,canPlace,add,move,rotate,action,occupied,slots,clone});
+ dimensions,create:layout,preset,normalize,canPlace,add,move,rotate,action,occupied,slots,clone,poseFor,isElevatedBed});
 })(window);

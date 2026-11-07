@@ -446,7 +446,7 @@ function mount(api){
    [Math.round(actor.c),Math.round(actor.r)]:null;
   const exitTile=oldApproach||free||[room.entrance?.c||0,room.entrance?.r||0];
   actor.actionAnchor={...base,approach:exitTile};
-  actor.pose=model.actions?.[item.actionId]?.pose||'idle';actor.actionId=item.actionId;
+  actor.pose=model.poseFor?.(item.assetId,item.actionId)??(model.actions?.[item.actionId]?.pose||'idle');actor.actionId=item.actionId;
   actor.c=base.c-.5;actor.r=base.r-.5;
   actor.direction=actor.adjustmentDraft.direction==='auto'?base.direction:actor.adjustmentDraft.direction;
   actor.reported=false;updateControls();draw();
@@ -489,7 +489,7 @@ function mount(api){
   const start=[Math.round(actor.c),Math.round(actor.r)];
   const path=pathTo(scene,start,[item.c,item.r],{item});
   if(!path.length){status('No free route to '+item.name+' · move blocking furniture');return;}
-  const action=model.actions?.[item.actionId],pose=action?.pose;
+  const action=model.actions?.[item.actionId],pose=model.poseFor?.(item.assetId,item.actionId)??action?.pose;
   const anchor=pose&&['toilet','sit','sleep','lie','work','bathe','bathtub_bathe'].includes(pose)?
     iso?.actionAnchor?.(item):null;
   const approach=path[path.length-1];

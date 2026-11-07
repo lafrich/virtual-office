@@ -126,7 +126,7 @@ test('Bangun Ruang walks to a bed, lies on its mattress, then sits on a chair',(
  element('scaleUse').onclick();
  for(let t=6500;t<18000;t+=40)frame(t);
  let state=actor.actor;
- assert.equal(state.pose,'sleep');
+ assert.equal(state.pose,'lie');
  assert.equal(state.actionAnchor.kind,'bed');
  assert.equal(state.actionAnchor.z,21);
  assert.ok(near(state.c+.5,g.VLInteriorIso.actionAnchor(bed).c));

@@ -318,7 +318,7 @@ function sanitize(v){
   if(p.type==='sprite'&&/^(?:env|street2)\/[a-z0-9_/-]+\.png$/.test(p.asset||'')&&assetByName.has(p.asset))e.asset=p.asset;
   if(actorType(p.type)){
     e.facing=directions.includes(p.facing)?p.facing:'sw';
-    e.pose=['sit','sleep','sleep_bed_right','sleep_bed_left','bathe','bathtub_bathe','toilet','work'].includes(p.pose)?p.pose:null;
+    e.pose=['sit','sleep','lie','sleep_bed_right','sleep_bed_left','bathe','bathtub_bathe','toilet','work'].includes(p.pose)?p.pose:null;
     e.variant='pipeline-v6b';
     e.profile=(mahluk?.has(p.profile)||window.VLCharacterRig?.profiles?.[p.profile])?p.profile:'ichsan';
   }
@@ -4042,12 +4042,13 @@ renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();f
 interiorPreview=window.VLSemestaInteriorPreview?.mount({
  getSelected:()=>item(),catalog:assetByName,message:tell,
  previewAction:(prop,action)=>{
-  if(!action?.pose)return false;
+  const pose=window.VLBuildingInterior?.poseFor?.(prop?.assetId,prop?.actionId)??action?.pose;
+  if(!pose)return false;
   const avatar=documentMap.objects.find(o=>actorType(o.type)&&rigs.has(o.id));
   if(!avatar)return false;
   const rig=rigs.get(avatar.id)?.rig;
   if(!rig)return false;
-  rig.setPose(action.pose);renderer.render(scene,camera);return true;
+  rig.setPose(pose);renderer.render(scene,camera);return true;
  }
 })||null;
 // The visual clock is game-time, independent of the editing and Walk Test
