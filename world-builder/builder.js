@@ -2366,11 +2366,10 @@ function currentPlayGameplay(){
   const key=(window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1';
   raw=JSON.parse(localStorage.getItem(key)||'null');
  }catch{raw=null;}
- // Jiwa UI Editor saves a layout per City Draft, with Global Foundation
- // as the fallback. Reuse existing gameplay schema; do not create new HUD rules.
+ // The game has one global authored UI. Cities change world content, not HUD
+ // composition. Legacy per-city layouts are consulted only for migration.
  const HL=window.VLHudLayout;
- const city=activeDraftId||'__jiwa_global__';
- const stored=HL?.resolveSavedLayout?.(city,localStorage);
+ const stored=HL?.resolveSavedLayout?.(null,localStorage);
  if(HL&&stored?.layout){
   raw=raw&&typeof raw==='object'?{...raw}:JG?.defaultGameplay?.()||{modules:{}};
   raw.modules={...(raw.modules||{}),hudLayout:HL.normalize(stored.layout)};
@@ -2750,9 +2749,9 @@ if(window.VLHub)window.VLHub.subscribe('gameplay',()=>syncPlayHud());
  // Live Jiwa → Semesta sync across browser tabs. localStorage storage events
  // fire in the *other* document; do not assume both apps share a tab.
  addEventListener('storage',e=>{
-  const key=e.key||'',activeId=activeDraftId||'__jiwa_global__';
-  if(key==='virtual-life-gameplay-v1'||key==='jiwa-hud-layout-city-v1:'+activeId||
-     key==='jiwa-hud-layout-city-v1:__jiwa_global__')syncPlayHud();
+  const key=e.key||'';
+  if(key==='virtual-life-gameplay-v1'||key===window.VLHudLayout?.GLOBAL_LAYOUT_KEY)
+   syncPlayHud();
  });
 
 const DEVICE_KEY='semesta-play-device-v1';
