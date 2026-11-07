@@ -127,10 +127,11 @@ function mount(opts){
    (a?.label||selected.actionId)+' triggered as editor preview. '+
    (result?'Character rig pose: '+pose+'.':'No matching character rig; action metadata only.');
  };
+ g.addEventListener('semesta:furniture-ready',()=>{if(active&&scene)draw();});
  return {
-  openFor(item){return open(item);},
+  openFor(item){model.refreshExternal?.();return open(item);},
   update(item,spec){
-   const available=item?.type==='sprite'&&(item?.enterable===true||spec?.enterable===true)&&
+   const available=!!item&&(item.enterable===true||spec?.enterable===true)&&
     (item?.interior?.floors?.length||spec?.interior?.floors?.length);
    enter.hidden=!available;
    if(!available&&!dialog.hidden&&dialog.open)close();
