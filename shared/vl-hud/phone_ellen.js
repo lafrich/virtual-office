@@ -286,20 +286,32 @@ function Progress(){const s={};
 // ---- Marketplace
 const MK=[['Lampu Meja',80000,'Raka'],['Kursi Kayu',120000,'Theo'],['Poster Kota',35000,'Dita'],['Rak Buku',210000,'Raka']];
 function Market(){
- if(liveData())return List({title:'Marketplace',num:'4-',items:[
-  {label:'Token Listrik',icon:'market',open:()=>Text({title:'Token Listrik',num:'4-',lines:[
-   ['Rp 1.000',true],['Isi ulang listrik'],['Kost diperlukan'],['Beli 5 unit']
-  ],soft:['Beli','Kembali'],onL:()=>{
-   const result=liveData()?.runAction?.('buy_token',{});
-   push(Msg([result?.ok?'Token bertambah':'Tidak berhasil',fit(result?.ok?'Listrik +5':result?.reason||'Coba lagi',90)],1));
-  }})},
-  {label:'Kulkas',icon:'furnitur',open:()=>Text({title:'Kulkas',num:'4-',lines:[
-   ['Rp 8.000',true],['Perlu akses kost'],['Butuh token listrik']
-  ],soft:['Beli','Kembali'],onL:()=>{
-   const result=liveData()?.runAction?.('buy_fridge',{});
-   push(Msg([result?.ok?'Kulkas dibeli':'Tidak berhasil',fit(result?.ok?'Untuk simpan ikan':result?.reason||'Coba lagi',90)],1));
-  }})}
- ]});
+ if(liveData()){
+  const g=liveData(),cfg=g.settings||{};
+  const lines=(title,price,extras,action,args,success)=>({
+   label:title,right:Math.round(price/1000)+'rb',
+   open:()=>Text({title,num:'4-',lines:[
+    [rp(price),true],
+    ['Kost '+(liveData()?.ownsRoom?'aktif':'diperlukan')],
+    ...extras.slice(0,2).map(v=>[v])
+   ],soft:['Beli','Kembali'],onL:()=>push(Confirm('Beli?',[
+    title,rp(price)
+   ],()=>{
+    pop();
+    const result=liveData()?.runAction?.(action,args||{});
+    push(Msg([result?.ok?'Pembelian sukses':'Gagal membeli',
+     fit(result?.ok?success:result?.reason||'Tidak tersedia',90)],1));
+   }))})
+  });
+  return List({title:'Marketplace',num:'4-',items:[
+   lines('Token Listrik',cfg.tokenPrice??1000,
+    ['+'+(cfg.tokenUnits??5)+' unit token','Untuk listrik kost'],
+    'buy_token',{},'Token listrik bertambah'),
+   ...(g.fridgeOwned?[]:[lines('Kulkas',cfg.fridgePrice??8000,
+    ['Simpan ikan / buah','Perlu token listrik'],
+    'buy_fridge',{},'Kulkas tersedia di kost')])
+  ]});
+ }
  return List({title:'Marketplace',num:'4-',numbered:true,items:[
  {label:'Beli',open:()=>List({title:'Beli',num:'4-1-',rowH:18,items:MK.map(m=>({label:m[0],right:Math.round(m[1]/1000)+'rb',sub:'oleh '+m[2],open:()=>MarketItem(m)}))})},
  {label:'Jual',open:()=>List({title:'Jual',num:'4-2-',y0:25,header:()=>{tx('Dari storage kamar:',1,16)},items:[['Kursi Kayu'],['Poster Kota'],['Tanaman']].map(j=>({label:j[0],open:()=>Harga(j[0])}))})},
@@ -317,14 +329,26 @@ function Harga(name){const s={v:''};
 const FU=[['Sofa Biru',450000,'sofa'],['Meja Kopi',150000,'meja'],['Kursi Kayu',120000,'kursi'],['Tanaman',60000,'tanaman'],['Lampu',90000,'lampu'],['Rak Buku',210000,'rak']];
 function Furnitur(){
  if(liveData()){
-  const catalog=[['Kasur',6000,'bed'],['Kursi',1500,'chair'],['Kompor',4500,'stove'],['Lemari',3500,'wardrobe']];
+  const data=liveData(),catalog=data.furnitureCatalog||[];
   return List({title:'Toko Furnitur',num:'5-',items:catalog.map(f=>({
-   label:f[0],right:Math.round(f[1]/1000)+'rb',
-   open:()=>Text({title:f[0],num:'5-',lines:[[rp(f[1]),true],['Dikirim ke kost'],['Beli sekali']],soft:['Beli','Kembali'],
-    onL:()=>{
-     const result=liveData()?.runAction?.('buy_furniture',{itemId:f[2]});
-     push(Msg([result?.ok?'Pembelian sukses':'Tidak berhasil',fit(result?.ok?f[0]:result?.reason||'Coba lagi',90)],1));
-    }})
+   label:f.label,right:Math.round(f.price/1000)+'rb',
+   open:()=>Text({title:f.label,num:'5-',lines:[
+    [rp(f.price),true],
+    [liveData()?.ownsRoom?'Kost aktif':'Butuh akses kost'],
+    [(liveData()?.furniture||[]).includes(f.id)?'Sudah dimiliki':'Beli satu kali']
+   ],soft:['Beli','Kembali'],onL:()=>{
+    if((liveData()?.furniture||[]).includes(f.id)){
+     push(Msg(['Sudah dimiliki',f.label],1));return;
+    }
+    push(Confirm('Beli?',[
+     f.label,rp(f.price)
+    ],()=>{
+     pop();
+     const result=liveData()?.runAction?.('buy_furniture',{itemId:f.id});
+     push(Msg([result?.ok?'Furnitur dibeli':'Tidak berhasil',
+      fit(result?.ok?f.label:result?.reason||'Tidak tersedia',90)],1));
+    }));
+   }})
   }))});
  }
  return List({title:'Toko Furnitur',num:'5-',items:FU.map(f=>({label:f[0],right:Math.round(f[1]/1000)+'rb',open:()=>FurniturDetail(f)}))});
