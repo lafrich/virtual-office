@@ -103,9 +103,11 @@ async function reloadRules(revision){
   const city=await projectFromJiwa(projectId);
   const globalRules=city&&city.lifeEconomy?city:await projectFromJiwa('__jiwa_global__');
   if(!active||revision!==sessionRevision)return;
-  config=RULES.normalize(globalRules?.lifeEconomy);
+  const catalog=root.JiwaActivities?.readLocal?.(localStorage);
+  config=RULES.normalize({...globalRules?.lifeEconomy,activities:catalog?.activities||[]});
   configSource=globalRules?.lifeEconomy?(city?.lifeEconomy?'JIWA CITY':'JIWA GLOBAL'):'DEFAULT V1';
   if(state){const previous=state;state=RULES.stateFrom(previous,config);}
+  buildSites();
   paintPanel();
  }catch{}
 }
@@ -151,6 +153,21 @@ function buildSites(){
  if(tent&&last?.kind==='hobo'&&last?.point){tent.x=last.point.x;tent.z=last.point.z;tent.placeholder=false;}
  const home=sites.find(n=>n.id==='kost');
  if(home&&state?.housing?.roomPosition){home.x=state.housing.roomPosition.x;home.z=state.housing.roomPosition.z;home.placeholder=!!state.housing.roomPosition.placeholder;}
+ // Global Jiwa activity registry: only real, configured buildings become
+ // game interactions; unbound drafts remain editable, never fake map pins.
+ const catalog=root.JiwaActivities;
+ if(catalog){
+  for(const a of config.activities||[]){
+   const found=catalog.matchBuilding(a,objects);
+   if(!found)continue;
+   const pos=findLanding(Number(found.x)||0,Number(found.z)||0);
+   const cat=catalog.CATEGORIES.find(c=>c.id===a.category);
+   sites.push({id:'act:'+a.id,label:a.label,
+    category:a.category,icon:cat?.emoji||'📍',
+    action:'configured_activity',activityId:a.id,actionAsset:a.actionAsset,
+    sourceId:String(found.id||''),placeholder:false,x:pos.x,z:pos.z});
+  }
+ }
  rebuildNokiaMapOverview();
 }
 function rebuildNokiaMapOverview(){
@@ -304,6 +321,8 @@ function nodeButtons(n){
  if(!n)return '<small>Berjalan ke pin di kota untuk berinteraksi (WASD / panah). Tombol Action di HUD dipakai untuk aksi terdekat.</small>';
  const id=n.id;let entries=[];
  const button=(action,label,args={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(args))+'">'+label+'</button>';
+ if(n.activityId)entries=[button('configured_activity','▶ '+esc(n.label),{activityId:n.activityId}),
+  '<small>JiWA · '+esc(n.actionAsset||'Action asset belum dipilih')+' · lokasi: '+esc(n.sourceId)+'</small>'];
  if(id==='fish')entries=[button('fish','🎣 Mancing',{spotId:n.sourceId||'water_placeholder'})];
  if(['siomay_batagor','pasar_ikan'].includes(id))entries=['<select id="slpItem">'+itemOptions('fish')+'</select>',button('sell_fish','💰 Jual Ikan',{buyerId:id})];
  if(n.jobId)entries=['<button id="slpWork" type="button">🛠 TAHAN ACTION UNTUK '+esc(n.label.toUpperCase())+'</button>','<div class="slp-work-progress"><span id="slpWorkFill"></span></div>'];
@@ -465,6 +484,10 @@ function runAction(action,args={}){
   bridge?.respawn?.();return {ok:true,reason:'respawn'};
  }
  const node=nearest();
+ if(action==='configured_activity'){
+  const expected='act:'+String(args.activityId||'');
+  if(node?.id!==expected||node.placeholder)return {ok:false,reason:'Datangi bangunan aktivitas yang sesuai di Semesta.'};
+ }
  if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','eat_item','discard_item','set_identity'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
@@ -507,6 +530,7 @@ function handleAction(){
   message('TAHAN tombol Action (atau tombol KERJA di panel) sampai progress penuh.');
   paintPanel();return true;
  }
+ if(node.activityId){runAction('configured_activity',{activityId:node.activityId});return true;}
  if(node.id==='siomay_batagor'||node.id==='pasar_ikan'||node.id==='loak'){
   message('Pilih barang dari tas, kemudian klik JUAL di panel.');paintPanel();return true;
  }
@@ -615,7 +639,9 @@ function start(){
  if(active&&id===projectId)return true;
  if(active)stop();
  projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;bagOpen=false;
- config=defaults();configSource='DEFAULT V1';restore();buildSites();makeRoot();attachNokia();
+ config=RULES.normalize({...defaults(),
+  activities:root.JiwaActivities?.readLocal?.(localStorage)?.activities||[]});
+ configSource='DEFAULT V1';restore();buildSites();makeRoot();attachNokia();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
  message('🎮 Play Mode aktif. '+(ownsRoom()?'Respawn di kost':'Mulai sebagai hobo; respawn dari tenda pinggiran kota')+'.');
@@ -628,6 +654,9 @@ function stop(){
  actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;bagOpen=false;
 }
 function attach(bridgeApi){bridge=bridgeApi||null;return api;}
+try{root.addEventListener?.('storage',ev=>{
+ if(ev.key==='jiwa-activities-global-v1'&&active)reloadRules(sessionRevision);
+});}catch(_e){}
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
  spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;state=RULES.stateFrom({wallet:6000},config);persist();paintPanel();}});
