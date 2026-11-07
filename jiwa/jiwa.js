@@ -7,6 +7,12 @@ const $=id=>document.getElementById(id), clone=x=>JSON.parse(JSON.stringify(x));
 const DB='jiwa-mechanics-v1',TABLE='projects',FALLBACK='jiwa-local-project:',CHANGE='jiwa-project-change';
 const ACTIVE='virtual-life-active-city-draft';
 const GLOBAL_CITY='__jiwa_global__';
+const HUD_LAYOUT_PREFIX='jiwa-hud-layout-city-v1:';
+const saveHudLayoutCache=(cityId,gameplay)=>{
+ try{const HL=window.VLHudLayout;if(!cityId||!HL)return;
+  localStorage.setItem(HUD_LAYOUT_PREFIX+cityId,JSON.stringify({layout:HL.normalize(gameplay?.modules?.hudLayout),at:Date.now()}));
+ }catch(_e){}
+};
 const params=new URLSearchParams(location.search);
 const KINDS=['wallet_min','stat_min','stat_max','has_item','quest_active','time_start','time_end'];
 const EFFECTS=['wallet_delta','stat_fullness','stat_energy','stat_hygiene','stat_bladder','inventory_add','quest_start','quest_complete','message','animation'];
@@ -138,6 +144,7 @@ async function save(){
  if(!state.project)return notice('No city selected');
  try{const p=validateProject(state.project,state.record.id);p.updatedAt=new Date().toISOString();const where=await writeProject(p);state.project=p;markSaved();notice('Rules saved · '+where+' · city unchanged');try{localStorage.setItem(CHANGE,JSON.stringify({cityId:p.cityId,at:p.updatedAt}));}catch{}
  try{localStorage.setItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1',JSON.stringify(p.gameplay||{}));}catch{}
+ saveHudLayoutCache(p.cityId,p.gameplay);
  try{window.VLHub&&window.VLHub.publish('gameplay',{cityId:p.cityId,at:p.updatedAt});}catch{}}
  catch(e){notice('SAVE FAILED: '+e.message);}
 }
@@ -168,11 +175,14 @@ async function loadCity(id){
    if(shared.updatedAt&&shared.foundation)raw.foundation=clone(shared.foundation);
   }
   state.project=validateProject({...newProject(id),...raw,cityId:id},id);
+  try{localStorage.setItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1',JSON.stringify(state.project.gameplay));}catch{}
+  saveHudLayoutCache(id,state.project.gameplay);
   const shown=visibleEntities();
   state.selected=(params.get('city')===id&&params.get('object')&&shown.some(o=>o.id===params.get('object')))?params.get('object'):(state.selected&&shown.some(o=>o.id===state.selected)?state.selected:shown[0]?.id||null);
   state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(visibleEntities().length);
   window.dispatchEvent(new Event('jiwa:context:render'));
   window.dispatchEvent(new Event('jiwa:life:render'));
+  window.dispatchEvent(new Event('jiwa:ui-layout:render'));
   $('mapInfo').textContent=record.name+' · '+visibleEntities().length+' OBJECTS';
   notice('City loaded: '+record.name+' · edit mechanics only, placement read-only');
  }catch(e){emptyCity('Load failed: '+e.message);}
@@ -245,12 +255,13 @@ function renderSystems(){
 function tab(which){
  state.tab=which;
  for(const b of document.querySelectorAll('[data-tab]'))b.classList.toggle('active',b.dataset.tab===which);
- for(const name of ['map','systems','test','context','play'])$(name+'View').hidden=which!==name;
+ for(const name of ['map','systems','test','context','play','ui'])$(name+'View').hidden=which!==name;
  if(which==='map')resizeCanvas();
  if(which==='systems')renderSystems();
  if(which==='test')renderTest();
  if(which==='context')window.dispatchEvent(new Event('jiwa:context:render'));
  if(which==='play')window.dispatchEvent(new Event('jiwa:life:render'));
+ if(which==='ui')window.dispatchEvent(new Event('jiwa:ui-layout:render'));
 }
 function lifeSpawnHints(){
  const objects=state.entities||[],coords=objects.filter(o=>Number.isFinite(Number(o.x))&&Number.isFinite(Number(o.z)));
@@ -484,6 +495,7 @@ window.JiwaGameplayBridge=Object.freeze({
   if(!state.project)return;
   state.project.gameplay=JG.normalizeGameplay(next);markDirty();
   try{localStorage.setItem((window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1',JSON.stringify(state.project.gameplay));}catch{}
+  saveHudLayoutCache(state.project.cityId,state.project.gameplay);
   try{window.VLHub&&window.VLHub.publish('gameplay',{cityId:state.project.cityId,live:true});}catch{}
   window.dispatchEvent(new Event('jiwa:gameplay'));
   renderSystems();renderTest();
