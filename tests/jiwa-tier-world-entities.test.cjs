@@ -61,7 +61,7 @@ test('Both apps load premise library before tier engine; NPC, Building and Objec
  const c=world.indexOf('src="../jiwa/interaction-rules.js'),d=world.indexOf('src="../jiwa/activity-catalog.js');
  assert.ok(c>=0&&c<d,'Semesta premise rules before catalog');
  const s=read('world-builder/semesta-life-play.js');
- assert.match(s,/matchWorld\?\.\(rule,objects\)/);
+ assert.match(s,/matchWorldAll\?\.\(rule,candidates,projectId\)/);
  assert.match(s,/worldRuleId:rule\.id/);
  assert.match(s,/sites\.filter\(n=>!n\.ambient\)/);
  assert.match(s,/world_ambient/);
