@@ -480,7 +480,7 @@ function handleAction(){
   message('Pilih barang dari tas, kemudian klik JUAL di panel.');paintPanel();return true;
  }
  const action=node.action;
- if(node.id==='kost'&&ownsRoom()){phoneOpen=false;bagOpen=false;message('Pilih WC, mandi, tidur, atau penyimpanan di panel.');paintPanel();return true;}
+ if(node.id==='kost'&&ownsRoom()){bagOpen=false;message('Pilih WC, mandi, tidur, atau penyimpanan di panel.');paintPanel();return true;}
  runAction(action,node.id==='fish'?{spotId:node.sourceId||'river'}:
   node.id==='bench'?{seatId:node.sourceId||'bangku_preview'}:
   node.id==='public_wc'||node.id==='public_bath'?{facilityId:node.sourceId||node.id}:{});return true;
