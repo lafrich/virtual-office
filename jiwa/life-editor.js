@@ -39,8 +39,12 @@
    '</tbody></table></div><p class="subtle">Ikan Sapu-sapu → Bang Siomay menerima, Pasar Ikan menolak. Ikan konsumsi → keduanya menerima. Semua harga editable.</p></div>'+
    '<div class="card"><h3>PARAMETER CORE SURVIVAL</h3><div class="context-grid">'+
    Object.entries({fishEnergy:'Energi / mancing',fishMinutes:'Durasi mancing (menit)',coffeePrice:'Harga kopi (Rp)',roomPrice:'Beli akses kost sekali (Rp)',
-    fridgePrice:'Harga kulkas (Rp)',tokenPrice:'Token listrik (Rp)',tokenUnits:'Unit listrik / token',fridgeExtraMinutes:'Bonus simpan kulkas (menit)',
-    faintRestMinutes:'Bed rest pingsan (menit)',arrestMoralThreshold:'Ambang moral hansip',
+    fridgePrice:'Harga kulkas (Rp)',tokenPrice:'Token listrik (Rp)',tokenUnits:'Unit listrik / token',
+    fridgeCoolingMultiplier:'Efektivitas pendinginan kulkas (x)',tokenDurationMinutes:'Durasi 1 unit token (menit)',
+    faintRestMinutes:'Bed rest pingsan (menit)',faintRecoveryEnergy:'Energi setelah bed rest',arrestMoralThreshold:'Ambang moral hansip',
+    passiveEnergyMinutes:'Interval turun energi (menit)',passiveBladderMinutes:'Interval naik keinginan pipis (menit)',
+    passiveHygieneMinutes:'Interval turun kebersihan (menit)',passiveFullnessMinutes:'Interval lapar (menit)',
+    realSecondsPerGameMinute:'Detik nyata untuk 1 menit simulasi',seatRestEnergy:'Energi dari duduk sebentar',
     publicShowerFee:'Biaya mandi umum (Rp)',publicShowerRecovery:'Pulih mandi umum',homeShowerRecovery:'Pulih mandi kost',
     publicToiletPenalty:'Penalti kebersihan WC umum',hoboSleepRecovery:'Energi tidur tenda',homeSleepRecovery:'Energi tidur kost'}).map(([key,label])=>
      '<label>'+label+'<input type="number" min="0" max="100000" data-setting="'+key+'" value="'+s[key]+'"></label>').join('')+
