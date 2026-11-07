@@ -150,17 +150,20 @@ function kindOf(o){
  return 'object';
 }
 function eligibleTargets(objects=[],rules=[],cityId=''){
- const eligible=[],seen=new Set();
- for(const o of objects){
-  if(!o||!o.id||seen.has(String(o.id)))continue;
-  const kind=kindOf(o);
-  const matches=(rules||[]).filter(r=>r?.enabled===true&&r.operation!=='none'&&
-   r.kind===kind&&r.selectionMode==='directory'&&PREMISES.matchWorld(r,[o],cityId));
-  if(!matches.length)continue;
-  seen.add(String(o.id));
-  eligible.push({...o,jiwaKind:kind,jiwaRuleIds:matches.map(r=>r.id)});
+ const byId=new Map((objects||[]).filter(o=>o?.id).map(o=>[String(o.id),o]));
+ const registered=new Map();
+ for(const r of rules||[]){
+  if(!r?.enabled||r.operation==='none'||r.selectionMode!=='directory')continue;
+  for(const target of r.targets||[]){
+   if(target.cityId!==cityId)continue;
+   const id=String(target.objectId||''),o=byId.get(id);
+   if(!o||kindOf(o)!==r.kind)continue;
+   const row=registered.get(id)||{...o,jiwaKind:r.kind,jiwaRuleIds:[]};
+   if(!row.jiwaRuleIds.includes(r.id))row.jiwaRuleIds.push(r.id);
+   registered.set(id,row);
+  }
  }
- return eligible;
+ return [...registered.values()];
 }
 function matchBuilding(entry,objects){
  const a=activity(entry),needle=a.buildingQuery.toLowerCase();
