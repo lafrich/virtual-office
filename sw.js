@@ -1,4 +1,4 @@
-/* sw v12 2026-11-07: tidy hobo tent exit (inside opening, relocated points, no exit-tent shadow). Phones pick up the new files.
+/* sw v13 2026-11-07: bed sleep uses the lie clip on elevated beds (floor mattress unchanged). Phones pick up the new files.
    This worker no longer decrypts the old game page, loads cancelled patches, or redirects to the archive login.
    skipWaiting+clients.claim so visitors who registered the old decrypting SW drop it immediately.
    All same-origin requests pass through to the network. */
