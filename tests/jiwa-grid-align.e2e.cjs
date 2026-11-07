@@ -71,7 +71,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.equal(both.anchor,'center-center');assert.equal(both.x,0);assert.equal(both.y,0);
  assert.ok(Math.abs(both.dx)<4&&Math.abs(both.dy)<4,'Preview must align both center axes');
  await jiwa.locator('#juiSave').click();
- await jiwa.waitForFunction(()=>document.getElementById('dirtyState')?.textContent==='SAVED',null,{timeout:15000});
+ await jiwa.waitForFunction(()=>document.getElementById('juiNotice')?.textContent?.includes('Tersimpan untuk SEMUA kota'),null,{timeout:15000});
  const applied=await semesta.evaluate(()=>{
   const g=window.SemestaPlay.gameplay();
   return {anchor:g.modules.hudLayout.desktop.hpButton.anchor,
