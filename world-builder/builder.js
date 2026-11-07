@@ -3553,6 +3553,7 @@ renderAssetList();
 const assetLibrary=window.VLSemestaAssetLibrary?.mount({
  catalog:()=>assetCatalog,
  vehicles:()=>trafficCatalog?.vehicles||[],
+ grokVehicles:()=>window.VLGrokAssetReview?.items?.filter(x=>x.category==='vehicle')||[],
  characters:()=>mahluk?.list?.()||[],
  refreshCustom:()=>refreshBangunRuang(),
  thumbnail:spec=>assetThumbnails?.sourceFor?.(spec)||null,
