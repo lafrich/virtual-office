@@ -19,8 +19,26 @@ const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/w
  const skip=page.locator('#tutorialSkip');
  if(await skip.count()&&await skip.isVisible())await skip.click({timeout:3000}).catch(()=>{});
  await page.locator('#walkMode').click({timeout:20000});
- await page.waitForFunction(()=>window.SemestaLifePlay?.active?.()&&window.VLPhoneEllen?.hasGameProvider?.(),
-  null,{timeout:20000});
+ try{
+  await page.waitForFunction(()=>window.SemestaLifePlay?.active?.()&&window.VLPhoneEllen?.hasGameProvider?.(),
+   null,{timeout:20000});
+ }catch(err){
+  const debug=await page.evaluate(()=>({
+   active:window.SemestaLifePlay?.active?.(),
+   state:window.SemestaLifePlay?.state?.(),
+   phoneProvider:window.VLPhoneEllen?.hasGameProvider?.(),
+   HUDMounted:!!document.querySelector('#vlPlayHud'),
+   walkButton:document.getElementById('walkMode')?.className,
+   playHUD:document.documentElement.className,
+   toast:document.getElementById('toast')?.textContent,
+   actorCount:window.SemestaPlay?.playObjects?.().filter(x=>x.type==='avatar').length,
+   lifeSites:window.SemestaLifePlay?.sites?.().length
+  }));
+  console.error('PLAY_MODE_DIAGNOSTICS',JSON.stringify({debug,pageErrors:errors.slice(0,16)}));
+  fs.mkdirSync('screenshots',{recursive:true});
+  await page.screenshot({path:'screenshots/nokia-play-mode-failure.png'});
+  throw err;
+ }
  const synced=await page.evaluate(()=>{
   const life=window.SemestaLifePlay,phone=window.VLPhoneEllen;
   const live=phone.gameSnapshot(),city=life.sites();
