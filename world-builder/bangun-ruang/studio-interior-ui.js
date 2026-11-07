@@ -758,11 +758,14 @@ function init(api){
  $('interiorViewPlan').onclick=()=>setInteriorView('plan');
  $('buildingMode').onchange=()=>{setMode($('buildingMode').value==='interactive');onStatus(enabled?'Interactive: floor editor enabled':'Decorative building: interior disabled');};
  $('interiorFloor').onchange=()=>selectFloor($('interiorFloor').value);
- function refreshFurnitureLibrary(){
+ function refreshFurnitureLibrary(force=false){
   const before=[...categories];
+  const oldIds=Object.entries(model.types).filter(([,t])=>t.external).map(([id,t])=>id+':'+t.category);
   model.refreshExternal?.();
   const next=[...new Set(Object.values(model.types).map(t=>t.category))];
-  if(next.length===before.length&&next.every((x,i)=>x===before[i]))return;
+  const newIds=Object.entries(model.types).filter(([,t])=>t.external).map(([id,t])=>id+':'+t.category);
+  if(force!==true&&next.length===before.length&&next.every((x,i)=>x===before[i])&&
+     oldIds.length===newIds.length&&oldIds.every((x,i)=>x===newIds[i]))return;
   const chosen=group.value;
   categories.splice(0,categories.length,...next);
   group.replaceChildren();
@@ -778,6 +781,7 @@ function init(api){
  g.addEventListener('storage',event=>{
   if(event.key===g.VLSemestaFurnitureSources?.STORE)refreshFurnitureLibrary();
  });
+ g.addEventListener('semesta:furniture-library-updated',()=>refreshFurnitureLibrary(true));
  g.addEventListener('semesta:furniture-ready',()=>{
   if(enabled&&preview==='interior')draw();
  });
