@@ -12,6 +12,7 @@ on:
       - "world-builder/semesta-life-play.js"
       - "tests/jiwa-visual-ui-editor.test.cjs"
       - "tests/jiwa-visual-ui-editor.e2e.cjs"
+      - "tests/jiwa-fullscreen.e2e.cjs"
       - ".github/workflows/jiwa-visual-ui-editor.yml"
   workflow_dispatch:
 permissions:
@@ -47,6 +48,8 @@ jobs:
           sleep 2
       - name: "Browser test: drag resize save and Semesta HUD"
         run: node virtual-office/tests/jiwa-visual-ui-editor.e2e.cjs
+      - name: "Browser test: fullscreen Jiwa desktop and mobile"
+        run: node virtual-office/tests/jiwa-fullscreen.e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
