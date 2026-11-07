@@ -189,6 +189,43 @@ function actionAnchor(item,opts={}){
   itemId:item.id,kind:item.assetId,localSeat:seat};
  return opts.raw?anchor:ACTION_ADJUST?.apply(anchor,item,item.actionId)||anchor;
 }
+// Use original four-direction Pixel Creator artwork for Semesta furniture.
+ // A missing PNG stays an explicitly generic room preview; source artwork
+ // is never recreated as an invented replacement.
+const imageCache=new Map();
+function nativeFurniture(ctx,geo,item,fw,fd){
+ const row=g.VLSemestaFurnitureSources?.get(item.assetId);
+ if(!row)return false;
+ const dir=['sw','se','ne','nw'][fixtureRotation(item)];
+ const view=row.views[dir]||row.views.sw;
+ if(!view?.url)return false;
+ let state=imageCache.get(view.url);
+ if(!state){
+  const img=new Image();state={img,ready:false,error:false};
+  imageCache.set(view.url,state);
+  img.onload=()=>{
+   state.ready=true;
+   try{g.dispatchEvent(new Event('semesta:furniture-ready'))}catch{}
+  };
+  img.onerror=()=>{state.error=true};
+  if(view.url.startsWith('https:'))img.crossOrigin='anonymous';
+  img.src=view.url;
+  return false;
+ }
+ if(!state.ready)return false;
+ const width=Number(view.size?.[0])||state.img.naturalWidth;
+ const height=Number(view.size?.[1])||state.img.naturalHeight;
+ const pivot=view.pivot||[width/2,height-5];
+ const scale=Math.min(1,Math.max(.4,((fw+fd)*32+16)/Math.max(1,width)));
+ const [centerX,centerY]=point(geo,item.c+fw/2,item.r+fd/2,0);
+ ctx.save();ctx.imageSmoothingEnabled=false;
+ ctx.translate(centerX,centerY);
+ if(item.flipX===true||item.flipY===true)ctx.scale(item.flipX===true?-1:1,item.flipY===true?-1:1);
+ ctx.drawImage(state.img,-Number(pivot[0])*scale,-Number(pivot[1])*scale,
+  width*scale,height*scale);
+ ctx.restore();
+ return true;
+}
 function furniture(ctx,geo,item,selected=false,warteg=false){
  const c=Number(item.c),r=Number(item.r),type=TYPES[item.assetId]?.visualAs||item.assetId;
  const [fw,fd]=itemFootprint(item);
@@ -365,8 +402,8 @@ function furniture(ctx,geo,item,selected=false,warteg=false){
   B(.10,.10,w-.20,d-.20,0,30,'wood');
  }
  };
- place();
- if(warteg&&g.VLWartegInteriorArt?.fixture){
+ if(!nativeFurniture(ctx,geo,item,fw,fd))place();
+ if(warteg&&g.VLWartegInteriorArt?.fixture&&!TYPES[item.assetId]?.external){
   g.VLWartegInteriorArt.fixture(ctx,geo,item,{fixtureBox,fixturePoint,box,point,line,polygon});
  }
  // Selected footprint is a native pixel outline, drawn after the object.
