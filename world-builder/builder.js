@@ -2370,12 +2370,18 @@ function currentPlayGameplay(){
  // as the fallback. Reuse existing gameplay schema; do not create new HUD rules.
  const HL=window.VLHudLayout;
  const city=activeDraftId||'__jiwa_global__';
- let stored=null;
+ let cityLayout=null,globalLayout=null;
  try{
-  stored=JSON.parse(localStorage.getItem('jiwa-hud-layout-city-v1:'+city)||'null');
-  if(!stored&&city!=='__jiwa_global__')
-   stored=JSON.parse(localStorage.getItem('jiwa-hud-layout-city-v1:__jiwa_global__')||'null');
- }catch(_e){stored=null;}
+  cityLayout=JSON.parse(localStorage.getItem('jiwa-hud-layout-city-v1:'+city)||'null');
+  if(city!=='__jiwa_global__')
+   globalLayout=JSON.parse(localStorage.getItem('jiwa-hud-layout-city-v1:__jiwa_global__')||'null');
+ }catch(_e){cityLayout=null;globalLayout=null;}
+ // A Global Foundation edit is deliberately usable in every Semesta city.
+ // Previously *any* older city layout masked the user's newer global Save.
+ // Prefer whichever relevant edit was last authored, with the city winning a tie.
+ const updatedAt=entry=>Number(entry?.at)||0;
+ const stored=globalLayout?.layout&&
+  (!cityLayout?.layout||updatedAt(globalLayout)>updatedAt(cityLayout))?globalLayout:cityLayout;
  if(HL&&stored?.layout){
   raw=raw&&typeof raw==='object'?{...raw}:JG?.defaultGameplay?.()||{modules:{}};
   raw.modules={...(raw.modules||{}),hudLayout:HL.normalize(stored.layout)};
