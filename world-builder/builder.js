@@ -2366,6 +2366,20 @@ function currentPlayGameplay(){
   const key=(window.VLHub&&window.VLHub.GAMEPLAY_KEY)||'virtual-life-gameplay-v1';
   raw=JSON.parse(localStorage.getItem(key)||'null');
  }catch{raw=null;}
+ // Jiwa UI Editor saves a layout per City Draft, with Global Foundation
+ // as the fallback. Reuse existing gameplay schema; do not create new HUD rules.
+ const HL=window.VLHudLayout;
+ const city=activeDraftId||'__jiwa_global__';
+ let stored=null;
+ try{
+  stored=JSON.parse(localStorage.getItem('jiwa-hud-layout-city-v1:'+city)||'null');
+  if(!stored&&city!=='__jiwa_global__')
+   stored=JSON.parse(localStorage.getItem('jiwa-hud-layout-city-v1:__jiwa_global__')||'null');
+ }catch(_e){stored=null;}
+ if(HL&&stored?.layout){
+  raw=raw&&typeof raw==='object'?{...raw}:JG?.defaultGameplay?.()||{modules:{}};
+  raw.modules={...(raw.modules||{}),hudLayout:HL.normalize(stored.layout)};
+ }
  return JG?JG.normalizeGameplay(raw):raw;
 }
 function playWorldSpeed(){
@@ -2738,6 +2752,13 @@ window.addEventListener('keydown',e=>{if(e.key==='Shift')walkRunning=true;},true
 window.addEventListener('keyup',e=>{if(e.key==='Shift')walkRunning=false;},true);
 window.addEventListener('blur',()=>{walkRunning=false;for(const k of Object.keys(walkInput))walkInput[k]=false;});
 if(window.VLHub)window.VLHub.subscribe('gameplay',()=>syncPlayHud());
+ // Live Jiwa → Semesta sync across browser tabs. localStorage storage events
+ // fire in the *other* document; do not assume both apps share a tab.
+ addEventListener('storage',e=>{
+  const key=e.key||'',activeId=activeDraftId||'__jiwa_global__';
+  if(key==='virtual-life-gameplay-v1'||key==='jiwa-hud-layout-city-v1:'+activeId||
+     key==='jiwa-hud-layout-city-v1:__jiwa_global__')syncPlayHud();
+ });
 
 const DEVICE_KEY='semesta-play-device-v1';
 const DEVICE_PRESETS={
