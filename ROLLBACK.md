@@ -19,6 +19,24 @@ git push origin main
 
 That restores `lie`-only clip consumption, `terrain/grass.png`, `sw.js` v6, and the previous kebon-sirih cache tag. It does not revert the earlier hub or cleanup commits. Keep `grass.png`; it was never overwritten.
 
+## This deploy (loak picker visibility + lamp head glow)
+
+- Previous live `main`: `912972091bbc5c8f656ea7163a40e071749fd5d9`
+- Feature commit: `45f18ce52af5bceebc23e6f2fea7e70216f8e32f`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 45f18ce52af5bceebc23e6f2fea7e70216f8e32f
+git push origin main
+```
+
+That restores the previous Asset Library picker (no LOAK OBJECTS / ITEMS category), the height-based lamp glow, and `sw.js` v7. It does not revert the sleep-clip or grass_v2 commits.
+
+
 
 ## SHAs
 
