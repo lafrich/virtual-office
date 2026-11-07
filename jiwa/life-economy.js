@@ -83,6 +83,9 @@ function normalize(raw){
    minHygiene:number(a.minHygiene,0,100,0),
    durationMinutes:number(a.durationMinutes,1,4320,20),
    moneyDelta:number(a.moneyDelta,-1e9,1e9,0),
+   grantType:['none','inventory','furniture','room','prop'].includes(a.grantType)?a.grantType:'none',
+   riskPercent:number(a.riskPercent,0,100,0),
+   detentionMinutes:number(a.detentionMinutes,0,4320,0),
    statEffects:Object.fromEntries(['energy','fullness','hygiene','bladder','moral','experience']
     .map(k=>[k,number(a.statEffects?.[k],-100,100,0)])),
    ingredients:(Array.isArray(a.ingredients)?a.ingredients:[]).slice(0,12)
@@ -197,8 +200,14 @@ function doAction(config,previous,action,args={}){
    if(!id||parts.includes(id))return reject('Bahan belum lengkap: '+ingredient);
    parts.push(id);
   }
-  if(a.outputItem&&s.inventory.length-parts.length>=setting.bagSlots)
+  if(a.outputItem&&['none','inventory','prop'].includes(a.grantType)&&
+     s.inventory.length-parts.length>=setting.bagSlots)
    return reject('Tas penuh untuk hasil aktivitas.');
+  if(a.grantType==='room'&&s.housing.room)return reject('Akses kost sudah dimiliki.');
+  if(a.grantType==='furniture'&&(!s.housing.room||!a.outputItem))
+   return reject('Perlu kost dan ID furnitur sebelum membeli.');
+  if(a.grantType==='furniture'&&s.furniture.includes(a.outputItem))
+   return reject('Furnitur sudah dimiliki.');
   if(parts.length){
    for(const id of parts){s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];}
    changes.push('bahan terpakai: '+a.ingredients.join(', '));
@@ -209,7 +218,27 @@ function doAction(config,previous,action,args={}){
   for(const k of ['energy','fullness','hygiene','bladder','moral','experience']){
    const diff=a.statEffects[k]||0;if(diff)stat(k,diff);
   }
-  if(a.outputItem)add(a.outputItem,a.outputLabel||a.outputItem,999999);
+  if(a.grantType==='room'){
+   s.housing.room=true;s.homeAccess=true;
+   if(args.roomSpawn&&Number.isFinite(Number(args.roomSpawn.x))&&Number.isFinite(Number(args.roomSpawn.z)))
+    s.housing.roomPosition={...args.roomSpawn};
+   changes.push('akses kost aktif');
+  }else if(a.grantType==='furniture'){
+   s.furniture.push(a.outputItem);changes.push('furnitur '+a.outputItem+' dimiliki');
+  }else if(a.outputItem&&['none','inventory','prop'].includes(a.grantType)){
+   add(a.outputItem,a.outputLabel||a.outputItem,999999);
+  }
+  // Optional consequences for immoral choices or explicitly configured jail.
+  // Roll supplied for deterministic tests; normal gameplay uses Math.random.
+  const roll=Number.isFinite(Number(args.riskRoll))?Math.max(0,Math.min(1,Number(args.riskRoll))):Math.random();
+  if(a.riskPercent>0&&roll<a.riskPercent/100){
+   s.detained=true;
+   s.detentionMinutes=Math.max(s.detentionMinutes,a.detentionMinutes||60);
+   changes.push('tertangkap · hukuman '+s.detentionMinutes+' menit');
+  }else if(a.category==='punishment'&&a.detentionMinutes>0){
+   s.detentionMinutes=Math.max(s.detentionMinutes,a.detentionMinutes);
+   changes.push('menjalani hukuman '+a.detentionMinutes+' menit');
+  }
   changes.push('aktivitas '+String(a.label||a.id).slice(0,96));
   break;
  }
