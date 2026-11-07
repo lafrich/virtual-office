@@ -57,14 +57,16 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.equal(scales.phone,.75,'Phone Action scale must save from resize properties');
  assert.equal(scales.desktop,1,'Phone changes must not change desktop Action');
  await jiwa.locator('#juiSave').click();
- await jiwa.waitForFunction(()=>document.getElementById('dirtyState')?.textContent==='SAVED',null,{timeout:15000});
+ await jiwa.waitForFunction(()=>document.getElementById('juiNotice')?.textContent?.includes('Tersimpan untuk SEMUA kota'),null,{timeout:15000});
  const browserStorage=await semesta.evaluate(()=>{
-  const raw=JSON.parse(localStorage.getItem('jiwa-hud-layout-city-v1:__jiwa_global__')||'null');
+  const key=window.VLHudLayout.GLOBAL_LAYOUT_KEY;
+  const raw=JSON.parse(localStorage.getItem(key)||'null');
   const g=window.SemestaPlay?.gameplay?.();
-  return {cache:raw?.layout?.desktop?.money,applied:g?.modules?.hudLayout?.desktop?.money};
+  return {scope:raw?.scope,cache:raw?.layout?.desktop?.money,applied:g?.modules?.hudLayout?.desktop?.money};
  });
- assert.ok(browserStorage.cache,'Jiwa must save cross-app layout cache');
- assert.equal(browserStorage.applied.x,after.x,'Semesta must read same per-city layout');
+ assert.ok(browserStorage.cache,'Jiwa must save GLOBAL cross-app layout');
+ assert.equal(browserStorage.scope,'global-game-ui');
+ assert.equal(browserStorage.applied.x,after.x,'Semesta must read same global layout');
  await semesta.locator('#walkMode').click({timeout:20000});
  await semesta.waitForFunction(()=>window.SemestaLifePlay?.active?.(),null,{timeout:20000});
  const runtime=await semesta.evaluate(()=>{
