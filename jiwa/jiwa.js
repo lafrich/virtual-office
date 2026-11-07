@@ -506,6 +506,20 @@ $('importFile').onchange=async ev=>{
  const f=ev.target.files?.[0];ev.target.value='';if(!f||!state.record)return;if(f.size>2e6)return notice('Import file too large (>2MB)');
  try{const parsed=JSON.parse(await f.text());const incoming=validateProject(parsed,state.record.id);if(!confirm('Replace Jiwa mechanics for this city with imported project?'))return;state.project=incoming;state.action=0;markDirty();renderInspector();renderSystems();resetTest();notice('Imported project. Click SAVE RULES to persist.');}catch(e){notice('Import rejected: '+e.message);}
 };
+// Refresh only the saved Semesta directory; keep unsaved Jiwa edits intact.
+async function refreshDirectory(){
+ if(!state.record||state.record.id===GLOBAL_CITY)throw Error('Pilih city Semesta tersimpan terlebih dahulu.');
+ const record=await window.VLCityDrafts.load(state.record.id);
+ if(!record||!Array.isArray(record.document?.objects))throw Error('City draft tidak ditemukan. Save dahulu di Semesta.');
+ state.record=record;state.entities=collectEntities(record);
+ renderTree();renderInspector();
+ $('objCount').textContent=String(visibleEntities().length);
+ $('mapInfo').textContent=record.name+' · '+visibleEntities().length+' OBJECTS';
+ if(state.tab==='map')draw();
+ window.dispatchEvent(new Event('jiwa:world-sync'));
+ notice('Directory refreshed · '+record.name+' · '+state.entities.length+' objects');
+ return {name:record.name,cityId:record.id,count:state.entities.length};
+}
 window.JiwaContextBridge=Object.freeze({
  project:()=>state.project,
  selectedObject:()=>{const o=selectedObject();return o?{id:o.id,name:objectName(o),type:o.type||''}:null;},
@@ -520,6 +534,8 @@ window.JiwaContextBridge=Object.freeze({
  sandbox:()=>state.test,
  city:()=>state.record,
  entities:()=>visibleEntities(),
+ directoryEntities:()=>state.entities.slice(),
+ refreshDirectory,
  lifeRun:(action,payload)=>{
    if(!state.project||!state.test)return {ok:false,reason:'City not loaded'};
    const data=action==='respawn'?{...lifeSpawnHints(),...(payload||{})}:payload||{};
