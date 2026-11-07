@@ -15,6 +15,7 @@ on:
       - "tests/hud-layout.test.cjs"
       - "tests/semesta-ui-editor.test.cjs"
       - "tests/semesta-ui-editor.e2e.cjs"
+      - "tests/semesta-phone-ui-editor.e2e.cjs"
       - ".github/workflows/semesta-global-ui-editor.yml"
   workflow_dispatch:
 permissions:
@@ -51,6 +52,8 @@ jobs:
           sleep 2
       - name: "Browser test: drag HUD, center, Save, reload and Jiwa removal"
         run: node virtual-office/tests/semesta-ui-editor.e2e.cjs
+      - name: "Browser test: Phone preview iframe select, drag, resize and Save"
+        run: node virtual-office/tests/semesta-phone-ui-editor.e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
