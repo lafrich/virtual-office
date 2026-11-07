@@ -75,6 +75,28 @@ const ICON={
  on:BM('.###.|#####|#####|#####|.###.'), off:BM('.###.|#...#|#...#|#...#|.###.'),
  avatar:BM('....######....|...#......#...|..#.##..##.#..|..#........#..|..#..#..#..#..|..#........#..|..#...##...#..|...#......#...|....######....|.....#..#.....|..##########..|.#..........#.|#............#|#............#')
 };
+// 5x5 monochrome quest symbols; rendered for EVERY active activity pin,
+// not just the selected one. Keeps the original Nokia LCD and app navigation.
+const MAP_QUEST_ICON={
+ peta:BM('..#..|..#..|..#..|.....|..#..'),
+ fish:BM('.##..|#..#.|.###.|#..#.|.##..'),
+ office:BM('.###.|.#.#.|.###.|.#.#.|#####'),
+ market:BM('#####|#...#|#####|.#.#.|#####'),
+ stall:BM('#####|#.#.#|#####|#...#|#...#'),
+ tree:BM('..#..|.###.|#####|..#..|..#..'),
+ cup:BM('.....|####.|#..#.|####.|.##..'),
+ house:BM('..#..|.###.|#####|#...#|#####'),
+ kursus:BM('#####|#...#|#.#.#|#...#|#####'),
+ kontak:BM('..#..|.###.|#####|.###.|..#..'),
+ wc:BM('#####|#.#.#|#####|#.#.#|#...#'),
+ bath:BM('#####|#...#|####.|..#..|.###.'),
+ tent:BM('..#..|.###.|#####|#...#|#.#.#'),
+ bench:BM('#####|#...#|#####|.#.#.|.#.#.'),
+ charity:BM('.#.#.|#####|#####|.###.|..#..'),
+ prayer:BM('..#..|.###.|#####|#...#|#####'),
+ hansip:BM('.###.|#.#.#|#####|.###.|.#.#.'),
+ scav:BM('.###.|#...#|#.#.#|#...#|.###.')
+};
 const ITEMBM={
  sofa:BM('.##########.|.#........#.|##........##|#.########.#|#.#......#.#|############|#..........#|##........##|.#........#.'),
  meja:BM('............|############|#..........#|############|.#........#.|.#........#.|.#........#.|.#........#.|............'),
@@ -382,8 +404,9 @@ function PetaSemesta(){
  const all=()=>snapshot().sites||[];
  const at=(v,min,max,start,length)=>start+Math.round(Math.max(0,Math.min(1,(Number(v||0)-min)/Math.max(.1,max-min)))*length);
  function coords(p,b){
-  return {x:at(p.x,Number(b.minX)||0,Number(b.maxX)||1,4,87),
-   y:at(p.z,Number(b.minZ)||0,Number(b.maxZ)||1,19,29)};
+  const x=at(p.x,b.minX,b.maxX,4,87),y=at(p.z,b.minZ,b.maxZ,19,29);
+  // Keep the whole 5x5 quest symbol inside the 96x64 Nokia map viewport.
+  return {x:Math.max(8,Math.min(87,x)),y:Math.max(23,Math.min(44,y))};
  }
  function boundsOf(m){
   const b=m.bounds||{};
@@ -420,17 +443,21 @@ function PetaSemesta(){
    // Unpainted city: only a faint reference grid, never fake roads.
    for(let x=4;x<=91;x+=6)for(let y=20;y<=48;y+=6)ps(x,y);
   }
-  // Category markers use short 1-bit symbols in one map, no 3D labels.
-  rows.forEach((site,i)=>{
-   const p=coords(site,b),focus=i===s.sel,marked=ST.mark===site.id;
-   if(focus){fr(p.x-4,p.y-4,9,9,1);fr(p.x-3,p.y-3,7,7,0);}
-   else fr(p.x-1,p.y-1,3,3,1);
+  // Every activity is a visible category icon: food, work, home, WC,
+  // fishing, shop, etc. Draw focused pin last so it stays legible if crowded.
+  function drawQuestPin(site,focus){
+   const p=coords(site,b),glyph=MAP_QUEST_ICON[site.icon]||MAP_QUEST_ICON.peta;
    if(focus){
-    const glyph=ICON[site.icon]||ICON.peta;
-    bm(glyph,p.x-3,p.y-3,1);
+    fr(p.x-4,p.y-4,9,9,1);
+    fr(p.x-3,p.y-3,7,7,0);
+   }else{
+    fr(p.x-3,p.y-3,7,7,0); // erase terrain behind each 1-bit icon
    }
-   if(marked){fr(p.x+5,p.y-4,2,7,1)}
-  });
+   bm(glyph,p.x-2,p.y-2,1);
+   if(ST.mark===site.id){fr(p.x+3,p.y-2,1,5,1);}
+  }
+  rows.forEach((site,i)=>{if(i!==s.sel)drawQuestPin(site,false)});
+  if(item)drawQuestPin(item,true);
   const pp=coords(m.player||{x:0,z:0},b);
   // Player stays visible and blinks; the map coordinates update while walking.
   if(Math.floor(ST.now()/500)%2===0||ST.fakeNow!=null){
