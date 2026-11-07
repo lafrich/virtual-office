@@ -3569,7 +3569,7 @@ if(window.VLHub){
  window.VLHub.subscribe('world',()=>{refreshDraftPicker(activeDraftId).catch(console.warn);});
 }
 
-$('openGame').onclick=()=>window.open('../arsip.html','_blank','noopener');
+$('openGame').onclick=()=>{}; // old Virtual Life archive removed
 $('viewRef').onclick=()=>{
  $('assetReference').hidden=false;
  const img=$('street2Ref');

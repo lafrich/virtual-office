@@ -6,15 +6,11 @@ on:
       - main
       - feature/game-asset-pipeline-bridge-v1
     paths:
-      - "game-assets/**"
       - "sw.js"
       - "tests/asset-bridge.test.cjs"
       - ".github/workflows/game-asset-bridge.yml"
   pull_request:
     paths:
-      - "game-assets/**"
-      - "rebuild/game.js"
-      - "rebuild/index.html"
       - "sw.js"
       - "tests/asset-bridge.test.cjs"
       - ".github/workflows/game-asset-bridge.yml"
@@ -26,10 +22,8 @@ jobs:
     steps:
       - name: Checkout virtual-office
         uses: actions/checkout@v4
-      - name: Validate production and game scripts
+      - name: Validate production scripts
         run: |
           node --check sw.js
-          node --check game-assets/rig-runtime.js
-          node --check game-assets/asset-bridge.js
-      - name: Integration regression
+      - name: Confirm unused old-game inspector is gone
         run: node tests/asset-bridge.test.cjs

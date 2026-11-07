@@ -8,14 +8,14 @@
 <title>Namanya Juga Hidup: The Game</title>
 <script>
 (function(){
-  var q=new URLSearchParams(location.search);
-  var dest=q.has('next')?'./arsip.html':'./membangun/';
-  location.replace(dest+location.search+location.hash);
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(function(){});
+  }
+  location.replace('./membangun/'+location.search+location.hash);
 })();
 </script>
 </head>
 <body>
 <p><a href="./membangun/">Namanya Juga Hidup: The Game — Membangun</a></p>
-<p><a href="./arsip.html">Arsip: Virtual Life v15a</a></p>
 </body>
 </html>

@@ -214,7 +214,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 </div>
 </aside>
 </section>
-<footer class="foot"><span id="status">READY</span><a href="../arsip.html">Arsip: Virtual Life v15a</a><span class="right">MEMBANGUN / CREATIVE STUDIO</span></footer>
+<footer class="foot"><span id="status">READY</span><span class="right">MEMBANGUN / CREATIVE STUDIO</span></footer>
 </main>
 </div>
 <div class="boot" id="boot" role="dialog" aria-label="Membangun initializing">
@@ -334,6 +334,7 @@ if(new URLSearchParams(location.search).has('app')&&!new URLSearchParams(locatio
 }else if(!new URLSearchParams(location.search).has('splash')){
  setTimeout(dismiss,window.matchMedia('(prefers-reduced-motion: reduce)').matches?120:2050);
 }
+if('serviceWorker' in navigator){navigator.serviceWorker.register(new URL('../sw.js',location.href),{scope:new URL('../',location.href).href,updateViaCache:'none'}).catch(()=>{});}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=true;dismiss()}if(e.key==='Enter'&&!$('boot').hidden)dismiss()});
 render();
 })();
