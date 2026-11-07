@@ -491,3 +491,12 @@
 #semestaDeviceBezel{transform-origin:center center;background:#111518;border-radius:36px;padding:16px 12px 20px;box-shadow:0 10px 28px #0008, inset 0 0 0 2px #2a3238}
 #semestaDeviceFrame{display:block;border:0;background:#000;border-radius:18px}
 html.vl-device-frame #semestaDeviceBar,html.vl-device-frame #semestaDeviceStage{display:none!important}
+
+
+/* Semesta full-viewport desktop workspace — match Mahluk Hidup app sizing. */
+html,body{width:100%;height:100%;overflow:hidden}
+#desktop{width:100%;height:100dvh;min-height:0;padding:0;background:var(--chrome)}
+#app{width:100%;max-width:none;height:100dvh;min-height:0;margin:0;border:0;outline:0;box-shadow:none}
+#workspace{min-height:0;min-width:0}
+#canvasPanel{min-height:0;min-width:0}
+@media(max-width:780px){html,body{overflow:hidden}#desktop,#app{height:100dvh;min-height:0}}
