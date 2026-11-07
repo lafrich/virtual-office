@@ -159,8 +159,8 @@ function spawnModule(mod,adapter){
  const valid=SR.validPool(mod,adapter),bounds=worldBounds();
  const marginX=(bounds.maxX-bounds.minX)*.25,marginZ=(bounds.maxZ-bounds.minZ)*.25;
  let edge=valid.filter(p=>p.x<=bounds.minX+marginX||p.x>=bounds.maxX-marginX||p.z<=bounds.minZ+marginZ||p.z>=bounds.maxZ-marginZ);
- if(!edge.length)edge=valid;
- return edge.length?{...mod,pool:edge}:mod;
+ if(!edge.length)return {...mod,playNoEdge:true};
+ return {...mod,pool:edge,playNoEdge:false};
 }
 function fallbackSpawn(){
  const b=worldBounds(),center={x:(b.minX+b.maxX)/2,z:(b.minZ+b.maxZ)/2};
@@ -452,7 +452,7 @@ function runAction(action,args={}){
   bridge?.respawn?.();return {ok:true,reason:'respawn'};
  }
  const node=nearest();
- if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside'].includes(action)&&!node)
+ if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','eat_item','discard_item'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.premium?'premium_job':'job',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
@@ -500,6 +500,7 @@ function handleAction(){
  const action=node.action;
  if(node.id==='kost'&&ownsRoom()){phoneOpen=false;bagOpen=false;message('Pilih WC, mandi, tidur, atau penyimpanan di panel.');paintPanel();return true;}
  runAction(action,node.id==='fish'?{spotId:node.sourceId||'river'}:
+  node.id==='bench'?{seatId:node.sourceId||'bangku_preview'}:
   node.id==='public_wc'||node.id==='public_bath'?{facilityId:node.sourceId||node.id}:{});return true;
 }
 function refresh(){
