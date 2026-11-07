@@ -594,7 +594,7 @@ function nokiaSnapshot(){
   settings:{...config.settings},
   furnitureCatalog:RULES.FURNITURE.map(v=>({...v})),
   map:{
-   player:getPos(),bounds:cachedMapOverview.bounds,terrain:cachedMapOverview.terrain,
+   player:{x:Number(getPos().x)||0,z:Number(getPos().z)||0},bounds:cachedMapOverview.bounds,terrain:cachedMapOverview.terrain,
    sites:sites.map(n=>({id:n.id,label:n.label,icon:iconFor(n),
     x:n.x,z:n.z,placeholder:!!n.placeholder}))
   },
