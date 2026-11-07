@@ -228,7 +228,14 @@ function Dompet(){const l=List({title:'Dompet',num:'1-',y0:36,y1:53,items:(liveD
   header:()=>{tx('Saldo',1,17);tx(rp(liveData()?.wallet??ST.saldo),1,26,1,true);dots(35)}});return l}
 // ---- Skill (example data, total 350 = 120+60+170 like earlier mockups)
 const SK=[['Trading',2,120,200],['Barista',1,60,100],['Coding',3,170,300],['Desain',1,0,100]];
-function Skill(){return List({title:'Skill',num:'2-',rowH:18,items:SK.map(([n,lv,xp,mx])=>({label:n,right:'Lv'+lv,bar:xp/mx,barTxt:xp+'/'+mx,
+function Skill(){
+ if(liveData())return Text({title:'Skill Karakter',num:'2-',lines:[
+  ['EXP '+Math.floor(liveData()?.experience||0),true],
+  ['EXP mempercepat kerja'],
+  ['Kursus lewat HP'],
+  ['Sosial terkunci V2']
+ ]});
+ return List({title:'Skill',num:'2-',rowH:18,items:SK.map(([n,lv,xp,mx])=>({label:n,right:'Lv'+lv,bar:xp/mx,barTxt:xp+'/'+mx,
  open:()=>Text({title:n,num:'Lv'+lv,body:()=>{tx('Level '+lv,1,17,1,true);bar(1,27,90,7,xp/mx);tx(xp+' / '+mx+' XP',1,36);tx('Naik lewat kursus',1,46)}})}))})}
 // ---- Kursus Online (Basic Trading = brief data; others example)
 const CR=[['Basic Trading',300,90,'+40 Trading XP'],['Barista Dasar',500,120,'+40 Barista XP'],['Coding Dasar',800,180,'+50 Coding XP'],['Desain Dasar',600,150,'+40 Desain XP']];
@@ -254,7 +261,22 @@ function Progress(){const s={};
  return s;}
 // ---- Marketplace
 const MK=[['Lampu Meja',80000,'Raka'],['Kursi Kayu',120000,'Theo'],['Poster Kota',35000,'Dita'],['Rak Buku',210000,'Raka']];
-function Market(){return List({title:'Marketplace',num:'4-',numbered:true,items:[
+function Market(){
+ if(liveData())return List({title:'Marketplace',num:'4-',items:[
+  {label:'Token Listrik',icon:'market',open:()=>Text({title:'Token Listrik',num:'4-',lines:[
+   ['Rp 1.000',true],['Isi ulang listrik'],['Kost diperlukan'],['Beli 5 unit']
+  ],soft:['Beli','Kembali'],onL:()=>{
+   const result=liveData()?.runAction?.('buy_token',{});
+   push(Msg([result?.ok?'Token bertambah':'Tidak berhasil',fit(result?.ok?'Listrik +5':result?.reason||'Coba lagi',90)],1));
+  }})},
+  {label:'Kulkas',icon:'furnitur',open:()=>Text({title:'Kulkas',num:'4-',lines:[
+   ['Rp 8.000',true],['Perlu akses kost'],['Butuh token listrik']
+  ],soft:['Beli','Kembali'],onL:()=>{
+   const result=liveData()?.runAction?.('buy_fridge',{});
+   push(Msg([result?.ok?'Kulkas dibeli':'Tidak berhasil',fit(result?.ok?'Untuk simpan ikan':result?.reason||'Coba lagi',90)],1));
+  }})}
+ ]});
+ return List({title:'Marketplace',num:'4-',numbered:true,items:[
  {label:'Beli',open:()=>List({title:'Beli',num:'4-1-',rowH:18,items:MK.map(m=>({label:m[0],right:Math.round(m[1]/1000)+'rb',sub:'oleh '+m[2],open:()=>MarketItem(m)}))})},
  {label:'Jual',open:()=>List({title:'Jual',num:'4-2-',y0:25,header:()=>{tx('Dari storage kamar:',1,16)},items:[['Kursi Kayu'],['Poster Kota'],['Tanaman']].map(j=>({label:j[0],open:()=>Harga(j[0])}))})},
  {label:'Listing Saya',open:()=>List({title:'Listing Saya',num:'4-3-',rowH:18,items:[['Lampu Meja','Aktif','Rp 80.000'],['Rak Kecil','Terjual','Rp 60.000']].map(l=>({label:l[0],right:l[1],sub:l[2],
@@ -375,11 +397,21 @@ function PetaSemesta(){
 }
 // ---- Kontak (example friends)
 const KO=[['Raka',1,'Kafe'],['Dita',1,'Taman'],['Theodore',0,'2 jam lalu'],['Sinta',0,'Kemarin'],['Bima',1,'Kantor']];
-function Kontak(){return List({title:'Kontak',num:'7-',items:KO.map(c=>({label:c[0],icon:c[1]?'on':'off',
+function Kontak(){if(liveData())return Text({title:'Kontak',num:'7-',lines:[['Friends: terkunci',true],['Interaksi sosial'],['Akan hadir di V2']]});return List({title:'Kontak',num:'7-',items:KO.map(c=>({label:c[0],icon:c[1]?'on':'off',
  open:()=>Text({title:c[0],num:'',body:()=>{bm(ICON.avatar,1,18);tx(c[0],19,18,1,true);bm(ICON[c[1]?'on':'off'],19,29);tx(c[1]?'Online':'Offline',26,28);
    tx(c[1]?'Di: '+c[2]:'Terakhir: '+c[2],1,38);tx('Teman',1,47)}})}))})}
 // ---- Profil (example)
-function Profil(){return Text({title:'Profil',num:'8',body:()=>{bm(ICON.avatar,1,18);tx('Ichsan',19,18,1,true);tx('Total XP 350',19,28);tx(rp(ST.saldo),1,38);tx('Teman 5 · Kamar 3B',1,47)}})}
+function Profil(){
+ const live=liveData();
+ if(live)return Text({title:'Profil',num:'8',body:()=>{
+  bm(ICON.avatar,1,18);
+  tx(live.ownsRoom?'Punya Kost':'Hobo',19,18,1,true);
+  tx('EXP '+Math.floor(live.experience||0),19,28);
+  tx(rp(live.wallet||0),1,38);
+  tx('Moral '+Math.floor(live.moral||0)+' / 100',1,47);
+ }});
+ return Text({title:'Profil',num:'8',body:()=>{bm(ICON.avatar,1,18);tx('Ichsan',19,18,1,true);tx('Total XP 350',19,28);tx(rp(ST.saldo),1,38);tx('Teman 5 · Kamar 3B',1,47)}});
+}
 // ---- Pengaturan
 function Pengaturan(){const tog=(k)=>({right:()=>ST[k]?'Aktif':'Mati',act:()=>{ST[k]=!ST[k]}});
  return List({title:'Pengaturan',num:'9-',numbered:true,items:[{label:'Suara',...tog('sound')},{label:'Getar',...tog('vib')},{label:'Musik',...tog('music')},
