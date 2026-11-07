@@ -68,10 +68,20 @@ function resolve(id,requested,moving){
   // Semesta/Bangun Ruang; never substitute an unrelated NPC body or head.
   const target=moving?"walk":requested||"idle";
   const own=v2Clip(entry,target);
-  if(!own)return {url:null,mode:target,frames:1,unavailable:true,
-   source:"unavailable",loop:false};
-  return {url:own.url,mode:target,frames:own.frames,row:0,
+  if(own)return {url:own.url,mode:target,frames:own.frames,row:0,
    durations:own.frame_ms||[],loop:own.loop!==false,separate:true,source:"mahluk2"};
+  if(target==="lie"){
+   const nativeLie=sleep()?.resolve(entry,"sleep_bed_right");
+   if(nativeLie){
+    const url=bridge().url(nativeLie.sheet);
+    if(url)return {url,mode:"lie",frames:nativeLie.frames,
+     row:nativeLie.row,durations:nativeLie.frame_ms,
+     loop:true,separate:nativeLie.separate,source:"universal-sleep",
+     objectLayer:"behind",rotation:0};
+   }
+  }
+  return {url:null,mode:target,frames:1,unavailable:true,
+   source:"unavailable",loop:false};
  }
  const hygiene=entry&&body()?.resolve(entry,requested);
  if(hygiene?.kind==="bathtub"){
@@ -102,11 +112,16 @@ function resolve(id,requested,moving){
  }
  // Reuse the selected character's true horizontal LIE frames.
  // Sleep presets are native game actions, not stored per-actor template pixels.
- const sleepId=requested==="sleep"?"sleep_bed_right":requested;
+ // VLUniversalSleep.resolve() only accepts sleep_bed_right / sleep_bed_left.
+ // Semesta Play and Bangun Ruang now request pose "lie" directly for elevated
+ // beds. Without this alias, Ichsan and other 44-row V6B sheets (row_starts.lie
+ // === 36, but no motions[].id==="lie") returned unavailable and the scale
+ // preview drew the tiny head-blob silhouette instead of the full side-lie.
+ const sleepId=requested==="sleep"||requested==="lie"?"sleep_bed_right":requested;
  const nativeSleep=entry&&sleep()?.resolve(entry,sleepId);
  if(nativeSleep){
   const url=bridge().url(nativeSleep.sheet);
-  if(url)return {url,mode:sleepId,frames:nativeSleep.frames,
+  if(url)return {url,mode:requested==="lie"?"lie":sleepId,frames:nativeSleep.frames,
    row:nativeSleep.row,durations:nativeSleep.frame_ms,
    loop:true,separate:nativeSleep.separate,source:"universal-sleep",
    objectLayer:"behind",rotation:0};
