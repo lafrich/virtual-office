@@ -20,7 +20,7 @@ test('Semesta loads V1 life runtime before builder module and hooks Action/HUD/m
  assert.match(builder,/SemestaLifePlay\?\.handleAction\?\.\(\)/);
  assert.match(builder,/SemestaLifePlay\.money\(\)/);
  assert.match(builder,/SemestaLifePlay\.bag\(\)/);
- assert.match(builder,/SemestaLifePlay\.speedFactor\(\)/);
+ assert.match(builder,/life\.speedFactor\(\)/);
 });
 test('No assets? Placeholder actor and interaction markers exist only in test, never City Draft',()=>{
  assert.match(builder,/makeTemporaryLifePlayer\(\)/);
@@ -37,7 +37,7 @@ test('Jiwa data and persistent local play session keyed per saved city',()=>{
  assert.match(play,/projectFromJiwa/);
  assert.match(play,/lifeEconomy/);
  assert.match(play,/localStorage\.setItem\(dataKey\(\)/);
- assert.match(play,/cityId:.*__working_copy__/);
+ assert.match(play,/function cityId\(\)/);assert.match(play,/__working_copy__/);
 });
 test('Core flow: hobo edge spawn -> work and forage -> save -> buy room -> private needs -> home respawn',()=>{
  const conf=c();
@@ -72,7 +72,7 @@ test('Fishing chances and buyer rules are executable, inventory proof prevents d
  assert.equal(E.run(cfg,sell.state,'sell_fish',{itemId:id,buyerId:'siomay_batagor'}).ok,false);
 });
 test('Faintness, public baths, charity, witnessed hansip, and release grace are simulated',()=>{
- const cfg=c(),p=fresh();p.energy=1;p.blader=100;
+ const cfg=c(),p=fresh();p.energy=1;p.bladder=100;
  const exhausted=E.run(cfg,p,'walk',{units:1});
  assert.ok(exhausted.ok);assert.ok(exhausted.state.restMinutes>0);assert.equal(E.speedFactor(exhausted.state),0);
  const camp=E.run(cfg,fresh(),'public_shower',{facilityId:'wc_umum'});
