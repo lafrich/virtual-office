@@ -258,10 +258,10 @@ function makeRoot(){
   if(ev.target.id==='slpDestination')navSelect=ev.target.value;
   if(!state)return;
   if(ev.target.id==='slpReligion'&&RULES.RELIGIONS.includes(ev.target.value)&&ev.target.value!=='satanis'){
-   state.identity.religion=ev.target.value;persist();message('Pilihan keyakinan: '+ev.target.value);paintPanel();
+   state.identity.religion=ev.target.value;state.identityChosen=true;persist();message('Pilihan keyakinan: '+ev.target.value);paintPanel();
   }
   if(ev.target.id==='slpZodiac'&&RULES.ZODIACS.includes(ev.target.value)){
-   state.identity.zodiac=ev.target.value;persist();message('Zodiak: '+ev.target.value+' (sosial V2 masih terkunci)');paintPanel();
+   state.identity.zodiac=ev.target.value;state.identityChosen=true;persist();message('Zodiak: '+ev.target.value+' (sosial V2 masih terkunci)');paintPanel();
   }
  });
 }
