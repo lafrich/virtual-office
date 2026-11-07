@@ -7,6 +7,8 @@
   if(root)root.JiwaLifeEconomy=api;
 })(typeof window!=='undefined'?window:null,function(){
 'use strict';
+const PREMISES=(typeof module!=='undefined'&&module.exports)?
+ require('./interaction-rules.js'):window.JiwaPremises;
 const RELIGIONS=['islam','kristen','katolik','hindu','buddha','konghucu','agnostik','ateis','satanis'];
 const ZODIACS=['capricorn','aquarius','pisces','aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius'];
 const BUYERS={siomay_batagor:'Bang Siomay / Batagor',pasar_ikan:'Pasar Ikan'};
@@ -41,7 +43,7 @@ function defaults(){return {
  passiveEnergyMinutes:60,passiveBladderMinutes:20,passiveHygieneMinutes:90,
  passiveFullnessMinutes:35,faintRecoveryEnergy:25,tokenDurationMinutes:60,
  realSecondsPerGameMinute:8,seatRestEnergy:3},
- fish:copy(FISH),jobs:copy(JOBS),activities:[]
+ fish:copy(FISH),jobs:copy(JOBS),activities:[],worldEntities:[]
 };}
 function normalize(raw){
  const base=defaults(),source=raw&&typeof raw==='object'?raw:{},s=source.settings||{};
@@ -75,10 +77,13 @@ function normalize(raw){
  });
  // Editable activity catalog is global and stored separately from legacy
  // wages/jobs. Only published enabled activities can be executed by Semesta.
+ base.worldEntities=(Array.isArray(source.worldEntities)?source.worldEntities:[])
+  .slice(0,300).map(v=>PREMISES.worldRule(v)).filter(v=>v.enabled);
  base.activities=(Array.isArray(source.activities)?source.activities:[]).slice(0,300)
   .filter(a=>a&&/^[a-z0-9_-]{1,64}$/.test(a.id)&&a.enabled===true)
   .map(a=>({
-   ...a, minExp:number(a.minExp,0,100000,0),
+   ...a,tier:PREMISES.cfg(a.category,a.tier||PREMISES.infer(a.category,a)).tier.id,
+   minExp:number(a.minExp,0,100000,0),
    minEnergy:number(a.minEnergy,0,100,0),
    minHygiene:number(a.minHygiene,0,100,0),
    durationMinutes:number(a.durationMinutes,1,4320,20),
@@ -185,10 +190,37 @@ function doAction(config,previous,action,args={}){
   return reject('Masih bed rest / menjalani hukuman. Majukan waktu terlebih dahulu.');
  if(s.detained&&!['fine','community_service','advance_time'].includes(action))return reject('Ditahan hansip: bayar denda atau bersihkan gorong-gorong.');
  switch(action){
+ case 'world_interaction': {
+  const rule=c.worldEntities.find(v=>v.id===String(args.ruleId||''));
+  if(!rule||rule.operation!=='ambient')return reject('Interaksi objek belum diaktifkan.');
+  const staged={category:rule.category,tier:rule.tier,moneyDelta:rule.moneyDelta,
+   durationMinutes:rule.durationMinutes,minExp:rule.minExp,
+   riskPercent:rule.riskPercent,statEffects:rule.statEffects,ingredients:[]};
+  const invalid=PREMISES.violations(staged);
+  if(invalid.length)return reject('Aturan '+rule.label+' tidak sesuai level: '+invalid[0].key);
+  if(s.experience<rule.minExp)return reject('Perlu EXP '+rule.minExp);
+  if(s.wallet<Math.max(0,-rule.moneyDelta))return reject('Uang tidak cukup');
+  if(rule.moneyDelta<0)spend(-rule.moneyDelta);
+  else if(rule.moneyDelta>0){s.wallet+=rule.moneyDelta;changes.push('uang +Rp'+rule.moneyDelta);}
+  clock(rule.durationMinutes);
+  for(const [key,amount] of Object.entries(rule.statEffects||{}))if(amount)stat(key,amount);
+  if(rule.riskPercent>0){
+   const roll=Number.isFinite(Number(args.riskRoll))?Number(args.riskRoll):Math.random();
+   if(roll<rule.riskPercent/100){
+    s.detained=true;s.detentionMinutes=Math.max(s.detentionMinutes,60);
+    changes.push('tertangkap akibat '+rule.label);
+   }
+  }
+  changes.push('aksi objek: '+rule.label);break;
+ }
  case 'configured_activity': {
   const id=String(args.activityId||'');
   const a=c.activities.find(v=>v.id===id);
   if(!a)return reject('Aktivitas belum diaktifkan dalam Jiwa.');
+  const failures=PREMISES.violations(a);
+  if(failures.length){
+   const f=failures[0];return reject('Tier '+a.tier+' membatasi '+f.key+' pada '+f.min+'–'+f.max+'. Perbaiki di Jiwa.');
+  }
   if(s.experience<a.minExp)return reject('Perlu EXP '+a.minExp+' (sekarang '+s.experience+').');
   if(s.energy<a.minEnergy)return reject('Energi belum memenuhi syarat '+a.minEnergy+'.');
   if(s.hygiene<a.minHygiene)return reject('Kebersihan belum memenuhi syarat '+a.minHygiene+'.');
@@ -525,7 +557,7 @@ function doAction(config,previous,action,args={}){
  }
  const delta=s.wallet-beforeWallet;
  if(delta!==0){
-  const names={configured_activity:(c.activities.find(a=>a.id===args.activityId)?.label||'Aktivitas Jiwa'),sell_fish:'Jual ikan',sell_loak:'Jual barang bekas',buy_room:'Akses kost',
+  const names={world_interaction:(c.worldEntities.find(v=>v.id===args.ruleId)?.label||'Interaksi Objek'),configured_activity:(c.activities.find(a=>a.id===args.activityId)?.label||'Aktivitas Jiwa'),sell_fish:'Jual ikan',sell_loak:'Jual barang bekas',buy_room:'Akses kost',
    buy_furniture:'Beli furnitur',buy_fridge:'Beli kulkas',buy_token:'Token listrik',
    work:'Upah kerja',public_shower:'Mandi umum',shower:'Mandi',eat:'Makan warung',
    coffee:'Beli kopi',charity:'Sedekah',fine:'Denda hansip',luck_find:'Rezeki / nasib'};
