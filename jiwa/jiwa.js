@@ -296,8 +296,9 @@ function tab(which){
  if(shell)shell.dataset.jiwaTab=which;
  mobilePane('main');
  for(const b of document.querySelectorAll('[data-tab]'))b.classList.toggle('active',b.dataset.tab===which);
- for(const name of ['activities','map','systems','test','context','play'])$(name==='activities'?'activityView':name+'View').hidden=which!==name;
+ for(const name of ['activities','entities','map','systems','test','context','play'])$(name==='activities'?'activityView':name==='entities'?'entitiesView':name+'View').hidden=which!==name;
  if(which==='activities')window.dispatchEvent(new Event('jiwa:activity:render'));
+ if(which==='entities')window.dispatchEvent(new Event('jiwa:entity:render'));
  if(which==='map')resizeCanvas();
  if(which==='systems')renderSystems();
  if(which==='test')renderTest();
