@@ -211,9 +211,10 @@ function updateControls(){
 }
 function syncPreview(){
  if(!active)return;
- // Gameplay getter in builder merges this preview without writing storage.
+ // Parent game and the scaled phone iframe each need the SAME unsaved draft.
  root.SemestaPlay?.refreshHud?.();
- refreshBoxes(performance.now());
+ if(environment().phone)syncFramePreview();
+ // The already-running animation loop refreshes the selection geometry.
 }
 function changeSlot(value){
  if(!active||!draft)return;
@@ -222,14 +223,16 @@ function changeSlot(value){
  dirty=true;syncPreview();updateControls();
  status('UNSAVED · Preview aktif, klik SAVE GLOBAL UI untuk simpan.');
 }
-function relativeToSlot(before,id,x,y,w,h){
- const b=host().getBoundingClientRect();
- const left=cap(x,0,Math.max(0,b.width-w)),top=cap(y,0,Math.max(0,b.height-h));
+function relativeToSlot(before,id,x,y,w,h,stageW,stageH){
+ // All coordinates passed here are measured in the target game viewport,
+ // not the scaled parent rectangle of the phone iframe.
+ const left=cap(x,0,Math.max(0,stageW-w)),top=cap(y,0,Math.max(0,stageH-h));
  const [v,u]=before.anchor.split('-');
- const ox=u==='right'?b.width-w-left:u==='center'?left-(b.width-w)/2:left;
- const oy=v==='bottom'?b.height-h-top:v==='center'?top-(b.height-h)/2:top;
+ const ox=u==='right'?stageW-w-left:u==='center'?left-(stageW-w)/2:left;
+ const oy=v==='bottom'?stageH-h-top:v==='center'?top-(stageH-h)/2:top;
  return {anchor:before.anchor,scale:before.scale,
-  x:Math.round(cap(ox,-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT)),y:Math.round(cap(oy,-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT))};
+  x:Math.round(cap(ox,-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT)),
+  y:Math.round(cap(oy,-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT))};
 }
 function pointerStart(ev,id){
  if(!active||ev.button!==0)return;
@@ -243,13 +246,15 @@ function pointerStart(ev,id){
 }
 function pointerMove(ev){
  if(!active||!drag)return;
- const d=drag,dx=ev.clientX-d.startX,dy=ev.clientY-d.startY;
+ const d=drag,dx=(ev.clientX-d.startX)/d.g.scaleX,
+  dy=(ev.clientY-d.startY)/d.g.scaleY;
  if(d.mode==='resize'){
-  const factor=1+Math.max(dx/Math.max(d.g.w,1),dy/Math.max(d.g.h,1));
+  const factor=1+Math.max(dx/Math.max(d.g.logical.w,1),dy/Math.max(d.g.logical.h,1));
   changeSlot({scale:Math.round(cap(d.slot.scale*factor,.5,1.5)*100)/100});
  }else{
-  const targetX=sn(d.g.x+dx),targetY=sn(d.g.y+dy);
-  changeSlot(relativeToSlot(d.slot,d.id,targetX,targetY,d.g.w,d.g.h));
+  const g=d.g.logical;
+  const targetX=sn(g.x+dx),targetY=sn(g.y+dy);
+  changeSlot(relativeToSlot(d.slot,d.id,targetX,targetY,g.w,g.h,g.stageW,g.stageH));
  }
 }
 function pointerEnd(){drag=null;}
