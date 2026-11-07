@@ -7,7 +7,7 @@
 })(typeof window!=='undefined'?window:typeof globalThis!=='undefined'?globalThis:null,function(root){
  'use strict';
  const ELEMENTS=['lifePanel','money','hpButton','bagButton','phone','bag','action','run','needs','toast','dock'];
- const ANCHORS=['top-left','top-right','bottom-left','bottom-right'];
+ const ANCHORS=['top-left','top-center','top-right','center-left','center-center','center-right','bottom-left','bottom-center','bottom-right'];
  const MIN_SCALE=0.5, MAX_SCALE=1.5, MIN_TAP=40;
  const SELECTORS={
   lifePanel:['#semestaLifePlayPanel'],
@@ -144,15 +144,18 @@
   const h=Math.max(1,(natural.h||el.offsetHeight||40)*scale);
   const sa=safeInsets(host.ownerDocument&&host.ownerDocument.defaultView);
   let ox=slot.x, oy=slot.y;
-  if(slot.anchor.indexOf('left')>=0)ox+=sa.l;
-  if(slot.anchor.indexOf('right')>=0)ox+=sa.r;
-  if(slot.anchor.indexOf('top')>=0)oy+=sa.t;
-  if(slot.anchor.indexOf('bottom')>=0)oy+=sa.b;
-  let x=ox,y=oy;
-  if(slot.anchor==='top-right'){x=hb.w-w-ox;y=oy;}
-  else if(slot.anchor==='bottom-left'){x=ox;y=hb.h-h-oy;}
-  else if(slot.anchor==='bottom-right'){x=hb.w-w-ox;y=hb.h-h-oy;}
-  else {x=ox;y=oy;}
+  const [vertical,horizontal]=slot.anchor.split('-');
+  // Center anchors are proportional to the actual gameplay viewport, not
+  // fixed design-stage pixels (1280/390). A centered HUD stays centered on
+  // other resolutions, landscape, Fold and resizes.
+  if(horizontal==='left')ox+=sa.l;
+  if(horizontal==='right')ox+=sa.r;
+  if(vertical==='top')oy+=sa.t;
+  if(vertical==='bottom')oy+=sa.b;
+  let x=horizontal==='right'?hb.w-w-ox:
+    horizontal==='center'?(hb.w-w)/2+ox:ox;
+  let y=vertical==='bottom'?hb.h-h-oy:
+    vertical==='center'?(hb.h-h)/2+oy:oy;
   x=Math.min(Math.max(0,x),Math.max(0,hb.w-w));
   y=Math.min(Math.max(0,y),Math.max(0,hb.h-h));
   return {x,y,w,h,scale};
