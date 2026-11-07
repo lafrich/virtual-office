@@ -39,7 +39,7 @@ const assert=require('node:assert/strict');
  assert.ok(editor.treeHidden&&editor.inspectorHidden,'UI Editor must focus on full-width canvas');
  assert.ok(editor.middle>=1900,'Fullwidth Jiwa UI Editor must use available width');
  assert.ok(editor.stage>=850,'Preview must expand beyond old fixed 850px');
- assert.ok(Math.abs(editor.stage.width/editor.height-16/9)<0.035,'Preview must retain correct 16:9 aspect ratio');
+ assert.ok(Math.abs(editor.stage/editor.height-16/9)<0.035,'Preview must retain correct 16:9 aspect ratio');
  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  mobile.on('pageerror',e=>errors.push('mobile:'+e.message));
  await mobile.goto(base+'jiwa/',{waitUntil:'domcontentloaded',timeout:90000});
