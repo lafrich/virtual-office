@@ -1,0 +1,11 @@
+{
+  "schema": "virtual-life-hub-v1",
+  "schemaVersion": 1,
+  "build": "hub-20261107-1",
+  "project": {
+    "name": "Namanya Juga Hidup: The Game",
+    "spokenName": "Namanya Juga Hidup the Game"
+  },
+  "apps": ["semesta", "bangun-ruang", "emosi", "jiwa", "mahluk-hidup"],
+  "topics": ["world", "rooms", "objects", "characters", "accessories", "emotions", "gameplay", "cityBuilding"]
+}

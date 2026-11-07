@@ -1,0 +1,7 @@
+/* v11a Nokia-style HP (gated VO_NOKIA_HP=1) */
+#vs-layer.vs-nk-on{background:rgba(6,8,12,.62)}
+.vs-nk{position:relative;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+.vs-nkc{display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;cursor:pointer;filter:drop-shadow(4px 5px 0 rgba(0,0,0,.4))}
+.vs-nklk{position:fixed;width:22px;height:22px;pointer-events:none;image-rendering:pixelated;
+  background:#10141B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 11' shape-rendering='crispEdges'%3E%3Cpath fill='%23C99A2E' d='M4 2h3v1H4zM3 3h1v2H3zM7 3h1v2H7zM2 5h7v4H2z'/%3E%3Cpath fill='%2310141B' d='M5 6h1v2H5z'/%3E%3C/svg%3E") center/22px 22px no-repeat;border-radius:2px;box-shadow:0 0 0 2px rgba(201,154,46,.35)}
+body.vs-nk-open #vs-act,body.vs-nk-open #vs-bag,body.vs-nk-open #joy,body.vs-nk-open #dpad{opacity:.45;filter:grayscale(.6)}

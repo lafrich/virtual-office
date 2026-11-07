@@ -3,13 +3,15 @@
 'use strict';
 const DIR=['sw','se','ne','nw'],BUILD=new Set(['jalan','kampung','loak']);
 const CATS={all:'ALL ASSETS',indo200:'INDONESIA / 200 ASET',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
- interior:'INTERIOR',vehicle:'KENDARAAN',character:'KARAKTER',custom:'CUSTOM'};
+ interior:'INTERIOR',object:'OBJEK / ITEM',vehicle:'KENDARAAN',character:'KARAKTER',custom:'CUSTOM'};
 function category(spec){
  if(spec?.objectCategory==='vehicle')return 'vehicle';
  if(spec?.source==='custom-building'||(spec?.source==='bangun-object'&&!spec.builtIn))return 'custom';
  if(spec?.source==='pipeline-vegetation'||spec?.objectCategory==='plant')return 'vegetation';
  if(spec?.source==='bangun-object')return spec.objectCategory==='furniture'?'interior':'street';
  if(spec?.source==='pipeline-street')return /^(semak_kota_|rumput_kota_)/.test(spec.id||'')?'vegetation':BUILD.has(spec.group)?'building':'street';
+ if(spec?.source==='loak-v2'||spec?.objectCategory==='item'||spec?.group==='Loak Objects')return 'object';
+ if(spec?.source==='legacy-local'&&(spec?.category==='props'||spec?.category==='spots'||spec?.category==='items'))return 'object';
  if(spec?.source==='gpt-original')return ['Interior','Office'].includes(spec.group)?'interior':'street';
  return ['Interior','Office'].includes(spec?.group)?'interior':'street';
 }
@@ -166,10 +168,13 @@ function mount(options={}){
    return s.relativeFile?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+s.relativeFile:null;
   if(s.source==='custom-building')return g.VLBuildingBridge?.image(s.id,side)||null;
   if(s.source==='bangun-object')return g.VLBangunObjects?.image(s.id,side)||null;
+  if(s.source==='loak-v2')return s.iconUrl||s.url||(g.VLLoakV2&&g.VLLoakV2.image(s));
+  if(s.source==='legacy-local')return s.url||(g.VLLegacyObjects&&g.VLLegacyObjects.image(s));
+  if(s.source==='traffic-light')return s.url||(g.VLSemestaTrafficLights&&g.VLSemestaTrafficLights.spriteUrl(s.facing||'sw','red'));
   return options.thumbnail?.(s)||null;
  }
  const glyph=s=>({building:'▥',street:'♧',vegetation:'♣',interior:'▤',
-  vehicle:'▰',character:'◉',custom:'✎'})[s?.category]||'▦';
+  object:'▣',vehicle:'▰',character:'◉',custom:'✎'})[s?.category]||'▦';
  function showImage(host,urlOrPromise,s){
   // Async rig previews arrive after an atlas/image load. An older selection
   // must never overwrite the currently selected art.

@@ -151,7 +151,7 @@
     <strong>Original Virtual Life Street2 map reference</strong>
     <button id="closeRef">Close</button>
     <p>Official baked map reference (not separated 3D meshes). Log in to Virtual Life to view protected images.</p>
-    <img src="../assets/street2/base.png" alt="Original Virtual Life scene">
+    <img id="street2Ref" data-src="../assets/street2/base.png" alt="Original Virtual Life scene">
    </div>
   </main>
   <div class="canvas-toolbar">
@@ -429,6 +429,8 @@
 .tree-replace-hint{font-size:10px;color:#4a657a}
 </style>
 <script src="./asset-catalog.js?v=2"></script>
+<script src="./legacy-objects.js?v=legacy-objects-v2"></script>
+<script src="./loak-v2-adapter.js?v=loak-objects-v2"></script>
 <script src="./pipeline-catalog.js?v=kebon-sirih-published-assets-v1"></script>
 <script src="./indonesia-assets.js?v=indonesia200-wheel-horizontal-v8"></script>
 <script src="./jakarta-urban-assets.js?v=jakarta-urban-v1-20261106"></script>
@@ -469,11 +471,19 @@
 <script src="./map-schema.js?v=semesta-v2-final"></script>
 <script src="./reference-city.js?v=traffic-queue-v2&amp;kebon-sirih-pavement-v1"></script>
 <script src="./jakarta-city.js?v=jakarta-city-v6-canopy-road-clearance"></script>
+<script src="../shared/hub-registry.js"></script>
+<script src="../shared/gameplay-schema.js"></script>
+<script src="../shared/vl-hud/phone_ellen.js"></script>
+<script src="../shared/vl-hud/nokia-play.js"></script>
+<script src="../shared/hud-layout.js"></script>
+<script src="../shared/play-hud.js"></script>
+<script src="../shared/loak-play.js"></script>
 <script src="./city-drafts.js?v=reference-city-drafts1"></script>
 <script src="./city-building-link.js?v=city-building-sync-v1"></script>
 <script src="./semesta-traffic-catalog.js?v=bus-driveable-visual-20261106"></script>
 <script src="./semesta-traffic.js?v=npc-flow-vehicle-ground-v2&amp;transport-flip-v1"></script>
 <script src="./semesta-traffic-flow.js?v=bus2-markers-v1"></script>
+<script src="./semesta-traffic-lights.js?v=traffic-lights-v1"></script>
 <script src="./virtual-life-vault.js?v=vl-vault-window-fix-v2"></script>
 <script src="./semesta-pipeline-ground.js?v=native-pixel-depth-v3"></script>
 <script src="./studio-sprite-grounding.js?v=grounded-pivot-v1"></script>

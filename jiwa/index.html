@@ -78,6 +78,7 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
    <div id="systemsView" class="view" hidden><div class="viewport-scroll">
     <div class="card"><h3>WORLD SYSTEMS</h3><p class="subtle">Nilai awal untuk Play Test JIWA. Tidak mengubah game online atau City Draft.</p><div class="pair"><label>Start Wallet (Rp)<input id="sys-wallet" type="number" min="0" step="1000"></label><label>Start Time (HH:MM)<input id="sys-time" type="time"></label></div><div class="pair"><label>Fullness<input id="sys-fullness" type="number" min="0" max="100"></label><label>Energy<input id="sys-energy" type="number" min="0" max="100"></label><label>Hygiene<input id="sys-hygiene" type="number" min="0" max="100"></label><label>Bladder<input id="sys-bladder" type="number" min="0" max="100"></label></div></div>
     <div class="card"><h3>MECHANICS REGISTRY</h3><p>Rules menggunakan <b>WHEN → IF → THEN</b>. Template reusable dipakai sebagai default, sementara setiap objek Semesta bisa mempunyai override masing-masing.</p><div id="registryInfo" class="subtle"></div></div>
+    <div class="card"><h3>GAMEPLAY MODULES</h3><p class="subtle">Tune HUD mechanics for Namanya Juga Hidup: The Game. Saved with this city as gameplay.json and previewed in Play Test.</p><div id="mechanicsPanel">Loading mechanics...</div><div class="controls"><button id="exportGameplay" type="button">EXPORT GAMEPLAY.JSON</button><button id="resetGameplay" type="button">RESET DEFAULTS</button></div></div>
    </div></div>
    <div id="testView" class="view" hidden><div class="viewport-scroll">
     <div class="card"><h3>CHARACTER ROOT / MAHLUK HIDUP 2</h3>
@@ -90,6 +91,7 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
       <canvas id="jiwaActorPreview" width="128" height="224" aria-label="Pixel character root SE-direction preview"></canvas>
      </div>
     </div>
+    <div class="card"><h3>Namanya Juga Hidup: The Game — Play Test</h3><p class="subtle" id="playtestHudHint">Nokia HP, Action, Bag, and movement. One window at a time, X close only. Isolated sandbox.</p><div id="playtestHud"></div></div>
     <div class="card"><h3>PLAY TEST — ISOLATED SANDBOX</h3><p class="subtle">Menguji conditions, ekonomi, inventory, dan needs. Tidak mengubah akun/multiplayer.</p><div class="stats-grid" id="testStats"></div><div class="controls" style="margin-top:10px"><button id="runSelected" class="primary">▶ RUN SELECTED ACTION</button><button id="resetTest">↻ RESET TEST</button></div></div>
     <div class="card"><h3>EVENT LOG</h3><div id="testLog" role="log" aria-live="polite">Play Test ready.</div></div>
    </div></div>
@@ -117,10 +119,18 @@ label input,label select{margin-top:5px}input[type=checkbox]{width:auto;margin:0
  </div>
  <footer class="footer"><span id="notice">JIWA / NO CHANGES TO SEMESTA</span><span id="dirtyState">SAVED</span><span>LOCAL MECHANICS V1</span></footer>
 </div>
+<script src="../shared/hub-registry.js"></script>
 <script src="../world-builder/city-drafts.js"></script>
+<script src="../shared/gameplay-schema.js"></script>
+<script src="../shared/vl-hud/phone_ellen.js"></script>
+<script src="../shared/vl-hud/nokia-play.js"></script>
+<script src="../shared/hud-layout.js"></script>
+<script src="../shared/play-hud.js"></script>
+<script src="../shared/loak-play.js"></script>
 <script src="/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1"></script>
 <script src="./foundation-engine.js"></script>
 <script src="./jiwa.js"></script>
 <script src="./character-link.js?v=mahluk1-v6b-20261107"></script>
 <script src="./context-editor.js"></script>
+<script src="./mechanics-panel.js"></script>
 </body></html>

@@ -1,0 +1,4451 @@
+{
+  "id": "loak-objects-v2",
+  "format": "semesta-asset-library-v1",
+  "name": "Loak Objects v2",
+  "createdAt": "2026-11-07T02:50:00.000Z",
+  "source": "Loak Objects v2 review pack + Virtual Life search props",
+  "notes": "Object/item category. 122 types / 133 sprites. 37 preserved originals are not duplicated. Props and search spots from the old game remain separate object entries.",
+  "entries": [
+    {
+      "id": "botol_plastik_bening",
+      "file": "loak-v2/ground/botol_plastik_bening.png",
+      "label": "Botol plastik bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "botol_plastik",
+      "rarity": "umum",
+      "catalogPrice": 300,
+      "icon": "loak-v2/icons/botol_plastik_bening.png",
+      "size": [
+        34,
+        19
+      ],
+      "pivot": [
+        15,
+        14
+      ],
+      "pickupAnchor": [
+        15,
+        14
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "botol_plastik_hijau",
+      "file": "loak-v2/ground/botol_plastik_hijau.png",
+      "label": "Botol plastik bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "botol_plastik",
+      "rarity": "umum",
+      "catalogPrice": 300,
+      "icon": "loak-v2/icons/botol_plastik_hijau.png",
+      "size": [
+        34,
+        19
+      ],
+      "pivot": [
+        15,
+        14
+      ],
+      "pickupAnchor": [
+        15,
+        14
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kaleng_minuman_merah",
+      "file": "loak-v2/ground/kaleng_minuman_merah.png",
+      "label": "Kaleng minuman bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kaleng_minuman",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/kaleng_minuman_merah.png",
+      "size": [
+        24,
+        16
+      ],
+      "pivot": [
+        10,
+        11
+      ],
+      "pickupAnchor": [
+        10,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kaleng_minuman_hijau",
+      "file": "loak-v2/ground/kaleng_minuman_hijau.png",
+      "label": "Kaleng minuman bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kaleng_minuman",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/kaleng_minuman_hijau.png",
+      "size": [
+        24,
+        16
+      ],
+      "pivot": [
+        10,
+        11
+      ],
+      "pickupAnchor": [
+        10,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kardus_lipat",
+      "file": "loak-v2/ground/kardus_lipat.png",
+      "label": "Kardus bekas dilipat",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kardus_lipat",
+      "rarity": "umum",
+      "catalogPrice": 800,
+      "icon": "loak-v2/icons/kardus_lipat.png",
+      "size": [
+        40,
+        23
+      ],
+      "pivot": [
+        20,
+        13
+      ],
+      "pickupAnchor": [
+        20,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "koran_bekas",
+      "file": "loak-v2/ground/koran_bekas.png",
+      "label": "Koran bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "koran_bekas",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/koran_bekas.png",
+      "size": [
+        36,
+        21
+      ],
+      "pivot": [
+        18,
+        12
+      ],
+      "pickupAnchor": [
+        18,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "sandal_jepit_biru",
+      "file": "loak-v2/ground/sandal_jepit_biru.png",
+      "label": "Sandal jepit putus",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "sandal_jepit",
+      "rarity": "umum",
+      "catalogPrice": 300,
+      "icon": "loak-v2/icons/sandal_jepit_biru.png",
+      "size": [
+        32,
+        19
+      ],
+      "pivot": [
+        14,
+        10
+      ],
+      "pickupAnchor": [
+        14,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "sandal_jepit_merah",
+      "file": "loak-v2/ground/sandal_jepit_merah.png",
+      "label": "Sandal jepit putus",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "sandal_jepit",
+      "rarity": "umum",
+      "catalogPrice": 300,
+      "icon": "loak-v2/icons/sandal_jepit_merah.png",
+      "size": [
+        32,
+        19
+      ],
+      "pivot": [
+        14,
+        10
+      ],
+      "pickupAnchor": [
+        14,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kabel_bekas",
+      "file": "loak-v2/ground/kabel_bekas.png",
+      "label": "Gulungan kabel bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kabel_bekas",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/kabel_bekas.png",
+      "size": [
+        30,
+        21
+      ],
+      "pivot": [
+        13,
+        9
+      ],
+      "pickupAnchor": [
+        13,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "charger_rusak",
+      "file": "loak-v2/ground/charger_rusak.png",
+      "label": "Charger HP rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "charger_rusak",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/charger_rusak.png",
+      "size": [
+        22,
+        18
+      ],
+      "pivot": [
+        8,
+        10
+      ],
+      "pickupAnchor": [
+        8,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kaset_pita",
+      "file": "loak-v2/ground/kaset_pita.png",
+      "label": "Kaset pita lama",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kaset_pita",
+      "rarity": "umum",
+      "catalogPrice": 2500,
+      "icon": "loak-v2/icons/kaset_pita.png",
+      "size": [
+        28,
+        18
+      ],
+      "pivot": [
+        14,
+        9
+      ],
+      "pickupAnchor": [
+        14,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "buku_bekas_merah",
+      "file": "loak-v2/ground/buku_bekas_merah.png",
+      "label": "Buku bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "buku_bekas",
+      "rarity": "umum",
+      "catalogPrice": 2000,
+      "icon": "loak-v2/icons/buku_bekas_merah.png",
+      "size": [
+        36,
+        22
+      ],
+      "pivot": [
+        18,
+        13
+      ],
+      "pickupAnchor": [
+        18,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "buku_bekas_biru",
+      "file": "loak-v2/ground/buku_bekas_biru.png",
+      "label": "Buku bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "buku_bekas",
+      "rarity": "umum",
+      "catalogPrice": 2000,
+      "icon": "loak-v2/icons/buku_bekas_biru.png",
+      "size": [
+        36,
+        22
+      ],
+      "pivot": [
+        18,
+        13
+      ],
+      "pickupAnchor": [
+        18,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "payung_rusak_ungu",
+      "file": "loak-v2/ground/payung_rusak_ungu.png",
+      "label": "Payung rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "payung_rusak",
+      "rarity": "umum",
+      "catalogPrice": 2000,
+      "icon": "loak-v2/icons/payung_rusak_ungu.png",
+      "size": [
+        42,
+        20
+      ],
+      "pivot": [
+        20,
+        15
+      ],
+      "pickupAnchor": [
+        20,
+        15
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "payung_rusak_hitam",
+      "file": "loak-v2/ground/payung_rusak_hitam.png",
+      "label": "Payung rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "payung_rusak",
+      "rarity": "umum",
+      "catalogPrice": 2000,
+      "icon": "loak-v2/icons/payung_rusak_hitam.png",
+      "size": [
+        42,
+        20
+      ],
+      "pivot": [
+        20,
+        15
+      ],
+      "pickupAnchor": [
+        20,
+        15
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "sepatu_bekas_putih",
+      "file": "loak-v2/ground/sepatu_bekas_putih.png",
+      "label": "Sepatu bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "sepatu_bekas",
+      "rarity": "umum",
+      "catalogPrice": 3000,
+      "icon": "loak-v2/icons/sepatu_bekas_putih.png",
+      "size": [
+        36,
+        28
+      ],
+      "pivot": [
+        16,
+        20
+      ],
+      "pickupAnchor": [
+        16,
+        20
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "sepatu_bekas_hitam",
+      "file": "loak-v2/ground/sepatu_bekas_hitam.png",
+      "label": "Sepatu bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "sepatu_bekas",
+      "rarity": "umum",
+      "catalogPrice": 3000,
+      "icon": "loak-v2/icons/sepatu_bekas_hitam.png",
+      "size": [
+        36,
+        28
+      ],
+      "pivot": [
+        16,
+        20
+      ],
+      "pickupAnchor": [
+        16,
+        20
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "dompet_kosong",
+      "file": "loak-v2/ground/dompet_kosong.png",
+      "label": "Dompet kosong",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "dompet_kosong",
+      "rarity": "umum",
+      "catalogPrice": 3000,
+      "icon": "loak-v2/icons/dompet_kosong.png",
+      "size": [
+        28,
+        20
+      ],
+      "pivot": [
+        14,
+        11
+      ],
+      "pickupAnchor": [
+        14,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "gelas_plastik",
+      "file": "loak-v2/ground/gelas_plastik.png",
+      "label": "Gelas plastik es teh",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "gelas_plastik",
+      "rarity": "umum",
+      "catalogPrice": 200,
+      "icon": "loak-v2/icons/gelas_plastik.png",
+      "size": [
+        18,
+        24
+      ],
+      "pivot": [
+        6,
+        19
+      ],
+      "pickupAnchor": [
+        6,
+        19
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "ember_bocor",
+      "file": "loak-v2/ground/ember_bocor.png",
+      "label": "Ember bocor",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "ember_bocor",
+      "rarity": "umum",
+      "catalogPrice": 2500,
+      "icon": "loak-v2/icons/ember_bocor.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        12,
+        25
+      ],
+      "pickupAnchor": [
+        12,
+        25
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "hp_jadul_biru",
+      "file": "loak-v2/ground/hp_jadul_biru.png",
+      "label": "HP jadul rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "hp_jadul",
+      "rarity": "jarang",
+      "catalogPrice": 15000,
+      "icon": "loak-v2/icons/hp_jadul_biru.png",
+      "size": [
+        24,
+        19
+      ],
+      "pivot": [
+        12,
+        9
+      ],
+      "pickupAnchor": [
+        12,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "hp_jadul_abu",
+      "file": "loak-v2/ground/hp_jadul_abu.png",
+      "label": "HP jadul rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "hp_jadul",
+      "rarity": "jarang",
+      "catalogPrice": 15000,
+      "icon": "loak-v2/icons/hp_jadul_abu.png",
+      "size": [
+        24,
+        19
+      ],
+      "pivot": [
+        12,
+        9
+      ],
+      "pickupAnchor": [
+        12,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "jam_tangan_rusak",
+      "file": "loak-v2/ground/jam_tangan_rusak.png",
+      "label": "Jam tangan rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "jam_tangan_rusak",
+      "rarity": "jarang",
+      "catalogPrice": 12000,
+      "icon": "loak-v2/icons/jam_tangan_rusak.png",
+      "size": [
+        24,
+        19
+      ],
+      "pivot": [
+        12,
+        9
+      ],
+      "pickupAnchor": [
+        12,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kacamata",
+      "file": "loak-v2/ground/kacamata.png",
+      "label": "Kacamata bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kacamata",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/kacamata.png",
+      "size": [
+        30,
+        16
+      ],
+      "pivot": [
+        10,
+        11
+      ],
+      "pickupAnchor": [
+        10,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kunci_lama",
+      "file": "loak-v2/ground/kunci_lama.png",
+      "label": "Kunci lama",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kunci_lama",
+      "rarity": "jarang",
+      "catalogPrice": 5000,
+      "icon": "loak-v2/icons/kunci_lama.png",
+      "size": [
+        24,
+        12
+      ],
+      "pivot": [
+        10,
+        6
+      ],
+      "pickupAnchor": [
+        10,
+        6
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "besi_tua",
+      "file": "loak-v2/ground/besi_tua.png",
+      "label": "Besi tua",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "besi_tua",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/besi_tua.png",
+      "size": [
+        40,
+        22
+      ],
+      "pivot": [
+        19,
+        14
+      ],
+      "pickupAnchor": [
+        19,
+        14
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "helm_bekas_merah",
+      "file": "loak-v2/ground/helm_bekas_merah.png",
+      "label": "Helm bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "helm_bekas",
+      "rarity": "jarang",
+      "catalogPrice": 20000,
+      "icon": "loak-v2/icons/helm_bekas_merah.png",
+      "size": [
+        34,
+        26
+      ],
+      "pivot": [
+        16,
+        17
+      ],
+      "pickupAnchor": [
+        16,
+        17
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "helm_bekas_putih",
+      "file": "loak-v2/ground/helm_bekas_putih.png",
+      "label": "Helm bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "helm_bekas",
+      "rarity": "jarang",
+      "catalogPrice": 20000,
+      "icon": "loak-v2/icons/helm_bekas_putih.png",
+      "size": [
+        34,
+        26
+      ],
+      "pivot": [
+        16,
+        17
+      ],
+      "pickupAnchor": [
+        16,
+        17
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "helm_bekas_hitam",
+      "file": "loak-v2/ground/helm_bekas_hitam.png",
+      "label": "Helm bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "helm_bekas",
+      "rarity": "jarang",
+      "catalogPrice": 20000,
+      "icon": "loak-v2/icons/helm_bekas_hitam.png",
+      "size": [
+        34,
+        26
+      ],
+      "pivot": [
+        16,
+        17
+      ],
+      "pickupAnchor": [
+        16,
+        17
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tas_bekas_coklat",
+      "file": "loak-v2/ground/tas_bekas_coklat.png",
+      "label": "Tas bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "tas_bekas",
+      "rarity": "jarang",
+      "catalogPrice": 15000,
+      "icon": "loak-v2/icons/tas_bekas_coklat.png",
+      "size": [
+        32,
+        35
+      ],
+      "pivot": [
+        14,
+        26
+      ],
+      "pickupAnchor": [
+        14,
+        26
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tas_bekas_hitam",
+      "file": "loak-v2/ground/tas_bekas_hitam.png",
+      "label": "Tas bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "tas_bekas",
+      "rarity": "jarang",
+      "catalogPrice": 15000,
+      "icon": "loak-v2/icons/tas_bekas_hitam.png",
+      "size": [
+        32,
+        35
+      ],
+      "pivot": [
+        14,
+        26
+      ],
+      "pickupAnchor": [
+        14,
+        26
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "boneka_kain",
+      "file": "loak-v2/ground/boneka_kain.png",
+      "label": "Boneka beruang kumal",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "boneka_kain",
+      "rarity": "jarang",
+      "catalogPrice": 7000,
+      "icon": "loak-v2/icons/boneka_kain.png",
+      "size": [
+        28,
+        30
+      ],
+      "pivot": [
+        13,
+        23
+      ],
+      "pickupAnchor": [
+        13,
+        23
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "mainan_mobil_merah",
+      "file": "loak-v2/ground/mainan_mobil_merah.png",
+      "label": "Mobil-mobilan rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "mainan_mobil",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/mainan_mobil_merah.png",
+      "size": [
+        34,
+        25
+      ],
+      "pivot": [
+        16,
+        16
+      ],
+      "pickupAnchor": [
+        16,
+        16
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "mainan_mobil_kuning",
+      "file": "loak-v2/ground/mainan_mobil_kuning.png",
+      "label": "Mobil-mobilan rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "mainan_mobil",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/mainan_mobil_kuning.png",
+      "size": [
+        34,
+        25
+      ],
+      "pivot": [
+        16,
+        16
+      ],
+      "pickupAnchor": [
+        16,
+        16
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kipas_angin",
+      "file": "loak-v2/ground/kipas_angin.png",
+      "label": "Kipas angin meja rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kipas_angin",
+      "rarity": "jarang",
+      "catalogPrice": 25000,
+      "icon": "loak-v2/icons/kipas_angin.png",
+      "size": [
+        32,
+        44
+      ],
+      "pivot": [
+        13,
+        35
+      ],
+      "pickupAnchor": [
+        13,
+        35
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "setrika_lama",
+      "file": "loak-v2/ground/setrika_lama.png",
+      "label": "Setrika lama",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "setrika_lama",
+      "rarity": "jarang",
+      "catalogPrice": 12000,
+      "icon": "loak-v2/icons/setrika_lama.png",
+      "size": [
+        36,
+        27
+      ],
+      "pivot": [
+        17,
+        18
+      ],
+      "pickupAnchor": [
+        17,
+        18
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "radio_tua",
+      "file": "loak-v2/ground/radio_tua.png",
+      "label": "Radio tua",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "radio_tua",
+      "rarity": "jarang",
+      "catalogPrice": 30000,
+      "icon": "loak-v2/icons/radio_tua.png",
+      "size": [
+        34,
+        38
+      ],
+      "pivot": [
+        14,
+        29
+      ],
+      "pickupAnchor": [
+        14,
+        29
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "jam_dinding",
+      "file": "loak-v2/ground/jam_dinding.png",
+      "label": "Jam dinding mati",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "jam_dinding",
+      "rarity": "jarang",
+      "catalogPrice": 15000,
+      "icon": "loak-v2/icons/jam_dinding.png",
+      "size": [
+        30,
+        19
+      ],
+      "pivot": [
+        14,
+        10
+      ],
+      "pickupAnchor": [
+        14,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "gembok_tua",
+      "file": "loak-v2/ground/gembok_tua.png",
+      "label": "Gembok tua",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "gembok_tua",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/gembok_tua.png",
+      "size": [
+        18,
+        20
+      ],
+      "pivot": [
+        6,
+        15
+      ],
+      "pickupAnchor": [
+        6,
+        15
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "senter_rusak",
+      "file": "loak-v2/ground/senter_rusak.png",
+      "label": "Senter rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "senter_rusak",
+      "rarity": "jarang",
+      "catalogPrice": 5000,
+      "icon": "loak-v2/icons/senter_rusak.png",
+      "size": [
+        32,
+        18
+      ],
+      "pivot": [
+        14,
+        12
+      ],
+      "pickupAnchor": [
+        14,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "koin_kuno",
+      "file": "loak-v2/ground/koin_kuno.png",
+      "label": "Koin kuno",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "koin_kuno",
+      "rarity": "langka",
+      "catalogPrice": 50000,
+      "icon": "loak-v2/icons/koin_kuno.png",
+      "size": [
+        22,
+        11
+      ],
+      "pivot": [
+        8,
+        5
+      ],
+      "pickupAnchor": [
+        8,
+        5
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tembaga_gulungan",
+      "file": "loak-v2/ground/tembaga_gulungan.png",
+      "label": "Gulungan kawat tembaga",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "tembaga_gulungan",
+      "rarity": "langka",
+      "catalogPrice": 40000,
+      "icon": "loak-v2/icons/tembaga_gulungan.png",
+      "size": [
+        30,
+        21
+      ],
+      "pivot": [
+        13,
+        12
+      ],
+      "pickupAnchor": [
+        13,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "aki_bekas",
+      "file": "loak-v2/ground/aki_bekas.png",
+      "label": "Aki bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "aki_bekas",
+      "rarity": "langka",
+      "catalogPrice": 35000,
+      "icon": "loak-v2/icons/aki_bekas.png",
+      "size": [
+        36,
+        32
+      ],
+      "pivot": [
+        16,
+        22
+      ],
+      "pickupAnchor": [
+        16,
+        22
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kamera_analog",
+      "file": "loak-v2/ground/kamera_analog.png",
+      "label": "Kamera analog",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "kamera_analog",
+      "rarity": "langka",
+      "catalogPrice": 80000,
+      "icon": "loak-v2/icons/kamera_analog.png",
+      "size": [
+        30,
+        27
+      ],
+      "pivot": [
+        13,
+        18
+      ],
+      "pickupAnchor": [
+        13,
+        18
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "walkman",
+      "file": "loak-v2/ground/walkman.png",
+      "label": "Walkman kaset",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "walkman",
+      "rarity": "langka",
+      "catalogPrice": 60000,
+      "icon": "loak-v2/icons/walkman.png",
+      "size": [
+        28,
+        23
+      ],
+      "pivot": [
+        14,
+        12
+      ],
+      "pickupAnchor": [
+        14,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "piringan_hitam",
+      "file": "loak-v2/ground/piringan_hitam.png",
+      "label": "Piringan hitam",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "piringan_hitam",
+      "rarity": "langka",
+      "catalogPrice": 70000,
+      "icon": "loak-v2/icons/piringan_hitam.png",
+      "size": [
+        48,
+        26
+      ],
+      "pivot": [
+        24,
+        14
+      ],
+      "pickupAnchor": [
+        24,
+        14
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "arloji_saku",
+      "file": "loak-v2/ground/arloji_saku.png",
+      "label": "Arloji saku antik",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "arloji_saku",
+      "rarity": "langka",
+      "catalogPrice": 120000,
+      "icon": "loak-v2/icons/arloji_saku.png",
+      "size": [
+        26,
+        15
+      ],
+      "pivot": [
+        12,
+        8
+      ],
+      "pickupAnchor": [
+        12,
+        8
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "lampu_petromaks",
+      "file": "loak-v2/ground/lampu_petromaks.png",
+      "label": "Lampu petromaks",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": null,
+      "variants": null,
+      "legacyType": "lampu_petromaks",
+      "rarity": "langka",
+      "catalogPrice": 90000,
+      "icon": "loak-v2/icons/lampu_petromaks.png",
+      "size": [
+        22,
+        37
+      ],
+      "pivot": [
+        8,
+        30
+      ],
+      "pickupAnchor": [
+        8,
+        30
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "pipa_besi",
+      "file": "loak-v2/ground/pipa_besi.png",
+      "label": "Pipa besi berkarat",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.67,
+        0.42
+      ],
+      "variants": null,
+      "legacyType": "pipa_besi",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/pipa_besi.png",
+      "size": [
+        43,
+        27
+      ],
+      "pivot": [
+        21,
+        18
+      ],
+      "pickupAnchor": [
+        21,
+        18
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "siku_pipa",
+      "file": "loak-v2/ground/siku_pipa.png",
+      "label": "Siku pipa besi",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.52,
+        0.39
+      ],
+      "variants": null,
+      "legacyType": "siku_pipa",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/siku_pipa.png",
+      "size": [
+        33,
+        25
+      ],
+      "pivot": [
+        17,
+        16
+      ],
+      "pickupAnchor": [
+        17,
+        16
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "engsel_pintu",
+      "file": "loak-v2/ground/engsel_pintu.png",
+      "label": "Engsel pintu lepas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.56,
+        0.31
+      ],
+      "variants": null,
+      "legacyType": "engsel_pintu",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/engsel_pintu.png",
+      "size": [
+        36,
+        20
+      ],
+      "pivot": [
+        18,
+        11
+      ],
+      "pickupAnchor": [
+        18,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "braket_rak",
+      "file": "loak-v2/ground/braket_rak.png",
+      "label": "Braket rak besi",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.53,
+        0.53
+      ],
+      "variants": null,
+      "legacyType": "braket_rak",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/braket_rak.png",
+      "size": [
+        34,
+        34
+      ],
+      "pivot": [
+        16,
+        26
+      ],
+      "pickupAnchor": [
+        16,
+        26
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "rantai_sepeda",
+      "file": "loak-v2/ground/rantai_sepeda.png",
+      "label": "Rantai sepeda putus",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.55,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "rantai_sepeda",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/rantai_sepeda.png",
+      "size": [
+        35,
+        18
+      ],
+      "pivot": [
+        16,
+        9
+      ],
+      "pickupAnchor": [
+        16,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "gir_sepeda",
+      "file": "loak-v2/ground/gir_sepeda.png",
+      "label": "Gir sepeda bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.47,
+        0.25
+      ],
+      "variants": null,
+      "legacyType": "gir_sepeda",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/gir_sepeda.png",
+      "size": [
+        30,
+        16
+      ],
+      "pivot": [
+        14,
+        9
+      ],
+      "pickupAnchor": [
+        14,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "pegas_besi",
+      "file": "loak-v2/ground/pegas_besi.png",
+      "label": "Per pegas lepas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.52,
+        0.25
+      ],
+      "variants": null,
+      "legacyType": "pegas_besi",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/pegas_besi.png",
+      "size": [
+        33,
+        16
+      ],
+      "pivot": [
+        15,
+        9
+      ],
+      "pickupAnchor": [
+        15,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "baut_mur",
+      "file": "loak-v2/ground/baut_mur.png",
+      "label": "Sekantong baut mur",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.47,
+        0.31
+      ],
+      "variants": null,
+      "legacyType": "baut_mur",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/baut_mur.png",
+      "size": [
+        30,
+        20
+      ],
+      "pivot": [
+        14,
+        12
+      ],
+      "pickupAnchor": [
+        14,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kran_air",
+      "file": "loak-v2/ground/kran_air.png",
+      "label": "Kran air rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.33,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "kran_air",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/kran_air.png",
+      "size": [
+        21,
+        22
+      ],
+      "pivot": [
+        7,
+        15
+      ],
+      "pickupAnchor": [
+        7,
+        15
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "gagang_pintu",
+      "file": "loak-v2/ground/gagang_pintu.png",
+      "label": "Gagang pintu bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.41,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "gagang_pintu",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/gagang_pintu.png",
+      "size": [
+        26,
+        17
+      ],
+      "pivot": [
+        10,
+        10
+      ],
+      "pickupAnchor": [
+        10,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kawat_kasa",
+      "file": "loak-v2/ground/kawat_kasa.png",
+      "label": "Kawat kasa sobek",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.64,
+        0.36
+      ],
+      "variants": null,
+      "legacyType": "kawat_kasa",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/kawat_kasa.png",
+      "size": [
+        41,
+        23
+      ],
+      "pivot": [
+        21,
+        13
+      ],
+      "pickupAnchor": [
+        21,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "potongan_seng",
+      "file": "loak-v2/ground/potongan_seng.png",
+      "label": "Potongan seng bergelombang",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.84,
+        0.48
+      ],
+      "variants": null,
+      "legacyType": "potongan_seng",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/potongan_seng.png",
+      "size": [
+        54,
+        31
+      ],
+      "pivot": [
+        27,
+        17
+      ],
+      "pickupAnchor": [
+        27,
+        17
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tutup_kaleng",
+      "file": "loak-v2/ground/tutup_kaleng.png",
+      "label": "Tutup kaleng cat",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.45,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "tutup_kaleng",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/tutup_kaleng.png",
+      "size": [
+        29,
+        17
+      ],
+      "pivot": [
+        13,
+        10
+      ],
+      "pickupAnchor": [
+        13,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "rangka_sadel",
+      "file": "loak-v2/ground/rangka_sadel.png",
+      "label": "Rangka sadel sepeda",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.39,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "rangka_sadel",
+      "rarity": "umum",
+      "catalogPrice": 1500,
+      "icon": "loak-v2/icons/rangka_sadel.png",
+      "size": [
+        25,
+        19
+      ],
+      "pivot": [
+        9,
+        10
+      ],
+      "pickupAnchor": [
+        9,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "jeriken_minyak",
+      "file": "loak-v2/ground/jeriken_minyak.png",
+      "label": "Jeriken minyak kosong",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.47,
+        0.5
+      ],
+      "variants": null,
+      "legacyType": "jeriken_minyak",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/jeriken_minyak.png",
+      "size": [
+        30,
+        32
+      ],
+      "pivot": [
+        14,
+        23
+      ],
+      "pickupAnchor": [
+        14,
+        23
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "botol_sampo",
+      "file": "loak-v2/ground/botol_sampo.png",
+      "label": "Botol sampo kosong",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.33,
+        0.47
+      ],
+      "variants": null,
+      "legacyType": "botol_sampo",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/botol_sampo.png",
+      "size": [
+        21,
+        30
+      ],
+      "pivot": [
+        8,
+        23
+      ],
+      "pickupAnchor": [
+        8,
+        23
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "botol_deterjen",
+      "file": "loak-v2/ground/botol_deterjen.png",
+      "label": "Botol deterjen kosong",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.38,
+        0.44
+      ],
+      "variants": null,
+      "legacyType": "botol_deterjen",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/botol_deterjen.png",
+      "size": [
+        24,
+        28
+      ],
+      "pivot": [
+        10,
+        21
+      ],
+      "pickupAnchor": [
+        10,
+        21
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "baskom_retak",
+      "file": "loak-v2/ground/baskom_retak.png",
+      "label": "Baskom retak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.53,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "baskom_retak",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/baskom_retak.png",
+      "size": [
+        34,
+        22
+      ],
+      "pivot": [
+        15,
+        13
+      ],
+      "pickupAnchor": [
+        15,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "saringan_plastik",
+      "file": "loak-v2/ground/saringan_plastik.png",
+      "label": "Saringan plastik patah",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.48,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "saringan_plastik",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/saringan_plastik.png",
+      "size": [
+        31,
+        18
+      ],
+      "pivot": [
+        12,
+        9
+      ],
+      "pickupAnchor": [
+        12,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kotak_makan",
+      "file": "loak-v2/ground/kotak_makan.png",
+      "label": "Kotak makan tanpa tutup",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.5,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "kotak_makan",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/kotak_makan.png",
+      "size": [
+        32,
+        22
+      ],
+      "pivot": [
+        14,
+        13
+      ],
+      "pickupAnchor": [
+        14,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tutup_botol",
+      "file": "loak-v2/ground/tutup_botol.png",
+      "label": "Tutup botol campur",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.39,
+        0.25
+      ],
+      "variants": null,
+      "legacyType": "tutup_botol",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/tutup_botol.png",
+      "size": [
+        25,
+        15
+      ],
+      "pivot": [
+        11,
+        8
+      ],
+      "pickupAnchor": [
+        11,
+        8
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "hanger_patah",
+      "file": "loak-v2/ground/hanger_patah.png",
+      "label": "Gantungan baju patah",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.56,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "hanger_patah",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/hanger_patah.png",
+      "size": [
+        36,
+        18
+      ],
+      "pivot": [
+        17,
+        9
+      ],
+      "pickupAnchor": [
+        17,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "pot_plastik",
+      "file": "loak-v2/ground/pot_plastik.png",
+      "label": "Pot tanaman kosong retak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.41,
+        0.38
+      ],
+      "variants": null,
+      "legacyType": "pot_plastik",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/pot_plastik.png",
+      "size": [
+        26,
+        24
+      ],
+      "pivot": [
+        12,
+        17
+      ],
+      "pickupAnchor": [
+        12,
+        17
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "keranjang_pecah",
+      "file": "loak-v2/ground/keranjang_pecah.png",
+      "label": "Keranjang belanja pecah",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.59,
+        0.45
+      ],
+      "variants": null,
+      "legacyType": "keranjang_pecah",
+      "rarity": "umum",
+      "catalogPrice": 400,
+      "icon": "loak-v2/icons/keranjang_pecah.png",
+      "size": [
+        38,
+        29
+      ],
+      "pivot": [
+        18,
+        19
+      ],
+      "pickupAnchor": [
+        18,
+        19
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tabung_karton",
+      "file": "loak-v2/ground/tabung_karton.png",
+      "label": "Tabung karton bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.59,
+        0.39
+      ],
+      "variants": null,
+      "legacyType": "tabung_karton",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/tabung_karton.png",
+      "size": [
+        38,
+        25
+      ],
+      "pivot": [
+        18,
+        17
+      ],
+      "pickupAnchor": [
+        18,
+        17
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kantong_kertas",
+      "file": "loak-v2/ground/kantong_kertas.png",
+      "label": "Kantong kertas kusut",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.38,
+        0.39
+      ],
+      "variants": null,
+      "legacyType": "kantong_kertas",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/kantong_kertas.png",
+      "size": [
+        24,
+        25
+      ],
+      "pivot": [
+        10,
+        18
+      ],
+      "pickupAnchor": [
+        10,
+        18
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tray_telur",
+      "file": "loak-v2/ground/tray_telur.png",
+      "label": "Tray telur karton",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.58,
+        0.33
+      ],
+      "variants": null,
+      "legacyType": "tray_telur",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/tray_telur.png",
+      "size": [
+        37,
+        21
+      ],
+      "pivot": [
+        18,
+        11
+      ],
+      "pickupAnchor": [
+        18,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "majalah_bekas",
+      "file": "loak-v2/ground/majalah_bekas.png",
+      "label": "Majalah bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.53,
+        0.31
+      ],
+      "variants": null,
+      "legacyType": "majalah_bekas",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/majalah_bekas.png",
+      "size": [
+        34,
+        20
+      ],
+      "pivot": [
+        16,
+        11
+      ],
+      "pickupAnchor": [
+        16,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "amplop_coklat",
+      "file": "loak-v2/ground/amplop_coklat.png",
+      "label": "Amplop coklat kosong",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.53,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "amplop_coklat",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/amplop_coklat.png",
+      "size": [
+        34,
+        19
+      ],
+      "pivot": [
+        16,
+        11
+      ],
+      "pickupAnchor": [
+        16,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "poster_gulung",
+      "file": "loak-v2/ground/poster_gulung.png",
+      "label": "Gulungan poster lama",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.56,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "poster_gulung",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/poster_gulung.png",
+      "size": [
+        36,
+        22
+      ],
+      "pivot": [
+        17,
+        14
+      ],
+      "pickupAnchor": [
+        17,
+        14
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kantong_semen",
+      "file": "loak-v2/ground/kantong_semen.png",
+      "label": "Kantong semen kosong",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.62,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "kantong_semen",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/kantong_semen.png",
+      "size": [
+        40,
+        22
+      ],
+      "pivot": [
+        20,
+        12
+      ],
+      "pickupAnchor": [
+        20,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "inti_lakban",
+      "file": "loak-v2/ground/inti_lakban.png",
+      "label": "Inti lakban karton",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.34,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "inti_lakban",
+      "rarity": "umum",
+      "catalogPrice": 500,
+      "icon": "loak-v2/icons/inti_lakban.png",
+      "size": [
+        22,
+        17
+      ],
+      "pivot": [
+        9,
+        10
+      ],
+      "pickupAnchor": [
+        9,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "botol_kecap",
+      "file": "loak-v2/ground/botol_kecap.png",
+      "label": "Botol kecap kosong",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.33,
+        0.45
+      ],
+      "variants": null,
+      "legacyType": "botol_kecap",
+      "rarity": "umum",
+      "catalogPrice": 800,
+      "icon": "loak-v2/icons/botol_kecap.png",
+      "size": [
+        21,
+        29
+      ],
+      "pivot": [
+        8,
+        22
+      ],
+      "pickupAnchor": [
+        8,
+        22
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "stoples_kaca",
+      "file": "loak-v2/ground/stoples_kaca.png",
+      "label": "Stoples kaca tanpa tutup",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.36,
+        0.36
+      ],
+      "variants": null,
+      "legacyType": "stoples_kaca",
+      "rarity": "umum",
+      "catalogPrice": 800,
+      "icon": "loak-v2/icons/stoples_kaca.png",
+      "size": [
+        23,
+        23
+      ],
+      "pivot": [
+        9,
+        16
+      ],
+      "pickupAnchor": [
+        9,
+        16
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "gelas_belimbing",
+      "file": "loak-v2/ground/gelas_belimbing.png",
+      "label": "Gelas belimbing retak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.31,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "gelas_belimbing",
+      "rarity": "umum",
+      "catalogPrice": 800,
+      "icon": "loak-v2/icons/gelas_belimbing.png",
+      "size": [
+        20,
+        19
+      ],
+      "pivot": [
+        7,
+        12
+      ],
+      "pickupAnchor": [
+        7,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "mangkuk_kaca",
+      "file": "loak-v2/ground/mangkuk_kaca.png",
+      "label": "Mangkuk kaca sumbing",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.38,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "mangkuk_kaca",
+      "rarity": "umum",
+      "catalogPrice": 800,
+      "icon": "loak-v2/icons/mangkuk_kaca.png",
+      "size": [
+        24,
+        18
+      ],
+      "pivot": [
+        10,
+        11
+      ],
+      "pickupAnchor": [
+        10,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "cermin_tangan",
+      "file": "loak-v2/ground/cermin_tangan.png",
+      "label": "Cermin tangan retak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.47,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "cermin_tangan",
+      "rarity": "umum",
+      "catalogPrice": 800,
+      "icon": "loak-v2/icons/cermin_tangan.png",
+      "size": [
+        30,
+        18
+      ],
+      "pivot": [
+        12,
+        9
+      ],
+      "pickupAnchor": [
+        12,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "keyboard_bekas",
+      "file": "loak-v2/ground/keyboard_bekas.png",
+      "label": "Keyboard bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.75,
+        0.42
+      ],
+      "variants": null,
+      "legacyType": "keyboard_bekas",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/keyboard_bekas.png",
+      "size": [
+        48,
+        27
+      ],
+      "pivot": [
+        24,
+        15
+      ],
+      "pickupAnchor": [
+        24,
+        15
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "mouse_rusak",
+      "file": "loak-v2/ground/mouse_rusak.png",
+      "label": "Mouse komputer rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.33,
+        0.25
+      ],
+      "variants": null,
+      "legacyType": "mouse_rusak",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/mouse_rusak.png",
+      "size": [
+        21,
+        16
+      ],
+      "pivot": [
+        8,
+        9
+      ],
+      "pickupAnchor": [
+        8,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "remote_tv",
+      "file": "loak-v2/ground/remote_tv.png",
+      "label": "Remote televisi rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.47,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "remote_tv",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/remote_tv.png",
+      "size": [
+        30,
+        17
+      ],
+      "pivot": [
+        14,
+        10
+      ],
+      "pickupAnchor": [
+        14,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "papan_sirkuit",
+      "file": "loak-v2/ground/papan_sirkuit.png",
+      "label": "Papan sirkuit bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.58,
+        0.31
+      ],
+      "variants": null,
+      "legacyType": "papan_sirkuit",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/papan_sirkuit.png",
+      "size": [
+        37,
+        20
+      ],
+      "pivot": [
+        18,
+        11
+      ],
+      "pickupAnchor": [
+        18,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "steker_listrik",
+      "file": "loak-v2/ground/steker_listrik.png",
+      "label": "Kepala colokan listrik",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.38,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "steker_listrik",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/steker_listrik.png",
+      "size": [
+        24,
+        17
+      ],
+      "pivot": [
+        11,
+        10
+      ],
+      "pickupAnchor": [
+        11,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "stopkontak_bekas",
+      "file": "loak-v2/ground/stopkontak_bekas.png",
+      "label": "Stopkontak tiga lubang",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.64,
+        0.33
+      ],
+      "variants": null,
+      "legacyType": "stopkontak_bekas",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/stopkontak_bekas.png",
+      "size": [
+        41,
+        21
+      ],
+      "pivot": [
+        21,
+        12
+      ],
+      "pickupAnchor": [
+        21,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kabel_usb",
+      "file": "loak-v2/ground/kabel_usb.png",
+      "label": "Kabel USB putus",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.48,
+        0.31
+      ],
+      "variants": null,
+      "legacyType": "kabel_usb",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/kabel_usb.png",
+      "size": [
+        31,
+        20
+      ],
+      "pivot": [
+        12,
+        13
+      ],
+      "pickupAnchor": [
+        12,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "speaker_kecil",
+      "file": "loak-v2/ground/speaker_kecil.png",
+      "label": "Speaker kecil rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.41,
+        0.45
+      ],
+      "variants": null,
+      "legacyType": "speaker_kecil",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/speaker_kecil.png",
+      "size": [
+        26,
+        29
+      ],
+      "pivot": [
+        10,
+        20
+      ],
+      "pickupAnchor": [
+        10,
+        20
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "adaptor_laptop",
+      "file": "loak-v2/ground/adaptor_laptop.png",
+      "label": "Adaptor laptop rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.55,
+        0.33
+      ],
+      "variants": null,
+      "legacyType": "adaptor_laptop",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/adaptor_laptop.png",
+      "size": [
+        35,
+        21
+      ],
+      "pivot": [
+        17,
+        10
+      ],
+      "pickupAnchor": [
+        17,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "router_wifi",
+      "file": "loak-v2/ground/router_wifi.png",
+      "label": "Router WiFi mati",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.52,
+        0.52
+      ],
+      "variants": null,
+      "legacyType": "router_wifi",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/router_wifi.png",
+      "size": [
+        33,
+        33
+      ],
+      "pivot": [
+        14,
+        24
+      ],
+      "pickupAnchor": [
+        14,
+        24
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "baling_kipas",
+      "file": "loak-v2/ground/baling_kipas.png",
+      "label": "Baling kipas lepas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.64,
+        0.33
+      ],
+      "variants": null,
+      "legacyType": "baling_kipas",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/baling_kipas.png",
+      "size": [
+        41,
+        21
+      ],
+      "pivot": [
+        21,
+        11
+      ],
+      "pickupAnchor": [
+        21,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "dinamo_kecil",
+      "file": "loak-v2/ground/dinamo_kecil.png",
+      "label": "Dinamo kecil bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.52,
+        0.31
+      ],
+      "variants": null,
+      "legacyType": "dinamo_kecil",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/dinamo_kecil.png",
+      "size": [
+        33,
+        20
+      ],
+      "pivot": [
+        17,
+        13
+      ],
+      "pickupAnchor": [
+        17,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kalkulator_mati",
+      "file": "loak-v2/ground/kalkulator_mati.png",
+      "label": "Kalkulator mati",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.47,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "kalkulator_mati",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/kalkulator_mati.png",
+      "size": [
+        30,
+        19
+      ],
+      "pivot": [
+        14,
+        10
+      ],
+      "pickupAnchor": [
+        14,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "headphone_patah",
+      "file": "loak-v2/ground/headphone_patah.png",
+      "label": "Headphone patah",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.52,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "headphone_patah",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/headphone_patah.png",
+      "size": [
+        33,
+        22
+      ],
+      "pivot": [
+        15,
+        13
+      ],
+      "pickupAnchor": [
+        15,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "dvd_bekas",
+      "file": "loak-v2/ground/dvd_bekas.png",
+      "label": "DVD bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.39,
+        0.25
+      ],
+      "variants": null,
+      "legacyType": "dvd_bekas",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/dvd_bekas.png",
+      "size": [
+        25,
+        14
+      ],
+      "pivot": [
+        11,
+        7
+      ],
+      "pickupAnchor": [
+        11,
+        7
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "fiting_lampu",
+      "file": "loak-v2/ground/fiting_lampu.png",
+      "label": "Fiting lampu lepas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.34,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "fiting_lampu",
+      "rarity": "jarang",
+      "catalogPrice": 8000,
+      "icon": "loak-v2/icons/fiting_lampu.png",
+      "size": [
+        22,
+        19
+      ],
+      "pivot": [
+        9,
+        12
+      ],
+      "pickupAnchor": [
+        9,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "panci_penyok",
+      "file": "loak-v2/ground/panci_penyok.png",
+      "label": "Panci aluminium penyok",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.55,
+        0.38
+      ],
+      "variants": null,
+      "legacyType": "panci_penyok",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/panci_penyok.png",
+      "size": [
+        35,
+        24
+      ],
+      "pivot": [
+        16,
+        14
+      ],
+      "pickupAnchor": [
+        16,
+        14
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "wajan_tua",
+      "file": "loak-v2/ground/wajan_tua.png",
+      "label": "Wajan tua",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.58,
+        0.31
+      ],
+      "variants": null,
+      "legacyType": "wajan_tua",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/wajan_tua.png",
+      "size": [
+        37,
+        20
+      ],
+      "pivot": [
+        15,
+        10
+      ],
+      "pickupAnchor": [
+        15,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tutup_panci",
+      "file": "loak-v2/ground/tutup_panci.png",
+      "label": "Tutup panci lepas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.5,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "tutup_panci",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/tutup_panci.png",
+      "size": [
+        32,
+        17
+      ],
+      "pivot": [
+        14,
+        8
+      ],
+      "pickupAnchor": [
+        14,
+        8
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "sendok_garpu",
+      "file": "loak-v2/ground/sendok_garpu.png",
+      "label": "Sendok garpu bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.5,
+        0.33
+      ],
+      "variants": null,
+      "legacyType": "sendok_garpu",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/sendok_garpu.png",
+      "size": [
+        32,
+        21
+      ],
+      "pivot": [
+        14,
+        12
+      ],
+      "pickupAnchor": [
+        14,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "parutan_dapur",
+      "file": "loak-v2/ground/parutan_dapur.png",
+      "label": "Parutan dapur tumpul",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.56,
+        0.33
+      ],
+      "variants": null,
+      "legacyType": "parutan_dapur",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/parutan_dapur.png",
+      "size": [
+        36,
+        21
+      ],
+      "pivot": [
+        18,
+        12
+      ],
+      "pickupAnchor": [
+        18,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "sodet_patah",
+      "file": "loak-v2/ground/sodet_patah.png",
+      "label": "Sodet patah",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.55,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "sodet_patah",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/sodet_patah.png",
+      "size": [
+        35,
+        18
+      ],
+      "pivot": [
+        16,
+        10
+      ],
+      "pickupAnchor": [
+        16,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "cangkir_enamel",
+      "file": "loak-v2/ground/cangkir_enamel.png",
+      "label": "Cangkir enamel sumbing",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.34,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "cangkir_enamel",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/cangkir_enamel.png",
+      "size": [
+        22,
+        19
+      ],
+      "pivot": [
+        8,
+        12
+      ],
+      "pickupAnchor": [
+        8,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "talenan_kayu",
+      "file": "loak-v2/ground/talenan_kayu.png",
+      "label": "Talenan kayu usang",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.59,
+        0.33
+      ],
+      "variants": null,
+      "legacyType": "talenan_kayu",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/talenan_kayu.png",
+      "size": [
+        38,
+        21
+      ],
+      "pivot": [
+        18,
+        11
+      ],
+      "pickupAnchor": [
+        18,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "termos_rusak",
+      "file": "loak-v2/ground/termos_rusak.png",
+      "label": "Termos rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.33,
+        0.48
+      ],
+      "variants": null,
+      "legacyType": "termos_rusak",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/termos_rusak.png",
+      "size": [
+        21,
+        31
+      ],
+      "pivot": [
+        7,
+        24
+      ],
+      "pickupAnchor": [
+        7,
+        24
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "sapu_lidi",
+      "file": "loak-v2/ground/sapu_lidi.png",
+      "label": "Sapu lidi pendek",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.66,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "sapu_lidi",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/sapu_lidi.png",
+      "size": [
+        42,
+        22
+      ],
+      "pivot": [
+        17,
+        11
+      ],
+      "pickupAnchor": [
+        17,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "sikat_pakaian",
+      "file": "loak-v2/ground/sikat_pakaian.png",
+      "label": "Sikat pakaian usang",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.41,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "sikat_pakaian",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/sikat_pakaian.png",
+      "size": [
+        26,
+        18
+      ],
+      "pivot": [
+        12,
+        11
+      ],
+      "pickupAnchor": [
+        12,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "rak_sabun",
+      "file": "loak-v2/ground/rak_sabun.png",
+      "label": "Rak kawat sabun",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.47,
+        0.33
+      ],
+      "variants": null,
+      "legacyType": "rak_sabun",
+      "rarity": "umum",
+      "catalogPrice": 1200,
+      "icon": "loak-v2/icons/rak_sabun.png",
+      "size": [
+        30,
+        21
+      ],
+      "pivot": [
+        14,
+        12
+      ],
+      "pickupAnchor": [
+        14,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "palu_bekas",
+      "file": "loak-v2/ground/palu_bekas.png",
+      "label": "Palu bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.59,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "palu_bekas",
+      "rarity": "umum",
+      "catalogPrice": 1800,
+      "icon": "loak-v2/icons/palu_bekas.png",
+      "size": [
+        38,
+        18
+      ],
+      "pivot": [
+        18,
+        9
+      ],
+      "pickupAnchor": [
+        18,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tang_karat",
+      "file": "loak-v2/ground/tang_karat.png",
+      "label": "Tang berkarat",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.59,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "tang_karat",
+      "rarity": "umum",
+      "catalogPrice": 1800,
+      "icon": "loak-v2/icons/tang_karat.png",
+      "size": [
+        38,
+        22
+      ],
+      "pivot": [
+        20,
+        13
+      ],
+      "pickupAnchor": [
+        20,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "obeng_minus",
+      "file": "loak-v2/ground/obeng_minus.png",
+      "label": "Obeng minus bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.56,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "obeng_minus",
+      "rarity": "umum",
+      "catalogPrice": 1800,
+      "icon": "loak-v2/icons/obeng_minus.png",
+      "size": [
+        36,
+        19
+      ],
+      "pivot": [
+        16,
+        12
+      ],
+      "pickupAnchor": [
+        16,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kunci_pas",
+      "file": "loak-v2/ground/kunci_pas.png",
+      "label": "Kunci pas bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.53,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "kunci_pas",
+      "rarity": "umum",
+      "catalogPrice": 1800,
+      "icon": "loak-v2/icons/kunci_pas.png",
+      "size": [
+        34,
+        18
+      ],
+      "pivot": [
+        15,
+        9
+      ],
+      "pickupAnchor": [
+        15,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "meteran_macet",
+      "file": "loak-v2/ground/meteran_macet.png",
+      "label": "Meteran gulung macet",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.44,
+        0.36
+      ],
+      "variants": null,
+      "legacyType": "meteran_macet",
+      "rarity": "umum",
+      "catalogPrice": 1800,
+      "icon": "loak-v2/icons/meteran_macet.png",
+      "size": [
+        28,
+        23
+      ],
+      "pivot": [
+        10,
+        14
+      ],
+      "pickupAnchor": [
+        10,
+        14
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kuas_cat",
+      "file": "loak-v2/ground/kuas_cat.png",
+      "label": "Kuas cat kering",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.52,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "kuas_cat",
+      "rarity": "umum",
+      "catalogPrice": 1800,
+      "icon": "loak-v2/icons/kuas_cat.png",
+      "size": [
+        33,
+        19
+      ],
+      "pivot": [
+        14,
+        10
+      ],
+      "pickupAnchor": [
+        14,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "gergaji_tumpul",
+      "file": "loak-v2/ground/gergaji_tumpul.png",
+      "label": "Gergaji tangan tumpul",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.69,
+        0.38
+      ],
+      "variants": null,
+      "legacyType": "gergaji_tumpul",
+      "rarity": "umum",
+      "catalogPrice": 1800,
+      "icon": "loak-v2/icons/gergaji_tumpul.png",
+      "size": [
+        44,
+        24
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "pickupAnchor": [
+        22,
+        14
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "gunting_patah",
+      "file": "loak-v2/ground/gunting_patah.png",
+      "label": "Gunting patah",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.55,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "gunting_patah",
+      "rarity": "umum",
+      "catalogPrice": 1800,
+      "icon": "loak-v2/icons/gunting_patah.png",
+      "size": [
+        35,
+        18
+      ],
+      "pivot": [
+        17,
+        9
+      ],
+      "pickupAnchor": [
+        17,
+        9
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "gasing_kayu",
+      "file": "loak-v2/ground/gasing_kayu.png",
+      "label": "Gasing kayu usang",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.34,
+        0.28
+      ],
+      "variants": null,
+      "legacyType": "gasing_kayu",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/gasing_kayu.png",
+      "size": [
+        22,
+        18
+      ],
+      "pivot": [
+        9,
+        11
+      ],
+      "pickupAnchor": [
+        9,
+        11
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "bola_kempis",
+      "file": "loak-v2/ground/bola_kempis.png",
+      "label": "Bola karet kempis",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.39,
+        0.25
+      ],
+      "variants": null,
+      "legacyType": "bola_kempis",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/bola_kempis.png",
+      "size": [
+        25,
+        14
+      ],
+      "pivot": [
+        11,
+        7
+      ],
+      "pickupAnchor": [
+        11,
+        7
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "yoyo_tanpa_tali",
+      "file": "loak-v2/ground/yoyo_tanpa_tali.png",
+      "label": "Yoyo tanpa tali",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.34,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "yoyo_tanpa_tali",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/yoyo_tanpa_tali.png",
+      "size": [
+        22,
+        17
+      ],
+      "pivot": [
+        9,
+        10
+      ],
+      "pickupAnchor": [
+        9,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "robot_mainan",
+      "file": "loak-v2/ground/robot_mainan.png",
+      "label": "Robot mainan satu lengan",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.41,
+        0.45
+      ],
+      "variants": null,
+      "legacyType": "robot_mainan",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/robot_mainan.png",
+      "size": [
+        26,
+        29
+      ],
+      "pivot": [
+        10,
+        22
+      ],
+      "pickupAnchor": [
+        10,
+        22
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "balok_kayu",
+      "file": "loak-v2/ground/balok_kayu.png",
+      "label": "Balok alfabet kayu",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.34,
+        0.31
+      ],
+      "variants": null,
+      "legacyType": "balok_kayu",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/balok_kayu.png",
+      "size": [
+        22,
+        20
+      ],
+      "pivot": [
+        8,
+        13
+      ],
+      "pickupAnchor": [
+        8,
+        13
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "peluit_mainan",
+      "file": "loak-v2/ground/peluit_mainan.png",
+      "label": "Peluit mainan rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.34,
+        0.25
+      ],
+      "variants": null,
+      "legacyType": "peluit_mainan",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/peluit_mainan.png",
+      "size": [
+        22,
+        15
+      ],
+      "pivot": [
+        9,
+        8
+      ],
+      "pickupAnchor": [
+        9,
+        8
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kelereng_kantong",
+      "file": "loak-v2/ground/kelereng_kantong.png",
+      "label": "Kelereng dalam kantong jala",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.39,
+        0.3
+      ],
+      "variants": null,
+      "legacyType": "kelereng_kantong",
+      "rarity": "jarang",
+      "catalogPrice": 6000,
+      "icon": "loak-v2/icons/kelereng_kantong.png",
+      "size": [
+        25,
+        19
+      ],
+      "pivot": [
+        11,
+        12
+      ],
+      "pickupAnchor": [
+        11,
+        12
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "lensa_kamera",
+      "file": "loak-v2/ground/lensa_kamera.png",
+      "label": "Lensa kamera lepas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.36,
+        0.34
+      ],
+      "variants": null,
+      "legacyType": "lensa_kamera",
+      "rarity": "langka",
+      "catalogPrice": 35000,
+      "icon": "loak-v2/icons/lensa_kamera.png",
+      "size": [
+        23,
+        22
+      ],
+      "pivot": [
+        9,
+        15
+      ],
+      "pickupAnchor": [
+        9,
+        15
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "kompas_saku",
+      "file": "loak-v2/ground/kompas_saku.png",
+      "label": "Kompas saku rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.39,
+        0.25
+      ],
+      "variants": null,
+      "legacyType": "kompas_saku",
+      "rarity": "langka",
+      "catalogPrice": 35000,
+      "icon": "loak-v2/icons/kompas_saku.png",
+      "size": [
+        25,
+        15
+      ],
+      "pivot": [
+        11,
+        8
+      ],
+      "pickupAnchor": [
+        11,
+        8
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "teropong_kecil",
+      "file": "loak-v2/ground/teropong_kecil.png",
+      "label": "Teropong kecil rusak",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.55,
+        0.38
+      ],
+      "variants": null,
+      "legacyType": "teropong_kecil",
+      "rarity": "langka",
+      "catalogPrice": 35000,
+      "icon": "loak-v2/icons/teropong_kecil.png",
+      "size": [
+        35,
+        24
+      ],
+      "pivot": [
+        16,
+        15
+      ],
+      "pickupAnchor": [
+        16,
+        15
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "medali_kuningan",
+      "file": "loak-v2/ground/medali_kuningan.png",
+      "label": "Medali kuningan bekas",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.36,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "medali_kuningan",
+      "rarity": "langka",
+      "catalogPrice": 35000,
+      "icon": "loak-v2/icons/medali_kuningan.png",
+      "size": [
+        23,
+        17
+      ],
+      "pivot": [
+        9,
+        8
+      ],
+      "pickupAnchor": [
+        9,
+        8
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "harmonika_tua",
+      "file": "loak-v2/ground/harmonika_tua.png",
+      "label": "Harmonika tua",
+      "category": "object",
+      "source": "loak-v2",
+      "kind": "sprite",
+      "group": "Loak Objects",
+      "published": true,
+      "pack": "loak-objects-v2",
+      "footprint": [
+        0.5,
+        0.27
+      ],
+      "variants": null,
+      "legacyType": "harmonika_tua",
+      "rarity": "langka",
+      "catalogPrice": 35000,
+      "icon": "loak-v2/icons/harmonika_tua.png",
+      "size": [
+        32,
+        17
+      ],
+      "pivot": [
+        14,
+        10
+      ],
+      "pickupAnchor": [
+        14,
+        10
+      ],
+      "protectedReference": false
+    },
+    {
+      "id": "tong_sampah_besi_sw",
+      "file": "legacy/virtual-life-legacy/props/tong_sampah_besi_sw.png",
+      "label": "Tong sampah",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "got_kecil_sw",
+      "file": "legacy/virtual-life-legacy/props/got_kecil_sw.png",
+      "label": "Got kecil (selokan)",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "tong_sampah_besi_se",
+      "file": "legacy/virtual-life-legacy/props/tong_sampah_besi_se.png",
+      "label": "Tong sampah",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "tumpukan_kardus_sw",
+      "file": "legacy/virtual-life-legacy/props/tumpukan_kardus_sw.png",
+      "label": "Tumpukan kardus",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "got_kecil_se",
+      "file": "legacy/virtual-life-legacy/props/got_kecil_se.png",
+      "label": "Got kecil (selokan)",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "kantong_kresek_se",
+      "file": "legacy/virtual-life-legacy/props/kantong_kresek_se.png",
+      "label": "Kantong kresek di sudut",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "karung_rongsok_se",
+      "file": "legacy/virtual-life-legacy/props/karung_rongsok_se.png",
+      "label": "Karung rongsokan",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "s1",
+      "file": "legacy/virtual-life-legacy/spots/s1_tong_sampah_besi_sw.png",
+      "label": "Search spot s1 \u00b7 trotoar",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "s2",
+      "file": "legacy/virtual-life-legacy/spots/s2_got_kecil_sw.png",
+      "label": "Search spot s2 \u00b7 jalan",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "s3",
+      "file": "legacy/virtual-life-legacy/spots/s3_tong_sampah_besi_se.png",
+      "label": "Search spot s3 \u00b7 belakang_indomaret",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "s4",
+      "file": "legacy/virtual-life-legacy/spots/s4_tumpukan_kardus_sw.png",
+      "label": "Search spot s4 \u00b7 sekitar_warung",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "s5",
+      "file": "legacy/virtual-life-legacy/spots/s5_got_kecil_se.png",
+      "label": "Search spot s5 \u00b7 gang",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "s6",
+      "file": "legacy/virtual-life-legacy/spots/s6_kantong_kresek_se.png",
+      "label": "Search spot s6 \u00b7 gang",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    },
+    {
+      "id": "s7",
+      "file": "legacy/virtual-life-legacy/spots/s7_karung_rongsok_se.png",
+      "label": "Search spot s7 \u00b7 gang",
+      "category": "object",
+      "source": "legacy-local",
+      "kind": "sprite",
+      "group": "Virtual Life Legacy",
+      "published": true,
+      "pack": "virtual-life-legacy-props",
+      "footprint": null,
+      "variants": null,
+      "protectedReference": false
+    }
+  ]
+}

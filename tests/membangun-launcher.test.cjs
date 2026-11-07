@@ -77,7 +77,7 @@ test('JIWA routes bypass the encrypted game service worker',()=>{
   Uint8Array,console,Promise,setTimeout,clearTimeout
  },{filename:'sw.js'});
  assert.equal(typeof handlers.fetch,'function');
- for(const asset of ['jiwa/','jiwa/index.html','jiwa/jiwa.js','membangun/','world-builder/','emotion-studio/','emotion-studio/index.html']){
+ for(const asset of ['jiwa/','jiwa/index.html','jiwa/jiwa.js','membangun/','world-builder/','emotion-studio/','emotion-studio/index.html','shared/','shared/hub-registry.js']){
   let intercepted=false;
   handlers.fetch({
    request:{method:'GET',url:scope+asset,mode:'navigate'},

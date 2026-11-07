@@ -1,0 +1,39 @@
+/* Adapter: keep old HUD rules, scope them to Play Test stage/overlay. */
+.pt-overlay{position:absolute;inset:0;z-index:50;pointer-events:none}
+.pt-overlay #vs-hud,.pt-stage #vs-hud{position:absolute;inset:0;z-index:50;pointer-events:none}
+.pt-overlay #vs-layer,.pt-stage #vs-layer{position:absolute;inset:0;z-index:60;pointer-events:none}
+.pt-overlay #vs-layer.on,.pt-stage #vs-layer.on{pointer-events:none}
+.pt-overlay #vs-layer.on > *,.pt-stage #vs-layer.on > *{pointer-events:auto}
+.pt-overlay #vs-tip,.pt-stage #vs-tip{position:absolute}
+.pt-stage{position:relative;min-height:360px;background:#d7e4ea;border:1px solid #9aadb8;overflow:hidden}
+#playtestMap{display:block;width:100%;height:320px;background:#dce8ee;image-rendering:pixelated;touch-action:none}
+.pt-title{position:absolute;top:8px;left:10px;right:86px;z-index:61;font:700 11px Tahoma,Verdana,sans-serif;color:#16344c;text-shadow:0 1px #fff8;pointer-events:none}
+.pt-readout{position:absolute;left:10px;top:36px;z-index:61;font:10px Tahoma,Verdana,sans-serif;color:#35556b;background:#fff9;padding:3px 6px;pointer-events:none;max-width:58%}
+.pt-overlay .pt-readout,.pt-overlay #ptMoveReadout{left:10px;top:36px;bottom:auto}
+#ptRunBtn,.vs-run{position:absolute;left:148px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:62;min-width:56px;min-height:56px;border-radius:50%;border:3px solid #1D4F1D;background:radial-gradient(circle at 35% 30%,#7ad07a,#2f8a2f 62%,#1d5a1d);color:#fff;font:700 11px Tahoma,Verdana,sans-serif;box-shadow:0 3px 0 rgba(0,0,0,.4);pointer-events:auto;touch-action:none}
+#ptRunBtn.on,.vs-run.on{background:radial-gradient(circle at 35% 30%,#ffe27a,#d08a1a 62%,#8a5b12);border-color:#8a5b12;transform:scale(.96)}
+.pt-overlay:not(.pt-with-pad) #ptRunBtn{left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+#ptWindow.vsw9 .pt-slots,.vs-slots.pt-slots{display:grid;grid-template-columns:repeat(4,minmax(44px,1fr));gap:6px;justify-content:center}
+#ptWindow.vsw9 .pt-slot,.vs-slot.pt-slot{min-height:44px;background:#fff;border:1px solid #7F9DB9;border-radius:3px;box-shadow:inset 1px 1px 0 #D6D0C5;padding:6px;font-size:10px}
+#ptWindow[data-kind=phone]{width:min(340px,calc(100vw - 24px))}
+#ptWindow[data-kind=phone] .vs-phone{background:#10141B;border-radius:18px;padding:10px 8px 14px;border:2px solid #3A4458}
+#ptWindow[data-kind=phone] .vs-pscr{background:linear-gradient(#9bb86a,#6e8a3e);border-radius:10px;min-height:min(320px,calc(100dvh - 180px));padding:8px;color:#1a2a10;overflow:auto}
+#ptWindow[data-kind=phone] .vs-pstat{display:flex;justify-content:space-between;font:700 11px Tahoma,sans-serif;margin-bottom:8px;color:#d7e0c2}
+#ptWindow[data-kind=phone] .pt-apps,#ptWindow[data-kind=phone] .vs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#ptWindow[data-kind=phone] .pt-apps button,#ptWindow[data-kind=phone] .vs-app{min-height:52px;background:#2a3b22;color:#d7f08a;border:1px solid #6a8a3a;border-radius:10px;font:700 11px Tahoma,sans-serif}
+html.vl-play-hud-active #toast{bottom:auto;top:72px;z-index:70;max-width:62%}
+html.vl-play-hud-active .floating-inspector{display:none!important}
+@media (max-width:760px){
+  .pt-title{font-size:10px}
+  #ptRunBtn,.vs-run{left:calc(148px + env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+  .pt-overlay:not(.pt-with-pad) #ptRunBtn{left:calc(12px + env(safe-area-inset-left,0px))}
+  #vs-hud.narrow{--vs-left:12px;--vs-top:36px}
+}
+
+/* Real Nokia canvas sits in #vs-layer; hide the XP chrome so only the handset shows.
+   #ptWinClose stays an invisible test/accessibility hook (old HP had no X). */
+#ptWindow.vsw9[data-kind=phone]{background:transparent;border:none;box-shadow:none;padding:0;width:auto;min-width:0;max-width:none}
+#ptWindow[data-kind=phone] .vst9,#ptWindow[data-kind=phone] .vsb9{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+#ptWindow[data-kind=phone] #ptWinClose{position:fixed;top:8px;right:8px;width:36px;height:36px;opacity:0;pointer-events:auto;z-index:80}
+.pt-overlay #vs-layer .vs-nk,.pt-stage #vs-layer .vs-nk{position:absolute;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+.pt-overlay #vs-layer .vs-nkc,.pt-stage #vs-layer .vs-nkc{max-width:min(100%,calc(100vw - 16px));max-height:min(100%,calc(100dvh - 16px))}

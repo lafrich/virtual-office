@@ -196,4 +196,5 @@ g.VLMahlukHidup=Object.freeze({
  get error(){return lastError},get baseUrl(){return BASE.href},
  DIR,FRAME:Object.freeze({w:64,h:112,pivotX:32,pivotY:100})
 });
+ try{g.VLHub&&typeof g.VLHub.installMark==='function'&&g.VLHub.installMark(g.document);}catch{}
 })(window);

@@ -279,6 +279,13 @@ function create(base,catalog,style,schema){
  city.map.nativeAdditions=artworks;
  city.map.proxyAdditions=proxy;
  city.map.presetObjectCount=city.objects.length;
+ if(g.VLSemestaTrafficLights){
+  const seeded=g.VLSemestaTrafficLights.seedObjects(city.map);
+  (seeded.objects||[]).forEach(o=>city.objects.push(o));
+  city.map.trafficLightCount=(seeded.objects||[]).length;
+  city.map.trafficLightBoxes=(seeded.boxes||[]).map(b=>b.id);
+  city.map.presetObjectCount=city.objects.length;
+ }
 
  return city;
 }

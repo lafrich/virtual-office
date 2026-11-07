@@ -1,0 +1,55 @@
+{
+  "schema": "virtual-life-gameplay-v1",
+  "schemaVersion": 1,
+  "project": { "name": "Namanya Juga Hidup: The Game" },
+  "hud": {
+    "style": "gta_minimal",
+    "oneWindowAtATime": true,
+    "windowClose": "x_only",
+    "noExtraTopHUD": true,
+    "noMinimapOnHUD": true
+  },
+  "modules": {
+    "phone": {
+      "enabled": true,
+      "kind": "nokia",
+      "apps": {
+        "map": true,
+        "jobs": false,
+        "courses": true,
+        "bank": true,
+        "messages": false,
+        "notifications": false
+      }
+    },
+    "action": { "enabled": true, "singleContextButton": true, "defaultIdle": "fart" },
+    "bag": { "enabled": true, "separateFromPhone": true, "slots": 8 },
+    "movement": { "enabled": true, "controllerOnly": true, "walkSpeed": 1.4, "runSpeed": 2.2 },
+    "energy": { "enabled": false, "todo": true, "zeroCanMove": true, "lowEnergySlowFactor": 0.35, "crossingCost": 0 },
+    "jobs": { "enabled": true, "dailyWageCap": 6000, "viaProfessionNpcOnly": true },
+    "courses": { "enabled": true, "dailyXpCap": 150 },
+    "traffic": { "enabled": false, "todo": true, "densityCycle": "shared_deterministic", "busyRatio": 0.6, "quietRatio": 0.3 },
+    "loak": { "enabled": false, "todo": true, "sellPercent": 5 },
+    "trafficLights": { "enabled": true, "cycleSeconds": 32 },
+    "hudLayout": {
+      "desktop": {
+        "phone": {"scale": 1, "anchor": "top-right", "x": 16, "y": 48},
+        "bag": {"scale": 1, "anchor": "top-left", "x": 16, "y": 48},
+        "action": {"scale": 1, "anchor": "bottom-right", "x": 12, "y": 10},
+        "run": {"scale": 1, "anchor": "bottom-left", "x": 148, "y": 12},
+        "needs": {"scale": 1, "anchor": "top-left", "x": 12, "y": 10},
+        "toast": {"scale": 1, "anchor": "top-left", "x": 12, "y": 64},
+        "dock": {"scale": 1, "anchor": "bottom-right", "x": 12, "y": 10}
+      },
+      "phone": {
+        "phone": {"scale": 0.72, "anchor": "top-right", "x": 10, "y": 40},
+        "bag": {"scale": 0.82, "anchor": "top-left", "x": 10, "y": 40},
+        "action": {"scale": 0.72, "anchor": "bottom-right", "x": 10, "y": 10},
+        "run": {"scale": 0.8, "anchor": "bottom-left", "x": 148, "y": 12},
+        "needs": {"scale": 0.8, "anchor": "top-left", "x": 10, "y": 8},
+        "toast": {"scale": 0.86, "anchor": "top-left", "x": 10, "y": 52},
+        "dock": {"scale": 1, "anchor": "bottom-right", "x": 10, "y": 8}
+      }
+    }
+  }
+}

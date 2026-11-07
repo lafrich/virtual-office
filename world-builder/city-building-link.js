@@ -73,6 +73,7 @@ function publishSignal(cityId,objectId,assetId){
  const event={draftId:cityId,objectId,assetId,
   nonce:Date.now()+'-'+Math.random().toString(36).slice(2)};
  localStorage.setItem(UPDATE_KEY,JSON.stringify(event));
+ try{g.VLHub&&g.VLHub.publish('cityBuilding',event);}catch{}
  return event;
 }
 function getAsset(id){

@@ -390,6 +390,7 @@ window.openBangunPixelCreator=async function(event){
 <script src="./character-scale-preview.js?v=mahluk2-approved-v1"></script>
 <script src="./preview-scale.js?v=local-zoom-v2"></script>
 <script src="./studio-interior-ui.js?v=object-flip-gizmo-v2"></script>
+<script src="../../shared/hub-registry.js"></script>
 <script src="../city-drafts.js?v=city-building-sync-v1"></script>
 <script src="../city-building-link.js?v=city-building-sync-v1"></script>
 <script src="./city-browser.js?v=city-building-sync-v1"></script>
@@ -1104,6 +1105,10 @@ cityBrowser=window.VLBangunCityBrowser?.mount({
  getSaved:()=>saved,openAsset:a=>openSavedAsset(a,{resume:false}),
  openPrefab:openCityPrefab,saveAsset,status
 })||null;
+if(window.VLHub){
+ window.VLHub.subscribe('world',()=>{cityBrowser?.refresh?.();});
+ window.VLHub.subscribe(['characters','accessories','emotions'],()=>{scaleController?.refreshProfiles?.(false);});
+}
 // Opening Bangun Ruang starts a genuinely NEW EMPTY building by default.
 // Never auto-open an old saved room or select its last adjusted toilet.
 // Existing work is in the Saved Buildings library and can be opened explicitly.

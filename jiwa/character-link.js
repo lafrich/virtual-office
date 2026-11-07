@@ -59,6 +59,7 @@ if($("jiwaActor")){
  $("jiwaSyncActors").onclick=()=>void refresh();
  window.addEventListener("storage",e=>{if(e.key===CUSTOM)void refresh()});
  window.addEventListener("focus",()=>void refresh());
+ if(window.VLHub)window.VLHub.subscribe(["characters","accessories","emotions"],()=>void refresh());
  void refresh();
 }
 g.JiwaActorLink=Object.freeze({

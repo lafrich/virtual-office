@@ -78,6 +78,7 @@ async function save(input){
  const record={id,name,createdAt:existing?.createdAt||now,updatedAt:now,
   document:JSON.parse(JSON.stringify(input.document)),format:'vl-city-draft-1'};
  await operation('put',record);
+ try{g.VLHub&&g.VLHub.publish('world',{id:record.id,name:record.name,action:'save',objectCount:record.document.objects.length});}catch{}
  return metadata(record);
 }
 async function list(){
@@ -92,6 +93,7 @@ async function load(id){
 }
 async function remove(id){
  await operation('delete',String(id));
+ try{g.VLHub&&g.VLHub.publish('world',{id:String(id),action:'remove'});}catch{}
 }
 g.VLCityDrafts=Object.freeze({save,list,load,remove,newId,cleanName,storage:'local browser / IndexedDB'});
 })(window);

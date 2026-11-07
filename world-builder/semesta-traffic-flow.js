@@ -43,11 +43,13 @@ function spawnClear(car,cars){
  }
  return true;
 }
-function pace(car,cars,speed,dt){
+function pace(car,cars,speed,dt,limit){
  if(!car?.route||car.awaitingRespawn||dt<=0)return 0;
  const roadRemaining=Math.max(0,car.route.length-car.distance);
  const headway=spaceAhead(car,cars);
- return Math.max(0,Math.min(speed*dt,roadRemaining,headway));
+ const cap=limit==null||limit===undefined?Infinity:Number(limit);
+ const light=Number.isFinite(cap)?Math.max(0,cap):Infinity;
+ return Math.max(0,Math.min(speed*dt,roadRemaining,headway,light));
 }
 g.VLSemestaTrafficFlow=Object.freeze({
  GAP,lengthOf,laneKey,sameLane,visibleCar,spaceAhead,spawnClear,pace

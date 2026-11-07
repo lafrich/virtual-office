@@ -1,0 +1,92 @@
+/* v12a Y2K / Vista HUD (gated VO_Y2K_HUD=1). Ellen's ui_y2k "Vista revision": Win2000/XP chrome + Aero glass orbs (pre-rendered 1x pixel art,
+   no backdrop blur -> cheap on phones). Joystick / d-pad untouched. Every state hook (ids, classes, data-*) of the v9a shell is kept. */
+
+
+body.y2k{--y2f:Tahoma,"VL Tahoma",Verdana,"DejaVu Sans",sans-serif}
+body.y2k #vs-hud,body.y2k #vs-hold,body.y2k #vs-tip, #toast.vl-vs-tip,body.y2k .vsw9,body.y2k .vsw9 button,body.y2k .vst9{font-family:var(--y2f)}
+body.y2k #vs-hud{font-size:11px;-webkit-font-smoothing:none;font-smooth:never}
+.y2i{display:inline-block;flex:none;width:16px;height:16px;background:center/16px 16px no-repeat;image-rendering:pixelated;vertical-align:middle}
+/* ---- profile card: Win2000 window (caption gradient + bevel body) ---- */
+body.y2k #vs-hud .vs-card{display:block;width:156px;height:auto;padding:0;gap:0;background:#ECE9D8;border:1px solid #404040;border-radius:0;
+  box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #716F64,inset -2px -2px 0 #ACA899,2px 2px 0 rgba(0,0,0,.35);color:#000}
+.y2-cap{display:flex;align-items:center;gap:3px;height:16px;margin:2px 2px 0;padding:0 3px;background:linear-gradient(90deg,#0A246A,#A6CAF0);color:#fff;font:700 11px/16px var(--y2f);white-space:nowrap;overflow:hidden}
+.y2-cap b{font:inherit!important;text-shadow:none!important;overflow:hidden;text-overflow:ellipsis}
+.y2-cb{display:flex;align-items:center;gap:6px;padding:4px 5px 5px}
+.y2-well{flex:none;width:34px;height:34px;background:#fff;box-shadow:inset 1px 1px 0 #716F64,inset -1px -1px 0 #fff,inset 2px 2px 0 #404040;display:flex;align-items:center;justify-content:center}
+body.y2k .vs-card canvas{width:32px!important;height:32px!important;border:0!important;border-radius:0!important;background:#ECE9D8!important}
+.y2-cbr{flex:1;min-width:0}
+.y2-lvrow{display:flex;justify-content:space-between;align-items:baseline;gap:4px;font:11px var(--y2f);color:#000}
+body.y2k .vs-lv{display:inline;font:700 11px var(--y2f);color:#000}
+.y2-xpp{color:#404040;font-size:11px}
+.y2-xp{display:block;height:9px;margin-top:3px;background:#fff;box-shadow:inset 1px 1px 0 #ACA899,inset -1px -1px 0 #fff;padding:2px;box-sizing:border-box}
+.y2-xpf{display:block;height:100%;width:0;background:#2A7BF6;-webkit-mask:repeating-linear-gradient(90deg,#000 0 4px,transparent 4px 5px);mask:repeating-linear-gradient(90deg,#000 0 4px,transparent 4px 5px)}
+/* ---- needs panel (below the card, flush left) ---- */
+body.y2k #vs-hud .vs-needs{top:calc(var(--vs-top) + var(--y2-cardh,62px) + 4px);left:var(--vs-left);transform:none;display:flex;flex-direction:column;gap:0;width:156px;padding:3px 3px 3px 4px;box-sizing:border-box;
+  background:#ECE9D8;border:1px solid #404040;border-radius:0;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #716F64,2px 2px 0 rgba(0,0,0,.35)}
+body.y2k #vs-hud .vs-need{display:flex;align-items:center;gap:4px;height:18px;padding:0 2px}
+body.y2k #vs-hud .vs-need i{width:16px;height:16px;font-size:0;filter:none;background:center/16px 16px no-repeat;image-rendering:pixelated}
+body.y2k #vs-hud .vs-tr{flex:1;width:auto;height:14px;background:#fff;border:0;border-radius:0;box-shadow:inset 1px 1px 0 #ACA899,inset -1px -1px 0 #fff,inset 2px 2px 0 #716F64}
+body.y2k #vs-hud .vs-fl{top:3px;bottom:3px;left:3px;max-width:calc(100% - 5px);-webkit-mask:repeating-linear-gradient(90deg,#000 0 5px,transparent 5px 6px);mask:repeating-linear-gradient(90deg,#000 0 5px,transparent 5px 6px)}
+body.y2k #vs-hud .vs-need.low .vs-fl{animation:none;background:#E5484D!important}
+body.y2k #vs-hud .vs-need.low{animation:y2blink 1.2s steps(1,end) infinite}
+body.y2k #vs-hud .vs-need.low:after{content:"";width:16px;height:16px;flex:none;background:var(--y2-warn) center/16px no-repeat;image-rendering:pixelated}
+@keyframes y2blink{0%{background:#F8D7D8}50%{background:transparent}}
+body.y2k #vs-hud .vs-needs.ph:after{content:"placeholder";font-size:10px;color:#716F64}
+/* ---- minimap: top-right mini window "Map" ---- */
+body.y2k #vs-hud .vs-br{display:none}
+body.y2k #vs-hud .vs-tr-right{top:var(--vs-top);right:calc(12px + var(--sa-r));gap:0}
+.y2-map{background:#ECE9D8;border:1px solid #404040;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #716F64,2px 2px 0 rgba(0,0,0,.35);padding:2px;pointer-events:auto}
+.y2-map .y2-cap{margin:0 0 2px}
+body.y2k #vs-hud .vs-mini,body.y2k #vs-hud.narrow .vs-mini{display:block;width:78px;height:68px;border:0;border-radius:0;box-shadow:inset 1px 1px 0 #716F64;outline:1px solid #ACA899}
+/* ---- bottom-right dock: ONE smoky glass capsule (money | HP | Bag) docked to the Action orb ---- */
+.y2-dock{position:absolute;right:calc(12px + var(--sa-r));bottom:calc(10px + var(--sa-b));height:71px;display:flex;align-items:center;pointer-events:none}
+.y2-bar{position:relative;display:flex;align-items:center;height:28px;margin-right:-36px;padding:0 42px 0 10px;border-radius:14px;box-sizing:border-box;pointer-events:none;
+  background:linear-gradient(rgba(86,110,142,.49) 0 50%,rgba(20,32,52,.59) 50% 100%);border:1px solid #060A12;
+  box-shadow:inset 0 1px 0 rgba(235,245,255,.6),inset 0 -1px 0 rgba(110,160,210,.47),0 1px 0 rgba(0,0,0,.25)}
+.y2-seg{display:flex;align-items:center;gap:4px;height:100%;white-space:nowrap}
+.y2-sep{display:block;width:2px;height:20px;margin:0 7px;background:linear-gradient(90deg,rgba(6,10,18,.8) 0 1px,rgba(235,245,255,.35) 1px 2px)}
+.y2-lb{font:700 11px var(--y2f);color:#fff;text-shadow:1px 1px 0 #05080E;pointer-events:none}
+body.y2k #vs-hud #vs-money{display:flex;align-items:center;gap:4px;padding:0 2px;background:none;border:0;border-radius:0;font:700 11px var(--y2f);color:#fff;text-shadow:1px 1px 0 #05080E;min-height:28px;cursor:pointer}
+body.y2k #vs-hud #vs-money:before{content:"";width:16px;height:16px;flex:none;background:var(--y2-coin) center/16px no-repeat;image-rendering:pixelated}
+body.y2k #vs-hud #vs-money.wait{opacity:1;color:#C8C8C8}
+body.y2k #vs-hud #vs-money.wait:before{background-image:var(--y2-hourglass)}
+body.y2k #vs-hud #vs-money:active{color:#A8DCFF}
+body.y2k #vs-hud .vs-rb{width:41px;height:41px;margin:-7px 0;border:0;border-radius:50%;background:var(--y2o) center/41px 41px no-repeat;box-shadow:none;font-size:0;color:transparent;image-rendering:pixelated}
+body.y2k #vs-hud .vs-rb span{display:none}
+body.y2k #vs-hud .vs-bag,body.y2k #vs-hud .vs-hp{position:relative;left:auto;top:auto}
+body.y2k #vs-hud .vs-rb:active{transform:none;background-image:var(--y2op)}
+body.y2k #vs-hud #vs-hp, #ptPhoneBtn{--y2o:var(--y2-hp-n);--y2op:var(--y2-hp-p)}
+body.y2k #vs-hud #vs-bag, #ptBagBtn{--y2o:var(--y2-bag-n);--y2op:var(--y2-bag-p)}
+body.y2k.y2-hp-open #vs-hud #vs-hp, #ptPhoneBtn{background-image:var(--y2-hp-p)}
+body.y2k.y2-bag-open #vs-hud #vs-bag, #ptBagBtn{background-image:var(--y2-bag-p)}
+body.y2k.vs-win:not(.y2-hp-open) #vs-hud #vs-hp, #ptPhoneBtn{background-image:var(--y2-hp-d)}
+body.y2k.vs-win:not(.y2-bag-open) #vs-hud #vs-bag, #ptBagBtn{background-image:var(--y2-bag-d)}
+body.y2k.vs-win .y2-bar{filter:saturate(.3)}
+body.y2k.vs-win .y2-lb,body.y2k.vs-win #vs-hud #vs-money{color:#C8C8C8}
+#vs-hud.y2-tight .y2-lb{display:none}#vs-hud.y2-tight .y2-sep{margin:0 4px}#vs-hud.y2-tight .y2-bar{padding-left:7px}
+/* ---- Action: green glass orb, "Action" inside, target badge top right, context tooltip above ---- */
+body.y2k #vs-hud .vs-actw{position:relative;right:auto;bottom:auto;width:71px;height:71px;flex:none;pointer-events:none}
+body.y2k #vs-hud .vs-act{width:71px;height:71px;border:0;border-radius:50%;background:var(--y2-act-n) center/71px 71px no-repeat;box-shadow:none;image-rendering:pixelated}
+body.y2k #vs-hud .vs-act i{display:none}
+body.y2k #vs-hud .vs-act.dim{filter:none;opacity:1}
+body.y2k #vs-hud .vs-act.press{transform:none;background-image:var(--y2-act-p)}
+body.y2k.vs-win #vs-hud .vs-act{background-image:var(--y2-act-d)}
+body.y2k.vs-nk-open #vs-act, #ptActionBtn,body.y2k.vs-nk-open #vs-bag, #ptBagBtn{opacity:1!important;filter:none!important}
+body.y2k #vs-hud .vs-badge{right:-5px;top:-5px;width:25px;height:25px;border:0;border-radius:50%;background:var(--y2b,none) center/25px no-repeat;font-size:0;color:transparent;image-rendering:pixelated}
+body.y2k #vs-hud .vs-act.dim .vs-badge,body.y2k.vs-win #vs-hud .vs-badge{display:none}
+body.y2k #vs-hud .vs-ring{inset:-7px;width:85px;height:85px}
+body.y2k #vs-hud .vs-ring circle{stroke:#B8F5B0;stroke-width:3.2;stroke-linecap:butt;filter:drop-shadow(0 0 1px #0B3F1E)}
+body.y2k #vs-hud .vs-actl{top:auto;bottom:calc(100% + 7px);padding:1px 5px;background:#FFFFE1;border:1px solid #000;color:#000;font:700 11px/15px var(--y2f);text-shadow:none;box-shadow:1px 1px 0 rgba(0,0,0,.3)}
+body.y2k #vs-hud .vs-actl:after{content:"";position:absolute;left:50%;top:100%;margin-left:-4px;border:4px solid transparent;border-top-color:#000;border-bottom:0}
+body.y2k #vs-hud .vs-act.dim+.vs-actl,body.y2k.vs-win #vs-hud .vs-actl{visibility:hidden}
+body.y2k.vs-win #vs-hud .vs-card,body.y2k.vs-win #vs-hud .vs-needs,body.y2k.vs-win #vs-hud .y2-map{filter:grayscale(1) contrast(.85)}
+body.y2k.vs-win .y2-cap{background:linear-gradient(90deg,#808080,#C0C0C0)}
+/* ---- hold menu: classic Windows context menu, above the bar near the thumb ---- */
+body.y2k #vs-hold{gap:0;padding:2px;min-width:150px;background:#fff;border:1px solid #404040;border-radius:0;box-shadow:inset 1px 1px 0 #ECE9D8,inset -1px -1px 0 #ACA899,2px 2px 0 rgba(0,0,0,.4);font:11px var(--y2f)}
+body.y2k #vs-hold button{display:flex;align-items:center;gap:6px;min-width:150px;min-height:28px;padding:2px 8px 2px 4px;border:0;border-radius:0;background:transparent;color:#000;font:11px var(--y2f)}
+body.y2k #vs-hold button:hover,body.y2k #vs-hold button:focus-visible{background:#316AC5;color:#fff;outline:0}
+body.y2k #vs-hold button.off,body.y2k #vs-hold button.lock{color:#ACA899;text-shadow:1px 1px 0 #fff;background:transparent}
+body.y2k #vs-hold button[data-h=cancel]{border-top:1px solid #ACA899;box-shadow:inset 0 1px 0 #fff;margin-top:2px}
+body.y2k #vs-hold button small{margin-left:auto}
+body.y2k #vs-tip, #toast.vl-vs-tip{border-radius:0;box-shadow:1px 1px 0 rgba(0,0,0,.35);font:11px/1.35 var(--y2f)}
+body.y2k #vs-hold button.off .y2i,body.y2k #vs-hold button.lock .y2i{filter:grayscale(1);opacity:.55}

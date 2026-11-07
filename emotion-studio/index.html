@@ -1527,6 +1527,7 @@ return Object.freeze({FORMAT,PATH,API,DIR,TEMPLATES,validEntry,validateCatalog,r
 });
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="../shared/hub-registry.js"></script>
 <script src="./drive-sync.js?v=auto-conflict-safe-20261106"></script>
 <script src="./frame-order.js?v=emotion-reorder-20261106"></script>
 <script src="./database-fork.js?v=emosi-fork-v1"></script>
@@ -1698,6 +1699,7 @@ async function persistSaved(entry){
   catch(localError){throw Error("Storage blocked or full. Export PROJECT JSON to keep this emotion. "+localError.message)}
  }
  savedEntries.set(entry.id,clone(entry));
+ try{window.VLHub&&window.VLHub.publish('emotions',{id:entry.id,action:'save'});}catch{}
 }
 async function removeSaved(id){
  try{await localTransaction("readwrite",store=>store.delete(id))}
@@ -1706,6 +1708,7 @@ async function removeSaved(id){
   catch(localError){throw Error("Unable to delete saved emotion: "+localError.message)}
  }
  savedEntries.delete(id);
+ try{window.VLHub&&window.VLHub.publish('emotions',{id,action:'remove'});}catch{}
 }
 function mergeCatalog(){
  const starter=U.getStarterCatalog();

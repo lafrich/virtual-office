@@ -37,3 +37,11 @@ test('hidden buttons are actually hidden on mobile and desktop',()=>{
  const css=fs.readFileSync(path.join(root,'xp.css'),'utf8');
  assert.match(css,/\[hidden\]\{display:none!important\}/);
 });
+
+test('street2 map reference is not fetched until Map Reference opens',()=>{
+ assert.doesNotMatch(html,/img src="\.\.\/assets\/street2\/base\.png"/);
+ assert.match(html,/id="street2Ref"/);
+ assert.match(html,/data-src="\.\.\/assets\/street2\/base\.png"/);
+ assert.match(builder,/street2Ref/);
+ assert.match(builder,/img\.dataset\.src/);
+});
