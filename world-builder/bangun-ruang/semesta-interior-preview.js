@@ -15,7 +15,12 @@ function mount(opts){
   const item=forItem||opts.getSelected(),spec=item?.type==='sprite'?opts.catalog.get(item.asset):null;
   const raw=item?.interior?.format==='virtual-life-interiors-v1'?item.interior:spec?.interior;
   if(!raw||!Array.isArray(raw.floors))return null;
-  const footprint=spec?.footprint||item?.footprint||raw.floors[0]?.sourceFootprint||[3,3];
+  const footprint=raw.floors[0]?.sourceFootprint||
+   (Array.isArray(item?.footprint)?item.footprint:
+    item?.footprint&&Number.isFinite(Number(item.footprint.w))?
+     [item.footprint.w,item.footprint.d]:null)||
+   (Array.isArray(spec?.footprint)?spec.footprint:null)||
+   [item?.w||3,item?.d||3];
   return {item,raw,cfg:{w:Number(footprint[0])||3,d:Number(footprint[1])||3}};
 
  }
