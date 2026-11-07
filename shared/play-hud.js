@@ -174,7 +174,10 @@
    body.append(hidden);
    if(root&&root.VLNokiaPlay&&typeof root.VLNokiaPlay.open==='function'){
     root.VLNokiaPlay.onHostClose(function(){if(openWindow==='phone')toggleWindow(null);});
-    try{root.VLNokiaPlay.open();}catch{}
+    // Rendering the HUD happens after every Jiwa wallet/stat change.
+    // Reopening an already-open handset would reset its screen to standby
+    // and undo the player's menu selection mid-transaction.
+    try{if(!root.VLNokiaPlay.isOpen?.())root.VLNokiaPlay.open();}catch{}
    }
   }else if(openWindow==='bag'){
    $('ptWinTitle').textContent='BAG';
