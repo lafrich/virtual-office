@@ -2487,6 +2487,7 @@ function ensurePlayHud(){
   onActionDown:ev=>window.SemestaLifePlay?.actionDown?.(ev),
   onActionUp:ev=>window.SemestaLifePlay?.actionUp?.(ev),
   onPhone:()=>window.SemestaLifePlay?.openPhone?.()||false,
+  onBag:()=>window.SemestaLifePlay?.openBag?.()||false,
   onRunChange:on=>{walkRunning=!!on;},
   toast:tell,
   getInventory:()=>window.SemestaLifePlay?.active?.()?window.SemestaLifePlay.bag():window.VLLoakPlay?window.VLLoakPlay.bagLabels():[],
