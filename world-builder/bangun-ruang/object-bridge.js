@@ -96,11 +96,11 @@ const outdoor=[
 // Proposed Grok sprites are independent archive-prefabs, never replacements for
 // the existing editable fixture renderers or existing placed building IDs.
 const grokFurniture=(Array.isArray(g.VLGrokAssetReview?.items)?g.VLGrokAssetReview.items:[])
- .filter(item=>item?.category==='furniture'&&item?.state==='review-preview'&&
+ .filter(item=>(item?.category==='furniture'||item?.category==='cityprop')&&item?.state==='review-preview'&&
   ['sw','se','ne','nw'].every(d=>item.views?.[d]?.url&&item.views[d].size&&item.views[d].pivot))
  .map(item=>({
-  id:'grok-'+item.id,name:'Grok · '+item.label,category:'furniture',kind:'grok-native',
-  footprint:item.footprint.slice(),collision:true,interactions:[],grok:item,
+  id:'grok-'+item.id,name:'Grok · '+item.label,category:item.category==='cityprop'?'street':'furniture',kind:'grok-native',
+  footprint:item.footprint.slice(),collision:item.id!=='park-lamp',interactions:[],grok:item,
   description:'Preview dari arsip '+item.batch+'; artwork empat arah asli, ukuran/pivot asli. Placement tersedia sebagai objek statis; action anchors dan gameplay belum divalidasi.'
  }));
 const builtins=Object.freeze([...fixtures,...outdoor,...grokFurniture]);
