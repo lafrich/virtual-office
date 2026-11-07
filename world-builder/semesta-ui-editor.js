@@ -105,9 +105,10 @@ function ensureOverlay(){
  const wrap=$('canvas-wrap');if(!wrap)return;
  overlay=document.createElement('div');
  overlay.id='semestaUIOverlay';
- overlay.innerHTML='<div class="sui-grid-layer"></div>'+
+ overlay.innerHTML='<div class="sui-phone-shield"></div>'+
+  '<div class="sui-grid-layer"></div>'+
   '<div class="sui-guide x"></div><div class="sui-guide y"></div>'+
-  '<div class="sui-hint-bar">EDIT UI · Drag elemen · Tarik sudut untuk resize · SAVE di kanan</div>';
+  '<div class="sui-hint-bar">EDIT UI · Pilih via panel kanan · Drag / resize · SAVE</div>';
  for(const id of HL.ELEMENTS){
   const node=document.createElement('div');node.className='sui-outline';
   node.dataset.suiId=id;node.hidden=true;
@@ -119,28 +120,83 @@ function ensureOverlay(){
  overlay.querySelector('.sui-grid-layer').style.backgroundSize='16px 16px';
  wrap.append(overlay);
 }
+function syncFramePreview(clear=false){
+ const frame=$('semestaDeviceFrame');
+ if(!frame)return false;
+ try{
+  const win=frame.contentWindow,api=win?.SemestaUIEditor;
+  if(!api?.setExternalPreview||!win?.SemestaPlay)return false;
+  api.setExternalPreview(clear?null:draft);
+  win.SemestaPlay.refreshHud?.();
+  return true;
+ }catch(_e){return false;}
+}
+function profileAndFrame(){
+ const env=environment(),next=env.phone?'phone':'desktop';
+ if(profile!==next){
+  profile=next;drag=null;
+  if(active){updateControls();status('MODE '+next.toUpperCase()+' · Edit menggunakan posisi HUD '+next+'.');}
+ }
+ if(env.phone&&env.win?.SemestaUIEditor&&previewFrameReady!==env.win.SemestaUIEditor){
+  previewFrameReady=env.win.SemestaUIEditor;
+  if(active){syncFramePreview();openPopupFor(selected);}
+ }else if(!env.phone)previewFrameReady=false;
+ return env;
+}
 function refreshBoxes(now=0){
  if(!active||!overlay)return;
- // Only geometry is updated; pointer-captured elements must NOT be recreated.
- const h=host(),w=h?.getBoundingClientRect();
- if(!w||!w.width||!w.height)return;
+ const env=profileAndFrame(),h=env.host,w=h?.getBoundingClientRect(),wrap=$('canvas-wrap')?.getBoundingClientRect();
+ // Phone is a distinct same-origin iframe; it takes time to finish loading.
+ // Never terminate the selection loop while waiting for the game HUD.
+ if(!w||!w.width||!w.height||!wrap){
+  for(const node of overlay.querySelectorAll('.sui-outline'))node.hidden=true;
+  const hint=$('suiVisibility');
+  if(hint)hint.textContent=env.phone?'Menyiapkan HUD Phone Preview…':'HUD belum siap di Play Mode.';
+  raf=requestAnimationFrame(refreshBoxes);
+  return;
+ }
+ overlay.dataset.profile=profile;
+ const outer=env.phone?env.frame.getBoundingClientRect():wrap;
+ const x=outer.left-wrap.left,y=outer.top-wrap.top,width=outer.width,height=outer.height;
+ const setArea=(el)=>{
+  if(!el)return;
+  el.style.inset='auto';el.style.left=x+'px';el.style.top=y+'px';
+  el.style.width=width+'px';el.style.height=height+'px';
+ };
+ const cell=overlay.querySelector('.sui-grid-layer'),shield=overlay.querySelector('.sui-phone-shield');
+ setArea(cell);setArea(shield);
+ if(shield)shield.hidden=!env.phone;
+ cell.hidden=!grid.show;
+ cell.style.backgroundSize=grid.size*(env.phone?env.scaleX:1)+'px '+
+  grid.size*(env.phone?env.scaleY:1)+'px';
+ const gx=overlay.querySelector('.sui-guide.x'),gy=overlay.querySelector('.sui-guide.y');
+ if(gx){gx.style.left=x+width/2+'px';gx.style.top=y+'px';gx.style.height=height+'px';gx.style.bottom='auto';}
+ if(gy){gy.style.top=y+height/2+'px';gy.style.left=x+'px';gy.style.width=width+'px';gy.style.right='auto';}
+ const solo=onlySelected[profile];
+ const toggle=$('suiSelectedOnly');if(toggle)toggle.checked=solo;
+ const mode=$('suiDeviceHint');
+ if(mode)mode.textContent=env.phone?
+  'PHONE MODE · Geser elemen di layar HP. Gunakan ◀ ▶ untuk kontrol yang bertumpuk.':
+  'DESKTOP MODE · Geser elemen di layar game.';
  for(const node of overlay.querySelectorAll('.sui-outline')){
   const id=node.dataset.suiId;
+  if(solo&&id!==selected){node.hidden=true;continue;}
   const g=geometry(id);
-  node.hidden=!g; if(!g)continue;
+  node.hidden=!g;if(!g)continue;
   node.style.left=g.x+'px';node.style.top=g.y+'px';
   node.style.width=g.w+'px';node.style.height=g.h+'px';
   node.classList.toggle('selected',selected===id);
+  node.classList.toggle('ghost',!!g.ghost);
   node.querySelector('.sui-resizer').hidden=selected!==id;
  }
- const cell=overlay.querySelector('.sui-grid-layer');
- cell.hidden=!grid.show;
- cell.style.backgroundSize=grid.size+'px '+grid.size+'px';
- if(now-lastStamp>160){lastStamp=now;const g=geometry(selected);
+ if(now-lastStamp>170){
+  lastStamp=now;const g=geometry(selected);
   const field=$('suiVisibility');
-  if(field)field.textContent=g?
-   ('VISIBLE · '+Math.round(g.x)+', '+Math.round(g.y)+' · '+Math.round(g.w)+' × '+Math.round(g.h)+' px'):
-   'Elemen ini belum terlihat di Play Mode. Pilih HP / Tas untuk membuka jendelanya.';}
+  if(field)field.textContent=!g?'HUD masih loading. Coba pilih elemen di daftar.':
+   g.ghost?'PLACEHOLDER · Elemen sedang tersembunyi, posisinya tetap bisa diatur.':
+   ('VISIBLE · '+Math.round(g.logical.x)+', '+Math.round(g.logical.y)+
+    ' · '+Math.round(g.logical.w)+' × '+Math.round(g.logical.h)+' px');
+ }
  raf=requestAnimationFrame(refreshBoxes);
 }
 function updateControls(){
