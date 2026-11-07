@@ -55,7 +55,7 @@ test('JIWA reads saved Semesta city drafts and exposes city-object deep links',(
  const bridge=read('world-builder/jiwa-link.js');
  assert.ok(jiwa.includes('<title>JIWA.EXE'));
  assert.ok(jiwa.includes('src="../world-builder/city-drafts.js"'));
- assert.ok(jiwa.includes('src="./jiwa.js"'));
+ assert.match(jiwa,/src="\.\/jiwa\.js(?:\?[^"]*)?"/);
  assert.ok(runtime.includes('window.VLCityDrafts.list()'));
  assert.ok(runtime.includes('window.VLCityDrafts.load(id)'));
  assert.ok(runtime.includes("const DB='jiwa-mechanics-v1'"));
