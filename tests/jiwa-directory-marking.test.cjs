@@ -66,9 +66,9 @@ test('UI and Semesta runtime implement explicit markings and refresh controls',(
   'worldDirectoryUnmarkAll','worldDirectoryRefresh'])assert.ok(ui.includes(id),id);
  assert.match(activity,/eligibleTargets\(currentObjects,draft\.worldEntities,cityId\)/);
  assert.match(activity,/id="activityTargetKind"/);
- assert.doesNotMatch(entities,/id="worldMatchMode"/);
- assert.doesNotMatch(entities,/id="worldQuery"/);
- assert.match(entities,/PILIH DIRECTORY DAHULU/);
+ assert.doesNotMatch(ui,/id="worldMatchMode"/);
+ assert.doesNotMatch(ui,/id="worldQuery"/);
+ assert.match(ui,/PILIH DIRECTORY DAHULU/);
  assert.match(activity,/id="activityRefreshDirectory"/);
  assert.match(semesta,/matchActivityTarget\(a,objects,config\.worldEntities\|\|\[\],projectId\)/);
  assert.match(semesta,/matchWorldAll\?\.\(rule,candidates,projectId\)/);
