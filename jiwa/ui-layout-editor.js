@@ -19,21 +19,44 @@ const TITLES={
  money:'Saldo',hpButton:'Tombol HP',bagButton:'Tombol Tas',
  action:'Action',run:'Run',phone:'Nokia HP',bag:'Jendela Tas',toast:'Notifikasi'
 };
-const MIN_SIZE=20;
-const LIMITS={min:.5,max:1.5};
+const GRID_CHOICES=[8,16,24,32,48];
+const GRID_PREF_KEY='jiwa-ui-editor-grid-v1';
+const gridPrefs=(()=>{
+ try{
+  const obj=JSON.parse(localStorage.getItem(GRID_PREF_KEY)||'null')||{};
+  return {show:obj.show!==false,snap:obj.snap!==false,size:GRID_CHOICES.includes(obj.size)?obj.size:16};
+ }catch(_e){return {show:true,snap:true,size:16};}
+})();
+const storeGridPrefs=()=>{try{localStorage.setItem(GRID_PREF_KEY,JSON.stringify(gridPrefs));}catch(_e){}};
 let profile='desktop',selected='lifePanel',preview='game',drag=null,dirty=false;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const safeNum=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 const styleRect=(slot,id)=>{
  const d=DEVICES[profile],size=SIZES[id],scale=slot.scale||1;
  const w=size.w*scale,h=size.h*scale;
- let x=slot.x,y=slot.y;
- if(slot.anchor.includes('right'))x=d.w-w-x;
- if(slot.anchor.includes('bottom'))y=d.h-h-y;
+ const [vertical,horizontal]=slot.anchor.split('-');
+ let x=horizontal==='right'?d.w-w-slot.x:
+   horizontal==='center'?(d.w-w)/2+slot.x:slot.x;
+ let y=vertical==='bottom'?d.h-h-slot.y:
+   vertical==='center'?(d.h-h)/2+slot.y:slot.y;
  x=clamp(x,0,Math.max(0,d.w-w));
  y=clamp(y,0,Math.max(0,d.h-h));
  return {x,y,w,h};
 };
+// Convert on-screen placement back into the canonical game anchor offsets.
+// Snap is based on visible screen coordinates, independent of which anchor is selected.
+function slotForRect(old,id,x,y){
+ const d=DEVICES[profile],size=SIZES[id],w=size.w*old.scale,h=size.h*old.scale;
+ const [vertical,horizontal]=old.anchor.split('-');
+ const left=clamp(x,0,Math.max(0,d.w-w)),top=clamp(y,0,Math.max(0,d.h-h));
+ const ox=horizontal==='right'?d.w-w-left:
+   horizontal==='center'?left-(d.w-w)/2:left;
+ const oy=vertical==='bottom'?d.h-h-top:
+   vertical==='center'?top-(d.h-h)/2:top;
+ return {...old,x:clamp(Math.round(ox),-480,480),y:clamp(Math.round(oy),-480,480)};
+}
+const snapCoord=n=>gridPrefs.snap?Math.round(n/gridPrefs.size)*gridPrefs.size:n;
+
 function gameplay(){return B.get();}
 function current(){return HL.normalize(gameplay()?.modules?.hudLayout);}
 function slot(id=selected){return current()[profile][id];}
@@ -71,6 +94,14 @@ function shouldShow(id){
 }
 function draw(){
  const d=dimensions(),l=current()[profile];
+ const grid=$('juiGrid');
+ if(grid){
+  grid.hidden=!gridPrefs.show;
+  grid.style.backgroundSize=(gridPrefs.size/d.w*100)+'% '+(gridPrefs.size/d.h*100)+'%';
+ }
+ $('juiShowGrid').checked=gridPrefs.show;
+ $('juiSnapGrid').checked=gridPrefs.snap;
+ $('juiGridSize').value=String(gridPrefs.size);
  $('juiDesktop').classList.toggle('primary',profile==='desktop');
  $('juiPhone').classList.toggle('primary',profile==='phone');
  ['game','phone','bag'].forEach(v=>{const b=$('juiView_'+v);if(b)b.classList.toggle('primary',preview===v);});
@@ -117,7 +148,7 @@ function begin(ev){
  const id=el.dataset.id,wasSelected=selected===id;selected=id;
  const s=slot(id),d=DEVICES[profile],r=stage.getBoundingClientRect();
  drag={id,mode:ev.target.closest('[data-resize]')?'resize':'move',startX:ev.clientX,startY:ev.clientY,
-  original:{...s},device:d,viewW:r.width,viewH:r.height};
+  original:{...s},originalBox:styleRect(s,id),device:d,viewW:r.width,viewH:r.height};
  ev.preventDefault();
  try{stage.setPointerCapture(ev.pointerId);}catch{}
  if(!wasSelected)draw();else paintInspector();
@@ -127,14 +158,14 @@ function move(ev){
  const d=drag.device;
  const dx=(ev.clientX-drag.startX)*d.w/Math.max(1,drag.viewW);
  const dy=(ev.clientY-drag.startY)*d.h/Math.max(1,drag.viewH);
- const next={...drag.original};
+ let next={...drag.original};
  if(drag.mode==='resize'){
   const sz=SIZES[drag.id],ratio=Math.max(dx/sz.w,dy/sz.h);
   next.scale=clamp(Math.round((drag.original.scale+ratio)*100)/100,.5,1.5);
  }else{
-  const signX=next.anchor.includes('right')?-1:1,signY=next.anchor.includes('bottom')?-1:1;
-  next.x=clamp(Math.round(drag.original.x+dx*signX),-480,480);
-  next.y=clamp(Math.round(drag.original.y+dy*signY),-480,480);
+  const targetX=snapCoord(drag.originalBox.x+dx);
+  const targetY=snapCoord(drag.originalBox.y+dy);
+  next=slotForRect(next,drag.id,targetX,targetY);
  }
  const rect=styleRect(next,drag.id),node=nodes.querySelector('.jui-node[data-id="'+drag.id+'"]');
  if(node){
@@ -157,6 +188,27 @@ stage.addEventListener('pointerdown',begin);
 stage.addEventListener('pointermove',move);
 stage.addEventListener('pointerup',end);
 stage.addEventListener('pointercancel',end);
+$('juiShowGrid').onchange=ev=>{gridPrefs.show=ev.target.checked;storeGridPrefs();draw();};
+$('juiSnapGrid').onchange=ev=>{gridPrefs.snap=ev.target.checked;storeGridPrefs();draw();};
+$('juiGridSize').onchange=ev=>{
+ const size=Number(ev.target.value);
+ if(GRID_CHOICES.includes(size))gridPrefs.size=size;
+ storeGridPrefs();draw();
+};
+// Center alignment changes anchor semantics, not just pixel offsets. An
+// aligned widget therefore stays centered in Semesta at any screen size.
+function alignSelection(axis){
+ const l=current(),s=l[profile][selected],parts=s.anchor.split('-');
+ let [vertical,horizontal]=parts;
+ if(axis==='x'||axis==='both'){horizontal='center';s.x=0;}
+ if(axis==='y'||axis==='both'){vertical='center';s.y=0;}
+ s.anchor=vertical+'-'+horizontal;
+ setLayout(l);draw();
+ notice('Aligned '+TITLES[selected]+' · '+(axis==='both'?'center X + Y':axis==='x'?'horizontal center':'vertical center')+' · profil '+profile);
+}
+$('juiAlignHorizontal').onclick=()=>alignSelection('x');
+$('juiAlignVertical').onclick=()=>alignSelection('y');
+$('juiAlignBoth').onclick=()=>alignSelection('both');
 for(const kind of ['desktop','phone'])$('jui'+(kind==='desktop'?'Desktop':'Phone')).onclick=()=>{
  profile=kind;draw();notice('Profil '+(kind==='desktop'?'Desktop':'Phone')+' · editing hanya profil aktif');};
 for(const kind of ['game','phone','bag'])$('juiView_'+kind).onclick=()=>{preview=kind;draw();};
