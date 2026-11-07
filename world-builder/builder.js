@@ -2855,7 +2855,9 @@ function beginSpawnRespawn(actor,trigger){
   ownedRoom:lifePlayer?lifePlayer.ownedRoom:mod.ownedRoom,
   profile:actor.profile
  },mod,spawnWorldAdapter(),Math.random);
- const decision=rawDecision?.ok?rawDecision:(!lifePlayer?.homeAccess?window.SemestaLifePlay?.fallbackSpawn?.()||rawDecision:rawDecision);
+ const decision=rawDecision?.ok?rawDecision:(lifePlayer?.homeAccess&&lifePlayer.ownedRoom?
+  {ok:true,kind:'home',playExitTent:false,point:lifePlayer.ownedRoom,reason:'kost-play-placeholder'}:
+  window.SemestaLifePlay?.fallbackSpawn?.()||rawDecision);
  window.__semestaLastSpawn=decision;
  window.SemestaLifePlay?.onSpawn?.(decision);
  if(!decision||!decision.ok||!decision.point){
@@ -2901,7 +2903,9 @@ function spawnRespawnApi(){
    const mod=window.SemestaLifePlay?.spawnModule?.(spawnModule(),spawnWorldAdapter())||spawnModule();
    const rawDecision=SR.resolve({homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
     ownedRoom:lifePlayer?lifePlayer.ownedRoom:mod.ownedRoom,profile:actor.profile},mod,spawnWorldAdapter(),opts.rand);
-   const decision=rawDecision?.ok?rawDecision:(!lifePlayer?.homeAccess?window.SemestaLifePlay?.fallbackSpawn?.()||rawDecision:rawDecision);
+   const decision=rawDecision?.ok?rawDecision:(lifePlayer?.homeAccess&&lifePlayer.ownedRoom?
+    {ok:true,kind:'home',playExitTent:false,point:lifePlayer.ownedRoom,reason:'kost-play-placeholder'}:
+    window.SemestaLifePlay?.fallbackSpawn?.()||rawDecision);
    window.__semestaLastSpawn=decision;
    window.SemestaLifePlay?.onSpawn?.(decision);
    const holder=rigs.get(actor.id);
@@ -4140,7 +4144,7 @@ window.addEventListener('keydown',e=>{
  if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||
   e.target instanceof HTMLTextAreaElement||e.target?.isContentEditable)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();restoreStack(undoStack,redoStack);}
-  else if(e.key.toLowerCase()==='e'&&mode==='walk'){e.preventDefault();enterNearbyBuilding();}
+  else if(e.key.toLowerCase()==='e'&&mode==='walk'){e.preventDefault();if(!window.SemestaLifePlay?.handleAction?.())enterNearbyBuilding();}
  else if(e.key.toLowerCase()==='h'){toggleGrid();}
  else if(e.key==='Delete'&&item())remove();
  else if(e.key.toLowerCase()==='g')setMode('move');
