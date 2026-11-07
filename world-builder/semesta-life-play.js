@@ -18,6 +18,7 @@ const SITES=[
  {id:'siomay_batagor',label:'Bang Siomay / Batagor',icon:'🥟',pattern:/siomay|batagor/i,action:'sell_fish',offset:[7,0]},
  {id:'pasar_ikan',label:'Pasar Ikan',icon:'🐟',pattern:/pasar.?ikan|fish.?market/i,action:'sell_fish',offset:[-7,3]},
  {id:'job',label:'Manusia Silver / Pak Ogah',icon:'💼',pattern:/manusia.?silver|pak.?ogah|kang.?parkir|job.npc|street.performer/i,action:'work',offset:[-5,4]},
+ {id:'premium_job',label:'Kerja Premium / Kantor',icon:'🏢',pattern:/kantor.?premium|premium.?job|office.?job/i,action:'work',offset:[-2,5]},
  {id:'loak',label:'Toko Loak',icon:'♻',pattern:/toko.?loak|babeh|pawnshop/i,action:'sell_loak',offset:[8,5]},
  {id:'scavenge',label:'Titik Mulung',icon:'📦',pattern:/botol|kardus|sampah|trash|barang.?bekas|scavenge/i,action:'scavenge',offset:[-8,-3]},
  {id:'tree',label:'Pohon Buah',icon:'🌳',pattern:/pohon|tree|mangga|jambu/i,action:'catch_fruit',offset:[-4,-8]},
@@ -28,9 +29,10 @@ const SITES=[
  {id:'kost',label:'Kost / Kamar',icon:'🏠',pattern:/kost|kos_|boarding.?room|cove|kamar.?sewa/i,action:'buy_room',offset:[9,-7]},
  {id:'tent',label:'Tenda Hobo',icon:'⛺',pattern:/tenda|hobo.?tent|hobo.?camp/i,action:'sleep',offset:[-10,-10]},
  {id:'prayer',label:'Tempat Ibadah',icon:'🕌',pattern:/masjid|mushola|musala|gereja|vihara|pura|klenteng/i,action:'worship',offset:[3,-9]},
+ {id:'hansip',label:'Hansip',icon:'🚨',pattern:/hansip|satpam|security.guard/i,action:'arrest',offset:[-1,-5]},
  {id:'course',label:'Kursus HP',icon:'📱',pattern:/kursus|course|school/i,action:'course',offset:[-3,9]}
 ];
-const PLACEHOLDER_COLORS={fish:0x5596be,siomay_batagor:0xe0a94a,pasar_ikan:0x4baf9d,job:0xd18e3a,
+const PLACEHOLDER_COLORS={premium_job:0x9579ba,hansip:0xc66766,fish:0x5596be,siomay_batagor:0xe0a94a,pasar_ikan:0x4baf9d,job:0xd18e3a,
  loak:0x839758,scavenge:0x9d9c84,tree:0x519a64,warung:0xd5aa53,coffee:0x856649,
  public_wc:0x77aec0,public_bath:0x77aec0,kost:0xb18cd3,tent:0x9a9d77,prayer:0x81c69f,course:0x709ac4};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
@@ -145,6 +147,18 @@ function spawnModule(mod,adapter){
  if(!edge.length)edge=valid;
  return edge.length?{...mod,pool:edge}:mod;
 }
+function fallbackSpawn(){
+ const b=worldBounds(),center={x:(b.minX+b.maxX)/2,z:(b.minZ+b.maxZ)/2};
+ const candidates=[
+  {id:'hobo_tenda_barats',x:b.minX+3,z:center.z},
+  {id:'hobo_tenda_timur',x:b.maxX-3,z:center.z},
+  {id:'hobo_tenda_utara',x:center.x,z:b.minZ+3},
+  {id:'hobo_tenda_selatan',x:center.x,z:b.maxZ-3}
+ ];
+ const candidate=candidates[Math.floor(Math.random()*candidates.length)];
+ const point=findLanding(candidate.x,candidate.z);
+ return {ok:true,kind:'hobo',playExitTent:false,point:{...point,id:candidate.id,facing:'se',placeholder:true},reason:'placeholder-hobo'};
+}
 function onSpawn(decision){
  if(!active||!decision?.ok||!decision.point||!state)return;
  const p=decision.point;
@@ -250,7 +264,7 @@ function nodeButtons(n){
  const button=(action,label,args={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(args))+'">'+label+'</button>';
  if(id==='fish')entries=[button('fish','🎣 Mancing',{spotId:n.sourceId||'water_placeholder'})];
  if(['siomay_batagor','pasar_ikan'].includes(id))entries=['<select id="slpItem">'+itemOptions('fish')+'</select>',button('sell_fish','💰 Jual Ikan',{buyerId:id})];
- if(id==='job')entries=['<button id="slpWork" type="button">🛠 TAHAN UNTUK KERJA</button>','<div class="slp-work-progress"><span id="slpWorkFill"></span></div>'];
+ if(id==='job'||id==='premium_job')entries=['<button id="slpWork" type="button">🛠 TAHAN UNTUK KERJA'+(id==='premium_job'?' PREMIUM':'')+'</button>','<div class="slp-work-progress"><span id="slpWorkFill"></span></div>'];
  if(id==='loak')entries=['<select id="slpItem">'+itemOptions('loak')+'</select>',button('sell_loak','💰 Jual Barang')];
  if(id==='scavenge')entries=[button('scavenge','📦 Mulung')];
  if(id==='tree')entries=[button('catch_fruit','🌳 Ambil Buah')];
@@ -268,6 +282,7 @@ function nodeButtons(n){
  if(id==='tent')entries=[button('sleep','💤 Tidur Tenda')];
  if(id==='prayer')entries=[button('worship','🤲 Ibadah',{placeReligion:config.identity?.religion||'islam'})];
  if(id==='course')entries=[button('course','📱 Kursus Online')];
+ if(id==='hansip')entries=['<small>Jika moral terlalu rendah, hansip dapat menangkapmu saat mendekat.</small>'];
  return entries.join('');
 }
 function paintPanel(){
@@ -284,7 +299,7 @@ function paintPanel(){
   '<div class="slp-actions" id="slpActions">'+(state.detained?
    '<button data-life-action="fine">Bayar Denda</button><button data-life-action="community_service">Bersihkan Gorong-gorong</button>':
    nodeButtons(n))+'</div>'+
-  '<div class="slp-actions"><button data-life-action="respawn">↻ Respawn</button><button data-life-action="rest">💤 Istirahat +15</button><button data-life-action="advance_time" data-args="{&quot;minutes&quot;:30}">⏩ +30 Menit</button></div>'+
+  '<div class="slp-actions"><button data-life-action="course">📱 KURSUS HP</button><button data-life-action="respawn">↻ Respawn</button><button data-life-action="rest">💤 Istirahat +15</button><button data-life-action="advance_time" data-args="{&quot;minutes&quot;:30}">⏩ +30 Menit</button></div>'+
   '<details><summary>🧭 TEST: PINDAH LOKASI / INVENTORI</summary><div class="slp-goto"><select id="slpDestination">'+options+'</select><button id="slpTravel" type="button">PINDAH</button></div>'+
   '<div><b>Tas:</b> '+esc((state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id).join(', ')||'kosong')+'</div>'+
   '<div><b>Kost:</b> '+esc(state.housing?.room?'Aktif':'Belum')+' · <b>Token:</b> '+state.powerTokens+
@@ -324,7 +339,7 @@ function workDown(ev){
   if(!progress||!active)return;
   const pct=clamp((performance.now()-progress.started)/progress.needed,0,1);
   const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width=(pct*100)+'%';
-  if(pct>=1){progress=null;workAnimation=0;runAction('work');return;}
+  if(pct>=1){progress=null;workAnimation=0;runAction('work',{premium:nearest()?.id==='premium_job'});return;}
   workAnimation=requestAnimationFrame(animate);
  };
  workAnimation=requestAnimationFrame(animate);
@@ -341,14 +356,14 @@ function runAction(action,args={}){
   bridge?.respawn?.();return {ok:true,reason:'respawn'};
  }
  const position=getPos(),node=nearest();
- if(!['rest','advance_time','fine','community_service','luck_find'].includes(action)&&!node)
+ if(!['rest','advance_time','fine','community_service','luck_find','course'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
-  fish:'fish',sell_fish:args.buyerId,work:'job',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
+  fish:'fish',sell_fish:args.buyerId,work:args.premium?'premium_job':'job',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
   eat:'warung',coffee:'coffee',public_toilet:'public_wc',public_shower:'public_bath',
   buy_room:'kost',home_toilet:'kost',home_shower:'kost',sleep:ownsRoom()?'kost':'tent',
   buy_token:'kost',buy_fridge:'kost',buy_furniture:'kost',cook:'kost',store_fridge:'kost',
-  worship:'prayer',course:'course'
+  worship:'prayer'
  }[action];
  if(required&&node?.id!==required){
   message('Dekati '+(sites.find(s=>s.id===required)?.label||required)+' dahulu.');return {ok:false,reason:'Lokasi aksi tidak sesuai'};
@@ -369,7 +384,13 @@ function runAction(action,args={}){
  }
  const result=RULES.run(config,state,action,args);
  if(result.ok){
-  state=result.state;persist();
+  state=result.state;
+  if(['fish','work','scavenge','catch_fruit'].includes(action)&&!state.detained){
+   const luck=RULES.run(config,state,'luck_find',{roll:Math.random()});
+   if(luck.ok)state=luck.state;
+   if(luck.ok&&luck.changes.some(x=>x.includes('+Rp')))result.changes.push(...luck.changes);
+  }
+  persist();
   if(action==='buy_room')message('🏠 Kost dibeli! Respawn berikutnya pindah ke kamar. WC dan mandi pribadi aktif.');
   else message('✅ '+result.changes.join(' · '));
  }else message('⛔ '+result.reason);
@@ -380,7 +401,7 @@ function handleAction(){
  if(!active)return false;
  const node=nearest();
  if(!node)return false;
- if(node.id==='job'){
+ if(node.id==='job'||node.id==='premium_job'){
   message('Tahan tombol TAHAN UNTUK KERJA di panel untuk menyelesaikan pekerjaan.');
   paintPanel();return true;
  }
@@ -416,7 +437,8 @@ function checkHansip(){
  if(!active||!state||state.detained||state.moral>=config.settings.arrestMoralThreshold)return;
  const p=getPos();
  const witness=(getWorld().objects||[]).find(o=>/hansip|satpam|security.guard/i.test(name(o))&&
-  Math.hypot((Number(o.x)||0)-p.x,(Number(o.z)||0)-p.z)<4);
+  Math.hypot((Number(o.x)||0)-p.x,(Number(o.z)||0)-p.z)<4)||
+  sites.find(n=>n.id==='hansip'&&Math.hypot(n.x-p.x,n.z-p.z)<4);
  if(!witness)return;
  const result=RULES.run(config,state,'arrest',{witnessed:true});
  if(result.ok){state=result.state;persist();message('🚨 Hansip menangkapmu! Bayar denda atau kerja sosial.');}
@@ -450,7 +472,7 @@ function stop(){
 }
 function attach(bridgeApi){bridge=bridgeApi||null;return api;}
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
- spawnModule,onSpawn,handleAction,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
+ spawnModule,fallbackSpawn,onSpawn,handleAction,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;state=RULES.stateFrom({wallet:6000},config);persist();paintPanel();}});
 return api;
 });
