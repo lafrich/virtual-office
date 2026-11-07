@@ -14,6 +14,8 @@ on:
       - "tests/semesta-custom-wardrobe-depth.test.cjs"
       - "tests/jiwa-base-human-gameplay.test.cjs"
       - "jiwa/**"
+      - "tests/semesta-jiwa-play-v1.test.cjs"
+      - "tests/jiwa-life-economy.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
       - "tests/mahluk-universal-hygiene.test.cjs"
       - "tests/mahluk-template-runtime.test.cjs"
@@ -48,6 +50,8 @@ on:
       - "tests/semesta-custom-wardrobe-depth.test.cjs"
       - "tests/jiwa-base-human-gameplay.test.cjs"
       - "jiwa/**"
+      - "tests/semesta-jiwa-play-v1.test.cjs"
+      - "tests/jiwa-life-economy.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
       - "tests/mahluk-universal-hygiene.test.cjs"
       - "tests/mahluk-template-runtime.test.cjs"
@@ -157,3 +161,9 @@ jobs:
           node tests/semesta-simple-effects.test.cjs
           node tests/semesta-daynight.test.cjs
           node tests/semesta-sidewalk-and-lighting.test.cjs
+
+      - name: Jiwa Survival V1 Play integration and business rules
+        run: |
+          node --check world-builder/semesta-life-play.js
+          node --check jiwa/life-economy.js
+          node --test tests/semesta-jiwa-play-v1.test.cjs tests/jiwa-life-economy.test.cjs
