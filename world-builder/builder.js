@@ -3031,9 +3031,12 @@ if(window.SemestaLifePlay){
   tell,
   openInteriorById:id=>{
    const obj=documentMap.objects.find(o=>String(o.id)===String(id));
-   if(!obj||obj.enterable!==true||!obj.interior?.floors?.length||
-      !interiorPreview?.openFor)return false;
-   interiorPreview.openFor(obj);return true;
+   const asset=obj?.type==='sprite'?assetByName.get(obj.asset):null;
+   if(!obj||!interiorPreview?.openFor||
+      !(obj.interior?.floors?.length||asset?.interior?.floors?.length))return false;
+   // A global Jiwa rule can grant entry without rewriting the placed
+   // Semesta building. Preview uses the same existing interior geometry.
+   interiorPreview.openFor({...obj,enterable:true});return true;
   },
   canStand:(x,z)=>{
    const world=spawnWorldAdapter();
