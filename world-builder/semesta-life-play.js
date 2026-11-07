@@ -297,8 +297,10 @@ function nodeButtons(n){
  if(id==='public_bath')entries=[button('public_shower','🚿 Mandi Umum',{facilityId:n.sourceId||id})];
  if(id==='kost')entries=ownsRoom()?
   [button('home_toilet','🚽 WC Kost'),button('home_shower','🚿 Mandi Kost'),button('sleep','💤 Tidur Kost'),
-   '<select id="slpItem">'+itemOptions('fish')+'</select>',
-   button('cook','🍳 Masak Ikan'),button('store_fridge','🧊 Simpan Kulkas'),
+   '<select id="slpItem">'+itemOptions('any')+'</select>',
+   button('cook','🍳 Masak Ikan'),button('store_fridge','🧊 Simpan Kulkas'),button('store_home','📦 Simpan di Kost'),
+   '<select id="slpHomeItem">'+(state.homeStorage||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
+   button('take_home','🎒 Ambil dari Kost'),
    '<select id="slpFridgeItem">'+(state.fridge||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
    button('take_fridge','📦 Ambil dari Kulkas')]:
    [button('buy_room','🏠 Beli Akses Kost (1×)')];
@@ -367,7 +369,7 @@ function paintPanel(){
   '<div class="slp-actions">'+optsButton('respawn','↻ Test Respawn')+
   optsButton('advance_time','⏩ +30 menit',{minutes:30})+'</div>'+
   '<div><b>Inventory:</b> '+esc((state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id).join(', ')||'kosong')+'</div>'+
-  '<div><b>Furnitur:</b> '+esc((state.furniture||[]).join(', ')||'belum')+' · <b>Token:</b> '+state.powerTokens+'</div>'+
+  '<div><b>Furnitur:</b> '+esc((state.furniture||[]).join(', ')||'belum')+' · <b>Token:</b> '+state.powerTokens+' · <b>Barang kost:</b> '+(state.homeStorage||[]).length+'</div>'+
   '<div><b>Sumber mekanik:</b> '+esc(configSource)+'</div>'+
   '<button id="slpReset" type="button">RESET PROGRESS TEST</button></details>'+
   '<div id="lifePlayMessage" role="status">'+esc(statusText||'Dekati objek dan gunakan Action. Tahan Action untuk bekerja.')+'</div>';
@@ -389,8 +391,9 @@ function click(ev){
  if(el.dataset.lifeAction){
   let args={};try{args=JSON.parse(el.dataset.args||'{}');}catch{}
   if(el.dataset.lifeAction==='take_fridge')args.itemId=outer.querySelector('#slpFridgeItem')?.value||'';
+  if(el.dataset.lifeAction==='take_home')args.itemId=outer.querySelector('#slpHomeItem')?.value||'';
   if(['eat_item','discard_item'].includes(el.dataset.lifeAction))args.itemId=outer.querySelector('#slpBagItem')?.value||'';
-  if(['sell_fish','sell_loak','cook','store_fridge'].includes(el.dataset.lifeAction)){
+  if(['sell_fish','sell_loak','cook','store_fridge','store_home'].includes(el.dataset.lifeAction)){
    args.itemId=outer.querySelector('#slpItem')?.value||'';
   }
   if(el.dataset.lifeAction==='buy_furniture')args.itemId=outer.querySelector('#slpFurniture')?.value||'';
@@ -458,7 +461,7 @@ function runAction(action,args={}){
   fish:'fish',sell_fish:args.buyerId,work:args.premium?'premium_job':'job',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
   eat:'warung',coffee:'coffee',public_toilet:'public_wc',public_shower:'public_bath',
   buy_room:'kost',home_toilet:'kost',home_shower:'kost',sleep:ownsRoom()?'kost':'tent',
-  cook:'kost',store_fridge:'kost',take_fridge:'kost',rest:'bench',help:'help',charity:'charity',
+  cook:'kost',store_fridge:'kost',take_fridge:'kost',store_home:'kost',take_home:'kost',rest:'bench',help:'help',charity:'charity',
   worship:node?.id?.startsWith('prayer_')?node.id:'prayer'
  }[action];
  if(required&&node?.id!==required){
