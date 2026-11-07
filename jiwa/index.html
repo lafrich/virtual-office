@@ -177,6 +177,7 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 .jui-guide-y{left:0;right:0;top:50%;height:1px;background:#f8db65;box-shadow:0 1px #1b4a8f}
 .jui-node-layer{z-index:5}
 @media(max-width:760px){.jui-gridbar{gap:5px}.jui-gridbar button{flex:1;font-size:10px;min-height:31px}.jui-grid-spacer{flex-basis:100%;width:100%}}
+.jui-global-tag{display:inline-block;margin-left:8px;padding:3px 7px;background:#23558d;color:#fff;font:700 10px "Courier New",monospace;vertical-align:middle;border:1px solid #092b63}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -200,8 +201,8 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
    <div id="mapView" class="view"><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
    <div id="uiView" class="view" hidden><div class="viewport-scroll">
  <section class="card" id="juiEditor">
-  <h3>UI EDITOR · NAMANYA JUGA HIDUP</h3>
-  <p class="subtle">Atur posisi dan ukuran UI gameplay. Layout Desktop dan Phone independen. Nokia asli tetap digunakan tanpa mengubah isi aplikasinya. Perubahan terlihat di Semesta pada browser yang sama.</p>
+  <h3>UI EDITOR · GLOBAL GAME UI <span class="jui-global-tag">ALL CITIES</span></h3>
+  <p class="subtle">Satu UI untuk seluruh game, tidak mengikuti kota yang dipilih di atas. Layout Desktop dan Phone independen. Nokia asli tetap. Edit dan klik SAVE &amp; SYNC agar dipakai di semua kota Semesta pada browser ini.</p>
   <div class="jui-toolbar">
    <span>Perangkat</span>
    <button id="juiDesktop" class="primary" type="button">🖥 Desktop 1280×720</button>
@@ -232,8 +233,8 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
    </div><p class="subtle">Klik elemen untuk select · drag untuk pindah · tarik kotak kecil di kanan bawah untuk resize.</p></div>
    <aside class="jui-side"><div class="jui-side-title">ELEMENTS</div><div id="juiElements" class="jui-elements"></div>
     <div class="jui-side-title">PROPERTIES</div><div id="juiInspector"></div>
-    <div class="jui-actions"><button id="juiReset" type="button">↶ RESET PROFIL</button><button id="juiSave" class="primary" type="button">💾 SAVE & SYNC</button><button id="juiOpenSemesta" type="button">▶ TEST SEMESTA</button></div>
-    <div id="juiNotice" class="subtle" role="status" aria-live="polite">Layout tersimpan di project Jiwa saat menekan SAVE & SYNC.</div>
+    <div class="jui-actions"><button id="juiReset" type="button">↶ RESET PROFIL</button><button id="juiSave" class="primary" type="button">💾 SAVE GLOBAL UI &amp; SYNC</button><button id="juiOpenSemesta" type="button">▶ TEST SEMESTA</button></div>
+    <div id="juiNotice" class="subtle" role="status" aria-live="polite">GLOBAL GAME UI · Berlaku untuk semua kota. Klik SAVE &amp; SYNC untuk menyimpan.</div>
    </aside>
   </div>
  </section></div></div>
@@ -290,16 +291,16 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 <script src="../shared/gameplay-schema.js"></script>
 <script src="../shared/vl-hud/phone_ellen.js"></script>
 <script src="../shared/vl-hud/nokia-play.js"></script>
-<script src="../shared/hud-layout.js?v=center-grid-sync-20261108"></script>
+<script src="../shared/hud-layout.js?v=global-game-ui-v2-20261108"></script>
 <script src="../shared/play-hud.js"></script>
 <script src="../shared/loak-play.js"></script>
 <script src="/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1"></script>
 <script src="./foundation-engine.js"></script>
 <script src="./life-economy.js"></script>
-<script src="./jiwa.js?v=center-grid-sync-20261108"></script>
+<script src="./jiwa.js?v=global-game-ui-v2-20261108"></script>
 <script src="./character-link.js?v=mahluk1-v6b-20261107"></script>
 <script src="./context-editor.js"></script>
 <script src="./mechanics-panel.js"></script>
 <script src="./life-editor.js"></script>
-<script src="./ui-layout-editor.js?v=grid-align-sync-20261108"></script>
+<script src="./ui-layout-editor.js?v=global-game-ui-v2-20261108"></script>
 </body></html>
