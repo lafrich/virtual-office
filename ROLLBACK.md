@@ -53,6 +53,26 @@ git push origin main
 
 That restores the previous Play start (no roadside tent / exit-tent clip), removes the Jiwa SPAWN & RESPAWN card and `modules.spawnRespawn`, and returns `sw.js` to v8. It does not revert the loak-picker, lamp-glow, sleep-clip, or grass_v2 commits.
 
+## This deploy (seat hobo tent on its ground-contact row)
+
+- Previous live `main`: `eccb9ad6c58e32c0a3b8e2da5d62f95e0218d82e`
+- Feature commit: `68d024e9fb844093d27073e9b993578a93a42fa8`
+- Service worker bump: `fc4a8dc22faef5b4653ccdfbc8192cb6e11708a5`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit fc4a8dc22faef5b4653ccdfbc8192cb6e11708a5
+git revert --no-edit 68d024e9fb844093d27073e9b993578a93a42fa8
+git push origin main
+```
+
+That restores the previous tent seating (authored plot-centre pivot, tent appearing sunk into the sidewalk) and `sw.js` v9. It does not revert the generic spawn/respawn mechanic, loak-picker, lamp-glow, sleep-clip, or grass_v2 commits.
+
+
 
 
 
