@@ -554,6 +554,7 @@ function nokiaSnapshot(){
   wallet:state.wallet,experience:state.experience,energy:state.energy,
   moral:state.moral,hygiene:state.hygiene,bladder:state.bladder,fullness:state.fullness,
   identity:{...state.identity},ownsRoom:ownsRoom(),
+  religions:RULES.RELIGIONS.filter(v=>v!=='satanis'),zodiacs:RULES.ZODIACS.slice(),
   transactions:(state.transactions||[]).slice().reverse(),
   inventory:(state.inventory||[]).map(id=>({id,label:state.itemMeta?.[id]?.label||id})),
   furniture:(state.furniture||[]).slice(),
