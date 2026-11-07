@@ -95,11 +95,14 @@ const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/w
   const end=E.gameSnapshot(),after=E.draw();
   let pixelDelta=0;
   for(let i=0;i<before.data.length;i++)if(before.data[i]!==after.data[i])pixelDelta++;
-  return {depth:E.depth(),start:start.map.player,end:end.map.player,dest,
+  return {depth:E.depth(),start:{x:start.map.player.x,z:start.map.player.z},
+   end:{x:end.map.player.x,z:end.map.player.z},dest,
    pixelDelta,terrainCount:end.map.terrain.length,stillOpen:window.VLNokiaPlay.isOpen()};
  });
  console.log('REAL_NOKIA_MAP',JSON.stringify(mapResult));
  assert.equal(mapResult.depth,3,'Nokia must be on its native Peta screen');
+ assert.ok(Math.hypot(mapResult.start.x-mapResult.end.x,mapResult.start.z-mapResult.end.z)>4,
+  'Real character world coordinates must change after teleport');
  assert.ok(Math.hypot(mapResult.end.x-mapResult.dest.x,mapResult.end.z-mapResult.dest.z)<.05,
   'Player marker in Nokia must follow actual Semesta teleport, not a demo position');
  assert.ok(mapResult.pixelDelta>0,'The actual Nokia LCD must visibly change when the player moves');
