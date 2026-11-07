@@ -37,6 +37,12 @@
    '<td><input type="number" min="1" max="100000" data-fish="'+i+'" data-key="spoilMinutes" value="'+f.spoilMinutes+'"></td>'+
    Object.keys(E.BUYERS).map(b=>'<td><label style="display:flex;gap:3px;align-items:center"><input type="checkbox" data-fish="'+i+'" data-buyer="'+b+'" '+(f.buyers[b]!==null?'checked':'')+' title="Buyer accepts this fish"><input type="number" min="0" max="1000000" data-fish="'+i+'" data-price="'+b+'" value="'+(f.buyers[b]??0)+'" '+(f.buyers[b]===null?'disabled':'')+'></label></td>').join('')+'</tr>').join('')+
    '</tbody></table></div><p class="subtle">Ikan Sapu-sapu → Bang Siomay menerima, Pasar Ikan menolak. Ikan konsumsi → keduanya menerima. Semua harga editable.</p></div>'+
+   '<div class="card"><h3>DATABASE PEKERJAAN · EDITABLE</h3><p class="subtle">Manusia Silver, Pak Ogah, Kang Parkir dan kerja premium punya aturan berbeda. EXP mengurangi waktu kerja. Semua nilai ini disimpan bersama City Rules.</p>'+
+   '<div class="life-table-scroll"><table class="life-table"><thead><tr><th>Jenis kerja</th><th>Upah</th><th>Waktu (m)</th><th>Energi -</th><th>Kebersihan -</th><th>EXP +</th><th>Min kebersihan</th></tr></thead><tbody>'+
+   c.jobs.map((j,i)=>'<tr><td><b>'+esc(j.label)+'</b></td>'+
+    ['wage','minutes','energyCost','hygieneCost','exp','minHygiene'].map(k=>
+    '<td><input type="number" min="0" max="1000000" data-job="'+i+'" data-job-key="'+k+'" value="'+j[k]+'"></td>').join('')+
+   '</tr>').join('')+'</tbody></table></div></div>'+
    '<div class="card"><h3>PARAMETER CORE SURVIVAL</h3><div class="context-grid">'+
    Object.entries({fishEnergy:'Energi / mancing',fishMinutes:'Durasi mancing (menit)',coffeePrice:'Harga kopi (Rp)',roomPrice:'Beli akses kost sekali (Rp)',
     fridgePrice:'Harga kulkas (Rp)',tokenPrice:'Token listrik (Rp)',tokenUnits:'Unit listrik / token',
@@ -54,6 +60,7 @@
   const el=ev.target;
   if(el.dataset.identity){setConfig(c=>c.identity[el.dataset.identity]=el.value);return;}
   if(el.dataset.setting){setConfig(c=>c.settings[el.dataset.setting]=Number(el.value));return;}
+  if(el.dataset.job!==undefined){setConfig(c=>c.jobs[Number(el.dataset.job)][el.dataset.jobKey]=Number(el.value));return;}
   if(el.dataset.fish===undefined)return;
   const idx=Number(el.dataset.fish);
   if(el.dataset.key){setConfig(c=>c.fish[idx][el.dataset.key]=Number(el.value));return;}
