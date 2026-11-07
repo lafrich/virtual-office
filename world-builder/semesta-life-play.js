@@ -293,31 +293,53 @@ function nodeButtons(n){
  if(id==='bench')entries=[button('rest','🪑 Duduk sebentar',{seatId:n.sourceId||'bangku_preview'})];
  return entries.join('');
 }
+function phoneMarkup(){
+ const religion=state.identity?.religion||'islam',zodiac=state.identity?.zodiac||'capricorn';
+ const options=(all,current)=>all.map(v=>'<option value="'+v+'" '+(v===current?'selected':'')+'>'+v[0].toUpperCase()+v.slice(1)+'</option>').join('');
+ return '<div class="slp-phone"><b>📱 HANDPHONE — APLIKASI V1</b>'+
+  '<div class="slp-actions"><button data-life-action="course">🎓 Kursus Online · +EXP</button>'+
+  '<button data-life-action="buy_token" '+(!ownsRoom()?'disabled':'')+'>⚡ Token Listrik · '+money(config.settings.tokenPrice)+'</button>'+
+  '<button data-life-action="buy_fridge" '+(!ownsRoom()||state.housing?.fridge?'disabled':'')+'>🧊 Beli Kulkas · '+money(config.settings.fridgePrice)+'</button></div>'+
+  '<details open><summary>🛒 Online Shop Furnitur</summary><p><small>Pembelian satu kali. Memerlukan akses kost. Placement visual nanti disinkronkan ke Bangun Ruang; tes ini mencatat inventaris furnitur.</small></p>'+
+  '<select id="slpFurniture"><option value="bed">Kasur · Rp6.000</option><option value="chair">Kursi · Rp1.500</option><option value="stove">Kompor · Rp4.500</option><option value="wardrobe">Lemari · Rp3.500</option></select>'+
+  '<button data-life-action="buy_furniture" '+(!ownsRoom()?'disabled':'')+'>Beli Sekali</button></details>'+
+  '<details><summary>📰 Berita / Petunjuk Pekerjaan</summary><p><small>INFO LOKAL: Ikan sapu-sapu paling sering ditemukan saat memancing. Bang Siomay/Batagor menerimanya, Pasar Ikan menolak. Pekerjaan premium mensyaratkan kebersihan minimal 70. Toko Loak membeli barang bekas. Bantu warga tanpa upah untuk menaikkan moral.</small></p></details>'+
+  '<details><summary>👤 Identitas Karakter</summary><p><small>Pilihan keyakinan menentukan akses ibadah, bukan nilai moral awal. Zodiak belum berpengaruh sampai V2.</small></p>'+
+  '<label>Agama / keyakinan <select id="slpReligion">'+options(RULES.RELIGIONS.filter(v=>v!=="satanis"),religion)+'</select></label>'+
+  '<label>Zodiak <select id="slpZodiac">'+options(RULES.ZODIACS,zodiac)+'</select></label>'+
+  '<div><small>Satanis: 🔒 V2 — jalur antagonis fiksi. Friends & Social: 🔒 V2</small></div></details>'+
+  '</div>';
+}
 function paintPanel(){
  if(!outer||!active||!state)return;
  const el=outer.querySelector('#slpContent');if(!el||el.hidden)return;
  const n=nearest();nearId=n?.id||'';
  const previousSelect=navSelect||'';
- const options=sites.map(n=>'<option value="'+esc(n.id)+'" '+(n.id===previousSelect?'selected':'')+'>'+esc(n.label)+(n.placeholder?' [PLACEHOLDER]':'')+'</option>').join('');
- el.innerHTML='<div><b>STATUS: '+(ownsRoom()?'🏠 PUNYA KOST':'⛺ HOBO')+'</b> · <b>'+money(state.wallet)+'</b> · TAS '+(state.inventory?.length||0)+'/8</div>'+
+ const options=sites.map(t=>'<option value="'+esc(t.id)+'" '+(t.id===previousSelect?'selected':'')+'>'+esc(t.label)+(t.placeholder?' [PLACEHOLDER]':'')+'</option>').join('');
+ const optsButton=(action,label,props={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(props))+'">'+label+'</button>';
+ const result=state.detained?
+  optsButton('fine','💰 Bayar Denda Rp2.000')+optsButton('community_service','🧹 Bersihkan Gorong-gorong'):
+  (state.restMinutes>0?optsButton('advance_time','⏩ Lewati 15 menit bed rest',{minutes:15}):
+   phoneOpen?phoneMarkup():nodeButtons(n));
+ el.innerHTML='<div class="slp-summary"><b>'+(ownsRoom()?'🏠 KOST':'⛺ HOBO')+'</b><b>'+money(state.wallet)+'</b><b>🎒 '+(state.inventory?.length||0)+'/'+(config.settings.bagSlots||8)+'</b><span>👥 Friends 🔒 V2</span></div>'+
   '<div class="slp-stats">'+drawStats()+'</div>'+
-  (state.restMinutes>0?'<div><b>⚠ Pingsan:</b> bed rest '+state.restMinutes+' menit.</div>':'')+
-  (state.detained?'<div><b>🚨 Ditangkap hansip!</b> Pilih denda atau kerja sosial.</div>':'')+
-  '<div class="slp-spot">📍 '+(n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Tidak ada objek dekat')+'</div>'+
-  '<div class="slp-actions" id="slpActions">'+(state.detained?
-   '<button data-life-action="fine">Bayar Denda</button><button data-life-action="community_service">Bersihkan Gorong-gorong</button>':
-   nodeButtons(n))+'</div>'+
-  '<div class="slp-actions"><button data-life-action="course">📱 KURSUS HP</button><button data-life-action="respawn">↻ Respawn</button><button data-life-action="rest">💤 Istirahat +15</button><button data-life-action="advance_time" data-args="{&quot;minutes&quot;:30}">⏩ +30 Menit</button></div>'+
-  '<details><summary>📱 HP • BERITA / PETUNJUK</summary><small>BERITA: Warga sering mendapatkan ikan sapu-sapu dari sungai. Bang Siomay/Batagor menerima ikan sapu-sapu, tetapi Pasar Ikan menolaknya. Untuk pekerjaan premium perlu kebersihan 70+. Friends / Sosial / Jalur Antagonis Satanis terkunci sampai V2.</small></details>'+ 
-  '<details><summary>🧭 TEST: PINDAH LOKASI / INVENTORI</summary><div class="slp-goto"><select id="slpDestination">'+options+'</select><button id="slpTravel" type="button">PINDAH</button></div>'+
-  '<div><b>Tas:</b> '+esc((state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id).join(', ')||'kosong')+'</div>'+
-  '<div><b>Kost:</b> '+esc(state.housing?.room?'Aktif':'Belum')+' · <b>Token:</b> '+state.powerTokens+
-  ' · <b>Furnitur:</b> '+esc((state.furniture||[]).join(', ')||'belum')+'</div>'+
-  '<div><b>Animasi:</b> '+esc(progress?'work: in progress':'menggunakan rig Mahluk Hidup jika tersedia; placeholder untuk action lain')+'</div>'+
-  '<button id="slpReset" type="button">RESET GAME TEST</button></details>'+
-  '<small>Aturan: '+esc(configSource)+' · Uji lokal (bukan uang multiplayer). Item & stats tersimpan di browser per kota; tidak mengubah City Draft.</small>'+
-  '<div id="lifePlayMessage" role="status">'+esc(statusText||'Aksi terdekat melalui tombol Action, atau pilih aktivitas.')+'</div>';
- if(previousSelect&&el.querySelector('#slpDestination')?.querySelector('option[value="'+previousSelect+'"]'))el.querySelector('#slpDestination').value=previousSelect;
+  (state.restMinutes>0?'<div class="slp-alert">⚠ PINGSAN · Bed rest '+state.restMinutes+' menit. Tidak bisa bekerja atau berjalan.</div>':'')+
+  (state.detained?'<div class="slp-alert">🚨 DITAHAN HANSIP · Pilih denda atau kerja sosial.</div>':'')+
+  (state.bladder>=80?'<div class="slp-alert">🚾 Kebelet pipis! Cari WC sebelum terlambat.</div>':'')+
+  '<div class="slp-spot">📍 '+(phoneOpen?'HP / APLIKASI':n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')+'</div>'+
+  '<div class="slp-actions" id="slpActions">'+result+'</div>'+
+  (state.bladder>=65&&!state.detained&&state.restMinutes===0?'<div class="slp-actions">'+optsButton('pee_outside','⚠ Pipis sembarangan (moral turun)')+'</div>':'')+
+  '<div class="slp-actions"><button id="slpPhone" type="button">'+(phoneOpen?'← Kembali':'📱 HP')+'</button></div>'+
+  '<details><summary>🧪 ALAT TES (bukan aksi gameplay)</summary><p><small>Untuk mengecek skenario tanpa memodifikasi kota asli.</small></p>'+
+  '<div class="slp-goto"><select id="slpDestination">'+options+'</select><button id="slpTravel" type="button">TELEPORT TEST</button></div>'+
+  '<div class="slp-actions">'+optsButton('respawn','↻ Test Respawn')+
+  optsButton('advance_time','⏩ +30 menit',{minutes:30})+'</div>'+
+  '<div><b>Inventory:</b> '+esc((state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id).join(', ')||'kosong')+'</div>'+
+  '<div><b>Furnitur:</b> '+esc((state.furniture||[]).join(', ')||'belum')+' · <b>Token:</b> '+state.powerTokens+'</div>'+
+  '<div><b>Sumber mekanik:</b> '+esc(configSource)+'</div>'+
+  '<button id="slpReset" type="button">RESET PROGRESS TEST</button></details>'+
+  '<div id="lifePlayMessage" role="status">'+esc(statusText||'Dekati objek dan gunakan Action. Tahan Action untuk bekerja.')+'</div>';
+ if(previousSelect&&Array.from(el.querySelector('#slpDestination')?.options||[]).some(o=>o.value===previousSelect))el.querySelector('#slpDestination').value=previousSelect;
 }
 function click(ev){
  const el=ev.target.closest('button');if(!el)return;
