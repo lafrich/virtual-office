@@ -304,7 +304,10 @@
    mounted=$('ptStage')||container;
   }
   container.dataset.ready='1';
-  if($('ptBagBtn'))$('ptBagBtn').onclick=()=>toggleWindow('bag');
+  if($('ptBagBtn'))$('ptBagBtn').onclick=()=>{
+   if(typeof opts.onBag==='function'&&opts.onBag()===true)return;
+   toggleWindow('bag');
+  };
   if($('ptPhoneBtn'))$('ptPhoneBtn').onclick=()=>{
    if(typeof opts.onPhone==='function'&&opts.onPhone()===true)return;
    toggleWindow('phone');
