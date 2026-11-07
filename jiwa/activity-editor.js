@@ -169,15 +169,34 @@ function editor(){
  };
  area.querySelectorAll('[data-activity-field]').forEach(el=>el.addEventListener('change',()=>{
   const key=el.dataset.activityField,raw=el.type==='number'?Number(el.value):el.value;
+  const candidate=A.activity({...current(),[key]:raw});
+  const fails=A.PREMISES.violations(candidate);
+  if(fails.length){
+   const bad=fails[0];notify('TIDAK BISA · Tier '+current().tier+' membatasi '+bad.key+
+    ' pada '+bad.min+'–'+bad.max+'. Pilih tier lain jika perlu.');
+   el.value=current()[key];return;
+  }
   update({[key]:raw},key==='label'||key==='buildingQuery');
  }));
  area.querySelectorAll('[data-activity-stat]').forEach(el=>el.addEventListener('change',()=>{
-  const prev=current();update({statEffects:{...prev.statEffects,[el.dataset.activityStat]:Number(el.value)}});
+  const prev=current(),patch={...prev.statEffects,[el.dataset.activityStat]:Number(el.value)};
+  const fails=A.PREMISES.violations({...prev,statEffects:patch});
+  if(fails.length){
+   const bad=fails[0];notify('TIDAK BISA · '+bad.key+' harus '+bad.min+'–'+bad.max+
+    ' untuk tier '+prev.tier);el.value=prev.statEffects[el.dataset.activityStat];return;
+  }
+  update({statEffects:patch});
  }));
  $('activityEnabled').onchange=e=>update({enabled:e.target.checked},true);
  $('activityObject').onchange=e=>update({objectId:e.target.value},true);
  $('activityGrantType').onchange=e=>update({grantType:e.target.value});
- $('activityIngredients').onchange=e=>update({ingredients:e.target.value.split(',').map(s=>s.trim()).filter(Boolean)});
+ $('activityIngredients').onchange=e=>{
+  const next=e.target.value.split(',').map(s=>s.trim()).filter(Boolean);
+  const fails=A.PREMISES.violations({...current(),ingredients:next});
+  if(fails.length){notify('Resep di tier '+current().tier+' dibatasi '+
+   fails[0].min+'–'+fails[0].max+' bahan.');e.target.value=current().ingredients.join(', ');return;}
+  update({ingredients:next});
+ };
  $('activityDuplicate').onclick=()=>{
   const n=copy(current());let id=n.id+'_copy',i=2;while(draft.activities.some(x=>x.id===id))id=n.id+'_copy_'+i++;
   n.id=id;n.label+=' (Copy)';n.enabled=false;draft.activities.push(A.activity(n));selected=id;setDirty();render();
