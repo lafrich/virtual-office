@@ -273,9 +273,13 @@
    const nat=naturalSize(el);
    const minScale=Math.min(MAX_SCALE,Math.max(slots[id].scale,Math.min(1,MIN_TAP/Math.min(nat.w,nat.h))));
    const used=Object.assign({},slots[id],{scale:minScale});
-   boxes[id]=Object.assign(placedRect(host,el,used,nat),{id,el,custom:!samePos(used,base[id])});
+   boxes[id]=Object.assign(placedRect(host,el,used,nat),{id,el,
+    custom:!samePos(used,base[id])||Math.abs(used.scale-base[id].scale)>.001});
   });
-  resolveOverlaps(boxes,mark);
+  // Author-placed global UI is authoritative. The old auto-overlap nudge
+  // silently moved edited buttons/menus away from their exact Jiwa coordinates.
+  // Keep collision adjustment only for the untouched out-of-box layout.
+  if(Object.values(boxes).every(b=>!b.custom))resolveOverlaps(boxes,mark);
   ELEMENTS.forEach(id=>{
    const box=boxes[id];if(!box||!box.el)return;
    const el=box.el;
@@ -308,6 +312,7 @@
    }else{
     if(el.dataset.hudPos){
      el.style.left='';el.style.top='';el.style.right='';el.style.bottom='';el.style.position='';
+     el.style.margin='';
      delete el.dataset.hudPos;
     }
    }
