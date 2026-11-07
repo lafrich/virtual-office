@@ -10,10 +10,10 @@ const cachedVehicles=new Map();
 const terrainNames={road:'road_asphalt',sidewalk:'sidewalk',grass:'grass',
  water:'water',drain:'drain',river:'river',plaza:'plaza',soil:'soil'};
 const symbols={indonesia:'▥',terrain:'▦',custom:'⌂',building:'▥',street:'♧',
- vegetation:'♣',interior:'▤',character:'◉',vehicles:'▰',
+ vegetation:'♣',interior:'▤',object:'▣',character:'◉',vehicles:'▰',
  people:'♙',quest:'⚑',logic:'◇'};
 const labels={indonesia:'INDONESIA',terrain:'TERRAIN',custom:'BUILDING',building:'BUILDING',
- street:'STREET',vegetation:'VEGETATION',interior:'INTERIOR',
+ street:'STREET',vegetation:'VEGETATION',interior:'INTERIOR',object:'LOAK',
  character:'CHARACTER',vehicles:'VEHICLE',people:'NPC',quest:'QUEST',logic:'LOGIC'};
 function validUrl(url){
  if(typeof url!=='string'||!url)return null;
@@ -38,6 +38,8 @@ function sourceFor(spec,env=g){
  }
  if(spec.source==='custom-building')return validUrl(env.VLBuildingBridge?.image(id,'sw'));
  if(spec.source==='bangun-object')return validUrl(env.VLBangunObjects?.image(id,'sw'));
+ if(spec.source==='loak-v2')
+  return validUrl(spec.iconUrl||spec.url||env.VLLoakV2?.icon?.(spec)||env.VLLoakV2?.image?.(spec));
  // GPT original art is protected by its own source vault; never request it
  // unless the user has explicitly unlocked that vault.
  return null;
@@ -88,6 +90,7 @@ function describe(entry,byName,env=g){
   title:entry?.title||spec?.label||'Asset',
   source:unavailable?'PREVIEW ONLY':spec?.source==='pipeline-street'||
     spec?.source==='pipeline-vegetation'?'PIXEL PIPELINE':
+    spec?.source==='loak-v2'?'LOAK OBJECTS':
     spec?.source==='bangun-object'||spec?.source==='custom-building'?'BANGUN RUANG':
     category==='terrain'?'CITY MATERIAL':tag.startsWith('vehicle:')?'MAHLUK HIDUP':
     entry?.label||'ASSET',

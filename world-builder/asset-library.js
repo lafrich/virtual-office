@@ -51,12 +51,19 @@ function validGeometry(meta){
  return [w,h,px,py].every(Number.isFinite)&&
   w>0&&h>0&&w<=8192&&h<=8192&&px>=0&&py>=0&&px<=w&&py<=h;
 }
+function resolveImageUrl(url){
+ if(typeof url!=='string'||!url)return '';
+ if(/^(?:data:image\/(?:png|webp|jpeg|gif);base64,|blob:https?:\/\/)/i.test(url))return url;
+ try{
+  const abs=new URL(url,typeof location!=='undefined'?location.href:'https://lafrich.github.io/');
+  if(abs.protocol==='https:')return abs.href;
+  if(abs.protocol==='http:'&&typeof location!=='undefined'&&abs.origin===location.origin)return abs.href;
+ }catch{}
+ return '';
+}
 function checkImage(url,geometry=null){
- const https=typeof url==='string'&&/^https:\/\//i.test(url);
- const localHttp=typeof url==='string'&&/^http:\/\//i.test(url)&&
-  typeof location!=='undefined'&&(()=>{try{return new URL(url).origin===location.origin}catch{return false}})();
- const inline=typeof url==='string'&&/^(?:data:image\/(?:png|webp|jpeg|gif);base64,|blob:https?:\/\/)/i.test(url);
- if(!url||!(https||localHttp||inline))return Promise.resolve(false);
+ url=resolveImageUrl(url);
+ if(!url)return Promise.resolve(false);
  const key=url+(geometry?'|'+geometry.size.join('x'):'');
  if(imageChecks.has(key))return imageChecks.get(key);
  const done=new Promise(resolve=>{

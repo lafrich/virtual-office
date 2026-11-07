@@ -3167,6 +3167,7 @@ function renderAssetList(){
     (spec.builtIn?'BANGUN RUANG / BUILT-IN PIXEL':'BANGUN RUANG / CUSTOM PIXEL'):
     spec.source==='custom-building'?
     (spec.enterable?'BANGUN RUANG / ENTERABLE':'BANGUN RUANG / DECORATIVE'):
+    spec.source==='loak-v2'?'LOAK OBJECTS / ITEM':
     spec.source==='gpt-original'?'GPT / ORIGINAL · login':
     spec.published?'PIPELINE / PNG':'PIPELINE / MANIFEST ONLY',
    origin:spec.source==='gpt-original'?'original':spec.published?'published':'unpublished'
@@ -3177,6 +3178,13 @@ function renderAssetList(){
   /^(character|pedestrian|quest-character):mh2_[a-z0-9]+$/.test(a.tag))&&
   (cat==='all'||a.category===cat)&&
   (a.title+' '+a.tag+' '+a.label).toLowerCase().includes(q));
+ if(cat==='object'){
+  list.sort((a,b)=>{
+   const al=a.label==='LOAK OBJECTS / ITEM'?0:1;
+   const bl=b.label==='LOAK OBJECTS / ITEM'?0:1;
+   return al-bl;
+  });
+ }
  $('assetCount').textContent=String(list.length).padStart(2,'0');
  const holder=$('assetList');holder.replaceChildren();
  for(const a of list){

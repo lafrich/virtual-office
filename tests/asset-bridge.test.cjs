@@ -22,4 +22,4 @@ assert.ok(!swSrc.includes("game-assets/asset-bridge.js"));
 assert.ok(!swSrc.includes("office.html"));
 assert.ok(!swSrc.includes("importScripts"));
 assert.ok(!swSrc.includes("onlineEnhanceHtml"));
-assert.match(swSrc,/sw v7/);
+assert.match(swSrc,/sw v8/);

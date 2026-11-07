@@ -71,7 +71,7 @@ const effects=window.VLSemestaWorldEffects.makeWorldEffects({
   {child:{position:{x:.3,z:0}}}
  ]}:null,
  getCategory:o=>['avatar','crowd','npc'].includes(o.id)?'actor':o.type,
- getSpec:()=>({height:4.4})
+ getSpec:o=>o.asset==='pipeline:lampu_taman'?{id:'lampu_taman',aliasOf:'lampu_taman_jakarta',height:3.8784}:{height:4.4}
 });
 const noon={night:0,glow:0,sky:'#b9d5e2',sun:{x:1,z:0,height:1},cast:.35,contact:.28};
 const midnight={night:.78,glow:1,sky:'#71869b',sun:{x:-1,z:1,height:0},cast:.01,contact:.02};
@@ -90,6 +90,14 @@ assert.ok(Number(tint.style.opacity)>0&&Number(tint.style.opacity)<=.22,'night t
 assert.equal(draws.lamps.length,1,'only lamp asset lights up, not vehicle/building');
 assert.ok(ctx.globalAlpha===1,'canvas opacity restored');
 assert.equal(draws.gradient,0,'never use a blur or radial light');
+objects.push({id:'park',type:'sprite',name:'Lampu Taman',asset:'pipeline:lampu_taman',subtype:'lampu_taman',rotation:0});
+roots.park={visible:true,position:{x:5,y:0,z:5}};
+draws.lamps.length=0;
+effects.update(.2,midnight,true);
+assert.equal(draws.lamps.length,3,'generic lamp plus one square per dual-head lantern');
+assert.equal(draws.gradient,0,'dual-head lamp still uses fillRect, not a gradient');
+const dual=draws.lamps.slice(1);
+assert.notEqual(JSON.stringify(dual[0]),JSON.stringify(dual[1]),'the two heads are not the same screen point');
 roots.npc.position.x=12;
 effects.update(.2,midnight,true);
 assert.notDeepEqual(shadows.matrices,before,'shadows follow moving characters');
