@@ -3029,6 +3029,12 @@ if(window.SemestaLifePlay){
   mountTo:()=>$('canvas-wrap'),
   syncHud:syncPlayHud,
   tell,
+  openInteriorById:id=>{
+   const obj=documentMap.objects.find(o=>String(o.id)===String(id));
+   if(!obj||obj.enterable!==true||!obj.interior?.floors?.length||
+      !interiorPreview?.openFor)return false;
+   interiorPreview.openFor(obj);return true;
+  },
   canStand:(x,z)=>{
    const world=spawnWorldAdapter();
    const tile=world.tileAt(x,z);
