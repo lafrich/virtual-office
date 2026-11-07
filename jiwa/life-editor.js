@@ -40,7 +40,9 @@
    '<div class="card"><h3>PARAMETER CORE SURVIVAL</h3><div class="context-grid">'+
    Object.entries({fishEnergy:'Energi / mancing',fishMinutes:'Durasi mancing (menit)',coffeePrice:'Harga kopi (Rp)',roomPrice:'Beli akses kost sekali (Rp)',
     fridgePrice:'Harga kulkas (Rp)',tokenPrice:'Token listrik (Rp)',tokenUnits:'Unit listrik / token',fridgeExtraMinutes:'Bonus simpan kulkas (menit)',
-    faintRestMinutes:'Bed rest pingsan (menit)',arrestMoralThreshold:'Ambang moral hansip'}).map(([key,label])=>
+    faintRestMinutes:'Bed rest pingsan (menit)',arrestMoralThreshold:'Ambang moral hansip',
+    publicShowerFee:'Biaya mandi umum (Rp)',publicShowerRecovery:'Pulih mandi umum',homeShowerRecovery:'Pulih mandi kost',
+    publicToiletPenalty:'Penalti kebersihan WC umum',hoboSleepRecovery:'Energi tidur tenda',homeSleepRecovery:'Energi tidur kost'}).map(([key,label])=>
      '<label>'+label+'<input type="number" min="0" max="100000" data-setting="'+key+'" value="'+s[key]+'"></label>').join('')+
    '</div></div>';
  }
@@ -58,7 +60,11 @@
   {id:'fishing',name:'🎣 Titik Mancing',emoji:'🎣',dx:3,dz:-3,kind:'fish',placeholder:true},
   {id:'siomay_batagor',name:'🥟 Bang Siomay / Batagor',emoji:'🥟',dx:6,dz:1,kind:'sell',placeholder:true},
   {id:'pasar_ikan',name:'🐟 Pasar Ikan',emoji:'🐟',dx:-6,dz:4,kind:'sell',placeholder:true},
-  {id:'tree',name:'🌳 Pohon Buah',emoji:'🌳',dx:-4,dz:-2,kind:'fruit',placeholder:true}
+  {id:'tree',name:'🌳 Pohon Buah',emoji:'🌳',dx:-4,dz:-2,kind:'fruit',placeholder:true},
+  {id:'public_wc',name:'🚾 WC Umum',emoji:'🚾',dx:8,dz:6,kind:'toilet',placeholder:true},
+  {id:'public_bath',name:'🧼 Mandi Umum',emoji:'🧼',dx:-8,dz:7,kind:'shower',placeholder:true},
+  {id:'kost',name:'🏠 Kost',emoji:'🏠',dx:9,dz:-7,kind:'home',placeholder:true},
+  {id:'tenda',name:'⛺ Tenda Hobo',emoji:'⛺',dx:-9,dz:-7,kind:'camp',placeholder:true}
  ];
  function cityData(){return B.city()?.document||{objects:[],map:{}};}
  function entities(){return B.entities()||[];}
@@ -78,9 +84,18 @@
     .sort((a,b)=>Math.hypot((Number(a.c)||0)-anchor.x,(Number(a.r)||0)-anchor.z)-Math.hypot((Number(b.c)||0)-anchor.x,(Number(b.r)||0)-anchor.z))[0];
   if(water){spots[0].x=Number(water.c)||0;spots[0].z=Number(water.r)||0;spots[0].placeholder=false;}
   const all=entities();
-  for(const [spotId,pattern] of [['siomay_batagor',/siomay|batagor/i],['pasar_ikan',/pasar.*ikan|fish.*market/i],['tree',/pohon|tree/i]]){
+  for(const [spotId,pattern] of [['siomay_batagor',/siomay|batagor/i],['pasar_ikan',/pasar.*ikan|fish.*market/i],['tree',/pohon|tree/i],
+    ['public_wc',/wc.umum|toilet.umum|public.?toilet/i],['public_bath',/mandi.umum|public.?bath|shower.umum/i],
+    ['kost',/kost|kos_|cove|kamar|boarding.?room/i],['tenda',/tenda|tent|hobo.camp|camping/i]]){
    const match=all.find(o=>pattern.test([o.name,o.asset,o.subtype].join(' ')));
    if(match){const sp=spots.find(v=>v.id===spotId);sp.x=Number(match.x)||0;sp.z=Number(match.z)||0;sp.placeholder=false;}
+  }
+  const current=B.sandbox()?.spawnPosition;
+  if(current&&Number.isFinite(Number(current.x))&&Number.isFinite(Number(current.z))){
+   player.x=Number(current.x);player.z=Number(current.z);
+   if(B.sandbox()?.spawn==='hobo'){
+    const tent=spots.find(v=>v.id==='tenda');tent.x=player.x;tent.z=player.z;tent.placeholder=current.placeholder===true;
+   }
   }
   focusId='fishing';viewZoom=1;
  }
@@ -101,13 +116,21 @@
     '<div class="life-preview-toolbar"><button data-move="up">↑</button><button data-move="left">←</button><button data-move="down">↓</button><button data-move="right">→</button><button data-zoom="-1">－ Zoom</button><button data-zoom="1">＋ Zoom</button></div>'+
     '<canvas id="lifeCanvas" width="860" height="410" tabindex="0" aria-label="Playable city schematic"></canvas>'+
     '<div class="life-preview-toolbar">'+spots.map(v=>'<button data-focus="'+v.id+'" '+(focusId===v.id?'class="primary"':'')+'>'+v.name+'</button>').join('')+'</div>'+
+    '<div class="life-preview-toolbar"><button class="primary" id="lifeRespawn">↻ RESPAWN</button><button id="lifeBuyRoom" '+(s.housing?.room?'disabled':'')+'>🏠 AKSES KOST</button><button id="lifeSleep">💤 TIDUR</button><button id="lifePublicWC">🚾 WC UMUM</button><button id="lifePublicBath">🧼 MANDI UMUM</button><button id="lifeHomeWC" '+(!s.housing?.room?'disabled':'')+'>🚽 WC KOST</button><button id="lifeHomeBath" '+(!s.housing?.room?'disabled':'')+'>🚿 MANDI KOST</button></div>'+ 
     '<div class="life-preview-toolbar"><button class="primary" id="lifeCatch">🎣 MANCING</button><button id="lifeFruit">🌳 PANJAT POHON</button><button id="lifeCoffee">☕ KOPI</button><button id="lifeEat">🍚 MAKAN</button><button id="lifeRest">💤 ISTIRAHAT</button><button id="lifeAdvance">＋30 MENIT</button></div>'+
     '<div class="life-preview-toolbar"><label>Isi Tas<select id="lifeItem">'+slots+'</select></label><label>Pembeli<select id="lifeBuyer">'+Object.entries(E.BUYERS).map(([id,name])=>'<option value="'+id+'">'+esc(name)+'</option>').join('')+'</select></label><button class="primary" id="lifeSell">💰 JUAL IKAN</button></div>'+
     '<div class="life-status">'+['wallet','energy','hygiene','bladder','moral','experience'].map(k=>'<span><b>'+k.toUpperCase()+'</b> '+(k==='wallet'?cash(s[k]):(s[k]??0)+'/100')+'</span>').join('')+
-    '<span><b>BAG</b> '+(s.inventory||[]).length+'/8</span><span><b>WAKTU BERLALU</b> '+(s.elapsedMinutes||0)+'m</span></div>'+
+    '<span><b>BAG</b> '+(s.inventory||[]).length+'/8</span><span><b>WAKTU BERLALU</b> '+(s.elapsedMinutes||0)+'m</span><span><b>HOUSING</b> '+(s.housing?.room?'KOST':'HOBO')+'</span><span><b>SPAWN</b> '+esc(s.spawnPosition?.id||'-')+'</span></div>'+ 
     '<div id="lifeFeedback" role="status" class="subtle">Pilih pin/titik interaksi, lalu lakukan aksi. WASD / arrow untuk bergerak ketika canvas aktif.</div></div>';
   if(selected&&Array.from($('lifeItem').options).some(o=>o.value===selected))$('lifeItem').value=selected;
   if(previousBuyer)$('lifeBuyer').value=previousBuyer;
+  $('lifeRespawn').onclick=()=>act('respawn',{});
+  $('lifeBuyRoom').onclick=()=>{const sp=spots.find(v=>v.id==='kost');act('buy_room',{roomSpawn:{id:sp.placeholder?'kost_preview_placeholder':sp.id,x:sp.x,z:sp.z,placeholder:sp.placeholder}});};
+  $('lifeSleep').onclick=()=>act('sleep',{});
+  $('lifePublicWC').onclick=()=>act('public_toilet',{facilityId:'preview_wc_umum'});
+  $('lifePublicBath').onclick=()=>act('public_shower',{facilityId:'preview_mandi_umum'});
+  $('lifeHomeWC').onclick=()=>act('home_toilet',{});
+  $('lifeHomeBath').onclick=()=>act('home_shower',{});
   $('lifeCatch').onclick=()=>act('fish',{spotId:'preview_water'});
   $('lifeFruit').onclick=()=>act('catch_fruit',{});
   $('lifeSell').onclick=()=>act('sell_fish',{itemId:$('lifeItem').value,buyerId:$('lifeBuyer').value});
@@ -121,12 +144,22 @@
   draw();
  }
  function act(action,args){
-  const required=action==='fish'?'fishing':action==='catch_fruit'?'tree':action==='sell_fish'?args.buyerId:null;
+  const required=action==='fish'?'fishing':action==='catch_fruit'?'tree':action==='sell_fish'?args.buyerId:
+    action==='public_toilet'?'public_wc':action==='public_shower'?'public_bath':
+    action==='home_toilet'||action==='home_shower'||action==='buy_room'?'kost':
+    action==='sleep'?(B.sandbox()?.housing?.room?'kost':'tenda'):null;
   const point=spots.find(v=>v.id===required);
   if(point&&Math.hypot(player.x-point.x,player.z-point.z)>1.8){
    if($('lifeFeedback'))$('lifeFeedback').textContent='DEKATI LOKASI: '+point.name+' dahulu (atau pilih pin untuk teleport sandbox).';return;
   }
   const result=dispatch(action,args);
+  if(result.ok&&action==='respawn'&&result.state.spawnPosition){
+   player.x=result.state.spawnPosition.x;player.z=result.state.spawnPosition.z;
+   if(result.state.spawn==='hobo'){
+    const tent=spots.find(v=>v.id==='tenda');tent.x=player.x;tent.z=player.z;tent.placeholder=result.state.spawnPosition.placeholder===true;
+   }
+   draw();
+  }
   const text=(result.ok?'BERHASIL: '+result.changes.join(' · '):'DITOLAK: '+result.reason);
   if($('lifeFeedback'))$('lifeFeedback').textContent=text;
  }
