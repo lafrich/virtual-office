@@ -58,3 +58,48 @@ test('one-time room purchase, sleeping tradeoff and coffee bladder consequence',
  const coffee=E.run(c,room.state,'coffee');assert.ok(coffee.state.bladder>room.state.bladder);
  const sleep=E.run(c,coffee.state,'sleep');assert.ok(sleep.state.hygiene<coffee.state.hygiene);
 });
+
+test('hobo respawns at one of the peripheral tents and not a city center',()=>{
+ const c=E.defaults(),s=base();
+ const bounds={minX:0,maxX:100,minZ:0,maxZ:100};
+ const west=E.run(c,s,'respawn',{bounds,roll:0.01});
+ const east=E.run(c,s,'respawn',{bounds,roll:.3});
+ assert.equal(west.ok,true);assert.equal(west.state.spawn,'hobo');
+ assert.equal(west.state.spawnPosition.id,'hobo_tent_west');
+ assert.equal(east.state.spawnPosition.id,'hobo_tent_east');
+ assert.notDeepEqual(west.state.spawnPosition,east.state.spawnPosition);
+ assert.equal(west.state.homeAccess,false);
+ const explicit=E.run(c,s,'respawn',{tents:[{id:'tenda_pinggir',x:97,z:12}],bounds,roll:0.5});
+ assert.equal(explicit.state.spawnPosition.id,'tenda_pinggir');
+});
+test('before kost: public shower, toilet, and lower-quality camp sleep; home facilities are locked',()=>{
+ const c=E.defaults(),s=base();s.wallet=2000;s.energy=10;s.hygiene=10;s.bladder=90;
+ assert.equal(E.run(c,s,'home_shower').ok,false);
+ assert.equal(E.run(c,s,'home_toilet').ok,false);
+ assert.equal(E.run(c,s,'public_shower').ok,false); // need location
+ const bathing=E.run(c,s,'public_shower',{facilityId:'wc_umum_1'});
+ assert.equal(bathing.ok,true);
+ assert.equal(bathing.state.hygiene,45);assert.equal(bathing.state.wallet,1500);
+ const wc=E.run(c,bathing.state,'public_toilet',{facilityId:'wc_umum_1'});
+ assert.equal(wc.ok,true);
+ assert.equal(wc.state.bladder,0);assert.equal(wc.state.hygiene,40);
+ const rest=E.run(c,wc.state,'sleep');
+ assert.equal(rest.ok,true);assert.equal(rest.state.energy,40);
+ assert.equal(rest.state.hygiene,25);
+});
+test('one-time kost unlock gives private WC, better shower and owned-room respawn',()=>{
+ const c=E.defaults(),s=base();s.wallet=50000;s.hygiene=10;s.bladder=90;s.energy=10;
+ const room=E.run(c,s,'buy_room',{roomSpawn:{id:'kost_a',x:8,z:16}});
+ assert.equal(room.ok,true);assert.equal(room.state.homeAccess,true);
+ assert.equal(E.run(c,room.state,'buy_room').ok,false);
+ const bathing=E.run(c,room.state,'home_shower');
+ assert.equal(bathing.ok,true);
+ assert.equal(bathing.state.hygiene,80);assert.equal(bathing.state.wallet,20000);
+ const wc=E.run(c,bathing.state,'home_toilet');
+ assert.equal(wc.state.bladder,0);assert.equal(wc.state.hygiene,80);
+ const rested=E.run(c,wc.state,'sleep');
+ assert.equal(rested.state.energy,75);
+ const spawn=E.run(c,rested.state,'respawn',{roll:0.99,bounds:{minX:-20,maxX:20,minZ:-20,maxZ:20}});
+ assert.equal(spawn.ok,true);assert.equal(spawn.state.spawn,'home');
+ assert.equal(spawn.state.spawnPosition.id,'kost_a');assert.equal(spawn.state.spawnPosition.x,8);
+});
