@@ -70,8 +70,9 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  await page.waitForFunction(()=>window.SemestaPlay.hud()?.getOpenWindow?.()==='phone',null,{timeout:10000});
  const phoneOutline=page.locator('.sui-outline[data-sui-id="phone"]');
  await phoneOutline.waitFor({state:'visible',timeout:12000});
- await page.locator('#suiScale').fill('0.85');
- await page.locator('#suiScale').dispatchEvent('input');
+ await page.locator('#suiScale').evaluate(el=>{
+  el.value='0.85';el.dispatchEvent(new Event('input',{bubbles:true}));
+ });
  const resized=await page.evaluate(()=>window.SemestaUIEditor.previewLayout().desktop.phone);
  assert.equal(resized.scale,.85,'Nokia resize must update live global UI layout');
  await page.locator('#suiElement').selectOption('bag');
