@@ -28,7 +28,14 @@ const SITES=[
  {id:'public_bath',label:'Mandi Umum',icon:'🚿',pattern:/mandi.umum|public.?shower|shower.umum/i,action:'public_shower',offset:[-10,10]},
  {id:'kost',label:'Kost / Kamar',icon:'🏠',pattern:/kost|kos_|boarding.?room|cove|kamar.?sewa/i,action:'buy_room',offset:[9,-7]},
  {id:'tent',label:'Tenda Hobo',icon:'⛺',pattern:/tenda|hobo.?tent|hobo.?camp/i,action:'sleep',offset:[-10,-10]},
- {id:'prayer',label:'Tempat Ibadah',icon:'🕌',pattern:/masjid|mushola|musala|gereja|vihara|pura|klenteng/i,action:'worship',offset:[3,-9]},
+ {id:'prayer_islam_a',label:'Masjid / Musala 1',religion:'islam',icon:'🕌',pattern:/masjid|mushola|musala/i,action:'worship',offset:[2,-4]},
+ {id:'prayer_islam_b',label:'Masjid / Musala 2',religion:'islam',icon:'🕌',pattern:/masjid|mushola|musala/i,action:'worship',offset:[4,-6]},
+ {id:'prayer_islam_c',label:'Masjid / Musala 3',religion:'islam',icon:'🕌',pattern:/masjid|mushola|musala/i,action:'worship',offset:[-2,-7]},
+ {id:'prayer_kristen',label:'Gereja Protestan',religion:'kristen',icon:'⛪',pattern:/gereja|church|protestan/i,action:'worship',offset:[-15,-10]},
+ {id:'prayer_katolik',label:'Gereja Katolik',religion:'katolik',icon:'⛪',pattern:/katolik|katedral|cathedral/i,action:'worship',offset:[15,-12]},
+ {id:'prayer_hindu',label:'Pura',religion:'hindu',icon:'🛕',pattern:/pura/i,action:'worship',offset:[-17,9]},
+ {id:'prayer_buddha',label:'Vihara',religion:'buddha',icon:'🛕',pattern:/vihara|wihara/i,action:'worship',offset:[16,11]},
+ {id:'prayer_konghucu',label:'Klenteng',religion:'konghucu',icon:'🏮',pattern:/klenteng|kelenteng/i,action:'worship',offset:[-17,14]},
  {id:'hansip',label:'Hansip',icon:'🚨',pattern:/hansip|satpam|security.guard/i,action:'arrest',offset:[-1,-5]},
  {id:'help',label:'Side Job Sosial (Tanpa Bayaran)',icon:'🤝',pattern:/relawan|volunteer|bantu.?warga|kerja.?sosial/i,action:'help',offset:[-6,6]},
  {id:'charity',label:'Kotak Sedekah',icon:'🎁',pattern:/sedekah|donation|sumbangan|kotak.?amal/i,action:'charity',offset:[0,-8]},
@@ -37,7 +44,9 @@ const SITES=[
 ];
 const PLACEHOLDER_COLORS={help:0x63a1a2,charity:0xd3a6c0,bench:0x9b825c,premium_job:0x9579ba,hansip:0xc66766,fish:0x5596be,siomay_batagor:0xe0a94a,pasar_ikan:0x4baf9d,job:0xd18e3a,
  loak:0x839758,scavenge:0x9d9c84,tree:0x519a64,warung:0xd5aa53,coffee:0x856649,
- public_wc:0x77aec0,public_bath:0x77aec0,kost:0xb18cd3,tent:0x9a9d77,prayer:0x81c69f,course:0x709ac4};
+ public_wc:0x77aec0,public_bath:0x77aec0,kost:0xb18cd3,tent:0x9a9d77,prayer:0x81c69f,prayer_islam_a:0x81c69f,prayer_islam_b:0x81c69f,prayer_islam_c:0x81c69f,
+ prayer_kristen:0x81c69f,prayer_katolik:0x81c69f,prayer_hindu:0x81c69f,prayer_buddha:0x81c69f,
+ prayer_konghucu:0x81c69f,course:0x709ac4};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
@@ -119,7 +128,9 @@ function buildSites(){
  const center={x:(bounds.minX+bounds.maxX)/2,z:(bounds.minZ+bounds.maxZ)/2};
  const maxRange=Math.min(28,Math.max(8,(bounds.maxX-bounds.minX+bounds.maxZ-bounds.minZ)/5));
  sites=SITES.map((d,i)=>{
-  const found=objects.find(o=>d.pattern.test(name(o)));
+  const matches=objects.filter(o=>d.pattern.test(name(o)));
+  const prayerIndex=d.id==='prayer_islam_b'?1:d.id==='prayer_islam_c'?2:0;
+  const found=matches[prayerIndex]||(!d.id.startsWith('prayer_')?matches[0]:null);
   let p=found?findLanding(Number(found.x)||0,Number(found.z)||0):null;
   if(!p&&d.id==='fish'){
    const cells=world.map?.terrain?.cells||[];
@@ -292,7 +303,7 @@ function nodeButtons(n){
    button('take_fridge','📦 Ambil dari Kulkas')]:
    [button('buy_room','🏠 Beli Akses Kost (1×)')];
  if(id==='tent')entries=[button('sleep','💤 Tidur Tenda')];
- if(id==='prayer')entries=[button('worship','🤲 Ibadah',{placeReligion:state.identity?.religion||'islam'})];
+ if(n.religion)entries=[button('worship','🤲 Ibadah '+n.religion,{placeReligion:n.religion})];
  if(id==='course')entries=[button('course','📱 Kursus Online')];
  if(id==='hansip')entries=['<small>Jika moral terlalu rendah, hansip dapat menangkapmu saat mendekat.</small>'];
  if(id==='help')entries=[button('help','🤝 Bantu warga (tanpa upah)')];
@@ -415,7 +426,7 @@ function runAction(action,args={}){
   eat:'warung',coffee:'coffee',public_toilet:'public_wc',public_shower:'public_bath',
   buy_room:'kost',home_toilet:'kost',home_shower:'kost',sleep:ownsRoom()?'kost':'tent',
   cook:'kost',store_fridge:'kost',take_fridge:'kost',rest:'bench',help:'help',charity:'charity',
-  worship:'prayer'
+  worship:node?.id?.startsWith('prayer_')?node.id:'prayer'
  }[action];
  if(required&&node?.id!==required){
   message('Dekati '+(sites.find(s=>s.id===required)?.label||required)+' dahulu.');return {ok:false,reason:'Lokasi aksi tidak sesuai'};
