@@ -101,64 +101,6 @@ function renderPanel(){
   c.append(field('Enabled',check(tl.enabled!==false,v=>patch(g=>g.modules.trafficLights.enabled=v))));
   c.append(field('Cycle seconds',number(tl.cycleSeconds==null?32:tl.cycleSeconds,12,120,1,v=>patch(g=>g.modules.trafficLights.cycleSeconds=Number(v)))));
  });
- card('HUD LAYOUT',c=>{
-  const HL=window.VLHudLayout;
-  const layout=(HL?HL.normalize(m.hudLayout):m.hudLayout)||{desktop:{},phone:{}};
-  const prof=hudEditProfile==='desktop'?'desktop':'phone';
-  try{document.documentElement.dataset.hudProfile=prof;}catch(_e){}
-  const row=document.createElement('div');row.style.display='flex';row.style.gap='6px';row.style.marginBottom='8px';
-  ['phone','desktop'].forEach(kind=>{
-   const b=document.createElement('button');b.type='button';
-   b.textContent=kind==='phone'?'Phone profile':'Desktop profile';
-   b.dataset.hudProfileBtn=kind;
-   if(prof===kind)b.classList.add('primary');
-   b.onclick=()=>{hudEditProfile=kind;renderPanel();if(window.VLPlayHud&&window.VLPlayHud.apply)window.VLPlayHud.apply(gp());};
-   row.append(b);
-  });
-  c.append(row);
-  const reset=document.createElement('button');reset.type='button';reset.id='hudLayoutReset';reset.textContent='Reset to default';
-  reset.onclick=()=>patch(g=>{
-   if(!HL)return;
-   g.modules.hudLayout=HL.normalize(g.modules.hudLayout);
-   g.modules.hudLayout[prof]=prof==='phone'?HL.phoneProfile():HL.desktopProfile();
-  });
-  c.append(reset);
-  const ids=HL?HL.ELEMENTS:['phone','bag','action','run','needs','toast','dock'];
-  const anchors=HL?HL.ANCHORS:['top-left','top-right','bottom-left','bottom-right'];
-  ids.forEach(id=>{
-   const slot=(layout[prof]&&layout[prof][id])||{scale:1,anchor:'top-left',x:12,y:12};
-   const box=document.createElement('div');box.className='hud-el';box.style.margin='8px 0';box.dataset.hudEl=id;
-   const title=document.createElement('strong');title.textContent=id;box.append(title);
-   const sc=document.createElement('input');sc.type='range';sc.min='0.5';sc.max='1.5';sc.step='0.01';sc.value=slot.scale;
-   sc.dataset.hudScale=id;sc.setAttribute('aria-label',id+' scale');
-   sc.addEventListener('input',()=>patch(g=>{
-    if(HL)g.modules.hudLayout=HL.normalize(g.modules.hudLayout);
-    g.modules.hudLayout=g.modules.hudLayout||{desktop:{},phone:{}};
-    g.modules.hudLayout[prof]=g.modules.hudLayout[prof]||{};
-    g.modules.hudLayout[prof][id]=Object.assign({scale:1,anchor:'top-left',x:12,y:12},g.modules.hudLayout[prof][id],{scale:Number(sc.value)});
-   }));
-   box.append(field(id+' scale',sc));
-   const sel=document.createElement('select');sel.dataset.hudAnchor=id;sel.setAttribute('aria-label',id+' anchor');
-   anchors.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;if(a===slot.anchor)o.selected=true;sel.append(o);});
-   sel.onchange=()=>patch(g=>{
-    if(HL)g.modules.hudLayout=HL.normalize(g.modules.hudLayout);
-    g.modules.hudLayout[prof][id].anchor=sel.value;
-   });
-   box.append(field(id+' anchor',sel));
-   box.append(field(id+' x',number(slot.x,-400,400,1,v=>patch(g=>{
-    if(HL)g.modules.hudLayout=HL.normalize(g.modules.hudLayout);
-    g.modules.hudLayout[prof][id].x=Number(v);
-   }))));
-   box.append(field(id+' y',number(slot.y,-400,400,1,v=>patch(g=>{
-    if(HL)g.modules.hudLayout=HL.normalize(g.modules.hudLayout);
-    g.modules.hudLayout[prof][id].y=Number(v);
-   }))));
-   c.append(box);
-  });
-  const hint=document.createElement('p');hint.className='subtle';
-  hint.textContent='Drag elements in Play Test to reposition. Semesta Play uses the Phone profile inside the device frame and Desktop otherwise.';
-  c.append(hint);
- });
  card('SPAWN & RESPAWN',c=>{
   const sr=m.spawnRespawn||{enabled:true,exitTentAnimation:true,triggers:{},pool:[],previewOwnsRoom:false,ownedRoom:null};
   const note=document.createElement('p');note.className='subtle';
