@@ -89,24 +89,46 @@ function editor(){
  if(stage==='preset')return presetStep();
  if(!a){area.innerHTML='<div class="activity-empty">Belum ada aktivitas. Klik ＋ ADD ACTIVITY untuk membuat satu.</div>';return;}
  const currentObjects=entities().slice(0,1500);
+ const bounds=A.PREMISES.bounds(category,a.tier);
+ const actions=[...new Set([a.actionAsset,...draft.activities.map(x=>x.actionAsset),
+  'idle','walk','work','talk','sit','sleep','eat','drink_coffee','pee_wall','vandal_wall','pray','read_book','cook_stir'])].filter(Boolean);
+ const placeChoices=[...new Set([a.buildingQuery,...currentObjects.map(x=>x.name||x.asset||x.subtype).filter(Boolean)])];
  const status=A.validation(a,currentObjects);
  const options=currentObjects.map(o=>'<option value="'+esc(o.id)+'"'+(a.objectId===o.id?' selected':'')+'>'+esc(o.name||o.id)+'</option>').join('');
- const input=(title,key,type='text',min='',max='')=>'<label>'+title+'<input data-activity-field="'+key+'" type="'+type+'"'+
-  (min!==''?' min="'+min+'"':'')+(max!==''?' max="'+max+'"':'')+
-  ' value="'+esc(a[key])+'"></label>';
+ const input=(title,key,type='text',min='',max='')=>{
+  const cap=key==='durationMinutes'?bounds.durationMinutes:key==='minExp'?bounds.minExp:
+   key==='moneyDelta'?bounds.moneyDelta:key==='riskPercent'?bounds.riskPercent:null;
+  if(cap){min=cap[0];max=cap[1];}
+  return '<label>'+title+(cap?' <small>tier '+min+'–'+max+'</small>':'')+
+   '<input data-activity-field="'+key+'" type="'+type+'"'+
+    (min!==''?' min="'+min+'"':'')+(max!==''?' max="'+max+'"':'')+
+   ' value="'+esc(a[key])+'"></label>';
+ };
  const areaField=(title,key)=>'<label>'+title+'<textarea data-activity-field="'+key+'" rows="3">'+esc(a[key])+'</textarea></label>';
- area.innerHTML='<div class="activity-head"><div><strong>'+esc(a.label)+'</strong><small>ID: '+esc(a.id)+'</small></div>'+
+ area.innerHTML='<div class="entity-preset-steps"><strong>02 · DETAIL</strong>'+
+  '<span>PREMISE TIER: '+esc(A.PREMISES.cfg(category,a.tier).tier.label)+
+  ' · Nilai dibatasi algoritma</span><button id="activityChangeTier" type="button">↶ TEMPLATE</button></div>'+
+  '<div class="activity-head"><div><strong>'+esc(a.label)+'</strong><small>ID: '+esc(a.id)+'</small></div>'+
   '<span class="activity-state '+(a.enabled?'ready':'draft')+'">'+(a.enabled?'LIVE / ACTIVE':'DRAFT / INACTIVE')+'</span></div>'+
   '<div class="activity-switch"><label><input id="activityEnabled" type="checkbox" '+(a.enabled?'checked':'')+'> Enable in Semesta (hanya jika bangunan ada)</label>'+
   '<small>Draft aman; gameplay asli tidak berubah sebelum disimpan dan diaktifkan.</small></div>'+
   '<div class="activity-fieldset"><h4>01 · PREMISE & FLOW</h4>'+
   input('Nama aktivitas','label')+
   areaField('Premis cerita: mengapa karakter melakukannya?','premise')+
+  '<label>Pola interaksi<select data-activity-field="flowPattern">'+
+  ['tap','hold','talk','buy','sell','collect','enter','craft'].map(v=>
+   '<option value="'+v+'"'+(a.flowPattern===v?' selected':'')+'>'+v.toUpperCase()+'</option>').join('')+
+  '</select></label>'+
   areaField('Urutan interaksi (player → lokasi → Action → hasil)','steps')+'</div>'+
   '<div class="activity-fieldset"><h4>02 · WORLD BINDING</h4>'+
-  input('Cari jenis bangunan / asset Semesta (contoh: bank, warteg)','buildingQuery')+
+  '<label>Jenis gedung/asset Semesta<select data-activity-field="buildingQuery">'+
+  '<option value="">— Pilih dari city preview —</option>'+placeChoices.map(v=>
+  '<option value="'+esc(v)+'"'+(a.buildingQuery===v?' selected':'')+'>'+esc(v)+'</option>').join('')+
+  '</select></label>'+
   '<label>Bind object spesifik di city yang sedang dipreview<select id="activityObject"><option value="">— Query bangunan berlaku lintas map —</option>'+options+'</select></label>'+
-  '<label>Action asset dari Mahluk Hidup (ID referensi) <input data-activity-field="actionAsset" value="'+esc(a.actionAsset)+'" placeholder="work_bank_counter"></label>'+
+  '<label>Action asset Mahluk Hidup<select data-activity-field="actionAsset">'+
+  '<option value="">— Pilih action —</option>'+actions.map(v=>
+  '<option value="'+esc(v)+'"'+(a.actionAsset===v?' selected':'')+'>'+esc(v)+'</option>').join('')+'</select></label>'+
   '<p class="activity-help">Binding berdasarkan nama/tag asset dapat digunakan di berbagai kota. ID object spesifik hanya cocok di map yang memuat object itu. Action asset adalah referensi ke database Mahluk Hidup; playback otomatis memerlukan integrasi animation registry.</p>'+
   '<div class="activity-validate">'+(status.length?status.map(t=>'<span>⚠ '+esc(t)+'</span>').join(''):'✓ Semua field binding terisi dan target ditemukan di city preview')+'</div></div>'+
   '<div class="activity-fieldset"><h4>03 · REQUIREMENTS & TIMING</h4><div class="activity-pair">'+
@@ -114,9 +136,15 @@ function editor(){
   input('Minimum energi','minEnergy','number',0,100)+input('Minimum hygiene','minHygiene','number',0,100)+'</div></div>'+
   '<div class="activity-fieldset"><h4>04 · REWARD / PENALTY</h4>'+
   input('Uang (Rp): + upah / − biaya','moneyDelta','number',-1000000000,1000000000)+
-  '<div class="activity-pair">'+A.STAT_KEYS.map(k=>'<label>'+esc(k.toUpperCase())+' Δ<input data-activity-stat="'+k+'" type="number" min="-100" max="100" value="'+a.statEffects[k]+'"></label>').join('')+'</div></div>'+
+  '<div class="activity-pair">'+A.STAT_KEYS.map(k=>{
+   const limit=bounds.metric==='statEffects.'+k?bounds.primary:[-100,100];
+   return '<label>'+esc(k.toUpperCase())+' Δ <small>('+limit[0]+'–'+limit[1]+')</small>'+
+    '<input data-activity-stat="'+k+'" type="number" min="'+limit[0]+'" max="'+limit[1]+'" value="'+a.statEffects[k]+'"></label>';
+  }).join('')+'</div></div>'+
   '<div class="activity-fieldset"><h4>05 · ITEMS & OUTCOME</h4>'+
-  '<label>Kombinasi bahan (ID, dipisah koma)<input id="activityIngredients" value="'+esc(a.ingredients.join(', '))+'" placeholder="nasi, telur, minyak"></label>'+
+  '<label>Kombinasi bahan (ID, dipisah koma)'+
+  (category==='cooking'?' · tier '+bounds.primary[0]+'–'+bounds.primary[1]+' bahan':'')+
+  '<input id="activityIngredients" value="'+esc(a.ingredients.join(', '))+'" placeholder="nasi, telur, minyak"></label>'+
   '<label>Hasil aktivitas<select id="activityGrantType">'+
   ['none','inventory','furniture','room','prop'].map(x=>'<option value="'+x+'"'+(a.grantType===x?' selected':'')+'>'+esc(x.toUpperCase())+'</option>').join('')+'</select></label>'+
   input('Output item ID (opsional)','outputItem')+
@@ -128,6 +156,7 @@ function editor(){
   '<div class="activity-bottom"><button id="activityDuplicate" type="button">⧉ DUPLICATE</button>'+
   '<button id="activityDelete" type="button">🗑 DELETE</button>'+
   '<button id="activityPreview" type="button">▶ PREVIEW FLOW</button></div>';
+ $('activityChangeTier').onclick=()=>{chosenTier=current().tier;stage='preset';render();};
  // Each field resolves the latest activity by stable ID. Replacing a
  // normalized object must not invalidate the other field handlers.
  const update=(patch,redraw=false)=>{
