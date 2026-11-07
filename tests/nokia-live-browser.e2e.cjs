@@ -16,8 +16,10 @@ const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/w
  await page.goto(base,{waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForFunction(()=>!!window.SemestaPlay&&!!window.SemestaLifePlay&&!!window.VLPhoneEllen,
   null,{timeout:120000});
- const skip=page.locator('#tutorialSkip');
- if(await skip.count()&&await skip.isVisible())await skip.click({timeout:3000}).catch(()=>{});
+ // Onboarding opens on window.load, which may occur AFTER domcontentloaded
+ // and our initial app-ready check. Close it deterministically in CI.
+ await page.waitForLoadState('load',{timeout:30000}).catch(()=>{});
+ await page.evaluate(()=>window.VLQuickTutorial?.close?.());
  await page.locator('#walkMode').click({timeout:20000});
  try{
   await page.waitForFunction(()=>window.SemestaLifePlay?.active?.()&&window.VLPhoneEllen?.hasGameProvider?.(),
