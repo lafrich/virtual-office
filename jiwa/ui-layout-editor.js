@@ -58,14 +58,12 @@ function slotForRect(old,id,x,y){
 const snapCoord=n=>gridPrefs.snap?Math.round(n/gridPrefs.size)*gridPrefs.size:n;
 
 function gameplay(){return B.get();}
-function current(){return HL.normalize(gameplay()?.modules?.hudLayout);}
+function current(){return HL.normalize(B.getUILayout?.()||gameplay()?.modules?.hudLayout);}
 function slot(id=selected){return current()[profile][id];}
 function setLayout(next){
- const g=gameplay();if(!g||!g.modules)return;
- g.modules.hudLayout=HL.normalize(next);
- B.set(g);
+ if(!B.setUILayout?.(HL.normalize(next)))return;
  dirty=true;
- notice('Live Preview aktif • SAVE & SYNC untuk simpan permanen');
+ notice('GLOBAL GAME UI • Belum disimpan. Klik SAVE & SYNC untuk berlaku di semua kota Semesta.');
 }
 function notice(msg){const o=$('juiNotice');if(o)o.textContent=msg;}
 function dimensions(){
@@ -218,11 +216,14 @@ $('juiReset').onclick=()=>{
  setLayout(layout);draw();
 };
 $('juiSave').onclick=()=>{
- document.getElementById('save')?.click();
- dirty=false;notice('Save requested · periksa status SAVED pada toolbar Jiwa.');
+ const result=B.saveUILayout?.();
+ if(result?.ok){
+  dirty=false;
+  notice('GLOBAL GAME UI ✓ Tersimpan untuk SEMUA kota · '+new Date(result.at).toLocaleTimeString('id-ID')+' · Buka Semesta → Play Mode');
+ }else notice('SAVE FAILED · '+(result?.reason||'Penyimpanan game UI gagal'));
 };
 $('juiOpenSemesta').onclick=()=>root.open('../world-builder/','_blank','noopener');
-function render(){if(!B.get())return;draw();}
+function render(){if(!B.getUILayout?.())return;draw();}
 root.addEventListener('jiwa:ui-layout:render',render);
 root.addEventListener('jiwa:gameplay',()=>{if(!drag)render();});
 root.addEventListener('jiwa:world-sync',render);
