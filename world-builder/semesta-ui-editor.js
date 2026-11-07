@@ -1,0 +1,270 @@
+/* SEMESTA — direct, live HUD position editor. 
+ * Uses original HUD elements, and stores one global layout for every city.
+ * No Jiwa editor, extra game state, or map-specific copy.
+ */
+(function(root){
+'use strict';
+const $=id=>document.getElementById(id);
+const HL=root.VLHudLayout;
+if(!HL)return;
+const LABELS={
+ lifePanel:'Survival / Stats',money:'Saldo',hpButton:'HP Button',
+ bagButton:'Tas Button',phone:'Nokia',bag:'Tas Window',
+ action:'Action',run:'Run',needs:'Needs (legacy)',toast:'Notifikasi',dock:'Dock'
+};
+const GRID_SIZES=[8,16,24,32,48];
+const GRID_PREF='semesta-global-ui-grid-v1';
+const grid=(()=>{
+ try{const v=JSON.parse(localStorage.getItem(GRID_PREF)||'null')||{};
+  return {show:v.show!==false,snap:v.snap!==false,size:GRID_SIZES.includes(v.size)?v.size:16};
+ }catch{return {show:true,snap:true,size:16};}
+})();
+const saveGrid=()=>{try{localStorage.setItem(GRID_PREF,JSON.stringify(grid));}catch{}};
+const cap=(v,a,b)=>Math.max(a,Math.min(b,v));
+const valid=n=>Number.isFinite(Number(n));
+const sn=n=>grid.snap?Math.round(n/grid.size)*grid.size:n;
+let active=false,draft=null,selected='action',drag=null,overlay=null,raf=0,lastStamp=0;
+let staleTimeout=0,dirty=false,profile='desktop';
+const hud=()=>root.SemestaPlay?.hud?.()||null;
+const host=()=>$('vlPlayHud');
+const play=()=>root.SemestaPlay?.gameplay?.()||null;
+const currentLayout=()=>HL.resolveSavedLayout(null,localStorage)?.layout||HL.defaults();
+const currentSlot=()=>draft?.[profile]?.[selected]||null;
+const status=(message,success=false)=>{
+ const el=$('suiStatus');if(!el)return;el.textContent=message;el.dataset.success=success?'true':'false';
+};
+function visibleElement(id){
+ for(const selector of HL.SELECTORS[id]||[]){
+  const el=document.querySelector(selector);
+  if(!el||el.hidden||!el.isConnected)continue;
+  if(id==='bag'&&el.id==='ptWindow'&&el.dataset.kind!=='bag')continue;
+  if(id==='phone'&&el.id==='ptWindow'&&el.dataset.kind!=='phone'&&!el.querySelector('.vs-nk'))continue;
+  if(el.closest('[hidden]'))continue;
+  const rect=el.getBoundingClientRect();
+  if(rect.width>2&&rect.height>2)return {el,rect};
+ }
+ return null;
+}
+function geometry(id){
+ const found=visibleElement(id);
+ if(!found||!host())return null;
+ const stage=host().getBoundingClientRect();
+ return {el:found.el,x:found.rect.left-stage.left,y:found.rect.top-stage.top,
+  w:found.rect.width,h:found.rect.height,stage};
+}
+function openPopupFor(id){
+ const h=hud();
+ if(id==='phone'||id==='bag'){
+  if(h?.getOpenWindow?.()!==id)h?.toggleWindow?.(id);
+ }else if(['action','run','hpButton','bagButton','dock','lifePanel','money'].includes(id)){
+  // Leave the popup open only when the user is editing its position.
+  if(h?.getOpenWindow?.())h.toggleWindow(null);
+ }
+}
+function ensureOverlay(){
+ if(overlay)return;
+ const wrap=$('canvas-wrap');if(!wrap)return;
+ overlay=document.createElement('div');
+ overlay.id='semestaUIOverlay';
+ overlay.innerHTML='<div class="sui-grid-layer"></div>'+
+  '<div class="sui-guide x"></div><div class="sui-guide y"></div>'+
+  '<div class="sui-hint-bar">EDIT UI · Drag elemen · Tarik sudut untuk resize · SAVE di kanan</div>';
+ for(const id of HL.ELEMENTS){
+  const node=document.createElement('div');node.className='sui-outline';
+  node.dataset.suiId=id;node.hidden=true;
+  const tag=document.createElement('span');tag.className='sui-tag';tag.textContent=LABELS[id]||id;node.append(tag);
+  const handle=document.createElement('span');handle.className='sui-resizer';handle.title='Resize '+id;handle.hidden=true;node.append(handle);
+  node.addEventListener('pointerdown',e=>pointerStart(e,id));
+  overlay.append(node);
+ }
+ overlay.querySelector('.sui-grid-layer').style.backgroundSize='16px 16px';
+ wrap.append(overlay);
+}
+function refreshBoxes(now=0){
+ if(!active||!overlay)return;
+ // Only geometry is updated; pointer-captured elements must NOT be recreated.
+ const h=host(),w=h?.getBoundingClientRect();
+ if(!w||!w.width||!w.height)return;
+ for(const node of overlay.querySelectorAll('.sui-outline')){
+  const id=node.dataset.suiId;
+  const g=geometry(id);
+  node.hidden=!g; if(!g)continue;
+  node.style.left=g.x+'px';node.style.top=g.y+'px';
+  node.style.width=g.w+'px';node.style.height=g.h+'px';
+  node.classList.toggle('selected',selected===id);
+  node.querySelector('.sui-resizer').hidden=selected!==id;
+ }
+ const cell=overlay.querySelector('.sui-grid-layer');
+ cell.hidden=!grid.show;
+ cell.style.backgroundSize=grid.size+'px '+grid.size+'px';
+ if(now-lastStamp>160){lastStamp=now;const g=geometry(selected);
+  const field=$('suiVisibility');
+  if(field)field.textContent=g?
+   ('VISIBLE · '+Math.round(g.x)+', '+Math.round(g.y)+' · '+Math.round(g.w)+' × '+Math.round(g.h)+' px'):
+   'Elemen ini belum terlihat di Play Mode. Pilih HP / Tas untuk membuka jendelanya.';}
+ raf=requestAnimationFrame(refreshBoxes);
+}
+function updateControls(){
+ const slot=currentSlot();if(!slot)return;
+ $('suiElement').value=selected;
+ $('suiAnchor').value=slot.anchor;
+ $('suiX').value=slot.x;$('suiY').value=slot.y;
+ $('suiScale').value=slot.scale;
+ $('suiScaleLabel').textContent=Math.round(slot.scale*100)+'%';
+ $('suiShowGrid').checked=grid.show;$('suiSnap').checked=grid.snap;
+ $('suiGridSize').value=String(grid.size);
+}
+function syncPreview(){
+ if(!active)return;
+ // Gameplay getter in builder merges this preview without writing storage.
+ root.SemestaPlay?.refreshHud?.();
+ refreshBoxes(performance.now());
+}
+function changeSlot(value){
+ if(!active||!draft)return;
+ const base=currentSlot(),next={...base,...value};
+ draft[profile][selected]=HL.normalizeSlot(next,base);
+ dirty=true;syncPreview();updateControls();
+ status('UNSAVED · Preview aktif, klik SAVE GLOBAL UI untuk simpan.');
+}
+function relativeToSlot(before,id,x,y,w,h){
+ const b=host().getBoundingClientRect();
+ const left=cap(x,0,Math.max(0,b.width-w)),top=cap(y,0,Math.max(0,b.height-h));
+ const [v,u]=before.anchor.split('-');
+ const ox=u==='right'?b.width-w-left:u==='center'?left-(b.width-w)/2:left;
+ const oy=v==='bottom'?b.height-h-top:v==='center'?top-(b.height-h)/2:top;
+ return {anchor:before.anchor,scale:before.scale,
+  x:Math.round(cap(ox,-480,480)),y:Math.round(cap(oy,-480,480))};
+}
+function pointerStart(ev,id){
+ if(!active||ev.button!==0)return;
+ ev.preventDefault();ev.stopPropagation();
+ const box=geometry(id);if(!box)return;
+ if(selected!==id){selected=id;updateControls();}
+ const resizing=!!ev.target.closest('.sui-resizer');
+ drag={id,mode:resizing?'resize':'move',startX:ev.clientX,startY:ev.clientY,
+  g:{...box},slot:{...draft[profile][id]}};
+ try{ev.currentTarget.setPointerCapture(ev.pointerId);}catch{}
+}
+function pointerMove(ev){
+ if(!active||!drag)return;
+ const d=drag,dx=ev.clientX-d.startX,dy=ev.clientY-d.startY;
+ if(d.mode==='resize'){
+  const factor=1+Math.max(dx/Math.max(d.g.w,1),dy/Math.max(d.g.h,1));
+  changeSlot({scale:Math.round(cap(d.slot.scale*factor,.5,1.5)*100)/100});
+ }else{
+  const targetX=sn(d.g.x+dx),targetY=sn(d.g.y+dy);
+  changeSlot(relativeToSlot(d.slot,d.id,targetX,targetY,d.g.w,d.g.h));
+ }
+}
+function pointerEnd(){drag=null;}
+function select(id){
+ if(!HL.ELEMENTS.includes(id))return;
+ selected=id;openPopupFor(id);updateControls();syncPreview();
+}
+function center(axis){
+ const before=currentSlot();
+ if(!before)return;
+ const [v,u]=before.anchor.split('-');
+ const anchor=(axis==='y'||axis==='both'?'center':v)+'-'+
+  (axis==='x'||axis==='both'?'center':u);
+ const next={anchor,x:(axis==='x'||axis==='both')?0:before.x,
+  y:(axis==='y'||axis==='both')?0:before.y};
+ changeSlot(next);
+}
+function start(){
+ if(active){select(selected);return true;}
+ if(!root.SemestaPlay||!root.VLHudLayout)return false;
+ // Enter Play Mode before enabling input capture, so the editor has real
+ // geometry from the exact same HUD that is used during gameplay.
+ if(!root.SemestaLifePlay?.active?.())$('walkMode')?.click();
+ if(!root.SemestaLifePlay?.active?.()){
+  status('Tidak bisa membuka Play Mode. Coba tombol 🎮 dahulu.');return false;
+ }
+ active=true;dirty=false;profile=HL.detectProfile(document);
+ draft=HL.normalize(currentLayout());
+ $('inspector').classList.add('sui-editing');
+ $('inspector').classList.add('mobile-open');
+ $('semestaUIEditorPane').hidden=false;
+ $('layoutPane').hidden=true;$('logicPane').hidden=true;
+ $('tabLayout').classList.remove('active');$('tabLogic').classList.remove('active');
+ $('tabUIEditor').classList.add('active');
+ ensureOverlay();overlay.hidden=false;
+ select(selected);
+ cancelAnimationFrame(raf);raf=requestAnimationFrame(refreshBoxes);
+ status('EDIT UI AKTIF · Elemen HUD langsung di Semesta. Belum ada perubahan.');
+ return true;
+}
+function stop(){
+ if(!active)return;
+ active=false;drag=null;
+ cancelAnimationFrame(raf);raf=0;
+ if(overlay)overlay.hidden=true;
+ $('inspector').classList.remove('sui-editing');
+ $('semestaUIEditorPane').hidden=true;
+ $('tabUIEditor').classList.remove('active');
+ if(!$('tabLayout').classList.contains('active')&&!$('tabLogic').classList.contains('active')){
+  $('tabLayout').classList.add('active');$('layoutPane').hidden=false;
+ }
+ draft=null;dirty=false;
+ // Discard only unsaved preview. Saved global HUD stays untouched.
+ root.SemestaPlay?.refreshHud?.();
+}
+function save(){
+ if(!active||!draft)return;
+ const result=HL.saveGlobalLayout(draft,localStorage);
+ if(!result?.ok){status('SAVE FAILED · '+(result?.reason||'Penyimpanan gagal'));return;}
+ dirty=false;
+ root.SemestaPlay?.refreshHud?.();
+ try{root.VLHub?.publish('gameplay',{scope:'global-game-ui',at:result.at,source:'semesta'});}catch{}
+ status('SAVED ✓ GLOBAL GAME UI · '+new Date(result.at).toLocaleTimeString('id-ID')+
+  ' · Berlaku untuk semua map/kota.',true);
+}
+function reset(){
+ if(!active)return;
+ if(!confirm('Reset layout '+profile.toUpperCase()+' ke default? Perubahan baru disimpan setelah klik SAVE.'))return;
+ draft[profile]=profile==='phone'?HL.phoneProfile():HL.desktopProfile();
+ dirty=true;syncPreview();updateControls();status('RESET PREVIEW · Klik SAVE untuk menyimpan reset.');
+}
+function init(){
+ const btn=$('tabUIEditor'),pane=$('semestaUIEditorPane');
+ if(!btn||!pane)return;
+ const list=$('suiElement'),anchors=$('suiAnchor');
+ for(const id of HL.ELEMENTS){list.add(new Option(LABELS[id]||id,id));}
+ for(const id of HL.ANCHORS)anchors.add(new Option(id,id));
+ btn.addEventListener('click',start);
+ $('tabLayout').addEventListener('click',stop);
+ $('tabLogic').addEventListener('click',stop);
+ $('suiCancel').addEventListener('click',stop);
+ $('suiElement').addEventListener('change',e=>select(e.target.value));
+ $('suiSave').addEventListener('click',save);
+ $('suiReset').addEventListener('click',reset);
+ $('suiCenterX').addEventListener('click',()=>center('x'));
+ $('suiCenterY').addEventListener('click',()=>center('y'));
+ $('suiCenterBoth').addEventListener('click',()=>center('both'));
+ $('suiShowGrid').addEventListener('change',e=>{grid.show=e.target.checked;saveGrid();});
+ $('suiSnap').addEventListener('change',e=>{grid.snap=e.target.checked;saveGrid();});
+ $('suiGridSize').addEventListener('change',e=>{if(GRID_SIZES.includes(Number(e.target.value)))grid.size=Number(e.target.value);saveGrid();});
+ $('suiAnchor').addEventListener('change',e=>changeSlot({anchor:e.target.value}));
+ for(const [id,key] of [['suiX','x'],['suiY','y']]){
+  $(id).addEventListener('change',e=>{
+   if(valid(e.target.value))changeSlot({[key]:cap(Math.round(Number(e.target.value)),-480,480)});
+  });
+ }
+ $('suiScale').addEventListener('input',e=>changeSlot({scale:Number(e.target.value)}));
+ $('suiScale').addEventListener('change',e=>changeSlot({scale:Number(e.target.value)}));
+ // Capture on outlines only. Actual HUD cannot click, move or spend while editing.
+ const layer=$('canvas-wrap');
+ layer.addEventListener('pointermove',pointerMove);
+ layer.addEventListener('pointerup',pointerEnd);
+ layer.addEventListener('pointercancel',pointerEnd);
+ window.addEventListener('keydown',e=>{if(active&&e.key==='Escape'){e.stopPropagation();stop();}});
+ updateControlsIfLoaded();
+}
+function updateControlsIfLoaded(){if(active)updateControls();}
+root.SemestaUIEditor=Object.freeze({start,stop,save,select,active:()=>active,
+ previewLayout:()=>active&&draft?HL.normalize(draft):null,
+ selected:()=>selected,profile:()=>profile,dirty:()=>dirty});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+else init();
+})(window);
