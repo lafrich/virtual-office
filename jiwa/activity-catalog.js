@@ -41,6 +41,9 @@ function activity(raw={}){
   ingredients:(Array.isArray(raw.ingredients)?raw.ingredients:[]).map(v=>slug(v)).filter(Boolean).slice(0,12),
   outputItem:slug(raw.outputItem),
   outputLabel:str(raw.outputLabel,80),
+  grantType:['none','inventory','furniture','room','prop'].includes(raw.grantType)?raw.grantType:'none',
+  riskPercent:num(raw.riskPercent,0,100,0),
+  detentionMinutes:num(raw.detentionMinutes,0,4320,0),
   punishment:str(raw.punishment,90),
   // Explicit opt-in. Unbound activities remain drafts and cannot be triggered.
   enabled:raw.enabled===true,
@@ -76,8 +79,15 @@ function seed(){
  const entries=examples.map(([category,id,label,premise,buildingQuery,actionAsset,minExp,durationMinutes,moneyDelta,statEffects])=>
   activity({category,id,label,premise,buildingQuery,actionAsset,minExp,durationMinutes,moneyDelta,statEffects,
    steps:'1. Pastikan syarat terpenuhi → 2. Dekati '+buildingQuery+' → 3. Jalankan animasi '+actionAsset+' → 4. Terima efek.'}));
- const recipe=entries.find(x=>x.id==='nasi_goreng');recipe.ingredients=['nasi','telur','minyak'];recipe.outputItem='nasi_goreng';recipe.outputLabel='Nasi Goreng';
+ const recipe=entries.find(x=>x.id==='nasi_goreng');recipe.ingredients=['nasi','telur','minyak'];recipe.outputItem='nasi_goreng';recipe.outputLabel='Nasi Goreng';recipe.grantType='inventory';
  const drink=entries.find(x=>x.id==='kopi_susu');drink.ingredients=['kopi','susu','gula'];drink.outputItem='kopi_susu';drink.outputLabel='Kopi Susu';
+ drink.grantType='inventory';
+ const bed=entries.find(x=>x.id==='beli_kost');bed.grantType='room';
+ const furn=entries.find(x=>x.id==='beli_furnitur');furn.grantType='furniture';furn.outputItem='bed';furn.outputLabel='Kasur';
+ const props=entries.find(x=>x.id==='beli_props');props.grantType='prop';props.outputItem='payung';props.outputLabel='Payung';
+ const steal=entries.find(x=>x.id==='mencuri');steal.riskPercent=30;steal.detentionMinutes=60;
+ const prison=entries.find(x=>x.id==='penjara');prison.detentionMinutes=180;prison.punishment='penjara';
+
  return {id:'global-game-activities',format:FORMAT,version:1,updatedAt:null,activities:entries};
 }
 function normalize(raw){
