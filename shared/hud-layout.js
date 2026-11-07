@@ -6,12 +6,15 @@
  if(root)root.VLHudLayout=api;
 })(typeof window!=='undefined'?window:typeof globalThis!=='undefined'?globalThis:null,function(root){
  'use strict';
- const ELEMENTS=['lifePanel','phone','bag','action','run','needs','toast','dock'];
+ const ELEMENTS=['lifePanel','money','hpButton','bagButton','phone','bag','action','run','needs','toast','dock'];
  const ANCHORS=['top-left','top-right','bottom-left','bottom-right'];
  const MIN_SCALE=0.5, MAX_SCALE=1.5, MIN_TAP=40;
  const SELECTORS={
   lifePanel:['#semestaLifePlayPanel'],
-  phone:['#vs-layer .vs-nk','.vs-nk','#ptWindow'],
+  money:['#vs-money'],
+  hpButton:['#ptPhoneBtn'],
+  bagButton:['#ptBagBtn'],
+  phone:['#vs-layer .vs-nkc','#vs-layer .vs-nk','.vs-nk','#ptWindow'],
   bag:['#ptWindow'],
   action:['#ptActionBtn'],
   run:['#ptRunBtn'],
@@ -20,7 +23,7 @@
   dock:['#y2-dock']
  };
  const ORIGIN={
-  lifePanel:'top left',
+  lifePanel:'top left',money:'center center',hpButton:'center center',bagButton:'center center',
   phone:'center center', bag:'top left', action:'center center',
   run:'bottom left', needs:'top left', toast:'top left', dock:'bottom right'
  };
@@ -35,6 +38,7 @@
  function desktopProfile(){
   return {
    lifePanel:slot(1,'top-left',10,10),
+   money:slot(1,'bottom-right',250,30),hpButton:slot(1,'bottom-right',156,30),bagButton:slot(1,'bottom-right',97,30),
    phone:slot(1,'top-right',16,48),
    bag:slot(1,'top-left',16,48),
    action:slot(1,'bottom-right',12,10),
@@ -49,6 +53,7 @@
   // action/run stay at or above a 40px tap target.
   return {
    lifePanel:slot(0.88,'top-left',5,5),
+   money:slot(1,'bottom-right',248,29),hpButton:slot(1,'bottom-right',154,29),bagButton:slot(1,'bottom-right',95,29),
    phone:slot(0.72,'top-right',10,40),
    bag:slot(0.82,'top-left',10,40),
    action:slot(0.72,'bottom-right',10,10),
@@ -204,6 +209,23 @@
   ELEMENTS.forEach(id=>{
    const box=boxes[id];if(!box||!box.el)return;
    const el=box.el;
+   // Buttons are nested inside the capsule dock. Absolute top/left would
+   // position them relative to that parent, rather than the game viewport.
+   // A local translation instead positions them in host-screen coordinates.
+   if(box.custom&&['action','hpButton','bagButton','money'].includes(id)){
+    if(el.dataset.hudPos==='translated'){
+     el.style.transform='none';
+    }else{
+     el.style.left='';el.style.top='';el.style.right='';el.style.bottom='';el.style.position='';
+     el.style.transform='none';
+    }
+    const hb=hostBox(host),r=el.getBoundingClientRect();
+    const dx=box.x-(r.left-hb.left),dy=box.y-(r.top-hb.top);
+    el.style.transform='translate('+Math.round(dx)+'px,'+Math.round(dy)+'px) scale('+box.scale+')';
+    el.style.transformOrigin='top left';
+    el.dataset.hudPos='translated';el.dataset.hudScale=String(box.scale);
+    return;
+   }
    el.style.transform='scale('+box.scale+')';
    el.style.transformOrigin=box.custom?'top left':(ORIGIN[id]||'top left');
    if(box.custom){
