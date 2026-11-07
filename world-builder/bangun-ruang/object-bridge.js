@@ -81,7 +81,10 @@ function cut(cv,pivot){
  ctx.drawImage(cv,left,top,width,height,0,0,width,height);
  return {url:out.toDataURL('image/png'),size:[width,height],pivot:[pivot[0]-left,pivot[1]-top]};
 }
-const fixtures=Object.entries(g.VLBuildingInterior?.types||{}).map(([id,def])=>({
+// Semesta custom furniture is already represented by its own original
+// Pixel Creator object. Do not generate a second generic fixture sprite.
+const fixtures=Object.entries(g.VLBuildingInterior?.types||{})
+ .filter(([,def])=>def.external!==true).map(([id,def])=>({
  id:'furniture-'+id,name:def.label,category:'furniture',kind:'fixture',fixture:id,
  footprint:[def.w,def.d],collision:true,interactions:def.actions||[]
 }));
