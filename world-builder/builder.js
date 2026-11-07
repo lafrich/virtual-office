@@ -2484,7 +2484,17 @@ function ensurePlayHud(){
  if(!wrap)return null;
  playHud=window.VLPlayHud.mount(wrap,{
   mode:'overlay',withWalkPad:true,getGameplay:currentPlayGameplay,hideLegacyNeeds:true,
-  onAction:()=>{if(window.SemestaLifePlay?.handleAction?.())return;if(tryLoakPickup()||tryLoakSellNearby())return;if(!enterNearbyBuilding())tell('ACTION · no nearby context');},
+  onAction:()=>{
+   if(window.SemestaLifePlay?.active?.()){
+    if(window.SemestaLifePlay.handleAction())return;
+    if(!enterNearbyBuilding())tell('ACTION · lihat Nokia → Peta untuk lokasi aktivitas');
+    return;
+   }
+   // Legacy Loak preview has its own money system; do not mix it with
+   // Jiwa Play Mode, which is the authoritative wallet and inventory.
+   if(tryLoakPickup()||tryLoakSellNearby())return;
+   if(!enterNearbyBuilding())tell('ACTION · no nearby context');
+  },
   onActionDown:ev=>window.SemestaLifePlay?.actionDown?.(ev),
   onActionUp:ev=>window.SemestaLifePlay?.actionUp?.(ev),
   onPhone:()=>window.SemestaLifePlay?.openPhone?.()||false,
