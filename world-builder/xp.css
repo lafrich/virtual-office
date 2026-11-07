@@ -561,3 +561,22 @@ html,body{width:100%;height:100%;overflow:hidden}
  #semestaUIEditorPane{padding-bottom:8px}
  #semestaUIOverlay .sui-hint-bar{top:6px;font-size:9px;max-width:90%;overflow:hidden;text-overflow:ellipsis}
 }
+
+/* Phone Mode HUD editing: real iframe geometry, selectable stacked controls. */
+.sui-select-row{display:grid;grid-template-columns:34px minmax(0,1fr) 34px;gap:4px}
+#semestaUIEditorPane .sui-select-row button{min-width:32px;min-height:34px;padding:3px}
+#semestaUIEditorPane .sui-select-row select{min-height:34px;width:100%;min-width:0}
+#semestaUIEditorPane .sui-selected-toggle{display:flex;flex-direction:row;align-items:flex-start;gap:6px;
+ font:10px/1.4 Tahoma,Verdana,sans-serif;color:#224a74;margin:3px 0 5px}
+.sui-selected-toggle input{flex:none;margin-top:1px}
+#semestaUIOverlay .sui-phone-shield{position:absolute;display:none;z-index:1;pointer-events:auto;
+ cursor:crosshair;background:rgba(12,36,80,.035)}
+#semestaUIOverlay[data-profile="phone"] .sui-phone-shield{display:block}
+#semestaUIOverlay .sui-outline{z-index:2}
+#semestaUIOverlay .sui-outline.ghost{border-style:dotted;background:#eddca526;
+ outline:1px dashed #9b7427}
+#semestaUIOverlay .sui-outline.ghost .sui-tag{background:#936b18}
+#semestaUIOverlay[data-profile="phone"] .sui-outline.selected{z-index:4}
+#semestaUIOverlay[data-profile="phone"] .sui-resizer{width:23px;height:23px;right:-12px;bottom:-12px}
+#semestaUIOverlay[data-profile="phone"] .sui-tag{top:-22px;min-height:20px;font-size:10px}
+#semestaUIOverlay[data-profile="phone"] .sui-hint-bar{z-index:5;max-width:95%;overflow:hidden;text-overflow:ellipsis}
