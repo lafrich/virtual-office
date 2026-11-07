@@ -573,14 +573,14 @@ function moneyBalance(){return active&&state?state.wallet:null;}
 function bagLabels(){return active&&state?(state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id):null;}
 function speedFactor(){return active&&state?RULES.speedFactor(state):1;}
 const NOKIA_ICONS={
- fish:'peta',siomay_batagor:'stall',pasar_ikan:'market',job_silver:'office',job_pak_ogah:'office',
- job_kang_parkir:'office',premium_job:'office',loak:'market',scavenge:'stall',tree:'tree',
- warung:'stall',coffee:'cup',public_wc:'house',public_bath:'house',kost:'house',tent:'house',
- help:'kontak',charity:'house',bench:'tree',course:'kursus',hansip:'office'
+ fish:'fish',siomay_batagor:'stall',pasar_ikan:'market',job_silver:'office',job_pak_ogah:'office',
+ job_kang_parkir:'office',premium_job:'office',loak:'market',scavenge:'scav',tree:'tree',
+ warung:'stall',coffee:'cup',public_wc:'wc',public_bath:'bath',kost:'house',tent:'tent',
+ help:'kontak',charity:'charity',bench:'bench',course:'kursus',hansip:'hansip'
 };
 function nokiaSnapshot(){
  if(!active||!state)return null;
- const iconFor=n=>n.id.startsWith('prayer_')?'house':NOKIA_ICONS[n.id]||'peta';
+ const iconFor=n=>n.id.startsWith('prayer_')?'prayer':NOKIA_ICONS[n.id]||'peta';
  return {
   wallet:state.wallet,experience:state.experience,energy:state.energy,
   moral:state.moral,hygiene:state.hygiene,bladder:state.bladder,fullness:state.fullness,
