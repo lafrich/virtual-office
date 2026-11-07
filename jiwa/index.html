@@ -184,6 +184,13 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
  .activity-pair{grid-template-columns:repeat(2,minmax(0,1fr))}
  .activity-cloud{flex-direction:column}
 }
+
+.window[data-jiwa-tab="activities"] .workspace{grid-template-columns:minmax(0,1fr)}
+.window[data-jiwa-tab="activities"] .workspace>.tree-panel,
+.window[data-jiwa-tab="activities"] .workspace>.inspector{display:none!important}
+.window[data-jiwa-tab="activities"] .workspace>.middle{min-width:0}
+.window[data-jiwa-tab="activities"] #activityView{display:flex;flex-direction:column;min-height:0}
+.window[data-jiwa-tab="activities"] #activityView>.viewport-scroll{flex:1;overflow:auto}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -280,14 +287,14 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 <script src="../shared/loak-play.js"></script>
 <script src="/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1"></script>
 <script src="./foundation-engine.js"></script>
-<script src="./life-economy.js"></script>
+<script src="./life-economy.js?v=activity-engine-20261108"></script>
 <script src="./activity-catalog.js?v=activity-premise-v1"></script>
-<script src="../world-builder/drive-sync.js?v=jiwa-catalog-cloud-v1"></script>
+<script src="../world-builder/drive-sync.js?v=jiwa-catalog-cloud-v2"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="./jiwa.js?v=global-game-ui-v2-precision-20261108"></script>
+<script src="./jiwa.js?v=activity-tabs-20261108"></script>
 <script src="./character-link.js?v=mahluk1-v6b-20261107"></script>
 <script src="./context-editor.js"></script>
 <script src="./mechanics-panel.js"></script>
 <script src="./life-editor.js"></script>
-<script src="./activity-editor.js?v=activity-premise-v1"></script>
+<script src="./activity-editor.js?v=activity-premise-v2"></script>
 </body></html>
