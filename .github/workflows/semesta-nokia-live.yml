@@ -1,0 +1,48 @@
+name: Semesta Nokia + Jiwa live browser check
+on:
+  push:
+    branches: [main]
+    paths:
+      - "shared/vl-hud/phone_ellen.js"
+      - "shared/vl-hud/nokia-play.js"
+      - "shared/play-hud.js"
+      - "world-builder/semesta-life-play.js"
+      - "world-builder/builder.js"
+      - "world-builder/index.html"
+      - "jiwa/life-economy.js"
+      - "tests/nokia-live-browser.e2e.cjs"
+      - ".github/workflows/semesta-nokia-live.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - name: Checkout original Semesta
+        uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - name: Checkout native asset pipeline
+        uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: npm install --no-save playwright@1.56.1
+      - name: Serve app and renderer from the same origin
+        run: |
+          python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/nokia-semesta-server.log 2>&1 &
+          sleep 2
+      - name: Check browser runtime: buy token, Dompet, activity pins, actor position
+        run: node virtual-office/tests/nokia-live-browser.e2e.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nokia-jiwa-real-browser
+          path: screenshots/
+          if-no-files-found: ignore
