@@ -434,16 +434,7 @@ function runAction(action,args={}){
  if(action==='buy_room'){
   args={...args,roomSpawn:{id:node.sourceId||'kost_placeholder',x:node.x,z:node.z,placeholder:node.placeholder}};
  }
- if(action==='worship'&&node){
-  const religion=state.identity?.religion;
-  args={...args,placeReligion:religion};
-  if(node.sourceId){const src=getWorld().objects?.find(o=>o.id===node.sourceId),title=name(src||{}).toLowerCase();
-   if(/masjid|mushola|musala/.test(title))args.placeReligion='islam';
-   else if(/gereja/.test(title))args.placeReligion='kristen';
-   else if(/pura/.test(title))args.placeReligion='hindu';
-   else if(/vihara/.test(title))args.placeReligion='buddha';
-  }
- }
+ if(action==='worship'&&node){args={...args,placeReligion:node.religion};}
  const result=RULES.run(config,state,action,args);
  if(result.ok){
   state=result.state;
