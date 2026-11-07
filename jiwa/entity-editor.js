@@ -41,8 +41,11 @@ function ruleList(){
   const b=document.createElement('button');b.type='button';
   b.className='activity-row'+(rule.id===id?' selected':'');
   const title=document.createElement('b');title.textContent=rule.label;
+  const marked=(rule.targets||[]).filter(t=>t.cityId===city()?.id).length;
+  const live=rule.enabled&&rule.selectionMode==='directory'&&marked>0;
   const details=document.createElement('span');details.textContent=
-   (rule.enabled?'● LIVE':'○ DRAFT')+' · '+rule.operation+' · '+(rule.query||'Unbound');
+   (live?'● LIVE':rule.enabled?'○ NO CITY TARGET':'○ DRAFT')+
+   ' · '+rule.operation+' · '+marked+' marked here';
   b.append(title,details);b.onclick=()=>select(rule.id);el.append(b);
  }
  for(const b of document.querySelectorAll('[data-entity-kind]')){
@@ -115,12 +118,13 @@ function renderDirectoryPanel(){
    if(enabled)targetMap.set(key,{cityId,objectId:String(o.id)});
    else targetMap.delete(key);
   }
-  if(update({targets:[...targetMap.values()],selectionMode:'directory',enabled:enabled||selected().enabled})){
+  if(update({targets:[...targetMap.values()],selectionMode:'directory',
+   enabled:targetMap.size>0&&(enabled||selected().enabled)})){
    $('worldEnabled').checked=selected().enabled;
    const match=P.matchWorld(selected(),entities().filter(o=>A.kindOf(o)===selected().kind),cityId);
    $('worldBindingStatus').textContent=match?'✓ Match objek nyata: '+(match.name||match.asset||match.id):
     '⚠ Belum ada directory yang ditandai di city ini.';
-   renderDirectoryPanel();
+   renderDirectoryPanel();ruleList();
   }
  };
  for(const o of showing){
@@ -143,9 +147,9 @@ function renderDirectoryPanel(){
 function detailForm(){
  const area=$('entityEditor'),r=selected();
  if(!r){area.innerHTML='<div class="activity-empty">Pilih atau buat World Entity rule.</div>';return;}
- const matches=entities().filter(o=>A.kindOf(o)===r.kind),match=P.matchWorld(r,matches,city()?.id),available=!!match;
- const opts=Array.from(new Set([r.query,...matches.map(v=>r.matchMode==='asset'?v.asset||v.assetId:
-  r.matchMode==='id'?v.id:r.matchMode==='type'?v.type:v.name||v.label).filter(Boolean)]));
+ const matches=entities().filter(o=>A.kindOf(o)===r.kind);
+ const match=r.selectionMode==='directory'?P.matchWorld(r,matches,city()?.id):null;
+ const available=!!match;
  const allActions=[...new Set([r.actionAsset,...catalog().activities.map(a=>a.actionAsset),
   'idle','talk','pee_wall','vandal_wall','graffiti','knock_door','sit','walk','help_npc'])].filter(Boolean);
  const options=(arr,value,labelFn=x=>x)=>arr.map(v=>'<option value="'+esc(v)+'"'+(v===value?' selected':'')+'>'+esc(labelFn(v))+'</option>').join('');
@@ -158,18 +162,17 @@ function detailForm(){
  area.innerHTML='<div class="entity-preset-steps"><strong>02 · DETAIL ENTITY</strong><span>'+esc(r.kind.toUpperCase())+
   ' · '+esc(r.tier.toUpperCase())+'</span><button type="button" id="worldChangeTier">↶ TEMPLATE</button></div>'+
   '<div class="activity-head"><div><strong>'+esc(r.label)+'</strong><small>'+esc(r.id)+'</small></div>'+
-  '<span class="activity-state '+(r.enabled?'ready':'draft')+'">'+(r.enabled?'LIVE':'DRAFT')+'</span></div>'+
+  '<span class="activity-state '+(r.enabled&&available?'ready':'draft')+'">'+
+   (r.enabled&&available?'LIVE IN THIS CITY':r.enabled?'NO CITY TARGET':'DRAFT')+'</span></div>'+
   '<div class="activity-switch"><label><input id="worldEnabled" type="checkbox"'+(r.enabled?' checked':'')+'> Enable di game</label>'+
-   '<small>Rule hanya aktif ketika objek matching benar-benar ditemukan di kota yang sedang dimainkan.</small></div>'+
-  '<div class="activity-fieldset"><h4>01 · IDENTITAS & MATCHING</h4>'+
+   '<small>Rule aktif di Play Mode hanya ketika ID objek sudah di-marking di kota ini.</small></div>'+
+  '<div class="activity-fieldset"><h4>01 · IDENTITAS RULE</h4>'+
   '<label>Nama rule<input id="worldLabel" value="'+esc(r.label)+'"></label>'+
   '<label>Jenis entitas<select id="worldEntityType">'+options(P.ENTITIES,r.kind,x=>x.toUpperCase())+'</select></label>'+
-  '<label>Metode pencocokan<select id="worldMatchMode">'+options(P.MATCH_MODES,r.matchMode,x=>x.toUpperCase())+'</select></label>'+
-  '<label>Target Semesta<select id="worldQuery"><option value="">— Pilih entity dari city preview —</option>'+opts.map(q=>
-    '<option value="'+esc(q)+'"'+(r.query===q?' selected':'')+'>'+esc(q)+'</option>').join('')+'</select></label>'+
+  '<p class="activity-help">Tentukan target lewat directory Semesta di bawah, bukan pencocokan nama/aset. Data query legacy tetap tersimpan untuk migrasi tetapi tidak dipakai Play Mode.</p>'+
   '<p id="worldBindingStatus" class="activity-validate">'+(available?
-    '✓ Match objek nyata: '+esc(match.name||match.asset||match.id):
-    '⚠ Belum ada objek cocok di kota preview. Tidak akan muncul di gameplay.')+'</p></div>'+
+    '✓ ID ditandai: '+esc(match.name||match.asset||match.id):
+    '⚠ Belum ada ID terpilih di kota ini; tidak muncul di gameplay.')+'</p></div>'+
   '<div class="activity-fieldset"><h4>02 · DIRECTORY SEMESTA / MARK INTERAKTIF</h4>'+
   '<p class="activity-help">Pilih beberapa ID dari directory city yang boleh memakai rule ini. Marking disimpan per city dan mengaktifkan rule; jika semua di-unmark, tidak ada fallback otomatis ke nama umum.</p>'+
   '<div class="activity-pair"><label>Cari Directory<input id="worldDirectorySearch" type="search" placeholder="Cari nama / ID / asset..."></label>'+
@@ -207,15 +210,21 @@ function detailForm(){
   if(update(payload)&&redraw)render();
  };
  $('worldChangeTier').onclick=()=>{chosenTier=selected().tier;pendingCategory=selected().category;phase='preset';render();};
- $('worldEnabled').onchange=e=>patch({enabled:e.target.checked},true);
+ $('worldEnabled').onchange=e=>{
+  if(e.target.checked&&(r.selectionMode!=='directory'||!(r.targets||[]).length)){
+   e.target.checked=false;
+   status('PILIH DIRECTORY DAHULU · Mark minimal satu objek dari Semesta.');
+   return;
+  }
+  patch({enabled:e.target.checked},true);
+ };
  $('worldLabel').onchange=e=>patch({label:e.target.value},true);
  $('worldEntityType').onchange=e=>{
   const k=e.target.value;
-  patch({kind:k,operation:k==='building'?'enter':k==='npc'?'npc_quest':'ambient',enterable:k==='building',targets:[]},true);
+  patch({kind:k,operation:k==='building'?'enter':k==='npc'?'npc_quest':'ambient',
+   enterable:k==='building',targets:[],enabled:false,selectionMode:'directory'},true);
   kind=k;
  };
- $('worldMatchMode').onchange=e=>patch({matchMode:e.target.value,query:''},true);
- $('worldQuery').onchange=e=>patch({query:e.target.value},true);
  $('worldOperation').onchange=e=>patch({operation:e.target.value},true);
  if($('worldEnterable'))$('worldEnterable').onchange=e=>patch({enterable:e.target.checked});
  if($('worldActivity'))$('worldActivity').onchange=e=>patch({activityId:e.target.value});

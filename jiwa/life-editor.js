@@ -25,7 +25,8 @@
  function renderEditor(){
   const p=B.project();if(!p){editor.innerHTML='<div class="card">Pilih City Draft Semesta atau GLOBAL FOUNDATION untuk edit aturan.</div>';return;}
   const c=config(),s=c.settings;
-  editor.innerHTML='<div class="card"><h3>GAMEPLAY V1 / LIFE ECONOMY</h3>'+
+  const authored=!!window.JiwaActivities?.readLocal?.(localStorage)?.updatedAt;
+  editor.innerHTML='<div class="card"><h3>GAMEPLAY V1 / LIFE ECONOMY · ADVANCED SANDBOX</h3>'+
    '<p class="subtle">Harga & peluang adalah balancing awal yang dapat diedit. Simulasi bersifat lokal; bukan transaksi multiplayer. Semesta menyimpan posisi, Mahluk Hidup menyimpan animasi.</p>'+
    '<div class="context-grid"><label>Agama / keyakinan<select data-identity="religion">'+
    E.RELIGIONS.map(x=>'<option value="'+x+'" '+(c.identity.religion===x?'selected':'')+' '+(x==='satanis'?'disabled':'')+'>'+esc(x.toUpperCase())+(x==='satanis'?' (V2 LOCK)':'')+'</option>').join('')+
@@ -37,11 +38,15 @@
    '<td><input type="number" min="1" max="100000" data-fish="'+i+'" data-key="spoilMinutes" value="'+f.spoilMinutes+'"></td>'+
    Object.keys(E.BUYERS).map(b=>'<td><label style="display:flex;gap:3px;align-items:center"><input type="checkbox" data-fish="'+i+'" data-buyer="'+b+'" '+(f.buyers[b]!==null?'checked':'')+' title="Buyer accepts this fish"><input type="number" min="0" max="1000000" data-fish="'+i+'" data-price="'+b+'" value="'+(f.buyers[b]??0)+'" '+(f.buyers[b]===null?'disabled':'')+'></label></td>').join('')+'</tr>').join('')+
    '</tbody></table></div><p class="subtle">Ikan Sapu-sapu → Bang Siomay menerima, Pasar Ikan menolak. Ikan konsumsi → keduanya menerima. Semua harga editable.</p></div>'+
-   '<div class="card"><h3>DATABASE PEKERJAAN · EDITABLE</h3><p class="subtle">Manusia Silver, Pak Ogah, Kang Parkir dan kerja premium punya aturan berbeda. EXP mengurangi waktu kerja. Semua nilai ini disimpan bersama City Rules.</p>'+
+   '<div class="card"><h3>DATABASE PEKERJAAN · DEMO LEGACY</h3><p class="subtle">'+
+   (authored?'READ ONLY · Pekerjaan final diedit di tab MONEY lalu dipasang pada objek melalui ENTITIES.':
+    'SANDBOX DEMO · Pekerjaan contoh untuk tes. Ketika katalog Jiwa disimpan, pekerjaan Play Mode hanya memakai MONEY + ENTITIES.')+
+   '</p>'+
    '<div class="life-table-scroll"><table class="life-table"><thead><tr><th>Jenis kerja</th><th>Upah</th><th>Waktu (m)</th><th>Energi -</th><th>Kebersihan -</th><th>EXP +</th><th>Min kebersihan</th></tr></thead><tbody>'+
    c.jobs.map((j,i)=>'<tr><td><b>'+esc(j.label)+'</b></td>'+
     ['wage','minutes','energyCost','hygieneCost','exp','minHygiene'].map(k=>
-    '<td><input type="number" min="0" max="1000000" data-job="'+i+'" data-job-key="'+k+'" value="'+j[k]+'"></td>').join('')+
+    '<td><input type="number" min="0" max="1000000" data-job="'+i+'" data-job-key="'+k+
+     '" value="'+j[k]+'"'+(authored?' disabled title="Edit di MONEY dan ENTITIES"':'')+'></td>').join('')+
    '</tr>').join('')+'</tbody></table></div></div>'+
    '<div class="card"><h3>PARAMETER CORE SURVIVAL</h3><div class="context-grid">'+
    Object.entries({fishEnergy:'Energi / mancing',fishMinutes:'Durasi mancing (menit)',coffeePrice:'Harga kopi (Rp)',roomPrice:'Beli akses kost sekali (Rp)',
@@ -123,7 +128,7 @@
   const selected=$('lifeItem')?.value;
   const previousBuyer=$('lifeBuyer')?.value;
   game.innerHTML='<div class="card"><h3>▶ GAME PREVIEW — '+esc(B.city()?.name||'GLOBAL FOUNDATION')+'</h3>'+
-    '<p class="subtle">Memakai koordinat objek dan tile City Draft asli dari Semesta. Tampilan 2D isometric sementara; bukan renderer 3D Semesta. Pin berlabel PLACEHOLDER hanya titik interaksi virtual, belum menyunting kota atau membuat aset.</p>'+
+    '<p class="subtle">SANDBOX LEGACY · Preview 2D untuk tes ekonomi dasar, bukan interaksi Play Mode authored. Pin PLACEHOLDER tidak pernah menyunting atau menyimpan objek Semesta.</p>'+
     '<div class="life-preview-toolbar"><button data-move="up">↑</button><button data-move="left">←</button><button data-move="down">↓</button><button data-move="right">→</button><button data-zoom="-1">－ Zoom</button><button data-zoom="1">＋ Zoom</button></div>'+
     '<canvas id="lifeCanvas" width="860" height="410" tabindex="0" aria-label="Playable city schematic"></canvas>'+
     '<div class="life-preview-toolbar">'+spots.map(v=>'<button data-focus="'+v.id+'" '+(focusId===v.id?'class="primary"':'')+'>'+v.name+'</button>').join('')+'</div>'+

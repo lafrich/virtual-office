@@ -31,3 +31,12 @@ Context files: `jiwa/foundation-engine.js` (pure rule logic), `jiwa/context-edit
 - **Fishing loot table**: sapu-sapu paling sering (weight 60), disusul lele (20), nila (12), mujair (8). **Bang Siomay/Batagor** menerima semua jenis dengan harga berbeda. **Pasar ikan** menolak sapu-sapu. Bobot, harga, penolakan pembeli, dan durasi busuk dapat diedit per kota dalam GAME PREVIEW.
 - Identitas keyakinan dan zodiak bisa disetel di editor; **Friends/social**, **referral**, dan **jalur antagonis fiksi V2** tetap dikunci. Aturan ini tidak mengubah animasi Mahluk Hidup.
 - Data project tetap tersimpan lokal per kota via **SAVE RULES**, bukan akun multiplayer / Google Drive. Pengujian: node --test tests/jiwa-life-economy.test.cjs.
+
+## Source of truth: Jiwa authoring vs legacy sandbox (2026-11-08)
+
+- **Jiwa Activities + World Entities** owns playable activity effects, wages and city-scoped targets. All playable objects must be marked by exact Semesta object ID. Historical name/query rules are retained only for migration and cannot authorize world actions in Play Mode.
+- **Semesta Play Mode** uses legacy example jobs/places and temporary placeholders only before a global Jiwa catalog has been saved. Once saved, legacy demonstration sites are excluded, and all authored actions use World Entities.
+- **Advanced / Life Economy** Jobs and 2D Game Preview are labeled sandbox legacy, not a second source of playable wages. The job inputs become read-only when an authored catalog exists; global survival/economy settings remain editable.
+- EXP prerequisites and player experience both use **0–100**. Older out-of-range EXP requirements are clamped on normalization. Check high-tier activities after migration.
+- Multiple activities and world rules linked to the same actual placed object appear together in its interaction menu; object geometry and ID are unchanged.
+- Save is local to the browser unless Drive backup/load is explicitly used. Google Drive is not a multiplayer server or live shared database.

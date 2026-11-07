@@ -17,6 +17,7 @@ on:
       - "tests/jiwa-authored-runtime-guards.test.cjs"
       - "jiwa/interaction-rules.js"
       - "jiwa/entity-editor.js"
+      - "jiwa/life-editor.js"
       - "world-builder/builder.js"
       - "tests/jiwa-activity-editor.e2e.cjs"
       - ".github/workflows/jiwa-activity-integration.yml"
@@ -46,6 +47,7 @@ jobs:
           node --check jiwa/activity-catalog.js
           node --check jiwa/activity-editor.js
           node --check jiwa/entity-editor.js
+          node --check jiwa/life-editor.js
           node --check jiwa/interaction-rules.js
           node --check jiwa/life-economy.js
           node --check jiwa/jiwa.js
