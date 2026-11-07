@@ -2,7 +2,24 @@
 
 Written 2026-11-07 (Asia/Jakarta). Cloudflare Worker and secrets were not changed.
 
-## This deploy (native side-lie frames on the bed)
+## This deploy (additive v6p activity clip consume-list)
+
+- Previous live `main`: `47c3105fed3ec6f7bc60c66f8f56b96af252c378`
+- Feature commit: `799a0d7b4ff721eaa1f4fd56a9947ba9f5a229b3`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 799a0d7b4ff721eaa1f4fd56a9947ba9f5a229b3
+git push origin main
+```
+
+That restores the previous Semesta consume-list (`idle|walk|talk|sit|lie|sleep|custom` only) and returns `sw.js` to v14. It does not revert the native bed side-lie frames, tent seating, spawn/respawn, or Mahluk Hidup launcher commits. jiwa/ pose playback is unchanged.
+
+## Previous deploy (native side-lie frames on the bed)
 
 - Previous live `main`: `4ee84ca1f07c69bcf8ebb3c3877531165682651b`
 - Feature commit: `ebc2a4bfde582c5562daa91174436ad39f78de35`
