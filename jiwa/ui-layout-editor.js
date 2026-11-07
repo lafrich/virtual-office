@@ -9,12 +9,14 @@ if(!HL||!B||!stage||!nodes||!inspector||!list)return;
 const $=id=>document.getElementById(id);
 const DEVICES={desktop:{w:1280,h:720},phone:{w:390,h:844}};
 const SIZES={
- lifePanel:{w:350,h:260},needs:{w:165,h:84},dock:{w:245,h:70},
+ lifePanel:{w:350,h:260},needs:{w:165,h:84},dock:{w:275,h:70},
+ money:{w:84,h:30},hpButton:{w:42,h:42},bagButton:{w:42,h:42},
  action:{w:72,h:72},run:{w:72,h:40},phone:{w:194,h:360},
  bag:{w:240,h:250},toast:{w:210,h:44}
 };
 const TITLES={
- lifePanel:'Survival / Stats',needs:'Legacy Needs',dock:'Uang · HP · Tas',
+ lifePanel:'Survival / Stats',needs:'Legacy Needs',dock:'Dock background',
+ money:'Saldo',hpButton:'Tombol HP',bagButton:'Tombol Tas',
  action:'Action',run:'Run',phone:'Nokia HP',bag:'Jendela Tas',toast:'Notifikasi'
 };
 const MIN_SIZE=20;
@@ -51,7 +53,10 @@ function dimensions(){
 function nodeMarkup(id){
  if(id==='lifePanel')return '<div class="jui-title">NAMANYA JUGA HIDUP</div><div class="jui-mock-body">🏕 HOBO &nbsp; Rp 6.000<hr><div class="jui-meter">Energi ▰▰▰▰▰▰▰</div><div class="jui-meter">Kebersihan ▰▰▰▰▰▱</div><div class="jui-meter">Pipis ▰▱▱▱▱▱</div><div class="jui-meter">Moral ▰▰▰▰▱▱</div></div>';
  if(id==='needs')return '<b>STATUS</b><div>Energi ▰▰▰▰▰</div><div>Kebersihan ▰▰▰▱▱</div>';
- if(id==='dock')return '<div class="jui-dock"><b>Rp 6.000</b><span>📱 HP</span><span>🎒 Tas</span></div>';
+ if(id==='dock')return '<div class="jui-dock"></div>';
+ if(id==='money')return '<div class="jui-money">Rp 6.000</div>';
+ if(id==='hpButton')return '<div class="jui-hp-btn">HP</div>';
+ if(id==='bagButton')return '<div class="jui-bag-btn">TAS</div>';
  if(id==='action')return '<div class="jui-orb">ACTION</div>';
  if(id==='run')return '<div class="jui-run">RUN</div>';
  if(id==='phone')return '<div class="jui-phone"><div class="jui-nokiabrand">NOKIA</div><div class="jui-lcd">PETA AKTIVITAS<small>● Pekerjaan<br>● Kost<br>● Warung<br>◉ Kamu</small></div><div class="jui-keys">◄ &nbsp; OK &nbsp; ►<div>1 &nbsp; 2 &nbsp; 3</div></div></div>';
