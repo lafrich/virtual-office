@@ -27,7 +27,7 @@ test('No assets? Placeholder actor and interaction markers exist only in test, n
  assert.match(builder,/clearTemporaryLifePlayer\(\)/);
  assert.match(builder,/copy\.objects=copy\.objects\.filter\(o=>o\.id!=='__semesta_life_temporary_player__'\)/);
  assert.match(builder,/id:asNew\?null:activeDraftId,name,document:mapForPersist\(\)/);
- assert.match(play,/jiwa-play-temporary-interactions/);
+ assert.doesNotMatch(play,/jiwa-play-temporary-interactions/); // activities only on Nokia map, not as floating 3D pins
  assert.match(play,/disposeMarkers\(\)/);
  assert.match(play,/fallbackSpawn\(\)/);
 });
