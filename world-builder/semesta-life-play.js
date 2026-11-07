@@ -434,7 +434,7 @@ function runAction(action,args={}){
   bridge?.respawn?.();return {ok:true,reason:'respawn'};
  }
  const node=nearest();
- if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','eat_item','discard_item'].includes(action)&&!node)
+ if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','eat_item','discard_item','set_identity'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
