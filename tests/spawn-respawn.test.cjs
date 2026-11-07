@@ -98,5 +98,9 @@ test('Ellen spawn_hobo art is present for tent layers and exit-tent sheets',()=>
  assert.match(rt,/openingAnchor/);
  assert.match(rt,/silhouetteMask/);
  assert.match(rt,/destination-in/);
+ assert.match(rt,/concealActor/);
+ assert.match(rt,/revealActor/);
+ assert.match(rt,/root.visible=false/);
+ assert.match(rt,/root.visible=true/);
 
 });

@@ -21,6 +21,10 @@ let playGen=0;
 function url(path){return BASE+path;}
 function hideMesh(mesh){if(mesh)mesh.visible=false;}
 function showMesh(mesh){if(mesh)mesh.visible=true;}
+// Contact shadows follow visible actor roots. Hide the root for the whole
+// exit-tent clip so the blob stays off until control / character mode.
+function concealActor(root,mesh){if(root)root.visible=false;hideMesh(mesh);}
+function revealActor(root,mesh){if(root)root.visible=true;showMesh(mesh);}
 function sheetFor(profile,facing){
  const who=/^ichsan$/i.test(profile||'')?'ichsan':'npc';
  return url('sheets/spawn_'+who+'_'+facing+'.png');
@@ -106,7 +110,7 @@ function insideDepth(frameIndex){
 function dispose(){
  playGen++;
  if(!state)return;
- showMesh(state.actorMesh);
+ revealActor(state.actorRoot,state.actorMesh);
  if(state.overlay){state.overlay.removeFromParent();state.overlay.geometry.dispose();state.overlay.material.map?.dispose();state.overlay.material.dispose();}
  if(state.group){
   state.group.traverse(n=>{
@@ -244,11 +248,11 @@ async function play(opts){
  group.position.set(Number(start.x)||0,0,Number(start.z)||0);
  scene.add(group);
  const sleepOff=pxToWorld(spec.tidur[0]-spec.pivot[0],(spec.tidur[1]+14)-spec.pivot[1]);
+ const actorMesh=opts.rig&&(opts.rig.mesh||opts.rig.group||null);
  if(opts.actorRoot){
   opts.actorRoot.position.set(group.position.x+sleepOff.x,0,group.position.z+sleepOff.z);
  }
- const actorMesh=opts.rig&&(opts.rig.mesh||opts.rig.group||null);
- hideMesh(actorMesh);
+ concealActor(opts.actorRoot,actorMesh);
  const frames=frameList();
  state={
   playing:true,group,back:null,front:null,overlay:null,tex:null,ctx:null,sheet:null,frames,
@@ -266,7 +270,7 @@ async function play(opts){
   ]);
  }catch(err){
   if(my===playGen){
-   showMesh(actorMesh);
+   revealActor(opts.actorRoot,actorMesh);
    if(state&&state.group===group){group.removeFromParent();state=null;}
   }
   throw err;
@@ -299,7 +303,7 @@ async function play(opts){
   restPixel:restPixel(spec,backImg,frontImg),
   mask:silhouetteMask(backImg,frontImg)
  });
- hideMesh(actorMesh);
+ concealActor(opts.actorRoot,actorMesh);
  placeInTent();
  paintFrame();
  return state;
@@ -309,7 +313,7 @@ function tick(dt,camera){
  if(!state)return;
  faceCamera(camera);
  if(!state.playing)return;
- hideMesh(state.actorMesh);
+ concealActor(state.actorRoot,state.actorMesh);
  if(!state.sheet||!state.overlay)return;
  const step=state.frames[state.index];
  if(!step)return;
@@ -321,7 +325,7 @@ function tick(dt,camera){
   if(state.index>=state.frames.length-1){
    state.playing=false;state.done=true;state.phase='control';
    if(state.overlay){state.overlay.visible=false;}
-   showMesh(state.actorMesh);
+   revealActor(state.actorRoot,state.actorMesh);
    return;
   }
   state.index++;
@@ -343,6 +347,6 @@ function snapshot(){
 
 g.VLSpawnHobo=Object.freeze({
  BASE,PHASES,TENTS,sheetFor,tentUrl,pxToWorld,lowestOpaqueRow,tentLift,openingAnchor,silhouetteMask,restPixel,tentPixelAt,placeInTent,
- frameList,insideDepth,play,tick,dispose,busy,snapshot
+ concealActor,revealActor,frameList,insideDepth,play,tick,dispose,busy,snapshot
 });
 })(window);
