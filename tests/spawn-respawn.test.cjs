@@ -94,4 +94,7 @@ test('Ellen spawn_hobo art is present for tent layers and exit-tent sheets',()=>
  const rt=fs.readFileSync(path.join(__dirname,'../world-builder/semesta-spawn-hobo.js'),'utf8');
  assert.match(rt,/tenda_buka_.*__belakang/);
  assert.match(rt,/tenda_buka_.*__depan/);
+ assert.match(rt,/lowestOpaqueRow/);
+ assert.match(rt,/contactY/);
+
 });
