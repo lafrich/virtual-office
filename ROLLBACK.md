@@ -2,6 +2,29 @@
 
 Written 2026-11-07 (Asia/Jakarta). Cloudflare Worker and secrets were not changed.
 
+## This deploy (tidy hobo tent exit)
+
+- Previous live `main`: `eba74c01657bd5de3fee1850d3ddc060479700fb`
+- Inside-tent character seating: `d7b5919beedbea5916a555985c02e8af9a86d442`
+- Relocated default tent points: `f1d610de406841ee0c07a922671c15676cf08012`
+- Hide contact shadow during exit-tent: `5fde96f91cf521af5e8b9aa342fab531053ff4f0`
+- Service worker bump: `65c1983ee5c57631fd44ec2e3dfd627e067b4c91`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 65c1983ee5c57631fd44ec2e3dfd627e067b4c91
+git revert --no-edit 5fde96f91cf521af5e8b9aa342fab531053ff4f0
+git revert --no-edit f1d610de406841ee0c07a922671c15676cf08012
+git revert --no-edit d7b5919beedbea5916a555985c02e8af9a86d442
+git push origin main
+```
+
+That restores the previous tent exit (character could read as in front of the door or on the roof, the old 8-point pool with 3 invalid Kebon Sirih spots, and a contact shadow during the clip) and `sw.js` v11. It does not revert the generic spawn/respawn mechanic, seated-tent ground contact, Mahluk Hidup v6p launcher, loak-picker, lamp-glow, sleep-clip, or grass_v2 commits.
+
 ## This deploy (Mahluk Hidup launcher → v6p-studio)
 
 - Previous live `main`: `13d95293f4d00ad93c1f63374584905b97ac0f20`
