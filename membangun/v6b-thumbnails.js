@@ -5,7 +5,7 @@
 'use strict';
 const ROOT='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/';
 const CHARACTER=ROOT+'assets/npc_aladdin_sane/sprites/aladdin_sane_v6b_sheet.png';
-const SILVER=ROOT+'assets/npc_manusia_silver/manusia_silver_idle_4views_4x.gif';
+const SILVER='https://lafrich.github.io/virtual-life-asset-pipeline/launcher-assets/manusia_silver_idle_4views_4x.gif';
 const ids=['mahluk','semesta','jiwa'];
 const canvases=new Map();
 function nodes(id){return [...document.querySelectorAll('.file[data-app="'+id+'"] .file-thumb, .art[data-art="'+id+'"]')]}
@@ -57,7 +57,7 @@ function silver(){
  nodes('jiwa').forEach(node=>{
   const img=new Image();img.alt='Manusia Silver V6B';img.className='v6b-silver-image';
   img.onload=()=>node.replaceChildren(img);
-  img.onerror=()=>{};
+  img.onerror=()=>{node.setAttribute('title','Native Manusia Silver preview belum tersedia dari build pipeline');};
   img.src=SILVER;
  });
 }
