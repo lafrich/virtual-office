@@ -28,7 +28,7 @@ const ACTIONS=Object.freeze({
  open:{label:'Open',pose:null,description:'Interaction hook only'},
  ...INDONESIA.actions
 });
-const TYPES=Object.freeze({
+const TYPES={
  wc:{label:'WC / Toilet',category:'Bathroom',glyph:'🚽',w:1,d:1,actions:['use_toilet','pee','poop']},
  shower:{label:'Shower',category:'Bathroom',glyph:'🚿',w:1,d:1,actions:['bathe']},
  bathtub:{label:'Bathtub',category:'Bathroom',glyph:'🛁',w:2,d:1,actions:['bathtub_bathe']},
@@ -48,7 +48,7 @@ const TYPES=Object.freeze({
  shelf:{label:'Rak Barang',category:'Shop',glyph:'▤',w:2,d:1,actions:['browse']},
  counter:{label:'Display Counter',category:'Shop',glyph:'▥',w:2,d:1,actions:['buy','sell']},
  ...INDONESIA.types
-});
+};
 const TEMPLATES=Object.freeze({
  empty:{label:'Empty / Kosong',theme:'cream',items:[]},
  home:{label:'Rumah',theme:'warm',items:[['bed',2,1],['sofa',1,4],['table',3,4],['wc',5,1]]},
@@ -60,6 +60,29 @@ const TEMPLATES=Object.freeze({
  kost:{label:'Kamar Kost',theme:'warm',items:[['bed',1,1],['desk',4,1],['chair',4,3],['wardrobe',1,4]]},
  ...INDONESIA.templates
 });
+// A mutable catalog keeps all existing V6B fixture IDs stable while adding
+// real four-view furniture from the Semesta Asset Library.
+function refreshExternal(){
+ const external=g.VLSemestaFurnitureSources?.refresh?.()||[];
+ const current=new Set(external.map(row=>row.id));
+ for(const row of external){
+  const actions=(row.interactions||[]).filter(id=>Object.prototype.hasOwnProperty.call(ACTIONS,id));
+  const guessed=/kursi|chair|sofa|bench|bangku|stool/i.test(row.label)?'sit':
+    /kasur|bed|mattress/i.test(row.label)?'sleep':
+    /toilet|\bwc\b/i.test(row.label)?'use_toilet':
+    /kompor|stove/i.test(row.label)?'cook':'browse';
+  TYPES[row.id]={label:row.label,category:row.category,glyph:'▣',
+   w:row.w,d:row.d,actions:actions.length?actions:[guessed],
+   external:true,sourceId:row.sourceId};
+ }
+ // Do not drop missing types: existing rooms can preserve furniture placement
+ // until the original PNG library is restored from Drive.
+ for(const [key,def] of Object.entries(TYPES)){
+  if(def.external===true&&!current.has(key))TYPES[key]={...def,missing:true};
+ }
+ return external.length;
+}
+refreshExternal();
 const clone=x=>JSON.parse(JSON.stringify(x));
 const limit=(v,lo,hi)=>Math.min(hi,Math.max(lo,Math.round(Number(v)||lo)));
 // Semesta exterior tiles are native 64x32 isometric. Each INTERIOR tile must
@@ -98,6 +121,7 @@ function add(scene,assetId,c,r){
   assetId,name:def.label,c:x,r:z,rotation:0,flipX:false,flipY:false,
   actionId:def.actions[0],pose:poseFor(assetId,def.actions[0]),
   capacity:assetId==='sofa'?2:1,blocking:true,triggerRadius:1.15,
+  ...(def.external?{footprint:[def.w,def.d]}:{}),
    actionAdjustments:ADJUST?.forType(assetId,def.actions)||{}};
  scene.items.push(item);return item;
 }
@@ -246,6 +270,15 @@ function normalize(raw,cfg){
  if(oldScale)base.entrance={c:Math.floor(base.width/2),r:base.depth-1};
  const ids=new Set();
  for(const old of Array.isArray(raw.items)?raw.items.slice(0,100):[]){
+  if(!TYPES[old?.assetId]&&typeof old?.assetId==='string'&&
+     old.assetId.startsWith('semesta-furniture:')&&old.assetId.length<160){
+   // Preserve a cloud room's original asset ID even if its custom PNG has
+   // not yet been restored on this device. Never silently erase furniture.
+   TYPES[old.assetId]={label:String(old.name||'Furnitur Semesta · belum sync').slice(0,80),
+    category:'SEMESTA / BELUM SYNC',glyph:'▣',w:Math.max(1,Math.min(12,Number(old.footprint?.[0])||1)),
+    d:Math.max(1,Math.min(12,Number(old.footprint?.[1])||1)),
+    actions:['browse'],external:true,missing:true};
+  }
   if(!TYPES[old?.assetId]||typeof old.id!=='string'||ids.has(old.id))continue;
   const rot=[0,90,180,270].includes(old.rotation)?old.rotation:0;
   const c=rc(old.c,oldWidth,base.width),r=rc(old.r,oldDepth,base.depth);
@@ -287,5 +320,5 @@ function slots(scene){
  }));
 }
 g.VLBuildingInterior=Object.freeze({types:TYPES,actions:ACTIONS,templates:TEMPLATES,
- dimensions,create:layout,preset,normalize,canPlace,add,move,rotate,action,occupied,slots,clone,poseFor,isElevatedBed});
+ dimensions,create:layout,preset,normalize,canPlace,add,move,rotate,action,occupied,slots,clone,poseFor,isElevatedBed,refreshExternal});
 })(window);
