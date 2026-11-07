@@ -38,7 +38,7 @@ jobs:
         run: |
           python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/nokia-semesta-server.log 2>&1 &
           sleep 2
-      - name: Check browser runtime: buy token, Dompet, activity pins, actor position
+      - name: "Check browser runtime: buy token, Dompet, activity pins, actor position"
         run: node virtual-office/tests/nokia-live-browser.e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
