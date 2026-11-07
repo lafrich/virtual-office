@@ -2370,9 +2370,10 @@ function currentPlayGameplay(){
  // composition. Legacy per-city layouts are consulted only for migration.
  const HL=window.VLHudLayout;
  const stored=HL?.resolveSavedLayout?.(null,localStorage);
- if(HL&&stored?.layout){
+ const uiLayout=window.SemestaUIEditor?.previewLayout?.()||stored?.layout;
+ if(HL&&uiLayout){
   raw=raw&&typeof raw==='object'?{...raw}:JG?.defaultGameplay?.()||{modules:{}};
-  raw.modules={...(raw.modules||{}),hudLayout:HL.normalize(stored.layout)};
+  raw.modules={...(raw.modules||{}),hudLayout:HL.normalize(uiLayout)};
  }
  return JG?JG.normalizeGameplay(raw):raw;
 }
@@ -2575,6 +2576,7 @@ function clearWalk(){
  clearTemporaryLifePlayer();
 }
 function setMode(m){
+ if(m!=='walk')window.SemestaUIEditor?.stop?.();
  if(mode==='walk'&&m!=='walk'){
   window.SemestaLifePlay?.stop?.();
   const savedCamera=lifeAutoCamera?mapCameraBeforeFollow:null;
@@ -2987,6 +2989,7 @@ function spawnRespawnApi(){
 
 window.SemestaPlay=Object.freeze({
  gameplay:currentPlayGameplay,
+ refreshHud:syncPlayHud,
  worldSpeed:playWorldSpeed,
  running:()=>walkRunning,
  controllerOnly:playControllerOnly,
