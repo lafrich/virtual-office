@@ -152,6 +152,19 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .art .v6b-native-preview{background:transparent!important;filter:none!important}
 .art .v6b-native-preview[src$=".gif"]{mix-blend-mode:normal}
 .file-list{grid-auto-flow:row}
+
+/* Native 64x112 V6B frame: transparent on warm paper, no dark GIF matte. */
+.v6b-native-frame{display:block;width:auto;height:auto;image-rendering:pixelated;object-fit:contain;background:transparent!important}
+.file-thumb .v6b-native-frame{width:40px;height:48px}
+.art .v6b-native-frame{height:min(75%,448px);width:auto;max-width:80%;max-height:80%}
+.mb-globe{width:min(75%,350px);aspect-ratio:1;display:grid;place-items:center}
+.mb-globe svg{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;filter:none!important}
+.file-thumb .mb-globe{width:90%}
+.mb-globe-lands{animation:mb-earth-axis 9s linear infinite}
+@keyframes mb-earth-axis{from{transform:translateX(0)}to{transform:translateX(-157px)}}
+.v6b-silver-image{max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated}
+.art .v6b-silver-image{height:min(82%,400px);max-width:75%}
+@media(prefers-reduced-motion:reduce){.mb-globe-lands{animation:none!important}}
 </style>
 </head>
 <body>
@@ -366,6 +379,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=t
 render();
 })();
 </script>
-<script src="./v6b-thumbnails.js?v=launcher-four-20261108"></script>
+<script src="./v6b-thumbnails.js?v=silver-globe-20261108"></script>
 </body>
 </html>
