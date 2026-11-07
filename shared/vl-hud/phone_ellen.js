@@ -450,20 +450,46 @@ function Kontak(){if(liveData())return Text({title:'Kontak',num:'7-',lines:[['Fr
    tx(c[1]?'Di: '+c[2]:'Terakhir: '+c[2],1,38);tx('Teman',1,47)}})}))})}
 // ---- Profil (example)
 function Profil(){
- const live=liveData();
- if(live)return Text({title:'Profil',num:'8',body:()=>{
-  bm(ICON.avatar,1,18);
-  tx(live.ownsRoom?'Punya Kost':'Hobo',19,18,1,true);
-  tx('EXP '+Math.floor(live.experience||0),19,28);
-  tx(rp(live.wallet||0),1,38);
-  tx('Moral '+Math.floor(live.moral||0)+' / 100',1,47);
- }});
- return Text({title:'Profil',num:'8',body:()=>{bm(ICON.avatar,1,18);tx('Ichsan',19,18,1,true);tx('Total XP 350',19,28);tx(rp(ST.saldo),1,38);tx('Teman 5 · Kamar 3B',1,47)}});
+ if(liveData()){
+  const choose=(field,title,choices)=>{
+   return List({title,num:'8-',items:choices.map(value=>({
+    label:value,right:()=>liveData()?.identity?.[field]===value?'OK':'',
+    act:()=>{
+     const result=liveData()?.runAction?.('set_identity',{[field]:value});
+     push(Msg([result?.ok?'Pilihan tersimpan':'Tidak berhasil',
+      fit(result?.ok?value:result?.reason||'Coba kembali',90)],1));
+    }
+   }))});
+  };
+  return List({title:'Profil Karakter',num:'8-',items:[
+   {label:'Status Tubuh',icon:'profil',open:()=>Text({title:'Kebutuhan',num:'8-',body:()=>{
+    const x=liveData()||{};
+    tx('Energi '+Math.round(x.energy||0)+'%',1,17,1,true);
+    tx('Kebersihan '+Math.round(x.hygiene||0)+'%',1,27);
+    tx('Lapar '+Math.round(x.fullness||0)+'%',1,37);
+    tx('Kandung '+Math.round(x.bladder||0)+'%',1,47);
+   }})},
+   {label:'Hidup & Moral',icon:'house',open:()=>Text({title:'Status Hidup',num:'8-',body:()=>{
+    const x=liveData()||{};
+    tx(x.ownsRoom?'Punya Akses Kost':'Hobo / Belum Kost',1,17,1,true);
+    tx('EXP '+Math.round(x.experience||0),1,27);
+    tx('Moral '+Math.round(x.moral||0),1,37);
+    tx('Token Listrik '+Math.round(x.powerTokens||0),1,47);
+   }})},
+   {label:'Agama',icon:'profil',right:()=>liveData()?.identity?.religion||'',
+    open:()=>choose('religion','Pilih Agama',liveData()?.religions||[])},
+   {label:'Zodiak',icon:'profil',right:()=>liveData()?.identity?.zodiac||'',
+    open:()=>choose('zodiac','Pilih Zodiak',liveData()?.zodiacs||[])}
+  ]});
+ }
+ return Text({title:'Profil',num:'8',lines:[
+  ['Belum ada karakter',true],['Buka Play Mode'],['untuk melihat status']
+ ]});
 }
 // ---- Pengaturan
 function Pengaturan(){const tog=(k)=>({right:()=>ST[k]?'Aktif':'Mati',act:()=>{ST[k]=!ST[k]}});
  return List({title:'Pengaturan',num:'9-',numbered:true,items:[{label:'Suara',...tog('sound')},{label:'Getar',...tog('vib')},{label:'Musik',...tog('music')},
-  {label:'Kontras',right:()=>String(ST.contrast+1),open:()=>Kontras()},{label:'Bahasa',right:'ID',act:()=>{}},{label:'Keluar game',open:()=>Confirm('Keluar?',['Kembali ke','layar judul'],()=>{pop()})}],soft:['Pilih','Kembali']})}
+  {label:'Kontras',right:()=>String(ST.contrast+1),open:()=>Kontras()},{label:'Bahasa',right:'ID',act:()=>{}},{label:'Tutup Nokia',act:()=>{closePhone();}}],soft:['Pilih','Kembali']})}
 function Kontras(){const s={old:ST.contrast};
  s.draw=()=>{status();title('Kontras','9-4');txC('Atur dengan',19);txC('tombol atas/bawah',28);
   for(let i=0;i<5;i++){const x=18+i*12;fr(x,40,10,9);if(i>ST.contrast)fr(x+1,41,8,7,0)}soft('OK','Kembali')};
