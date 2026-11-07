@@ -130,7 +130,7 @@ function add(){
  draft.activities.push(a);selected=a.id;setDirty();render();
 }
 function save(){
- try{draft=A.saveLocal(draft,localStorage);dirty=false;remoteLoaded=false;
+ try{draft=A.saveLocal(draft,localStorage);dirty=false;
   root.VLHub?.publish?.('gameplay',{scope:'global-activities',at:draft.updatedAt});
   notify('SAVED LOCAL ✓ '+draft.activities.length+' aktivitas · Semesta membaca katalog ini saat Play Mode / refresh.',true);
  }catch(e){notify('SAVE FAILED · '+e.message);}
@@ -139,8 +139,10 @@ async function connect(){
  const cloud=D();if(!cloud)throw Error('Drive client belum dimuat');
  if(!cloud.connected())await cloud.connect();
  const files=await cloud.list('jiwa','activities');
- cloudFile=files.find(f=>f.name==='activities--global-game-activities.json')||null;
- remoteLoaded=!!cloudFile;
+ const nextFile=files.find(f=>f.name==='activities--global-game-activities.json')||null;
+ if(!cloudFile||cloudFile.id!==nextFile?.id||cloudFile.modifiedTime!==nextFile?.modifiedTime)
+  remoteLoaded=false;
+ cloudFile=nextFile;
  notify('DRIVE CONNECTED ✓ '+(cloudFile?'Ada katalog di Drive. Tekan LOAD DRIVE untuk menariknya.':'Belum ada katalog di Drive.')+
   ' · Sync Drive tidak otomatis menimpa file lokal.',true);
  return cloud;
@@ -150,7 +152,7 @@ async function upload(){
  try{
   if(dirty)save();
   const cloud=await connect();
-  if(cloudFile&&!remoteLoaded)throw Error('Ada katalog cloud; LOAD DRIVE dahulu untuk mencegah overwrite.');
+  if(cloudFile&&!remoteLoaded)throw Error('Katalog Drive sudah ada. Klik LOAD DRIVE dahulu untuk membandingkan dan menghindari overwrite.');
   const updated=await cloud.save('jiwa','activities',draft,cloudFile);
   cloudFile=updated.file;remoteLoaded=true;
   notify('DRIVE SYNC SUCCESS ✓ Membangun/Jiwa/activities--global-game-activities.json · '+new Date().toLocaleTimeString('id-ID'),true);
