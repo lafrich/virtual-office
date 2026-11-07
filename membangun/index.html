@@ -135,6 +135,16 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .file-thumb .v6b-animated-preview{width:100%;height:100%}
 .art .v6b-animated-preview{width:min(70%,380px);height:min(85%,380px);max-width:100%;max-height:100%}
 @media(max-width:700px){.art .v6b-animated-preview{width:min(62%,240px);height:min(90%,240px)}}
+
+/* Genuine authored pipeline asset display; contain without stretching. */
+.v6b-native-preview{display:block;image-rendering:pixelated;object-fit:contain;max-width:100%;max-height:100%}
+.file-thumb .v6b-native-preview{width:100%;height:100%}
+.art .v6b-native-preview{width:auto;height:min(83%,448px);max-width:85%;max-height:85%;filter:drop-shadow(4px 5px 0 #314b6520)}
+.v6b-emotion-crop{width:64px;height:112px;overflow:hidden;position:relative;flex:none;image-rendering:pixelated;transform-origin:center center}
+.v6b-emotion-crop img{display:block;width:256px;height:448px;max-width:none!important;max-height:none!important;object-fit:fill!important;image-rendering:pixelated}
+.file-thumb .v6b-emotion-crop{transform:scale(.33)}
+.art .v6b-emotion-crop{transform:scale(2.7)}
+@media(max-width:700px){.art .v6b-emotion-crop{transform:scale(1.45)}}
 </style>
 </head>
 <body>
@@ -353,6 +363,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=t
 render();
 })();
 </script>
-<script src="./v6b-thumbnails.js?v=20261108"></script>
+<script src="./v6b-thumbnails.js?v=native-20261108"></script>
 </body>
 </html>
