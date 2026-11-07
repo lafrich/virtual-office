@@ -440,7 +440,7 @@ function afterLifeTransition(previous){
   lastFaintCount=state.faintCount;
   progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
   for(const el of document.querySelectorAll('#ptActionBtn,#slpWork'))el.blur?.();
-  bridge?.respawn?.();
+  bridge?.respawn?.({fainted:true});
   message('⚠ PINGSAN! Dipindahkan ke '+(ownsRoom()?'kost':'tenda hobo')+' untuk bed rest '+state.restMinutes+' menit.');
  }
  notifyHud();paintPanel();
