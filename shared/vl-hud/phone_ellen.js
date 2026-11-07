@@ -650,6 +650,7 @@ try{
  window.VL={press,compose,hitTest,home,openPhone,closePhone,renderPhone,draw:drawFrame,ST,DEV,PW,PH,KEYS,KPC,NAVC,LCDX,LCDY,
   setGameProvider:fn=>{gameProvider=typeof fn==='function'?fn:null;ST.mark=-1;},
   hasGameProvider:()=>!!gameProvider,
+  gameSnapshot:()=>liveData(),
   setPressed:k=>{pressedKey=k}, isOpen:()=>phoneOpen, depth:()=>stack.length, reset:()=>{phoneOpen=true;home();ST.course=null;ST.mark=-1;ST.contrast=2;ST.sound=true;ST.vib=true;ST.music=false;pressedKey=null}};
  window.VLPhoneEllen=window.VL;
  home();
