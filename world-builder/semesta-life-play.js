@@ -412,6 +412,17 @@ function openPhone(){
 }
 function actionDown(ev){workDown(ev);}
 function actionUp(ev){workUp(ev);}
+function afterLifeTransition(previous){
+ if(!active||!state)return;
+ if((state.faintCount||0)>(previous?.faintCount||0)&&state.restMinutes>0){
+  lastFaintCount=state.faintCount;
+  progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
+  for(const el of document.querySelectorAll('#ptActionBtn,#slpWork'))el.blur?.();
+  bridge?.respawn?.();
+  message('⚠ PINGSAN! Dipindahkan ke '+(ownsRoom()?'kost':'tenda hobo')+' untuk bed rest '+state.restMinutes+' menit.');
+ }
+ notifyHud();paintPanel();
+}
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
@@ -447,7 +458,8 @@ function runAction(action,args={}){
   if(action==='buy_room')message('🏠 Kost dibeli! Respawn berikutnya pindah ke kamar. WC dan mandi pribadi aktif.');
   else message('✅ '+result.changes.join(' · '));
  }else message('⛔ '+result.reason);
- notifyHud();paintPanel();
+ if(result.ok)afterLifeTransition(prior);
+ else{notifyHud();paintPanel();}
  return result;
 }
 function handleAction(){
@@ -483,7 +495,7 @@ function actorMoved(dt){
   if(walkerDistance>=8){
    walkerDistance-=8;
    const result=RULES.run(config,state,'walk',{units:1});
-   if(result.ok){state=result.state;persist();notifyHud();}
+   if(result.ok){const prior=state;state=result.state;persist();afterLifeTransition(prior);}
   }
  }
 }
@@ -498,10 +510,27 @@ function checkHansip(){
  if(result.ok){state=result.state;persist();message('🚨 Hansip menangkapmu! Bayar denda atau kerja sosial.');}
 }
 function tick(dt){
- if(!active)return;
- actorMoved(dt);
- frameAccumulator+=Math.max(0,Number(dt)||0);
- if(frameAccumulator>.9){frameAccumulator=0;checkHansip();const current=nearest()?.id||'';if(nearId!==current)paintPanel();}
+ if(!active||!state)return;
+ const seconds=Math.max(0,Math.min(.2,Number(dt)||0));
+ actorMoved(seconds);
+ timeAccumulator+=seconds;
+ const period=Math.max(1,config.settings.realSecondsPerGameMinute||8);
+ if(timeAccumulator>=period){
+  const minutes=Math.min(15,Math.floor(timeAccumulator/period));
+  timeAccumulator-=minutes*period;
+  const result=RULES.run(config,state,'advance_time',{minutes});
+  if(result.ok){
+   const prior=state;state=result.state;persist();afterLifeTransition(prior);
+   if(result.changes.some(x=>x.startsWith('BED REST SELESAI')))
+    message('✅ Bed rest selesai. Energi pulih; sekarang bisa beraktivitas lagi.');
+  }
+ }
+ frameAccumulator+=seconds;
+ if(frameAccumulator>=.9){
+  frameAccumulator=0;checkHansip();
+  const current=nearest()?.id||'';
+  if(nearId!==current)paintPanel();
+ }
 }
 function moneyBalance(){return active&&state?state.wallet:null;}
 function bagLabels(){return active&&state?(state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id):null;}
@@ -511,7 +540,7 @@ function start(){
  const id=cityId();
  if(active&&id===projectId)return true;
  if(active)stop();
- projectId=id;active=true;sessionRevision++;
+ projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;phoneOpen=false;
  config=defaults();configSource='DEFAULT V1';restore();buildSites();makeRoot();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
@@ -522,7 +551,7 @@ function stop(){
  if(!active)return;
  persist();active=false;cancelAnimationFrame(workAnimation);progress=null;
  disposeMarkers();if(outer)outer.hidden=true;
- actorMoved.prev=null;walkerDistance=0;nearId='';
+ actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;phoneOpen=false;
 }
 function attach(bridgeApi){bridge=bridgeApi||null;return api;}
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
