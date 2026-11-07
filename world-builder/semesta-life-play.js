@@ -158,7 +158,7 @@ function buildSites(){
  const catalog=root.JiwaActivities;
  if(catalog){
   for(const a of config.activities||[]){
-   const found=catalog.matchBuilding(a,objects);
+   const found=catalog.matchActivityTarget(a,objects,config.worldEntities||[],projectId);
    if(!found)continue;
    const pos=findLanding(Number(found.x)||0,Number(found.z)||0);
    const cat=catalog.CATEGORIES.find(c=>c.id===a.category);
@@ -172,7 +172,7 @@ function buildSites(){
  // Ambient interactions never create a quest marker in Nokia.
  const worldPremises=root.JiwaPremises;
  for(const rule of config.worldEntities||[]){
-  const found=worldPremises?.matchWorld?.(rule,objects);
+  const found=worldPremises?.matchWorld?.(rule,objects.filter(o=>catalog?.kindOf?.(o)===rule.kind),projectId);
   if(!found)continue;
   const pos=findLanding(Number(found.x)||0,Number(found.z)||0);
   const opts={id:'world:'+rule.id,label:rule.label,worldRuleId:rule.id,
