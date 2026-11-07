@@ -305,8 +305,17 @@
   }
   container.dataset.ready='1';
   if($('ptBagBtn'))$('ptBagBtn').onclick=()=>toggleWindow('bag');
-  if($('ptPhoneBtn'))$('ptPhoneBtn').onclick=()=>toggleWindow('phone');
-  if($('ptActionBtn'))$('ptActionBtn').onclick=()=>{if(typeof opts.onAction==='function')opts.onAction();};
+  if($('ptPhoneBtn'))$('ptPhoneBtn').onclick=()=>{
+   if(typeof opts.onPhone==='function'&&opts.onPhone()===true)return;
+   toggleWindow('phone');
+  };
+  if($('ptActionBtn')){
+   const action=$('ptActionBtn');
+   action.onclick=()=>{if(typeof opts.onAction==='function')opts.onAction();};
+   action.addEventListener('pointerdown',ev=>{if(typeof opts.onActionDown==='function')opts.onActionDown(ev);});
+   ['pointerup','pointercancel','pointerleave','lostpointercapture'].forEach(event=>
+    action.addEventListener(event,ev=>{if(typeof opts.onActionUp==='function')opts.onActionUp(ev);}));
+  }
   if($('ptWinClose'))$('ptWinClose').onclick=()=>toggleWindow(null);
   bindRun($('ptRunBtn'));
   const view=doc.defaultView;
