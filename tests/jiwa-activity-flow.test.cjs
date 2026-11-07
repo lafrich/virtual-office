@@ -94,7 +94,7 @@ test('Jiwa icon UX, Semesta runtime binding and Google Drive wiring are present'
  assert.match(ui,/D\(\)/);
  assert.match(ui,/cloud\.save\('jiwa','activities'/);
  assert.match(ui,/cloud\.load\(cloudFile\)/);
- assert.match(semesta,/catalog\.matchBuilding\(a,objects\)/);
+ assert.match(semesta,/catalog\.matchActivityTarget\(a,objects,config\.worldEntities/);
  assert.match(semesta,/id:'act:'\+a\.id/);
  assert.match(semesta,/action:'configured_activity'/);
  assert.match(semesta,/expected='act:'\+String\(args\.activityId/);
