@@ -93,3 +93,77 @@ test('V2 gates stay locked while premium job needs hygiene threshold',()=>{
  assert.ok(bath.ok);assert.ok(bath.state.hygiene>poor.hygiene);
  assert.equal(E.run(cfg,{...bath.state,hygiene:75},'work',{premium:true}).ok,true);
 });
+
+test('Passive survival makes time consequential even when player stands still',()=>{
+ const cfg=c(),p=fresh();
+ const after=E.run(cfg,p,'advance_time',{minutes:60});
+ assert.ok(after.ok);
+ assert.ok(after.state.energy<p.energy);
+ assert.ok(after.state.bladder>p.bladder);
+ assert.ok(after.state.fullness<p.fullness);
+ assert.equal(E.run(cfg,p,'rest').ok,false); // no free energy button anywhere
+});
+test('Fainting blocks player movement until bed rest finishes, then restores energy',()=>{
+ const cfg=c(),s={...fresh(),energy:1};
+ const faint=E.run(cfg,s,'walk',{units:1});
+ assert.ok(faint.ok);assert.equal(faint.state.restMinutes,cfg.settings.faintRestMinutes);
+ assert.equal(E.speedFactor(faint.state),0);
+ assert.equal(E.run(cfg,faint.state,'work').ok,false);
+ const recovered=E.run(cfg,faint.state,'advance_time',{minutes:cfg.settings.faintRestMinutes});
+ assert.ok(recovered.ok);assert.equal(recovered.state.restMinutes,0);
+ assert.ok(recovered.state.energy>=cfg.settings.faintRecoveryEnergy);
+ assert.ok(E.speedFactor(recovered.state)>0);
+});
+test('Kost provides item storage; hobo cannot use it and room inventory survives in-home transfer',()=>{
+ const cfg=c(),initial=fresh();
+ const loot=E.run(cfg,initial,'scavenge');assert.ok(loot.ok);
+ const id=loot.state.inventory[0];assert.equal(E.run(cfg,loot.state,'store_home',{itemId:id}).ok,false);
+ const owned=E.run(cfg,{...loot.state,wallet:50000},'buy_room',{roomSpawn:{id:'kost',x:2,z:3}});
+ assert.ok(owned.ok);
+ const stored=E.run(cfg,owned.state,'store_home',{itemId:id});
+ assert.ok(stored.ok);assert.equal(stored.state.homeStorage.length,1);assert.equal(stored.state.inventory.length,0);
+ const taken=E.run(cfg,stored.state,'take_home',{itemId:id});
+ assert.ok(taken.ok);assert.equal(taken.state.inventory[0],id);
+});
+test('Fruit can be eaten, goes bad in the bag, can be refrigerated with electric tokens',()=>{
+ const cfg=c(),s={...fresh(),wallet:90000};
+ const picked=E.run(cfg,s,'catch_fruit');
+ assert.ok(picked.ok);const id=picked.state.inventory[0];
+ const edible=E.run(cfg,picked.state,'eat_item',{itemId:id});assert.ok(edible.ok);
+ assert.equal(edible.state.inventory.length,0);
+ const stale=E.run(cfg,picked.state,'advance_time',{minutes:130});
+ assert.ok(stale.ok);
+ assert.equal(E.run(cfg,stale.state,'eat_item',{itemId:id}).ok,false);
+ const disposed=E.run(cfg,stale.state,'discard_item',{itemId:id});
+ assert.ok(disposed.ok);assert.equal(disposed.state.inventory.length,0);
+ const room=E.run(cfg,picked.state,'buy_room');
+ const fridge=E.run(cfg,room.state,'buy_fridge');
+ const token=E.run(cfg,fridge.state,'buy_token');
+ const stored=E.run(cfg,token.state,'store_fridge',{itemId:id});assert.ok(stored.ok);
+ const chilled=E.run(cfg,stored.state,'advance_time',{minutes:60});
+ assert.ok(chilled.ok);assert.ok(chilled.state.itemMeta[id].expiresAt>stored.state.itemMeta[id].expiresAt);
+ assert.ok(chilled.state.powerTokens<stored.state.powerTokens);
+});
+test('Faith changes only worship access, not baseline morality; atheist can help neighbors',()=>{
+ const cfg=c();cfg.identity.religion='islam';
+ const p=fresh();
+ assert.equal(E.run(cfg,p,'worship',{placeReligion:'kristen'}).ok,false);
+ assert.equal(E.run(cfg,p,'worship',{placeReligion:'islam'}).ok,true);
+ const atheist={...p,identity:{religion:'ateis',zodiac:'gemini'},identityChosen:true};
+ assert.equal(E.run(cfg,atheist,'worship',{placeReligion:'islam'}).ok,false);
+ const help=E.run(cfg,atheist,'help');
+ assert.ok(help.ok);assert.ok(help.state.moral>atheist.moral);
+ assert.equal(help.state.identity.religion,'ateis');
+ assert.equal(cfg.gates.satanicEvilRouteV2,false);
+});
+test('Play mode exposes real survival controls and no always-free rest',()=>{
+ assert.match(play,/function openPhone\(\)/);
+ assert.match(play,/function openBag\(\)/);
+ assert.match(play,/function afterLifeTransition\(previous\)/);
+ assert.match(play,/function tick\(dt\)/);
+ assert.match(play,/const result=RULES\.run\(config,state,'advance_time'/);
+ assert.match(play,/case|prayer_islam_b/);
+ assert.match(builder,/onActionDown:ev/);
+ assert.match(builder,/onPhone:\(\)=>/);
+ assert.match(builder,/onBag:\(\)=>/);
+});
