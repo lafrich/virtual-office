@@ -2372,8 +2372,11 @@ function playWorldSpeed(){
  const move=g.modules&&g.modules.movement;
  if(move&&move.enabled===false)return 0;
  const JG=window.JiwaGameplay;
- const base=JG?JG.walkSpeedAt(g,walkRunning,80):(walkRunning?2.2:1.4);
- return Number(base||0)*PLAY_SPEED_SCALE;
+ const life=window.SemestaLifePlay;
+ const factor=life&&life.active()?life.speedFactor():1;
+ const energy=life&&life.active()?life.state()?.energy:80;
+ const base=JG?JG.walkSpeedAt(g,walkRunning,energy):(walkRunning?2.2:1.4);
+ return Number(base||0)*PLAY_SPEED_SCALE*factor;
 }
 function playControllerOnly(){
  const g=currentPlayGameplay();
@@ -2479,11 +2482,11 @@ function ensurePlayHud(){
  if(!wrap)return null;
  playHud=window.VLPlayHud.mount(wrap,{
   mode:'overlay',withWalkPad:true,getGameplay:currentPlayGameplay,
-  onAction:()=>{if(tryLoakPickup()||tryLoakSellNearby())return;if(!enterNearbyBuilding())tell('ACTION · no nearby context');},
+  onAction:()=>{if(window.SemestaLifePlay?.handleAction?.())return;if(tryLoakPickup()||tryLoakSellNearby())return;if(!enterNearbyBuilding())tell('ACTION · no nearby context');},
   onRunChange:on=>{walkRunning=!!on;},
   toast:tell,
-  getInventory:()=>window.VLLoakPlay?window.VLLoakPlay.bagLabels():[],
-  getMoney:()=>window.VLLoakPlay?window.VLLoakPlay.money():0
+  getInventory:()=>window.SemestaLifePlay?.active?.()?window.SemestaLifePlay.bag():window.VLLoakPlay?window.VLLoakPlay.bagLabels():[],
+  getMoney:()=>window.SemestaLifePlay?.active?.()?window.SemestaLifePlay.money():window.VLLoakPlay?window.VLLoakPlay.money():0
  });
  return playHud;
 }
@@ -2510,7 +2513,7 @@ function clearWalk(){
  }
 }
 function setMode(m){
- if(mode==='walk'&&m!=='walk')clearWalk();
+ if(mode==='walk'&&m!=='walk'){window.SemestaLifePlay?.stop?.();clearWalk();}
  if(m==='pan'&&activeAssetAimId)cancelActiveAssetAim();
  mode=m;
  applyPlayPickupVisibility();
@@ -2527,6 +2530,7 @@ function setMode(m){
    const first=(item()&&actorType(item().type)?item():documentMap.objects.find(x=>actorType(x.type)));
    if(!first){tell('Add character before Walk Test');setMode('select');return;}
    walkActorId=first.id;select(first.id);
+   window.SemestaLifePlay?.start?.();
    rigs.get(walkActorId)?.rig.setPose(null);
    tell('Walk Test: WASD / arrow keys / touch D-pad. Edits are not saved.');
    try{beginSpawnRespawn(first,'playStart');}catch(err){console.warn('spawn/respawn preview',err);}
@@ -2798,7 +2802,8 @@ function spawnModule(){
 function beginSpawnRespawn(actor,trigger){
  const SR=window.VLSpawnRespawn;
  if(!SR)return null;
- const mod=spawnModule();
+ const rawMod=spawnModule();
+ const mod=window.SemestaLifePlay?.spawnModule?.(rawMod,spawnWorldAdapter())||rawMod;
  if(mod.enabled===false)return null;
  const triggers=mod.triggers||{};
  if(trigger==='playStart'&&triggers.playStart===false)return null;
@@ -2806,12 +2811,14 @@ function beginSpawnRespawn(actor,trigger){
  if(trigger==='reconnect'&&triggers.reconnect===false)return null;
  const holder=actor&&rigs.get(actor.id);
  if(!holder)return null;
+ const lifePlayer=window.SemestaLifePlay?.spawnEntitlement?.();
  const decision=SR.resolve({
-  homeAccess:!!mod.previewOwnsRoom,
-  ownedRoom:mod.ownedRoom,
+  homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
+  ownedRoom:lifePlayer?lifePlayer.ownedRoom:mod.ownedRoom,
   profile:actor.profile
  },mod,spawnWorldAdapter(),Math.random);
  window.__semestaLastSpawn=decision;
+ window.SemestaLifePlay?.onSpawn?.(decision);
  if(!decision||!decision.ok||!decision.point){
   tell('Spawn: no valid roadside tent point');
   return decision;
@@ -2851,8 +2858,12 @@ function spawnRespawnApi(){
    const actor=documentMap.objects.find(o=>o.id===walkActorId)||documentMap.objects.find(o=>o.type==='avatar')||item();
    if(!actor)return {ok:false,reason:'no-actor'};
    if(window.VLSpawnHobo)window.VLSpawnHobo.dispose();
-   const decision=SR.resolve({homeAccess:!!spawnModule().previewOwnsRoom,ownedRoom:spawnModule().ownedRoom,profile:actor.profile},spawnModule(),spawnWorldAdapter(),opts.rand);
+   const lifePlayer=window.SemestaLifePlay?.spawnEntitlement?.();
+   const mod=window.SemestaLifePlay?.spawnModule?.(spawnModule(),spawnWorldAdapter())||spawnModule();
+   const decision=SR.resolve({homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
+    ownedRoom:lifePlayer?lifePlayer.ownedRoom:mod.ownedRoom,profile:actor.profile},mod,spawnWorldAdapter(),opts.rand);
    window.__semestaLastSpawn=decision;
+   window.SemestaLifePlay?.onSpawn?.(decision);
    const holder=rigs.get(actor.id);
    if(decision&&decision.ok&&decision.point&&holder){
     holder.root.position.set(decision.point.x,holder.root.position.y||0,decision.point.z);
@@ -2913,6 +2924,34 @@ window.SemestaPlay=Object.freeze({
   return inspectTrafficLights();
  }
 });
+
+if(window.SemestaLifePlay){
+ window.SemestaLifePlay.attach({
+  THREE,
+  getWorld:()=>documentMap,
+  getScene:()=>scene,
+  getCityId:()=>activeDraftId||'__semesta_working_copy__',
+  getPosition:walkWorldPos,
+  getRoot:()=>rigs.get(walkActorId)?.root||null,
+  mountTo:()=>$('canvas-wrap'),
+  syncHud:syncPlayHud,
+  tell,
+  canStand:(x,z)=>{
+   const world=spawnWorldAdapter();
+   const tile=world.tileAt(x,z);
+   return !['road','water','river','drain'].includes(tile)&&!world.blocked(x,z);
+  },
+  teleport:(x,z)=>{
+   const holder=rigs.get(walkActorId);
+   if(!holder||!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return false;
+   holder.root.position.set(Number(x),holder.root.position.y||0,Number(z));
+   holder.rig?.setMoving(0,0,false);
+   focusCameraAt(Number(x),Number(z),14);
+   return true;
+  },
+  respawn:()=>spawnRespawnApi().respawn()
+ });
+}
 $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');};
 $('home').onclick=cameraMapView;
 $('rotateL').onclick=()=>{if(item()&&!actorType(item().type)&&item().type!=='vehicle')edit(o=>{o.rotation=(o.rotation-90+360)%360;});};
@@ -4303,6 +4342,7 @@ function frame(now){
  }
  updateLargeOcclusion(dt);
  try{window.VLSpawnHobo&&window.VLSpawnHobo.tick(dt,camera);}catch{}
+ try{window.SemestaLifePlay?.tick?.(dt);}catch(err){console.warn('life play tick',err);}
  worldEffects.update(elapsedReal,dayClock.solar());
  renderer.render(scene,camera);
 }
