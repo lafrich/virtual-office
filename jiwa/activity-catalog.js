@@ -137,6 +137,31 @@ function saveLocal(raw,storage){
   throw Error('Gagal memverifikasi hasil save aktivitas');
  return cfg;
 }
+// Semesta directory is the source of real object IDs. Classification is
+// independent of which activity tab eventually consumes an entity.
+function kindOf(o){
+ const type=String(o?.type||'').toLowerCase(),layer=String(o?.layer||'').toLowerCase();
+ const text=[o?.name,o?.label,o?.subtype,o?.asset,o?.assetId].filter(Boolean).join(' ').toLowerCase();
+ if(['npc','quest_npc','pedestrian','crowd','avatar','character'].includes(type)||
+    layer==='character')return 'npc';
+ if(['building','shop','structure'].includes(type)||layer==='structure'||o?.enterable===true||
+    /rumah|ruko|kantor|warteg|toko|masjid|musala|gereja|sekolah|bank|hotel|indomaret|mall|kost/.test(text))
+  return 'building';
+ return 'object';
+}
+function eligibleTargets(objects=[],rules=[],cityId=''){
+ const eligible=[],seen=new Set();
+ for(const o of objects){
+  if(!o||!o.id||seen.has(String(o.id)))continue;
+  const kind=kindOf(o);
+  const matches=(rules||[]).filter(r=>r?.enabled===true&&r.operation!=='none'&&
+   r.kind===kind&&PREMISES.matchWorld(r,[o],cityId));
+  if(!matches.length)continue;
+  seen.add(String(o.id));
+  eligible.push({...o,jiwaKind:kind,jiwaRuleIds:matches.map(r=>r.id)});
+ }
+ return eligible;
+}
 function matchBuilding(entry,objects){
  const a=activity(entry),needle=a.buildingQuery.toLowerCase();
  if(!needle&&!a.objectId)return null;
@@ -146,15 +171,25 @@ function matchBuilding(entry,objects){
   return [o.id,o.name,o.label,o.asset,o.assetId,o.subtype,...(o.tags||[])].filter(Boolean).join(' ').toLowerCase().includes(needle);
  })||null;
 }
-function validation(a,objects=[]){
+function matchActivityTarget(entry,objects=[],rules=[],cityId=''){
+ const a=activity(entry),available=eligibleTargets(objects,rules,cityId);
+ // A bound instance cannot fall back silently if the instance was unmarked.
+ if(a.objectId)return available.find(o=>String(o.id)===a.objectId)||null;
+ if(!a.buildingQuery)return null;
+ return matchBuilding(a,available);
+}
+function validation(a,objects=[],rules=null,cityId=''){
  const errors=[];
  if(!a?.label)errors.push('Nama aktivitas wajib diisi');
- if(!a?.buildingQuery&&!a?.objectId)errors.push('Pilih bangunan/asset target');
+ if(!a?.buildingQuery&&!a?.objectId)errors.push('Pilih target interaksi dari Entities');
  if(!a?.actionAsset)errors.push('Pilih Action Asset Mahluk Hidup');
- if(!matchBuilding(a,objects))errors.push('Bangunan belum ditemukan di map aktif');
+ if(Array.isArray(rules)){
+  if(!matchActivityTarget(a,objects,rules,cityId))
+   errors.push('Target belum ditandai interaktif dan aktif di Entities untuk city ini');
+ }else if(!matchBuilding(a,objects))errors.push('Bangunan belum ditemukan di map aktif');
  const limit=PREMISES.violations(a);
  for(const f of limit)errors.push('Tier '+a.tier+' membatasi '+f.key+' ke '+f.min+'–'+f.max+' (sekarang '+f.value+')');
  return errors;
 }
-return Object.freeze({KEY,FORMAT,CATEGORIES,STAT_KEYS,STAT_ZERO,PREMISES,activity,seed,normalize,readLocal,saveLocal,matchBuilding,validation});
+return Object.freeze({KEY,FORMAT,CATEGORIES,STAT_KEYS,STAT_ZERO,PREMISES,activity,seed,normalize,readLocal,saveLocal,matchBuilding,matchActivityTarget,eligibleTargets,kindOf,validation});
 });
