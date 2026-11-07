@@ -20,7 +20,7 @@ function editGameUILayout(layout){
  const HL=window.VLHudLayout;if(!HL)return false;
  globalUiDraft=HL.normalize(layout);
  globalUiDirty=true;
- window.dispatchEvent(new Event('jiwa:ui-layout:render'));
+ /* UI layout editor moved to Semesta; no local UI view. */
  return true;
 }
 function saveGameUILayout(){
@@ -30,7 +30,7 @@ function saveGameUILayout(){
  if(result.ok){
   globalUiDirty=false;
   try{window.VLHub?.publish('gameplay',{scope:'global-game-ui',at:result.at});}catch(_e){}
-  window.dispatchEvent(new Event('jiwa:ui-layout:render'));
+  /* UI layout editor moved to Semesta; no local UI view. */
  }
  return result;
 }
@@ -208,7 +208,7 @@ async function loadCity(id){
   state.action=0;markSaved();renderTree();renderInspector();renderSystems();resetTest();fitMap();$('objCount').textContent=String(visibleEntities().length);
   window.dispatchEvent(new Event('jiwa:context:render'));
   window.dispatchEvent(new Event('jiwa:life:render'));
-  window.dispatchEvent(new Event('jiwa:ui-layout:render'));
+  /* UI layout editor moved to Semesta; no local UI view. */
   $('mapInfo').textContent=record.name+' · '+visibleEntities().length+' OBJECTS';
   notice('City loaded: '+record.name+' · edit mechanics only, placement read-only');
  }catch(e){emptyCity('Load failed: '+e.message);}
@@ -296,13 +296,12 @@ function tab(which){
  if(shell)shell.dataset.jiwaTab=which;
  mobilePane('main');
  for(const b of document.querySelectorAll('[data-tab]'))b.classList.toggle('active',b.dataset.tab===which);
- for(const name of ['map','systems','test','context','play','ui'])$(name+'View').hidden=which!==name;
+ for(const name of ['map','systems','test','context','play'])$(name+'View').hidden=which!==name;
  if(which==='map')resizeCanvas();
  if(which==='systems')renderSystems();
  if(which==='test')renderTest();
  if(which==='context')window.dispatchEvent(new Event('jiwa:context:render'));
  if(which==='play')window.dispatchEvent(new Event('jiwa:life:render'));
- if(which==='ui')window.dispatchEvent(new Event('jiwa:ui-layout:render'));
 }
 function lifeSpawnHints(){
  const objects=state.entities||[],coords=objects.filter(o=>Number.isFinite(Number(o.x))&&Number.isFinite(Number(o.z)));
