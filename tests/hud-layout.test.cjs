@@ -36,7 +36,7 @@ test('play-hud and Jiwa load the module and expose sliders plus reset',()=>{
  assert.match(hud,/applyHudLayout/);
  assert.match(hud,/VLHudLayout/);
  assert.doesNotMatch(panel,/card\('HUD LAYOUT'/);
- assert.match(jiwa,/GAME PREVIEW/);
+ assert.match(jiwa,/data-tab="play"/);
  assert.doesNotMatch(panel,/hudLayoutReset/);
  assert.match(html,/id="tabUIEditor"/);
  assert.match(jiwa,/hud-layout\.js/);
