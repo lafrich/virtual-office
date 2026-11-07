@@ -500,3 +500,64 @@ html,body{width:100%;height:100%;overflow:hidden}
 #workspace{min-height:0;min-width:0}
 #canvasPanel{min-height:0;min-width:0}
 @media(max-width:780px){html,body{overflow:hidden}#desktop,#app{height:100dvh;min-height:0}}
+
+
+/* Semesta / global GAME UI editor — actual HUD editing, not a mock canvas. */
+#inspector.sui-editing .selection,#inspector.sui-editing #tools,
+#inspector.sui-editing #layoutPane,#inspector.sui-editing #logicPane{display:none!important}
+#inspector.sui-editing #tabUIEditor{background:#a7c9f9;border-style:inset}
+#inspector .tabs{gap:3px}
+#inspector .tabs button{min-width:0;font-size:10px;padding:7px 1px}
+#semestaUIEditorPane{display:flex;flex-direction:column;gap:7px;min-height:0}
+#semestaUIEditorPane[hidden]{display:none!important}
+#semestaUIEditorPane label{display:flex;flex-direction:column;gap:4px;font:bold 10px Tahoma,Verdana,sans-serif;color:#34475b}
+#semestaUIEditorPane select,#semestaUIEditorPane input[type=number]{width:100%;min-width:0;min-height:28px;box-sizing:border-box}
+#semestaUIEditorPane input[type=range]{width:100%;min-height:26px}
+#semestaUIEditorPane output{float:right;color:#1f5594}
+#semestaUIEditorPane button{min-height:28px;white-space:normal;font:bold 10px Tahoma}
+.sui-banner{padding:8px;background:linear-gradient(90deg,#174587,#629de3);
+ color:white;border:1px solid #09295e;font:bold 11px 'Courier New',monospace}
+.sui-section{border-bottom:1px solid #979f9f;padding-bottom:4px;font:bold 10px 'Courier New',monospace;color:#224674}
+.sui-help,.sui-hint{font:10px/1.4 Tahoma;color:#53616c;margin:1px 0 4px}
+.sui-checks{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+#semestaUIEditorPane .sui-checks label{display:flex;flex-direction:row;align-items:center;gap:4px;font-size:10px;white-space:nowrap}
+.sui-checks input{margin:0}
+.sui-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sui-aligns{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+#suiCenterBoth{grid-column:1/-1}
+.sui-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+#suiSave{grid-column:1/-1;background:#c0dcfe!important;color:#113c74!important;border:2px outset #e6f2ff!important}
+#suiCancel{background:#e0e4ea}
+.sui-status{font:10px/1.45 'Courier New',monospace;border:1px solid #a6bccb;background:#eef5fa;
+ padding:7px;min-height:40px;margin:0;overflow-wrap:anywhere}
+.sui-status[data-success="true"]{background:#e1f0e0;border-color:#73966b;color:#22521d}
+/* Absolute, interactive selection outlines sit OVER actual Semesta HUD windows. */
+#semestaUIOverlay{position:absolute;inset:0;z-index:200;pointer-events:none;touch-action:none}
+#semestaUIOverlay[hidden]{display:none!important}
+#semestaUIOverlay .sui-grid-layer{position:absolute;inset:0;pointer-events:none;
+ background-image:linear-gradient(90deg,rgba(20,55,90,.25) 1px,transparent 1px),
+ linear-gradient(0deg,rgba(20,55,90,.25) 1px,transparent 1px)}
+#semestaUIOverlay .sui-guide{position:absolute;pointer-events:none;background:#f4df6a66}
+#semestaUIOverlay .sui-guide.x{left:50%;top:0;bottom:0;width:1px}
+#semestaUIOverlay .sui-guide.y{top:50%;left:0;right:0;height:1px}
+#semestaUIOverlay .sui-outline{position:absolute;border:1.5px dashed #1c5188;
+ background:rgba(54,110,186,.08);cursor:move;pointer-events:auto;touch-action:none;
+ box-sizing:border-box;min-width:14px;min-height:14px}
+#semestaUIOverlay .sui-outline:hover{background:#76c1fb2a}
+#semestaUIOverlay .sui-outline.selected{border:2px solid #ffcc56;
+ outline:1px solid #1f3963;box-shadow:0 0 0 2px #143c6670;background:rgba(60,115,185,.12);z-index:3}
+#semestaUIOverlay .sui-outline .sui-tag{position:absolute;top:-20px;left:-1px;
+ color:white;background:#134584;border:1px solid #a3c1e3;
+ padding:2px 4px;font:bold 9px Tahoma;white-space:nowrap;pointer-events:none}
+#semestaUIOverlay .sui-resizer{position:absolute;right:-8px;bottom:-8px;width:17px;height:17px;
+ border:2px solid #103764;background:#ffe28c;cursor:nwse-resize;pointer-events:auto;touch-action:none}
+#semestaUIOverlay .sui-hint-bar{position:absolute;top:8px;left:50%;transform:translateX(-50%);
+ background:#123d70e8;color:white;border:1px solid #d9e8ff;padding:7px 11px;
+ font:bold 10px Tahoma;white-space:nowrap;pointer-events:none}
+#semestaUIOverlay .sui-missing{position:absolute;inset:35% 10% auto;display:none;text-align:center;
+ color:#163c64;background:#ffffffdd;border:1px dashed #294a74;padding:10px}
+@media(max-width:780px){
+ #inspector.sui-editing{display:flex;max-height:min(74dvh,640px)}
+ #semestaUIEditorPane{padding-bottom:8px}
+ #semestaUIOverlay .sui-hint-bar{top:6px;font-size:9px;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+}
