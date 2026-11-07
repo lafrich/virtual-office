@@ -15,6 +15,7 @@ on:
       - "tests/jiwa-base-human-gameplay.test.cjs"
       - "jiwa/**"
       - "tests/semesta-jiwa-play-v1.test.cjs"
+      - "tests/nokia-activity-map.test.cjs"
       - "tests/jiwa-life-economy.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
       - "tests/mahluk-universal-hygiene.test.cjs"
@@ -51,6 +52,7 @@ on:
       - "tests/jiwa-base-human-gameplay.test.cjs"
       - "jiwa/**"
       - "tests/semesta-jiwa-play-v1.test.cjs"
+      - "tests/nokia-activity-map.test.cjs"
       - "tests/jiwa-life-economy.test.cjs"
       - "tests/mahluk-action-frame-sync.test.cjs"
       - "tests/mahluk-universal-hygiene.test.cjs"
@@ -166,4 +168,4 @@ jobs:
         run: |
           node --check world-builder/semesta-life-play.js
           node --check jiwa/life-economy.js
-          node --test tests/semesta-jiwa-play-v1.test.cjs tests/jiwa-life-economy.test.cjs
+          node --test tests/semesta-jiwa-play-v1.test.cjs tests/jiwa-life-economy.test.cjs tests/nokia-activity-map.test.cjs
