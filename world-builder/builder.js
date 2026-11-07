@@ -1845,8 +1845,8 @@ function updateSelection(){
  }
  updateLogicUI();
  interiorPreview?.update(cur,cur?.type==='sprite'?assetByName.get(cur.asset):null);
- const enterAvailable=cur?.type==='sprite'&&cur.enterable===true&&
-  (cur?.interior?.floors?.length||assetByName.get(cur.asset)?.interior?.floors?.length);
+ const enterAvailable=!!cur&&cur.enterable===true&&
+  (cur?.interior?.floors?.length||(cur.type==='sprite'&&assetByName.get(cur.asset)?.interior?.floors?.length));
  $('quickEnterBuilding').hidden=!enterAvailable;
  const canEditInterior=!!cur&&window.VLSemestaCityBuildings?.isBuilding(cur,assetCatalog)===true;
  $('editInBangunRuang').hidden=!canEditInterior;
@@ -2333,9 +2333,9 @@ canvas.addEventListener('wheel',e=>{
  function enterNearbyBuilding(){
   const root=owners.get(walkActorId);
   if(!root||!interiorPreview)return false;
-  const candidates=documentMap.objects.filter(o=>o.type==='sprite'&&
+  const candidates=documentMap.objects.filter(o=>
    o.enterable===true&&
-   (o.interior?.floors?.length||assetByName.get(o.asset)?.interior?.floors?.length));
+   (o.interior?.floors?.length||(o.type==='sprite'&&assetByName.get(o.asset)?.interior?.floors?.length)));
   const sorted=candidates.map(o=>{
    const spec=assetByName.get(o.asset);
    const door=window.VLWarteg3D?.supported(spec)?
@@ -3681,7 +3681,8 @@ function reconcileExternalCityBuilding(raw){
   const wasDirty=draftDirty;
   // Rebuild the current catalog first to register the newly authored sprite.
   refreshBangunRuang();
-  const updated=cityBuildingLink.replaceInstance(documentMap.objects[index],asset);
+  const updated=notice.interiorOnly?cityBuildingLink.replaceInterior(documentMap.objects[index],asset):
+    cityBuildingLink.replaceInstance(documentMap.objects[index],asset);
   style.normalize(updated,assetByName);schema.normalize(updated,assetByName,style);
   documentMap.objects[index]=updated;
   rebuild();updateSelection();saved();
