@@ -2420,6 +2420,7 @@ function applyPlayPickupVisibility(){
 function mapForPersist(){
  const copy=JSON.parse(JSON.stringify(documentMap));
  if(Array.isArray(copy.objects)){
+  copy.objects=copy.objects.filter(o=>o.id!==LIFE_TEST_ACTOR_ID);
   for(const o of copy.objects){delete o._pickedPreview;delete o._playHidden;}
  }
  return copy;
@@ -2497,6 +2498,43 @@ function syncPlayHud(){
  hud.apply(g);
  hud.setVisible(mode==='walk');
 }
+
+const LIFE_TEST_ACTOR_ID='__semesta_life_temporary_player__';
+function makeTemporaryLifePlayer(){
+ const existing=documentMap.objects.find(o=>o.id===LIFE_TEST_ACTOR_ID);
+ if(existing)return existing;
+ const p={x:0,z:0};
+ const pool=window.VLSpawnRespawn?.validPool?.(spawnModule(),spawnWorldAdapter())||[];
+ if(pool.length){p.x=pool[0].x;p.z=pool[0].z;}
+ else{
+  const first=documentMap.objects.find(o=>Number.isFinite(Number(o.x))&&Number.isFinite(Number(o.z)));
+  p.x=Number(first?.x)||0;p.z=Number(first?.z)||0;
+ }
+ const player={id:LIFE_TEST_ACTOR_ID,type:'avatar',name:'PLAY TEST / PLAYER PLACEHOLDER',
+  x:p.x,z:p.z,y:0,collision:true,scale:1,facing:'se',profile:'placeholder'};
+ const root=new THREE.Group();root.name=player.name;root.position.set(p.x,0,p.z);
+ const mat=new THREE.MeshBasicMaterial({color:0x4e8ac6});
+ const body=new THREE.Mesh(new THREE.CylinderGeometry(.3,.38,1.05,8),mat);body.position.y=.73;root.add(body);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.29,10,8),new THREE.MeshBasicMaterial({color:0xe5c29a}));head.position.y=1.53;root.add(head);
+ const rig={mesh:root,state:{loaded:true,failed:false},setMoving(){},setPose(){},setDirection(){},
+  setProfile(){},step(){},dispose(){}};
+ documentMap.objects.push(player);assetRoots.add(root);owners.set(player.id,root);rigs.set(player.id,{rig,root});
+ tell('Placeholder player aktif untuk Play Mode (tidak masuk City Draft).');
+ return player;
+}
+function clearTemporaryLifePlayer(){
+ if(!documentMap.objects.some(o=>o.id===LIFE_TEST_ACTOR_ID))return;
+ const rec=rigs.get(LIFE_TEST_ACTOR_ID);
+ if(rec){
+  rec.root.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material?.dispose();});
+  rec.root.removeFromParent();rigs.delete(LIFE_TEST_ACTOR_ID);
+ }
+ owners.delete(LIFE_TEST_ACTOR_ID);
+ documentMap.objects=documentMap.objects.filter(o=>o.id!==LIFE_TEST_ACTOR_ID);
+ if(selectedId===LIFE_TEST_ACTOR_ID)selectedId=null;
+ if(cameraFollowId===LIFE_TEST_ACTOR_ID){cameraFollowId=null;mapCameraBeforeFollow=null;updateCharacterCameraUI();}
+ walkActorId=null;
+}
 function clearWalk(){
  try{window.VLSpawnHobo&&window.VLSpawnHobo.dispose();}catch{}
  for(const k of Object.keys(walkInput))walkInput[k]=false;
@@ -2510,7 +2548,7 @@ function clearWalk(){
      rec.rig.setProfile(source.profile||'ichsan');
      if(source.pose)rec.rig.setPose(source.pose);
    }
- }
+ clearTemporaryLifePlayer();
 }
 function setMode(m){
  if(mode==='walk'&&m!=='walk'){window.SemestaLifePlay?.stop?.();clearWalk();}
@@ -2527,8 +2565,8 @@ function setMode(m){
  if(placementPreview)placementPreview.visible=m==='place';
  $('walkPad').classList.toggle('active',m==='walk');
  if(m==='walk'){
-   const first=(item()&&actorType(item().type)?item():documentMap.objects.find(x=>actorType(x.type)));
-   if(!first){tell('Add character before Walk Test');setMode('select');return;}
+   const first=(item()&&actorType(item().type)&&rigs.has(item().id)&&owners.get(item().id)?.visible!==false?item():
+    documentMap.objects.find(x=>actorType(x.type)&&rigs.has(x.id)&&owners.get(x.id)?.visible!==false))||makeTemporaryLifePlayer();
    walkActorId=first.id;select(first.id);
    window.SemestaLifePlay?.start?.();
    rigs.get(walkActorId)?.rig.setPose(null);
@@ -3824,7 +3862,7 @@ async function saveNamedCity(asNew=false){
  saved();
  try{
   const result=await drafts.save({
-   id:asNew?null:activeDraftId,name,document:documentMap
+   id:asNew?null:activeDraftId,name,document:mapForPersist()
   });
   activeDraftId=result.id;draftDirty=false;
   try{localStorage.setItem(ACTIVE_DRAFT_KEY,result.id);}catch{}
