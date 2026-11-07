@@ -40,7 +40,12 @@ function metrics(spec,dir='sw'){
   width:w*PX,height:h*PY,centerX:(w/2-px)*PX,
   centerY:(py-h/2)*PY,
   centerDepth:(fw+fd)/2,
-  groundPixel:py,hasFrontPixels:h>py
+  groundPixel:py,hasFrontPixels:h>py,
+  // Small isometric street furniture has genuine feet/front pixels below
+  // the authored footprint-centre pivot. They must remain above terrain.
+  // Do not apply this to buildings: their forward apron is physical depth.
+  furnitureApronLift:(['taman','prop','sinyal'].includes(spec.group)&&
+   fw<=4&&fd<=4)?Math.max(0,(h-py)*PY)+.055:0
  });
 }
 function projectedSurface(relativePxY,sourceDepth,centerDepth){
@@ -125,7 +130,7 @@ function configure(THREE,bundle,spec,dir,color,depth){
  if(old)old.dispose();
  // Screen-right is world (+X,-Z) for Semesta's locked ortho yaw=45deg.
  // Do not shift the pivot purely along world X: it changes its screen depth.
- bundle.facade.position.set(m.centerX/Math.SQRT2,m.centerY,-m.centerX/Math.SQRT2);
+ bundle.facade.position.set(m.centerX/Math.SQRT2,m.centerY+m.furnitureApronLift,-m.centerX/Math.SQRT2);
  bundle.facade.material.map=color;
  bundle.facade.material.needsUpdate=true;
  const u=bundle.facade.material.userData.nativeDepthUniforms;
