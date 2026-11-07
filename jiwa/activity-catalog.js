@@ -116,6 +116,19 @@ function readLocal(storage){
 }
 function saveLocal(raw,storage){
  const cfg=normalize(raw);cfg.updatedAt=new Date().toISOString();
+ for(const a of cfg.activities){
+  const fails=PREMISES.violations(a);
+  if(fails.length){
+   const f=fails[0];throw Error(a.label+': tier '+a.tier+' membatasi '+f.key+' pada '+f.min+'–'+f.max+'. Naikkan tier atau ubah nilainya.');
+  }
+ }
+ for(const r of cfg.worldEntities){
+  if(!r.enabled||r.operation!=='ambient')continue;
+  const fails=PREMISES.violations(r);
+  if(fails.length){
+   const f=fails[0];throw Error(r.label+': tier '+r.tier+' membatasi '+f.key+' pada '+f.min+'–'+f.max);
+  }
+ }
  if(!storage?.setItem)throw Error('Storage tidak tersedia');
  storage.setItem(KEY,JSON.stringify(cfg));
  const check=readLocal(storage);
