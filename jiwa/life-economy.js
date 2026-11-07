@@ -62,6 +62,9 @@ function stateFrom(existing,config){
  s.elapsedMinutes=number(s.elapsedMinutes,0,1e9,0);
  s.itemSequence=number(s.itemSequence,0,1e9,0);
  s.powerTokens=number(s.powerTokens,0,1e9,0);
+ s.furniture=Array.isArray(s.furniture)?s.furniture:[];
+ s.detained=s.detained===true;
+ s.luckClaims=number(s.luckClaims,0,1e9,0);
  s.restMinutes=number(s.restMinutes,0,1e9,0);
  s.detentionMinutes=number(s.detentionMinutes,0,1e9,0);
  for(const [k,def] of Object.entries({wallet:6000,energy:80,hygiene:75,bladder:20,fullness:70,moral:50,experience:0})){
@@ -100,7 +103,61 @@ function doAction(config,previous,action,args={}){
   changes.push('dapat '+label);return id;};
  if(!['advance_time','rest','respawn'].includes(action)&&(s.restMinutes>0||s.detentionMinutes>0))
   return reject('Masih bed rest / menjalani hukuman. Majukan waktu terlebih dahulu.');
+ if(s.detained&&!['fine','community_service','advance_time'].includes(action))return reject('Ditahan hansip: bayar denda atau bersihkan gorong-gorong.');
  switch(action){
+ case 'walk': {
+  const units=number(args.units,1,20,1);
+  stat('energy',-units);clock(units);break;
+ }
+ case 'scavenge': {
+  if(s.inventory.length>=setting.bagSlots)return reject('Tas penuh.');
+  if(s.energy<4)return reject('Energi tidak cukup untuk mulung.');
+  clock(8);stat('energy',-4);
+  add('barang_bekas','Barang bekas',999999);break;
+ }
+ case 'sell_loak':{
+  const id=String(args.itemId||'');
+  if(!s.inventory.includes(id))return reject('Barang tidak ada di tas.');
+  const meta=s.itemMeta[id];
+  if(!meta||meta.species!=='barang_bekas')return reject('Toko Loak hanya menerima barang bekas pada tes ini.');
+  s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];
+  s.wallet+=1000;changes.push('jual barang bekas +Rp1000');break;
+ }
+ case 'buy_furniture':{
+  if(!s.housing.room)return reject('Beli akses kost sebelum membeli furnitur.');
+  const id=String(args.itemId||'').slice(0,48);
+  const catalog={bed:6000,chair:1500,stove:4500,wardrobe:3500};
+  if(!Object.prototype.hasOwnProperty.call(catalog,id))return reject('Jenis furnitur belum tersedia.');
+  if(s.furniture.includes(id))return reject('Furnitur ini sudah dibeli.');
+  if(!spend(catalog[id]))return reject('Uang tidak cukup.');
+  s.furniture.push(id);changes.push('furnitur '+id+' masuk ke kost');break;
+ }
+ case 'cook':{
+  if(!s.housing.room||!s.furniture.includes('stove'))return reject('Masak membutuhkan kost dan kompor.');
+  if(s.powerTokens<1)return reject('Token listrik habis.');
+  const id=String(args.itemId||'');
+  if(!s.inventory.includes(id))return reject('Bahan makanan tidak ada di tas.');
+  const info=activeItem(c,s,id);if(!info.ok||info.spoiled)return reject('Ikan sudah busuk / tidak bisa dimasak.');
+  clock(20);s.powerTokens-=1;
+  s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];
+  stat('energy',18);stat('fullness',40);stat('bladder',10);
+  changes.push('masak dan makan '+info.fish.label);break;
+ }
+ case 'luck_find':{
+  if(s.luckClaims>=5)return reject('Kesempatan rezeki dalam sesi ini sudah habis.');
+  const roll=Number.isFinite(Number(args.roll))?Math.max(0,Math.min(1,Number(args.roll))):Math.random();
+  s.luckClaims++;
+  const threshold=Math.min(.35,.05+s.moral/1000*2);
+  if(roll<threshold){s.wallet+=500;changes.push('rezeki tak terduga +Rp500');}
+  else changes.push('tidak menemukan rezeki');
+  break;
+ }
+ case 'arrest':{
+  if(s.moral>=setting.arrestMoralThreshold)return reject('Tidak ada alasan penahanan.');
+  if(!args.witnessed)return reject('Tidak ada hansip yang melihat.');
+  if(s.detained)return reject('Sudah ditahan.');
+  s.detained=true;changes.push('hansip menangkap pemain');break;
+ }
  case 'respawn':{
   if(s.housing.room){
    const room=args.roomSpawn&&Number.isFinite(Number(args.roomSpawn.x))&&Number.isFinite(Number(args.roomSpawn.z))?args.roomSpawn:null;
@@ -241,15 +298,19 @@ function doAction(config,previous,action,args={}){
   s.fridge.splice(s.fridge.indexOf(id),1);s.inventory.push(id);changes.push('ambil dari kulkas');break;
  }
  case 'fine':{
-  if(s.moral>=setting.arrestMoralThreshold)return reject('Tidak ada perkara aktif.');
+  if(!s.detained)return reject('Belum ditahan hansip.');
   if(!spend(2000))return reject('Uang tidak cukup untuk denda.');
-  stat('moral',5);break;
+  s.detained=false;stat('moral',5);changes.push('denda lunas, bebas');break;
  }
  case 'community_service':{
-  if(s.moral>=setting.arrestMoralThreshold)return reject('Tidak ada perkara aktif.');
-  clock(45);stat('energy',-15);stat('moral',10);changes.push('kerja sosial membersihkan gorong-gorong');break;
+  if(!s.detained)return reject('Belum ditahan hansip.');
+  clock(45);s.detained=false;stat('energy',-15);stat('moral',10);changes.push('kerja sosial membersihkan gorong-gorong; bebas');break;
  }
  default:return reject('Aksi belum didukung: '+String(action));
+ }
+ if(s.bladder>=100&&action!=='toilet'&&action!=='public_toilet'&&action!=='home_toilet'){
+  s.bladder=0;s.hygiene=Math.max(0,s.hygiene-20);s.moral=Math.max(0,s.moral-5);
+  changes.push('KENCING DI CELANA · hygiene -20 · moral -5');
  }
  if(s.energy<=0&&!['advance_time','rest'].includes(action)){
   s.restMinutes=setting.faintRestMinutes;changes.push('PINGSAN · bed rest '+s.restMinutes+'m');
