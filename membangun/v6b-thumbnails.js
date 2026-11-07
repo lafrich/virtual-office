@@ -59,7 +59,7 @@ function silver(){
  // Fallback is clearly a silver-character preview, not an invented GIF.
  nodes('jiwa').forEach(node=>{
   const img=new Image();img.alt='Manusia Silver V6B';img.className='v6b-silver-image';
-  img.onload=()=>node.replaceChildren(img);
+  img.onload=()=>{const crop=document.createElement('div');crop.className='v6b-silver-crop';crop.appendChild(img);node.replaceChildren(crop);};
   img.onerror=()=>{node.setAttribute('title','Native Manusia Silver preview belum tersedia dari build pipeline');};
   img.src=SILVER;
  });
