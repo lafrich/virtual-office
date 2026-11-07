@@ -13,6 +13,7 @@ on:
       - "tests/jiwa-visual-ui-editor.test.cjs"
       - "tests/jiwa-visual-ui-editor.e2e.cjs"
       - "tests/jiwa-fullscreen.e2e.cjs"
+      - "tests/jiwa-grid-align.e2e.cjs"
       - ".github/workflows/jiwa-visual-ui-editor.yml"
   workflow_dispatch:
 permissions:
@@ -50,6 +51,8 @@ jobs:
         run: node virtual-office/tests/jiwa-visual-ui-editor.e2e.cjs
       - name: "Browser test: fullscreen Jiwa desktop and mobile"
         run: node virtual-office/tests/jiwa-fullscreen.e2e.cjs
+      - name: "Browser test: grid snap, center align and Semesta sync"
+        run: node virtual-office/tests/jiwa-grid-align.e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
