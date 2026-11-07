@@ -90,6 +90,27 @@
    phone:normalizeProfile(src.phone,'phone')
   };
  }
+ // One authoritative saved layout for the active Semesta city. A later
+ // Global Foundation edit can intentionally replace an older city cache;
+ // opening a city without edits never writes this cache.
+ const STORAGE_PREFIX='jiwa-hud-layout-city-v1:';
+ function resolveSavedLayout(cityId,storage){
+  const id=cityId||'__jiwa_global__';
+  const store=storage||(root&&root.localStorage);
+  if(!store||typeof store.getItem!=='function')return null;
+  const read=key=>{
+   try{const obj=JSON.parse(store.getItem(STORAGE_PREFIX+key)||'null');
+    return obj&&obj.layout?obj:null;
+   }catch(_e){return null;}
+  };
+  const city=read(id),global=id==='__jiwa_global__'?null:read('__jiwa_global__');
+  if(!city&&!global)return null;
+  const rank=x=>Number.isFinite(Number(x?.at))?Number(x.at):0;
+  const useGlobal=!!global&&(!city||rank(global)>rank(city));
+  const item=useGlobal?global:city;
+  return {layout:normalize(item.layout),scope:useGlobal?'__jiwa_global__':id,
+   at:rank(item)};
+ }
  function detectProfile(doc, hint){
   if(hint==='phone'||hint==='desktop')return hint;
   try{
@@ -340,6 +361,6 @@
  return {
   ELEMENTS,ANCHORS,MIN_SCALE,MAX_SCALE,MIN_TAP,SELECTORS,
   defaults,normalize,normalizeProfile,normalizeSlot,detectProfile,pick,
-  applyTo,measure,bindPreview,desktopProfile,phoneProfile
+  applyTo,measure,bindPreview,desktopProfile,phoneProfile,placedRect,resolveSavedLayout
  };
 });
