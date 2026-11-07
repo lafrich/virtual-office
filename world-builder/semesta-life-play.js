@@ -172,16 +172,19 @@ function buildSites(){
  // Ambient interactions never create a quest marker in Nokia.
  const worldPremises=root.JiwaPremises;
  for(const rule of config.worldEntities||[]){
-  const found=worldPremises?.matchWorld?.(rule,objects.filter(o=>catalog?.kindOf?.(o)===rule.kind),projectId);
-  if(!found)continue;
-  const pos=findLanding(Number(found.x)||0,Number(found.z)||0);
-  const opts={id:'world:'+rule.id,label:rule.label,worldRuleId:rule.id,
-   operation:rule.operation,sourceId:String(found.id||''),placeholder:false,
-   actionAsset:rule.actionAsset,activityId:rule.operation==='npc_quest'?rule.activityId:null,
-   ambient:rule.operation==='ambient',x:pos.x,z:pos.z,icon:rule.operation==='npc_quest'?'❗':'🚪'};
-  if(rule.operation==='npc_quest'&&!config.activities.some(a=>a.id===rule.activityId))continue;
-  if(rule.operation==='enter'&&!rule.enterable)continue;
-  sites.push(opts);
+  if(!rule.enabled||rule.operation==='none')continue;
+  const candidates=objects.filter(o=>catalog?.kindOf?.(o)===rule.kind);
+  const matches=worldPremises?.matchWorldAll?.(rule,candidates,projectId)||[];
+  for(const found of matches.slice(0,300)){
+   const pos=findLanding(Number(found.x)||0,Number(found.z)||0);
+   const opts={id:'world:'+rule.id+':'+found.id,label:rule.label,worldRuleId:rule.id,
+    operation:rule.operation,sourceId:String(found.id||''),placeholder:false,
+    actionAsset:rule.actionAsset,activityId:rule.operation==='npc_quest'?rule.activityId:null,
+    ambient:rule.operation==='ambient',x:pos.x,z:pos.z,icon:rule.operation==='npc_quest'?'❗':'🚪'};
+   if(rule.operation==='npc_quest'&&!config.activities.some(a=>a.id===rule.activityId))continue;
+   if(rule.operation==='enter'&&!rule.enterable)continue;
+   sites.push(opts);
+  }
  }
  rebuildNokiaMapOverview();
 }
@@ -512,7 +515,7 @@ function runAction(action,args={}){
  const node=nearest();
  if(['world_ambient','world_enter','world_quest'].includes(action)){
   const ruleId=String(args.ruleId||'');
-  if(node?.id!=='world:'+ruleId||node.placeholder)
+  if(node?.worldRuleId!==ruleId||node.placeholder)
    return {ok:false,reason:'Dekati entity interaksi yang cocok di Semesta.'};
   const rule=config.worldEntities?.find(x=>x.id===ruleId);
   if(!rule||rule.operation!==({world_ambient:'ambient',world_enter:'enter',world_quest:'npc_quest'}[action]))
