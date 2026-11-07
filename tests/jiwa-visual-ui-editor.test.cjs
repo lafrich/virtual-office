@@ -15,11 +15,11 @@ test('Jiwa UI Editor is a visible tab and uses canonical gameplay HUD module',()
  assert.match(jiwa,/\['map','systems','test','context','play','ui'\]/);
  assert.match(jiwa,/jiwa:ui-layout:render/);
  assert.match(js,/HL\.normalize/);
- assert.match(js,/B\.set\(g\)/);
+ assert.match(js,/B\.setUILayout/);
  assert.match(js,/stage\.addEventListener\('pointerdown'/);
  assert.match(js,/stage\.addEventListener\('pointermove'/);
  assert.match(js,/stage\.addEventListener\('pointerup'/);
- assert.match(js,/document\.getElementById\('save'\)\?\.click\(\)/);
+ assert.match(js,/B\.saveUILayout\?\.\(\)/);
  assert.doesNotMatch(js,/\.innerHTML\s*=\s*.*Nokia\.render/);
 });
 test('Desktop and phone have independent slots for Nokia, buttons and survival panel',()=>{
@@ -34,16 +34,18 @@ test('Desktop and phone have independent slots for Nokia, buttons and survival p
  assert.notEqual(a.phone.hpButton.x,100);
  assert.equal(a.desktop.hpButton.scale,1.2);
 });
-test('Jiwa saves per-city cache and Semesta reads matching city/global fallback',()=>{
+test('UI Editor is global; city ID cannot change its saved layout',()=>{
  const jiwa=read('jiwa/jiwa.js'),builder=read('world-builder/builder.js');
- assert.match(jiwa,/HUD_LAYOUT_PREFIX='jiwa-hud-layout-city-v1:'/);
- assert.match(jiwa,/saveHudLayoutCache\(p\.cityId,p\.gameplay\)/);
- assert.match(jiwa,/saveHudLayoutCache\(state\.project\.cityId,state\.project\.gameplay\)/);
- assert.match(read('shared/hud-layout.js'),/STORAGE_PREFIX='jiwa-hud-layout-city-v1:'/);
- assert.match(builder,/HL\?\.resolveSavedLayout\?\.\(city,localStorage\)/);
- assert.match(builder,/activeDraftId\|\|'__jiwa_global__'/);
+ const ui=read('jiwa/ui-layout-editor.js');
+ assert.match(jiwa,/getUILayout:\(\)=>gameUILayout\(\)/);
+ assert.match(jiwa,/setUILayout:next=>editGameUILayout\(next\)/);
+ assert.match(jiwa,/saveUILayout:\(\)=>saveGameUILayout\(\)/);
+ assert.doesNotMatch(jiwa,/saveHudLayoutCache/);
+ assert.match(builder,/HL\?\.resolveSavedLayout\?\.\(null,localStorage\)/);
+ assert.match(builder,/key===window\.VLHudLayout\?\.GLOBAL_LAYOUT_KEY/);
  assert.match(builder,/addEventListener\('storage',e=>/);
- assert.match(builder,/syncPlayHud\(\)/);
+ assert.match(ui,/B\.getUILayout\?\.\(\)/);
+ assert.match(ui,/B\.saveUILayout\?\.\(\)/);
 });
 test('HUD uses real Nokia and preserves actual Action controls',()=>{
  const hud=read('shared/play-hud.js');
@@ -88,21 +90,29 @@ test('Canonical center anchors stay centered at any viewport size',()=>{
   assert.equal(y.x,w-72-10);
  }
 });
-test('Newest relevant save wins, and city navigation is not a layout edit',()=>{
- const layout=HL.defaults();
- const mk=(x)=>({layout:{desktop:{action:{...layout.desktop.action,x}}},at:1000});
+test('One global save applies unchanged to Jakarta, Bandung and any future city',()=>{
  const storeMap=new Map();
- storeMap.set('jiwa-hud-layout-city-v1:jakarta',JSON.stringify(mk(100)));
- storeMap.set('jiwa-hud-layout-city-v1:__jiwa_global__',JSON.stringify({...mk(33),at:2000}));
- const storage={getItem:k=>storeMap.get(k)||null};
- let selected=HL.resolveSavedLayout('jakarta',storage);
- assert.equal(selected.scope,'__jiwa_global__');
- assert.equal(selected.layout.desktop.action.x,33);
- storeMap.set('jiwa-hud-layout-city-v1:jakarta',JSON.stringify({...mk(140),at:3000}));
- selected=HL.resolveSavedLayout('jakarta',storage);
- assert.equal(selected.scope,'jakarta');
- assert.equal(selected.layout.desktop.action.x,140);
- assert.equal(HL.resolveSavedLayout('bandung',storage).layout.desktop.action.x,33);
- const jiwa=read('jiwa/jiwa.js');
- assert.doesNotMatch(jiwa,/saveHudLayoutCache\(id,state\.project\.gameplay\)/);
+ const storage={getItem:k=>storeMap.get(k)||null,
+  setItem:(k,v)=>storeMap.set(k,v),
+  get length(){return storeMap.size;},
+  key:i=>[...storeMap.keys()][i]||null};
+ const old=HL.defaults();
+ old.desktop.hpButton={scale:1,anchor:'top-left',x:73,y:41};
+ storeMap.set('jiwa-hud-layout-city-v1:jakarta',JSON.stringify({layout:old,at:3000}));
+ const recovered=HL.resolveSavedLayout('bandung',storage);
+ assert.ok(recovered);
+ assert.equal(recovered.layout.desktop.hpButton.x,73,'older city work must be recoverable');
+ const layout=HL.normalize(recovered.layout);
+ layout.desktop.hpButton={scale:1,anchor:'center-center',x:0,y:0};
+ const saved=HL.saveGlobalLayout(layout,storage);
+ assert.ok(saved.ok,saved.reason);
+ for(const city of ['jakarta','bandung','__jiwa_global__','new_future_city']){
+  const chosen=HL.resolveSavedLayout(city,storage);
+  assert.equal(chosen.scope,'global-game-ui');
+  assert.deepEqual(chosen.layout,layout);
+ }
+ const stale=HL.defaults();stale.desktop.hpButton.x=450;
+ storeMap.set('jiwa-hud-layout-city-v1:jakarta',JSON.stringify({layout:stale,at:9000000000}));
+ assert.equal(HL.resolveSavedLayout('jakarta',storage).layout.desktop.hpButton.x,0,
+  'later city data must not override global game UI');
 });
