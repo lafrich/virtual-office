@@ -4267,8 +4267,22 @@ function frame(now){
      const realW=iw*PIXEL_WORLD,realH=ih*PIXEL_WORLD*VERTICAL_COMP;
      plane.scale.x=realW/plane.userData.authorWidth;
      plane.scale.y=realH/plane.userData.authorHeight;
-     plane.position.y=realH*((plane.userData.pivotY??.8)-.5);
+     const authoredPivot=plane.userData.pivotY??.8;
+     plane.position.y=realH*(authoredPivot-.5);
      plane.position.x=realW*(plane.userData.pivotX||0);
+     // Non-depth-mapped art is a vertical plane. Its visible opaque feet can
+     // be BELOW the metadata pivot and vanish behind the raised terrain.
+     // Ground the lowest opaque row instead; retain depth tests and world XY.
+     // Native depth-mapped facades and custom studio buildings use their own
+     // independent physical/compositing grounding, so don't alter them here.
+     if(!plane.userData.studioGroundComposite&&!vegetationGround?.isTree(spec)){
+      const contact=window.VLSemestaWheelGround?.contact(img,authoredPivot);
+      const ratio=Math.max(authoredPivot,contact?.source==='authored-fallback'?1:(contact?.ratio??1));
+      plane.position.y=realH*(ratio-.5)+.055;
+      plane.userData.autoGround=true;
+      plane.userData.nativeContactRatio=ratio;
+      plane.userData.nativeContactSource=contact?.source||'bottom-fallback';
+     }
      // For 22 published tree species the authored pipeline pivot is under
      // the trunk, but the grass skirt may extend below it in 2:1 space.
      // Seat the lowest OPAQUE root/skirt pixels on the terrain automatically
