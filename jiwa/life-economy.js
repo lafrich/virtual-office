@@ -25,7 +25,10 @@ function defaults(){return {
  fridgePrice:8000,tokenPrice:1000,tokenUnits:5,fridgeExtraMinutes:600,
  faintRestMinutes:30,arrestMoralThreshold:15,
  publicShowerFee:500,publicShowerRecovery:35,homeShowerRecovery:70,
- publicToiletPenalty:5,hoboSleepRecovery:30,homeSleepRecovery:65},
+ publicToiletPenalty:5,hoboSleepRecovery:30,homeSleepRecovery:65,
+ passiveEnergyMinutes:60,passiveBladderMinutes:20,passiveHygieneMinutes:90,
+ passiveFullnessMinutes:35,faintRecoveryEnergy:25,tokenDurationMinutes:60,
+ realSecondsPerGameMinute:8,seatRestEnergy:3},
  fish:copy(FISH)
 };}
 function normalize(raw){
@@ -62,6 +65,8 @@ function stateFrom(existing,config){
  s.elapsedMinutes=number(s.elapsedMinutes,0,1e9,0);
  s.itemSequence=number(s.itemSequence,0,1e9,0);
  s.powerTokens=number(s.powerTokens,0,1e9,0);
+ s.tokenUseMinutes=number(s.tokenUseMinutes,0,1e9,0);
+ s.faintCount=number(s.faintCount,0,1e9,0);
  s.furniture=Array.isArray(s.furniture)?s.furniture:[];
  s.detained=s.detained===true;
  s.arrestGraceMinutes=number(s.arrestGraceMinutes,0,100000,0);
@@ -71,7 +76,9 @@ function stateFrom(existing,config){
  for(const [k,def] of Object.entries({wallet:6000,energy:80,hygiene:75,bladder:20,fullness:70,moral:50,experience:0})){
   s[k]=number(s[k],0,k==='wallet'?1e9:100,def);
  }
- s.identity=copy(c.identity);
+ s.identity={...c.identity,...(s.identity&&typeof s.identity==='object'?s.identity:{})};
+ if(!RELIGIONS.includes(s.identity.religion)||s.identity.religion==='satanis')s.identity.religion=c.identity.religion;
+ if(!ZODIACS.includes(s.identity.zodiac))s.identity.zodiac=c.identity.zodiac;
  return s;
 }
 function weighted(config,roll){
@@ -85,7 +92,7 @@ function activeItem(config,s,id){
  if(!meta)return {ok:false,reason:'Item tidak ditemukan'};
  const fish=normalize(config).fish.find(f=>f.id===meta.species);
  if(!fish)return {ok:false,reason:'Jenis ikan tidak dikenal'};
- const limit=meta.expiresAt+(meta.inFridge?normalize(config).settings.fridgeExtraMinutes:0);
+ const limit=meta.expiresAt;
  return {ok:true,fish,meta,spoiled:s.elapsedMinutes>=limit};
 }
 function speedFactor(s){
@@ -95,8 +102,38 @@ function doAction(config,previous,action,args={}){
  const c=normalize(config),s=stateFrom(previous,c),setting=c.settings,changes=[];
  const reject=reason=>({ok:false,reason,state:copy(previous||s),changes:[]});
  const stat=(k,v)=>{s[k]=Math.max(0,Math.min(100,s[k]+v));changes.push(k+' '+(v>=0?'+':'')+v);};
- const clock=m=>{m=number(m,0,100000,0);s.elapsedMinutes+=m;s.restMinutes=Math.max(0,s.restMinutes-m);
-  s.detentionMinutes=Math.max(0,s.detentionMinutes-m);s.arrestGraceMinutes=Math.max(0,s.arrestGraceMinutes-m);changes.push('waktu +'+m+'m');};
+ const clock=m=>{
+  m=number(m,0,100000,0);if(m===0)return;
+  const before=s.elapsedMinutes,wasFaint=s.restMinutes>0;
+  if(s.housing.fridge&&s.fridge.length&&s.powerTokens>0){
+   const powered=Math.min(m,Math.max(0,s.powerTokens*setting.tokenDurationMinutes-s.tokenUseMinutes));
+   for(const id of s.fridge){const meta=s.itemMeta[id];if(meta)meta.expiresAt+=powered*2;}
+   s.tokenUseMinutes+=powered;
+   while(s.tokenUseMinutes>=setting.tokenDurationMinutes&&s.powerTokens>0){
+    s.powerTokens--;s.tokenUseMinutes-=setting.tokenDurationMinutes;
+   }
+   if(s.powerTokens===0&&powered<m)changes.push('Token listrik habis: kulkas berhenti mendinginkan');
+  }
+  s.elapsedMinutes+=m;
+  s.restMinutes=Math.max(0,s.restMinutes-m);
+  s.detentionMinutes=Math.max(0,s.detentionMinutes-m);
+  s.arrestGraceMinutes=Math.max(0,s.arrestGraceMinutes-m);
+  const count=rate=>Math.floor(s.elapsedMinutes/rate)-Math.floor(before/rate);
+  const energyUse=wasFaint?0:count(setting.passiveEnergyMinutes);
+  const hygieneUse=count(setting.passiveHygieneMinutes);
+  const bladderGain=count(setting.passiveBladderMinutes);
+  const fullnessUse=count(setting.passiveFullnessMinutes);
+  if(energyUse)s.energy=Math.max(0,s.energy-energyUse);
+  if(hygieneUse)s.hygiene=Math.max(0,s.hygiene-hygieneUse);
+  if(bladderGain)s.bladder=Math.min(100,s.bladder+bladderGain*3);
+  if(fullnessUse)s.fullness=Math.max(0,s.fullness-fullnessUse*2);
+  if(s.fullness===0&&!wasFaint)s.energy=Math.max(0,s.energy-1);
+  if(wasFaint&&s.restMinutes===0){
+   s.energy=Math.max(s.energy,setting.faintRecoveryEnergy);
+   changes.push('BED REST SELESAI · energi pulih '+s.energy);
+  }
+  changes.push('waktu +'+m+'m');
+ };
  const spend=amount=>{if(s.wallet<amount)return false;s.wallet-=amount;changes.push('uang -Rp'+amount);return true;};
  const add=(type,label,minutes)=>{if(s.inventory.length>=setting.bagSlots)return null;
   const id='life:'+type+':'+(++s.itemSequence);
@@ -217,7 +254,11 @@ function doAction(config,previous,action,args={}){
   clock(8);stat('energy',-7);add('buah','Buah pohon',120);break;
  }
  case 'advance_time':clock(args.minutes??30);break;
- case 'rest':clock(args.minutes??15);stat('energy',15);break;
+ case 'rest':{
+  if(s.restMinutes>0){clock(args.minutes??15);break;}
+  if(!args.seatId)return reject('Energi hanya pulih dari makan, kopi atau tidur. Duduk perlu kursi/bangku.');
+  clock(12);stat('energy',setting.seatRestEnergy);break;
+ }
  case 'eat': {
   if(!spend(2500))return reject('Uang tidak cukup.');
   clock(10);stat('energy',12);stat('fullness',30);stat('bladder',12);break;
@@ -226,7 +267,12 @@ function doAction(config,previous,action,args={}){
   if(!spend(setting.coffeePrice))return reject('Uang tidak cukup.');
   clock(5);stat('energy',20);stat('bladder',25);break;
  }
- case 'sleep':clock(60);stat('energy',s.housing.room?setting.homeSleepRecovery:setting.hoboSleepRecovery);stat('hygiene',s.housing.room?-8:-15);changes.push(s.housing.room?'tidur di kost':'tidur di tenda / fasilitas umum');break;
+ case 'sleep':{
+  if(s.restMinutes>0)return reject('Sedang bed rest akibat pingsan. Lanjutkan waktu istirahat.');
+  clock(60);stat('energy',s.housing.room?setting.homeSleepRecovery:setting.hoboSleepRecovery);
+  stat('hygiene',s.housing.room?-8:-15);
+  changes.push(s.housing.room?'tidur di kost':'tidur di tenda pinggiran kota');break;
+ }
  case 'shower':case 'public_shower':case 'home_shower':{
    const home=action==='home_shower'||(action==='shower'&&s.housing.room);
    if(home&&!s.housing.room)return reject('Mandi di kost hanya untuk pemilik akses kamar.');
@@ -259,8 +305,9 @@ function doAction(config,previous,action,args={}){
  }
  case 'help':clock(15);stat('energy',-5);stat('moral',5);break;
  case 'worship': {
-  if(['ateis','agnostik'].includes(c.identity.religion))return reject('Karakter tidak memilih ibadah agama; moral bisa dinaikkan lewat perbuatan baik.');
-  if(args.placeReligion&&args.placeReligion!==c.identity.religion)return reject('Tempat ibadah tidak sesuai pilihan agama.');
+  if(['ateis','agnostik'].includes(s.identity.religion))return reject('Karakter tidak memilih ibadah agama; moral bisa dinaikkan lewat perbuatan baik.');
+  if(!args.placeReligion)return reject('Ibadah harus dilakukan di tempat ibadah yang sesuai.');
+  if(args.placeReligion!==s.identity.religion)return reject('Tempat ibadah tidak sesuai pilihan agama.');
   clock(15);stat('moral',5);break;
  }
  case 'buy_room': {
@@ -289,15 +336,16 @@ function doAction(config,previous,action,args={}){
   if(s.powerTokens<=0)return reject('Token listrik habis.');
   if(!s.inventory.includes(id))return reject('Item tidak ada di tas.');
   const info=activeItem(c,s,id);if(!info.ok||info.spoiled)return reject('Barang tidak bisa disimpan karena sudah busuk.');
-  s.powerTokens-=1;
   s.inventory.splice(s.inventory.indexOf(id),1);s.fridge.push(id);
-  info.meta.inFridge=true;changes.push('masuk kulkas; token -1');break;
+  info.meta.inFridge=true;changes.push('masuk kulkas; pendinginan mengonsumsi token sepanjang waktu');break;
  }
  case 'take_fridge': {
   const id=String(args.itemId||'');
   if(!s.fridge.includes(id))return reject('Barang tidak ada di kulkas.');
   if(s.inventory.length>=setting.bagSlots)return reject('Tas penuh.');
-  s.fridge.splice(s.fridge.indexOf(id),1);s.inventory.push(id);changes.push('ambil dari kulkas');break;
+  s.fridge.splice(s.fridge.indexOf(id),1);s.inventory.push(id);
+  if(s.itemMeta[id])s.itemMeta[id].inFridge=false;
+  changes.push('ambil dari kulkas');break;
  }
  case 'fine':{
   if(!s.detained)return reject('Belum ditahan hansip.');
@@ -314,8 +362,9 @@ function doAction(config,previous,action,args={}){
   s.bladder=0;s.hygiene=Math.max(0,s.hygiene-20);s.moral=Math.max(0,s.moral-5);
   changes.push('KENCING DI CELANA · hygiene -20 · moral -5');
  }
- if(s.energy<=0&&!['advance_time','rest'].includes(action)){
-  s.restMinutes=setting.faintRestMinutes;changes.push('PINGSAN · bed rest '+s.restMinutes+'m');
+ if(s.energy<=0&&s.restMinutes===0&&!['advance_time','rest','respawn'].includes(action)){
+  s.restMinutes=setting.faintRestMinutes;s.faintCount++;
+  changes.push('PINGSAN · bed rest '+s.restMinutes+'m');
  }
  return {ok:true,state:s,changes,action};
 }
