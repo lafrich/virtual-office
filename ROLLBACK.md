@@ -2,6 +2,23 @@
 
 Written 2026-11-07 (Asia/Jakarta). Cloudflare Worker and secrets were not changed.
 
+## This deploy (Mahluk Hidup launcher → v6p-studio)
+
+- Previous live `main`: `13d95293f4d00ad93c1f63374584905b97ac0f20`
+- Feature commit: `2f366da0045a56296311b96990afb7e364081ca9`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 2f366da0045a56296311b96990afb7e364081ca9
+git push origin main
+```
+
+That restores the Membangun Mahluk Hidup OPEN button, program URL, and laptop launcher to the old Character Studio root / `v6b-reset-studio.html`, and returns `sw.js` to v10. It does not revert the seated hobo tent, spawn/respawn, loak-picker, lamp-glow, sleep-clip, or grass_v2 commits. jiwa/ and world-builder/ were not changed.
+
 ## This deploy (sleep clip + grass_v2)
 
 - Previous live `main`: `66d584f4c41f7e367044fc357df2217d18d4bec5`
