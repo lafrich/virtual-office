@@ -30,9 +30,12 @@ const SITES=[
  {id:'tent',label:'Tenda Hobo',icon:'⛺',pattern:/tenda|hobo.?tent|hobo.?camp/i,action:'sleep',offset:[-10,-10]},
  {id:'prayer',label:'Tempat Ibadah',icon:'🕌',pattern:/masjid|mushola|musala|gereja|vihara|pura|klenteng/i,action:'worship',offset:[3,-9]},
  {id:'hansip',label:'Hansip',icon:'🚨',pattern:/hansip|satpam|security.guard/i,action:'arrest',offset:[-1,-5]},
+ {id:'help',label:'Side Job Sosial (Tanpa Bayaran)',icon:'🤝',pattern:/relawan|volunteer|bantu.?warga|kerja.?sosial/i,action:'help',offset:[-6,6]},
+ {id:'charity',label:'Kotak Sedekah',icon:'🎁',pattern:/sedekah|donation|sumbangan|kotak.?amal/i,action:'charity',offset:[0,-8]},
+ {id:'bench',label:'Bangku Istirahat',icon:'🪑',pattern:/bench|kursi.?taman|bangku/i,action:'rest',offset:[2,5]},
  {id:'course',label:'Kursus HP',icon:'📱',pattern:/kursus|course|school/i,action:'course',offset:[-3,9]}
 ];
-const PLACEHOLDER_COLORS={premium_job:0x9579ba,hansip:0xc66766,fish:0x5596be,siomay_batagor:0xe0a94a,pasar_ikan:0x4baf9d,job:0xd18e3a,
+const PLACEHOLDER_COLORS={help:0x63a1a2,charity:0xd3a6c0,bench:0x9b825c,premium_job:0x9579ba,hansip:0xc66766,fish:0x5596be,siomay_batagor:0xe0a94a,pasar_ikan:0x4baf9d,job:0xd18e3a,
  loak:0x839758,scavenge:0x9d9c84,tree:0x519a64,warung:0xd5aa53,coffee:0x856649,
  public_wc:0x77aec0,public_bath:0x77aec0,kost:0xb18cd3,tent:0x9a9d77,prayer:0x81c69f,course:0x709ac4};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
@@ -41,7 +44,8 @@ const money=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
 const name=o=>[o.name,o.label,o.asset,o.subtype,o.questId,...(Array.isArray(o.tags)?o.tags:[])].filter(Boolean).join(' ');
 let bridge=null,active=false,projectId='',config=RULES?RULES.defaults():null;
 let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',progress=null;
-let walkerDistance=0,frameAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
+let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
+let phoneOpen=false,justWorkedAt=0,lastFaintCount=0;
 let navSelect=null,workHoldStart=0,workAnimation=0;
 function defaults(){return RULES?RULES.defaults():null;}
 function getWorld(){return bridge&&bridge.getWorld?bridge.getWorld():{objects:[],map:{}};}
@@ -275,17 +279,18 @@ function nodeButtons(n){
  if(id==='public_bath')entries=[button('public_shower','🚿 Mandi Umum',{facilityId:n.sourceId||id})];
  if(id==='kost')entries=ownsRoom()?
   [button('home_toilet','🚽 WC Kost'),button('home_shower','🚿 Mandi Kost'),button('sleep','💤 Tidur Kost'),
-   button('buy_token','⚡ Beli Token'),button('buy_fridge','🧊 Beli Kulkas'),
-   '<select id="slpFurniture"><option value="bed">Kasur</option><option value="chair">Kursi</option><option value="stove">Kompor</option><option value="wardrobe">Lemari</option></select>',
-   button('buy_furniture','🛒 Beli Furnitur'),'<select id="slpItem">'+itemOptions('fish')+'</select>',
+   '<select id="slpItem">'+itemOptions('fish')+'</select>',
    button('cook','🍳 Masak Ikan'),button('store_fridge','🧊 Simpan Kulkas'),
    '<select id="slpFridgeItem">'+(state.fridge||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
    button('take_fridge','📦 Ambil dari Kulkas')]:
    [button('buy_room','🏠 Beli Akses Kost (1×)')];
  if(id==='tent')entries=[button('sleep','💤 Tidur Tenda')];
- if(id==='prayer')entries=[button('worship','🤲 Ibadah',{placeReligion:config.identity?.religion||'islam'})];
+ if(id==='prayer')entries=[button('worship','🤲 Ibadah',{placeReligion:state.identity?.religion||'islam'})];
  if(id==='course')entries=[button('course','📱 Kursus Online')];
  if(id==='hansip')entries=['<small>Jika moral terlalu rendah, hansip dapat menangkapmu saat mendekat.</small>'];
+ if(id==='help')entries=[button('help','🤝 Bantu warga (tanpa upah)')];
+ if(id==='charity')entries=[button('charity','🎁 Sedekah Rp1.000')];
+ if(id==='bench')entries=[button('rest','🪑 Duduk sebentar',{seatId:n.sourceId||'bangku_preview'})];
  return entries.join('');
 }
 function paintPanel(){
@@ -360,14 +365,14 @@ function runAction(action,args={}){
  if(action==='respawn'){
   bridge?.respawn?.();return {ok:true,reason:'respawn'};
  }
- const position=getPos(),node=nearest();
- if(!['rest','advance_time','fine','community_service','luck_find','course'].includes(action)&&!node)
+ const node=nearest();
+ if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.premium?'premium_job':'job',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
   eat:'warung',coffee:'coffee',public_toilet:'public_wc',public_shower:'public_bath',
   buy_room:'kost',home_toilet:'kost',home_shower:'kost',sleep:ownsRoom()?'kost':'tent',
-  buy_token:'kost',buy_fridge:'kost',buy_furniture:'kost',cook:'kost',store_fridge:'kost',take_fridge:'kost',
+  cook:'kost',store_fridge:'kost',take_fridge:'kost',rest:'bench',help:'help',charity:'charity',
   worship:'prayer'
  }[action];
  if(required&&node?.id!==required){
@@ -377,9 +382,8 @@ function runAction(action,args={}){
   args={...args,roomSpawn:{id:node.sourceId||'kost_placeholder',x:node.x,z:node.z,placeholder:node.placeholder}};
  }
  if(action==='worship'&&node){
-  const religion=config.identity?.religion;
-  const label=node.label.toLowerCase();
-  args={...args,placeReligion:religion}; // correct gate derives from editor and specific place when tagged
+  const religion=state.identity?.religion;
+  args={...args,placeReligion:religion};
   if(node.sourceId){const src=getWorld().objects?.find(o=>o.id===node.sourceId),title=name(src||{}).toLowerCase();
    if(/masjid|mushola|musala/.test(title))args.placeReligion='islam';
    else if(/gereja/.test(title))args.placeReligion='kristen';
@@ -407,14 +411,15 @@ function handleAction(){
  const node=nearest();
  if(!node)return false;
  if(node.id==='job'||node.id==='premium_job'){
-  message('Tahan tombol TAHAN UNTUK KERJA di panel untuk menyelesaikan pekerjaan.');
+  if(performance.now()-justWorkedAt<550)return true;
+  message('TAHAN tombol Action (atau tombol KERJA di panel) sampai progress penuh.');
   paintPanel();return true;
  }
  if(node.id==='siomay_batagor'||node.id==='pasar_ikan'||node.id==='loak'){
   message('Pilih barang dari tas, kemudian klik JUAL di panel.');paintPanel();return true;
  }
  const action=node.action;
- if(node.id==='kost'&&ownsRoom()){message('Pilih WC, mandi, tidur, atau furnitur di panel.');return true;}
+ if(node.id==='kost'&&ownsRoom()){phoneOpen=false;message('Pilih WC, mandi, tidur, atau penyimpanan di panel.');paintPanel();return true;}
  runAction(action,node.id==='fish'?{spotId:node.sourceId||'river'}:
   node.id==='public_wc'||node.id==='public_bath'?{facilityId:node.sourceId||node.id}:{});return true;
 }
