@@ -18,6 +18,12 @@ const FISH=[
  {id:'nila',label:'Ikan Nila',weight:12,spoilMinutes:180,buyers:{siomay_batagor:1900,pasar_ikan:2500}},
  {id:'mujair',label:'Ikan Mujair',weight:8,spoilMinutes:180,buyers:{siomay_batagor:1400,pasar_ikan:2000}}
 ];
+const FURNITURE=[
+ {id:'bed',label:'Kasur',price:6000},
+ {id:'chair',label:'Kursi',price:1500},
+ {id:'stove',label:'Kompor',price:4500},
+ {id:'wardrobe',label:'Lemari',price:3500}
+];
 const JOBS=[
  {id:'manusia_silver',label:'Manusia Silver',wage:1600,energyCost:12,hygieneCost:8,minutes:25,exp:7,minHygiene:0},
  {id:'pak_ogah',label:'Pak Ogah',wage:2500,energyCost:10,hygieneCost:4,minutes:20,exp:7,minHygiene:0},
@@ -72,6 +78,7 @@ function normalize(raw){
 function stateFrom(existing,config){
  const s=copy(existing||{}),c=normalize(config);
  s.inventory=Array.isArray(s.inventory)?s.inventory:[];
+ s.transactions=Array.isArray(s.transactions)?s.transactions.slice(-40).filter(t=>t&&Number.isFinite(Number(t.delta))):[];
  s.homeStorage=Array.isArray(s.homeStorage)?s.homeStorage:[];
  s.itemMeta=s.itemMeta&&typeof s.itemMeta==='object'?s.itemMeta:{};
  s.fridge=Array.isArray(s.fridge)?s.fridge:[];
@@ -117,6 +124,7 @@ function speedFactor(s){
 }
 function doAction(config,previous,action,args={}){
  const c=normalize(config),s=stateFrom(previous,c),setting=c.settings,changes=[];
+ const beforeWallet=s.wallet;
  const reject=reason=>({ok:false,reason,state:copy(previous||s),changes:[]});
  const stat=(k,v)=>{s[k]=Math.max(0,Math.min(100,s[k]+v));changes.push(k+' '+(v>=0?'+':'')+v);};
  const clock=m=>{
@@ -181,10 +189,10 @@ function doAction(config,previous,action,args={}){
  case 'buy_furniture':{
   if(!s.housing.room)return reject('Beli akses kost sebelum membeli furnitur.');
   const id=String(args.itemId||'').slice(0,48);
-  const catalog={bed:6000,chair:1500,stove:4500,wardrobe:3500};
-  if(!Object.prototype.hasOwnProperty.call(catalog,id))return reject('Jenis furnitur belum tersedia.');
+  const product=FURNITURE.find(x=>x.id===id);
+  if(!product)return reject('Jenis furnitur belum tersedia.');
   if(s.furniture.includes(id))return reject('Furnitur ini sudah dibeli.');
-  if(!spend(catalog[id]))return reject('Uang tidak cukup.');
+  if(!spend(product.price))return reject('Uang tidak cukup.');
   s.furniture.push(id);changes.push('furnitur '+id+' masuk ke kost');break;
  }
  case 'cook':{
@@ -430,7 +438,22 @@ function doAction(config,previous,action,args={}){
   s.restMinutes=setting.faintRestMinutes;s.faintCount++;
   changes.push('PINGSAN · bed rest '+s.restMinutes+'m');
  }
+ const delta=s.wallet-beforeWallet;
+ if(delta!==0){
+  const names={sell_fish:'Jual ikan',sell_loak:'Jual barang bekas',buy_room:'Akses kost',
+   buy_furniture:'Beli furnitur',buy_fridge:'Beli kulkas',buy_token:'Token listrik',
+   work:'Upah kerja',public_shower:'Mandi umum',shower:'Mandi',eat:'Makan warung',
+   coffee:'Beli kopi',charity:'Sedekah',fine:'Denda hansip',luck_find:'Rezeki / nasib'};
+  const label=action==='work'&&args.jobId?
+   (c.jobs.find(j=>j.id===args.jobId)?.label||'Upah kerja'):
+   action==='buy_furniture'?
+   (FURNITURE.find(x=>x.id===String(args.itemId))?.label||'Furnitur'):
+   names[action]||action.replace(/_/g,' ');
+  s.transactions.push({id:'txn:'+s.elapsedMinutes+':'+(s.transactions.length+1),
+   action,label,delta,balance:s.wallet,minute:s.elapsedMinutes});
+  s.transactions=s.transactions.slice(-40);
+ }
  return {ok:true,state:s,changes,action};
 }
-return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,run:doAction});
+return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,FURNITURE,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,run:doAction});
 });
