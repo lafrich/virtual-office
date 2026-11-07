@@ -13,6 +13,7 @@ on:
       - "world-builder/drive-sync.js"
       - "tests/jiwa-activity-flow.test.cjs"
       - "tests/jiwa-tier-world-entities.test.cjs"
+      - "tests/jiwa-directory-marking.test.cjs"
       - "jiwa/interaction-rules.js"
       - "jiwa/entity-editor.js"
       - "world-builder/builder.js"
@@ -43,11 +44,13 @@ jobs:
           cd virtual-office
           node --check jiwa/activity-catalog.js
           node --check jiwa/activity-editor.js
+          node --check jiwa/entity-editor.js
+          node --check jiwa/interaction-rules.js
           node --check jiwa/life-economy.js
           node --check jiwa/jiwa.js
           node --check world-builder/semesta-life-play.js
           node --check world-builder/drive-sync.js
-          node --test tests/jiwa-activity-flow.test.cjs tests/jiwa-tier-world-entities.test.cjs
+          node --test tests/jiwa-activity-flow.test.cjs tests/jiwa-tier-world-entities.test.cjs tests/jiwa-directory-marking.test.cjs
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
       - name: Serve game and mechanics
