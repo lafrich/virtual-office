@@ -19,6 +19,7 @@ function init(api){
  const canvas=$('interiorCanvas'),ctx=canvas.getContext('2d');
  canvas.style.touchAction='none';canvas.style.cursor='grab';
  ctx.imageSmoothingEnabled=false;
+ model.refreshExternal?.();
  const categories=[...new Set(Object.values(model.types).map(t=>t.category))];
  const group=$('interiorCategory'),asset=$('interiorAsset');
  const tray=$('interiorQuickBar'),trayContainer=$('interiorQuickTools');
@@ -221,6 +222,20 @@ function init(api){
    thumb.className='quick-asset-thumb';thumb.width=48;thumb.height=48;
    const tctx=thumb.getContext('2d');tctx.imageSmoothingEnabled=false;
    if(g.VLInteriorPixels)g.VLInteriorPixels.draw(tctx,key,2,2,44,44);
+   // Custom Semesta furniture uses its original PNG thumbnail, not the
+   // generic procedural fallback that made these objects look missing.
+   const artwork=def.external?g.VLSemestaFurnitureSources?.get(key)?.views?.sw?.url:null;
+   if(artwork){
+    const img=new Image();
+    img.onload=()=>{
+     const ratio=Math.min(44/img.naturalWidth,44/img.naturalHeight);
+     const w=Math.max(1,img.naturalWidth*ratio),h=Math.max(1,img.naturalHeight*ratio);
+     tctx.clearRect(0,0,48,48);tctx.imageSmoothingEnabled=false;
+     tctx.drawImage(img,(48-w)/2,(48-h)/2,w,h);
+    };
+    if(artwork.startsWith('https:'))img.crossOrigin='anonymous';
+    img.src=artwork;
+   }
    const title=document.createElement('span');title.textContent=def.label;
    button.append(thumb,title);button.onclick=()=>armPlacement(key);
    tray.append(button);tiles.set(key,button);
@@ -743,6 +758,29 @@ function init(api){
  $('interiorViewPlan').onclick=()=>setInteriorView('plan');
  $('buildingMode').onchange=()=>{setMode($('buildingMode').value==='interactive');onStatus(enabled?'Interactive: floor editor enabled':'Decorative building: interior disabled');};
  $('interiorFloor').onchange=()=>selectFloor($('interiorFloor').value);
+ function refreshFurnitureLibrary(){
+  const before=[...categories];
+  model.refreshExternal?.();
+  const next=[...new Set(Object.values(model.types).map(t=>t.category))];
+  if(next.length===before.length&&next.every((x,i)=>x===before[i]))return;
+  const chosen=group.value;
+  categories.splice(0,categories.length,...next);
+  group.replaceChildren();
+  for(const category of categories){
+   const option=document.createElement('option');option.value=category;option.textContent=category;
+   group.append(option);
+  }
+  group.value=next.includes(chosen)?chosen:
+   next.includes('SEMESTA / FURNITUR')?'SEMESTA / FURNITUR':(next[0]||'');
+  updateCategories();buildTray();refresh();
+ }
+ g.addEventListener('focus',refreshFurnitureLibrary);
+ g.addEventListener('storage',event=>{
+  if(event.key===g.VLSemestaFurnitureSources?.STORE)refreshFurnitureLibrary();
+ });
+ g.addEventListener('semesta:furniture-ready',()=>{
+  if(enabled&&preview==='interior')draw();
+ });
  group.onchange=()=>{updateCategories();buildTray();};updateCategories();
  $('applyInteriorTemplate').onclick=()=>{
   const current=scene(),template=$('interiorTemplate').value;
