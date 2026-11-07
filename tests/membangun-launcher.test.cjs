@@ -5,11 +5,11 @@ const fs=require('node:fs');
 const path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 
-test('Membangun is the entry point with five current .EXE programs',()=>{
+test('Membangun is the entry point with four current .EXE programs',()=>{
  const s=read('membangun/index.html');
- assert.ok(s.includes("const ids=['mahluk','emotion','bangun','semesta','jiwa'];"));
+ assert.ok(s.includes("const ids=['mahluk','bangun','semesta','jiwa'];"));
  for(const [id,name] of [
-  ['mahluk','MAHLUK HIDUP.EXE'],['emotion','EMOSI.EXE'],['bangun','BANGUN RUANG.EXE'],
+  ['mahluk','MAHLUK HIDUP.EXE'],['bangun','BANGUN RUANG.EXE'],
   ['semesta','SEMESTA.EXE'],['jiwa','JIWA.EXE']
  ]){
   assert.ok(s.includes('data-app="'+id+'"'),'launcher missing '+id+' button');
@@ -18,14 +18,14 @@ test('Membangun is the entry point with five current .EXE programs',()=>{
  }
  assert.ok(s.includes('https://lafrich.github.io/virtual-life-asset-pipeline/mahluk-hidup.html'));
  assert.ok(!s.includes('v6b-reset-studio.html'));
-  assert.ok(s.includes('https://lafrich.github.io/virtual-life-asset-pipeline/mahluk-hidup.html?tab=emotion'));
- assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'));
+  assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/world-builder/'));
  assert.ok(s.includes('https://lafrich.github.io/virtual-office/jiwa/'));
  assert.ok(s.includes("requestedApp=new URLSearchParams(location.search).get('app')"));
  assert.ok(s.includes("let selected=ids.includes(requestedApp)?requestedApp:'mahluk';"));
  assert.ok(s.includes("window.open(url,'_blank','noopener,noreferrer')"));
  assert.ok(s.includes("%ids.length"),'carousel navigation should use all apps');
+ assert.ok(!s.includes('data-app="emotion"'),'Emosi is part of Mahluk Hidup');
 });
 
 test('desktop panels remain aligned and mobile launcher layout survives',()=>{
@@ -34,7 +34,7 @@ test('desktop panels remain aligned and mobile launcher layout survives',()=>{
  assert.ok(s.includes('grid-template-columns:218px minmax(0,1fr) 236px'));
  assert.ok(s.includes('@media (min-width:701px) and (max-width:900px)'));
  assert.ok(s.includes('@media(max-width:700px)'));
- for(const id of ['mahluk','emotion','bangun','semesta','jiwa']){
+ for(const id of ['mahluk','bangun','semesta','jiwa']){
   assert.ok(s.includes('data-app="'+id+'"'));
  }
 });
