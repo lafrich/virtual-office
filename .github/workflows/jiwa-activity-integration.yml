@@ -12,6 +12,10 @@ on:
       - "world-builder/index.html"
       - "world-builder/drive-sync.js"
       - "tests/jiwa-activity-flow.test.cjs"
+      - "tests/jiwa-tier-world-entities.test.cjs"
+      - "jiwa/interaction-rules.js"
+      - "jiwa/entity-editor.js"
+      - "world-builder/builder.js"
       - "tests/jiwa-activity-editor.e2e.cjs"
       - ".github/workflows/jiwa-activity-integration.yml"
   workflow_dispatch:
@@ -43,7 +47,7 @@ jobs:
           node --check jiwa/jiwa.js
           node --check world-builder/semesta-life-play.js
           node --check world-builder/drive-sync.js
-          node --test tests/jiwa-activity-flow.test.cjs
+          node --test tests/jiwa-activity-flow.test.cjs tests/jiwa-tier-world-entities.test.cjs
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
       - name: Serve game and mechanics
