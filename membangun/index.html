@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073a9d">
 <meta name="color-scheme" content="only light">
-<meta name="description" content="Membangun — Mahluk Hidup, Bangun Ruang, Semesta.">
+<meta name="description" content="Membangun — Mahluk Hidup, Bangun Ruang, Semesta, Jiwa, Ellen.">
 <title>Namanya Juga Hidup: The Game — Membangun</title>
 <style>
 html.character-reference-reset .mahluk-sprite,
@@ -104,6 +104,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
  .art .mahluk-sprite,.art .mahluk-static{height:min(76%,230px);max-width:min(65%,230px)}
 }
 @media(max-width:700px){
+.file-list{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 .desktop{padding:0;display:block;background:#07368a}.window{width:100%;min-height:100dvh;border:0;outline:0;box-shadow:none;display:flex;flex-direction:column}
 .titlebar{height:43px;flex:none}.window-title{font-size:16px}.window-controls span{width:27px;height:26px}
 .menubar{height:39px;flex:none}.menubar button{font-size:15px;padding:6px 10px}
@@ -172,6 +173,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 .v6b-silver-crop .v6b-silver-image{display:block;position:absolute;top:0;left:0;width:400%;height:100%;max-width:none!important;max-height:none!important;object-fit:fill;image-rendering:pixelated}
 .file-thumb .v6b-silver-crop{height:44px}
 @media(max-width:700px){.art .v6b-silver-crop{height:min(85%,280px)}}
+
+.ellen-mark{display:grid;place-items:center;width:100%;height:100%;color:#1859b2;font-size:39px;font-weight:900;line-height:1;text-shadow:2px 3px 0 #c7daf9}
+.art .ellen-mark{width:210px;height:210px;max-width:80%;max-height:80%;font-size:clamp(90px,18vw,170px);border:8px double #a8c8ef;background:linear-gradient(145deg,#f4fbff,#bad4f0);box-shadow:7px 8px 0 #1f497230;border-radius:12px}
+@media(max-width:700px){.file-thumb .ellen-mark{font-size:28px}.art .ellen-mark{width:160px;height:150px;font-size:96px}}
 </style>
 </head>
 <body>
@@ -235,16 +240,17 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <div class="file-list" role="group" aria-label="Pilih aplikasi">
 <button class="file active" data-app="mahluk" aria-pressed="true"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP.EXE</span><span class="file-kind">MAHLUK HIDUP</span></span></button>
 <button class="file" data-app="bangun" aria-pressed="false"><span class="file-thumb"><img class="warteg-thumb" alt="Warteg Kharisma Bahari" hidden></span><span class="file-txt"><span class="file-name">BANGUN RUANG.EXE</span><span class="file-kind">BUILDING STUDIO</span></span></button>
-<button class="file" data-app="semesta" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-semesta"/></svg></span><span class="file-txt"><span class="file-name">SEMESTA.EXE</span><span class="file-kind">WORLD BUILDER</span></span></button><button class="file" data-app="jiwa" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-jiwa"/></svg></span><span class="file-txt"><span class="file-name">JIWA.EXE</span><span class="file-kind">MECHANICS STUDIO</span></span></button>
+<button class="file" data-app="semesta" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-semesta"/></svg></span><span class="file-txt"><span class="file-name">SEMESTA.EXE</span><span class="file-kind">WORLD BUILDER</span></span></button><button class="file" data-app="jiwa" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-jiwa"/></svg></span><span class="file-txt"><span class="file-name">JIWA.EXE</span><span class="file-kind">MECHANICS STUDIO</span></span></button><button class="file" data-app="ellen" aria-pressed="false"><span class="file-thumb"><span class="ellen-mark" aria-hidden="true">✦</span></span><span class="file-txt"><span class="file-name">ELLEN.EXE</span><span class="file-kind">AI PROJECT AGENT</span></span></button>
 </div>
 <div class="file-hint">DOUBLE CLICK TO OPEN</div>
 </aside>
 <section class="canvas-panel" aria-label="Preview">
-<div class="canvas-header"><strong>PREVIEW</strong><span>1 / 4</span></div>
+<div class="canvas-header"><strong>PREVIEW</strong><span>1 / 5</span></div>
 <div class="canvas-space" id="canvas">
 <div class="art active" data-art="mahluk"><svg role="img" aria-label="Mahluk Hidup 2.0 modular pixel character"><use href="#icon-mahluk"/></svg></div>
 <div class="art" data-art="bangun"><img class="warteg-thumb" role="img" alt="Warteg Kharisma Bahari — aset bangunan isometrik dari Bangun Ruang" hidden></div>
 <div class="art" data-art="semesta"><svg role="img" aria-label="Pixel art isometric world"><use href="#icon-semesta"/></svg></div><div class="art" data-art="jiwa"><svg role="img" aria-label="Pixel-art node based mechanics editor"><use href="#icon-jiwa"/></svg></div>
+<div class="art" data-art="ellen"><span class="ellen-mark" role="img" aria-label="Ellen AI Agent">✦</span></div>
 <div class="canvas-corner">MEMBANGUN® / STUDIO</div>
 </div>
 <div class="canvas-toolbar"><button class="chrome-button" id="prev">← PREV</button><span class="canvas-scale">PIXEL / V6B</span><button class="chrome-button" id="next">NEXT →</button></div>
@@ -287,7 +293,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <form class="modal-body" id="linkForm">
 <label>MAHLUK HIDUP<input id="url-mahluk" type="url" placeholder="https://..."></label>
 <label>BANGUN RUANG<input id="url-bangun" type="url" placeholder="https://..."></label>
-<label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label><label>JIWA<input id="url-jiwa" type="url" placeholder="https://..."></label>
+<label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label><label>JIWA<input id="url-jiwa" type="url" placeholder="https://..."></label><label>ELLEN<input id="url-ellen" type="url" placeholder="https://..."></label>
 <div class="modal-error" id="urlError" role="alert"></div>
 <div class="modal-buttons"><button type="button" class="chrome-button" id="cancel">CANCEL</button><button type="submit" class="chrome-button main">SAVE</button></div>
 </form>
@@ -314,13 +320,14 @@ const $=id=>document.getElementById(id);
   });
  }catch(error){console.warn('Warteg preview unavailable.',error);}
 })();
-const ids=['mahluk','bangun','semesta','jiwa'];
+const ids=['mahluk','bangun','semesta','jiwa','ellen'];
 // Deep links only select a program; opening it remains a deliberate user action.
 const requestedApp=new URLSearchParams(location.search).get('app');
 const data={
 mahluk:{name:'MAHLUK HIDUP.EXE',type:'MAHLUK HIDUP',desc:'Satu aplikasi: Emosi, Character, Action dan Animation. Pixel Editor tetap lengkap, termasuk empat arah, frame timeline dan sinkronisasi Drive.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/mahluk-hidup.html'},
 bangun:{name:'BANGUN RUANG.EXE',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
-semesta:{name:'SEMESTA.EXE',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'},jiwa:{name:'JIWA.EXE',type:'MECHANICS',desc:'Atur rules dan Play Test dari kota Semesta.',url:'https://lafrich.github.io/virtual-office/jiwa/'}
+semesta:{name:'SEMESTA.EXE',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'},jiwa:{name:'JIWA.EXE',type:'MECHANICS',desc:'Atur rules dan Play Test dari kota Semesta.',url:'https://lafrich.github.io/virtual-office/jiwa/'},
+ellen:{name:'ELLEN.EXE',type:'AI AGENT',desc:'Chat, Teach, Project Knowledge & Google Drive Memory. AI privat perlu backend yang dikonfigurasi; mode lokal tetap dapat mencari knowledge.',url:'https://lafrich.github.io/virtual-office/ellen/'}
 };
 let selected=ids.includes(requestedApp)?requestedApp:'mahluk';
 function getUrl(id){try{const x=localStorage.getItem('membangun-link-'+id);return x?x:data[id].url;}catch(e){return data[id].url}}
