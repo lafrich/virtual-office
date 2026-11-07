@@ -19,12 +19,12 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
   assert.ok((await jiwa.locator('#activityList .activity-row').count())>0);
  }
  const target=await semesta.evaluate(()=>{
-  const all=window.SemestaPlay.playObjects();
+  // Full metadata must match the actual runtime geometry, not a stripped
+  // {id,type,asset} preview that can misclassify named Semesta entities.
+  const all=window.SemestaPlay.worldDirectory();
   const match=all.find(o=>String(o.id||'').length>3&&String(o.id||'').length<80&&
    window.JiwaActivities.kindOf(o)==='object');
-  return match?{id:match.id,name:match.name||match.label||'Test Asset',
-   type:match.type||'prop',layer:match.layer||'props',asset:match.asset||'',
-   x:Number(match.x)||0,z:Number(match.z)||0}:null;
+  return match||null;
  });
  assert.ok(target,'Semesta must have an actual object to mark in Entities');
  // Use the Semesta current working-copy ID as a saved draft, so Jiwa reads
@@ -86,7 +86,20 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  await semesta.waitForFunction(()=>window.SemestaLifePlay?.active?.(),null,{timeout:20000});
  await semesta.evaluate(()=>window.SemestaLifePlay.reload());
  await semesta.waitForFunction(()=>window.SemestaLifePlay?.sites?.().some(s=>s.id==='act:bank_teller'),
-  null,{timeout:30000});
+  null,{timeout:30000}).catch(async error=>{
+   const diagnostic=await semesta.evaluate(id=>{
+    const catalog=window.JiwaActivities.readLocal(localStorage);
+    const world=window.SemestaPlay.worldDirectory();
+    const selection=catalog.activities.find(x=>x.id==='bank_teller');
+    const rules=catalog.worldEntities;
+    return {worldMatches:world.filter(o=>o.id===id),
+     activity:selection,activeRules:rules.filter(r=>r.enabled),
+     targetKind:window.JiwaActivities.kindOf(world.find(o=>o.id===id)),
+     available:window.JiwaActivities.eligibleTargets(world,rules,'__semesta_working_copy__').map(x=>x.id),
+     sites:window.SemestaLifePlay.sites().filter(x=>x.activityId||x.worldRuleId)};
+   },target.id);
+   throw Error(error.message+' / diagnostic: '+JSON.stringify(diagnostic).slice(0,3000));
+  });
  const linked=await semesta.evaluate(()=>{
   const sites=window.SemestaLifePlay.sites();
   const a=sites.find(s=>s.id==='act:bank_teller');
