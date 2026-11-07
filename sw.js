@@ -1,11 +1,11 @@
-/* sw v4 2026-11-04: JIWA bypasses encrypted game routing; online authentication preserved. */
+/* sw v5 2026-11-07: root is the Membangun launcher; archive login is arsip.html; studios bypass encrypted routing. */
 /* Virtual Office decrypting service worker. Holds the AES key in memory only;
    when restarted it asks an unlocked tab (which keeps it in sessionStorage). */
 'use strict';
 importScripts('./game-core/world-patches.js?v=clean1','./game-core/xp-loading.js?v=clean1','./game-assets/online-enhancement.js?v=o2');
 const SCOPE = self.registration.scope;              // e.g. https://x.github.io/virtual-office/
 const BASE = new URL(SCOPE).pathname;
-const PLAIN = new Set(['', 'index.html', 'sw.js', 'game-assets/rig-runtime.js', 'game-assets/asset-bridge.js', 'game-assets/online-enhancement.js', '.nojekyll', '404.html']);
+const PLAIN = new Set(['', 'index.html', 'arsip.html', 'sw.js', 'game-assets/rig-runtime.js', 'game-assets/asset-bridge.js', 'game-assets/online-enhancement.js', '.nojekyll', '404.html']);
 let KEY = null, MAN = null, MANP = null, MANT = 0;
 
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -51,7 +51,7 @@ self.addEventListener('fetch', ev => {
 
 async function handle(ev, p, u) {
   const nav = ev.request.mode === 'navigate';
-  if (!await getKey(ev)) return nav ? Response.redirect(SCOPE + '?next=' + encodeURIComponent(p + u.search), 302)
+  if (!await getKey(ev)) return nav ? Response.redirect(SCOPE + 'arsip.html?next=' + encodeURIComponent(p + u.search), 302)
                                     : new Response('locked', { status: 401 });
   try {
     if (p === 'data.json') {                                    // live data: always fresh, cache-busted
@@ -96,6 +96,6 @@ async function handle(ev, p, u) {
     return new Response(plaintext, { headers: { 'Content-Type': ent[1], 'Cache-Control': 'no-store' } });
   } catch (e) {
     if (e && e.name === 'OperationError') KEY = null;           // wrong/stale key: force re-unlock
-    return nav ? Response.redirect(SCOPE + '?next=' + encodeURIComponent(p + u.search), 302) : new Response('decrypt failed', { status: 500 });
+    return nav ? Response.redirect(SCOPE + 'arsip.html?next=' + encodeURIComponent(p + u.search), 302) : new Response('decrypt failed', { status: 500 });
   }
 }

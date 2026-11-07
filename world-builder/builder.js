@@ -3123,7 +3123,7 @@ window.addEventListener('focus',()=>{
  updateSelection();
 });
 
-$('openGame').onclick=()=>window.open('../','_blank','noopener');
+$('openGame').onclick=()=>window.open('../arsip.html','_blank','noopener');
 $('viewRef').onclick=()=>{$('assetReference').hidden=false;};
 $('closeRef').onclick=()=>{$('assetReference').hidden=true;};
 $('undo').onclick=()=>restoreStack(undoStack,redoStack);
