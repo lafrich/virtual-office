@@ -121,7 +121,7 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 
 
 /* Activity-first JIWA UX; archive technical editors under Advanced. */
-.jiwa-activity-nav{display:grid;grid-template-columns:repeat(8,minmax(0,1fr)) minmax(92px,.85fr);
+.jiwa-activity-nav{display:grid;grid-template-columns:repeat(9,minmax(0,1fr)) minmax(92px,.85fr);
  gap:3px;padding:7px;border-bottom:1px solid #91a0af;background:linear-gradient(#eff4fa,#d3dce7);overflow-x:auto;flex-shrink:0}
 .jiwa-activity-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;min-height:69px;
  padding:6px 3px!important;gap:4px;line-height:1.1;font:bold 9px Tahoma;color:#243b54;border:1px solid #a7b4c4;border-radius:3px}
@@ -191,6 +191,26 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 .window[data-jiwa-tab="activities"] .workspace>.middle{min-width:0}
 .window[data-jiwa-tab="activities"] #activityView{display:flex;flex-direction:column;min-height:0}
 .window[data-jiwa-tab="activities"] #activityView>.viewport-scroll{flex:1;overflow:auto}
+
+.jiwa-activity-nav #entityTab{background:linear-gradient(#e7f2ff,#c1d4ed);color:#224c7c}
+.jiwa-activity-nav #entityTab.active{border-color:#2567b4;box-shadow:inset 0 0 0 2px #8babdd;background:#b5d5ff}
+.entity-kind-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.entity-kind-tabs button{min-height:43px;font:bold 11px Tahoma;background:#f0f4fa;border:1px solid #a2b6d1}
+.entity-kind-tabs button.active{background:#b2d3fa;color:#123c78;border:2px inset #3977ba}
+.entity-preset-steps{display:flex;align-items:center;gap:6px;margin:10px 0;flex-wrap:wrap;font:10px Tahoma}
+.entity-preset-steps strong{background:#1f5591;color:white;padding:5px}
+.premise-tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}
+.premise-tier{display:flex;flex-direction:column;align-items:flex-start;gap:7px;text-align:left;border:2px solid #b9c9dc;
+ background:#f2f7fe;color:#274468;padding:12px;min-width:0;white-space:normal}
+.premise-tier strong{font:bold 13px Tahoma}.premise-tier span,.premise-tier small{font:10px/1.5 Tahoma;color:#576e80}
+.premise-tier.selected{background:#d4e8ff;border-color:#226cbe;box-shadow:inset 0 0 0 2px #9bc4f2}
+.premise-preview{padding:13px;background:#f4f8ff;border:1px solid #b2c5e2;font:11px/1.6 Tahoma;color:#2b4a6d}
+.premise-preview b{color:#154d92}
+.premise-stage-actions{display:flex;gap:8px;justify-content:flex-end;margin:12px 0}
+.premise-warning{color:#8b4a16;background:#fff4dc;border:1px solid #ddbc7f;padding:8px;font-size:10px}
+.activity-fieldset .activity-select{min-width:0}
+.activity-fieldset input:invalid{border-color:#b84b3f;background:#fff4f2}
+@media(max-width:760px){.premise-tiers{grid-template-columns:1fr}.entity-kind-tabs button{font-size:10px}}
 </style></head><body>
 <div class="window">
  <header class="titlebar"><span class="appicon">✳</span><strong>JIWA.EXE</strong><span>— MECHANICS STUDIO</span><div class="wincontrol" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
@@ -210,7 +230,7 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
    <div class="system-links"><button id="toSystems">⚙ GAME SYSTEMS</button><button id="toTest">▶ PLAY TEST</button></div>
   </aside>
   <section class="middle">
-   <div class="tabs jiwa-activity-nav" aria-label="Jiwa mechanics categories"><button type="button" data-activity-tab="money" aria-pressed="true" class="active" title="MONEY"><span class="jiwa-tab-icon">💰</span><span>MONEY</span></button><button type="button" data-activity-tab="energy" aria-pressed="false" class="" title="ENERGY"><span class="jiwa-tab-icon">⚡</span><span>ENERGY</span></button><button type="button" data-activity-tab="moral" aria-pressed="false" class="" title="MORAL"><span class="jiwa-tab-icon">🤲</span><span>MORAL</span></button><button type="button" data-activity-tab="immoral" aria-pressed="false" class="" title="IMMORAL"><span class="jiwa-tab-icon">😈</span><span>IMMORAL</span></button><button type="button" data-activity-tab="exp" aria-pressed="false" class="" title="EXP"><span class="jiwa-tab-icon">📚</span><span>EXP</span></button><button type="button" data-activity-tab="cooking" aria-pressed="false" class="" title="COOKING"><span class="jiwa-tab-icon">🍳</span><span>COOKING</span></button><button type="button" data-activity-tab="buying" aria-pressed="false" class="" title="BUYING"><span class="jiwa-tab-icon">🛒</span><span>BUYING</span></button><button type="button" data-activity-tab="punishment" aria-pressed="false" class="" title="PUNISHMENT"><span class="jiwa-tab-icon">⚖️</span><span>PUNISHMENT</span></button><button type="button" id="activityAdvanced" aria-expanded="false" title="World preview and advanced mechanics tools">⚙<span>ADVANCED</span></button></div>
+   <div class="tabs jiwa-activity-nav" aria-label="Jiwa mechanics categories"><button type="button" data-activity-tab="money" aria-pressed="true" class="active" title="MONEY"><span class="jiwa-tab-icon">💰</span><span>MONEY</span></button><button type="button" data-activity-tab="energy" aria-pressed="false" class="" title="ENERGY"><span class="jiwa-tab-icon">⚡</span><span>ENERGY</span></button><button type="button" data-activity-tab="moral" aria-pressed="false" class="" title="MORAL"><span class="jiwa-tab-icon">🤲</span><span>MORAL</span></button><button type="button" data-activity-tab="immoral" aria-pressed="false" class="" title="IMMORAL"><span class="jiwa-tab-icon">😈</span><span>IMMORAL</span></button><button type="button" data-activity-tab="exp" aria-pressed="false" class="" title="EXP"><span class="jiwa-tab-icon">📚</span><span>EXP</span></button><button type="button" data-activity-tab="cooking" aria-pressed="false" class="" title="COOKING"><span class="jiwa-tab-icon">🍳</span><span>COOKING</span></button><button type="button" data-activity-tab="buying" aria-pressed="false" class="" title="BUYING"><span class="jiwa-tab-icon">🛒</span><span>BUYING</span></button><button type="button" data-activity-tab="punishment" aria-pressed="false" class="" title="PUNISHMENT"><span class="jiwa-tab-icon">⚖️</span><span>PUNISHMENT</span></button><button type="button" id="entityTab" class="jiwa-entity-tab" title="Define Buildings, NPC Quest and Object Animations" aria-pressed="false"><span class="jiwa-tab-icon">🏙️</span><span>ENTITIES</span></button><button type="button" id="activityAdvanced" aria-expanded="false" title="World preview and advanced mechanics tools">⚙<span>ADVANCED</span></button></div>
    <div id="jiwaAdvancedTabs" class="jiwa-tech-tabs" hidden><button data-tab="map">◈ WORLD</button><button data-tab="context">◉ CONTEXT</button><button data-tab="systems">⚙ SYSTEMS</button><button data-tab="test">▶ TEST</button><button data-tab="play">🎮 PREVIEW</button></div>
    <div id="activityView" class="view"><div class="viewport-scroll activity-scroll">
  <div class="activity-app">
@@ -228,7 +248,25 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
    <div class="activity-cloud-buttons"><button id="activityDriveConnect" type="button">🔗 CONNECT DRIVE</button><button id="activityDrivePush" type="button">☁ SAVE TO DRIVE</button><button id="activityDrivePull" type="button">↓ LOAD DRIVE</button></div></div>
   <div id="activityStatus" class="activity-status" aria-live="polite" role="status">Mulai dari template. Edit premis, target, durasi, dan efek. SAVE saat sudah siap.</div>
  </div></div></div>
-   <div id="mapView" class="view" hidden><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
+   <div id="entitiesView" class="view" hidden>
+ <div class="viewport-scroll activity-scroll"><div class="activity-app">
+  <div class="activity-topline"><div><small>JIWA.EXE / WORLD INTERACTION REGISTRY / GLOBAL</small>
+  <h2>🏙️ World Entities</h2><p>Building · NPC · Object — pilih aset Semesta, aturan interaksi, dan premis tier.</p></div>
+  <div class="activity-top-actions"><button id="entityNew" type="button">＋ NEW ENTITY RULE</button>
+  <button id="entitySave" class="primary" type="button">💾 SAVE WORLD RULES</button></div></div>
+  <div class="activity-global">SATU DATABASE GLOBAL · Cocokkan berdasarkan asset/type/nama untuk seluruh kota, atau ID untuk satu instans · hanya objek nyata Semesta</div>
+  <div class="entity-kind-tabs">
+    <button data-entity-kind="building" class="active">🏢 BUILDINGS</button>
+    <button data-entity-kind="npc">🧍 NPC QUESTS</button>
+    <button data-entity-kind="object">🧱 OBJECT ACTIONS</button>
+  </div>
+  <div class="activity-workspace"><aside class="activity-side"><div class="activity-list-head"><b>ENTITY RULES</b><span id="entityCount"></span></div>
+    <div id="entityList" class="activity-list"></div></aside>
+    <section id="entityEditor" class="activity-edit-form" aria-label="World entity interaction rule editor"></section></div>
+  <div class="activity-global">⚙ World rules disimpan bersama katalog aktivitas Jiwa. Sync Google Drive lewat panel Activity → SAVE TO DRIVE.</div>
+  <div id="entityStatus" class="activity-status" aria-live="polite">Pilih aturan atau tambah baru. Contoh awal tidak aktif sampai kamu Enable.</div>
+ </div></div></div>
+ <div id="mapView" class="view" hidden><div class="map-tools"><button id="fit">⌖ FIT</button><button id="zoomIn">＋</button><button id="zoomOut">－</button><span class="mini" id="mapInfo">READ-ONLY SEMESTA SCENE</span></div><div class="map-wrap"><canvas id="map" aria-label="Clickable isometric schematic of selected Semesta city"></canvas><div class="map-note">Preview skematis 2:1 dari data Semesta · pilih objek atau interior furniture. Posisi asli tidak diubah.</div></div></div>
    <div id="contextView" class="view" hidden><div class="viewport-scroll" id="contextEditor"><div class="card">Loading contextual foundation...</div></div></div>
    <div id="playView" class="view" hidden><div class="viewport-scroll"><div id="gamePreview"></div><div id="lifeEditor"></div></div></div>
    <div id="systemsView" class="view" hidden><div class="viewport-scroll">
@@ -288,7 +326,8 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 <script src="/virtual-life-asset-pipeline/human-gameplay-rig.js?v=base-human-gameplay-v1"></script>
 <script src="./foundation-engine.js"></script>
 <script src="./life-economy.js?v=activity-engine-20261108"></script>
-<script src="./activity-catalog.js?v=activity-premise-v1"></script>
+<script src="./interaction-rules.js?v=premise-tiers-global-v1"></script>
+<script src="./activity-catalog.js?v=premise-tiers-global-v1"></script>
 <script src="../world-builder/drive-sync.js?v=jiwa-catalog-cloud-v2"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./jiwa.js?v=activity-tabs-20261108"></script>
@@ -296,5 +335,6 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 <script src="./context-editor.js"></script>
 <script src="./mechanics-panel.js"></script>
 <script src="./life-editor.js"></script>
-<script src="./activity-editor.js?v=activity-premise-v2"></script>
+<script src="./activity-editor.js?v=premise-wizard-v1"></script>
+<script src="./entity-editor.js?v=world-entities-v1"></script>
 </body></html>
