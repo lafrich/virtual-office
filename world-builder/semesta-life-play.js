@@ -446,6 +446,7 @@ function runAction(action,args={}){
   args={...args,roomSpawn:{id:node.sourceId||'kost_placeholder',x:node.x,z:node.z,placeholder:node.placeholder}};
  }
  if(action==='worship'&&node){args={...args,placeReligion:node.religion};}
+ const prior=state;
  const result=RULES.run(config,state,action,args);
  if(result.ok){
   state=result.state;
