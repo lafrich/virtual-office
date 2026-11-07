@@ -2,6 +2,25 @@
 
 Written 2026-11-07 (Asia/Jakarta). Cloudflare Worker and secrets were not changed.
 
+## This deploy (bed sleep uses the lie pose)
+
+- Previous live `main`: `37d288e439685c2e68ec6b37df333015bd8fae15`
+- Feature commit: `c42fdd79b61c3d04a467b2ce885af63212fa40e5`
+- Service worker bump + stale sw v11 test fix: `ccd43b12af8d6fae364348369e9a7ba31b2373b3`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit ccd43b12af8d6fae364348369e9a7ba31b2373b3
+git revert --no-edit c42fdd79b61c3d04a467b2ce885af63212fa40e5
+git push origin main
+```
+
+That restores elevated-bed sleep to the floor `sleep` pose (characters will no longer lie on the mattress with row 36 / v2Clips.lie) and `sw.js` v12. It does not revert the tidy hobo tent exit, generic spawn/respawn, seated-tent ground contact, Mahluk Hidup v6p launcher, loak-picker, lamp-glow, sleep-clip, or grass_v2 commits.
+
 ## This deploy (tidy hobo tent exit)
 
 - Previous live `main`: `eba74c01657bd5de3fee1850d3ddc060479700fb`
