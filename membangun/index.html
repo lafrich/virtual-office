@@ -121,6 +121,20 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 }
 @media(max-width:400px){.menubar .version{display:none}.menubar .laptop-entry{font-size:10px;padding:6px 7px}.file-name{font-size:8px!important}.file-list{gap:3px;padding:4px}.file{padding:3px 1px}.file-thumb{width:35px;height:36px}.prop-inner{column-gap:6px;padding:7px 8px}.desc{font-size:10px}.file-name{font-size:9px}.inspector .chrome-button{min-width:82px;padding:8px 6px}.window-title span{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* Full desktop workspace and responsive V6B thumbnail canvases. */
+@media(min-width:901px){
+ .desktop{padding:0!important;display:block!important}
+ .window{width:100%!important;max-width:none!important;min-height:100dvh;display:flex;flex-direction:column;margin:0!important;outline:0;box-shadow:none}
+ .workspace{flex:1;height:auto!important;min-height:0!important;grid-template-columns:clamp(215px,18vw,300px) minmax(0,1fr) clamp(230px,20vw,330px)!important}
+ .canvas-panel{min-height:0}
+ .canvas-space{min-height:0}
+ .art .v6b-animated-preview{width:min(70%,480px);height:min(85%,480px)}
+}
+.v6b-animated-preview{display:block;aspect-ratio:1;object-fit:contain;image-rendering:pixelated}
+.file-thumb .v6b-animated-preview{width:100%;height:100%}
+.art .v6b-animated-preview{width:min(70%,380px);height:min(85%,380px);max-width:100%;max-height:100%}
+@media(max-width:700px){.art .v6b-animated-preview{width:min(62%,240px);height:min(90%,240px)}}
 </style>
 </head>
 <body>
@@ -339,5 +353,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('modal').hidden=t
 render();
 })();
 </script>
+<script src="./v6b-thumbnails.js?v=20261108"></script>
 </body>
 </html>
