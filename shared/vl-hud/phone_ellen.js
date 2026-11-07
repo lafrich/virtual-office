@@ -101,6 +101,8 @@ function dots(y,x0=0,x1=LW-1){for(let x=x0;x<=x1;x+=2)ps(x,y)}
 function bar(x,y,w,h,frac,v=1){fr(x,y,w,1,v);fr(x,y+h-1,w,1,v);fr(x,y,1,h,v);fr(x+w-1,y,1,h,v);fr(x+1,y+1,Math.round((w-2)*Math.max(0,Math.min(1,frac))),h-2,v)}
 
 // ---------------- game/example state ----------------
+let gameProvider=null;
+function liveData(){try{return typeof gameProvider==='function'?gameProvider():null;}catch(e){return null;}}
 const ST={
  clock:null, // null = real time
  saldo:1250000, contrast:2, sound:true, vib:true, music:false,
@@ -203,7 +205,7 @@ function Standby(){const s={};
   tx('VLife',8,1); // operator name (example)
   const c=clockStr(); txR(c,88,1,1,true);
   skyline(17,14);
-  txC(rp(ST.saldo),41,1,true);
+  txC(rp(liveData()?.wallet??ST.saldo),41,1,true);
   soft('Menu','Tutup');
  };
  s.key=k=>{
@@ -222,8 +224,8 @@ function MainMenu(){return List({title:'Menu',num:'',numbered:true,items:MENU.ma
 // ---- Dompet (example history)
 const HIST=[['Gaji kerja','+75rb','+Rp 75.000','Kerja barista','Hari ini 09:40'],['Kursus','-300','-Rp 300','Basic Trading Course','Hari ini 08:15'],
  ['Sofa Biru','-450rb','-Rp 450.000','Toko Furnitur','Kemarin 20:02'],['Jual lampu','+80rb','+Rp 80.000','Marketplace','Kemarin 13:30'],['Gaji kerja','+75rb','+Rp 75.000','Kerja barista','Kemarin 10:00']];
-function Dompet(){const l=List({title:'Dompet',num:'1-',y0:36,y1:53,items:HIST.map(h=>({label:h[0],right:h[1],open:()=>Text({title:h[0],num:'',lines:[[h[2],1],[h[3]],[h[4]],['(data contoh)']]})})),
-  header:()=>{tx('Saldo',1,17);tx(rp(ST.saldo),1,26,1,true);dots(35)}});return l}
+function Dompet(){const l=List({title:'Dompet',num:'1-',y0:36,y1:53,items:(liveData()?[]:HIST).map(h=>({label:h[0],right:h[1],open:()=>Text({title:h[0],num:'',lines:[[h[2],1],[h[3]],[h[4]],['(data contoh)']]})})),
+  header:()=>{tx('Saldo',1,17);tx(rp(liveData()?.wallet??ST.saldo),1,26,1,true);dots(35)}});return l}
 // ---- Skill (example data, total 350 = 120+60+170 like earlier mockups)
 const SK=[['Trading',2,120,200],['Barista',1,60,100],['Coding',3,170,300],['Desain',1,0,100]];
 function Skill(){return List({title:'Skill',num:'2-',rowH:18,items:SK.map(([n,lv,xp,mx])=>({label:n,right:'Lv'+lv,bar:xp/mx,barTxt:xp+'/'+mx,
@@ -231,7 +233,15 @@ function Skill(){return List({title:'Skill',num:'2-',rowH:18,items:SK.map(([n,lv
 // ---- Kursus Online (Basic Trading = brief data; others example)
 const CR=[['Basic Trading',300,90,'+40 Trading XP'],['Barista Dasar',500,120,'+40 Barista XP'],['Coding Dasar',800,180,'+50 Coding XP'],['Desain Dasar',600,150,'+40 Desain XP']];
 const mmss=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');
-function Kursus(){return List({title:'Kursus Online',num:'3-',rowH:18,items:CR.map(c=>({label:c[0],sub:rp(c[1])+' · '+c[2]+' dtk',open:()=>KursusDetail(c)}))})}
+function Kursus(){
+ if(liveData())return List({title:'Kursus Online',num:'3-',items:[
+  {label:'Belajar via HP',sub:'Durasi Jiwa / +12 EXP',act:()=>{
+   const d=liveData(),result=d?.runAction?.('course',{});
+   push(Msg([result?.ok?'EXP bertambah!':'Gagal kursus',fit(result?.ok?'+12 EXP':result?.reason||'Coba kembali',90)],1));
+  }}
+ ]});
+ return List({title:'Kursus Online',num:'3-',rowH:18,items:CR.map(c=>({label:c[0],sub:rp(c[1])+' · '+c[2]+' dtk',open:()=>KursusDetail(c)}))});
+}
 function KursusDetail(c){return Text({title:c[0],num:'',lines:[[rp(c[1]),1],['Durasi '+c[2]+' detik'],[c[3]],['Belajar via HP']],soft:['Mulai','Kembali'],
  onL:()=>{if(ST.course&&!courseDone()){push(Progress());return}push(Confirm('Bayar?',[rp(c[1]),c[0]],()=>{ST.course={c,start:ST.now()};pop();push(Progress())}))}})}
 function courseLeft(){return ST.course?Math.max(0,ST.course.c[2]-(ST.now()-ST.course.start)/1000):0}
@@ -259,7 +269,20 @@ function Harga(name){const s={v:''};
  return s;}
 // ---- Toko Furnitur
 const FU=[['Sofa Biru',450000,'sofa'],['Meja Kopi',150000,'meja'],['Kursi Kayu',120000,'kursi'],['Tanaman',60000,'tanaman'],['Lampu',90000,'lampu'],['Rak Buku',210000,'rak']];
-function Furnitur(){return List({title:'Toko Furnitur',num:'5-',items:FU.map(f=>({label:f[0],right:Math.round(f[1]/1000)+'rb',open:()=>FurniturDetail(f)}))})}
+function Furnitur(){
+ if(liveData()){
+  const catalog=[['Kasur',6000,'bed'],['Kursi',1500,'chair'],['Kompor',4500,'stove'],['Lemari',3500,'wardrobe']];
+  return List({title:'Toko Furnitur',num:'5-',items:catalog.map(f=>({
+   label:f[0],right:Math.round(f[1]/1000)+'rb',
+   open:()=>Text({title:f[0],num:'5-',lines:[[rp(f[1]),true],['Dikirim ke kost'],['Beli sekali']],soft:['Beli','Kembali'],
+    onL:()=>{
+     const result=liveData()?.runAction?.('buy_furniture',{itemId:f[2]});
+     push(Msg([result?.ok?'Pembelian sukses':'Tidak berhasil',fit(result?.ok?f[0]:result?.reason||'Coba lagi',90)],1));
+    }})
+  }))});
+ }
+ return List({title:'Toko Furnitur',num:'5-',items:FU.map(f=>({label:f[0],right:Math.round(f[1]/1000)+'rb',open:()=>FurniturDetail(f)}))});
+}
 function FurniturDetail(f){return Text({title:f[0],num:'',soft:['Beli','Kembali'],body:()=>{
   fr(0,17,28,20);fr(1,18,26,18,0);bm(ITEMBM[f[2]],2,18,1,2);
   tx(rp(f[1]),31,19,1,true);tx('Ukuran 2x1',31,29);
@@ -267,7 +290,7 @@ function FurniturDetail(f){return Text({title:f[0],num:'',soft:['Beli','Kembali'
  onL:()=>push(Confirm('Beli?',[f[0],rp(f[1])],()=>{pop();push(Msg(['Dibeli!','Dikirim ke','storage kamar'],2))}))})}
 // ---- Peta
 const LM=[['Rumah','house',12,20],['Kafe','cup',44,20],['Kantor','office',76,20],['Toko Furnitur','furnitur',12,41],['Taman','tree',44,41],['Pasar','stall',76,41]];
-function Peta(){const s={sel:1};
+function Peta(){if(liveData()?.map)return PetaSemesta();const s={sel:1};
  s.draw=()=>{status();const L=LM[s.sel];title(L[0],(s.sel+1)+'/'+LM.length);
   for(let y=16;y<=54;y++)for(let x=0;x<96;x++){if(((x%4)===0)&&((y%4)===2))ps(x,y)}
   fr(0,32,96,5,0);fr(0,32,96,1);fr(0,36,96,1);
@@ -282,6 +305,74 @@ function Peta(){const s={sel:1};
   if(/^[1-6]$/.test(k)){s.sel=+k-1;return true}
   if(k==='L'||k==='OK'){ST.mark=ST.mark===s.sel?-1:s.sel;return true}if(k==='R'){pop();return true}return false};
  return s;}
+// ---- Semesta gameplay activity map. Uses the original Nokia LCD, never world-space pins.
+function PetaSemesta(){
+ const s={sel:0,selectedId:null};
+ const snapshot=()=>liveData()?.map||{sites:[],player:{x:0,z:0},bounds:{minX:-20,maxX:20,minZ:-20,maxZ:20}};
+ const all=()=>snapshot().sites||[];
+ const at=(v,min,max,start,length)=>start+Math.round(Math.max(0,Math.min(1,(Number(v||0)-min)/Math.max(.1,max-min)))*length);
+ function coords(p,b){
+  return {x:at(p.x,Number(b.minX)||0,Number(b.maxX)||1,4,87),
+   y:at(p.z,Number(b.minZ)||0,Number(b.maxZ)||1,19,29)};
+ }
+ function boundsOf(m){
+  const b=m.bounds||{};
+  return {minX:Number.isFinite(Number(b.minX))?Number(b.minX):-20,
+   maxX:Number.isFinite(Number(b.maxX))?Number(b.maxX):20,
+   minZ:Number.isFinite(Number(b.minZ))?Number(b.minZ):-20,
+   maxZ:Number.isFinite(Number(b.maxZ))?Number(b.maxZ):20};
+ }
+ function selected(){
+  const rows=all();
+  if(!rows.length)return null;
+  const saved=rows.findIndex(p=>p.id===s.selectedId);
+  if(saved>=0)s.sel=saved;else s.sel=Math.max(0,Math.min(rows.length-1,s.sel));
+  s.selectedId=rows[s.sel].id;return rows[s.sel];
+ }
+ s.draw=()=>{
+  status();const m=snapshot(),rows=all(),item=selected();
+  title(item?.label||'Peta Aktivitas',item?(s.sel+1)+'/'+rows.length:'');
+  dots(16);
+  const b=boundsOf(m);
+  // Simple city-block/grid motif retained from the original Nokia map.
+  for(let x=4;x<=91;x+=4)for(let y=20;y<=48;y+=4)ps(x,y);
+  for(const x of [26,53,78]){fr(x,19,2,30,0);fr(x,19,1,30)}
+  fr(4,32,88,3,0);fr(4,33,88,1);
+  // Category markers use short 1-bit symbols in one map, no 3D labels.
+  rows.forEach((site,i)=>{
+   const p=coords(site,b),focus=i===s.sel,marked=ST.mark===site.id;
+   if(focus){fr(p.x-4,p.y-4,9,9,1);fr(p.x-3,p.y-3,7,7,0);}
+   else fr(p.x-1,p.y-1,3,3,1);
+   if(focus){
+    const glyph=ICON[site.icon]||ICON.peta;
+    bm(glyph,p.x-3,p.y-3,1);
+   }
+   if(marked){fr(p.x+5,p.y-4,2,7,1)}
+  });
+  const pp=coords(m.player||{x:0,z:0},b);
+  // Player stays visible and blinks; the map coordinates update while walking.
+  if(Math.floor(ST.now()/500)%2===0||ST.fakeNow!=null){
+   fr(pp.x-1,pp.y-1,3,3,0);fr(pp.x,pp.y,1,1,1);
+   ps(pp.x-3,pp.y);ps(pp.x+3,pp.y);ps(pp.x,pp.y-3);ps(pp.x,pp.y+3);
+  }
+  if(item){
+   const d=Math.round(Math.hypot((Number(item.x)||0)-(Number(m.player?.x)||0),(Number(item.z)||0)-(Number(m.player?.z)||0)));
+   tx(fit((item.placeholder?'* ':'')+item.label+' '+d+'m',93),1,49);
+  }else tx('Belum ada aktivitas',1,49);
+  soft(ST.mark===item?.id?'Hapus tanda':'Tandai','Kembali');
+ };
+ s.key=k=>{
+  const items=all(),len=items.length;
+  if(k==='U'||k==='D'){
+   if(len){s.sel=(s.sel+(k==='U'?-1:1)+len)%len;s.selectedId=items[s.sel].id;}
+   return true;
+  }
+  if(k==='L'||k==='OK'){const item=selected();if(item)ST.mark=ST.mark===item.id?-1:item.id;return true;}
+  if(k==='R'){pop();return true;}
+  return false;
+ };
+ return s;
+}
 // ---- Kontak (example friends)
 const KO=[['Raka',1,'Kafe'],['Dita',1,'Taman'],['Theodore',0,'2 jam lalu'],['Sinta',0,'Kemarin'],['Bima',1,'Kantor']];
 function Kontak(){return List({title:'Kontak',num:'7-',items:KO.map(c=>({label:c[0],icon:c[1]?'on':'off',
@@ -439,6 +530,8 @@ function hitTest(dev,x,y){ // canvas logical coords -> key id
 function drawFrame(){try{cls();if(top())top().draw();return renderPhone();}catch(e){return null}}
 try{
  window.VL={press,compose,hitTest,home,openPhone,closePhone,renderPhone,draw:drawFrame,ST,DEV,PW,PH,KEYS,KPC,NAVC,LCDX,LCDY,
+  setGameProvider:fn=>{gameProvider=typeof fn==='function'?fn:null;ST.mark=-1;},
+  hasGameProvider:()=>!!gameProvider,
   setPressed:k=>{pressedKey=k}, isOpen:()=>phoneOpen, depth:()=>stack.length, reset:()=>{phoneOpen=true;home();ST.course=null;ST.mark=-1;ST.contrast=2;ST.sound=true;ST.vib=true;ST.music=false;pressedKey=null}};
  window.VLPhoneEllen=window.VL;
  home();
