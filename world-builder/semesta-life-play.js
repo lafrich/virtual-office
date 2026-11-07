@@ -56,7 +56,7 @@ const name=o=>[o.name,o.label,o.asset,o.subtype,o.questId,...(Array.isArray(o.ta
 let bridge=null,active=false,projectId='',config=RULES?RULES.defaults():null;
 let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',progress=null;
 let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
-let phoneOpen=false,bagOpen=false,justWorkedAt=0,lastFaintCount=0;
+let bagOpen=false,justWorkedAt=0,lastFaintCount=0;
 let navSelect=null,workHoldStart=0,workAnimation=0;
 function defaults(){return RULES?RULES.defaults():null;}
 function getWorld(){return bridge&&bridge.getWorld?bridge.getWorld():{objects:[],map:{}};}
@@ -208,22 +208,8 @@ function makeLabel(THREE,label){
  sprite.scale.set(3.5,.87,1);return sprite;
 }
 function placeMarkers(){
- disposeMarkers();if(!active||!bridge?.THREE||!getScene())return;
- const T=bridge.THREE,group=new T.Group();group.name='jiwa-play-temporary-interactions';
- const geo=new T.CylinderGeometry(.19,.25,.82,6);
- const baseGeo=new T.CircleGeometry(.45,20);
- for(const n of sites){
-  if(!n.placeholder)continue; // Original Semesta assets remain visible without duplicate signboards.
-  const color=PLACEHOLDER_COLORS[n.id]||0x7eabc4;
-  const marker=new T.Mesh(geo,new T.MeshBasicMaterial({color,transparent:true,opacity:.85,depthTest:true}));
-  marker.position.set(n.x,0.51,n.z);marker.userData={semestaLifeSite:n.id,placeholder:n.placeholder};
-  const base=new T.Mesh(baseGeo,new T.MeshBasicMaterial({color,transparent:true,opacity:.3,depthWrite:false,side:T.DoubleSide}));
-  base.rotation.x=-Math.PI/2;base.position.set(n.x,.045,n.z);
-  group.add(base,marker);
-  const label=makeLabel(T,n.label+(n.placeholder?' *':''));
-  label.position.set(n.x,1.75,n.z);group.add(label);
- }
- getScene().add(group);markerGroup=group;
+ // Activity points live in the original Nokia Peta, never as floating 3D pins.
+ disposeMarkers();
 }
 function nearest(){
  const p=getPos();let found=null,dist=2.5;
@@ -329,23 +315,6 @@ function bagMarkup(){
    '<button data-life-action="discard_item">🗑 Buang Barang</button></div>':'<small>Tas kosong. Mulung, mancing, atau panjat pohon untuk mengisi tas.</small>')+
   '</div>';
 }
-function phoneMarkup(){
- const religion=state.identity?.religion||'islam',zodiac=state.identity?.zodiac||'capricorn';
- const options=(all,current)=>all.map(v=>'<option value="'+v+'" '+(v===current?'selected':'')+'>'+v[0].toUpperCase()+v.slice(1)+'</option>').join('');
- return '<div class="slp-phone"><b>📱 HANDPHONE — APLIKASI V1</b>'+
-  '<div class="slp-actions"><button data-life-action="course">🎓 Kursus Online · +EXP</button>'+
-  '<button data-life-action="buy_token" '+(!ownsRoom()?'disabled':'')+'>⚡ Token Listrik · '+money(config.settings.tokenPrice)+'</button>'+
-  '<button data-life-action="buy_fridge" '+(!ownsRoom()||state.housing?.fridge?'disabled':'')+'>🧊 Beli Kulkas · '+money(config.settings.fridgePrice)+'</button></div>'+
-  '<details open><summary>🛒 Online Shop Furnitur</summary><p><small>Pembelian satu kali. Memerlukan akses kost. Placement visual nanti disinkronkan ke Bangun Ruang; tes ini mencatat inventaris furnitur.</small></p>'+
-  '<select id="slpFurniture"><option value="bed">Kasur · Rp6.000</option><option value="chair">Kursi · Rp1.500</option><option value="stove">Kompor · Rp4.500</option><option value="wardrobe">Lemari · Rp3.500</option></select>'+
-  '<button data-life-action="buy_furniture" '+(!ownsRoom()?'disabled':'')+'>Beli Sekali</button></details>'+
-  '<details><summary>📰 Berita / Petunjuk Pekerjaan</summary><p><small>INFO LOKAL: Ikan sapu-sapu paling sering ditemukan saat memancing. Bang Siomay/Batagor menerimanya, Pasar Ikan menolak. Pekerjaan premium mensyaratkan kebersihan minimal 70. Toko Loak membeli barang bekas. Bantu warga tanpa upah untuk menaikkan moral.</small></p></details>'+
-  '<details><summary>👤 Identitas Karakter</summary><p><small>Pilihan keyakinan menentukan akses ibadah, bukan nilai moral awal. Zodiak belum berpengaruh sampai V2.</small></p>'+
-  '<label>Agama / keyakinan <select id="slpReligion">'+options(RULES.RELIGIONS.filter(v=>v!=="satanis"),religion)+'</select></label>'+
-  '<label>Zodiak <select id="slpZodiac">'+options(RULES.ZODIACS,zodiac)+'</select></label>'+
-  '<div><small>Satanis: 🔒 V2 — jalur antagonis fiksi. Friends & Social: 🔒 V2</small></div></details>'+
-  '</div>';
-}
 function paintPanel(){
  if(!outer||!active||!state)return;
  const el=outer.querySelector('#slpContent');if(!el||el.hidden)return;
@@ -356,7 +325,7 @@ function paintPanel(){
  const result=state.detained?
   optsButton('fine','💰 Bayar Denda Rp2.000')+optsButton('community_service','🧹 Bersihkan Gorong-gorong'):
   (state.restMinutes>0?optsButton('advance_time','⏩ Lewati 15 menit bed rest',{minutes:15}):
-   phoneOpen?phoneMarkup():bagOpen?bagMarkup():nodeButtons(n));
+   bagOpen?bagMarkup():nodeButtons(n));
  const nextGoal=ownsRoom()?('🏠 Hidup mandiri: gunakan WC/kamar, beli furnitur lewat HP, dan kelola token listrik.'):
   ('🎯 SURVIVAL: Kumpulkan '+money(config.settings.roomPrice)+' untuk akses kost (sekarang '+money(state.wallet)+'). Bekerja, mulung, atau mancing sambil menjaga energi & kebersihan.');
  el.innerHTML='<div class="slp-summary"><b>'+(ownsRoom()?'🏠 KOST':'⛺ HOBO')+'</b><b>'+money(state.wallet)+'</b><b>🎒 '+(state.inventory?.length||0)+'/'+(config.settings.bagSlots||8)+'</b><span>👥 Friends 🔒 V2</span></div>'+
@@ -365,10 +334,10 @@ function paintPanel(){
   (state.restMinutes>0?'<div class="slp-alert">⚠ PINGSAN · Bed rest '+state.restMinutes+' menit. Tidak bisa bekerja atau berjalan.</div>':'')+
   (state.detained?'<div class="slp-alert">🚨 DITAHAN HANSIP · Pilih denda atau kerja sosial.</div>':'')+
   (state.bladder>=80?'<div class="slp-alert">🚾 Kebelet pipis! Cari WC sebelum terlambat.</div>':'')+
-  '<div class="slp-spot">📍 '+(phoneOpen?'HP / APLIKASI':bagOpen?'TAS / INVENTORI':n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')+'</div>'+
+  '<div class="slp-spot">📍 '+(bagOpen?'TAS / INVENTORI':n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')+'</div>'+
   '<div class="slp-actions" id="slpActions">'+result+'</div>'+
   (state.bladder>=65&&!state.detained&&state.restMinutes===0?'<div class="slp-actions">'+optsButton('pee_outside','⚠ Pipis sembarangan (moral turun)')+'</div>':'')+
-  '<div class="slp-actions"><button id="slpPhone" type="button">'+(phoneOpen?'← Kembali':'📱 HP')+'</button><button id="slpBag" type="button">'+(bagOpen?'← Kembali':'🎒 Tas')+'</button></div>'+ 
+  '<div class="slp-actions"><button id="slpPhone" type="button">📱 NOKIA · PETA AKTIVITAS</button><button id="slpBag" type="button">'+(bagOpen?'← Kembali':'🎒 Tas')+'</button></div>'+  
   '<details><summary>🧪 ALAT TES (bukan aksi gameplay)</summary><p><small>Untuk mengecek skenario tanpa memodifikasi kota asli.</small></p>'+
   '<div class="slp-goto"><select id="slpDestination">'+options+'</select><button id="slpTravel" type="button">TELEPORT TEST</button></div>'+
   '<div class="slp-actions">'+optsButton('respawn','↻ Test Respawn')+
@@ -387,8 +356,8 @@ function click(ev){
   const point=sites.find(s=>s.id===id);if(!point)return;
   bridge.teleport(point.x,point.z);message('Teleport TEST ke '+point.label);paintPanel();return;
  }
- if(el.id==='slpPhone'){phoneOpen=!phoneOpen;bagOpen=false;paintPanel();return;}
- if(el.id==='slpBag'){bagOpen=!bagOpen;phoneOpen=false;paintPanel();return;}
+ if(el.id==='slpPhone'){openPhone();return;}
+ if(el.id==='slpBag'){bagOpen=!bagOpen;paintPanel();return;}
  if(el.id==='slpReset'){
   if(!confirm('Reset semua uang, inventori, status, dan akses kost untuk test kota ini?'))return;
   state=RULES.stateFrom({wallet:6000},config);persist();bridge.respawn();paintPanel();return;
@@ -432,14 +401,16 @@ function workUp(ev){
  const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width='0%';
 }
 function openPhone(){
- if(!active||!outer)return false;
- phoneOpen=!phoneOpen;bagOpen=false;
- const content=outer.querySelector('#slpContent');if(content)content.hidden=false;
- paintPanel();return true;
+ if(!active)return false;
+ // Reuse the original Nokia phone window and its existing key navigation.
+ // This also runs from the main HUD HP button through onPhone.
+ if(typeof root.VLPlayHud?.toggleWindow!=='function')return false;
+ root.VLPlayHud.toggleWindow('phone');
+ return true;
 }
 function openBag(){
  if(!active||!outer)return false;
- bagOpen=!bagOpen;phoneOpen=false;
+ bagOpen=!bagOpen;
  const content=outer.querySelector('#slpContent');if(content)content.hidden=false;
  paintPanel();return true;
 }
@@ -570,13 +541,42 @@ function tick(dt){
 function moneyBalance(){return active&&state?state.wallet:null;}
 function bagLabels(){return active&&state?(state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id):null;}
 function speedFactor(){return active&&state?RULES.speedFactor(state):1;}
+const NOKIA_ICONS={
+ fish:'peta',siomay_batagor:'stall',pasar_ikan:'market',job_silver:'office',job_pak_ogah:'office',
+ job_kang_parkir:'office',premium_job:'office',loak:'market',scavenge:'stall',tree:'tree',
+ warung:'stall',coffee:'cup',public_wc:'house',public_bath:'house',kost:'house',tent:'house',
+ help:'kontak',charity:'house',bench:'tree',course:'kursus',hansip:'office'
+};
+function nokiaSnapshot(){
+ if(!active||!state)return null;
+ const iconFor=n=>n.id.startsWith('prayer_')?'house':NOKIA_ICONS[n.id]||'peta';
+ return {
+  wallet:state.wallet,experience:state.experience,energy:state.energy,
+  moral:state.moral,hygiene:state.hygiene,bladder:state.bladder,
+  ownsRoom:ownsRoom(),
+  map:{
+   player:getPos(),bounds:worldBounds(),
+   sites:sites.map(n=>({id:n.id,label:n.label,icon:iconFor(n),
+    x:n.x,z:n.z,placeholder:!!n.placeholder}))
+  },
+  runAction:(action,args)=>runAction(action,args)
+ };
+}
+function attachNokia(){
+ if(typeof root.VLPhoneEllen?.setGameProvider==='function')
+  root.VLPhoneEllen.setGameProvider(nokiaSnapshot);
+}
+function detachNokia(){
+ if(typeof root.VLPhoneEllen?.setGameProvider==='function')
+  root.VLPhoneEllen.setGameProvider(null);
+}
 function start(){
  if(!RULES||!bridge)return false;
  const id=cityId();
  if(active&&id===projectId)return true;
  if(active)stop();
- projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;phoneOpen=false;bagOpen=false;
- config=defaults();configSource='DEFAULT V1';restore();buildSites();makeRoot();
+ projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;bagOpen=false;
+ config=defaults();configSource='DEFAULT V1';restore();buildSites();makeRoot();attachNokia();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
  message('🎮 Play Mode aktif. '+(ownsRoom()?'Respawn di kost':'Mulai sebagai hobo; respawn dari tenda pinggiran kota')+'.');
@@ -584,9 +584,9 @@ function start(){
 }
 function stop(){
  if(!active)return;
- persist();active=false;cancelAnimationFrame(workAnimation);progress=null;
+ persist();detachNokia();active=false;cancelAnimationFrame(workAnimation);progress=null;
  disposeMarkers();if(outer)outer.hidden=true;
- actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;phoneOpen=false;bagOpen=false;
+ actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;bagOpen=false;
 }
 function attach(bridgeApi){bridge=bridgeApi||null;return api;}
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
