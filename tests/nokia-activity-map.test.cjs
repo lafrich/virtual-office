@@ -55,7 +55,7 @@ test('Semesta exports city-wide activity coordinates to Nokia and has no 3D floa
  assert.match(gameplaySource,/function nokiaSnapshot\(\)/);
  assert.match(gameplaySource,/map:\{/);
  assert.match(gameplaySource,/player:\{x:Number\(getPos\(\)\.x\)\|\|0,z:Number\(getPos\(\)\.z\)\|\|0\},bounds:cachedMapOverview\.bounds,terrain:cachedMapOverview\.terrain/);
- assert.match(gameplaySource,/sites:sites\.map\(/);
+ assert.match(gameplaySource,/sites:sites\.filter\(n=>!n\.ambient\)\.map\(/);
  assert.match(gameplaySource,/root\.VLPhoneEllen\.setGameProvider\(nokiaSnapshot\)/);
  assert.match(gameplaySource,/root\.VLPhoneEllen\.setGameProvider\(null\)/);
  assert.match(gameplaySource,/function placeMarkers\(\)\{\s*\/\/ Activity points live in the original Nokia Peta/);
