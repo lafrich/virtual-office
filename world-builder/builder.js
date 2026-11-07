@@ -2998,6 +2998,10 @@ window.SemestaPlay=Object.freeze({
  pickedIds:()=>[...playPickedIds],
  pickupPreview:previewPickupById,
  playObjects:()=>documentMap.objects.map(o=>({id:o.id,type:o.type,asset:o.asset})),
+ // Read-only full Semesta directory for Jiwa binding checks and editor previews.
+ worldDirectory:()=>documentMap.objects.map(o=>({id:o.id,name:o.name||o.label||'',label:o.label||'',
+  type:o.type||'',layer:o.layer||'',subtype:o.subtype||'',asset:o.asset||'',assetId:o.assetId||'',
+  x:Number(o.x)||0,z:Number(o.z)||0,enterable:o.enterable===true})),
  spawnRespawn:spawnRespawnApi(),
  devicePref:readDevicePref,
  setDevice:(mode,preset)=>{writeDevicePref({mode,preset});applyDevicePreview();return readDevicePref();},
