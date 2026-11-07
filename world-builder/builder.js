@@ -2355,6 +2355,7 @@ canvas.addEventListener('wheel',e=>{
 // the authored map or touching multiplayer / player data.
 const walkInput={up:false,down:false,left:false,right:false};
 let walkActorId=null;
+let lifeAutoCamera=false;
 const PLAY_SPEED_SCALE=4.1/1.4; // default walk 1.4 matches the previous 4.1 world units
 let walkRunning=false;
 let playHud=null;
@@ -2556,7 +2557,15 @@ function clearWalk(){
  clearTemporaryLifePlayer();
 }
 function setMode(m){
- if(mode==='walk'&&m!=='walk'){window.SemestaLifePlay?.stop?.();clearWalk();}
+ if(mode==='walk'&&m!=='walk'){
+  window.SemestaLifePlay?.stop?.();
+  clearWalk();
+  if(lifeAutoCamera){
+   cameraFollowId=null;lifeAutoCamera=false;
+   if(mapCameraBeforeFollow){cameraFocus.copy(mapCameraBeforeFollow.focus);viewSize=mapCameraBeforeFollow.size;}
+   mapCameraBeforeFollow=null;fitCamera();updateCharacterCameraUI();
+  }
+ }
  if(m==='pan'&&activeAssetAimId)cancelActiveAssetAim();
  mode=m;
  applyPlayPickupVisibility();
@@ -2574,6 +2583,12 @@ function setMode(m){
     documentMap.objects.find(x=>actorType(x.type)&&rigs.has(x.id)&&owners.get(x.id)?.visible!==false))||makeTemporaryLifePlayer();
    walkActorId=first.id;select(first.id);
    window.SemestaLifePlay?.start?.();
+   if(!cameraFollowId){
+    mapCameraBeforeFollow={focus:cameraFocus.clone(),size:viewSize};
+    cameraFollowId=first.id;lifeAutoCamera=true;
+   }
+   const where=rigs.get(first.id)?.root?.position||first;
+   focusCameraAt(where.x,where.z,16);updateCharacterCameraUI();
    rigs.get(walkActorId)?.rig.setPose(null);
    tell('Walk Test: WASD / arrow keys / touch D-pad. Edits are not saved.');
    try{beginSpawnRespawn(first,'playStart');}catch(err){console.warn('spawn/respawn preview',err);}
