@@ -392,8 +392,8 @@ window.openBangunPixelCreator=async function(event){
 <script src="./studio-interior-ui.js?v=object-flip-gizmo-v2"></script>
 <script src="../../shared/hub-registry.js"></script>
 <script src="../city-drafts.js?v=city-building-sync-v1"></script>
-<script src="../city-building-link.js?v=city-building-sync-v1"></script>
-<script src="./city-browser.js?v=city-building-sync-v1"></script>
+<script src="../city-building-link.js?v=interior-only-20261107"></script>
+<script src="./city-browser.js?v=city-building-interior-drive-v2"></script>
 <script src="./procedural-generator.js?v=integrated-v1"></script>
 <script>
 (function(){
@@ -1103,7 +1103,15 @@ scaleController=window.VLCharacterScale?.mount({
 scaleController?.sync();
 cityBrowser=window.VLBangunCityBrowser?.mount({
  getSaved:()=>saved,openAsset:a=>openSavedAsset(a,{resume:false}),
- openPrefab:openCityPrefab,saveAsset,status
+ openPrefab:openCityPrefab,saveAsset,status,
+ ensureInterior:()=>{
+  const mode=$('buildingMode');
+  if(mode.value!=='interactive'){
+   mode.value='interactive';mode.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  interiorUi?.selectFloor(1);
+  interiorUi?.selectTab('interior');interiorUi?.setPreview('interior');
+ }
 })||null;
 if(window.VLHub){
  window.VLHub.subscribe('world',()=>{cityBrowser?.refresh?.();});
