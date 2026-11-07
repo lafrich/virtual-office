@@ -18,6 +18,12 @@ const FISH=[
  {id:'nila',label:'Ikan Nila',weight:12,spoilMinutes:180,buyers:{siomay_batagor:1900,pasar_ikan:2500}},
  {id:'mujair',label:'Ikan Mujair',weight:8,spoilMinutes:180,buyers:{siomay_batagor:1400,pasar_ikan:2000}}
 ];
+const JOBS=[
+ {id:'manusia_silver',label:'Manusia Silver',wage:1600,energyCost:12,hygieneCost:8,minutes:25,exp:7,minHygiene:0},
+ {id:'pak_ogah',label:'Pak Ogah',wage:2500,energyCost:10,hygieneCost:4,minutes:20,exp:7,minHygiene:0},
+ {id:'kang_parkir',label:'Kang Parkir',wage:2100,energyCost:8,hygieneCost:3,minutes:18,exp:6,minHygiene:0},
+ {id:'kantor_premium',label:'Kerja Premium',wage:4500,energyCost:12,hygieneCost:2,minutes:28,exp:8,minHygiene:70}
+];
 function defaults(){return {
  version:1,identity:{religion:'islam',zodiac:'capricorn'},
  gates:{friendsV2:false,socialV2:false,satanicEvilRouteV2:false},
@@ -29,7 +35,7 @@ function defaults(){return {
  passiveEnergyMinutes:60,passiveBladderMinutes:20,passiveHygieneMinutes:90,
  passiveFullnessMinutes:35,faintRecoveryEnergy:25,tokenDurationMinutes:60,
  realSecondsPerGameMinute:8,seatRestEnergy:3},
- fish:copy(FISH)
+ fish:copy(FISH),jobs:copy(JOBS)
 };}
 function normalize(raw){
  const base=defaults(),source=raw&&typeof raw==='object'?raw:{},s=source.settings||{};
@@ -52,6 +58,15 @@ function normalize(raw){
    spoilMinutes:number(p.spoilMinutes,1,100000,d.spoilMinutes),buyers};
  });
  if(!base.fish.some(f=>f.weight>0))base.fish=copy(FISH);
+ const incomingJobs=new Map((Array.isArray(source.jobs)?source.jobs:[]).filter(j=>j&&j.id).map(j=>[j.id,j]));
+ base.jobs=JOBS.map(d=>{
+  const next=incomingJobs.get(d.id)||{};
+  return {id:d.id,label:d.label,wage:number(next.wage,0,1000000,d.wage),
+   energyCost:number(next.energyCost,0,100,d.energyCost),
+   hygieneCost:number(next.hygieneCost,0,100,d.hygieneCost),
+   minutes:number(next.minutes,1,100000,d.minutes),exp:number(next.exp,0,100,d.exp),
+   minHygiene:number(next.minHygiene,0,100,d.minHygiene)};
+ });
  return base;
 }
 function stateFrom(existing,config){
@@ -332,12 +347,20 @@ function doAction(config,previous,action,args={}){
  }
  case 'pee_outside':clock(3);stat('bladder',-100);stat('hygiene',-20);stat('moral',-10);changes.push('pipis sembarangan berisiko ketahuan');break;
  case 'work': {
-  if(s.energy<10)return reject('Energi tidak cukup untuk bekerja.');
-  if(args.premium&&s.hygiene<70)return reject('Pekerjaan premium membutuhkan kebersihan 70.');
-  clock(Math.max(5,Math.round(30/(1+s.experience/100))));
-  stat('energy',-10);s.wallet+=args.premium?4500:2500;
-  s.experience=Math.min(100,s.experience+7);
-  changes.push('upah +Rp'+(args.premium?4500:2500));break;
+  const jobId=String(args.jobId||'');
+  const job=jobId?c.jobs.find(j=>j.id===jobId):null;
+  if(jobId&&!job)return reject('Jenis pekerjaan tidak dikenal di Jiwa.');
+  const required=job?.minHygiene??(args.premium?70:0),energy=job?.energyCost??10;
+  const wage=job?.wage??(args.premium?4500:2500);
+  const duration=job?.minutes??30,exp=job?.exp??7;
+  if(s.energy<energy)return reject('Energi tidak cukup untuk bekerja.');
+  if(s.hygiene<required)return reject('Pekerjaan ini membutuhkan kebersihan '+required+'.');
+  clock(Math.max(5,Math.round(duration/(1+s.experience/100))));
+  stat('energy',-energy);
+  if(job?.hygieneCost)stat('hygiene',-job.hygieneCost);
+  s.wallet+=wage;s.experience=Math.min(100,s.experience+exp);
+  changes.push('kerja '+(job?.label||(args.premium?'Premium':'Reguler'))+' · upah +Rp'+wage+' · EXP +'+exp);
+  break;
  }
  case 'course':clock(25);s.experience=Math.min(100,s.experience+12);changes.push('EXP +12');break;
  case 'charity': {
@@ -409,5 +432,5 @@ function doAction(config,previous,action,args={}){
  }
  return {ok:true,state:s,changes,action};
 }
-return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,run:doAction});
+return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,run:doAction});
 });
