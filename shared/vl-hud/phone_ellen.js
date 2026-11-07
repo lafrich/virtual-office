@@ -105,7 +105,7 @@ let gameProvider=null;
 function liveData(){try{return typeof gameProvider==='function'?gameProvider():null;}catch(e){return null;}}
 const ST={
  clock:null, // null = real time
- saldo:1250000, contrast:2, sound:true, vib:true, music:false,
+ saldo:0, contrast:2, sound:true, vib:true, music:false,
  course:null, // {name,total,start}
  now:()=>ST.fakeNow!=null?ST.fakeNow:Date.now(), fakeNow:null,
  mark:-1
@@ -224,17 +224,35 @@ function MainMenu(){return List({title:'Menu',num:'',numbered:true,items:MENU.ma
 // ---- Dompet (example history)
 const HIST=[['Gaji kerja','+75rb','+Rp 75.000','Kerja barista','Hari ini 09:40'],['Kursus','-300','-Rp 300','Basic Trading Course','Hari ini 08:15'],
  ['Sofa Biru','-450rb','-Rp 450.000','Toko Furnitur','Kemarin 20:02'],['Jual lampu','+80rb','+Rp 80.000','Marketplace','Kemarin 13:30'],['Gaji kerja','+75rb','+Rp 75.000','Kerja barista','Kemarin 10:00']];
-function Dompet(){const l=List({title:'Dompet',num:'1-',y0:36,y1:53,items:(liveData()?[]:HIST).map(h=>({label:h[0],right:h[1],open:()=>Text({title:h[0],num:'',lines:[[h[2],1],[h[3]],[h[4]],['(data contoh)']]})})),
-  header:()=>{tx('Saldo',1,17);tx(rp(liveData()?.wallet??ST.saldo),1,26,1,true);dots(35)}});return l}
+function Dompet(){
+ const live=liveData(),history=live?.transactions||[];
+ const items=live?history.map(t=>({
+  label:String(t.label||'Transaksi'),
+  right:(t.delta>0?'+':'-')+Math.abs(t.delta),
+  open:()=>Text({title:'Riwayat Dompet',num:'1-',lines:[
+   [fit(String(t.label||'Transaksi'),94),true],
+   [(t.delta>0?'+':'-')+rp(Math.abs(t.delta))],
+   ['Saldo '+rp(t.balance)],
+   ['Menit game '+t.minute]
+  ]})
+ })):[];
+ return List({title:'Dompet',num:'1-',y0:34,y1:53,items,
+  header:()=>{
+   tx('Saldo '+(liveData()?'Jiwa':'(tidak aktif)'),1,17);
+   tx(fit(rp(liveData()?.wallet??0),94,true),1,25,1,true);
+   dots(33);
+  }});
+}
 // ---- Skill (example data, total 350 = 120+60+170 like earlier mockups)
 const SK=[['Trading',2,120,200],['Barista',1,60,100],['Coding',3,170,300],['Desain',1,0,100]];
 function Skill(){
- if(liveData())return Text({title:'Skill Karakter',num:'2-',lines:[
-  ['EXP '+Math.floor(liveData()?.experience||0),true],
-  ['EXP mempercepat kerja'],
-  ['Kursus lewat HP'],
-  ['Sosial terkunci V2']
- ]});
+ if(liveData())return Text({title:'Skill Karakter',num:'2-',body:()=>{
+  const g=liveData(),xp=Math.floor(g?.experience||0),energy=Math.floor(g?.energy||0);
+  tx('EXP '+xp+' / 100',1,17,1,true);
+  bar(1,29,94,6,xp/100);
+  tx('Energi '+energy+'%',1,39);
+  tx('Waktu kerja -EXP',1,48);
+ }});
  return List({title:'Skill',num:'2-',rowH:18,items:SK.map(([n,lv,xp,mx])=>({label:n,right:'Lv'+lv,bar:xp/mx,barTxt:xp+'/'+mx,
  open:()=>Text({title:n,num:'Lv'+lv,body:()=>{tx('Level '+lv,1,17,1,true);bar(1,27,90,7,xp/mx);tx(xp+' / '+mx+' XP',1,36);tx('Naik lewat kursus',1,46)}})}))})}
 // ---- Kursus Online (Basic Trading = brief data; others example)
@@ -242,10 +260,16 @@ const CR=[['Basic Trading',300,90,'+40 Trading XP'],['Barista Dasar',500,120,'+4
 const mmss=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');
 function Kursus(){
  if(liveData())return List({title:'Kursus Online',num:'3-',items:[
-  {label:'Belajar via HP',sub:'Durasi Jiwa / +12 EXP',act:()=>{
-   const d=liveData(),result=d?.runAction?.('course',{});
-   push(Msg([result?.ok?'EXP bertambah!':'Gagal kursus',fit(result?.ok?'+12 EXP':result?.reason||'Coba kembali',90)],1));
-  }}
+  {label:'Belajar via HP',sub:'25 menit game / +12 EXP',open:()=>Text({
+   title:'Kursus Online',num:'3-',lines:[
+    ['Biaya Rp 0',true],['25 menit game'],['Tambah 12 EXP'],
+    ['Moral tidak berubah']
+   ],soft:['Belajar','Kembali'],onL:()=>{
+    const result=liveData()?.runAction?.('course',{});
+    push(Msg([result?.ok?'EXP bertambah!':'Gagal kursus',
+     fit(result?.ok?'EXP +12':result?.reason||'Coba kembali',90)],1));
+   }
+  })}
  ]});
  return List({title:'Kursus Online',num:'3-',rowH:18,items:CR.map(c=>({label:c[0],sub:rp(c[1])+' · '+c[2]+' dtk',open:()=>KursusDetail(c)}))});
 }
