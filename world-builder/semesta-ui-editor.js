@@ -137,9 +137,13 @@ function profileAndFrame(){
   profile=next;drag=null;
   if(active){updateControls();status('MODE '+next.toUpperCase()+' · Edit menggunakan posisi HUD '+next+'.');}
  }
- if(env.phone&&env.win?.SemestaUIEditor&&previewFrameReady!==env.win.SemestaUIEditor){
-  previewFrameReady=env.win.SemestaUIEditor;
-  if(active){syncFramePreview();openPopupFor(selected);}
+ if(env.phone&&env.win?.SemestaUIEditor&&
+    previewFrameReady!==env.win.SemestaUIEditor&&
+    env.win?.SemestaLifePlay?.active?.()){
+  if(active&&syncFramePreview()){
+   previewFrameReady=env.win.SemestaUIEditor;
+   openPopupFor(selected);
+  }
  }else if(!env.phone)previewFrameReady=false;
  return env;
 }
@@ -262,6 +266,10 @@ function select(id){
  if(!HL.ELEMENTS.includes(id))return;
  selected=id;openPopupFor(id);updateControls();syncPreview();
 }
+function cycle(direction){
+ const list=HL.ELEMENTS,i=list.indexOf(selected);
+ select(list[(i+direction+list.length)%list.length]);
+}
 function center(axis){
  const before=currentSlot();
  if(!before)return;
@@ -281,7 +289,7 @@ function start(){
  if(!root.SemestaLifePlay?.active?.()){
   status('Tidak bisa membuka Play Mode. Coba tombol 🎮 dahulu.');return false;
  }
- active=true;dirty=false;profile=HL.detectProfile(document);
+ active=true;dirty=false;profile=environment().phone?'phone':HL.detectProfile(document);
  draft=HL.normalize(currentLayout());
  $('inspector').classList.add('sui-editing');
  $('inspector').classList.add('mobile-open');
@@ -297,6 +305,7 @@ function start(){
 }
 function stop(){
  if(!active)return;
+ syncFramePreview(true);
  active=false;drag=null;
  cancelAnimationFrame(raf);raf=0;
  if(overlay)overlay.hidden=true;
@@ -337,6 +346,9 @@ function init(){
  $('tabLogic').addEventListener('click',stop);
  $('suiCancel').addEventListener('click',stop);
  $('suiElement').addEventListener('change',e=>select(e.target.value));
+ $('suiPrev').addEventListener('click',()=>cycle(-1));
+ $('suiNext').addEventListener('click',()=>cycle(1));
+ $('suiSelectedOnly').addEventListener('change',e=>{onlySelected[profile]=e.target.checked;});
  $('suiSave').addEventListener('click',save);
  $('suiReset').addEventListener('click',reset);
  $('suiCenterX').addEventListener('click',()=>center('x'));
@@ -363,8 +375,13 @@ function init(){
 }
 function updateControlsIfLoaded(){if(active)updateControls();}
 root.SemestaUIEditor=Object.freeze({start,stop,save,select,active:()=>active,
- previewLayout:()=>active&&draft?HL.normalize(draft):null,
- selected:()=>selected,profile:()=>profile,dirty:()=>dirty});
+ // In deviceFrame this is an externally driven preview. The unsaved layout
+ // is never stored in Jiwa or per-map city data.
+ setExternalPreview:layout=>{externalDraft=layout?HL.normalize(layout):null;return true;},
+ previewLayout:()=>active&&draft?HL.normalize(draft):
+  externalDraft?HL.normalize(externalDraft):null,
+ selected:()=>selected,profile:()=>profile,dirty:()=>dirty,
+ frameGeometry:id=>geometry(id),onDeviceChanged:()=>{if(active)profileAndFrame();}});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
 else init();
 })(window);
