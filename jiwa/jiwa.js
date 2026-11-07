@@ -64,7 +64,7 @@ const TEMPLATES={
   transport:{label:'Transport / Vehicle',rules:[rule('board','Naik kendaraan','ride',[c('wallet_min',1000)],[e('wallet_delta',-1000),e('message','Tiket dibayar')])]},
   building:{label:'Enterable Building',rules:[rule('enter','Masuk bangunan','walk',[],[e('message','Entrance activated')],'enter')]}
 };
-const state={cities:[],record:null,project:null,entities:[],selected:null,action:0,dirty:false,tab:'map',test:null,testLines:[],zoom:1,panX:0,panY:0,midX:0,midZ:0,points:[],drag:null,selectedCategory:'',suppress:false};
+const state={cities:[],record:null,project:null,entities:[],selected:null,action:0,dirty:false,tab:'activities',test:null,testLines:[],zoom:1,panX:0,panY:0,midX:0,midZ:0,points:[],drag:null,selectedCategory:'',suppress:false};
 function allTemplates(){return {...TEMPLATES,...(state.project?.templates||{})};}
 function collectEntities(record){
  const base=record?.document?.objects||[],all=base.slice();
@@ -296,7 +296,8 @@ function tab(which){
  if(shell)shell.dataset.jiwaTab=which;
  mobilePane('main');
  for(const b of document.querySelectorAll('[data-tab]'))b.classList.toggle('active',b.dataset.tab===which);
- for(const name of ['map','systems','test','context','play'])$(name+'View').hidden=which!==name;
+ for(const name of ['activities','map','systems','test','context','play'])$(name==='activities'?'activityView':name+'View').hidden=which!==name;
+ if(which==='activities')window.dispatchEvent(new Event('jiwa:activity:render'));
  if(which==='map')resizeCanvas();
  if(which==='systems')renderSystems();
  if(which==='test')renderTest();
