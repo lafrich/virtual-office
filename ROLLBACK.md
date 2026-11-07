@@ -36,6 +36,24 @@ git push origin main
 
 That restores the previous Asset Library picker (no LOAK OBJECTS / ITEMS category), the height-based lamp glow, and `sw.js` v7. It does not revert the sleep-clip or grass_v2 commits.
 
+## This deploy (generic spawn and respawn / roadside hobo tent)
+
+- Previous live `main`: `3175c6822e1b17972bc7c90fcec330f644fe2db7`
+- Feature commit: `6f0ce8b250098ace26a9d1c50b3d107da34fa039`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 6f0ce8b250098ace26a9d1c50b3d107da34fa039
+git push origin main
+```
+
+That restores the previous Play start (no roadside tent / exit-tent clip), removes the Jiwa SPAWN & RESPAWN card and `modules.spawnRespawn`, and returns `sw.js` to v8. It does not revert the loak-picker, lamp-glow, sleep-clip, or grass_v2 commits.
+
+
 
 
 ## SHAs
