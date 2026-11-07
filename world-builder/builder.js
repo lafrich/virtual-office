@@ -2855,7 +2855,7 @@ function beginSpawnRespawn(actor,trigger){
  const holder=actor&&rigs.get(actor.id);
  if(!holder)return null;
  const lifePlayer=window.SemestaLifePlay?.spawnEntitlement?.();
- const rawDecision=SR.resolve({
+ const rawDecision=mod.playNoEdge&&!lifePlayer?.homeAccess?null:SR.resolve({
   homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
   ownedRoom:lifePlayer?lifePlayer.ownedRoom:mod.ownedRoom,
   profile:actor.profile
@@ -2906,7 +2906,7 @@ function spawnRespawnApi(){
    if(window.VLSpawnHobo)window.VLSpawnHobo.dispose();
    const lifePlayer=window.SemestaLifePlay?.spawnEntitlement?.();
    const mod=window.SemestaLifePlay?.spawnModule?.(spawnModule(),spawnWorldAdapter())||spawnModule();
-   const rawDecision=SR.resolve({homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
+   const rawDecision=mod.playNoEdge&&!lifePlayer?.homeAccess?null:SR.resolve({homeAccess:lifePlayer?lifePlayer.homeAccess:!!mod.previewOwnsRoom,
     ownedRoom:lifePlayer?lifePlayer.ownedRoom:mod.ownedRoom,profile:actor.profile},mod,spawnWorldAdapter(),opts.rand);
    const decision=rawDecision?.ok?rawDecision:(lifePlayer?.homeAccess&&lifePlayer.ownedRoom?
     {ok:true,kind:'home',playExitTent:false,point:lifePlayer.ownedRoom,reason:'kost-play-placeholder'}:
@@ -2916,7 +2916,7 @@ function spawnRespawnApi(){
    const holder=rigs.get(actor.id);
    if(decision&&decision.ok&&decision.point&&holder){
     holder.root.position.set(decision.point.x,holder.root.position.y||0,decision.point.z);
-    if(decision.kind==='hobo'&&decision.playExitTent&&window.VLSpawnHobo){
+    if(decision.kind==='hobo'&&decision.playExitTent&&!opts.fainted&&window.VLSpawnHobo){
      focusCameraAt(decision.point.x,decision.point.z,14);
      window.VLSpawnHobo.play({
       THREE,scene,camera,actorRoot:holder.root,rig:holder.rig,
@@ -2999,7 +2999,7 @@ if(window.SemestaLifePlay){
    focusCameraAt(Number(x),Number(z),14);
    return true;
   },
-  respawn:()=>spawnRespawnApi().respawn()
+  respawn:(opts)=>spawnRespawnApi().respawn(opts)
  });
 }
 $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');};
