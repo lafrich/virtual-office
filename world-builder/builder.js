@@ -2483,7 +2483,7 @@ function ensurePlayHud(){
  const wrap=$('canvas-wrap');
  if(!wrap)return null;
  playHud=window.VLPlayHud.mount(wrap,{
-  mode:'overlay',withWalkPad:true,getGameplay:currentPlayGameplay,
+  mode:'overlay',withWalkPad:true,getGameplay:currentPlayGameplay,hideLegacyNeeds:true,
   onAction:()=>{if(window.SemestaLifePlay?.handleAction?.())return;if(tryLoakPickup()||tryLoakSellNearby())return;if(!enterNearbyBuilding())tell('ACTION · no nearby context');},
   onActionDown:ev=>window.SemestaLifePlay?.actionDown?.(ev),
   onActionUp:ev=>window.SemestaLifePlay?.actionUp?.(ev),
