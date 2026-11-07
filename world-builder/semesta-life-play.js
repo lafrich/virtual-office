@@ -58,6 +58,7 @@ let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',prog
 let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
 let bagOpen=false,justWorkedAt=0,lastFaintCount=0;
 let navSelect=null,workHoldStart=0,workAnimation=0;
+let cachedMapOverview={bounds:{minX:-20,maxX:20,minZ:-20,maxZ:20},terrain:[]};
 function defaults(){return RULES?RULES.defaults():null;}
 function getWorld(){return bridge&&bridge.getWorld?bridge.getWorld():{objects:[],map:{}};}
 function getPos(){const p=bridge&&bridge.getPosition?bridge.getPosition():null;return p||{x:0,z:0};}
@@ -150,7 +151,37 @@ function buildSites(){
  if(tent&&last?.kind==='hobo'&&last?.point){tent.x=last.point.x;tent.z=last.point.z;tent.placeholder=false;}
  const home=sites.find(n=>n.id==='kost');
  if(home&&state?.housing?.roomPosition){home.x=state.housing.roomPosition.x;home.z=state.housing.roomPosition.z;home.placeholder=!!state.housing.roomPosition.placeholder;}
+ rebuildNokiaMapOverview();
 }
+function rebuildNokiaMapOverview(){
+ const doc=getWorld(),cells=doc.map?.terrain?.cells||[];
+ const bb=worldBounds();
+ // The Nokia Peta spans the actual city layout, including roads and water,
+ // without modifying the world geometry or persisting any test markers.
+ for(const n of sites){
+  if(!Number.isFinite(n.x)||!Number.isFinite(n.z))continue;
+  bb.minX=Math.min(bb.minX,n.x-2);bb.maxX=Math.max(bb.maxX,n.x+2);
+  bb.minZ=Math.min(bb.minZ,n.z-2);bb.maxZ=Math.max(bb.maxZ,n.z+2);
+ }
+ const minSpan=14,cx=(bb.minX+bb.maxX)/2,cz=(bb.minZ+bb.maxZ)/2;
+ bb.minX=Math.min(bb.minX,cx-minSpan/2);
+ bb.maxX=Math.max(bb.maxX,cx+minSpan/2);
+ bb.minZ=Math.min(bb.minZ,cz-minSpan/2);
+ bb.maxZ=Math.max(bb.maxZ,cz+minSpan/2);
+ const tiles=new Map(),rank={sidewalk:1,road:3,river:4,water:4,drain:5};
+ for(const t of cells){
+  if(!Object.prototype.hasOwnProperty.call(rank,t?.type))continue;
+  const c=Number(t.c),r=Number(t.r);
+  if(!Number.isFinite(c)||!Number.isFinite(r))continue;
+  const u=Math.round((c-bb.minX)/(bb.maxX-bb.minX)*87);
+  const v=Math.round((r-bb.minZ)/(bb.maxZ-bb.minZ)*29);
+  if(u<0||u>87||v<0||v>29)continue;
+  const key=u+','+v,old=tiles.get(key);
+  if(!old||rank[t.type]>rank[old.type])tiles.set(key,{u,v,type:t.type});
+ }
+ cachedMapOverview={bounds:bb,terrain:[...tiles.values()]};
+}
+
 function spawnEntitlement(){
  if(!active||!state)return null;
  const pos=state.housing?.roomPosition||sites.find(n=>n.id==='kost');
@@ -563,7 +594,7 @@ function nokiaSnapshot(){
   settings:{...config.settings},
   furnitureCatalog:RULES.FURNITURE.map(v=>({...v})),
   map:{
-   player:getPos(),bounds:worldBounds(),
+   player:getPos(),bounds:cachedMapOverview.bounds,terrain:cachedMapOverview.terrain,
    sites:sites.map(n=>({id:n.id,label:n.label,icon:iconFor(n),
     x:n.x,z:n.z,placeholder:!!n.placeholder}))
   },
