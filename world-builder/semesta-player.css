@@ -1,0 +1,48 @@
+/* mainkan.exe: native Semesta renderer, player-only chrome.
+   Source-of-truth stays in Semesta; do not hide the native play HUD,
+   world canvas, 24-hour clock, interaction overlays or D-pad. */
+html.semesta-player-mode,html.semesta-player-mode body{
+ width:100%;height:100%;min-width:0!important;min-height:0!important;overflow:hidden!important;
+}
+html.semesta-player-mode #desktop{
+ width:100%!important;height:100dvh!important;min-height:0!important;
+ margin:0!important;padding:0!important;background:transparent!important;
+}
+html.semesta-player-mode #app{
+ display:flex!important;width:100%!important;height:100dvh!important;
+ min-height:0!important;max-width:none!important;
+ margin:0!important;padding:0!important;border:0!important;outline:0!important;box-shadow:none!important;
+}
+html.semesta-player-mode #titlebar,
+html.semesta-player-mode #menubar,
+html.semesta-player-mode #toolsPanel,
+html.semesta-player-mode #assetsPanel,
+html.semesta-player-mode #inspector,
+html.semesta-player-mode #footer,
+html.semesta-player-mode .canvas-head,
+html.semesta-player-mode .canvas-toolbar,
+html.semesta-player-mode #hint,
+html.semesta-player-mode #status,
+html.semesta-player-mode #floatingInspector,
+html.semesta-player-mode #cameraFollowLabel,
+html.semesta-player-mode #semestaDeviceBar,
+html.semesta-player-mode #semestaDeviceStage,
+html.semesta-player-mode #semesta-ui-editor-panel{
+ display:none!important;
+}
+html.semesta-player-mode #workspace{
+ display:flex!important;flex:1!important;width:100%!important;height:100%!important;min-height:0!important;min-width:0!important;
+ grid-template-columns:none!important;padding:0!important;overflow:hidden!important;
+}
+html.semesta-player-mode #canvasPanel{
+ display:flex!important;flex:1!important;height:100%!important;min-height:0!important;min-width:0!important;overflow:hidden!important;
+}
+html.semesta-player-mode #canvas-wrap{
+ position:relative!important;flex:1!important;height:100%!important;min-height:0!important;min-width:0!important;overflow:hidden!important;
+}
+html.semesta-player-mode #world{width:100%!important;height:100%!important;cursor:default!important}
+html.semesta-player-mode #walkPad.active{display:grid!important}
+html.semesta-player-mode .floating-inspector{display:none!important}
+@media(max-width:650px){
+ html.semesta-player-mode #walkPad{bottom:9px;left:9px;transform:scale(.86);transform-origin:bottom left}
+}
