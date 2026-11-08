@@ -54,12 +54,47 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(result.nativeWorld,true);
  assert.equal(result.nativeLife,true);
  assert.equal(result.nativePlayMode,true);
+ // Mainkan must control its own Genesis actor, not an authored Ichsan NPC.
+ await page.waitForFunction(()=>{
+  try{
+   const win=document.getElementById('semestaFrame').contentWindow;
+   const actor=win.SemestaPlay?.playerActor?.();
+   return actor?.profile==='genesis_male_nude'&&win.SemestaPlay?.playerProfile?.()?.base==='genesis_male_nude'&&
+    win.SemestaPlay?.playerActor?.()?.name==='Semesta Tester'&&
+    win.SemestaPlay?.playerRigStatus?.()?.loaded===true;
+  }catch{return false;}
+ },null,{timeout:100000});
+ const genesis=await page.evaluate(()=>{
+  const win=document.getElementById('semestaFrame').contentWindow;
+  return {profile:win.SemestaPlay.playerProfile(),actor:win.SemestaPlay.playerActor(),
+   rig:win.SemestaPlay.playerRigStatus(),faces:win.VLEmosiSource?.emotions?.length,
+   faceSource:win.VLEmosiSource?.format};
+ });
+ assert.equal(genesis.profile.faceSource,'emosi.exe');
+ assert.equal(genesis.actor.profile,'genesis_male_nude');
+ assert.ok(genesis.faces>=18);
+ assert.equal(genesis.faceSource,'mainkan-emosi-published-v1');
+ assert.equal(genesis.rig.source,'genesis','Player geometry must be Genesis pixels');
+ assert.notEqual(genesis.actor.profile,'ichsan');
  assert.equal(result.hasNativeHUD,true);
  assert.equal(result.hiddenEditor,true);
  assert.ok(await page.locator('#mainkanGameBar').isVisible());
  assert.equal(await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.document.getElementById('vs-hud').getBoundingClientRect().height),0,'Native HUD chrome hidden, source systems retained');
  assert.equal(result.tutorialHidden,true);
  assert.ok(result.rendererSize[0]>300&&result.rendererSize[1]>200,'Native Semesta canvas must have real viewport');
+ const respawn=await page.evaluate(()=>{
+  const win=document.getElementById('semestaFrame').contentWindow;
+  const before=win.SemestaPlay.playerActor();
+  const at=win.SemestaPlay.spawnRespawn.respawn({fainted:true});
+  const after=win.SemestaPlay.playerActor();
+  const emotion=win.SemestaPlay.setPlayerEmotion('happy',3);
+  return {same:before?.id===after?.id,before:before?.profile,after:after?.profile,
+   respawnOk:at?.ok===true,happyAvailable:emotion};
+ });
+ assert.equal(respawn.same,true,'Respawn must retain the same player instance');
+ assert.equal(respawn.before,'genesis_male_nude');
+ assert.equal(respawn.after,'genesis_male_nude');
+ assert.equal(respawn.happyAvailable,true,'Emosi happy context must be selectable');
  const actionBridge=await page.evaluate(()=>{
   const source=document.getElementById('semestaFrame').contentWindow.document.getElementById('ptActionBtn');
   window.__mainkanActionEvents=[];
