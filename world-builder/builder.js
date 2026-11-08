@@ -4,6 +4,11 @@
  * Intentionally separate from production: no auth, economy or NPC side effects.
  */
 const $=id=>document.getElementById(id);
+// mainkan.exe reuses the native Semesta renderer, assets, physics and Jiwa play runtime.
+// Player entry is read-only and cannot enter authoring modes.
+const playerMode=new URLSearchParams(location.search).get('player')==='1';
+const playerProfile=new URLSearchParams(location.search).get('character')||'';
+if(playerMode)document.documentElement.classList.add('semesta-player-mode');
 const fail=$('empty'),canvas=$('world');
 let THREE;
 for(const url of [
@@ -268,14 +273,14 @@ try{
  const previousRaw=localStorage.getItem(STORE),saved=JSON.parse(previousRaw||'null');
  if(saved&&saved.format===seed.format&&Array.isArray(saved.objects)){
   const upgrade=window.VLKebonSirihStyle?.upgrade(saved,assetCatalog);
-  if(upgrade?.changed&&previousRaw){
+  if(upgrade?.changed&&previousRaw&&!playerMode){
    try{
     const backupKey=STORE+'-backup-pre-kebon-sirih';
     if(!localStorage.getItem(backupKey))localStorage.setItem(backupKey,previousRaw);
    }catch(error){console.warn('Cannot retain old working draft backup',error);}
   }
   documentMap=sanitize(upgrade?.map||saved);
-  if(upgrade?.changed){
+  if(upgrade?.changed&&!playerMode){
    try{localStorage.setItem(STORE,JSON.stringify(mapForPersist()));}
    catch(error){console.warn('Could not auto-save upgraded draft',error);}
   }
@@ -383,6 +388,7 @@ function scheduleCloudCitySave(){
  },3200);
 }
 function saved(){
+ if(playerMode)return; // Preview must not mutate Semesta's authoring draft or Drive.
  syncClockToMap();
  draftDirty=true;
  try{
@@ -2577,6 +2583,7 @@ function clearWalk(){
  clearTemporaryLifePlayer();
 }
 function setMode(m){
+ if(playerMode&&m!=='walk')return;
  if(m!=='walk')window.SemestaUIEditor?.stop?.();
  if(mode==='walk'&&m!=='walk'){
   window.SemestaLifePlay?.stop?.();
@@ -2601,8 +2608,12 @@ function setMode(m){
  if(placementPreview)placementPreview.visible=m==='place';
  $('walkPad').classList.toggle('active',m==='walk');
  if(m==='walk'){
-   const first=(item()&&actorType(item().type)&&rigs.has(item().id)&&owners.get(item().id)?.visible!==false?item():
-    documentMap.objects.find(x=>actorType(x.type)&&rigs.has(x.id)&&owners.get(x.id)?.visible!==false))||makeTemporaryLifePlayer();
+   const usable=o=>o&&actorType(o.type)&&rigs.has(o.id)&&owners.get(o.id)?.visible!==false;
+   const first=(playerMode?
+    (documentMap.objects.find(o=>usable(o)&&o.type==='avatar'&&o.profile===playerProfile)||
+     documentMap.objects.find(o=>usable(o)&&o.type==='avatar')||
+     documentMap.objects.find(usable)):
+    (usable(item())?item():documentMap.objects.find(usable)))||makeTemporaryLifePlayer();
    walkActorId=first.id;select(first.id);
    window.SemestaLifePlay?.start?.();
    if(!cameraFollowId){
@@ -4289,6 +4300,23 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&clockOpen)openTimePanel(false);
 });
 rebuild();resetCamera();resize();saved();updateClockHUD(true);
+if(playerMode){
+ // No new map renderer or duplicate app state: the same live Semesta scene and gameplay.
+ // Only the native walk path is enabled. Never unlock editor tools from Mainkan.
+ try{
+  setMode('walk');
+  document.documentElement.dataset.mainkanReady='true';
+  if(window.parent!==window)window.parent.postMessage({
+   type:'mainkan:semesta-ready',city:documentMap.map?.name||'Semesta',
+   count:documentMap.objects.filter(o=>o.id!=='__semesta_life_temporary_player__').length
+  },location.origin);
+ }catch(error){
+  console.error('Mainkan Semesta player mode failed',error);
+  if(window.parent!==window)window.parent.postMessage({
+   type:'mainkan:semesta-error',message:'Gagal mengaktifkan Semesta Play Mode'
+  },location.origin);
+ }
+}
 ensureDeviceChrome();bootDeviceFrame();
 addEventListener('resize',()=>fitDeviceStage());
 worldEffects.update(.2,dayClock.solar(),true);
@@ -4302,7 +4330,7 @@ function frame(now){
  clockLastSaved+=elapsedReal;
  // Save the running virtual time at low frequency, without dirtying the
  // geometry/draft or hammering localStorage at 60 frames per second.
- if(clockLastSaved>=25){
+ if(clockLastSaved>=25&&!playerMode){
   clockLastSaved=0;
   try{syncClockToMap();localStorage.setItem(STORE,JSON.stringify(mapForPersist()));}catch{}
  }
