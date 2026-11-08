@@ -17,3 +17,22 @@ jobs:
         run: node --test tests/cloud-first-universal.test.cjs tests/cloud-first-startup.test.cjs tests/cloud-first-drive-mock.test.cjs tests/cloud-first-native-entry.test.cjs
       - name: Native Jiwa, Emosi, Mainkan regression
         run: node --test tests/jiwa-foundation-contract.test.cjs tests/jiwa-activity-flow.test.cjs tests/emotion-drive-oauth.test.cjs tests/mainkan-smoke.test.cjs
+  browser-acceptance:
+    needs: native-safety
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.56.0
+          npx playwright install chromium
+      - name: Test native Emosi Jiwa Mainkan Cloud-first flows in Chromium
+        run: |
+          mkdir -p /tmp/cloud-first-root
+          ln -s "$PWD" /tmp/cloud-first-root/virtual-office
+          python3 -m http.server 4174 --bind 127.0.0.1 -d /tmp/cloud-first-root >/tmp/cloud-first-server.log 2>&1 &
+          node tests/cloud-first-remaining-browser.cjs
