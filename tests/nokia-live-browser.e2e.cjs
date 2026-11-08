@@ -1,11 +1,10 @@
 'use strict';
-/* Real Chromium proof that Semesta's 3D actor, Jiwa wallet and the original
- * Nokia LCD share state. Run from repo-parent with a same-origin web server.
- */
+/* Real Chromium proof that Mainkan's native Semesta player, Jiwa wallet
+ * and original Nokia LCD share state. Never enter gameplay via city editor. */
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/world-builder/';
+const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/mainkan/';
 (async()=>{
  const browser=await chromium.launch({headless:true,channel:'chrome',
   args:['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--ignore-gpu-blocklist']});
@@ -14,34 +13,27 @@ const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/w
  page.on('pageerror',e=>errors.push(String(e.stack||e)));
  page.on('console',message=>{if(message.type()==='error'&&/unhandled|undefined|ReferenceError|SyntaxError/i.test(message.text()))errors.push(message.text())});
  await page.goto(base,{waitUntil:'domcontentloaded',timeout:90000});
- await page.waitForFunction(()=>!!window.SemestaPlay&&!!window.SemestaLifePlay&&!!window.VLPhoneEllen,
-  null,{timeout:120000});
- // Onboarding opens on window.load, which may occur AFTER domcontentloaded
- // and our initial app-ready check. Close it deterministically in CI.
- await page.waitForLoadState('load',{timeout:30000}).catch(()=>{});
- await page.evaluate(()=>window.VLQuickTutorial?.close?.());
- await page.locator('#walkMode').click({timeout:20000});
- try{
-  await page.waitForFunction(()=>window.SemestaLifePlay?.active?.()&&window.VLPhoneEllen?.hasGameProvider?.(),
-   null,{timeout:20000});
- }catch(err){
-  const debug=await page.evaluate(()=>({
-   active:window.SemestaLifePlay?.active?.(),
-   state:window.SemestaLifePlay?.state?.(),
-   phoneProvider:window.VLPhoneEllen?.hasGameProvider?.(),
-   HUDMounted:!!document.querySelector('#vlPlayHud'),
-   walkButton:document.getElementById('walkMode')?.className,
-   playHUD:document.documentElement.className,
-   toast:document.getElementById('toast')?.textContent,
-   actorCount:window.SemestaPlay?.playObjects?.().filter(x=>x.type==='avatar').length,
-   lifeSites:window.SemestaLifePlay?.sites?.().length
-  }));
-  console.error('PLAY_MODE_DIAGNOSTICS',JSON.stringify({debug,pageErrors:errors.slice(0,16)}));
-  fs.mkdirSync('screenshots',{recursive:true});
-  await page.screenshot({path:'screenshots/nokia-play-mode-failure.png'});
-  throw err;
- }
- const synced=await page.evaluate(()=>{
+ await page.locator('#skipSplash').click({timeout:15000}).catch(()=>{});
+ await page.locator('#welcomeGuest').click({timeout:15000});
+ await page.locator('#playerName').fill('Nokia Tester');
+ await page.locator('#ccDay').fill('11');
+ await page.locator('#ccMonth').fill('01');
+ await page.locator('#ccYear').fill('1994');
+ await page.locator('#ccYear').dispatchEvent('input');
+ await page.locator('#characterForm button[type=submit]').click();
+ await page.locator('#confirmGo').click({timeout:15000});
+ await page.locator('#tutorialDone').click({timeout:15000});
+ await page.waitForFunction(()=>{
+  const win=document.getElementById('semestaFrame')?.contentWindow;
+  try{return !!win?.document?.documentElement?.dataset?.mainkanReady&&
+    win.SemestaLifePlay?.active?.()===true&&document.getElementById('worldLoading').hidden;}
+  catch{return false;}
+ },null,{timeout:150000});
+ const frame=await (await page.locator('#semestaFrame').elementHandle()).contentFrame();
+ if(!frame)throw Error('Mainkan native Semesta frame unavailable');
+ await frame.waitForFunction(()=>window.SemestaLifePlay?.active?.()&&
+  window.VLPhoneEllen?.hasGameProvider?.(),null,{timeout:30000});
+ const synced=await frame.evaluate(()=>{
   const life=window.SemestaLifePlay,phone=window.VLPhoneEllen;
   const live=phone.gameSnapshot(),city=life.sites();
   return {lifeActive:life.active(),wallet:life.state().wallet,nokiaWallet:live.wallet,
@@ -59,9 +51,9 @@ const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/w
  assert.equal(synced.matching,true,'Nokia activity pins must use real gameplay action coordinates');
  assert.ok(synced.siteCount>=12,'Expected playable V1 activity sites');
  assert.ok(synced.terrainCount>0,'Nokia map should use real Semesta terrain rather than a fake grid');
- await page.locator('#ptPhoneBtn').click({timeout:10000});
- await page.waitForFunction(()=>window.VLNokiaPlay?.isOpen?.(),null,{timeout:15000});
- const token=await page.evaluate(()=>{
+ await page.locator('#gamePhone').click({timeout:10000});
+ await frame.waitForFunction(()=>window.VLNokiaPlay?.isOpen?.(),null,{timeout:15000});
+ const token=await frame.evaluate(()=>{
   const game=window.SemestaLifePlay;
   // Test-only fixture: user progress is never mutated outside this disposable
   // CI browser context. Ensure owned-room purchase eligibility.
@@ -71,7 +63,7 @@ const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/w
   return {depth,wallet,rgba:[...before.data]};
  });
  assert.equal(token.depth,3,'Nokia must navigate to Dompet within original handset');
- const trade=await page.evaluate(()=>{
+ const trade=await frame.evaluate(()=>{
   const E=window.VLPhoneEllen;E.press('R');E.press('4');E.press('1');E.press('L');E.press('L');
   const game=window.SemestaLifePlay,live=E.gameSnapshot();
   return {wallet:game.state().wallet,nokiaWallet:live.wallet,token:game.state().powerTokens,
@@ -83,7 +75,7 @@ const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/w
  assert.ok(trade.ledger.some(t=>t.action==='buy_token'&&t.delta===-1000),'Dompet must reflect real transaction');
  assert.equal(trade.stillOpen,true,'Nokia must remain open after game HUD refresh');
  assert.ok(trade.depth>=3,'Nokia must not reset to standby during purchase');
- const mapResult=await page.evaluate(()=>{
+ const mapResult=await frame.evaluate(()=>{
   const E=window.VLPhoneEllen;
   for(let i=0;i<8&&E.depth()>2;i++)E.press('R');
   E.press('6');
@@ -110,7 +102,7 @@ const base=process.env.SEMESTA_TEST_URL||'http://127.0.0.1:8091/virtual-office/w
  assert.ok(!errors.some(e=>/ReferenceError|SyntaxError|TypeError/i.test(e)),
   'Browser JS errors: '+errors.join(' | ').slice(0,800));
  fs.mkdirSync('screenshots',{recursive:true});
- await page.screenshot({path:'screenshots/semesta-nokia-jiwa-verified.png'});
+ await page.screenshot({path:'screenshots/mainkan-nokia-jiwa-verified.png'});
  await browser.close();
  console.log('NOKIA_LIVE_E2E_PASS',JSON.stringify({wallet:trade.wallet,pins:synced.siteCount,
   terrain:synced.terrainCount,positionChanged:mapResult.pixelDelta>0}));
