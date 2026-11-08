@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'mainkan/**'
+      - 'shared/genesis-*.js'
+      - 'shared/emosi-source.js'
       - 'world-builder/builder.js'
       - 'world-builder/index.html'
       - 'world-builder/semesta-player.css'
