@@ -7,7 +7,7 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  const browser=await chromium.launch({headless:true,channel:'chrome',args:['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--ignore-gpu-blocklist']});
  const page=await browser.newPage({viewport:{width:1365,height:900},acceptDownloads:true});
  const errors=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));
- await page.goto(new URL('flow-editor.html',base).href,{waitUntil:'domcontentloaded',timeout:60000});
+ await page.goto(new URL('flow-editor.html?cloudLegacy=1',base).href,{waitUntil:'domcontentloaded',timeout:60000});
  await page.locator('.node[data-id=welcome]').click({timeout:10000});
  const desc=page.locator('#inspector textarea');await desc.fill('Welcome khusus dari Flow Editor!');await desc.blur();
  assert.equal(await page.locator('.node').count(),10);
