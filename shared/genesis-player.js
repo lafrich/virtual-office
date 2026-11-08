@@ -208,5 +208,13 @@ function createRig(THREE,input){
   refresh(){previous="";},
   dispose(){mesh.geometry.dispose();mat.dispose();tex.dispose();}};
 }
-return Object.freeze({IDs,normalizeProfile,draw,directPreview,createRig,expressionFor});
+function debug(profile){
+ const p=normalizeProfile(profile);
+ return listParts(p).map(part=>{
+  const url=resolvePart(part,p),asset=lookupImage(url);
+  return {part,ready:!!asset?.ready,error:!!asset?.error,code:url.startsWith("data:")?"Genesis source":url,
+   naturalWidth:asset?.img?.naturalWidth||0,naturalHeight:asset?.img?.naturalHeight||0};
+ });
+}
+return Object.freeze({IDs,normalizeProfile,draw,directPreview,createRig,expressionFor,debug});
 });
