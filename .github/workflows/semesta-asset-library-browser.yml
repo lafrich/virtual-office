@@ -224,6 +224,10 @@ jobs:
             ]);
             bangun.on('pageerror',err=>faults.push('bangun '+err.message));
             await bangun.waitForLoadState('domcontentloaded');
+            // Bangun Ruang is a second authoring app with its own cloud startup.
+            bangun.once('dialog',dialog=>dialog.accept());
+            await bangun.getByRole('button',{name:/OPEN EXISTING DATA.*OFFLINE/}).click({timeout:30000});
+            await bangun.locator('#mb-cloud-entry').waitFor({state:'detached',timeout:10000});
             await bangun.waitForFunction(()=>document.querySelector('#name')?.value?.includes('Custom'),null,{timeout:60000});
             const desc=await bangun.locator('#assetDescription').inputValue();
             if(!desc)throw Error('Source description missing in Bangun Ruang');
