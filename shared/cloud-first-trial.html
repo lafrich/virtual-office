@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Membangun Cloud-First · Safe Sync Trial</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font:12px Tahoma,Arial,sans-serif;background:#008080;color:#151515}
+main{background:#c0c0c0;border:2px solid;border-color:#fff #555 #555 #fff;box-shadow:3px 3px #222;margin:18px auto;padding:12px;max-width:850px;display:grid;gap:12px}
+h1{font-size:15px;padding:9px;margin:0;color:white;background:#000080}
+p{margin:4px 0;line-height:1.55}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button,select{background:#ddd;border:2px solid;border-color:#fff #777 #777 #fff;padding:9px 12px;color:#111;font:12px Tahoma;min-height:36px}
+button:disabled{opacity:.45}
+button:focus-visible,select:focus-visible{outline:2px solid #025cdb;outline-offset:2px}
+pre{overflow:auto;background:white;white-space:pre-wrap;overflow-wrap:anywhere;max-height:48vh;padding:12px;border:2px inset #777;font-size:11px}
+#status{font:11px Consolas,monospace;white-space:pre-wrap}
+.small{font-size:11px;color:#3f3f3f}
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="./cloud-first-universal.js"></script>
+<script src="./cloud-first-drive.js"></script>
+<script src="./cloud-first-startup.js"></script></head>
+<body><main>
+<h1>▣ MEMBANGUN CLOUD SYNC · SAFE TRIAL</h1>
+<p>Uji akses Google Drive, Universal Import/Export, readback, dan konflik versi pada folder terpisah.
+<strong>Aplikasi produksi tidak dimodifikasi dan data browser tidak dihapus.</strong></p>
+<div class="actions"><label for="app">Database</label><select id="app">
+<option value="mahluk">Mahluk Hidup</option><option value="emosi">Emosi</option><option value="semesta">Semesta</option><option value="bangun">Bangun Ruang</option><option value="jiwa">Jiwa</option><option value="mainkan">Mainkan</option><option value="pipeline">Asset Pipeline</option></select>
+<button id="open" disabled>↻ SYNC NOW</button><button id="export" disabled>↓ DOWNLOAD UNIVERSAL</button>
+<button id="probe" disabled>✓ TEST DRIVE WRITE/READ</button></div>
+<div id="status" role="status">Editor locked until Google Drive connects and data is verified.</div>
+<p class="small">Drive path: Membangun / Universal Cloud v1 / (aplikasi). Berkas baru tidak mengganti aset di Semesta, Mahluk, atau repository GitHub.
+Import Manual wajib di-upload dan diverifikasi sebelum masuk sesi ini. Untuk mengimpor data lama dari aplikasi asli, diperlukan converter khusus (belum tersedia pada trial ini).</p>
+<h2>Cloud record inspector</h2>
+<pre id="records">Waiting for verified cloud session.</pre>
+</main><script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id);
+const url=new URL(location.href);
+const requested=url.searchParams.get("app");
+if(window.MembangunUniversal.APPS.has(requested))$("app").value=requested;
+const app=$("app").value;
+$("app").onchange=()=>{const next=new URL(location.href);next.searchParams.set("app",$("app").value);location.href=next.href};
+const D=window.MembangunCloudFirstDrive.create(app),U=window.MembangunUniversal;
+let rows=[],hasVerifiedSession=false;
+const status=(message,error=false)=>{$("status").textContent=message;$("status").style.color=error?"#990000":"#173c60"};
+function render(){
+ $("records").textContent=JSON.stringify(rows.map(r=>({app:r.app,kind:r.kind,id:r.id,
+  sha256:"(verified on Drive)",bytes:JSON.stringify(r.data).length})),null,2);
+ $("open").disabled=$("export").disabled=$("probe").disabled=!hasVerifiedSession;
+ status("CLOUD READY · "+rows.length+" records · "+app.toUpperCase()+". Data is in memory; no browser draft was written.");
+}
+const originalApply=D.apply;
+const adapter={...D,apply:async imported=>{await originalApply(imported)}};
+const session=window.MembangunCloudStartup.mount({app,adapter,onReady:async data=>{
+ rows=data.records||[];hasVerifiedSession=true;render();
+}});
+$("open").onclick=async()=>{
+ try{status("Syncing latest Drive data...");const d=await D.loadAll();if(!d.verified)throw Error("Unverified response");
+ rows=d.records;render()}catch(e){status("SYNC FAILED: "+e.message,true)}
+};
+$("export").onclick=()=>session.exportUniversal().catch(e=>status("EXPORT FAILED: "+e.message,true));
+$("probe").onclick=async()=>{
+ const button=$("probe");button.disabled=true;
+ try{
+  status("Writing cloud test record and verifying readback...");
+  const record={app,kind:"connection_test",id:"probe_"+Date.now().toString(36),
+   data:{note:"Drive API write-read verification",timestamp:new Date().toISOString()}};
+  const receipt=await D.upload(record);
+  if(!receipt.verified)throw Error("Cloud did not verify test record");
+  const read=await D.readback(record,receipt);
+  if(await U.hash(read.data)!==await U.hash(record.data))throw Error("Readback checksum mismatch");
+  const fresh=await D.loadAll();rows=fresh.records;render();
+  status("✓ DRIVE WRITE/READ VERIFIED · "+record.id+" · "+rows.length+" records");
+ }catch(e){status("TEST FAILED: "+e.message,true)}finally{button.disabled=!hasVerifiedSession}
+};
+})();
+</script></body></html>
