@@ -21,6 +21,14 @@ on:
       - "world-builder/builder.js"
       - "tests/jiwa-activity-editor.e2e.cjs"
       - ".github/workflows/jiwa-activity-integration.yml"
+  pull_request:
+    paths:
+      - "jiwa/**"
+      - "mainkan/**"
+      - "world-builder/index.html"
+      - "world-builder/builder.js"
+      - "tests/jiwa-activity-editor.e2e.cjs"
+      - ".github/workflows/jiwa-activity-integration.yml"
   workflow_dispatch:
 permissions:
   contents: read
@@ -56,9 +64,15 @@ jobs:
           node --test tests/jiwa-activity-flow.test.cjs tests/jiwa-tier-world-entities.test.cjs tests/jiwa-directory-marking.test.cjs tests/jiwa-authored-runtime-guards.test.cjs
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
+      - name: Link approved Genesis + Emosi player art
+        run: |
+          ln -s site/media virtual-life-asset-pipeline/media
+          ln -s site/v6p-compositor.js virtual-life-asset-pipeline/v6p-compositor.js
+          ln -s site/genesis-source.js virtual-life-asset-pipeline/genesis-source.js
+          ln -s site/emosi-source.js virtual-life-asset-pipeline/emosi-source.js
       - name: Serve game and mechanics
         run: |
           python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/jiwa-activity.log 2>&1 &
           sleep 2
-      - name: "Browser test: eight icon tabs, Save, Semesta bind, Nokia quest map"
+      - name: "Browser test: Jiwa eight tabs, Save and Mainkan native activity/Nokia map"
         run: node virtual-office/tests/jiwa-activity-editor.e2e.cjs
