@@ -169,3 +169,9 @@ The walking simulation now:
 - Has a deterministic 1,200-frame-per-character/crowd-member regression over Reference City sidewalks; a stuck frame indicates broken route/physics behavior.
 
 The vehicle display uses the correct sprite art aspect ratio plus transparent-pixel-based contact pivot. The car/bus/motorbike representative mocked mesh test verifies the visual wheel contact at 0.115 world units for both preview and original source sheets, with unchanged vehicle traffic footprint and queue calculations.
+
+## Exploration versus gameplay (2026-11-08)
+- **Semesta standalone (`/world-builder/`)** owns editing and an exploration-only Walk Test: WASD/arrows, touch D-pad, camera follow, collision, NPC/traffic and day/night previews. No survival progression, game HUD, job/economy actions or game respawn runs here.
+- **Mainkan (`/mainkan/`)** starts the **same native WebGL renderer** under `?player=1`, which is the only entry that activates Jiwa's survival, jobs, inventory, respawn and full gameplay interaction system.
+- **Global HUD editing lives in `/mainkan/ui-editor.html`**, not in Semesta's inspector; saved layout is compatible with the shared `jiwa-game-ui-global-v2` contract.
+- This mode split does not delete authored maps, asset catalogs, Bangun Ruang interiors, entity markers or Jiwa's rules.
