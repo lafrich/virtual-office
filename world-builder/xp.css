@@ -580,3 +580,11 @@ html,body{width:100%;height:100%;overflow:hidden}
 #semestaUIOverlay[data-profile="phone"] .sui-resizer{width:23px;height:23px;right:-12px;bottom:-12px}
 #semestaUIOverlay[data-profile="phone"] .sui-tag{top:-22px;min-height:20px;font-size:10px}
 #semestaUIOverlay[data-profile="phone"] .sui-hint-bar{z-index:5;max-width:95%;overflow:hidden;text-overflow:ellipsis}
+
+/* On narrow real phones, expose the canvas while retaining a one-tap route
+   back to the inspector controls (the existing Inspector toolbar button). */
+#suiDragOnScreen{display:none}
+@media(max-width:780px){
+ #semestaUIEditorPane #suiDragOnScreen{display:block;width:100%;background:#c3def5;color:#173d70}
+}
+#semestaUIOverlay .sui-phone-shield{touch-action:none}

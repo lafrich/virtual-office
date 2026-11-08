@@ -117,6 +117,14 @@ function ensureOverlay(){
   node.addEventListener('pointerdown',e=>pointerStart(e,id));
   overlay.append(node);
  }
+ // When Selected Only is enabled, other outlines are intentionally hidden.
+ // Hit-test the live HUD beneath the transparent shield so users can still
+ // select and drag a different element directly, without using the dropdown.
+ overlay.querySelector('.sui-phone-shield').addEventListener('pointerdown',ev=>{
+  const id=pickAt(ev.clientX,ev.clientY);
+  if(id)pointerStart(ev,id);
+ });
+ overlay.addEventListener('lostpointercapture',pointerEnd);
  overlay.querySelector('.sui-grid-layer').style.backgroundSize='16px 16px';
  wrap.append(overlay);
 }
@@ -132,7 +140,9 @@ function syncFramePreview(clear=false){
  }catch(_e){return false;}
 }
 function profileAndFrame(){
- const env=environment(),next=env.phone?'phone':'desktop';
+ // On a physical phone the HUD is in this document (not in an iframe).
+ // Never reset its phone profile to desktop on the next animation frame.
+ const env=environment(),next=env.phone?'phone':HL.detectProfile(document);
  if(profile!==next){
   profile=next;drag=null;
   if(active){updateControls();status('MODE '+next.toUpperCase()+' · Edit menggunakan posisi HUD '+next+'.');}
@@ -169,7 +179,9 @@ function refreshBoxes(now=0){
  };
  const cell=overlay.querySelector('.sui-grid-layer'),shield=overlay.querySelector('.sui-phone-shield');
  setArea(cell);setArea(shield);
- if(shield)shield.hidden=!env.phone;
+ // Both the scaled phone preview AND a real mobile viewport need the
+ // input shield, so taps cannot activate the underlying game while editing.
+ if(shield)shield.hidden=profile!=='phone';
  cell.hidden=!grid.show;
  cell.style.backgroundSize=grid.size*(env.phone?env.scaleX:1)+'px '+
   grid.size*(env.phone?env.scaleY:1)+'px';
@@ -180,7 +192,7 @@ function refreshBoxes(now=0){
  const toggle=$('suiSelectedOnly');if(toggle)toggle.checked=solo;
  const mode=$('suiDeviceHint');
  if(mode)mode.textContent=env.phone?
-  'PHONE MODE · Geser elemen di layar HP. Gunakan ◀ ▶ untuk kontrol yang bertumpuk.':
+  'PHONE MODE · Tap elemen untuk pilih lalu drag. ◀ ▶ untuk yang bertumpuk.':
   'DESKTOP MODE · Geser elemen di layar game.';
  for(const node of overlay.querySelectorAll('.sui-outline')){
   const id=node.dataset.suiId;
@@ -238,20 +250,41 @@ function relativeToSlot(before,id,x,y,w,h,stageW,stageH){
   x:Math.round(cap(ox,-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT)),
   y:Math.round(cap(oy,-HL.OFFSET_LIMIT,HL.OFFSET_LIMIT))};
 }
+function pickAt(clientX,clientY){
+ const rect=$('canvas-wrap')?.getBoundingClientRect();
+ if(!rect)return null;
+ const x=clientX-rect.left,y=clientY-rect.top;
+ const hits=[];
+ for(const id of HL.ELEMENTS){
+  const g=geometry(id);
+  if(!g||g.ghost)continue;
+  if(x>=g.x&&x<=g.x+g.w&&y>=g.y&&y<=g.y+g.h)
+   hits.push({id,area:g.w*g.h});
+ }
+ // Prefer a small button over its enclosing panel/dock, not the first
+ // SELECTORS entry. Overlapping items can still be cycled in the inspector.
+ hits.sort((a,b)=>a.area-b.area||HL.ELEMENTS.indexOf(a.id)-HL.ELEMENTS.indexOf(b.id));
+ return hits[0]?.id||null;
+}
 function pointerStart(ev,id){
- if(!active||ev.button!==0)return;
+ if(!active||drag||ev.button!==0||ev.isPrimary===false)return;
+ const box=geometry(id);if(!box||!draft?.[profile]?.[id])return;
  ev.preventDefault();ev.stopPropagation();
- const box=geometry(id);if(!box)return;
  if(selected!==id){selected=id;updateControls();}
  const resizing=!!ev.target.closest('.sui-resizer');
- drag={id,mode:resizing?'resize':'move',startX:ev.clientX,startY:ev.clientY,
+ drag={id,pointerId:ev.pointerId,pointerType:ev.pointerType,
+  mode:resizing?'resize':'move',startX:ev.clientX,startY:ev.clientY,
   g:{...box},slot:{...draft[profile][id]}};
  try{ev.currentTarget.setPointerCapture(ev.pointerId);}catch{}
 }
 function pointerMove(ev){
- if(!active||!drag)return;
- const d=drag,dx=(ev.clientX-d.startX)/d.g.scaleX,
-  dy=(ev.clientY-d.startY)/d.g.scaleY;
+ if(!active||!drag||ev.pointerId!==drag.pointerId)return;
+ const d=drag;
+ const pixelX=ev.clientX-d.startX,pixelY=ev.clientY-d.startY;
+ // A simple tap selects without marking the global layout as modified.
+ if(Math.hypot(pixelX,pixelY)<(d.pointerType==='touch'?4:2))return;
+ if(ev.cancelable)ev.preventDefault();
+ const dx=pixelX/d.g.scaleX,dy=pixelY/d.g.scaleY;
  if(d.mode==='resize'){
   const factor=1+Math.max(dx/Math.max(d.g.logical.w,1),dy/Math.max(d.g.logical.h,1));
   changeSlot({scale:Math.round(cap(d.slot.scale*factor,.5,1.5)*100)/100});
@@ -261,7 +294,9 @@ function pointerMove(ev){
   changeSlot(relativeToSlot(d.slot,d.id,targetX,targetY,g.w,g.h,g.stageW,g.stageH));
  }
 }
-function pointerEnd(){drag=null;}
+function pointerEnd(ev){
+ if(drag&&(!ev||ev.pointerId===drag.pointerId))drag=null;
+}
 function select(id){
  if(!HL.ELEMENTS.includes(id))return;
  selected=id;openPopupFor(id);updateControls();syncPreview();
@@ -365,11 +400,16 @@ function init(){
  }
  $('suiScale').addEventListener('input',e=>changeSlot({scale:Number(e.target.value)}));
  $('suiScale').addEventListener('change',e=>changeSlot({scale:Number(e.target.value)}));
- // Capture on outlines only. Actual HUD cannot click, move or spend while editing.
- const layer=$('canvas-wrap');
- layer.addEventListener('pointermove',pointerMove);
- layer.addEventListener('pointerup',pointerEnd);
- layer.addEventListener('pointercancel',pointerEnd);
+ // Captured pointer events bubble to window even if the finger/mouse moves
+ // beyond the canvas. Filter by pointerId so second touches never move HUD.
+ window.addEventListener('pointermove',pointerMove,{passive:false});
+ window.addEventListener('pointerup',pointerEnd);
+ window.addEventListener('pointercancel',pointerEnd);
+ $('suiDragOnScreen')?.addEventListener('click',()=>{
+  // A native phone's inspector covers the bottom HUD (Action / Nokia).
+  // Temporarily close the sheet; the canvas-toolbar Inspector opens it again.
+  $('inspector')?.classList.remove('mobile-open');
+ });
  window.addEventListener('keydown',e=>{if(active&&e.key==='Escape'){e.stopPropagation();stop();}});
  updateControlsIfLoaded();
 }

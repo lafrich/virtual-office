@@ -52,3 +52,15 @@ test('The global HUD layout survives map changes and retains custom positions',(
  assert.equal(HL.normalizeSlot({x:2100,y:1500,scale:1.2,anchor:'top-left'}).x,2100);
  assert.equal(G.normalizeGameplay({modules:{hudLayout:g}}).modules.hudLayout.desktop.money.anchor,'center-center');
 });
+
+test('Phone select-drag supports real mobile viewport and touch hit testing',()=>{
+ const src=path('world-builder/semesta-ui-editor.js');
+ const html=path('world-builder/index.html');
+ assert.match(src,/next=env\\.phone\\?'phone':HL\\.detectProfile\\(document\\)/);
+ assert.match(src,/shield\\.hidden=profile!=='phone'/);
+ assert.match(src,/function pickAt\\(clientX,clientY\\)/);
+ assert.match(src,/addEventListener\\('pointerdown',ev=>/);
+ assert.match(src,/ev\\.pointerId!==drag\\.pointerId/);
+ assert.match(src,/setPointerCapture\\(ev\\.pointerId\\)/);
+ assert.match(html,/id="suiDragOnScreen"/);
+});

@@ -76,6 +76,23 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.equal(await page.locator('#suiElement').inputValue(),'bagButton');
  await page.locator('#suiPrev').click();
  assert.equal(await page.locator('#suiElement').inputValue(),'hpButton');
+ // Select a DIFFERENT HUD control by touching its live phone-frame geometry,
+ // even though Selected Only hides all other outlines. Drag it in one gesture.
+ const other=await page.evaluate(()=>{
+  const g=window.SemestaUIEditor.frameGeometry('bagButton');
+  const wrap=document.getElementById('canvas-wrap').getBoundingClientRect();
+  return g?{x:wrap.left+g.x+g.w/2,y:wrap.top+g.y+g.h/2}:null;
+ });
+ assert.ok(other,'Bag button must be available for direct phone hit-testing');
+ await page.mouse.move(other.x,other.y);
+ await page.mouse.down();
+ await page.mouse.move(other.x-22,other.y-34,{steps:7});
+ await page.mouse.up();
+ assert.equal(await page.locator('#suiElement').inputValue(),'bagButton',
+  'Tapping a hidden outline must select the HUD button through the phone shield');
+ const bagDragged=await page.evaluate(()=>window.SemestaUIEditor.previewLayout().phone.bagButton);
+ assert.notDeepEqual(bagDragged,before.phone.bagButton,
+  'Selecting and dragging directly must move the phone Bag button');
  await page.locator('#suiElement').selectOption('phone');
  await page.waitForFunction(()=>document.getElementById('semestaDeviceFrame').contentWindow
   .SemestaPlay?.hud?.()?.getOpenWindow?.()==='phone',null,{timeout:12000});
