@@ -58,7 +58,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
   const p=await context.newPage();pages.push(p);await mockGoogle(p);
   p.on('console',msg=>{if(msg.type()==='error'&&/Cloud entry|cloud deps|Cannot read/.test(msg.text()))console.warn('PAGE',path,msg.text())});
   await p.goto(base+path,{waitUntil:'domcontentloaded',timeout:45000});
-  await p.waitForFunction(prop=>!!window[prop]&&!!window.google?.accounts?.oauth2,{timeout:45000},property);
+  await p.waitForFunction(prop=>!!window[prop]&&!!window.google?.accounts?.oauth2,property,{timeout:45000});
   return p;
  }
  try{
@@ -71,14 +71,14 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
    await page.evaluate(()=>localStorage.setItem('cloud-regression-sentinel','PRESERVE'));
    assert.equal(await page.locator('[aria-label="Cloud startup"]').count(),1);
    await page.getByRole('button',{name:/SYNC FROM DRIVE/i}).first().click();
-   await page.waitForFunction(prop=>window[prop]?.gate?.isReady?.()===true,{timeout:40000},entry);
+   await page.waitForFunction(prop=>window[prop]?.gate?.isReady?.()===true,entry,{timeout:40000});
    assert.equal(await page.evaluate(()=>localStorage.getItem('cloud-regression-sentinel')),'PRESERVE');
    console.log('PASS '+entry+' Google OAuth + Drive folder sync, browser data retained');
    if(entry==='MainkanCloudEntry'){
     await page.locator('#flowName').fill('Cloud Test Flow');
     await page.locator('#flowName').dispatchEvent('change');
     await page.waitForFunction(()=>document.querySelector('#mainkan-cloud-tools')?.textContent.includes('LATEST ON DRIVE'),
-     {timeout:20000});
+     null,{timeout:20000});
     assert.ok([...files.values()].some(f=>f.name==='flow--main-flow.json'),'Mainkan flow missing on Drive');
     console.log('PASS Mainkan Flow Editor delayed verified cloud autosave');
     const download=page.waitForEvent('download');
