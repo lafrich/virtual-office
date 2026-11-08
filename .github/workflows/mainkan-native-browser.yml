@@ -10,6 +10,7 @@ on:
       - 'world-builder/quick-tutorial.js'
       - 'tests/mainkan-native-semesta.e2e.cjs'
       - 'tests/mainkan-flow-editor.e2e.cjs'
+      - 'tests/mainkan-classic-creator.e2e.cjs'
       - '.github/workflows/mainkan-native-browser.yml'
   workflow_dispatch:
 permissions:
@@ -41,6 +42,8 @@ jobs:
         run: node virtual-office/tests/mainkan-native-semesta.e2e.cjs
       - name: Verify editable flowchart, JSON export/import and Test Flow
         run: node virtual-office/tests/mainkan-flow-editor.e2e.cjs
+      - name: Verify classic Paint creator on desktop and mobile
+        run: node virtual-office/tests/mainkan-classic-creator.e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
