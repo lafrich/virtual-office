@@ -14,7 +14,7 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  page.on('pageerror',e=>errors.push(String(e.stack||e)));
  await page.goto(base,{waitUntil:'domcontentloaded',timeout:90000});
  await page.locator('#skipSplash').click({timeout:15000}).catch(()=>{});
- await page.locator('#guestButton').click({timeout:15000});
+ await page.locator('#welcomeGuest').click({timeout:15000});
  await page.locator('#playerName').fill('Semesta Tester');
  await page.locator('#zodiac').selectOption({label:'Capricorn'});
  const before=await page.evaluate(()=>localStorage.getItem('virtual-life-gpt-world-builder-pipeline-v3'));
