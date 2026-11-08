@@ -20,6 +20,11 @@ const approvedV2=id=>typeof id==='string'&&/^mh2_[a-z0-9]+$/.test(id);
 function v2Clip(entry,target){
  const clips=entry.v2Clips||{};
  if(clips[target])return clips[target];
+ // Runtime requests may use the semantic action name; stock clips keep clp_ IDs.
+ if(typeof target==="string"&&/^[a-z][a-z0-9_]{2,70}$/.test(target)){
+  if(clips["clp_"+target])return clips["clp_"+target];
+  if(clips["clip_"+target])return clips["clip_"+target];
+ }
  if(target==="walk")return clips.idle||null;
  // Bed / sleep actions in Play and Jiwa request "sleep" (sometimes a
  // sleep_bed_* alias). Prefer the authored sleep clip; fall back to lie
