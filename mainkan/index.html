@@ -277,12 +277,13 @@ body.mainkan-playing #viewport{
      </div>
   </div>
   <div class="game-bottom" id="mainkanGameBar">
- <span class="micro" id="gameWallet">Rp —</span>
- <span class="micro" id="gameNeeds">Hunger — · Energy —</span>
+ <span class="micro" id="gameWallet" data-hud-item="money">Rp —</span>
+ <span class="micro" id="gameNeeds" data-hud-item="lifePanel">Hunger — · Energy —</span>
  <div class="actions">
   <button type="button" class="btn compact" id="gamePhone" data-hud-item="hpButton">▣ HP</button>
   <button type="button" class="btn compact" id="gameBag" data-hud-item="bagButton">▣ Bag</button>
   <button type="button" class="btn primary" id="gameAction" data-hud-item="action">ACTION</button>
+  <button type="button" class="btn compact" id="gameRun" data-hud-item="run" aria-label="Hold to run">RUN</button>
  </div>
 </div>
 </section>
