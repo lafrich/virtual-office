@@ -1,62 +1,54 @@
-name: Semesta Global UI Editor — Browser
+name: Mainkan Global HUD Editor — Browser
 on:
   push:
     branches: [main]
     paths:
+      - "mainkan/**"
       - "world-builder/index.html"
-      - "world-builder/xp.css"
       - "world-builder/builder.js"
-      - "world-builder/semesta-ui-editor.js"
+      - "world-builder/semesta-player.css"
       - "shared/hud-layout.js"
       - "shared/play-hud.js"
-      - "jiwa/index.html"
-      - "jiwa/jiwa.js"
-      - "jiwa/mechanics-panel.js"
-      - "tests/hud-layout.test.cjs"
       - "tests/semesta-ui-editor.test.cjs"
-      - "tests/semesta-ui-editor.e2e.cjs"
-      - "tests/semesta-phone-ui-editor.e2e.cjs"
+      - "tests/mainkan-ui-editor.e2e.cjs"
+      - "tests/semesta-jiwa-play-v1.test.cjs"
+      - ".github/workflows/semesta-global-ui-editor.yml"
+  pull_request:
+    paths:
+      - "mainkan/**"
+      - "world-builder/index.html"
+      - "world-builder/builder.js"
+      - "tests/semesta-ui-editor.test.cjs"
+      - "tests/mainkan-ui-editor.e2e.cjs"
       - ".github/workflows/semesta-global-ui-editor.yml"
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  edit-actual-game-ui:
+  hud-layout-authoring:
     runs-on: ubuntu-24.04
-    timeout-minutes: 16
+    timeout-minutes: 12
     steps:
-      - name: Checkout Semesta and Jiwa
+      - name: Checkout Semesta and Mainkan
         uses: actions/checkout@v4
         with:
           path: virtual-office
-      - name: Checkout game asset pipeline
-        uses: actions/checkout@v4
-        with:
-          repository: lafrich/virtual-life-asset-pipeline
-          path: virtual-life-asset-pipeline
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Validate editor scripts and global layout tests
+      - name: Check scripts and verify runtime boundaries
         run: |
           cd virtual-office
-          node --check world-builder/semesta-ui-editor.js
+          node --check mainkan/ui-editor.js
+          node --check mainkan/game-hud.js
+          node --check world-builder/builder.js
           node --check shared/hud-layout.js
-          node --check jiwa/jiwa.js
-          node --test tests/hud-layout.test.cjs tests/semesta-ui-editor.test.cjs
-      - name: Install browser test runtime
+          node --test tests/hud-layout.test.cjs tests/semesta-ui-editor.test.cjs tests/semesta-jiwa-play-v1.test.cjs
+      - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
-      - name: Serve Semesta and Jiwa
+      - name: Serve Mainkan and Semesta on their production-style shared origin
         run: |
-          python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/semesta-global-ui.log 2>&1 &
+          python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/mainkan-ui-editor.log 2>&1 &
           sleep 2
-      - name: "Browser test: drag HUD, center, Save, reload and Jiwa removal"
-        run: node virtual-office/tests/semesta-ui-editor.e2e.cjs
-      - name: "Browser test: Phone preview iframe select, drag, resize and Save"
-        run: node virtual-office/tests/semesta-phone-ui-editor.e2e.cjs
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: semesta-game-ui-edit-browser
-          path: screenshots/
-          if-no-files-found: ignore
+      - name: Verify Mainkan HUD drag, device profiles, save and reload
+        run: node virtual-office/tests/mainkan-ui-editor.e2e.cjs
