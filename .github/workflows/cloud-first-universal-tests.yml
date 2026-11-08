@@ -28,6 +28,18 @@ jobs:
       - name: Trial UI isolation and smoke
         if: success() || failure()
         run: node --test tests/cloud-first-trial.test.cjs
-      - name: Existing application regression suite
+      - name: Launcher regression
         if: success() || failure()
-        run: node --test tests/membangun-launcher.test.cjs tests/semesta-asset-library.test.cjs tests/mahluk-unified-bridge.test.cjs tests/jiwa-foundation-contract.test.cjs tests/emotion-drive-oauth.test.cjs
+        run: node --test tests/membangun-launcher.test.cjs
+      - name: Semesta regression
+        if: success() || failure()
+        run: node --test tests/semesta-asset-library.test.cjs
+      - name: Mahluk regression
+        if: success() || failure()
+        run: node --test tests/mahluk-unified-bridge.test.cjs
+      - name: Jiwa regression
+        if: success() || failure()
+        run: node --test tests/jiwa-foundation-contract.test.cjs
+      - name: Emosi regression
+        if: success() || failure()
+        run: node --test tests/emotion-drive-oauth.test.cjs
