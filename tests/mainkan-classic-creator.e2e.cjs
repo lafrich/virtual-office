@@ -63,6 +63,23 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   await page.locator('#ccTools [data-tool=body]').click();
   await page.locator('#ccOptions .cc-choice-btn').filter({hasText:'Female'}).click();
   assert.equal(await page.locator('#characterChoices .choice.selected').getAttribute('data-character'),'genesis_female_nude');
+  // Switching base must retain original Custom Wear but select female-specific
+  // top/custom_f, pants/custom_f, shoes/custom_f, not reuse male sheets.
+  await page.waitForFunction(()=>{
+   const el=document.getElementById('ccPreviewUpdating');
+   const p={base:'genesis_female_nude',appearance:{
+    hairStyle:document.getElementById('hairStyle').value,
+    topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}};
+   return window.VLGenesisPlayer.imageStatus(p).ready&&el.hidden;
+  },null,{timeout:45000});
+  const femaleLayers=await page.evaluate(()=>{
+   const layers=window.VLGenesisPlayer.debug({base:'genesis_female_nude',
+    appearance:{hairStyle:'long_curtain',topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}});
+   return layers.filter(x=>x.part.includes('/custom'));
+  });
+  assert.deepEqual(femaleLayers.map(x=>x.part),['top/custom_back','shoes/custom','pants/custom','top/custom']);
+  assert.ok(femaleLayers.every(x=>x.ready&&x.code==='Genesis source'),
+   'Female must use approved female custom atlas layers, not stock or male clothing');
   await page.locator('#ccDay').fill('11');
   await page.locator('#ccMonth').fill('01');
   await page.locator('#ccYear').fill('1994');
