@@ -331,6 +331,18 @@ window.addEventListener('message',e=>{
   $('statusText').textContent='SEMESTA • ERROR';
  }
 });
+$('importPlayerFlow').addEventListener('click',()=>$('importFlowFile').click());
+$('importFlowFile').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];e.target.value='';if(!file)return;
+ if(file.size>250000){$('statusText').textContent='IMPORT FAILED • FILE TOO LARGE';return;}
+ try{
+  const parsed=F.normalize(JSON.parse(await file.text()));
+  if(frame.getAttribute('src'))frame.removeAttribute('src');
+  graph=parsed;sequence++;splashSeen.clear();worldReady=false;booted=true;
+  $('statusText').textContent='FLOW IMPORTED • '+graph.name;
+  showNode(graph.start);
+ }catch(err){$('statusText').textContent='IMPORT ERROR: '+String(err.message).slice(0,80);}
+});
 function startup(){
  if(booted)return;
  booted=true;showNode(graph.start);setLoginMode('login');
