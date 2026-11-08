@@ -83,3 +83,21 @@ test('Game UI moved to Mainkan while Semesta stays source for world/phone system
  assert.match(app,/mainkan:flow-request/);
  assert.match(html,/id="importPlayerFlow"/);
 });
+
+test('Genesis is the only player body; all player faces are Emosi.exe sources',()=>{
+ const gen=read('shared/genesis-player.js'),base=read('shared/genesis-source.js'),emotions=read('shared/emosi-source.js');
+ for(const [file,source] of [['shared/genesis-player.js',gen],['shared/genesis-source.js',base],['shared/emosi-source.js',emotions]])
+  assert.doesNotThrow(()=>new vm.Script(source,{filename:file}));
+ assert.match(html,/genesis_male_nude/);
+ assert.match(html,/genesis_female_nude/);
+ assert.doesNotMatch(app,/['"](?:ichsan|noor|theodore)['"]/);
+ assert.doesNotMatch(html,/data-character="(?:ichsan|noor|theodore)"/);
+ assert.match(gen,/faceSource:"emosi\.exe"/);
+ assert.match(gen,/EMOSI\.emotions/);
+ assert.match(semesta,/mainkan:profile-request/);
+ assert.match(semesta,/mainkan:player-profile/);
+ assert.match(semesta,/GenesisPlayer\.createRig/);
+ assert.match(semesta,/const first=playerMode\?makeTemporaryLifePlayer\(\)/);
+ assert.match(semesta,/setPlayerEmotion/);
+ assert.match(gen,/parts\.map\(part=>lookupImage/);
+});
