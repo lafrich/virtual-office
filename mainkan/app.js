@@ -166,10 +166,33 @@ document.querySelectorAll('[data-move]').forEach(b=>{
  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);held.add(dir);worldState.target=null;});
  for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>held.delete(dir));
 });
-let tapStart=null;
-canvas.addEventListener('pointerdown',e=>{if(stage!=='gameScreen')return;tapStart={x:e.clientX,y:e.clientY};});
-canvas.addEventListener('pointerup',e=>{
- if(!tapStart||Math.hypot(e.clientX-tapStart.x,e.clientY-tapStart.y)>12){tapStart=null;return;}
+let tapStart=null,pinchPrevious=0;
+const pointers=new Map();
+function pointerDistance(){
+ const p=[...pointers.values()];return p.length<2?0:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+}
+canvas.addEventListener('pointerdown',e=>{
+ if(stage!=='gameScreen')return;
+ pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pointers.size===1)tapStart={x:e.clientX,y:e.clientY};
+ else{tapStart=null;pinchPrevious=pointerDistance();}
+});
+canvas.addEventListener('pointermove',e=>{
+ if(!pointers.has(e.pointerId))return;
+ pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pointers.size>=2){
+   const distance=pointerDistance();
+   if(pinchPrevious>0 && distance>0)worldState.zoom=Math.min(2,Math.max(.55,worldState.zoom*distance/pinchPrevious));
+   pinchPrevious=distance;tapStart=null;
+ }
+});
+function releasePointer(e,cancelled){
+ if(!pointers.has(e.pointerId))return;
+ const wasPinch=pointers.size>1;
+ pointers.delete(e.pointerId);
+ pinchPrevious=pointers.size>=2?pointerDistance():0;
+ if(cancelled||wasPinch||!tapStart){tapStart=null;return;}
+ if(Math.hypot(e.clientX-tapStart.x,e.clientY-tapStart.y)>12){tapStart=null;return;}
  tapStart=null;
  const rect=canvas.getBoundingClientRect();
  const dx=(e.clientX-rect.left-rect.width/2)/worldState.zoom;
@@ -177,7 +200,9 @@ canvas.addEventListener('pointerup',e=>{
  const tx=worldState.cam.x+dx/48+dy/24;
  const tz=worldState.cam.z+dy/24-dx/48;
  worldState.target={x:tx,z:tz};
-});
+}
+canvas.addEventListener('pointerup',e=>releasePointer(e,false));
+canvas.addEventListener('pointercancel',e=>releasePointer(e,true));
 $('actionButton').addEventListener('click',action);
 function action(){
  const near=worldState.near;
