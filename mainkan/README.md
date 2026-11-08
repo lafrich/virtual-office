@@ -1,54 +1,50 @@
-# mainkan.exe — Namanya Juga Hidup / Player Client
+# mainkan.exe — Namanya Juga Hidup
 
-**Source:** lafrich/virtual-office (GitHub Pages).
+Player shell and onboarding-flow authoring for the existing Semesta world engine.
 
-- Player URL: https://lafrich.github.io/virtual-office/mainkan/
+## Open
+- Game: https://lafrich.github.io/virtual-office/mainkan/
+- **Flow Editor:** https://lafrich.github.io/virtual-office/mainkan/flow-editor.html
 - Membangun launcher: https://lafrich.github.io/virtual-office/membangun/?app=mainkan
-- Native Semesta player-only entry: https://lafrich.github.io/virtual-office/world-builder/?player=1
 
-## Architecture
+## Clear ownership
+- **Mainkan:** splash, Welcome, auth screens, character creator, confirmation, tutorial, pause, user-facing HUD buttons and the editable graph.
+- **Semesta:** existing WebGL scene, city data, assets, physics/collision, live character rig, animation, movement, traffic, world time and Jiwa gameplay engines.
+- **Mahluk Hidup:** canonical rig / custom appearance art source. Mainkan does not modify its editor or duplicate V6B assets.
 
-Mainkan.exe owns the splash screen, login/register UI, character onboarding, and the outer player shell.
+Native world is embedded from `../world-builder/?player=1` on the same origin. The player entry hides editor controls and the old Semesta HUD chrome, preserving Nokia/Bag popup engines and touch D-pad. Mainkan's phone/bag/action buttons forward to the original native controls; Mainkan reads Jiwa status, never forks wallet or player economy.
 
-When player enters the world, Mainkan loads **the actual Semesta WebGL engine** in a same-origin fullscreen iframe using `world-builder/?player=1`. The engine reuses Semesta's own:
+**Performance note:** this separates UI ownership and removes duplicated HUD chrome; it does not yet tree-shake heavy Semesta editor JavaScript from the player-side runtime. A true lightweight production client would need a separated shared engine bundle.
 
-- World and city working copy, terrain, objects, native V6B art pipeline.
-- Renderer / isometric camera, geometry, physics and collision.
-- Walk Mode, camera follow, traffic, 24-hour environment.
-- SemestaLifePlay, Jiwa interactions, Play HUD and phone, native touch controls.
+## Onboarding flow (restored from the 2026-11-02 source bundle)
+Default flow:
 
-There is **no second renderer in Mainkan**. The previous duplicate 2D world.json/Canvas simulation was removed.
+`Splash → Welcome → Login/Register or Guest → Character Creator → Confirm → Loading/Enter World → First-Time Check → Tutorial (if new) → Semesta Gameplay`.
 
-## Player-mode protections
+The character screen includes the classic design choices: birthday-derived zodiac, nickname, human male/female or Astrofrich base, hair and colors, skin, glasses, facial hair, tops, pants, shoes, and rotating/animated V6B preview. **Current limitation:** custom outfit/skin choices are collected in the character model but do not yet compose a new V6B rig in the world. Existing prebuilt V6B character sheets are shown as reference. Final integration depends on the current Mahluk Hidup asset/export contract, not the older bundle's private patch chain.
 
-- Adds `semesta-player-mode` to the Semesta document.
-- Hides edit menus, tools, asset browser, property inspector, and authoring controls while preserving the actual native canvas and gameplay overlays.
-- Automatically enters `setMode('walk')` and disallows leaving Walk Mode from player entry.
-- Skips Semesta editor draft autosaves in player mode, including the periodic clock write, so starting player mode does not overwrite the editor's working map.
-- Sends a same-origin `mainkan:semesta-ready` message with city name and object count after the native runtime starts.
+Guest preview stays in memory only. No online account should be claimed as created until a real backend confirms it.
 
-This is a **player preview**, not a security boundary: production multiplayer needs a separate server-authoritative client and resource permissions.
+## Flow Editor
 
-## Which city is displayed?
+Open `flow-editor.html` in the browser.
+- Select a node to edit its properties.
+- Drag nodes to move them. Click the **yellow output port**, then click another node to reconnect NEXT.
+- Branch routes (Guest / New Player / Returning / First-Time) are editable in the inspector.
+- Set splash frequency `every_launch`, `once_per_session` or `first_time_player`; set repeat count (1–5), duration (0–15000ms), skip, title and description.
+- Add, duplicate, remove, undo, redo, choose start node, and load four presets: Default New Player, Returning, Guest, Debug.
+- **Test Flow** opens an isolated same-origin Mainkan iframe with the current in-memory graph via postMessage.
+- **Export JSON** downloads a `.json` file to your computer. **Import JSON** restores it. No flow editor browser autosave, online database, Drive backup, or GitHub write is performed.
+- To try an exported JSON flow in the main Mainkan application, click **Import Flow JSON** in Mainkan's toolbar. It applies for that active game session only. Export your changes to retain them.
 
-The native Semesta editor currently reads the `virtual-life-gpt-world-builder-pipeline-v3` working map in the **same browser and origin**. If none exists, it loads Semesta's built-in starter city. As a result, the player preview uses what Semesta normally opens **on that device**.
+Graph model: `mainkan/flow-model.js`. It rejects malformed formats, missing IDs/targets, unsupported types, excessive nodes and invalid duration/repeat values.
 
-A city stored only in Google Drive or an IndexedDB named draft on another device is **not** automatically published to player mode. For consistent cross-device multiplayer cities, add a separate Publish City pipeline and a canonical hosted read-only world snapshot. This is not yet implemented.
+## Known boundaries
+- GitHub Pages alone cannot authenticate accounts or run multiplayer. Secure auth needs a backend and session management. `mainkan/config.js` keeps only a public origin, no secrets.
+- Native Semesta reads the same browser's Semesta working city. The latest Google Drive city, server-published maps, player-owned rooms and cross-device continuity need a separate publish/online sync pipeline.
+- Semesta's world renderer stays authoritative for physics and NPC/gameplay rules.
+- Editor UI is hidden in `?player=1`, but hiding controls is **not** a production security boundary.
 
-## What remains incomplete?
-
-- Real player accounts and secure backend sessions; current Guest Preview does not persist online. Never store passwords in Drive, GitHub or browser storage.
-- Cross-device player progress, wallet, owned rooms, authoritative Jiwa economy, and networking.
-- Final character creation / clothing sync with the current Mahluk Hidup data contract. Mainkan currently selects a preview profile, and native Semesta uses the closest available existing rig.
-- Latest Drive city publishing / sync into an authoritative player-world build.
-- End-to-end interactive browser testing across PC and mobile.
-
-When a backend is available, set `window.MAINKAN_CONFIG.apiBase` inside `mainkan/config.js` to a secure HTTPS origin that supports credentialed CORS and HttpOnly sessions.
-
-Endpoints provisionally expected:
-- `POST /auth/register` and `POST /auth/login` receive `{email,password}` and return `{authenticated:true,player?:{character?:...}}`
-- `PUT /players/profile` receives `{character:{name,zodiac,asset,gender}}` and returns `{saved:true,player?:...}`
-
-## Smoke tests
-
-Run `node --test tests/mainkan-smoke.test.cjs`.
+## Tests
+- Node: `node --test tests/mainkan-smoke.test.cjs`
+- Real Chromium: `node tests/mainkan-native-semesta.e2e.cjs` and `node tests/mainkan-flow-editor.e2e.cjs` in the CI same-origin checkout layout.
