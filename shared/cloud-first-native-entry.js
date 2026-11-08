@@ -10,6 +10,15 @@
  };
  function createNode(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n}
  function init({app}={}){
+  const params=new URLSearchParams(root.location?.search||"");
+  // Player and device previews are read-only gameplay surfaces. Never block
+  // Mainkan gameplay, phone previews, or isolated browser regression sessions.
+  if(app==="semesta"&&(params.get("player")==="1"||params.get("deviceFrame")==="1"))
+   return Object.freeze({isReady:()=>true,mode:"read-only-player"});
+  // Explicit opt-out for legacy smoke tests and emergency recovery only.
+  // Ordinary editor URLs always get the Drive-first startup.
+  if(params.get("cloudLegacy")==="1")
+   return Object.freeze({isReady:()=>false,mode:"legacy-offline"});
   if(!SUPPORTED[app]||!U||!D)throw Error("Native cloud startup requires matching Drive and Universal modules");
   let isBusy=false,ready=false,pending=null;
   const overlay=createNode("section");overlay.id="mb-cloud-entry";overlay.setAttribute("role","dialog");
