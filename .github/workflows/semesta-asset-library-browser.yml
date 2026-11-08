@@ -1,5 +1,9 @@
 name: Semesta Asset Library — Browser Smoke
 on:
+  pull_request:
+    paths:
+      - "world-builder/**"
+      - ".github/workflows/semesta-asset-library-browser.yml"
   workflow_dispatch:
   push:
     branches: [main]
@@ -48,6 +52,11 @@ jobs:
             const page=await context.newPage();
             const faults=[];page.on('pageerror',err=>faults.push(err.message));
             await page.goto('http://127.0.0.1:8091/virtual-office/world-builder/',{waitUntil:'domcontentloaded',timeout:90000});
+            // This authoring-only smoke intentionally selects the existing offline draft.
+            // Never change production cloud gates or claim any Drive sync in CI.
+            page.once('dialog',dialog=>dialog.accept());
+            await page.getByRole('button',{name:/OPEN EXISTING DATA.*OFFLINE/}).click({timeout:30000});
+            await page.locator('#mb-cloud-entry').waitFor({state:'detached',timeout:10000});
             await page.waitForFunction(()=>typeof document.getElementById('openAssetLibrary')?.onclick==='function',null,{timeout:90000});
             const skip=page.getByRole('button',{name:'Skip'});
             if(await skip.count())await skip.first().click().catch(()=>{});
@@ -215,6 +224,10 @@ jobs:
             ]);
             bangun.on('pageerror',err=>faults.push('bangun '+err.message));
             await bangun.waitForLoadState('domcontentloaded');
+            // Bangun Ruang is a second authoring app with its own cloud startup.
+            bangun.once('dialog',dialog=>dialog.accept());
+            await bangun.getByRole('button',{name:/OPEN EXISTING DATA.*OFFLINE/}).click({timeout:30000});
+            await bangun.locator('#mb-cloud-entry').waitFor({state:'detached',timeout:10000});
             await bangun.waitForFunction(()=>document.querySelector('#name')?.value?.includes('Custom'),null,{timeout:60000});
             const desc=await bangun.locator('#assetDescription').inputValue();
             if(!desc)throw Error('Source description missing in Bangun Ruang');
