@@ -631,7 +631,12 @@ window.JiwaCloudProjects=Object.freeze({
  async putNew(project){
   if(!project?.cityId||!project.updatedAt||typeof project.bindings!=='object')
    throw Error('Invalid remote Jiwa mechanics project');
-  const local=(await this.list()).find(p=>p.cityId===project.cityId);
+  // Even an incomplete/undated existing IDB row is protected: never infer
+  // "empty" from updatedAt alone and silently replace a browser draft.
+  let local=null;
+  try{local=await dbOperation('get',project.cityId)}catch{}
+  if(!local){try{const raw=localStorage.getItem(FALLBACK+project.cityId);
+   if(raw)local=JSON.parse(raw)}catch{}}
   if(local){
    if(JSON.stringify(local)===JSON.stringify(project))return false;
    throw Error('Local Jiwa project differs: '+project.cityId+'; no browser data overwritten');
