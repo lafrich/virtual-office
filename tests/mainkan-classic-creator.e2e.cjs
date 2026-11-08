@@ -18,10 +18,11 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   assert.equal(await title.textContent(),'untitled - Character Creator');
   assert.equal(await page.locator('#ccTools .cc-tool-btn').count(),10,'All classic Paint tools required');
   assert.equal(await page.locator('#ccSwatches .cc-swatch-row').count(),5,'Five color palettes required');
-  // Both approved Genesis bases expose their actual pixel-exact Custom Wear.
+  // Original Genesis shoe custom sheets are skin-coloured bare feet, not shoes.
+  // Start dressed via native Mahluk footwear; custom top/pants art stays untouched.
   assert.equal(await page.locator('#topStyle').inputValue(),'custom');
   assert.equal(await page.locator('#pantsStyle').inputValue(),'custom');
-  assert.equal(await page.locator('#shoesStyle').inputValue(),'custom');
+  assert.equal(await page.locator('#shoesStyle').inputValue(),'shoes');
   // Short/Swept have deliberate 1x1 transparent back-hair files; they must
   // render with real front hair, without blanking the whole avatar.
   for(const [value,visibleText] of [['short','Short'],['swept','Short swept']]){
@@ -50,10 +51,26 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
     custom:parts.filter(p=>p.part.includes('/custom')).map(p=>({part:p.part,source:p.code,ready:p.ready}))};
   });
   assert.equal(custom.ready,true,'Genesis frame must be complete');
-  assert.deepEqual(custom.custom.map(p=>p.part),['top/custom_back','shoes/custom','pants/custom','top/custom']);
+  assert.deepEqual(custom.custom.map(p=>p.part),['top/custom_back','pants/custom','top/custom']);
   assert.ok(custom.custom.every(p=>p.source==='Genesis source'&&p.ready),
-   'Approved custom layers must originate from Genesis actual source PNGs');
-  console.log('[ok] Short/Swept + Genesis Custom Wear + no blank preview ('+label+')');
+   'Approved custom top/pants layers must originate from Genesis actual source PNGs');
+  const maleShoes=await page.evaluate(()=>window.VLGenesisPlayer.debug({
+   base:'genesis_male_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'shoes'}
+  }));
+  assert.ok(maleShoes.some(p=>p.part==='shoes/shoes'&&p.ready&&!p.error),
+   'Native male Mahluk shoe sheet should be fully loaded');
+  // Verify the original barefoot slot is still explicitly selectable/editable.
+  await page.locator('#ccTools [data-tool=shoes]').click();
+  await page.locator('#ccOptions').getByRole('button',{name:/Genesis Barefoot/}).click();
+  const barefoot=await page.evaluate(()=>window.VLGenesisPlayer.debug({
+   base:'genesis_male_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}
+  }));
+  assert.ok(barefoot.some(p=>p.part==='shoes/custom'&&p.code==='Genesis source'&&p.ready),
+   'Original Genesis barefoot source must not be overwritten');
+  await page.locator('#ccOptions').getByRole('button',{name:/Mahluk Shoes/}).click();
+  assert.equal(await page.locator('#shoesStyle').inputValue(),'shoes');
+  await page.locator('#ccTools [data-tool=hair]').click();
+  console.log('[ok] Short/Swept + native shoes + preserved Genesis source ('+label+')');
 
   await page.locator('#ccOptions .cc-choice-btn').filter({hasText:'Long curtain'}).click();
   assert.equal(await page.locator('#hairStyle').inputValue(),'long_curtain');
@@ -63,23 +80,34 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   await page.locator('#ccTools [data-tool=body]').click();
   await page.locator('#ccOptions .cc-choice-btn').filter({hasText:'Female'}).click();
   assert.equal(await page.locator('#characterChoices .choice.selected').getAttribute('data-character'),'genesis_female_nude');
-  // Switching base must retain original Custom Wear but select female-specific
-  // top/custom_f, pants/custom_f, shoes/custom_f, not reuse male sheets.
+  // Female retains her own custom top/pants but uses native female shoes.
+  // The published skin-coloured shoes/custom_f stays available as barefoot source.
   await page.waitForFunction(()=>{
    const el=document.getElementById('ccPreviewUpdating');
    const p={base:'genesis_female_nude',appearance:{
     hairStyle:document.getElementById('hairStyle').value,
-    topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}};
+    topStyle:'custom',pantsStyle:'custom',shoesStyle:'shoes'}};
    return window.VLGenesisPlayer.imageStatus(p).ready&&el.hidden;
   },null,{timeout:45000});
   const femaleLayers=await page.evaluate(()=>{
    const layers=window.VLGenesisPlayer.debug({base:'genesis_female_nude',
-    appearance:{hairStyle:'long_curtain',topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}});
+    appearance:{hairStyle:'long_curtain',topStyle:'custom',pantsStyle:'custom',shoesStyle:'shoes'}});
    return layers.filter(x=>x.part.includes('/custom'));
   });
-  assert.deepEqual(femaleLayers.map(x=>x.part),['top/custom_back','shoes/custom','pants/custom','top/custom']);
+  assert.deepEqual(femaleLayers.map(x=>x.part),['top/custom_back','pants/custom','top/custom']);
   assert.ok(femaleLayers.every(x=>x.ready&&x.code==='Genesis source'),
-   'Female must use approved female custom atlas layers, not stock or male clothing');
+   'Female must use approved custom top/pants atlas layers');
+  assert.equal(await page.locator('#shoesStyle').inputValue(),'shoes');
+  const femaleShoes=await page.evaluate(()=>window.VLGenesisPlayer.debug({
+   base:'genesis_female_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'shoes'}
+  }));
+  assert.ok(femaleShoes.some(p=>p.part==='shoes/shoes_f'&&p.ready&&!p.error),
+   'Female must wear the native female Mahluk footwear sheet');
+  const originalFemale=await page.evaluate(()=>window.VLGenesisPlayer.debug({
+   base:'genesis_female_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}
+  }));
+  assert.ok(originalFemale.some(p=>p.part==='shoes/custom'&&p.code==='Genesis source'&&p.ready),
+   'Female original barefoot custom layer remains editable and gender-specific');
   await page.locator('#ccDay').fill('11');
   await page.locator('#ccMonth').fill('01');
   await page.locator('#ccYear').fill('1994');
