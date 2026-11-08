@@ -1381,4 +1381,9 @@ window.addEventListener('focus',()=>scaleController?.refreshProfiles?.(false));
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="../drive-sync.js?v=cloud-autosync-20261106"></script>
 <script src="../drive-ui.js?v=semesta-bangun-furniture-cloud-20261107" defer></script>
+<script src="../../shared/cloud-first-universal.js?v=nondestructive-20261108"></script>
+<script src="../../shared/cloud-first-native-entry.js?v=nondestructive-20261108"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>{try{
+ window.MembangunNativeCloudEntry.init({app:"bangun"});
+}catch(error){console.error("Cloud entry setup failed; existing app data was not changed",error)}});</script>
 </body></html>
