@@ -12,7 +12,8 @@ test('Semesta loads V1 life runtime before builder module and hooks Action/HUD/m
  const playScript=html.indexOf('./semesta-life-play.js');
  const builderScript=html.indexOf('./builder.js');
  assert.ok(lifeScript>0&&playScript>lifeScript&&builderScript>playScript);
- assert.match(html,/id="walkMode".*PLAY GAME/);
+ assert.match(html,/id="walkMode".*EXPLORE \/ WALK TEST/);
+ assert.match(builder,/if\(playerMode\)window\.SemestaLifePlay\?\.start\?\.\(\)/);
  assert.match(builder,/SemestaLifePlay\.attach\(/);
  assert.match(builder,/SemestaLifePlay\?\.start\?\.\(/);
  assert.match(builder,/SemestaLifePlay\?\.stop\?\.\(/);
