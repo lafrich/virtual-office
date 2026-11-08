@@ -136,6 +136,35 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   });
   assert.ok(renderedShoes>=15,
    'Female shoe pixels must render as dark footwear rather than nude skin: '+renderedShoes);
+  // Compare actual composite pixel masks, not just resource paths. Real black
+  // shoes must remain visible through all Idle/Walk frames and four directions.
+  const frameCoverage=await page.evaluate(()=>{
+   const player=window.VLGenesisPlayer;
+   const base={base:'genesis_female_nude',appearance:{
+    hairStyle:document.getElementById('hairStyle').value,
+    topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}};
+   const shoe={...base,appearance:{...base.appearance,shoesStyle:'shoes'}};
+   const score=(profile,dir,action,frame)=>{
+    const c=document.createElement('canvas');c.width=64;c.height=112;
+    if(!player.directPreview(c,profile,dir,action,frame,'neutral',0))return -1;
+    const d=c.getContext('2d').getImageData(0,0,64,112).data;
+    let n=0;for(let y=90;y<=103;y++)for(let x=18;x<=46;x++){
+     const i=(y*64+x)*4;
+     if(d[i+3]>200&&d[i]<100&&d[i+1]<100&&d[i+2]<110)n++;
+    }
+    return n;
+   };
+   const out=[];
+   for(const action of ['idle','walk'])for(const dir of ['se','sw','ne','nw'])
+    for(let frame=0;frame<(action==='walk'?6:4);frame++){
+     const actual=score(shoe,dir,action,frame);
+     const natural=score(base,dir,action,frame);
+     out.push({action,dir,frame,delta:actual-natural,actual,natural});
+    }
+   return out;
+  });
+  assert.ok(frameCoverage.every(r=>r.delta>=20),
+   'Black shoes must stay visible in every pose/frame: '+JSON.stringify(frameCoverage.filter(r=>r.delta<20)));
   // Loading the source layer is asynchronous even though it is preserved.
   await page.waitForFunction(()=>window.VLGenesisPlayer.imageStatus({
    base:'genesis_female_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}
