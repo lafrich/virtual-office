@@ -70,16 +70,29 @@ function move(actor,start,dx,dz,objects,map,catalog,style,livePositions){
  return {x,z,moved:Math.hypot(x-start.x,z-start.z)>EPS,blocked};
 }
 function bigStructure(o,catalog,style){
- if(!solid(o)||style.category(o,catalog)!=='building')return false;
- const [w,d]=style.footprint(o,catalog);
+ if(!o||['marker','avatar','npc','pedestrian','crowd','quest_npc','vehicle'].includes(o.type))return false;
+ const kind=style.category(o,catalog);
  const spec=o.type==='sprite'?catalog?.get(o.asset):null;
  const h=Number(o.h||spec?.height||o.height||5)*Number(o.scale||1);
+ // Visual occlusion is independent of collision: even a pass-through tree
+ // or a slender landmark can hide the player from the camera.
+ if(kind==='tree')return h>=2.2;
+ if(o.subtype==='landmark'||(Array.isArray(o.tags)&&o.tags.includes('landmark')))return true;
+ if(!solid(o)||kind!=='building')return false;
+ const [w,d]=style.footprint(o,catalog);
  return w*d>=12 && h>=2.8;
 }
 function bigBox(o,catalog,style){
- const [w,d]=style.footprint(o,catalog);
+ let [w,d]=style.footprint(o,catalog);
  const spec=o.type==='sprite'?catalog?.get(o.asset):null;
- const h=Math.max(1,Number(o.h||spec?.height||o.height||5)*Number(o.scale||1));
+ const scale=Number(o.scale||1);
+ const h=Math.max(1,Number(o.h||spec?.height||o.height||5)*scale);
+ if(style.category(o,catalog)==='tree'){
+  // The collider covers only the trunk; the visual box must include the canopy.
+  // Do not change collision footprints or player movement.
+  const canopy=Math.max(w,Number(o.width||spec?.width||4.3)*scale);
+  w=Math.max(w,canopy);d=Math.max(d,canopy);
+ }
  const x=Number(o.x)||0,z=Number(o.z)||0,y=Number(o.y)||0;
  return {min:{x:x-w/2,y,z:z-d/2},
   max:{x:x+w/2,y:y+h,z:z+d/2}};
