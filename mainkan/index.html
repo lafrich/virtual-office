@@ -60,9 +60,42 @@ body.mainkan-playing #viewport{
   max-height:calc(100dvh - 52px)!important;
  }
 }
+
+/* Mainkan owns menus and onboarding; Semesta is exclusively the world runtime. */
+.window{position:relative}
+.menubar{align-items:center;min-height:37px}
+.menubar a{color:#133b78;font-weight:bold;text-decoration:none;border:1px solid #888;background:#ececec;padding:5px 10px}
+.menubar a:hover{background:#d6e4ff}
+.welcome-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
+.creator-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:19px}
+.creator-preview{position:sticky;top:0;background:#ddd;border:2px inset #888;padding:13px;align-self:start;text-align:center}
+.creator-preview canvas{height:168px;width:96px;image-rendering:pixelated;display:block;margin:4px auto;background:linear-gradient(#b1c7c2,#90a9aa)}
+.creator-preview .actions{justify-content:center;margin-top:8px}
+.creator-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.creator-options .field{min-width:0}
+.birthday-row{display:grid;grid-template-columns:60px 60px 90px;gap:5px;align-items:center}
+.birthday-row input{text-align:center;width:100%;padding:8px}
+.creator-headline{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.creator-headline h1{margin:0}
+.creator-help{font-size:11px;color:#575757}
+.small-label{font-size:11px;font-weight:bold;color:#444}
+#characterChoices{margin:8px 0 16px}
+#characterChoices .choice{min-height:105px;padding:7px}
+#characterChoices canvas{height:65px!important;width:37px!important}
+#characterChoices img{height:65px}
+#charSummary{background:#e4e4d9;border:1px inset #888;padding:10px;line-height:1.5}
+#confirmList{line-height:1.7;padding:8px;background:#e8e6df;border:1px inset #999}
+#previewNotice{padding:7px;border:1px solid #aa9990;background:#efe7d2;margin-top:7px;line-height:1.4}
+.inline-msg{padding:10px;border:1px solid #8e8e8e;background:#eceadf;margin:12px 0}
+#loadingScreen .progress{max-width:430px}
+#tutorialScreen .guide{background:#ebebe3;border:2px inset #aaa;padding:16px;margin:13px 0}
+#pauseScreen .btn{min-width:175px}
+@media(max-width:650px){.creator-layout{grid-template-columns:1fr}.creator-preview{position:static;display:grid;grid-template-columns:80px 1fr;gap:7px;align-items:center}.creator-preview canvas{width:64px;height:112px;margin:0}.creator-options{grid-template-columns:repeat(2,minmax(0,1fr))}.creator-preview .actions{align-items:center}.creator-headline{margin-bottom:5px}.birthday-row{grid-template-columns:repeat(3,1fr)}}
+
 </style>
 <script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
 <script src="../shared/spawn-respawn.js?v=mainkan-20261108" defer></script>
+<script src="./flow-model.js?v=mainkan-flow-v1" defer></script>
 <script src="./config.js?v=mainkan-20261108" defer></script>
 <script src="./app.js?v=mainkan-20261108" defer></script>
 </head>
@@ -70,7 +103,7 @@ body.mainkan-playing #viewport{
 <div id="desktop">
 <main class="window" aria-label="Mainkan aplikasi pemain">
 <header class="titlebar"><span class="icon" aria-hidden="true">▶</span><span>MAINKAN.EXE — Namanya Juga Hidup</span><div class="controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
-<div class="menubar"><span>Game</span><span>Player</span><span>Help</span></div>
+<div class="menubar"><span>Game</span><span>Player</span><a href="./flow-editor.html" id="openFlowEditor" title="Atur flow game secara visual">▤ Flow Editor</a></div>
 <section id="splashScreen" class="screen" aria-label="Splash Screen">
   <div class="split"><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Game dunia virtual Indonesia<br>mainkan.exe / player client</small></div>
   <div><h1>Memuat dunia...</h1><p class="muted">Memeriksa peta dan aset game. Ini aplikasi untuk pemain, bukan editor.</p><div class="progress" role="progressbar" aria-label="Persiapan game"><div id="progressFill"></div></div><p id="bootText" class="micro" aria-live="polite">Starting mainkan.exe...</p><button id="skipSplash" type="button" class="btn compact">Lewati intro</button></div></div>
@@ -82,22 +115,69 @@ body.mainkan-playing #viewport{
 <form id="authForm"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" placeholder="email@contoh.com" required></div><div class="field"><label for="password">Password</label><input id="password" type="password" minlength="8" autocomplete="current-password" placeholder="Minimal 8 karakter" required></div><div class="actions"><button class="btn primary" id="authSubmit" type="submit">Login</button><button class="btn" id="guestButton" type="button">▶ Mainkan Preview</button></div><p id="authMessage" class="status" aria-live="polite"></p></form>
 </div></div>
 </section>
-<section id="characterScreen" class="screen" hidden aria-label="Buat karakter">
-<h1>Buat karaktermu</h1><p class="muted">Pilih template visual. Character rig dan sistem pakaian final tetap dikelola di Mahluk Hidup, bukan di sini.</p>
-<div class="choices" id="characterChoices">
- <button type="button" class="choice selected" data-character="ichsan" aria-pressed="true"><img alt="Preview manusia laki-laki" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/ichsan_v6b_sheet.png"><strong>Human · Male</strong><small>V6B preview</small></button>
- <button type="button" class="choice" data-character="noor" aria-pressed="false"><img alt="Preview manusia perempuan" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/noor_v6b_sheet.png"><strong>Human · Female</strong><small>V6B preview</small></button>
- <button type="button" class="choice" data-character="theodore" aria-pressed="false"><img alt="Preview Theodore" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/theodore_v6b_sheet.png"><strong>Theodore</strong><small>Astrofrich · preview</small></button>
-</div>
-<div class="hr"></div>
-<form id="characterForm"><div class="split"><div class="field"><label for="playerName">Nama karakter</label><input id="playerName" maxlength="24" minlength="2" placeholder="Nama di dalam game" required></div><div class="field"><label for="zodiac">Zodiak</label><select id="zodiac" required><option value="">Pilih zodiak...</option><option>Aries</option><option>Taurus</option><option>Gemini</option><option>Cancer</option><option>Leo</option><option>Virgo</option><option>Libra</option><option>Scorpio</option><option>Sagittarius</option><option>Capricorn</option><option>Aquarius</option><option>Pisces</option></select></div></div>
-<div class="actions"><button type="button" id="backToLogin" class="btn">← Kembali</button><button type="submit" class="btn primary">Masuk Dunia →</button></div>
-<p id="characterMessage" class="status" aria-live="polite"></p></form>
+<section id="welcomeScreen" class="screen" hidden aria-label="Welcome">
+<div class="split"><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Hidup semaumu di dunia virtual Indonesia.</small></div>
+<div><h1>Selamat datang.</h1><p class="muted" id="welcomeCopy">Bikin karakter, masuk ke kota, cari pekerjaan, dan jalani hidupmu.</p>
+<div class="welcome-actions"><button type="button" class="btn primary" id="welcomeContinue">▶ Mulai</button><button type="button" class="btn" id="welcomeGuest">Mainkan Preview</button></div></div></div></section><section id="characterScreen" class="screen" hidden aria-label="Create Character">
+<div class="creator-headline"><h1>Create Character</h1><span class="creator-help">Appearance · 4 arah · preview V6B</span></div>
+<p class="muted">Versi modern dari Character Creator lama. Pilih bentuk dan penampilan, lalu cek sebelum masuk kota.</p>
+<div class="creator-layout">
+ <aside class="creator-preview">
+  <div><canvas id="charPreview" width="64" height="112" aria-label="V6B player preview"></canvas><p class="small-label" id="previewDirection">Direction: SE · Idle</p></div>
+  <div><div class="actions"><button type="button" class="btn compact" id="charRotate">↻ Rotate</button><button type="button" class="btn compact" id="charAnimate">Walk / Idle</button><button type="button" class="btn compact" id="charExpression">Expression</button></div><p class="tiny">Sprite preview dari pipeline V6B; pilihan pakaian tersimpan di konfigurasi karakter tetapi belum dirender sebagai layer yang terhubung ke Mahluk Hidup.</p></div>
+ </aside>
+ <div>
+ <div class="small-label">BODY / BASE</div>
+ <div class="choices" id="characterChoices">
+  <button type="button" class="choice selected" data-character="ichsan" aria-pressed="true"><img alt="Human male V6B" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/ichsan_v6b_sheet.png"><strong>Human · Male</strong></button>
+  <button type="button" class="choice" data-character="noor" aria-pressed="false"><img alt="Human female V6B" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/noor_v6b_sheet.png"><strong>Human · Female</strong></button>
+  <button type="button" class="choice" data-character="theodore" aria-pressed="false"><img alt="Astrofrich Theodore V6B" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/theodore_v6b_sheet.png"><strong>Astrofrich</strong></button>
+ </div>
+ <form id="characterForm">
+ <div class="creator-options">
+ <div class="field"><label for="playerName">Nickname</label><input id="playerName" maxlength="24" minlength="2" placeholder="Nama karakter" required></div>
+ <div class="field"><label for="birthday">Birthday (optional)</label><input id="birthday" type="date" max="2100-01-01" autocomplete="bday"></div>
+ <div class="field"><label for="zodiac">Zodiak</label><select id="zodiac" required><option value="">Pilih...</option><option>Aries</option><option>Taurus</option><option>Gemini</option><option>Cancer</option><option>Leo</option><option>Virgo</option><option>Libra</option><option>Scorpio</option><option>Sagittarius</option><option>Capricorn</option><option>Aquarius</option><option>Pisces</option></select></div>
+ </div>
+ <div class="hr"></div><h2>Appearance</h2><div class="creator-options">
+  <div class="field"><label for="hairStyle">Hair</label><select id="hairStyle"><option value="short">Short</option><option value="swept">Short swept</option><option value="mid_curtain">Curtain fringe</option><option value="mid">Mid bangs</option><option value="wavy">Wavy</option><option value="wavy_curtain">Wavy curtain</option><option value="long">Long</option><option value="long_curtain">Long curtain</option></select></div>
+  <div class="field"><label for="hairColor">Hair color</label><select id="hairColor"><option>black</option><option>navy</option><option>brown</option><option>chestnut</option><option>blonde</option><option>red</option><option>white</option><option>pink</option></select></div>
+  <div class="field"><label for="skinTone">Skin tone</label><select id="skinTone"><option>porcelain</option><option>light</option><option>tan</option><option>medium</option><option>brown</option><option>deep</option></select></div>
+  <div class="field"><label for="topStyle">Top</label><select id="topStyle"><option value="tee">T-shirt</option><option value="tee_long">Long-sleeve tee</option><option value="tee_graphic">Graphic tee</option><option value="shirt">Shirt</option><option value="shirt_tie">Shirt + tie</option><option value="cardigan">Cardigan</option><option value="cardigan_dots">Dotted cardigan</option></select></div>
+  <div class="field"><label for="topColor">Top color</label><select id="topColor"><option>charcoal</option><option>white</option><option>navy</option><option>red</option><option>green</option><option>mustard</option><option>sky</option><option>pink</option></select></div>
+  <div class="field"><label for="pantsStyle">Bottom</label><select id="pantsStyle"><option value="trousers">Trousers</option><option value="trousers_ripped">Ripped trousers</option><option value="baggy">Baggy</option><option value="baggy_ripped">Ripped baggy</option></select></div>
+  <div class="field"><label for="pantsColor">Bottom color</label><select id="pantsColor"><option>slate</option><option>night</option><option>denim</option><option>khaki</option><option>olive</option><option>grey</option></select></div>
+  <div class="field"><label for="shoesStyle">Shoes</label><select id="shoesStyle"><option>shoes</option><option>sneakers</option><option>boots</option><option>hightops</option></select></div>
+  <div class="field"><label for="shoesColor">Shoes color</label><select id="shoesColor"><option>walnut</option><option>black</option><option>white</option><option>red</option><option>navy</option><option>tan</option></select></div>
+  <div class="field"><label for="glasses">Glasses</label><select id="glasses"><option>none</option><option>round</option><option>square</option></select></div>
+  <div class="field"><label for="facialHair">Facial hair</label><select id="facialHair"><option value="none">Clean shaven</option><option value="mustache">Mustache</option><option value="stubble">Stubble</option><option value="both">Mustache + stubble</option></select></div>
+ </div>
+ <div class="hr"></div><div class="actions"><button type="button" id="backToLogin" class="btn">← Kembali</button><button type="submit" class="btn primary">Review Character →</button></div>
+ <p id="characterMessage" class="status" aria-live="polite"></p>
+ </form></div>
+</div></section><section id="confirmScreen" class="screen" hidden aria-label="Confirm Character">
+<h1>Confirm Character</h1><p class="muted">Periksa nama, zodiak, body, dan penampilan sebelum masuk dunia.</p>
+<div id="confirmList"></div><div class="actions" style="margin-top:15px"><button type="button" class="btn" id="confirmBack">← Edit Character</button><button type="button" class="btn primary" id="confirmGo">Create Character ✓</button></div><p id="confirmMessage" class="status"></p>
+</section>
+<section id="loadingScreen" class="screen" hidden aria-label="Enter World">
+<h1>Entering World...</h1><p class="muted" id="loadingCopy">Menyiapkan kehidupanmu di Semesta.</p><div class="progress"><div id="enterProgress"></div></div>
+</section>
+<section id="tutorialScreen" class="screen" hidden aria-label="Tutorial">
+<h1>Selamat datang di kota.</h1>
+<div class="guide"><h2>Dasar permainan</h2><p>WASD / Arrow: berjalan. Shift: berlari. Gunakan tombol Action saat dekat objek atau NPC. Buka handphone untuk fitur kota. Cari pekerjaan dan jaga kebutuhan hidupmu.</p></div>
+<div class="actions"><button class="btn primary" type="button" id="tutorialDone">Mulai Hidup →</button><button class="btn" type="button" id="tutorialSkip">Skip Tutorial</button></div>
+</section>
+<section id="pauseScreen" class="screen" hidden aria-label="Pause">
+<h1>Game Paused</h1><p class="muted">World tetap dibuka. Lanjut bermain atau kembali ke Welcome.</p>
+<div class="actions"><button class="btn primary" id="resumeGame">▶ Resume</button><button class="btn" id="pauseExit">Exit to Menu</button></div>
+</section>
+<section id="messageScreen" class="screen" hidden aria-label="Custom Flow Screen">
+<h1 id="customTitle">Screen</h1><p class="muted" id="customDescription"></p><button type="button" class="btn primary" id="customContinue">Continue →</button>
 </section>
 <section id="gameScreen" class="screen" hidden aria-label="Semesta gameplay">
   <div class="game-top"><div><strong id="cityName">SEMESTA • Original World</strong>
   <div class="micro" id="worldLabel">Menggunakan renderer dan mekanik Semesta asli</div></div>
-  <div class="actions"><button type="button" class="btn compact" id="reloadWorld">↻ Reload</button>
+  <div class="actions"><button type="button" class="btn compact" id="pauseButton">Ⅱ Pause</button><button type="button" class="btn compact" id="reloadWorld">↻ Reload</button>
   <button class="btn compact" id="exitGame" type="button">Keluar</button></div></div>
   <div id="viewport">
     <iframe id="semestaFrame" title="Semesta — mode bermain tanpa editor" allow="fullscreen" referrerpolicy="same-origin" tabindex="0"></iframe>
