@@ -27,7 +27,11 @@
 .progress{height:24px;background:#fff;border:2px inset #777;padding:3px}.progress div{height:100%;background:repeating-linear-gradient(90deg,#072aaa 0 14px,#fff 14px 16px);width:0;transition:width .3s}
 .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.choice{border:2px solid;border-color:#fff #777 #777 #fff;background:#d6d6d6;text-align:center;min-height:156px;padding:12px 6px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px}.choice.selected{outline:2px solid #082e99;background:#dde7ff}.choice img{height:94px;max-width:100%;image-rendering:pixelated;object-fit:contain}.choice .silhouette{width:60px;height:86px;display:grid;place-items:center;background:#95a8af;color:#103549;font-size:41px}
 .statusbar{border-top:1px solid #fff;display:flex;justify-content:space-between;gap:8px;padding:5px 8px;font:11px monospace;color:#454545}
-#gameScreen{padding:0;display:flex;flex-direction:column;overflow:hidden;height:min(76dvh,670px)}.game-top{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:9px 10px;background:#c5c5c5}.game-top strong{font-size:13px}.game-top .actions{gap:5px}
+#gameScreen{padding:0;display:flex;flex-direction:column;overflow:hidden;height:min(79dvh,720px);width:100%}
+#semestaFrame{display:block;width:100%;height:100%;border:0;background:#768e81}
+#worldLoading{position:absolute;inset:0;background:#d5d5d5ef;color:#183d66;display:grid;place-items:center;font:700 13px Tahoma;z-index:4}
+#viewport{min-height:230px;touch-action:auto}
+#worldLoading[hidden]{display:none!important}.game-top{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:9px 10px;background:#c5c5c5}.game-top strong{font-size:13px}.game-top .actions{gap:5px}
 #viewport{position:relative;flex:1;min-height:225px;overflow:hidden;background:#728b69;touch-action:none}
 #world{display:block;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
 #gameHud{position:absolute;left:11px;top:11px;padding:8px 10px;min-width:140px;background:#c0c0c0ec;border:2px solid;border-color:#fff #555 #555 #fff;font-size:11px;pointer-events:none}
@@ -72,12 +76,17 @@
 <div class="actions"><button type="button" id="backToLogin" class="btn">← Kembali</button><button type="submit" class="btn primary">Masuk Dunia →</button></div>
 <p id="characterMessage" class="status" aria-live="polite"></p></form>
 </section>
-<section id="gameScreen" class="screen" hidden aria-label="Game preview">
-<div class="game-top"><div><strong id="cityName">Semesta • Preview World</strong><div class="micro" id="worldLabel">Membaca data dunia...</div></div><div class="actions"><div id="zoom"><button class="btn compact" id="zoomOut" title="Zoom out" type="button">−</button><button class="btn compact" id="zoomIn" title="Zoom in" type="button">+</button></div><button class="btn compact" id="exitGame" type="button">Keluar</button></div></div>
-<div id="viewport"><canvas id="world" aria-label="Dunia isometrik, gerakkan karakter dengan WASD atau tombol arah"></canvas><div id="gameHud" aria-live="polite"><strong id="hudName">Player</strong><div id="hudPosition">Posisi: --</div><div>MODE: Preview / Offline</div></div><div id="interaction">Jalan dengan WASD atau tombol arah.</div></div>
-<div class="game-bottom"><span class="micro">WASD / arrows: jalan • E: interaksi • Scroll: zoom • tap peta: arah tujuan</span>
-<div class="dpad" aria-label="Kontrol arah"><span></span><button type="button" class="btn compact" data-move="up" aria-label="Atas">▲</button><span></span><button type="button" class="btn compact" data-move="left" aria-label="Kiri">◀</button><button type="button" class="btn compact" data-move="down" aria-label="Bawah">▼</button><button type="button" class="btn compact" data-move="right" aria-label="Kanan">▶</button></div>
-<button type="button" id="actionButton" class="btn primary">ACTION</button></div>
+<section id="gameScreen" class="screen" hidden aria-label="Semesta gameplay">
+  <div class="game-top"><div><strong id="cityName">SEMESTA • Original World</strong>
+  <div class="micro" id="worldLabel">Menggunakan renderer dan mekanik Semesta asli</div></div>
+  <div class="actions"><button type="button" class="btn compact" id="reloadWorld">↻ Reload</button>
+  <button class="btn compact" id="exitGame" type="button">Keluar</button></div></div>
+  <div id="viewport">
+    <iframe id="semestaFrame" title="Semesta — mode bermain tanpa editor" allow="fullscreen" referrerpolicy="same-origin" tabindex="0"></iframe>
+    <div id="worldLoading" role="status" aria-live="polite">Memuat dunia Semesta asli...</div>
+  </div>
+  <div class="game-bottom"><span class="micro" id="gameHelp">WASD / arrow: jalan • Shift: lari • Touch: D-pad & Action milik Semesta • Klik dunia untuk fokus keyboard</span>
+  <span class="micro">GAME CLIENT / READ-ONLY</span></div>
 </section>
 <div class="statusbar"><span id="statusText">READY</span><span>mainkan.exe · preview v0.1</span></div>
 </main></div>
