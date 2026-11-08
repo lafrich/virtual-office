@@ -18,7 +18,7 @@ let guest=true,session=null,selected='genesis_male_nude',profile=null,characterD
 let previewApplied=false,booted=false,sequence=0,firstTime=true,worldReady=false;
 let splashSeen=new Set(),pauseRequested=false;
 const directions=['se','sw','ne','nw'],expressions=['neutral','happy','sad','angry','sleepy','surprised','fear','shy','cry'];
-let charDirection=0,charWalk=false,charExpression=0,charTick=0;
+let charDirection=0,charWalk=false,charExpression=0,charTick=0,previewFrameShown=false;
 function message(id,text,error){
  const el=$(id);if(!el)return;el.textContent=text;el.classList.toggle('error',!!error);
 }
@@ -236,9 +236,22 @@ function drawAvatar(){
  const action=charWalk?'walk':'idle';
  const frames=charWalk?6:4;
  const frame=Math.floor(charTick/(charWalk?1:2))%frames;
- const shown=window.VLGenesisPlayer?.directPreview(c,profile,directions[charDirection],action,frame,expressions[charExpression],charTick/6);
- if(!shown)ctx.clearRect(0,0,64,112);
- $('previewDirection').textContent='Genesis '+(selected==='genesis_female_nude'?'Female':'Male')+' · '+directions[charDirection].toUpperCase()+' · '+(charWalk?'Walk':'Idle')+' · Emosi '+expressions[charExpression];
+ const direction=directions[charDirection],emotion=expressions[charExpression];
+ const shown=window.VLGenesisPlayer?.directPreview(c,profile,direction,action,frame,emotion,charTick/6);
+ // Keep the previous fully rendered sprite until ALL new sheets are ready.
+ if(shown)previewFrameShown=true;
+ const status=window.VLGenesisPlayer?.imageStatus(profile,emotion,direction)||{loaded:0,total:1,pending:1,errors:[]};
+ const fault=status.errors.length>0;
+ const waiting=!shown&&(status.pending>0||fault);
+ $('ccPreviewLoading').hidden=previewFrameShown||!waiting;
+ $('ccPreviewUpdating').hidden=!previewFrameShown||!waiting;
+ $('ccPreviewProgress').style.width=Math.round(100*status.loaded/Math.max(1,status.total))+'%';
+ $('ccPreviewLoadingText').textContent=fault?'Asset tidak tersedia: '+status.errors.join(', '):
+  'Memuat '+status.loaded+'/'+status.total+' layer Genesis / Emosi.exe...';
+ $('ccPreviewUpdating').textContent=fault?'Sprite gagal dimuat · gambar sebelumnya dipertahankan':
+  'Memuat perubahan... '+status.loaded+'/'+status.total+' layer';
+ $('previewDirection').textContent='Genesis '+(selected==='genesis_female_nude'?'Female':'Male')+
+  ' · '+direction.toUpperCase()+' · '+(charWalk?'Walk':'Idle')+' · Emosi '+emotion;
 }
 $('charRotate').addEventListener('click',()=>{charDirection=(charDirection+1)%4;drawAvatar();});
 $('charAnimate').addEventListener('click',()=>{charWalk=!charWalk;drawAvatar();});
@@ -283,7 +296,9 @@ function startWorld(force=false){
   pauseRequested=false;return;
  }
  worldReady=false;$('worldLoading').hidden=false;
- $('worldLoading').textContent='Memuat world WebGL, Jiwa, physics dan asset Semesta...';
+ $('worldProgress').style.width='3%';
+ $('worldLoadingText').textContent='Memuat world WebGL, Jiwa, physics dan asset Semesta...';
+ $('worldLoadingDetail').textContent='Menghubungkan engine Semesta...';
  $('worldLabel').textContent='World asli Semesta • perangkat ini';
  const url=new URL('../world-builder/',location.href);
  url.searchParams.set('player','1');
@@ -306,12 +321,19 @@ window.addEventListener('message',e=>{
    frame.contentWindow?.postMessage({type:'mainkan:player-profile',profile:normalized},location.origin);
   }catch(err){
    frame.contentWindow?.postMessage({type:'mainkan:player-profile-error',message:String(err.message)},location.origin);
-   $('worldLoading').textContent='Gagal memuat karakter Genesis: '+err.message;
+   $('worldLoadingText').textContent='Gagal memuat karakter Genesis: '+err.message;
+   $('worldLoadingDetail').textContent='Data karakter aman. Coba Reload.';
   }
   return;
  }
- if(e.data.type==='mainkan:semesta-ready'){
+ if(e.data.type==='mainkan:player-loading'){
+  const loaded=Number(e.data.loaded)||0,total=Math.max(1,Number(e.data.total)||1);
+  $('worldProgress').style.width=Math.round(100*loaded/total)+'%';
+  $('worldLoadingText').textContent='Menyiapkan Genesis + Emosi.exe...';
+  $('worldLoadingDetail').textContent=loaded+'/'+total+' layer sprite siap. Karakter ditampilkan setelah lengkap.';
+ }else if(e.data.type==='mainkan:semesta-ready'){
   worldReady=true;
+  $('worldProgress').style.width='100%';
   $('worldLoading').hidden=true;
   $('cityName').textContent=e.data.city||'SEMESTA • Native World';
   $('worldLabel').textContent='Semesta WebGL · '+Number(e.data.count||0)+' objek · '+(guest?'Guest':'Player');
@@ -319,7 +341,9 @@ window.addEventListener('message',e=>{
   if(pauseRequested)frame.contentWindow?.postMessage({type:'mainkan:pause'},location.origin);
   else try{frame.focus();}catch{}
  }else if(e.data.type==='mainkan:semesta-error'){
-  $('worldLoading').textContent=e.data.message||'Semesta tidak bisa dimuat. Coba Reload.';
+  $('worldLoading').hidden=false;
+  $('worldLoadingText').textContent=e.data.message||'Semesta tidak bisa dimuat. Coba Reload.';
+  $('worldLoadingDetail').textContent='Karakter tidak diganti atau dihapus. Gunakan Reload.';
   $('statusText').textContent='SEMESTA • ERROR';
  }
 });
