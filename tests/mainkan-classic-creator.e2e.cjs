@@ -62,6 +62,9 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   // Verify the original barefoot slot is still explicitly selectable/editable.
   await page.locator('#ccTools [data-tool=shoes]').click();
   await page.locator('#ccOptions').getByRole('button',{name:/Genesis Barefoot/}).click();
+  await page.waitForFunction(()=>window.VLGenesisPlayer.imageStatus({
+   base:'genesis_male_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}
+  }).ready,null,{timeout:45000});
   const barefoot=await page.evaluate(()=>window.VLGenesisPlayer.debug({
    base:'genesis_male_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}
   }));
@@ -103,6 +106,20 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   }));
   assert.ok(femaleShoes.some(p=>p.part==='shoes/shoes_f'&&p.ready&&!p.error),
    'Female must wear the native female Mahluk footwear sheet');
+  // Verify the actual rendered feet, not just the dropdown and resource URL.
+  const renderedShoes=await page.evaluate(()=>{
+   const cv=document.getElementById('charPreview'),px=cv.getContext('2d').getImageData(0,0,64,112).data;
+   let dark=0;for(let y=95;y<=101;y++)for(let x=20;x<=44;x++){
+    const i=(y*64+x)*4;if(px[i+3]>200&&px[i]<100&&px[i+1]<100&&px[i+2]<110)dark++;
+   }
+   return dark;
+  });
+  assert.ok(renderedShoes>=15,
+   'Female shoe pixels must render as dark footwear rather than nude skin: '+renderedShoes);
+  // Loading the source layer is asynchronous even though it is preserved.
+  await page.waitForFunction(()=>window.VLGenesisPlayer.imageStatus({
+   base:'genesis_female_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}
+  }).ready,null,{timeout:45000});
   const originalFemale=await page.evaluate(()=>window.VLGenesisPlayer.debug({
    base:'genesis_female_nude',appearance:{topStyle:'custom',pantsStyle:'custom',shoesStyle:'custom'}
   }));
