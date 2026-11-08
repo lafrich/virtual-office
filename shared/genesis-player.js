@@ -24,9 +24,9 @@ function normalizeProfile(input){
  const defaults={hairStyle:sourceLook.hair||"none",hairColor:sourceLook.hairColor||"black",
   skinTone:sourceLook.skin||"light",topStyle:"custom",topColor:sourceLook.topColor||"white",
   pantsStyle:"custom",pantsColor:sourceLook.pantsColor||"slate",
-  // Published Genesis custom shoes contain barefoot skin pixels, not painted footwear.
-  // Default to native Mahluk shoes without overwriting the editable custom artwork.
-  shoesStyle:"shoes",shoesColor:sourceLook.shoesColor||"black",
+  // Genesis Nude must open with its own immutable Custom Wear barefoot sheet.
+  // Native Mahluk black shoes remain opt-in, not silently worn over a nude base.
+  shoesStyle:"custom",shoesColor:sourceLook.shoesColor||"black",
   glasses:"none",facialHair:"none"};
  const fields={
   hairStyle:"hair",hairColor:"hairColor",skinTone:"skin",topStyle:"top",topColor:"topColor",
@@ -111,12 +111,14 @@ function listParts(profile){
  parts.push("base/body"+f);
  if(a.topStyle==="custom")parts.push("top/custom_back");
  else if(a.topStyle!=="nude")parts.push("top/"+a.topStyle+"_back"+f);
- // Exactly ONE garment per slot: Genesis custom wear OR chosen stock clothing.
- // Never paint a stock outfit over custom wear and never drop custom layers.
- if(a.shoesStyle==="custom")parts.push("shoes/custom");
- else if(a.shoesStyle!=="nude")parts.push("shoes/"+a.shoesStyle+f);
+ // Pants must be drawn before shoes. The previous stock shoe underlay was
+ // overwritten by the Genesis custom pants on a variable number of pixels
+ // between Idle, Walk and Sit, visibly flashing black shoe edges.
  if(a.pantsStyle==="custom")parts.push("pants/custom");
  else if(a.pantsStyle!=="nude")parts.push("pants/"+a.pantsStyle+f);
+ // Exactly ONE shoe per slot: approved original custom/barefoot OR selected stock.
+ if(a.shoesStyle==="custom")parts.push("shoes/custom");
+ else if(a.shoesStyle!=="nude")parts.push("shoes/"+a.shoesStyle+f);
  if(["boots","hightops"].includes(a.shoesStyle))parts.push("shoes/"+a.shoesStyle+"_over"+f);
  if(a.topStyle==="custom")parts.push("top/custom");
  else if(a.topStyle!=="nude")parts.push("top/"+a.topStyle+f);
@@ -163,8 +165,11 @@ function draw(ctx,profile,dir="se",action="idle",frame=0,emotion="neutral",tick=
  const work=canvas(),g=work.getContext("2d",{alpha:true});g.imageSmoothingEnabled=false;
  const parts=listParts(norm);
  const shade=part=>compositedPixel(part,norm,a,d,f);
- const drawLayer=part=>{const cell=shade(part);if(cell)g.drawImage(cell,0,0);};
- for(const part of parts.slice(0,-2))drawLayer(part);
+ // imageStatus only confirms that a PNG loaded; it does not verify this exact
+ // atlas cell exists. Never swap a partially drawn frame during action changes.
+ const cells=parts.map(part=>shade(part));
+ if(cells.some(cell=>!cell))return false;
+ for(const cell of cells.slice(0,-2))g.drawImage(cell,0,0);
  // Emosi.exe is the ONLY facial source.
  const e=expressionFor(emotion)||expressionFor("neutral");
  const face=lookupImage(e?.png);
@@ -172,9 +177,9 @@ function draw(ctx,profile,dir="se",action="idle",frame=0,emotion="neutral",tick=
   const faceFrame=Math.floor(Math.max(0,tick)*Math.max(1,e?.fps||6))%Math.max(1,e?.frames||1);
   g.drawImage(face.img,faceFrame*64,DIRS.indexOf(d)*112,64,112,0,0,64,112);
  }
- const shadow=shade("base/shadow"),fx=shade("base/fx");
- if(shadow){g.save();g.globalCompositeOperation="destination-over";g.drawImage(shadow,0,0);g.restore();}
- if(fx)g.drawImage(fx,0,0);
+ const shadow=cells[cells.length-2],fx=cells[cells.length-1];
+ g.save();g.globalCompositeOperation="destination-over";g.drawImage(shadow,0,0);g.restore();
+ g.drawImage(fx,0,0);
  // Atomic swap: a fully rendered canvas is committed in one operation.
  ctx.clearRect(0,0,64,112);ctx.drawImage(work,0,0);
  return true;
@@ -190,7 +195,9 @@ function createRig(THREE,input){
  const mat=new THREE.MeshBasicMaterial({map:tex,transparent:false,alphaTest:.45,depthTest:true,depthWrite:true,side:THREE.DoubleSide});
  const pixelWorld=Math.SQRT2/64,h=112*pixelWorld/(Math.sqrt(3)/2),w=64*pixelWorld;
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
- mesh.position.y=h*(100/112-.5);
+ // Small ground clearance keeps soles above undulating Semesta terrain
+ // without changing the original Genesis 32,100 pivot or walking footprint.
+ mesh.position.y=h*(100/112-.5)+0.025;
  mesh.userData.characterBillboard=true;mesh.userData.characterSource="genesis";
  mesh.userData.nativeFrame={w:64,h:112,pivotX:32,pivotY:100};
  const state={profile,loaded:false,failed:false,direction:"se",moving:false,pose:null,emotion:"neutral",time:0};
