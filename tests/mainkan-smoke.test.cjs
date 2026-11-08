@@ -49,3 +49,37 @@ test('Membangun opens the standalone player client',()=>{
  assert.match(launcher,/data-art="mainkan"/);
  assert.match(launcher,/virtual-office\/mainkan\//);
 });
+
+test('Flow Editor parses and includes graph, inspector, file IO and test preview',()=>{
+ const editor=read('mainkan/flow-editor.html'),logic=read('mainkan/flow-editor.js'),schema=read('mainkan/flow-model.js');
+ assert.doesNotThrow(()=>new vm.Script(logic,{filename:'mainkan/flow-editor.js'}));
+ assert.doesNotThrow(()=>new vm.Script(schema,{filename:'mainkan/flow-model.js'}));
+ for(const name of ['nodeLayer','wires','inspector','addNode','duplicateNode','deleteNode','importFlow','exportFlow','testFlow','testFrame'])
+  assert.match(editor,new RegExp('id="'+name+'"'));
+ assert.match(logic,/pointermove/);
+ assert.match(logic,/mainkan:flow-config/);
+ assert.match(logic,/Blob\(/);
+});
+test('validated onboarding default flow has connected branches',()=>{
+ const F=require('../mainkan/flow-model.js');
+ const graph=F.normalize(F.preset('default'));
+ assert.equal(graph.format,'mainkan-flow-v1');
+ assert.equal(F.get(graph,'auth').routes.guest,'character');
+ assert.equal(F.get(graph,'character').next,'confirm');
+ assert.equal(F.get(graph,'firstCheck').routes.first_time,'tutorial');
+ assert.equal(F.get(graph,'tutorial').next,'game');
+ const invalid=F.clone(graph);invalid.nodes.find(n=>n.id==='character').next='deleted';
+ assert.equal(F.check(invalid).ok,false);
+});
+test('Game UI moved to Mainkan while Semesta stays source for world/phone systems',()=>{
+ const hud=read('mainkan/game-hud.js');
+ assert.match(html,/id="gamePhone"/);
+ assert.match(html,/id="gameBag"/);
+ assert.match(html,/id="gameAction"/);
+ assert.match(hud,/ptPhoneBtn/);
+ assert.match(hud,/ptActionBtn/);
+ assert.match(playerCSS,/#vs-hud\{display:none!important\}/);
+ assert.match(app,/flowPreview/);
+ assert.match(app,/mainkan:flow-request/);
+ assert.match(html,/id="importPlayerFlow"/);
+});
