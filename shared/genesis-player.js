@@ -24,7 +24,9 @@ function normalizeProfile(input){
  const defaults={hairStyle:sourceLook.hair||"none",hairColor:sourceLook.hairColor||"black",
   skinTone:sourceLook.skin||"light",topStyle:"custom",topColor:sourceLook.topColor||"white",
   pantsStyle:"custom",pantsColor:sourceLook.pantsColor||"slate",
-  shoesStyle:"custom",shoesColor:sourceLook.shoesColor||"black",
+  // Published Genesis custom shoes contain barefoot skin pixels, not painted footwear.
+  // Default to native Mahluk shoes without overwriting the editable custom artwork.
+  shoesStyle:"shoes",shoesColor:sourceLook.shoesColor||"black",
   glasses:"none",facialHair:"none"};
  const fields={
   hairStyle:"hair",hairColor:"hairColor",skinTone:"skin",topStyle:"top",topColor:"topColor",
