@@ -258,6 +258,9 @@ $('charAnimate').addEventListener('click',()=>{charWalk=!charWalk;drawAvatar();}
 $('charExpression').addEventListener('click',()=>{charExpression=(charExpression+1)%expressions.length;drawAvatar();});
 setInterval(()=>{if(stage==='characterScreen'){charTick++;drawAvatar();}},170);
 const fields=['hairStyle','hairColor','skinTone','topStyle','topColor','pantsStyle','pantsColor','shoesStyle','shoesColor','glasses','facialHair'];
+// Reflect pending asset loads immediately when any part changes, instead of
+// waiting for the 170ms animation tick (which left a stale status on screen).
+fields.forEach(id=>$(id)?.addEventListener('change',drawAvatar));
 $('characterForm').addEventListener('submit',e=>{
  e.preventDefault();
  const name=$('playerName').value.trim(),birth=$('birthday').value,zodiac=$('zodiac').value;
