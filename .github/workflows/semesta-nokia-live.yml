@@ -1,4 +1,4 @@
-name: Semesta Nokia + Jiwa live browser check
+name: Mainkan Nokia + Jiwa live browser check
 on:
   push:
     branches: [main]
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 14
     steps:
-      - name: Checkout original Semesta
+      - name: Checkout Mainkan and native Semesta runtime
         uses: actions/checkout@v4
         with:
           path: virtual-office
@@ -34,11 +34,17 @@ jobs:
           node-version: "22"
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
+      - name: Link approved Genesis and Emosi art into the same-origin preview
+        run: |
+          ln -s site/media virtual-life-asset-pipeline/media
+          ln -s site/v6p-compositor.js virtual-life-asset-pipeline/v6p-compositor.js
+          ln -s site/genesis-source.js virtual-life-asset-pipeline/genesis-source.js
+          ln -s site/emosi-source.js virtual-life-asset-pipeline/emosi-source.js
       - name: Serve app and renderer from the same origin
         run: |
           python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/nokia-semesta-server.log 2>&1 &
           sleep 2
-      - name: "Check browser runtime: buy token, Dompet, activity pins, actor position"
+      - name: "Check Mainkan player: buy token, Dompet, activity pins, actor position"
         run: node virtual-office/tests/nokia-live-browser.e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
