@@ -34,6 +34,10 @@ jobs:
           node-version: '22'
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
+      - name: Map published Mahluk V6P source into local Pages test layout
+        run: |
+          ln -s site/media virtual-life-asset-pipeline/media
+          ln -s site/v6p-compositor.js virtual-life-asset-pipeline/v6p-compositor.js
       - name: Serve apps from same origin
         run: |
           python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/mainkan-server.log 2>&1 &
