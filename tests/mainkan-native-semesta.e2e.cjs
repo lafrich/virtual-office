@@ -16,7 +16,11 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  await page.locator('#skipSplash').click({timeout:15000}).catch(()=>{});
  await page.locator('#welcomeGuest').click({timeout:15000});
  await page.locator('#playerName').fill('Semesta Tester');
- await page.locator('#zodiac').selectOption({label:'Capricorn'});
+ await page.locator('#ccDay').fill('11');
+ await page.locator('#ccMonth').fill('01');
+ await page.locator('#ccYear').fill('1994');
+ await page.locator('#ccYear').dispatchEvent('input');
+ assert.equal(await page.locator('#zodiac').inputValue(),'Capricorn');
  const before=await page.evaluate(()=>localStorage.getItem('virtual-life-gpt-world-builder-pipeline-v3'));
  await page.locator('#characterForm button[type=submit]').click();
  await page.locator('#confirmGo').click({timeout:15000});
