@@ -15,6 +15,7 @@
  }
  function checkpoint(){
   undo.push(JSON.stringify(flow));if(undo.length>80)undo.shift();redo.length=0;
+  setTimeout(()=>document.dispatchEvent(new Event('mainkan:flow-edit')),0);
  }
  function find(id){return F.get(flow,id);}
  function optionList(chosen,includeEmpty=false){
