@@ -1,0 +1,19 @@
+name: Cloud-first Remaining Editors — Safety
+on:
+  push:
+    branches: [feature/cloud-first-emosi-jiwa-mainkan-20261108]
+  workflow_dispatch:
+jobs:
+  native-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: New Emosi/Jiwa/Mainkan native Drive mocks and integrity
+        run: node --test tests/cloud-first-remaining.test.cjs
+      - name: Universal interchange, startup, simulated Drive and native Semesta/Bangun
+        run: node --test tests/cloud-first-universal.test.cjs tests/cloud-first-startup.test.cjs tests/cloud-first-drive-mock.test.cjs tests/cloud-first-native-entry.test.cjs
+      - name: Native Jiwa, Emosi, Mainkan regression
+        run: node --test tests/jiwa-foundation-contract.test.cjs tests/jiwa-activity-flow.test.cjs tests/emotion-drive-oauth.test.cjs tests/mainkan-smoke.test.cjs
