@@ -126,3 +126,17 @@ body:has(#characterScreen:not([hidden])) .window{
  .cc-zodiac input{width:110px}
  .cc-form-actions{width:100%;justify-content:flex-end}
 }
+
+/* Async Genesis V6P sprite loader: keep the prior canvas visible while a
+ * replacement hair or garment sheet downloads. Full-screen only on first
+ * appearance, a small status chip on subsequent changes. */
+.cc-paper{position:relative}
+.cc-preview-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:11px;padding:14px;
+ background:#f4f4ec;color:#253767;text-align:center;font:11px/1.5 Tahoma,sans-serif;z-index:2}
+.cc-preview-loading strong{font-size:13px}
+.cc-preview-loading[hidden],.cc-preview-updating[hidden]{display:none!important}
+.cc-load-track{width:min(94%,225px);height:20px;background:#fff;padding:2px;border:2px solid;border-color:#808080 #fff #fff #808080}
+#ccPreviewProgress{height:100%;width:0;background:repeating-linear-gradient(90deg,#073399 0 13px,#f4f4f4 13px 15px);transition:width .12s}
+.cc-preview-updating{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 26px);white-space:normal;
+ background:#ffffe3;color:#173265;border:1px solid #969687;padding:5px 9px;z-index:2;font:bold 11px Tahoma,sans-serif;
+ box-shadow:2px 2px #7775;pointer-events:none}
