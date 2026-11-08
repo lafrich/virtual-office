@@ -22,17 +22,17 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   assert.equal(await page.locator('#topStyle').inputValue(),'custom');
   assert.equal(await page.locator('#pantsStyle').inputValue(),'custom');
   assert.equal(await page.locator('#shoesStyle').inputValue(),'custom');
-  await page.locator('#ccPreviewLoading[hidden]').waitFor({state:'attached',timeout:25000}).catch(()=>{});
   // Short/Swept have deliberate 1x1 transparent back-hair files; they must
   // render with real front hair, without blanking the whole avatar.
   for(const [value,visibleText] of [['short','Short'],['swept','Short swept']]){
-   await page.locator('#ccOptions .cc-choice-btn').filter({hasText:visibleText,exact:true}).click();
+   await page.locator('#ccOptions').getByRole('button',{name:visibleText,exact:true}).click();
    assert.equal(await page.locator('#hairStyle').inputValue(),value);
    await page.waitForFunction(()=>{
     const el=document.getElementById('charPreview'),loading=document.getElementById('ccPreviewLoading'),
       changing=document.getElementById('ccPreviewUpdating');
-    return loading.hidden&&changing.hidden&&
-     el.getContext('2d').getImageData(30,32,1,1).data[3]>0;
+    const px=el.getContext('2d').getImageData(0,0,64,112).data;
+    let opaque=0;for(let i=3;i<px.length;i+=4)if(px[i]>0)opaque++;
+    return loading.hidden&&changing.hidden&&opaque>100;
    },null,{timeout:45000});
   }
   const custom=await page.evaluate(()=>{
