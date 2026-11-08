@@ -5,7 +5,7 @@ const {PNG}=require('pngjs');
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 
-const URL='http://127.0.0.1:8091/virtual-office/emotion-studio/';
+const URL='http://127.0.0.1:8091/virtual-office/emotion-studio/?cloudLegacy=1';
 const W=64,H=112;
 function pixel(png,dir,x,y){
  const k=((y+H*dir)*png.width+x)*4;
