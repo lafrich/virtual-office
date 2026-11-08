@@ -47,14 +47,13 @@
   if(!st)return;
   const amount=number(st.wallet??st.money??st.cash);
   if(amount!==null)$('gameWallet').textContent='Rp '+Math.round(amount).toLocaleString('id-ID');
-  $('gameNeeds').textContent='Hunger '+fmtNeed(st,'hunger')+' · Energy '+fmtNeed(st,'energy');
  }
 
  // Mainkan positions its visible HUD against the actual world viewport.
  // The Semesta iframe keeps the same canonical HUD layout for popups.
  const bar=$('mainkanGameBar'),viewport=$('viewport');
  if(bar&&viewport)viewport.appendChild(bar);
- const HUD_ELEMENTS={lifePanel:'gameNeeds',money:'gameWallet',
+ const HUD_ELEMENTS={money:'gameWallet',
   hpButton:'gamePhone',bagButton:'gameBag',action:'gameAction',run:'gameRun'};
  function layout(){
   const HL=window.VLHudLayout;
