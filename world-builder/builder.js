@@ -3023,6 +3023,11 @@ function spawnRespawnApi(){
 window.SemestaPlay=Object.freeze({
  playerProfile:()=>mainkanPlayerProfile,
  playerActor:()=>playerMode?documentMap.objects.find(o=>o.id===LIFE_TEST_ACTOR_ID)||null:null,
+ playerRigStatus:()=>{
+  const rig=playerMode?rigs.get(LIFE_TEST_ACTOR_ID)?.rig:null;
+  return rig?{loaded:!!rig.state?.loaded,failed:!!rig.state?.failed,
+   source:rig.mesh?.userData?.characterSource||'',emotion:rig.state?.emotion||'neutral'}:null;
+ },
  setPlayerEmotion:(name,duration=3)=>playerMode?!!rigs.get(LIFE_TEST_ACTOR_ID)?.rig?.setEmotion?.(name,duration):false,
  gameplay:currentPlayGameplay,
  refreshHud:syncPlayHud,
