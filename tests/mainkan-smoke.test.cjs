@@ -99,5 +99,13 @@ test('Genesis is the only player body; all player faces are Emosi.exe sources',(
  assert.match(semesta,/GenesisPlayer\.createRig/);
  assert.match(semesta,/const first=playerMode\?makeTemporaryLifePlayer\(\)/);
  assert.match(semesta,/setPlayerEmotion/);
- assert.match(gen,/parts\.map\(part=>lookupImage/);
+ // Source loading is now atomic; one slow hair sheet may not erase a frame.
+ assert.match(gen,/const items=names\.map\(part=>\(\{part,image:lookupImage/);
+ assert.match(gen,/if\(!status\.ready\)return false/);
+ assert.match(gen,/ctx\.clearRect\(0,0,64,112\);ctx\.drawImage\(work,0,0\)/);
+ assert.match(gen,/\["short","swept"\]\.includes/);
+ for(const id of ['topStyle','pantsStyle','shoesStyle'])
+  assert.match(html,new RegExp('<select id="'+id+'"><option value="custom" selected>Genesis Custom Wear'));
+ assert.match(app,/mainkan:player-loading/);
+ assert.match(semesta,/function reportPlayerReady\(\)/);
 });
