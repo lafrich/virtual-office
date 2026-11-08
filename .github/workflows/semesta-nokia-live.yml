@@ -12,6 +12,13 @@ on:
       - "jiwa/life-economy.js"
       - "tests/nokia-live-browser.e2e.cjs"
       - ".github/workflows/semesta-nokia-live.yml"
+  pull_request:
+    paths:
+      - "mainkan/**"
+      - "world-builder/builder.js"
+      - "world-builder/semesta-life-play.js"
+      - "tests/nokia-live-browser.e2e.cjs"
+      - ".github/workflows/semesta-nokia-live.yml"
   workflow_dispatch:
 permissions:
   contents: read
