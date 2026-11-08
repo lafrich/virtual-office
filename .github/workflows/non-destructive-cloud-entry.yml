@@ -1,7 +1,7 @@
 name: Non-destructive Native Cloud Entry
 on:
   push:
-    branches: [feature/nondestructive-cloud-entry-20261108]
+    branches: [feature/nondestructive-cloud-entry-20261108, fix/cloud-editor-only-20261108]
   workflow_dispatch:
 jobs:
   safety:
