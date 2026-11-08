@@ -15,7 +15,7 @@ if(playerMode){
    '/virtual-life-asset-pipeline/v6p-compositor.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/emosi-source.js?v=genesis-player-20261108',
-   '../shared/genesis-player.js?v=genesis-player-20261108'
+   '../shared/genesis-player.js?v=genesis-wear-flickerfix-v2'
   ]){
    await new Promise((resolve,reject)=>{
     const script=document.createElement('script');script.src=src;script.onload=resolve;
@@ -4361,12 +4361,45 @@ if(playerMode){
   const accepted=await Promise.race([mainkanProfileGate,new Promise(resolve=>setTimeout(()=>resolve(false),12000))]);
   if(!accepted||!mainkanPlayerProfile)throw Error('Genesis player was not provided');
   setMode('walk');
-  document.documentElement.dataset.mainkanReady='true';
-  if(window.parent!==window)window.parent.postMessage({
-   type:'mainkan:semesta-ready',city:documentMap.map?.name||'Semesta',
-   profile:mainkanPlayerProfile.base,faceSource:'emosi.exe',
-   count:documentMap.objects.filter(o=>o.id!=='__semesta_life_temporary_player__').length
-  },location.origin);
+  // Native Semesta animation loop starts after this bootstrap block. Do NOT
+  // block it while waiting for the async PNG atlases. Keep Mainkan's loading
+  // screen until the *first actual CanvasTexture frame* has been painted.
+  const loadedAt=performance.now();
+  let done=false,reportedAt=0;
+  function reportPlayerReady(){
+   if(done)return;
+   const rig=rigs.get(LIFE_TEST_ACTOR_ID)?.rig;
+   if(rig?.state?.loaded){
+    done=true;
+    document.documentElement.dataset.mainkanReady='true';
+    if(window.parent!==window)window.parent.postMessage({
+     type:'mainkan:semesta-ready',city:documentMap.map?.name||'Semesta',
+     profile:mainkanPlayerProfile.base,faceSource:'emosi.exe',
+     count:documentMap.objects.filter(o=>o.id!=='__semesta_life_temporary_player__').length
+    },location.origin);
+    return;
+   }
+   const status=window.VLGenesisPlayer.imageStatus(mainkanPlayerProfile,
+    rig?.state?.emotion||'neutral',rig?.state?.direction||'se');
+   const timedOut=performance.now()-loadedAt>90000;
+   if(status.errors.length||timedOut){
+    done=true;
+    const reason=status.errors.length?'Asset tidak tersedia: '+status.errors.join(', '):
+     'Loading Genesis terlalu lama. Coba Reload.';
+    if(window.parent!==window)window.parent.postMessage({
+     type:'mainkan:semesta-error',message:reason
+    },location.origin);
+    return;
+   }
+   if(performance.now()-reportedAt>350){
+    reportedAt=performance.now();
+    if(window.parent!==window)window.parent.postMessage({
+     type:'mainkan:player-loading',loaded:status.loaded,total:status.total
+    },location.origin);
+   }
+   setTimeout(reportPlayerReady,130);
+  }
+  setTimeout(reportPlayerReady,0);
  }catch(error){
   console.error('Mainkan Semesta player mode failed',error);
   if(window.parent!==window)window.parent.postMessage({
