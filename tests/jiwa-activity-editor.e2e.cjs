@@ -8,8 +8,8 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  const jiwa=await context.newPage(),semesta=await context.newPage(),errors=[];
  for(const [name,page] of [['jiwa',jiwa],['semesta',semesta]])
   page.on('pageerror',e=>errors.push(name+': '+String(e.stack||e)));
- await jiwa.goto(base+'jiwa/',{waitUntil:'domcontentloaded',timeout:90000});
- await semesta.goto(base+'world-builder/',{waitUntil:'domcontentloaded',timeout:90000});
+ await jiwa.goto(base+'jiwa/?cloudLegacy=1',{waitUntil:'domcontentloaded',timeout:90000});
+ await semesta.goto(base+'world-builder/?cloudLegacy=1',{waitUntil:'domcontentloaded',timeout:90000});
  await jiwa.waitForFunction(()=>!!window.JiwaActivityEditor&&!!window.JiwaActivities&&
   document.querySelectorAll('#activityList .activity-row').length>0,null,{timeout:90000});
  await semesta.waitForFunction(()=>!!window.SemestaPlay&&!!window.SemestaLifePlay,null,{timeout:90000});
