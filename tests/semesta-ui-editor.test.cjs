@@ -56,11 +56,13 @@ test('The global HUD layout survives map changes and retains custom positions',(
 test('Phone select-drag supports real mobile viewport and touch hit testing',()=>{
  const src=path('world-builder/semesta-ui-editor.js');
  const html=path('world-builder/index.html');
- assert.match(src,/next=env\\.phone\\?'phone':HL\\.detectProfile\\(document\\)/);
- assert.match(src,/shield\\.hidden=profile!=='phone'/);
- assert.match(src,/function pickAt\\(clientX,clientY\\)/);
- assert.match(src,/addEventListener\\('pointerdown',ev=>/);
- assert.match(src,/ev\\.pointerId!==drag\\.pointerId/);
- assert.match(src,/setPointerCapture\\(ev\\.pointerId\\)/);
- assert.match(html,/id="suiDragOnScreen"/);
+ for(const s of [
+  "next=env.phone?'phone':HL.detectProfile(document)",
+  "shield.hidden=profile!=='phone'",
+  "function pickAt(clientX,clientY)",
+  "addEventListener('pointerdown',ev=>",
+  "ev.pointerId!==drag.pointerId",
+  "setPointerCapture(ev.pointerId)"
+ ])assert.ok(src.includes(s),'Missing phone pointer integration: '+s);
+ assert.ok(html.includes('id="suiDragOnScreen"'));
 });
