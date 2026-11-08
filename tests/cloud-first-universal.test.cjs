@@ -39,3 +39,9 @@ test("No proof means no cleanup",async()=>{
  const result=U.cleanupSynced({getItem:k=>map.get(k),removeItem:k=>map.delete(k)},[r],[]);
  assert.equal(result.removed.length,0);assert.equal(map.get("draft"),"data");
 });
+test("Startup shell and Google Drive adapter modules load without browser globals",()=>{
+ const splash=require("../shared/cloud-first-startup.js");
+ const drive=require("../shared/cloud-first-drive.js");
+ assert.equal(typeof splash.mount,"function");
+ assert.equal(typeof drive.create,"function");
+});
