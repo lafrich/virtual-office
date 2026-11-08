@@ -29,13 +29,15 @@
   function button(label){const b=root.document.createElement("button");b.type="button";b.textContent=label;b.style.cssText="min-height:42px;border:2px solid;border-color:#fff #555 #555 #fff;background:#d6d6d6;color:#111;font:700 12px Tahoma;padding:8px";return b}
   const sync=button("☁ SYNC FROM DRIVE"),importButton=button("↓ IMPORT UNIVERSAL");
   const confirm=button("↑ CONNECT & UPLOAD IMPORT");confirm.hidden=true;
+  const offline=button("OPEN EXISTING DATA · OFFLINE");
+  offline.style.gridColumn="1 / -1";offline.title="Recovery: use existing browser drafts without claiming they are synced";
   confirm.style.gridColumn="1 / -1";
   const file=root.document.createElement("input");file.type="file";file.accept=".json,application/json";file.hidden=true;
-  actions.append(sync,importButton,confirm);
+  actions.append(sync,importButton,confirm,offline);
   panel.append(title,desc,state,actions,file);view.append(panel);
   root.document.body.append(view);
   const message=(s,error)=>{state.textContent=s;state.style.color=error?"#9b0000":"#102e49"};
-  function toggle(disabled){busy=disabled;sync.disabled=importButton.disabled=confirm.disabled=disabled}
+  function toggle(disabled){busy=disabled;sync.disabled=importButton.disabled=confirm.disabled=offline.disabled=disabled}
   async function enter(data){
    if(!data||data.verified!==true)throw Error("Drive load not verified; editor locked");
    // Hydrate first; do not purge a browser draft when editor initialization fails.
@@ -67,6 +69,12 @@
     const data=await api.loadAll();
     await enter({...data,imported});
    }catch(e){message("IMPORT NOT APPLIED: "+e.message,true)}finally{toggle(false)}
+  };
+  offline.onclick=()=>{
+   if(busy)return;
+   if(!root.confirm?.("Open existing browser drafts without syncing to Drive? No data will be deleted."))return;
+   if(typeof config.onOffline==="function")config.onOffline();
+   ready=false;view.remove();
   };
   async function exportUniversal(){
    if(!ready)throw Error("Cannot export before verified Drive load");
