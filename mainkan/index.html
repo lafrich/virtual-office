@@ -112,7 +112,7 @@ body.mainkan-playing #viewport{
 <div id="desktop">
 <main class="window" aria-label="Mainkan aplikasi pemain">
 <header class="titlebar"><span class="icon" aria-hidden="true">▶</span><span>MAINKAN.EXE — Namanya Juga Hidup</span><div class="controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
-<div class="menubar"><span>Game</span><span>Player</span><a href="./flow-editor.html" id="openFlowEditor" title="Atur flow game secara visual">▤ Flow Editor</a></div>
+<div class="menubar"><span>Game</span><span>Player</span><a href="./flow-editor.html" id="openFlowEditor" title="Atur flow game secara visual">▤ Flow Editor</a><button type="button" class="btn compact" id="importPlayerFlow">Import Flow JSON</button><input type="file" id="importFlowFile" accept=".json,application/json" hidden></div>
 <section id="splashScreen" class="screen" aria-label="Splash Screen">
   <div class="split"><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Game dunia virtual Indonesia<br>mainkan.exe / player client</small></div>
   <div><h1>Memuat dunia...</h1><p class="muted">Memeriksa peta dan aset game. Ini aplikasi untuk pemain, bukan editor.</p><div class="progress" role="progressbar" aria-label="Persiapan game"><div id="progressFill"></div></div><p id="bootText" class="micro" aria-live="polite">Starting mainkan.exe...</p><button id="skipSplash" type="button" class="btn compact">Lewati intro</button></div></div>
