@@ -14,7 +14,7 @@ function pixel(png,dir,x,y){
  try{
   const page=await browser.newPage({viewport:{width:1590,height:1050},acceptDownloads:true});
   const faults=[];page.on('pageerror',e=>faults.push(e.message));
-  await page.goto('http://127.0.0.1:8091/virtual-office/emotion-studio/',{
+  await page.goto('http://127.0.0.1:8091/virtual-office/emotion-studio/?cloudLegacy=1',{
    waitUntil:'domcontentloaded',timeout:90000});
   await page.waitForFunction(()=>document.querySelectorAll('#timeline .frame-cell').length>0,
    null,{timeout:60000});
