@@ -8,7 +8,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  const ctx=await browser.newContext({viewport:{width:1600,height:950}});
  const page=await ctx.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(String(e.stack||e)));
- await page.goto(base+'world-builder/',{waitUntil:'domcontentloaded',timeout:90000});
+ await page.goto(base+'world-builder/?cloudLegacy=1',{waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForFunction(()=>window.SemestaPlay&&window.SemestaUIEditor&&window.SemestaLifePlay,
   null,{timeout:90000});
  await page.waitForLoadState('load',{timeout:60000}).catch(()=>{});
@@ -93,7 +93,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  });
  assert.deepEqual(reload.live,centered,'Reload must preserve saved UI');
  for(const cityLayout of reload.samples)assert.deepEqual(cityLayout,centered,'All cities must use one UI');
- await page.goto(base+'jiwa/',{waitUntil:'domcontentloaded'});
+ await page.goto(base+'jiwa/?cloudLegacy=1',{waitUntil:'domcontentloaded'});
  const jiwa=await page.evaluate(()=>({ui:!!document.getElementById('uiView'),
   editorTab:!!document.querySelector('[data-tab="ui"]'),
   secondaryHudCard:document.getElementById('mechanicsPanel')?.textContent?.includes('HUD LAYOUT')}));
