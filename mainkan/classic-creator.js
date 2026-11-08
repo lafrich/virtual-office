@@ -152,7 +152,7 @@
  }
  function resetLook(){
   const defaults={hairStyle:'mid_curtain',hairColor:'navy',skinTone:'light',topStyle:'custom',topColor:'white',
-   pantsStyle:'custom',pantsColor:'slate',shoesStyle:'custom',shoesColor:'black',glasses:'none',facialHair:'none'};
+   pantsStyle:'custom',pantsColor:'slate',shoesStyle:'shoes',shoesColor:'black',glasses:'none',facialHair:'none'};
   for(const [field,val] of Object.entries(defaults))setInput(field,val);
   setBody('genesis_male_nude');paintOptions();paintSwatches();paintSummary();status('Appearance reset');
  }
