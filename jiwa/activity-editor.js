@@ -259,6 +259,7 @@ function save(){
  try{draft=A.saveLocal(draft,localStorage);dirty=false;
   root.VLHub?.publish?.('gameplay',{scope:'global-activities',at:draft.updatedAt});
   notify('SAVED LOCAL ✓ '+draft.activities.length+' aktivitas · Semesta membaca katalog ini saat Play Mode / refresh.',true);
+  void root.JiwaCloudEntry?.activitySaved?.(draft);
  }catch(e){notify('SAVE FAILED · '+e.message);}
 }
 async function connect(){
@@ -322,7 +323,17 @@ function initialize(){
  render();
  B()?.navigate?.('activities');
 }
-root.JiwaActivityEditor=Object.freeze({render,chooseCategory,save,get:()=>A.normalize(draft),
+root.JiwaActivityEditor=Object.freeze({render,chooseCategory,save,
+ get:()=>A.normalize(draft),hasLocal:()=>localStorage.getItem(A.KEY)!==null,
+ applyCloud:record=>{
+  if(dirty)throw Error('Unsaved activity edits; local data kept');
+  const incoming=A.normalize(record),old=localStorage.getItem(A.KEY);
+  if(old&&JSON.stringify(A.normalize(JSON.parse(old)))!==JSON.stringify(incoming))
+   throw Error('Local activities differ from Drive; no overwrite');
+  localStorage.setItem(A.KEY,JSON.stringify(incoming));
+  draft=incoming;selected=draft.activities[0]?.id||null;category=draft.activities[0]?.category||'money';
+  dirty=false;render();root.VLHub?.publish?.('gameplay',{scope:'global-activities',source:'cloud-first'});
+ },
  setWorldRules:next=>{draft.worldEntities=(Array.isArray(next)?next:[]).map(A.PREMISES.worldRule);
   setDirty();return true;},
  dirty:()=>dirty});
