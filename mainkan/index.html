@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#008080">
+<meta name="color-scheme" content="only light">
+<meta name="robots" content="noindex,nofollow">
+<title>Mainkan.exe — Namanya Juga Hidup</title>
+<style>
+:root{font-family:Tahoma,"MS Sans Serif",Arial,sans-serif;font-size:13px;color:#161616;background:#008080}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;color:#777}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px dotted #111;outline-offset:2px}
+[hidden]{display:none!important}
+#desktop{height:100dvh;display:flex;align-items:center;justify-content:center;padding:16px 16px 48px;background-color:#008080;background-image:linear-gradient(145deg,#009494,#006b6d)}
+.window{width:min(100%,920px);max-height:calc(100dvh - 76px);display:flex;flex-direction:column;background:#c0c0c0;border:2px solid;border-color:#fff #3b3b3b #3b3b3b #fff;box-shadow:2px 2px 0 #000,11px 11px 0 #002c2b44}
+.titlebar{min-height:34px;background:linear-gradient(90deg,#000080,#1667ac);color:white;display:flex;align-items:center;gap:9px;padding:5px 6px;font-weight:bold}
+.titlebar .icon{background:#e5e3bf;color:#002c74;padding:2px 4px;border:1px solid #fff;font-size:15px}
+.titlebar .controls{margin-left:auto;display:flex;gap:3px}.controls span{width:22px;height:21px;display:grid;place-items:center;background:#c0c0c0;color:#111;border:2px solid;border-color:#fff #555 #555 #fff}
+.menubar{padding:6px 12px;border-bottom:1px solid #878787;background:#ddd;display:flex;gap:16px}.menubar span:first-letter{text-decoration:underline}
+.screen{padding:clamp(16px,3vw,32px);overflow:auto;flex:1;min-height:0}.screen h1{font-size:clamp(22px,3.4vw,35px);margin:5px 0 8px;letter-spacing:-.04em}.screen h2{font-size:17px;margin:0 0 11px}.muted{color:#555;line-height:1.6}.micro{font-size:11px;color:#555}.hr{height:1px;border-top:1px solid #888;border-bottom:1px solid #fff;margin:17px 0}
+.btn{border:2px solid;border-color:#fff #6d6d6d #6d6d6d #fff;background:#d5d5d5;color:#111;padding:9px 15px;min-height:37px;box-shadow:1px 1px #555}.btn:active{border-color:#666 #fff #fff #666;box-shadow:none}.btn.primary{background:#e9e9dc;font-weight:bold}.btn.compact{min-height:29px;padding:4px 9px}.btn:disabled{opacity:.6}
+.field{display:grid;gap:6px;margin-bottom:11px}.field label{font-weight:bold;font-size:11px}.field input,.field select{padding:10px;border:2px solid;border-color:#777 #fff #fff #777;background:white;max-width:100%;min-width:0}
+.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.status{min-height:19px;color:#374158}.status.error{color:#910b0b}
+.split{display:grid;grid-template-columns:1fr minmax(0,340px);gap:26px;align-items:center}.hero{min-height:235px;background:#153d60;position:relative;overflow:hidden;border:2px inset #777;color:#fff;padding:28px;display:flex;flex-direction:column;justify-content:end}
+.hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 24px,#89cabb1c 24px 25px),linear-gradient(160deg,#11748e,#28376c 67%,#151e44)}.hero>*{position:relative}.hero strong{font:bold clamp(30px,5vw,48px)/.95 Impact,"Arial Black",sans-serif;letter-spacing:.02em;text-transform:uppercase;text-shadow:3px 3px #092137}.hero small{margin-top:12px;line-height:1.5}
+.tabs{display:flex;gap:3px;margin-bottom:18px}.tab{padding:9px 16px;background:#acacac;border:2px solid;border-color:#eee #666 #c0c0c0 #eee}.tab.active{background:#c0c0c0;border-bottom-color:#c0c0c0;font-weight:bold}
+.progress{height:24px;background:#fff;border:2px inset #777;padding:3px}.progress div{height:100%;background:repeating-linear-gradient(90deg,#072aaa 0 14px,#fff 14px 16px);width:0;transition:width .3s}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.choice{border:2px solid;border-color:#fff #777 #777 #fff;background:#d6d6d6;text-align:center;min-height:156px;padding:12px 6px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px}.choice.selected{outline:2px solid #082e99;background:#dde7ff}.choice img{height:94px;max-width:100%;image-rendering:pixelated;object-fit:contain}.choice .silhouette{width:60px;height:86px;display:grid;place-items:center;background:#95a8af;color:#103549;font-size:41px}
+.statusbar{border-top:1px solid #fff;display:flex;justify-content:space-between;gap:8px;padding:5px 8px;font:11px monospace;color:#454545}
+#gameScreen{padding:0;display:flex;flex-direction:column;overflow:hidden}.game-top{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:9px 10px;background:#c5c5c5}.game-top strong{font-size:13px}.game-top .actions{gap:5px}
+#viewport{position:relative;flex:1;min-height:225px;overflow:hidden;background:#728b69;touch-action:none}
+#world{display:block;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
+#gameHud{position:absolute;left:11px;top:11px;padding:8px 10px;min-width:140px;background:#c0c0c0ec;border:2px solid;border-color:#fff #555 #555 #fff;font-size:11px;pointer-events:none}
+#interaction{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#eee8c9eb;min-width:min(90%,300px);padding:7px 10px;text-align:center;font-size:11px;border:1px solid #555;pointer-events:none}
+.game-bottom{padding:8px;display:flex;align-items:center;gap:9px;justify-content:space-between;background:#c0c0c0;flex-wrap:wrap}.game-bottom .micro{flex:1}.dpad{display:grid;grid-template-columns:repeat(3,34px);grid-template-rows:repeat(2,32px);gap:2px}.dpad button{touch-action:none;min-height:30px;padding:2px}
+#zoom{display:flex;gap:4px}#zoom button{min-width:34px;padding:3px}
+.taskbar{position:fixed;left:0;right:0;bottom:0;min-height:39px;display:flex;align-items:center;gap:10px;padding:4px 8px;background:#c0c0c0;border-top:2px solid #fff;z-index:12}
+.start{font-weight:bold;border:2px solid;border-color:#fff #6a6a6a #6a6a6a #fff;padding:5px 10px;background:#c5c5c5}.taskbar .appname{border:2px inset #888;padding:6px 12px;min-width:155px;background:#bbb}.taskbar .time{margin-left:auto;border:1px inset #777;padding:5px 9px;white-space:nowrap}
+@media(max-width:630px){#desktop{padding:6px 6px 45px}.window{width:100%;max-height:calc(100dvh - 54px)}.screen{padding:15px}.split{grid-template-columns:1fr;gap:14px}.hero{min-height:145px;padding:16px}.hero strong{font-size:35px}.choices{gap:5px}.choice{padding:8px 4px;min-height:125px}.choice img{height:72px}.game-top{padding:7px}.game-bottom{padding:6px}.game-bottom .micro{display:none}.taskbar{min-height:36px}.taskbar .appname{min-width:0}.titlebar{font-size:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
+<script src="../shared/spawn-respawn.js?v=mainkan-20261108" defer></script>
+<script src="./app.js?v=mainkan-20261108" defer></script>
+</head>
+<body>
+<div id="desktop">
+<main class="window" aria-label="Mainkan aplikasi pemain">
+<header class="titlebar"><span class="icon" aria-hidden="true">▶</span><span>MAIN KAN .EXE — Namanya Juga Hidup</span><div class="controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
+<div class="menubar"><span>Game</span><span>Player</span><span>Help</span></div>
+<section id="splashScreen" class="screen" aria-label="Splash Screen">
+  <div class="split"><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Game dunia virtual Indonesia<br>mainkan.exe / player client</small></div>
+  <div><h1>Memuat dunia...</h1><p class="muted">Memeriksa peta dan aset game. Ini aplikasi untuk pemain, bukan editor.</p><div class="progress" role="progressbar" aria-label="Persiapan game"><div id="progressFill"></div></div><p id="bootText" class="micro" aria-live="polite">Starting mainkan.exe...</p><button id="skipSplash" type="button" class="btn compact">Lewati intro</button></div></div>
+</section>
+<section id="loginScreen" class="screen" hidden aria-label="Login dan Register">
+<div class="split"><div><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Virtual life • Indonesia<br>Player login</small></div><p class="micro">Versi preview — akun online dan multiplayer memerlukan server terpisah.</p></div>
+<div><h1>Selamat datang.</h1><p class="muted">Masuk untuk melanjutkan kehidupanmu di kota.</p>
+<div class="tabs" role="tablist" aria-label="Pilihan akun"><button type="button" class="tab active" id="loginTab" aria-selected="true">Login</button><button type="button" class="tab" id="registerTab" aria-selected="false">Daftar</button></div>
+<form id="authForm"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" placeholder="email@contoh.com" required></div><div class="field"><label for="password">Password</label><input id="password" type="password" minlength="8" autocomplete="current-password" placeholder="Minimal 8 karakter" required></div><div class="actions"><button class="btn primary" id="authSubmit" type="submit">Login</button><button class="btn" id="guestButton" type="button">▶ Mainkan Preview</button></div><p id="authMessage" class="status" aria-live="polite"></p></form>
+</div></div>
+</section>
+<section id="characterScreen" class="screen" hidden aria-label="Buat karakter">
+<h1>Buat karaktermu</h1><p class="muted">Pilih template visual. Character rig dan sistem pakaian final tetap dikelola di Mahluk Hidup, bukan di sini.</p>
+<div class="choices" id="characterChoices">
+ <button type="button" class="choice selected" data-character="ichsan" aria-pressed="true"><img alt="Preview manusia laki-laki" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/ichsan_v6b_sheet.png"><strong>Human · Male</strong><small>V6B preview</small></button>
+ <button type="button" class="choice" data-character="noor" aria-pressed="false"><img alt="Preview manusia perempuan" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/noor_v6b_sheet.png"><strong>Human · Female</strong><small>V6B preview</small></button>
+ <button type="button" class="choice" data-character="theodore" aria-pressed="false"><img alt="Preview Theodore" src="https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/theodore_v6b_sheet.png"><strong>Theodore</strong><small>Astrofrich · preview</small></button>
+</div>
+<div class="hr"></div>
+<form id="characterForm"><div class="split"><div class="field"><label for="playerName">Nama karakter</label><input id="playerName" maxlength="24" minlength="2" placeholder="Nama di dalam game" required></div><div class="field"><label for="zodiac">Zodiak</label><select id="zodiac" required><option value="">Pilih zodiak...</option><option>Aries</option><option>Taurus</option><option>Gemini</option><option>Cancer</option><option>Leo</option><option>Virgo</option><option>Libra</option><option>Scorpio</option><option>Sagittarius</option><option>Capricorn</option><option>Aquarius</option><option>Pisces</option></select></div></div>
+<div class="actions"><button type="button" id="backToLogin" class="btn">← Kembali</button><button type="submit" class="btn primary">Masuk Dunia →</button></div>
+<p id="characterMessage" class="status" aria-live="polite"></p></form>
+</section>
+<section id="gameScreen" class="screen" hidden aria-label="Game preview">
+<div class="game-top"><div><strong id="cityName">Semesta • Preview World</strong><div class="micro" id="worldLabel">Membaca data dunia...</div></div><div class="actions"><div id="zoom"><button class="btn compact" id="zoomOut" title="Zoom out" type="button">−</button><button class="btn compact" id="zoomIn" title="Zoom in" type="button">+</button></div><button class="btn compact" id="exitGame" type="button">Keluar</button></div></div>
+<div id="viewport"><canvas id="world" aria-label="Dunia isometrik, gerakkan karakter dengan WASD atau tombol arah"></canvas><div id="gameHud" aria-live="polite"><strong id="hudName">Player</strong><div id="hudPosition">Posisi: --</div><div>MODE: Preview / Offline</div></div><div id="interaction">Jalan dengan WASD atau tombol arah.</div></div>
+<div class="game-bottom"><span class="micro">WASD / arrows: jalan • E: interaksi • Scroll: zoom • tap peta: arah tujuan</span>
+<div class="dpad" aria-label="Kontrol arah"><span></span><button type="button" class="btn compact" data-move="up" aria-label="Atas">▲</button><span></span><button type="button" class="btn compact" data-move="left" aria-label="Kiri">◀</button><button type="button" class="btn compact" data-move="down" aria-label="Bawah">▼</button><button type="button" class="btn compact" data-move="right" aria-label="Kanan">▶</button></div>
+<button type="button" id="actionButton" class="btn primary">ACTION</button></div>
+</section>
+<div class="statusbar"><span id="statusText">READY</span><span>mainkan.exe · preview v0.1</span></div>
+</main></div>
+<footer class="taskbar"><button class="start" type="button" id="homeButton">▣ Start</button><span class="appname">▶ Mainkan.exe</span><span class="time" id="clock">--:--</span></footer>
+</body>
+</html>
