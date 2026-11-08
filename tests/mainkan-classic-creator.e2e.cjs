@@ -94,6 +94,22 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   assert.equal(await page.locator('#ccMenuPopup').isHidden(),true);
   const position=await page.locator('#charPreview').boundingBox();
   assert.ok(position&&position.width>=35&&position.height>100,'Real character canvas must fit the Paint preview');
+  const geometry=await page.evaluate(()=>{
+   const bounds=id=>{const r=document.querySelector(id).getBoundingClientRect();return {w:r.width,h:r.height,x:r.x,y:r.y}};
+   return {window:bounds('.window'),workspace:bounds('.cc-canvas-frame'),
+    paper:bounds('.cc-paper'),sprite:bounds('#charPreview'),
+    paperPosition:getComputedStyle(document.querySelector('.cc-paper')).position};
+  });
+  assert.equal(geometry.paperPosition,'absolute','Paint paper must not collapse into a short relative-positioned strip');
+  assert.ok(geometry.paper.h>=Math.min(180,geometry.workspace.h*.70),
+   'White Paint work area must fill the preview height: '+JSON.stringify(geometry));
+  assert.ok(geometry.paper.w>=geometry.workspace.w*.80,
+   'White Paint work area must fill the preview width: '+JSON.stringify(geometry));
+  if(label==='desktop'){
+   assert.ok(geometry.window.w>=width*.85,'Desktop Paint window should fill browser width: '+JSON.stringify(geometry));
+   assert.ok(geometry.sprite.h>=Math.min(230,geometry.paper.h*.70),
+    'Desktop sprite must be visibly enlarged, not a tiny sprite at the top: '+JSON.stringify(geometry));
+  }
   assert.ok(position.x>=0&&position.x+position.width<=width+2,'Preview must not overflow the viewport');
   await page.screenshot({path:'screenshots/mainkan-classic-paint-'+label+'.png'});
   await page.locator('#playerName').fill('Player_Test');
