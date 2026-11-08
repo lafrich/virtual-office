@@ -10,7 +10,7 @@ const assert=require('node:assert/strict');
  try{
   const page=await browser.newPage({viewport:{width:1500,height:980},acceptDownloads:true});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('http://127.0.0.1:8091/virtual-office/emotion-studio/',
+  await page.goto('http://127.0.0.1:8091/virtual-office/emotion-studio/?cloudLegacy=1',
    {waitUntil:'domcontentloaded',timeout:90000});
   await page.waitForFunction(()=>window.EmosiDatabase&&
    document.querySelectorAll('#cards .emotion-card').length>0,null,{timeout:60000});
