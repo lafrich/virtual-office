@@ -46,3 +46,9 @@ html.semesta-player-mode .floating-inspector{display:none!important}
 @media(max-width:650px){
  html.semesta-player-mode #walkPad{bottom:9px;left:9px;transform:scale(.86);transform-origin:bottom left}
 }
+
+/* Native systems remain active, but player controls are now owned by mainkan.exe.
+ * Keep #vs-layer (Nokia, Bag popups), #vlPlayHud host and native D-pad.
+ * This rule only applies to the dedicated player entry, never the Semesta editor.
+ */
+html.semesta-player-mode #vs-hud{display:none!important}
