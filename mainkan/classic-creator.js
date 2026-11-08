@@ -72,7 +72,7 @@
   return true;
  }
  function getInput(id){return $(id)?.value||'';}
- function currentBody(){return root.querySelector('#characterChoices .choice.selected')?.dataset.character||'ichsan';}
+ function currentBody(){return root.querySelector('#characterChoices .choice.selected')?.dataset.character||'genesis_male_nude';}
  function setBody(value){
   const button=root.querySelector('#characterChoices .choice[data-character="'+value+'"]');
   if(button)button.click();
