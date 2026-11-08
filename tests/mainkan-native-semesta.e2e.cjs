@@ -55,6 +55,7 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(result.nativeLife,true);
  assert.equal(result.nativePlayMode,true);
  // Mainkan must control its own Genesis actor, not an authored Ichsan NPC.
+ try{
  await page.waitForFunction(()=>{
   try{
    const win=document.getElementById('semestaFrame').contentWindow;
@@ -63,7 +64,18 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
     win.SemestaPlay?.playerActor?.()?.name==='Semesta Tester'&&
     win.SemestaPlay?.playerRigStatus?.()?.loaded===true;
   }catch{return false;}
- },null,{timeout:100000});
+ },null,{timeout:25000});
+ }catch(error){
+  const diag=await page.evaluate(()=>{
+   const w=document.getElementById('semestaFrame').contentWindow;
+   return {actor:w.SemestaPlay?.playerActor?.(),rig:w.SemestaPlay?.playerRigStatus?.(),
+    profile:w.SemestaPlay?.playerProfile?.(),
+    layers:w.VLGenesisPlayer?.debug?.(w.SemestaPlay?.playerProfile?.())||null,
+    missed:performance.getEntriesByType('resource').filter(x=>/v6p/.test(x.name)).slice(-15).map(x=>x.name)};
+  });
+  console.log('GENESIS_PLAYER_DIAGNOSTICS',JSON.stringify(diag).slice(0,13000));
+  throw error;
+ }
  const genesis=await page.evaluate(()=>{
   const win=document.getElementById('semestaFrame').contentWindow;
   return {profile:win.SemestaPlay.playerProfile(),actor:win.SemestaPlay.playerActor(),
