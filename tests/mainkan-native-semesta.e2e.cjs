@@ -19,6 +19,8 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  await page.locator('#zodiac').selectOption({label:'Capricorn'});
  const before=await page.evaluate(()=>localStorage.getItem('virtual-life-gpt-world-builder-pipeline-v3'));
  await page.locator('#characterForm button[type=submit]').click();
+ await page.locator('#confirmGo').click({timeout:15000});
+ await page.locator('#tutorialDone').click({timeout:15000});
  await page.waitForFunction(()=>{
    const el=document.getElementById('semestaFrame');
    const win=el?.contentWindow;
@@ -50,6 +52,8 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(result.nativePlayMode,true);
  assert.equal(result.hasNativeHUD,true);
  assert.equal(result.hiddenEditor,true);
+ assert.ok(await page.locator('#mainkanGameBar').isVisible());
+ assert.equal(await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.document.getElementById('vs-hud').getBoundingClientRect().height),0,'Native HUD chrome hidden, source systems retained');
  assert.equal(result.tutorialHidden,true);
  assert.ok(result.rendererSize[0]>300&&result.rendererSize[1]>200,'Native Semesta canvas must have real viewport');
  assert.equal(after,before,'Player entry must not overwrite the authoring working city');
