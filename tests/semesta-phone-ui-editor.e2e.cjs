@@ -7,7 +7,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  const ctx=await browser.newContext({viewport:{width:1500,height:1000}});
  const page=await ctx.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(String(e.stack||e)));
- await page.goto(base+'world-builder/',{waitUntil:'domcontentloaded',timeout:90000});
+ await page.goto(base+'world-builder/?cloudLegacy=1',{waitUntil:'domcontentloaded',timeout:90000});
  await page.waitForFunction(()=>!!window.SemestaPlay&&!!window.SemestaLifePlay&&!!window.SemestaUIEditor,
   null,{timeout:90000});
  await page.waitForLoadState('load',{timeout:60000}).catch(()=>{});
