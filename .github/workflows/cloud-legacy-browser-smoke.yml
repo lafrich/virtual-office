@@ -1,0 +1,41 @@
+name: Cloud legacy editor compatibility smoke
+on:
+  push:
+    branches: [fix/cloud-legacy-browser-regressions-20261108]
+  workflow_dispatch:
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Stale Emosi launcher assertions and native data formats
+        run: node --test virtual-office/tests/emosi-database.test.cjs
+      - name: Install Playwright and PNG reader
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.56.1 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Serve both game and asset repos from same origin
+        run: |
+          python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/cloud-legacy-smoke.log 2>&1 &
+          sleep 2
+      - name: Emosi original browser regression with explicit offline mode
+        run: node virtual-office/tests/emosi-database.browser.cjs
+      - name: Jiwa activity browser regression with explicit offline mode
+        if: success() || failure()
+        run: node virtual-office/tests/jiwa-activity-editor.e2e.cjs
+      - name: Semesta editor browser regression with explicit offline mode
+        if: success() || failure()
+        run: node virtual-office/tests/semesta-ui-editor.e2e.cjs
+      - name: Mainkan Flow Editor original browser regression with explicit offline mode
+        if: success() || failure()
+        run: node virtual-office/tests/mainkan-flow-editor.e2e.cjs
