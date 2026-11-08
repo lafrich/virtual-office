@@ -104,8 +104,10 @@ test('Genesis is the only player body; all player faces are Emosi.exe sources',(
  assert.match(gen,/if\(!status\.ready\)return false/);
  assert.match(gen,/ctx\.clearRect\(0,0,64,112\);ctx\.drawImage\(work,0,0\)/);
  assert.match(gen,/\["short","swept"\]\.includes/);
- for(const id of ['topStyle','pantsStyle','shoesStyle'])
+ for(const id of ['topStyle','pantsStyle'])
   assert.match(html,new RegExp('<select id="'+id+'"><option value="custom" selected>Genesis Custom Wear'));
+ assert.match(html,/<select id="shoesStyle"><option value="custom">Genesis Barefoot[^<]*<\/option><option value="shoes" selected>/);
+ assert.match(gen,/shoesStyle:"shoes",shoesColor/);
  assert.match(app,/mainkan:player-loading/);
  assert.match(semesta,/function reportPlayerReady\(\)/);
 });
