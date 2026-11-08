@@ -1563,7 +1563,8 @@ function updateLargeOcclusion(dt){
   const point=actor?occlusionRay.intersectBox(entry.box,occlusionHit):null;
   const blocked=!!point&&point.distanceTo(occlusionRay.origin)>.15&&
    point.distanceTo(occlusionRay.origin)<115;
-  const target=blocked?0.23:1;
+  // Preserve the silhouette while revealing a character behind a tree or landmark.
+   const target=blocked?0.60:1;
   if(target===1&&entry.alpha===1)continue;
   const alpha=1-Math.exp(-dt*12);
   entry.alpha+=(target-entry.alpha)*alpha;
