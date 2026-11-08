@@ -21,7 +21,7 @@ function make(records=[],stats={imported:1,uploaded:0,failed:0,conflicts:0}){
  };
  const window={document,confirm:()=>true,MembangunUniversal:U,MembangunCloudDrive:D,
   MembangunCloudUI:{syncOnConnect:async()=>{syncCalls++;return stats}}};
- const context={window,document,console,Blob,URL,setTimeout};
+ const context={window,document,console,Blob,URL,URLSearchParams,setTimeout};
  vm.runInNewContext(SOURCE,context);
  const button=s=>nodes.find(n=>n.tag==="button"&&n.textContent.includes(s));
  return{window,D,nodes,button,db,stats,connects:()=>connects,uploads:()=>uploads,syncCalls:()=>syncCalls,saveCalls};
@@ -84,4 +84,23 @@ test("cloud entry never deletes local or IndexedDB records",()=>{
  assert.ok(!/localStorage\.(?:clear|removeItem)\s*\(/.test(SOURCE));
  assert.ok(!/indexedDB\.deleteDatabase\s*\(/.test(SOURCE));
  assert.ok(!/localStorage\s*\.\s*setItem\s*\(/.test(SOURCE));
+});
+
+test("read-only Mainkan player never opens cloud startup modal",()=>{
+ const m=make();m.window.location={search:"?player=1"};
+ const gate=m.window.MembangunNativeCloudEntry.init({app:"semesta"});
+ assert.equal(gate.mode,"read-only-player");
+ assert.equal(m.button("SYNC GOOGLE DRIVE"),undefined);
+});
+test("Semesta phone frame preview never opens a second cloud startup modal",()=>{
+ const m=make();m.window.location={search:"?deviceFrame=1"};
+ const gate=m.window.MembangunNativeCloudEntry.init({app:"semesta"});
+ assert.equal(gate.mode,"read-only-player");
+ assert.equal(m.button("SYNC GOOGLE DRIVE"),undefined);
+});
+test("legacy cloud recovery opts out without touching existing browser data",()=>{
+ const m=make();m.window.location={search:"?cloudLegacy=1"};
+ const gate=m.window.MembangunNativeCloudEntry.init({app:"bangun"});
+ assert.equal(gate.mode,"legacy-offline");
+ assert.equal(m.uploads(),0);
 });
