@@ -100,19 +100,24 @@ body.mainkan-playing #viewport{
 @media(max-width:650px){#mainkanGameBar{gap:6px}#mainkanGameBar .micro{display:block;font-size:10px;flex:0 0 auto}
 #mainkanGameBar .actions{margin-left:0;width:100%;justify-content:space-between}#mainkanGameBar .btn{flex:1}
 }
+#worldLoading .world-loader-card{width:min(88%,420px);padding:20px;background:#c0c0c0;border:2px solid;border-color:#fff #666 #666 #fff;box-shadow:3px 3px 0 #3337;text-align:left;font:12px Tahoma,sans-serif;color:#1c2441}
+#worldLoading .world-loader-card strong{display:block;font-size:14px;line-height:1.5}
+#worldLoading .world-loader-card p{margin:13px 0;line-height:1.4}
+#worldLoading .world-loader-card small{display:block;margin-top:9px;line-height:1.4;color:#4c4c4c}
+#worldLoading .progress{height:19px}
 </style>
-<link rel="stylesheet" href="./classic-creator.css?v=classic-paint-v1">
+<link rel="stylesheet" href="./classic-creator.css?v=genesis-wear-flickerfix-v2">
 <script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
 <script src="../shared/spawn-respawn.js?v=mainkan-20261108" defer></script>
 <script src="/virtual-life-asset-pipeline/v6p-compositor.js?v=genesis-player-20261108" defer></script>
 <script src="/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108" defer></script>
 <script src="/virtual-life-asset-pipeline/emosi-source.js?v=genesis-player-20261108" defer></script>
-<script src="../shared/genesis-player.js?v=genesis-player-20261108" defer></script>
+<script src="../shared/genesis-player.js?v=genesis-wear-flickerfix-v2" defer></script>
 <script src="./flow-model.js?v=mainkan-flow-v1" defer></script>
 <script src="./config.js?v=mainkan-20261108" defer></script>
-<script src="./app.js?v=mainkan-20261108" defer></script>
+<script src="./app.js?v=genesis-wear-flickerfix-v2" defer></script>
 <script src="./game-hud.js?v=mainkan-flow-v1" defer></script>
-<script src="./classic-creator.js?v=classic-paint-v1" defer></script>
+<script src="./classic-creator.js?v=genesis-wear-flickerfix-v2" defer></script>
 </head>
 <body>
 <div id="desktop">
@@ -157,6 +162,12 @@ body.mainkan-playing #viewport{
      <div class="cc-canvas-frame">
        <div class="cc-paper">
          <canvas id="charPreview" width="64" height="112" aria-label="Genesis character with Emosi.exe face, pixel-art preview"></canvas>
+          <div id="ccPreviewLoading" class="cc-preview-loading" role="status" aria-live="polite">
+           <strong>Memuat Genesis + Emosi.exe</strong>
+           <span id="ccPreviewLoadingText">Menyiapkan sprite dan Custom Wear...</span>
+           <div class="cc-load-track"><div id="ccPreviewProgress"></div></div>
+          </div>
+          <div id="ccPreviewUpdating" class="cc-preview-updating" role="status" aria-live="polite" hidden>Memuat perubahan karakter...</div>
        </div>
        <div class="cc-vertical-scroll" aria-hidden="true"><i>▲</i><span></span><i>▼</i></div>
        <div class="cc-horizontal-scroll" aria-hidden="true"><i>◀</i><span></span><i>▶</i></div>
@@ -203,11 +214,11 @@ body.mainkan-playing #viewport{
      <select id="hairStyle"><option value="short">Short</option><option value="swept">Short swept</option><option value="mid_curtain">Curtain fringe</option><option value="mid">Mid bangs</option><option value="wavy">Wavy</option><option value="wavy_curtain">Wavy curtain</option><option value="long">Long</option><option value="long_curtain">Long curtain</option></select>
 <select id="hairColor"><option>black</option><option>navy</option><option>brown</option><option>chestnut</option><option>blonde</option><option>red</option><option>white</option><option>pink</option></select>
 <select id="skinTone"><option>porcelain</option><option>light</option><option>tan</option><option>medium</option><option>brown</option><option>deep</option></select>
-<select id="topStyle"><option value="tee">T-shirt</option><option value="tee_long">Long-sleeve tee</option><option value="tee_graphic">Graphic tee</option><option value="shirt">Shirt</option><option value="shirt_tie">Shirt + tie</option><option value="cardigan">Cardigan</option><option value="cardigan_dots">Dotted cardigan</option></select>
+<select id="topStyle"><option value="custom" selected>Genesis Custom Wear (original)</option><option value="tee">T-shirt</option><option value="tee_long">Long-sleeve tee</option><option value="tee_graphic">Graphic tee</option><option value="shirt">Shirt</option><option value="shirt_tie">Shirt + tie</option><option value="cardigan">Cardigan</option><option value="cardigan_dots">Dotted cardigan</option></select>
 <select id="topColor"><option>charcoal</option><option>white</option><option>navy</option><option>red</option><option>green</option><option>mustard</option><option>sky</option><option>pink</option></select>
-<select id="pantsStyle"><option value="trousers">Trousers</option><option value="trousers_ripped">Ripped trousers</option><option value="baggy">Baggy</option><option value="baggy_ripped">Ripped baggy</option></select>
+<select id="pantsStyle"><option value="custom" selected>Genesis Custom Wear (original)</option><option value="trousers">Trousers</option><option value="trousers_ripped">Ripped trousers</option><option value="baggy">Baggy</option><option value="baggy_ripped">Ripped baggy</option></select>
 <select id="pantsColor"><option>slate</option><option>night</option><option>denim</option><option>khaki</option><option>olive</option><option>grey</option></select>
-<select id="shoesStyle"><option>shoes</option><option>sneakers</option><option>boots</option><option>hightops</option></select>
+<select id="shoesStyle"><option value="custom" selected>Genesis Custom Wear (original)</option><option>shoes</option><option>sneakers</option><option>boots</option><option>hightops</option></select>
 <select id="shoesColor"><option>walnut</option><option>black</option><option>white</option><option>red</option><option>navy</option><option>tan</option></select>
 <select id="glasses"><option>none</option><option>round</option><option>square</option></select>
 <select id="facialHair"><option value="none">Clean shaven</option><option value="mustache">Mustache</option><option value="stubble">Stubble</option><option value="both">Mustache + stubble</option></select>
@@ -243,7 +254,14 @@ body.mainkan-playing #viewport{
   <button class="btn compact" id="exitGame" type="button">Keluar</button></div></div>
   <div id="viewport">
     <iframe id="semestaFrame" title="Semesta — mode bermain tanpa editor" allow="fullscreen" referrerpolicy="same-origin" tabindex="0"></iframe>
-    <div id="worldLoading" role="status" aria-live="polite">Memuat dunia Semesta asli...</div>
+    <div id="worldLoading" role="status" aria-live="polite">
+      <div class="world-loader-card">
+       <strong>MAINKAN · MEMUAT SEMESTA</strong>
+       <p id="worldLoadingText">Menyiapkan dunia dan karakter Genesis...</p>
+       <div class="progress"><div id="worldProgress"></div></div>
+       <small id="worldLoadingDetail">Karakter akan muncul setelah semua sprite siap.</small>
+      </div>
+     </div>
   </div>
   <div class="game-bottom" id="mainkanGameBar">
  <span class="micro" id="gameWallet">Rp —</span>
