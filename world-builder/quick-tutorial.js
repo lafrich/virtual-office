@@ -67,6 +67,8 @@ g.addEventListener('keydown',event=>{
 });
 // New browsers see the tutorial once, after the initial map has loaded.
 g.addEventListener('load',()=>{
+ // mainkan.exe uses this exact world in player mode; never show editor tutorial.
+ if(document.documentElement.classList.contains('semesta-player-mode'))return;
  let seen=false;try{seen=localStorage.getItem(KEY)==='done';}catch{}
  if(!seen)open();
 },{once:true});
