@@ -19,10 +19,11 @@ test('Mainkan owns game UI editor and positions real visible controls, not dupli
  assert.match(mainkan,/href="\.\/ui-editor\.html" id="openUIEditor"/);
  assert.match(mainkan,/shared\/hud-layout\.js/);
  assert.match(mainkan,/mainkan-hud-edit-20261108/);
- for(const [id,element] of Object.entries({gameWallet:'money',gameNeeds:'lifePanel',
+ for(const [id,element] of Object.entries({gameWallet:'money',
   gamePhone:'hpButton',gameBag:'bagButton',gameAction:'action',gameRun:'run'})){
   assert.match(mainkan,new RegExp('id="'+id+'" data-hud-item="'+element+'"'));
  }
+ assert.doesNotMatch(mainkan,/id="gameNeeds"/);
  assert.match(runtime,/viewport\.appendChild\(bar\)/);
  assert.match(runtime,/HL\.resolveSavedLayout\(null,localStorage\)/);
  assert.match(runtime,/getElementById\(id\)/);
