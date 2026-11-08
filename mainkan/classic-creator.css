@@ -4,7 +4,9 @@
  * scrollbars, color palette, DD/MM/YYYY form, statusbar and retro 98 buttons.
  */
 body:has(#characterScreen:not([hidden])) .window{
- width:min(970px,calc(100vw - 20px));height:calc(100dvh - 64px);
+ /* Paint is the desktop workspace: use the available viewport width even
+    when the browser is zoomed out. Keep the Win98 title/taskbar visible. */
+ width:calc(100vw - 20px);max-width:none;height:calc(100dvh - 64px);
  max-height:calc(100dvh - 64px);
 }
 #characterScreen.screen{padding:0!important;overflow:hidden!important;min-height:0;flex:1}
@@ -130,7 +132,10 @@ body:has(#characterScreen:not([hidden])) .window{
 /* Async Genesis V6P sprite loader: keep the prior canvas visible while a
  * replacement hair or garment sheet downloads. Full-screen only on first
  * appearance, a small status chip on subsequent changes. */
-.cc-paper{position:relative}
+/* The paper MUST stay absolute inside .cc-canvas-frame. A previous
+ * loader CSS override changed it to relative, collapsing the white canvas
+ * into a thin strip at the top and making the sprite look microscopic. */
+.cc-paper{position:absolute}
 .cc-preview-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:11px;padding:14px;
  background:#f4f4ec;color:#253767;text-align:center;font:11px/1.5 Tahoma,sans-serif;z-index:2}
 .cc-preview-loading strong{font-size:13px}
