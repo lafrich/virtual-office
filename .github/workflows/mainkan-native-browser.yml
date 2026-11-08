@@ -1,0 +1,46 @@
+name: Mainkan Native Semesta Browser
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mainkan/**'
+      - 'world-builder/builder.js'
+      - 'world-builder/index.html'
+      - 'world-builder/semesta-player.css'
+      - 'world-builder/quick-tutorial.js'
+      - 'tests/mainkan-native-semesta.e2e.cjs'
+      - '.github/workflows/mainkan-native-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - name: Checkout Semesta and Mainkan
+        uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - name: Checkout native art pipeline
+        uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: npm install --no-save playwright@1.56.1
+      - name: Serve apps from same origin
+        run: |
+          python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/mainkan-server.log 2>&1 &
+          sleep 2
+      - name: Verify Mainkan uses native Semesta WebGL
+        run: node virtual-office/tests/mainkan-native-semesta.e2e.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mainkan-native-semesta-browser
+          path: screenshots/
+          if-no-files-found: ignore
