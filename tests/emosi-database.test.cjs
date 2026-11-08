@@ -54,7 +54,8 @@ test('Emosi.exe has all database controls and old inline scripts still parse',()
   assert.ok(html.includes(fn),'Missing '+fn);
  }
  assert.match(html,/<script src="\.\/database-fork\.js/);
- assert.match(launcher,/EMOSI\.EXE/);
+ assert.match(launcher,/MAHLUK HIDUP\.EXE/);
+ assert.doesNotMatch(launcher,/data-app="emotion"/);
  assert.doesNotMatch(launcher,/EMOTION STUDIO\.EXE/);
  const scripts=[...html.matchAll(/<script(?:[^>]*)>([\s\S]*?)<\/script>/g)]
   .map(x=>x[1]).filter(Boolean);
