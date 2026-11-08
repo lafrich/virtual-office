@@ -7,7 +7,21 @@ const $=id=>document.getElementById(id);
 // mainkan.exe reuses the native Semesta renderer, assets, physics and Jiwa play runtime.
 // Player entry is read-only and cannot enter authoring modes.
 const playerMode=new URLSearchParams(location.search).get('player')==='1';
-const playerProfile=new URLSearchParams(location.search).get('character')||'';
+// Mainkan provides the approved Genesis body + Emosi appearance by same-origin message.
+let mainkanPlayerProfile=null,finishMainkanProfile=null;
+const mainkanProfileGate=new Promise(resolve=>{finishMainkanProfile=resolve;});
+if(playerMode)window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==window.parent)return;
+ if(event.data?.type==='mainkan:player-profile'){
+  try{
+   mainkanPlayerProfile=window.VLGenesisPlayer.normalizeProfile(event.data.profile);
+   finishMainkanProfile(true);
+  }catch(error){console.warn('Mainkan Genesis player rejected',error);finishMainkanProfile(false);}
+ }else if(event.data?.type==='mainkan:player-profile-error'){
+  console.warn('Mainkan player profile unavailable:',event.data.message);
+  finishMainkanProfile(false);
+ }
+});
 if(playerMode)document.documentElement.classList.add('semesta-player-mode');
 const fail=$('empty'),canvas=$('world');
 let THREE;
@@ -2541,16 +2555,26 @@ function makeTemporaryLifePlayer(){
   const first=documentMap.objects.find(o=>Number.isFinite(Number(o.x))&&Number.isFinite(Number(o.z)));
   p.x=Number(first?.x)||0;p.z=Number(first?.z)||0;
  }
- const player={id:LIFE_TEST_ACTOR_ID,type:'avatar',name:'PLAY TEST / PLAYER PLACEHOLDER',
-  x:p.x,z:p.z,y:0,collision:true,scale:1,facing:'se',profile:'placeholder'};
+ const playing=playerMode;
+ if(playing&&!mainkanPlayerProfile)throw Error('Genesis player profile not received');
+ const player={id:LIFE_TEST_ACTOR_ID,type:'avatar',
+  name:playing?mainkanPlayerProfile.name:'PLAY TEST / PLAYER PLACEHOLDER',
+  x:p.x,z:p.z,y:0,collision:true,scale:1,facing:'se',
+  profile:playing?mainkanPlayerProfile.base:'placeholder'};
  const root=new THREE.Group();root.name=player.name;root.position.set(p.x,0,p.z);
- const mat=new THREE.MeshBasicMaterial({color:0x4e8ac6});
- const body=new THREE.Mesh(new THREE.CylinderGeometry(.3,.38,1.05,8),mat);body.position.y=.73;root.add(body);
- const head=new THREE.Mesh(new THREE.SphereGeometry(.29,10,8),new THREE.MeshBasicMaterial({color:0xe5c29a}));head.position.y=1.53;root.add(head);
- const rig={mesh:root,state:{loaded:true,failed:false},setMoving(){},setPose(){},setDirection(){},
-  setProfile(){},step(){},dispose(){}};
+ let rig;
+ if(playing){
+  // Ephemeral player avatar. Original city actors and City Draft stay unchanged.
+  rig=window.VLGenesisPlayer.createRig(THREE,mainkanPlayerProfile);
+  root.add(rig.mesh);
+ }else{
+  const mat=new THREE.MeshBasicMaterial({color:0x4e8ac6});
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.3,.38,1.05,8),mat);body.position.y=.73;root.add(body);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.29,10,8),new THREE.MeshBasicMaterial({color:0xe5c29a}));head.position.y=1.53;root.add(head);
+  rig={mesh:root,state:{loaded:true,failed:false},setMoving(){},setPose(){},setDirection(){},setProfile(){},step(){},dispose(){}};
+ }
  documentMap.objects.push(player);assetRoots.add(root);owners.set(player.id,root);rigs.set(player.id,{rig,root});
- tell('Placeholder player aktif untuk Play Mode (tidak masuk City Draft).');
+ tell(playing?'Genesis '+mainkanPlayerProfile.gender+' · Emosi.exe':'Placeholder player aktif untuk Play Mode (tidak masuk City Draft).');
  return player;
 }
 function clearTemporaryLifePlayer(){
@@ -2609,11 +2633,8 @@ function setMode(m){
  $('walkPad').classList.toggle('active',m==='walk');
  if(m==='walk'){
    const usable=o=>o&&actorType(o.type)&&rigs.has(o.id)&&owners.get(o.id)?.visible!==false;
-   const first=(playerMode?
-    (documentMap.objects.find(o=>usable(o)&&o.type==='avatar'&&o.profile===playerProfile)||
-     documentMap.objects.find(o=>usable(o)&&o.type==='avatar')||
-     documentMap.objects.find(usable)):
-    (usable(item())?item():documentMap.objects.find(usable)))||makeTemporaryLifePlayer();
+   const first=playerMode?makeTemporaryLifePlayer():
+    ((usable(item())?item():documentMap.objects.find(usable))||makeTemporaryLifePlayer());
    walkActorId=first.id;select(first.id);
    window.SemestaLifePlay?.start?.();
    if(!cameraFollowId){
@@ -3000,6 +3021,9 @@ function spawnRespawnApi(){
 }
 
 window.SemestaPlay=Object.freeze({
+ playerProfile:()=>mainkanPlayerProfile,
+ playerActor:()=>playerMode?documentMap.objects.find(o=>o.id===LIFE_TEST_ACTOR_ID)||null:null,
+ setPlayerEmotion:(name,duration=3)=>playerMode?!!rigs.get(LIFE_TEST_ACTOR_ID)?.rig?.setEmotion?.(name,duration):false,
  gameplay:currentPlayGameplay,
  refreshHud:syncPlayHud,
  worldSpeed:playWorldSpeed,
@@ -4301,19 +4325,24 @@ document.addEventListener('keydown',e=>{
 });
 rebuild();resetCamera();resize();saved();updateClockHUD(true);
 if(playerMode){
- // No new map renderer or duplicate app state: the same live Semesta scene and gameplay.
- // Only the native walk path is enabled. Never unlock editor tools from Mainkan.
+ // Mainkan must provide Genesis. Never silently take an existing Ichsan avatar.
  try{
+  if(!window.VLGenesisSource||!window.VLEmosiSource||!window.VLGenesisPlayer)
+   throw Error('Genesis/Emosi runtime not loaded');
+  if(window.parent!==window)window.parent.postMessage({type:'mainkan:profile-request'},location.origin);
+  const accepted=await Promise.race([mainkanProfileGate,new Promise(resolve=>setTimeout(()=>resolve(false),12000))]);
+  if(!accepted||!mainkanPlayerProfile)throw Error('Genesis player was not provided');
   setMode('walk');
   document.documentElement.dataset.mainkanReady='true';
   if(window.parent!==window)window.parent.postMessage({
    type:'mainkan:semesta-ready',city:documentMap.map?.name||'Semesta',
+   profile:mainkanPlayerProfile.base,faceSource:'emosi.exe',
    count:documentMap.objects.filter(o=>o.id!=='__semesta_life_temporary_player__').length
   },location.origin);
  }catch(error){
   console.error('Mainkan Semesta player mode failed',error);
   if(window.parent!==window)window.parent.postMessage({
-   type:'mainkan:semesta-error',message:'Gagal mengaktifkan Semesta Play Mode'
+   type:'mainkan:semesta-error',message:'Genesis player gagal: '+(error?.message||'profile unavailable')
   },location.origin);
  }
 }
@@ -4333,6 +4362,9 @@ function frame(now){
  if(clockLastSaved>=25&&!playerMode){
   clockLastSaved=0;
   try{syncClockToMap();localStorage.setItem(STORE,JSON.stringify(mapForPersist()));}catch{}
+ }
+ if(playerMode&&mainkanPlayerProfile&&rigs.has(LIFE_TEST_ACTOR_ID)){
+  rigs.get(LIFE_TEST_ACTOR_ID).rig.applyContext?.(window.SemestaLifePlay?.state?.());
  }
  if(mode==='walk'&&walkActorId&&rigs.has(walkActorId)&&!(window.VLSpawnHobo&&window.VLSpawnHobo.busy())){
    const holder=rigs.get(walkActorId);
