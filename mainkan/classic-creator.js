@@ -171,8 +171,8 @@
    Options:[['Return to Hair tools',()=>{category='hair';paintTools();paintOptions();}],['Reset colors',resetLook]],
    Help:[['Help Topics',()=>status('Select tool → style choice → colors. Enter Nickname and Birthday. Create Character to review.')],['About Character Creator',()=>status('Original Paint-style Character Creator · v6b interface · mainkan.exe')]]
   };
-  for(const [name,fn] of actions[name]||[]){
-   const item=document.createElement('button');item.type='button';item.textContent=name;item.setAttribute('role','menuitem');
+  for(const [itemLabel,fn] of actions[name]||[]){
+   const item=document.createElement('button');item.type='button';item.textContent=itemLabel;item.setAttribute('role','menuitem');
    item.addEventListener('click',()=>{closeMenu();fn();});menu.append(item);
   }
   menu.style.left=button.offsetLeft+'px';menu.hidden=false;
