@@ -9,6 +9,10 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  for(const [name,page] of [['jiwa',jiwa],['semesta',semesta]])
   page.on('pageerror',e=>errors.push(name+': '+String(e.stack||e)));
  await jiwa.goto(base+'jiwa/',{waitUntil:'domcontentloaded',timeout:90000});
+ // Explicit test-only cloud recovery requires confirmation; never bypass Drive state in production.
+ jiwa.once('dialog',dialog=>dialog.accept());
+ await jiwa.getByRole('button',{name:/OPEN EXISTING DATA.*OFFLINE/}).click({timeout:45000});
+ await jiwa.locator('[aria-label="Cloud startup"]').waitFor({state:'detached',timeout:10000});
  await semesta.goto(base+'world-builder/',{waitUntil:'domcontentloaded',timeout:90000});
  await jiwa.waitForFunction(()=>!!window.JiwaActivityEditor&&!!window.JiwaActivities&&
   document.querySelectorAll('#activityList .activity-row').length>0,null,{timeout:90000});
@@ -80,14 +84,32 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.equal(saved.bank.minExp,0);
  assert.equal(saved.bank.moneyDelta,7200);
  assert.equal(saved.registered.length,1);
- await semesta.waitForLoadState('load',{timeout:60000}).catch(()=>{});
- await semesta.evaluate(()=>window.VLQuickTutorial?.close?.());
- await semesta.locator('#walkMode').click({timeout:20000});
- await semesta.waitForFunction(()=>window.SemestaLifePlay?.active?.(),null,{timeout:20000});
- await semesta.evaluate(()=>window.SemestaLifePlay.reload());
- await semesta.waitForFunction(()=>window.SemestaLifePlay?.sites?.().some(s=>s.id==='act:bank_teller'),
+ // Gameplay validation belongs in Mainkan, not Semesta's exploration preview.
+ const mainkan=await context.newPage();
+ mainkan.on('pageerror',e=>errors.push('mainkan: '+String(e.stack||e)));
+ await mainkan.goto(base+'mainkan/',{waitUntil:'domcontentloaded',timeout:90000});
+ await mainkan.locator('#skipSplash').click({timeout:15000}).catch(()=>{});
+ await mainkan.locator('#welcomeGuest').click({timeout:15000});
+ await mainkan.locator('#playerName').fill('Jiwa Activity Tester');
+ await mainkan.locator('#ccDay').fill('11');
+ await mainkan.locator('#ccMonth').fill('01');
+ await mainkan.locator('#ccYear').fill('1994');
+ await mainkan.locator('#ccYear').dispatchEvent('input');
+ await mainkan.locator('#characterForm button[type=submit]').click();
+ await mainkan.locator('#confirmGo').click({timeout:15000});
+ await mainkan.locator('#tutorialDone').click({timeout:15000});
+ await mainkan.waitForFunction(()=>{
+  const win=document.getElementById('semestaFrame')?.contentWindow;
+  try{return !!win?.document?.documentElement?.dataset?.mainkanReady&&
+   win.SemestaLifePlay?.active?.()===true&&document.getElementById('worldLoading').hidden;}
+  catch{return false;}
+ },null,{timeout:150000});
+ const play=await (await mainkan.locator('#semestaFrame').elementHandle()).contentFrame();
+ if(!play)throw Error('Mainkan game frame unavailable');
+ await play.evaluate(()=>window.SemestaLifePlay.reload());
+ await play.waitForFunction(()=>window.SemestaLifePlay?.sites?.().some(s=>s.id==='act:bank_teller'),
   null,{timeout:30000}).catch(async error=>{
-   const diagnostic=await semesta.evaluate(id=>{
+   const diagnostic=await play.evaluate(id=>{
     const catalog=window.JiwaActivities.readLocal(localStorage);
     const world=window.SemestaPlay.worldDirectory();
     const selection=catalog.activities.find(x=>x.id==='bank_teller');
@@ -100,7 +122,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
    },target.id);
    throw Error(error.message+' / diagnostic: '+JSON.stringify(diagnostic).slice(0,3000));
   });
- const linked=await semesta.evaluate(()=>{
+ const linked=await play.evaluate(()=>{
   const sites=window.SemestaLifePlay.sites();
   const a=sites.find(s=>s.id==='act:bank_teller');
   const ambient=sites.find(s=>s.id.startsWith('world:wall_pee:'));
@@ -117,14 +139,14 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.equal(linked.ambientOnMap,false,'ambient actions do not become quest pins');
  // The same real object has a Money activity and an Immoral ambient action.
  // Both actions must appear at one physical location and be selectable.
- await semesta.locator('#slpContent details summary').first().click();
- await semesta.locator('#slpDestination').selectOption('act:bank_teller');
- await semesta.locator('#slpTravel').click();
- const siblings=await semesta.locator('#slpActions [data-life-action]').evaluateAll(buttons=>
+ await play.locator('#slpContent details summary').first().click();
+ await play.locator('#slpDestination').selectOption('act:bank_teller');
+ await play.locator('#slpTravel').click();
+ const siblings=await play.locator('#slpActions [data-life-action]').evaluateAll(buttons=>
   buttons.map(button=>button.dataset.lifeAction));
  assert.ok(siblings.includes('configured_activity'),siblings.join(','));
  assert.ok(siblings.includes('world_ambient'),siblings.join(','));
- const ambientResult=await semesta.evaluate(()=>window.SemestaLifePlay.runAction('world_ambient',{ruleId:'wall_pee'}));
+ const ambientResult=await play.evaluate(()=>window.SemestaLifePlay.runAction('world_ambient',{ruleId:'wall_pee'}));
  assert.equal(ambientResult.ok,true,ambientResult.reason);
  assert.deepEqual(linked.demoSites,[],'Published Jiwa authoring cannot coexist with legacy placeholder and job sites');
  await jiwa.locator('[data-activity-tab="cooking"]').click();
