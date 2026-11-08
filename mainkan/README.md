@@ -1,46 +1,54 @@
 # mainkan.exe — Namanya Juga Hidup / Player Client
 
-A separate **player-facing** application in the same GitHub Pages repository as Membangun and Semesta.
+**Source:** lafrich/virtual-office (GitHub Pages).
 
-## Open
+- Player URL: https://lafrich.github.io/virtual-office/mainkan/
+- Membangun launcher: https://lafrich.github.io/virtual-office/membangun/?app=mainkan
+- Native Semesta player-only entry: https://lafrich.github.io/virtual-office/world-builder/?player=1
 
-- Player: https://lafrich.github.io/virtual-office/mainkan/
-- Developer launcher: https://lafrich.github.io/virtual-office/membangun/?app=mainkan
+## Architecture
 
-## Implemented (preview v0.1)
+Mainkan.exe owns the splash screen, login/register UI, character onboarding, and the outer player shell.
 
-- Windows 98 responsive splash screen and player login / registration screens.
-- Clear unauthenticated guest preview path, with in-memory-only character selection (name, zodiac, V6B preview).
-- Read-only isometric world runtime loaded from `../world-builder/world.json`, with metadata and verified published sprite URLs from `../world-builder/pipeline-catalog.js`.
-- Keyboard (WASD/arrows), touch direction controls, click/tap-to-walk, zoom, player camera, context action probe, world collision fallback.
-- Uses shared `../shared/spawn-respawn.js` (fallback spawn pool when no player-owned room).
-- No editor controls exposed in player client.
-- Standalone launcher entry in Membangun.exe.
+When player enters the world, Mainkan loads **the actual Semesta WebGL engine** in a same-origin fullscreen iframe using `world-builder/?player=1`. The engine reuses Semesta's own:
 
-## Intentionally not implemented
+- World and city working copy, terrain, objects, native V6B art pipeline.
+- Renderer / isometric camera, geometry, physics and collision.
+- Walk Mode, camera follow, traffic, 24-hour environment.
+- SemestaLifePlay, Jiwa interactions, Play HUD and phone, native touch controls.
 
-- **Accounts**: no functional login/register until a secure backend exists. The buttons explain the limitation; passwords are not stored in GitHub, Google Drive, localStorage, or any browser game-save store.
-- **Multiplayer and cloud progress**: require authoritative online service and per-player database.
-- **Final character editor / clothes**: owned by Mahluk Hidup, not duplicated here.
-- **Gameplay rule execution**: Jiwa rules need a published, server-authoritative runtime integration; Action currently identifies nearby objects but deliberately does not award money / alter rules.
-- **Latest published Jakarta City**: `world-builder/world.json` is an authoring snapshot, not automatically the user's latest Google Drive city. A separate publish/export step is needed.
-- **Missing sprites**: only pipeline assets with published PNGs render as authentic sprites; unavailable legacy assets show visibly approximate primitive placeholders.
-- **Owned-room respawn**: requires authenticated profile and room data; guest preview uses shared public spawn fallback.
+There is **no second renderer in Mainkan**. The previous duplicate 2D world.json/Canvas simulation was removed.
 
-## Future backend contract
+## Player-mode protections
 
-Set `window.MAINKAN_CONFIG.apiBase` in `mainkan/config.js` to a secure HTTPS server origin. API must support CORS for this game origin and Secure HttpOnly session cookies.
+- Adds `semesta-player-mode` to the Semesta document.
+- Hides edit menus, tools, asset browser, property inspector, and authoring controls while preserving the actual native canvas and gameplay overlays.
+- Automatically enters `setMode('walk')` and disallows leaving Walk Mode from player entry.
+- Skips Semesta editor draft autosaves in player mode, including the periodic clock write, so starting player mode does not overwrite the editor's working map.
+- Sends a same-origin `mainkan:semesta-ready` message with city name and object count after the native runtime starts.
 
-- `POST /auth/register`: `{email,password}` -> `{authenticated:true,player?:{character?:...}}`
-- `POST /auth/login`: same request and response.
-- `PUT /players/profile`: `{character:{name,zodiac,asset,gender}}` -> `{saved:true,player?:...}`
+This is a **player preview**, not a security boundary: production multiplayer needs a separate server-authoritative client and resource permissions.
 
-The player client passes `credentials:'include'`, never saves passwords locally, and will **not** claim a login succeeded without the server confirming `authenticated:true`.
+## Which city is displayed?
 
-Before production launch, implement logout, CSRF protection, rate limiting, email verification, recovery, server validation, secure session lifecycle, per-player persistence, authoritative multiplayer, and publishing of approved Semesta + Jiwa datasets. Guest preview should remain visually distinct from real online play.
+The native Semesta editor currently reads the `virtual-life-gpt-world-builder-pipeline-v3` working map in the **same browser and origin**. If none exists, it loads Semesta's built-in starter city. As a result, the player preview uses what Semesta normally opens **on that device**.
 
-## Quick test
+A city stored only in Google Drive or an IndexedDB named draft on another device is **not** automatically published to player mode. For consistent cross-device multiplayer cities, add a separate Publish City pipeline and a canonical hosted read-only world snapshot. This is not yet implemented.
 
-`node --test tests/mainkan-smoke.test.cjs`
+## What remains incomplete?
 
-Do not modify existing Semesta authoring map, Jiwa rules, or Mahluk Hidup assets just to test Mainkan.
+- Real player accounts and secure backend sessions; current Guest Preview does not persist online. Never store passwords in Drive, GitHub or browser storage.
+- Cross-device player progress, wallet, owned rooms, authoritative Jiwa economy, and networking.
+- Final character creation / clothing sync with the current Mahluk Hidup data contract. Mainkan currently selects a preview profile, and native Semesta uses the closest available existing rig.
+- Latest Drive city publishing / sync into an authoritative player-world build.
+- End-to-end interactive browser testing across PC and mobile.
+
+When a backend is available, set `window.MAINKAN_CONFIG.apiBase` inside `mainkan/config.js` to a secure HTTPS origin that supports credentialed CORS and HttpOnly sessions.
+
+Endpoints provisionally expected:
+- `POST /auth/register` and `POST /auth/login` receive `{email,password}` and return `{authenticated:true,player?:{character?:...}}`
+- `PUT /players/profile` receives `{character:{name,zodiac,asset,gender}}` and returns `{saved:true,player?:...}`
+
+## Smoke tests
+
+Run `node --test tests/mainkan-smoke.test.cjs`.
