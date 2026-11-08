@@ -89,7 +89,7 @@
      else $(c.key==='rotate'?'charRotate':c.key==='walk'?'charAnimate':'charExpression').click();
      if(c.key==='rotate')status('Rotate character / 4 directions');
      if(c.key==='walk')status('Preview animation: '+$('previewDirection').textContent);
-     if(c.key==='expr')status('Expression: '+$('previewDirection').textContent);
+     if(c.key==='expr')status('Expression from Emosi.exe: '+$('previewDirection').textContent);
     }else{category=c.key;paintTools();paintOptions();status(c.label);}
    });
    parent.append(btn);
@@ -112,7 +112,7 @@
   for(const [field,title] of STYLES[category]||[]){
    const small=document.createElement('strong');small.textContent=title;panel.append(small);
    const buttons=document.createElement('div');buttons.className='cc-choice-buttons';
-   const source=field==='body'?[['ichsan','Male'],['noor','Female'],['theodore','Astrofrich']]:styleOptions(field);
+   const source=field==='body'?[['genesis_male_nude','Genesis Male Nude'],['genesis_female_nude','Genesis Female Nude']]:styleOptions(field);
    source.forEach(([value,name])=>{
     const b=document.createElement('button');b.type='button';b.className='cc-choice-btn';b.textContent=name;
     const selected=field==='body'?currentBody():getInput(field);
@@ -147,14 +147,14 @@
  function randomize(){
   const fields=['hairStyle','glasses','facialHair','topStyle','pantsStyle','shoesStyle',...GROUPS.map(g=>g.field)];
   fields.forEach(id=>{const options=styleOptions(id);if(!options.length)return;setInput(id,options[Math.floor(Math.random()*options.length)][0]);});
-  const bodies=['ichsan','noor'];setBody(bodies[Math.floor(Math.random()*bodies.length)]);
+  const bodies=['genesis_male_nude','genesis_female_nude'];setBody(bodies[Math.floor(Math.random()*bodies.length)]);
   paintOptions();paintSwatches();paintSummary();status('Random look applied');
  }
  function resetLook(){
   const defaults={hairStyle:'mid_curtain',hairColor:'navy',skinTone:'light',topStyle:'tee',topColor:'charcoal',
    pantsStyle:'trousers',pantsColor:'slate',shoesStyle:'shoes',shoesColor:'walnut',glasses:'none',facialHair:'none'};
   for(const [field,val] of Object.entries(defaults))setInput(field,val);
-  setBody('ichsan');paintOptions();paintSwatches();paintSummary();status('Appearance reset');
+  setBody('genesis_male_nude');paintOptions();paintSwatches();paintSummary();status('Appearance reset');
  }
  function closeMenu(){
   menuOpen='';$('ccMenuPopup').hidden=true;
