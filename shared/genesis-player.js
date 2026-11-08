@@ -126,8 +126,10 @@ function draw(ctx,profile,dir="se",action="idle",frame=0,emotion="neutral",tick=
  ctx.clearRect(0,0,64,112);ctx.imageSmoothingEnabled=false;
  const parts=listParts(norm);
  // Preload all layers before painting any, to avoid showing a headless body.
- const missing=parts.some(part=>!lookupImage(resolvePart(part,norm))?.ready);
- if(missing)return false;
+ // Kick off ALL source layers concurrently. Array.some() short-circuits and
+ // previously caused dozens of heavyweight 384×4928 atlases to load serially.
+ const sourceLayers=parts.map(part=>lookupImage(resolvePart(part,norm)));
+ if(!sourceLayers.every(image=>image?.ready))return false;
  const shade=part=>compositedPixel(part,norm,a,d,f);
  const drawLayer=part=>{const cell=shade(part);if(cell)ctx.drawImage(cell,0,0);};
  for(const part of parts.slice(0,-2))drawLayer(part);
