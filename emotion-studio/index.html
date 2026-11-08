@@ -1815,8 +1815,11 @@ async function refreshDrive({force=false}={}){
   if(response.folderId)$("driveFolder").href="https://drive.google.com/drive/folders/"+encodeURIComponent(response.folderId);
   driveStatus("AUTO SYNC: "+imported+" LOADED, "+uploaded+" UPLOADED, "+conflicts+" CONFLICT COPIES, "+failed+" ERRORS",!!(conflicts||failed));
   status("✓ DRIVE SYNC COMPLETE · EMOTION AUTO-SAVES AFTER EDITING"+(conflicts?" · LOCAL CONFLICT BACKUPS PRESERVED":""));
- }catch(error){driveStatus("DRIVE SYNC FAILED: "+error.message,true);status("DRIVE SYNC FAILED: "+error.message,true)}
- finally{$("driveRefresh").disabled=false}
+  return {verified:failed===0&&response.errors.length===0,imported,uploaded,conflicts,failed,errors:response.errors};
+ }catch(error){
+  driveStatus("DRIVE SYNC FAILED: "+error.message,true);status("DRIVE SYNC FAILED: "+error.message,true);
+  return {verified:false,failed:1,errors:[error.message]};
+ }finally{$("driveRefresh").disabled=false}
 }
 async function saveToDrive(){
  if(!D?.connected()){status("CONNECT GOOGLE DRIVE FIRST · GOOGLE LOGIN REQUIRED",true);return}
@@ -2160,8 +2163,20 @@ function wire(){editor=P.create({overlay:$("pixelOverlay"),canvas:$("pixelCanvas
  window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
  requestAnimationFrame(animationTick);
 }
+window.EmosiCloudBridge=Object.freeze({
+ async reconcile(){
+  if(!D?.connected())throw Error("Connect Google Drive first");
+  const result=await refreshDrive({force:true});
+  if(!result?.verified)throw Error("Emosi reconciliation failed: "+JSON.stringify(result?.errors||[]));
+  return result;
+ },
+ status:()=>({connected:!!D?.connected(),saved:savedEntries.size,cloud:driveEntries.size})
+});
 wire();reload({force:true});
 })();
 </script>
 <script src="./convo-editor.js?v=convo-inline-fullpage-20261107"></script>
+<script src="../shared/cloud-first-universal.js?v=emosi-safe-20261108"></script>
+<script src="../shared/cloud-first-startup.js?v=emosi-safe-20261108"></script>
+<script src="./cloud-first-emosi-entry.js?v=emosi-safe-20261108"></script>
 </body></html>

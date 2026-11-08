@@ -15,6 +15,7 @@
  }
  function checkpoint(){
   undo.push(JSON.stringify(flow));if(undo.length>80)undo.shift();redo.length=0;
+  setTimeout(()=>document.dispatchEvent(new Event('mainkan:flow-edit')),0);
  }
  function find(id){return F.get(flow,id);}
  function optionList(chosen,includeEmpty=false){
@@ -209,6 +210,18 @@
   try{return F.normalize(flow);}
   catch(err){notify('Invalid flow: '+err.message,true);return null;}
  }
+ window.MainkanFlowCloudBridge=Object.freeze({
+  get:()=>F.normalize(flow),
+  apply:incoming=>{
+   const validated=F.normalize(incoming);
+   checkpoint();flow=validated;selected=flow.start;presetName='cloud';
+   connecting=null;render();notify('✓ Verified Mainkan flow loaded from Drive');
+  },
+  onEdit:callback=>{
+   const fn=()=>callback();document.addEventListener('mainkan:flow-edit',fn);
+   return ()=>document.removeEventListener('mainkan:flow-edit',fn);
+  }
+ });
  function exportJson(){
   const normalized=validFlow();if(!normalized)return;
   const blob=new Blob([JSON.stringify(normalized,null,2)],{type:'application/json'});
