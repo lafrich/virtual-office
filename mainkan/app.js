@@ -9,15 +9,15 @@ const F=window.MainkanFlow;
 const screens=['splashScreen','welcomeScreen','loginScreen','characterScreen','confirmScreen','loadingScreen','tutorialScreen','gameScreen','pauseScreen','messageScreen'];
 const base=String(window.MAINKAN_CONFIG?.apiBase||'').replace(/\/$/,'');
 const apiReady=/^https:\/\//i.test(base)||/^http:\/\/localhost(?::\d+)?$/i.test(base);
-const allowed=['ichsan','noor','theodore'];
+const allowed=['genesis_male_nude','genesis_female_nude'];
 const frame=$('semestaFrame');
 const unavailable='Login online belum tersedia. Backend autentikasi belum dikonfigurasi. Gunakan Mainkan Preview.';
 const previewMode=new URLSearchParams(location.search).get('flowPreview')==='1';
 let graph=F.preset('default'),currentNode=null,stage='splashScreen',loginMode='login';
-let guest=true,session=null,selected='ichsan',profile=null,characterDraft=null,worldCounter=0;
+let guest=true,session=null,selected='genesis_male_nude',profile=null,characterDraft=null,worldCounter=0;
 let previewApplied=false,booted=false,sequence=0,firstTime=true,worldReady=false;
 let splashSeen=new Set(),pauseRequested=false;
-const assets=new Map(),directions=['SE','SW','NW','NE'],expressions=['','smile','happy','sad','surpr','sleepy'];
+const directions=['se','sw','ne','nw'],expressions=['neutral','happy','sad','angry','sleepy','surprised','fear','shy','cry'];
 let charDirection=0,charWalk=false,charExpression=0,charTick=0;
 function message(id,text,error){
  const el=$(id);if(!el)return;el.textContent=text;el.classList.toggle('error',!!error);
@@ -190,9 +190,9 @@ $('authForm').addEventListener('submit',async e=>{
   });
   if(result.authenticated!==true)throw Error('Server belum mengonfirmasi sesi login.');
   $('password').value='';guest=false;session=result;profile=result.player||null;
-  firstTime=!profile?.character;
-  if(profile.character&&allowed.includes(profile.character.asset))selected=profile.character.asset;
-  const route=profile.character?'returning':'new_player';
+  firstTime=!allowed.includes(profile?.character?.base);
+  if(!firstTime)selected=profile.character.base;
+  const route=firstTime?'new_player':'returning';
   branchCurrent(route);
  }catch(err){message('authMessage',err.message||'Login gagal',true);}
  finally{button.disabled=false;}
@@ -212,50 +212,33 @@ function selectCharacter(asset){
  if(!allowed.includes(asset))return;
  selected=asset;
  document.querySelectorAll('.choice').forEach(el=>{
-  const yes=el.dataset.character===asset;
-  el.classList.toggle('selected',yes);el.setAttribute('aria-pressed',String(yes));
+  const yes=el.dataset.character===asset;el.classList.toggle('selected',yes);
+  el.setAttribute('aria-pressed',String(yes));
  });
- drawAvatar(true);
+ window.MainkanClassicCreator?.refresh?.();
+ drawAvatar();
 }
 document.querySelectorAll('.choice').forEach(el=>el.addEventListener('click',()=>selectCharacter(el.dataset.character)));
-const rootAssets='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/game/assets/chars/';
-function spriteUrl(asset,expr){return rootAssets+asset+'_v6b_'+(expr?'f'+expr+'.png':'sheet.png');}
-function loadSprite(asset,expression){
- const key=asset+'|'+(expression||'');
- if(assets.has(key))return assets.get(key);
- const image=new Image(),rec={image,ready:false,failed:false};
- image.onload=()=>{rec.ready=true;};
- image.onerror=()=>{rec.failed=true;};
- image.src=spriteUrl(asset,expression);
- assets.set(key,rec);return rec;
+function currentGenesisProfile(){
+ const appearance={};
+ for(const id of ['hairStyle','hairColor','skinTone','topStyle','topColor','pantsStyle','pantsColor','shoesStyle','shoesColor','glasses','facialHair'])
+  appearance[id]=$(id)?.value||'';
+ return window.VLGenesisPlayer?.normalizeProfile({
+  base:selected,name:$('playerName')?.value||'Player',birthday:$('birthday')?.value||null,
+  zodiac:$('zodiac')?.value||'',appearance
+ })||null;
 }
-document.querySelectorAll('.choice img').forEach(img=>{
- const asset=img.parentNode?.dataset.character,rec=loadSprite(asset,'');
- const thumbnail=document.createElement('canvas');thumbnail.width=64;thumbnail.height=112;
- thumbnail.style.width='38px';thumbnail.style.height='65px';thumbnail.style.imageRendering='pixelated';
- img.replaceWith(thumbnail);
- function draw(){
-  if(!rec.ready){if(!rec.failed)setTimeout(draw,140);return;}
-  const c=thumbnail.getContext('2d');c.imageSmoothingEnabled=false;
-  c.clearRect(0,0,64,112);c.drawImage(rec.image,0,0,64,112,0,0,64,112);
- }
- draw();
-});
 function drawAvatar(){
  if(stage!=='characterScreen')return;
- const c=$('charPreview'),g=c.getContext('2d');g.imageSmoothingEnabled=false;
- g.clearRect(0,0,64,112);
- const expr=expressions[charExpression];
- const data=loadSprite(selected,expr);
- const backup=loadSprite(selected,'');
- const use=data.ready?data:backup.ready?backup:null;
- if(use){
-  const x=(charWalk?Math.floor(charTick/5)%6:0)*64,y=charDirection*112;
-  try{g.drawImage(use.image,x,y,64,112,0,0,64,112);}catch{}
- }else{
-  g.fillStyle='#688aa8';g.fillRect(21,46,22,44);g.fillStyle='#edc4a0';g.fillRect(22,15,20,31);
- }
- $('previewDirection').textContent='Direction '+directions[charDirection]+' · '+(charWalk?'Walk':'Idle')+(expr?' · '+expr:'');
+ const c=$('charPreview'),ctx=c.getContext('2d');
+ ctx.imageSmoothingEnabled=false;
+ const profile=currentGenesisProfile();
+ const action=charWalk?'walk':'idle';
+ const frames=charWalk?6:4;
+ const frame=Math.floor(charTick/(charWalk?1:2))%frames;
+ const shown=window.VLGenesisPlayer?.directPreview(c,profile,directions[charDirection],action,frame,expressions[charExpression],charTick/6);
+ if(!shown)ctx.clearRect(0,0,64,112);
+ $('previewDirection').textContent='Genesis '+(selected==='genesis_female_nude'?'Female':'Male')+' · '+directions[charDirection].toUpperCase()+' · '+(charWalk?'Walk':'Idle')+' · Emosi '+expressions[charExpression];
 }
 $('charRotate').addEventListener('click',()=>{charDirection=(charDirection+1)%4;drawAvatar();});
 $('charAnimate').addEventListener('click',()=>{charWalk=!charWalk;drawAvatar();});
@@ -270,19 +253,18 @@ $('characterForm').addEventListener('submit',e=>{
   message('characterMessage','Tanggal lahir tidak valid.',true);return;
  }
  const appearance={};for(const id of fields)appearance[id]=$ (id).value;
- characterDraft={name,zodiac,birthday:birth||null,asset:selected,
-  gender:selected==='ichsan'?'male':selected==='noor'?'female':'astro',appearance};
+ characterDraft=window.VLGenesisPlayer.normalizeProfile({name,zodiac,birthday:birth||null,base:selected,appearance});
  if(currentNode?.type==='character')branchCurrent();
  else showType('confirm');
 });
 function drawConfirm(){
  if(!characterDraft){
-  characterDraft={name:$('playerName').value.trim()||'Preview',zodiac:$('zodiac').value||'Capricorn',asset:selected};
+  characterDraft=currentGenesisProfile();
  }
  const ch=characterDraft;
  const lines=[
   ['Nickname',ch.name],['Birthday',ch.birthday||'Not entered'],['Zodiac',ch.zodiac],
-  ['Body',ch.gender],['Base rig',ch.asset],
+  ['Body',ch.gender],['Base rig',ch.base],['Face database',ch.faceSource],
   ['Hair',ch.appearance?(ch.appearance.hairStyle+' · '+ch.appearance.hairColor):'Default'],
   ['Clothing',ch.appearance?(ch.appearance.topStyle+' / '+ch.appearance.pantsStyle):'Default'],
   ['Shoes',ch.appearance?ch.appearance.shoesStyle:'Default']
@@ -305,7 +287,6 @@ function startWorld(force=false){
  $('worldLabel').textContent='World asli Semesta • perangkat ini';
  const url=new URL('../world-builder/',location.href);
  url.searchParams.set('player','1');
- url.searchParams.set('character',selected);
  url.searchParams.set('v',String(++worldCounter));
  frame.src=url.href;
 }
@@ -318,6 +299,17 @@ window.addEventListener('message',e=>{
   return;
  }
  if(e.source!==frame.contentWindow)return;
+ if(e.data.type==='mainkan:profile-request'){
+  try{
+   const data=profile?.character||characterDraft||currentGenesisProfile();
+   const normalized=window.VLGenesisPlayer.normalizeProfile(data);
+   frame.contentWindow?.postMessage({type:'mainkan:player-profile',profile:normalized},location.origin);
+  }catch(err){
+   frame.contentWindow?.postMessage({type:'mainkan:player-profile-error',message:String(err.message)},location.origin);
+   $('worldLoading').textContent='Gagal memuat karakter Genesis: '+err.message;
+  }
+  return;
+ }
  if(e.data.type==='mainkan:semesta-ready'){
   worldReady=true;
   $('worldLoading').hidden=true;
