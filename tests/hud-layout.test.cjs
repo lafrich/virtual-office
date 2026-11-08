@@ -38,7 +38,9 @@ test('play-hud and Jiwa load the module and expose sliders plus reset',()=>{
  assert.doesNotMatch(panel,/card\('HUD LAYOUT'/);
  assert.match(jiwa,/data-tab="play"/);
  assert.doesNotMatch(panel,/hudLayoutReset/);
- assert.match(html,/id="tabUIEditor"/);
+ assert.doesNotMatch(html,/id="tabUIEditor"/);
+ const mainkan=fs.readFileSync(path.resolve(__dirname,"../mainkan/index.html"),"utf8");
+ assert.match(mainkan,/id="openUIEditor"/);
  assert.match(jiwa,/hud-layout\.js/);
  assert.doesNotMatch(jiwa,/id="uiView"/);
  assert.match(html,/hud-layout\.js/);

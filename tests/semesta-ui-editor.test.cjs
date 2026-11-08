@@ -1,68 +1,65 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
-const path=p=>fs.readFileSync(p,'utf8');
-const HL=require('../shared/hud-layout.js'),G=require('../shared/gameplay-schema.js');
-test('Semesta right inspector has one Edit UI tab and full editing controls',()=>{
- const html=path('world-builder/index.html'),css=path('world-builder/xp.css'),js=path('world-builder/semesta-ui-editor.js');
- for(const id of ['tabUIEditor','semestaUIEditorPane','suiElement','suiShowGrid','suiSnap','suiGridSize',
-  'suiCenterX','suiCenterY','suiCenterBoth','suiAnchor','suiX','suiY','suiScale','suiSave','suiReset','suiCancel'])
-  assert.match(html,new RegExp('id="'+id+'"'));
- assert.match(html,/semesta-ui-editor\.js/);
- assert.match(css,/#semestaUIOverlay/);
- assert.match(css,/#inspector\.sui-editing/);
- assert.match(js,/function pointerStart\(/);
- assert.match(js,/function pointerMove\(/);
- assert.match(js,/function changeSlot\(/);
- assert.match(js,/function relativeToSlot\(/);
- assert.match(js,/HL\.saveGlobalLayout\(draft,localStorage\)/);
- assert.match(js,/root\.SemestaPlay\?\.refreshHud\?\.\(\)/);
-});
-test('Game UI edits are global, preview-only until Save, unaffected by city draft',()=>{
- const builder=path('world-builder/builder.js'),editor=path('world-builder/semesta-ui-editor.js');
- assert.match(builder,/SemestaUIEditor\?\.previewLayout\?\.\(\)/);
- assert.match(builder,/HL\?\.resolveSavedLayout\?\.\(null,localStorage\)/);
- assert.match(builder,/refreshHud:syncPlayHud/);
- assert.match(editor,/function start\(\)/);
- assert.match(editor,/if\(!root\.SemestaLifePlay\?\.active\?\.\(\)\)/);
- assert.match(editor,/function save\(\)/);
- assert.match(editor,/function stop\(\)/);
- assert.match(editor,/draft=null;dirty=false/);
- assert.doesNotMatch(editor,/saveCity|cityId|saveDraftMenu/);
-});
-test('Jiwa does not have UI Editor tab, script or secondary Systems layout form',()=>{
- const index=path('jiwa/index.html'),jiwa=path('jiwa/jiwa.js'),systems=path('jiwa/mechanics-panel.js');
- assert.doesNotMatch(index,/data-tab="ui"/);
- assert.doesNotMatch(index,/id="uiView"/);
- assert.doesNotMatch(index,/ui-layout-editor\.js/);
- assert.doesNotMatch(systems,/card\('HUD LAYOUT'/);
- assert.doesNotMatch(jiwa,/\['map','systems','test','context','play','ui'\]/);
- for(const mode of ['map','systems','test','context','play'])assert.match(index,new RegExp('data-tab="'+mode+'"'));
-});
-test('The global HUD layout survives map changes and retains custom positions',()=>{
- const m=new Map(),storage={getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),
-  key:i=>[...m.keys()][i]||null,get length(){return m.size}};
- const g=HL.defaults();g.desktop.money={anchor:'center-center',x:0,y:0,scale:1.1};
- const saved=HL.saveGlobalLayout(g,storage);
- assert.equal(saved.ok,true);
- for(const city of ['Jakarta City','Bandung City','__jiwa_global__','new-map']){
-  const got=HL.resolveSavedLayout(city,storage);
-  assert.equal(got.scope,'global-game-ui');
-  assert.deepEqual(got.layout,g);
- }
- assert.equal(HL.normalizeSlot({x:2100,y:1500,scale:1.2,anchor:'top-left'}).x,2100);
- assert.equal(G.normalizeGameplay({modules:{hudLayout:g}}).modules.hudLayout.desktop.money.anchor,'center-center');
-});
+const read=p=>fs.readFileSync(p,'utf8');
+const semesta=read('world-builder/index.html'),builder=read('world-builder/builder.js');
+const mainkan=read('mainkan/index.html'),runtime=read('mainkan/game-hud.js');
+const editor=read('mainkan/ui-editor.html'),editorJs=read('mainkan/ui-editor.js');
+const HL=require('../shared/hud-layout.js');
 
-test('Phone select-drag supports real mobile viewport and touch hit testing',()=>{
- const src=path('world-builder/semesta-ui-editor.js');
- const html=path('world-builder/index.html');
- for(const s of [
-  "next=env.phone?'phone':HL.detectProfile(document)",
-  "shield.hidden=profile!=='phone'",
-  "function pickAt(clientX,clientY)",
-  "addEventListener('pointerdown',ev=>",
-  "ev.pointerId!==drag.pointerId",
-  "setPointerCapture(ev.pointerId)"
- ])assert.ok(src.includes(s),'Missing phone pointer integration: '+s);
- assert.ok(html.includes('id="suiDragOnScreen"'));
+test('Semesta has map authoring and pure exploration, but no game HUD editor',()=>{
+ assert.doesNotMatch(semesta,/id="tabUIEditor"|id="semestaUIEditorPane"|semesta-ui-editor\.js/);
+ assert.match(semesta,/id="walkMode" title="EXPLORE \/ WALK TEST/);
+ assert.match(builder,/if\(!playerMode\)return null; \/\/ No game HUD in Semesta exploration/);
+ assert.match(builder,/if\(!playerMode\)return walkRunning\?6\.5:4\.1/);
+ assert.match(builder,/if\(playerMode\)window\.SemestaLifePlay\?\.start\?\.\(\)/);
+ assert.match(builder,/if\(playerMode\)try\{beginSpawnRespawn\(first,'playStart'\)/);
+ assert.match(builder,/else if\(playerMode&&e\.key\.toLowerCase\(\)==='e'&&mode==='walk'\)/);
+});
+test('Mainkan owns game UI editor and positions real visible controls, not duplicate Semesta chrome',()=>{
+ assert.match(mainkan,/href="\.\/ui-editor\.html" id="openUIEditor"/);
+ assert.match(mainkan,/shared\/hud-layout\.js/);
+ assert.match(mainkan,/mainkan-hud-edit-20261108/);
+ for(const [id,element] of Object.entries({gameWallet:'money',
+  gamePhone:'hpButton',gameBag:'bagButton',gameAction:'action',gameRun:'run'})){
+  assert.match(mainkan,new RegExp('id="'+id+'" data-hud-item="'+element+'"'));
+ }
+ assert.doesNotMatch(mainkan,/id="gameNeeds"/);
+ assert.match(runtime,/viewport\.appendChild\(bar\)/);
+ assert.match(runtime,/HL\.resolveSavedLayout\(null,localStorage\)/);
+ assert.match(runtime,/getElementById\(id\)/);
+ assert.match(runtime,/runEvent\('pointerdown'\)/);
+ assert.match(runtime,/window\.MainkanHUDLayout=Object\.freeze/);
+});
+test('Mainkan HUD editor has live drag, resize, Desktop + Phone, grid and verified global Save',()=>{
+ for(const id of ['uiProfile','hudStage','uiElement','uiAnchor','uiX','uiY','uiScale',
+  'uiSave','uiResetProfile','uiRevert','uiShowGrid','uiSnap','uiGridSize',
+  'uiCenterX','uiCenterY','uiCenterBoth'])assert.match(editor,new RegExp('id="'+id+'"'));
+ assert.match(editorJs,/function down\(e,id\)/);
+ assert.match(editorJs,/function move\(e\)/);
+ assert.match(editorJs,/function positionSlot\(/);
+ assert.match(editorJs,/function render\(/);
+ assert.match(editorJs,/HL\.saveGlobalLayout\(draft,localStorage\)/);
+ assert.match(editorJs,/root\.MainkanUIEditor=Object\.freeze/);
+ assert.doesNotMatch(editorJs,/SemestaUIEditor|saveCity|saveDraftMenu/);
+});
+test('Global HUD data remains compatible with legacy saved layout, no city rewrite',()=>{
+ const m=new Map(),storage={
+  getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,String(v)),
+  get length(){return m.size;},key:i=>[...m.keys()][i]};
+ const layout=HL.defaults();
+ layout.desktop.action={anchor:'center-center',x:210,y:70,scale:1.3};
+ layout.phone.hpButton={anchor:'bottom-right',x:46,y:31,scale:.8};
+ const saved=HL.saveGlobalLayout(layout,storage);
+ assert.equal(saved.ok,true);
+ assert.equal(saved.scope,'global-game-ui');
+ const recovered=HL.resolveSavedLayout('another-city',storage);
+ assert.equal(recovered.scope,'global-game-ui');
+ assert.deepEqual(recovered.layout,HL.normalize(layout));
+ assert.equal(HL.normalizeSlot({anchor:'top-left',x:9000,y:-9000,scale:10}).x,4096);
+});
+test('Jiwa remains responsible for mechanic configuration, not HUD placement',()=>{
+ const jiwa=read('jiwa/index.html');
+ assert.doesNotMatch(jiwa,/data-tab="ui"|id="uiView"|ui-layout-editor\.js/);
+ assert.match(builder,/SemestaLifePlay\.attach\(/);
+ assert.match(builder,/SemestaLifePlay\?\.tick\?\.\(dt\)/);
 });

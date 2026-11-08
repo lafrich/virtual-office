@@ -14,6 +14,14 @@ on:
       - 'tests/mainkan-flow-editor.e2e.cjs'
       - 'tests/mainkan-classic-creator.e2e.cjs'
       - '.github/workflows/mainkan-native-browser.yml'
+  pull_request:
+    paths:
+      - 'mainkan/**'
+      - 'world-builder/builder.js'
+      - 'world-builder/index.html'
+      - 'world-builder/semesta-player.css'
+      - 'tests/mainkan-native-semesta.e2e.cjs'
+      - '.github/workflows/mainkan-native-browser.yml'
   workflow_dispatch:
 permissions:
   contents: read

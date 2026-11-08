@@ -48,3 +48,10 @@ Graph model: `mainkan/flow-model.js`. It rejects malformed formats, missing IDs/
 ## Tests
 - Node: `node --test tests/mainkan-smoke.test.cjs`
 - Real Chromium: `node tests/mainkan-native-semesta.e2e.cjs` and `node tests/mainkan-flow-editor.e2e.cjs` in the CI same-origin checkout layout.
+
+## Mainkan HUD / UI Editor (2026-11-08)
+- **UI Editor:** https://lafrich.github.io/virtual-office/mainkan/ui-editor.html
+- This is the single authoring entry for the global game HUD; it provides Desktop/Phone profiles, drag/resize, anchors, grid/snap, centered alignment, Reset and Save.
+- The saved `jiwa-game-ui-global-v2` layout is shared with native Semesta `?player=1`. Mainkan's visible money, HP, Bag, Action and Run controls use the same profile; the full Jiwa life panel and Nokia/Bag popup windows stay backed by the native player runtime.
+- Standalone Semesta Walk Test is an exploration-only preview. Enter Mainkan to exercise the full game mechanics, not the city editor.
+- HUD layout persistence remains same-origin browser data for backward compatibility; it is not by itself a cross-device Google Drive publish. No City Drafts, rigs or Jiwa authoring rules are rewritten.

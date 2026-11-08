@@ -105,6 +105,18 @@ body.mainkan-playing #viewport{
 #worldLoading .world-loader-card p{margin:13px 0;line-height:1.4}
 #worldLoading .world-loader-card small{display:block;margin-top:9px;line-height:1.4;color:#4c4c4c}
 #worldLoading .progress{height:19px}
+
+/* Mainkan is the authoritative visible gameplay HUD. Positions are authored in UI Editor. */
+#viewport #mainkanGameBar{position:absolute;inset:0;z-index:3;display:block;width:100%;height:100%;background:transparent;padding:0;pointer-events:none}
+#viewport #mainkanGameBar .actions{display:contents}
+#viewport #mainkanGameBar [data-hud-item]{position:absolute;flex:none!important;pointer-events:auto;white-space:nowrap;margin:0;transform-origin:top left;box-sizing:border-box}
+#viewport #gameWallet,#viewport #gameNeeds{display:block;background:#c0c0c0e8;border:2px solid;border-color:#fff #666 #666 #fff;padding:6px 8px;color:#1b2540;line-height:1.3}
+#viewport #gameNeeds{white-space:normal;width:175px}
+#viewport #gameWallet{min-width:90px}
+#viewport #gameAction{min-width:78px}
+#viewport #gameRun{min-width:59px;touch-action:none;user-select:none}
+#viewport #gameRun.on{background:#b0cfff;border-color:#777 #fff #fff #777}
+@media(max-width:650px){#viewport #mainkanGameBar .micro{display:block}#viewport #mainkanGameBar .btn{flex:none!important;min-width:0}}
 </style>
 <link rel="stylesheet" href="./classic-creator.css?v=desktop-paint-preview-20261108">
 <script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
@@ -116,14 +128,15 @@ body.mainkan-playing #viewport{
 <script src="./flow-model.js?v=mainkan-flow-v1" defer></script>
 <script src="./config.js?v=mainkan-20261108" defer></script>
 <script src="./app.js?v=genesis-wear-flickerfix-v3" defer></script>
-<script src="./game-hud.js?v=mainkan-flow-v1" defer></script>
+<script src="../shared/hud-layout.js?v=mainkan-hud-20261108" defer></script>
+ <script src="./game-hud.js?v=mainkan-hud-edit-20261108" defer></script>
 <script src="./classic-creator.js?v=genesis-wear-flickerfix-v2" defer></script>
 </head>
 <body>
 <div id="desktop">
 <main class="window" aria-label="Mainkan aplikasi pemain">
 <header class="titlebar"><span class="icon" aria-hidden="true">▶</span><span>MAINKAN.EXE — Namanya Juga Hidup</span><div class="controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
-<div class="menubar"><span>Game</span><span>Player</span><a href="./flow-editor.html" id="openFlowEditor" title="Atur flow game secara visual">▤ Flow Editor</a><button type="button" class="btn compact" id="importPlayerFlow">Import Flow JSON</button><input type="file" id="importFlowFile" accept=".json,application/json" hidden></div>
+<div class="menubar"><span>Game</span><span>Player</span><a href="./flow-editor.html" id="openFlowEditor" title="Atur flow game secara visual">▤ Flow Editor</a><a href="./ui-editor.html" id="openUIEditor" title="Atur posisi HUD Mainkan desktop dan phone">▤ UI Editor</a><button type="button" class="btn compact" id="importPlayerFlow">Import Flow JSON</button><input type="file" id="importFlowFile" accept=".json,application/json" hidden></div>
 <section id="splashScreen" class="screen" aria-label="Splash Screen">
   <div class="split"><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Game dunia virtual Indonesia<br>mainkan.exe / player client</small></div>
   <div><h1>Memuat dunia...</h1><p class="muted">Memeriksa peta dan aset game. Ini aplikasi untuk pemain, bukan editor.</p><div class="progress" role="progressbar" aria-label="Persiapan game"><div id="progressFill"></div></div><p id="bootText" class="micro" aria-live="polite">Starting mainkan.exe...</p><button id="skipSplash" type="button" class="btn compact">Lewati intro</button></div></div>
@@ -264,12 +277,13 @@ body.mainkan-playing #viewport{
      </div>
   </div>
   <div class="game-bottom" id="mainkanGameBar">
- <span class="micro" id="gameWallet">Rp —</span>
- <span class="micro" id="gameNeeds">Hunger — · Energy —</span>
+ <span class="micro" id="gameWallet" data-hud-item="money">Rp —</span>
+ <!-- Life stats and activity controls are the native SemestaLifePlay panel, only in Mainkan player mode. -->
  <div class="actions">
-  <button type="button" class="btn compact" id="gamePhone">▣ HP</button>
-  <button type="button" class="btn compact" id="gameBag">▣ Bag</button>
-  <button type="button" class="btn primary" id="gameAction">ACTION</button>
+  <button type="button" class="btn compact" id="gamePhone" data-hud-item="hpButton">▣ HP</button>
+  <button type="button" class="btn compact" id="gameBag" data-hud-item="bagButton">▣ Bag</button>
+  <button type="button" class="btn primary" id="gameAction" data-hud-item="action">ACTION</button>
+  <button type="button" class="btn compact" id="gameRun" data-hud-item="run" aria-label="Hold to run">RUN</button>
  </div>
 </div>
 </section>

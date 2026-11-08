@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light"><meta name="theme-color" content="#008080">
+<title>Mainkan.exe — HUD / UI Editor</title>
+<style>
+:root{font:12px Tahoma,"MS Sans Serif",Verdana,sans-serif;color:#151515;background:#008080}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}
+[hidden]{display:none!important}button,select,input{font:inherit}button{cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px dotted #111;outline-offset:2px}
+#app{height:100dvh;display:flex;flex-direction:column;background:#c0c0c0;border:2px solid #fff}
+.top{background:linear-gradient(90deg,#000080,#3777ae);color:white;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;gap:10px}
+.top strong{font-size:13px}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px;background:#d5d5d5;border-bottom:2px solid #777}
+.btn{min-height:32px;background:#dedede;border:2px solid;border-color:#fff #777 #777 #fff;padding:5px 10px;color:#151515;text-decoration:none;display:inline-flex;align-items:center}
+.btn.primary{background:#e6edce;font-weight:bold}.btn:active{border-color:#777 #fff #fff #777}
+.toolbar label{display:inline-flex;gap:6px;align-items:center}.toolbar select{min-height:31px;border:2px inset #777;background:#fff;padding:4px}
+.layout{min-height:0;flex:1;display:grid;grid-template-columns:minmax(0,1fr) 285px}
+.preview{min-width:0;min-height:0;display:flex;flex-direction:column;background:#e1e1e1}
+.caption{padding:8px 10px;border-bottom:1px solid #aaa;font-size:11px;color:#455}
+.stage-wrap{min-height:0;flex:1;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;overscroll-behavior:contain}
+#hudStage{position:relative;flex:none;width:min(900px,100%);height:540px;border:3px solid #4d5558;overflow:hidden;touch-action:none;background-color:#9fb4a0;background-image:linear-gradient(154deg,transparent 45%,#6f777c 45% 53%,transparent 53%),linear-gradient(26deg,transparent 46%,#8d9697 46% 55%,transparent 55%),repeating-linear-gradient(0deg,#8ea88f22 0 31px,#607d652b 31px 32px),repeating-linear-gradient(90deg,transparent 0 31px,#49644d2b 31px 32px)}
+#hudStage.phone{width:min(390px,100%);height:680px}
+#hudStage::before{content:"SEMESTA · WORLD PREVIEW";position:absolute;right:8px;top:8px;color:#133f4377;font:700 10px monospace;pointer-events:none}
+#grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(#ffffff38 1px,transparent 1px),linear-gradient(90deg,#ffffff38 1px,transparent 1px);z-index:1}
+.hud-chip{position:absolute;z-index:2;display:flex;align-items:center;justify-content:center;min-height:27px;background:#d4d5d1e8;border:2px solid #fff;outline:1px solid #54606c;color:#182331;padding:7px 9px;white-space:nowrap;cursor:grab;user-select:none;touch-action:none;transform-origin:top left;box-shadow:2px 2px 0 #0004}
+.hud-chip[data-element="lifePanel"]{background:#e5e7e3ec;min-width:190px;min-height:105px;white-space:pre-wrap;text-align:left;align-items:flex-start;justify-content:flex-start}
+.hud-chip[data-element="phone"]{height:180px;width:125px;background:#bec5ceee}
+.hud-chip[data-element="bag"]{height:155px;width:155px;background:#eee6ceee}
+.hud-chip[data-element="action"]{font-weight:bold;background:#aebfef}
+.hud-chip[data-element="run"]{background:#d0ecc5}
+.hud-chip[data-element="dock"]{width:150px;height:36px;background:#dadadaad}
+.hud-chip[data-element="toast"]{background:#e1ca7dee}
+.hud-chip[data-element="needs"]{width:140px;height:56px}
+.hud-chip.selected{outline:3px solid #ffd34d;outline-offset:2px;z-index:4}
+.hud-chip .resize{position:absolute;right:-10px;bottom:-10px;width:17px;height:17px;background:#ffd54a;border:2px solid #423000;cursor:nwse-resize}
+.inspector{min-width:0;min-height:0;overflow:auto;background:#d4d4d4;border-left:2px solid #777;padding:13px 12px}
+.inspector h2{font-size:13px;margin:0 0 10px}.inspector h3{font-size:11px;margin:15px 0 8px;border-bottom:1px solid #aaa;padding-bottom:4px}
+.field{display:grid;gap:5px;margin:9px 0}.field input,.field select{width:100%;padding:6px;background:#fff;border:2px inset #999;min-height:31px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}.controls{display:flex;flex-wrap:wrap;gap:6px}.checks{display:flex;flex-wrap:wrap;gap:12px}
+#uiScale{width:100%}.tip{font-size:11px;color:#444;line-height:1.5}
+#uiStatus{font:11px/1.4 monospace;color:#154d39;padding:8px;border:1px inset #aaa;background:#f3f3ed;min-height:36px;margin-top:10px;overflow-wrap:anywhere}
+.foot{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;border-top:1px solid #777;font:11px monospace;background:#ddd}
+@media(max-width:760px){.layout{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(240px,1fr) minmax(230px,38dvh)}.inspector{border-left:0;border-top:2px solid #777}.stage-wrap{padding:8px}#hudStage{height:430px}#hudStage.phone{height:560px}.top strong{font-size:11px}.toolbar{gap:4px}.btn{padding:5px 7px}}
+</style>
+<script src="../shared/hud-layout.js?v=mainkan-hud-20261108" defer></script>
+<script src="./ui-editor.js?v=mainkan-hud-editor-v1" defer></script>
+</head>
+<body><div id="app">
+<header class="top"><strong>▤ MAINKAN.EXE / UI EDITOR</strong><span>Windows 98 · global game HUD</span></header>
+<div class="toolbar">
+<a class="btn" href="./">← Mainkan</a>
+<label for="uiProfile">Device <select id="uiProfile"><option value="desktop">Desktop</option><option value="phone">Phone</option></select></label>
+<button id="uiSave" class="btn primary" type="button">💾 Save Global UI</button>
+<button id="uiRevert" class="btn" type="button">↺ Discard Unsaved</button>
+</div>
+<div class="layout">
+<section class="preview" aria-label="Preview positions">
+<div class="caption">DRAG HUD UNTUK MOVE · TARIK KOTAK KUNING UNTUK RESIZE · SIMULASI LAYOUT (BUKAN SESI GAME)</div>
+<div class="stage-wrap"><div id="hudStage"><div id="grid"></div></div></div>
+</section>
+<aside class="inspector" aria-label="HUD element settings">
+<h2>HUD ELEMENTS</h2>
+<div class="field"><label for="uiElement">Pilih elemen</label><select id="uiElement"></select></div>
+<p class="tip" id="uiSelectedInfo">Pilih elemen atau drag langsung di preview.</p>
+<h3>POSITION / SIZE</h3>
+<div class="field"><label for="uiAnchor">Anchor</label><select id="uiAnchor"></select></div>
+<div class="pair">
+<div class="field"><label for="uiX">X offset</label><input id="uiX" type="number" step="1" min="-4096" max="4096"></div>
+<div class="field"><label for="uiY">Y offset</label><input id="uiY" type="number" step="1" min="-4096" max="4096"></div>
+</div>
+<div class="field"><label for="uiScale">Scale · <output id="uiScaleLabel">100%</output></label><input id="uiScale" type="range" min=".5" max="1.5" step=".01"></div>
+<div class="controls"><button class="btn" id="uiCenterX">Center X</button><button class="btn" id="uiCenterY">Center Y</button><button class="btn" id="uiCenterBoth">Center Both</button></div>
+<h3>GRID / SNAP</h3>
+<div class="checks"><label><input type="checkbox" id="uiShowGrid" checked> Show grid</label><label><input type="checkbox" id="uiSnap" checked> Snap</label></div>
+<div class="field"><label for="uiGridSize">Grid size</label><select id="uiGridSize"><option>8</option><option selected>16</option><option>24</option><option>32</option><option>48</option></select></div>
+<h3>RESET</h3>
+<button class="btn" type="button" id="uiResetProfile">Reset current device (preview)</button>
+<p class="tip">Posisi Desktop dan Phone disimpan terpisah. Save menerapkan layout global yang sama di semua kota, bukan mengubah City Draft. Menu HP dan Bag tetap dibuka lewat Mainkan saat gameplay.</p>
+<div id="uiStatus" role="status">READY · Tidak ada perubahan.</div>
+</aside>
+</div>
+<footer class="foot"><span>MAINKAN / HUD EDITOR</span><span>GLOBAL LAYOUT · DESKTOP + PHONE</span></footer>
+</div></body></html>

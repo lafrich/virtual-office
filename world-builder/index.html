@@ -37,7 +37,7 @@
   <button class="chrome-tool" id="panMode" type="button" title="Pan camera — drag anywhere on canvas (including over objects)" aria-pressed="false" aria-label="Pan camera">✋</button>
   <button class="chrome-tool" id="paintMode" title="Paint terrain with one finger">▧</button>
   <button class="chrome-tool" id="fillMode" title="Fill connected terrain">▰</button>
-  <button class="chrome-tool" id="walkMode" title="PLAY GAME · Uji survival, tenda hobo, mancing, pekerjaan, kost dan kebutuhan">🎮</button>
+  <button class="chrome-tool" id="walkMode" title="EXPLORE / WALK TEST · Jalan dan cek kota tanpa HUD atau mekanik gameplay">🚶</button>
   <button class="chrome-tool" id="cameraCharacter" title="Focus and follow selected player / NPC" aria-pressed="false">◎</button>
   <button class="chrome-tool" id="home" title="Fit map view">⌂</button>
   <button class="chrome-tool" id="undo" title="Undo">↶</button>
@@ -198,7 +198,6 @@
    <div class="tabs" role="tablist">
     <button class="tab active" id="tabLayout" type="button">LAYOUT</button>
     <button class="tab" id="tabLogic" type="button">LOGIC</button>
-    <button class="tab" id="tabUIEditor" type="button" title="Edit global game HUD directly on Semesta">EDIT UI</button>
    </div>
    <section id="layoutPane">
     <div class="section-label">POSITION / TRANSFORM</div>
@@ -298,48 +297,6 @@
     </div>
     <p class="help">Map logic keeps asset footprints, coordinates, and interaction hooks inside the saved city. No mechanics execute inside the editor.</p>
    </section>
-<section id="semestaUIEditorPane" hidden aria-label="Global game HUD layout editor">
- <div class="sui-banner">GLOBAL GAME UI · ALL CITIES</div>
- <p class="sui-help">Edit posisi HUD langsung di layar Semesta. Tap atau klik elemen HUD untuk memilih, drag untuk memindahkan, tarik sudut kuning untuk resize. Di HP, tutup panel untuk menggeser elemen di belakangnya. Save berlaku untuk seluruh kota.</p>
- <div class="sui-section">ELEMENT</div>
- <label for="suiElement">Pilih elemen HUD</label>
- <div class="sui-select-row">
-  <button id="suiPrev" type="button" title="Pilih elemen sebelumnya">◀</button>
-  <select id="suiElement" aria-label="Select game HUD element"></select>
-  <button id="suiNext" type="button" title="Pilih elemen berikutnya">▶</button>
- </div>
- <label class="sui-selected-toggle"><input id="suiSelectedOnly" type="checkbox"> Tampilkan outline elemen terpilih saja (untuk HUD yang bertumpuk)</label>
- <button id="suiDragOnScreen" type="button" title="Sembunyikan panel agar seluruh layar game bisa disentuh">↘ DRAG DI LAYAR · TUTUP PANEL</button>
- <p id="suiDeviceHint" class="sui-hint">Mode Desktop · Semua elemen yang terlihat bisa dipilih.</p>
- <p id="suiVisibility" class="sui-hint">Pilih elemen untuk diedit.</p>
- <div class="sui-section">GRID</div>
- <div class="sui-checks">
-  <label><input id="suiShowGrid" type="checkbox" checked> Show grid</label>
-  <label><input id="suiSnap" type="checkbox" checked> Snap to grid</label>
- </div>
- <label for="suiGridSize">Grid size</label>
- <select id="suiGridSize"><option value="8">8 px</option><option value="16" selected>16 px</option><option value="24">24 px</option><option value="32">32 px</option><option value="48">48 px</option></select>
- <div class="sui-section">POSITION / ALIGN</div>
- <div class="sui-aligns">
-  <button id="suiCenterX" type="button">⇔ Center X</button>
-  <button id="suiCenterY" type="button">⇕ Center Y</button>
-  <button id="suiCenterBoth" type="button">⊞ Center Both</button>
- </div>
- <label for="suiAnchor">Anchor</label><select id="suiAnchor"></select>
- <div class="sui-pair">
-  <label>X offset<input id="suiX" type="number" min="-480" max="480" step="1"></label>
-  <label>Y offset<input id="suiY" type="number" min="-480" max="480" step="1"></label>
- </div>
- <label for="suiScale">Size <output id="suiScaleLabel">100%</output></label>
- <input id="suiScale" type="range" min=".5" max="1.5" step=".01" value="1">
- <div class="sui-actions">
-  <button id="suiSave" type="button">💾 SAVE GLOBAL UI</button>
-  <button id="suiReset" type="button">↺ RESET</button>
-  <button id="suiCancel" type="button">✕ DONE</button>
- </div>
- <p id="suiStatus" class="sui-status" role="status" aria-live="polite">Belum ada perubahan.</p>
- <p class="sui-hint">Ini menyimpan layout UI game, bukan posisi objek kota. Nokia dan tombol Action tetap berfungsi di Play Mode.</p>
- </section>
   </div>
  </aside>
 </div>
@@ -555,7 +512,6 @@
 <script src="./drive-sync.js?v=cloud-autosync-20261106"></script>
 <script src="./drive-ui.js?v=semesta-bangun-furniture-cloud-20261107" defer></script>
 <script type="module" src="./builder.js?v=world-entity-interiors-v2&amp;semesta-ground-contact-20261107&amp;trees-grounded-v1&amp;warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1&amp;kebon-sirih-city-v2&amp;city-building-sync-v1&amp;native-pixel-depth-v3&amp;asset-thumbnails-v1&amp;indonesia-pack=v1&amp;asset-library=v1&amp;preview-parity=20261105&amp;native-riders=v3-20261105&amp;native-cars=20261105&amp;indonesia-200=20261105&amp;quality-v3=20261105&amp;quality-v4=20261105&amp;quality-v5=20261105&amp;quality-v6=20261105&amp;vegetation-hifi=20261105&amp;transport-npc=20261105&amp;mahluk2-approved-v1&amp;cloud-auto-v3&amp;jakarta-city=v6-bus-tree-depth&amp;scale-small-v1&amp;replace-selected=20261107&amp;loak-visible=20261107&amp;spawn-hobo=noshadow-20261107&amp;bed-lie=20261107&amp;jiwa-directory-metadata=v1&amp;genesis-custom-wear-loading-v2"></script>
-<script src="./semesta-ui-editor.js?v=phone-pointer-select-fix-20261108" defer></script>
 <script src="./jiwa-link.js?v=jiwa-launch-v1" defer></script>
 <script src="../shared/cloud-first-universal.js?v=nondestructive-20261108"></script>
 <script src="../shared/cloud-first-native-entry.js?v=nondestructive-20261108"></script>

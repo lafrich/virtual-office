@@ -2414,7 +2414,7 @@ function currentPlayGameplay(){
  // composition. Legacy per-city layouts are consulted only for migration.
  const HL=window.VLHudLayout;
  const stored=HL?.resolveSavedLayout?.(null,localStorage);
- const uiLayout=window.SemestaUIEditor?.previewLayout?.()||stored?.layout;
+ const uiLayout=stored?.layout;
  if(HL&&uiLayout){
   raw=raw&&typeof raw==='object'?{...raw}:JG?.defaultGameplay?.()||{modules:{}};
   raw.modules={...(raw.modules||{}),hudLayout:HL.normalize(uiLayout)};
@@ -2422,6 +2422,8 @@ function currentPlayGameplay(){
  return JG?JG.normalizeGameplay(raw):raw;
 }
 function playWorldSpeed(){
+ // Standalone Semesta is exploration only, never Jiwa gameplay.
+ if(!playerMode)return walkRunning?6.5:4.1;
  const g=currentPlayGameplay()||{};
  const move=g.modules&&g.modules.movement;
  if(move&&move.enabled===false)return 0;
@@ -2532,6 +2534,7 @@ function tryLoakSellNearby(){
 }
 
 function ensurePlayHud(){
+ if(!playerMode)return null; // No game HUD in Semesta exploration.
  if(playHud||!window.VLPlayHud)return playHud;
  const wrap=$('canvas-wrap');
  if(!wrap)return null;
@@ -2631,7 +2634,7 @@ function clearWalk(){
 }
 function setMode(m){
  if(playerMode&&m!=='walk')return;
- if(m!=='walk')window.SemestaUIEditor?.stop?.();
+ // UI authoring lives exclusively in mainkan/ui-editor.html.
  if(mode==='walk'&&m!=='walk'){
   window.SemestaLifePlay?.stop?.();
   const savedCamera=lifeAutoCamera?mapCameraBeforeFollow:null;
@@ -2659,7 +2662,7 @@ function setMode(m){
    const first=playerMode?makeTemporaryLifePlayer():
     ((usable(item())?item():documentMap.objects.find(usable))||makeTemporaryLifePlayer());
    walkActorId=first.id;select(first.id);
-   window.SemestaLifePlay?.start?.();
+   if(playerMode)window.SemestaLifePlay?.start?.();
    if(!cameraFollowId){
     mapCameraBeforeFollow={focus:cameraFocus.clone(),size:viewSize};
     cameraFollowId=first.id;lifeAutoCamera=true;
@@ -2668,7 +2671,7 @@ function setMode(m){
    focusCameraAt(where.x,where.z,16);updateCharacterCameraUI();
    rigs.get(walkActorId)?.rig.setPose(null);
    tell('Walk Test: WASD / arrow keys / touch D-pad. Edits are not saved.');
-   try{beginSpawnRespawn(first,'playStart');}catch(err){console.warn('spawn/respawn preview',err);}
+   if(playerMode)try{beginSpawnRespawn(first,'playStart');}catch(err){console.warn('spawn/respawn preview',err);}
  }
  syncPlayHud();
  applyDevicePreview();
@@ -4271,7 +4274,7 @@ window.addEventListener('keydown',e=>{
  if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||
   e.target instanceof HTMLTextAreaElement||e.target?.isContentEditable)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();restoreStack(undoStack,redoStack);}
-  else if(e.key.toLowerCase()==='e'&&mode==='walk'){e.preventDefault();if(!window.SemestaLifePlay?.handleAction?.())enterNearbyBuilding();}
+  else if(playerMode&&e.key.toLowerCase()==='e'&&mode==='walk'){e.preventDefault();if(!window.SemestaLifePlay?.handleAction?.())enterNearbyBuilding();}
  else if(e.key.toLowerCase()==='h'){toggleGrid();}
  else if(e.key==='Delete'&&item())remove();
  else if(e.key.toLowerCase()==='g')setMode('move');
