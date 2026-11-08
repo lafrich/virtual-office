@@ -92,6 +92,14 @@ body.mainkan-playing #viewport{
 #pauseScreen .btn{min-width:175px}
 @media(max-width:650px){.creator-layout{grid-template-columns:1fr}.creator-preview{position:static;display:grid;grid-template-columns:80px 1fr;gap:7px;align-items:center}.creator-preview canvas{width:64px;height:112px;margin:0}.creator-options{grid-template-columns:repeat(2,minmax(0,1fr))}.creator-preview .actions{align-items:center}.creator-headline{margin-bottom:5px}.birthday-row{grid-template-columns:repeat(3,1fr)}}
 
+
+#mainkanGameBar{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+#mainkanGameBar .micro{flex:1;white-space:nowrap}
+#mainkanGameBar .actions{margin-left:auto}
+#gameAction{min-width:78px}
+@media(max-width:650px){#mainkanGameBar{gap:6px}#mainkanGameBar .micro{display:block;font-size:10px;flex:0 0 auto}
+#mainkanGameBar .actions{margin-left:0;width:100%;justify-content:space-between}#mainkanGameBar .btn{flex:1}
+}
 </style>
 <script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
 <script src="../shared/spawn-respawn.js?v=mainkan-20261108" defer></script>
@@ -183,8 +191,15 @@ body.mainkan-playing #viewport{
     <iframe id="semestaFrame" title="Semesta — mode bermain tanpa editor" allow="fullscreen" referrerpolicy="same-origin" tabindex="0"></iframe>
     <div id="worldLoading" role="status" aria-live="polite">Memuat dunia Semesta asli...</div>
   </div>
-  <div class="game-bottom"><span class="micro" id="gameHelp">WASD / arrow: jalan • Shift: lari • Touch: D-pad & Action milik Semesta • Klik dunia untuk fokus keyboard</span>
-  <span class="micro">GAME CLIENT / READ-ONLY</span></div>
+  <div class="game-bottom" id="mainkanGameBar">
+ <span class="micro" id="gameWallet">Rp —</span>
+ <span class="micro" id="gameNeeds">Hunger — · Energy —</span>
+ <div class="actions">
+  <button type="button" class="btn compact" id="gamePhone">▣ HP</button>
+  <button type="button" class="btn compact" id="gameBag">▣ Bag</button>
+  <button type="button" class="btn primary" id="gameAction">ACTION</button>
+ </div>
+</div>
 </section>
 <div class="statusbar"><span id="statusText">READY</span><span>mainkan.exe · preview v0.1</span></div>
 </main></div>
