@@ -25,7 +25,7 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   assert.equal(await page.locator('#hairColor').inputValue(),'red');
   await page.locator('#ccTools [data-tool=body]').click();
   await page.locator('#ccOptions .cc-choice-btn').filter({hasText:'Female'}).click();
-  assert.equal(await page.locator('#characterChoices .choice.selected').getAttribute('data-character'),'noor');
+  assert.equal(await page.locator('#characterChoices .choice.selected').getAttribute('data-character'),'genesis_female_nude');
   await page.locator('#ccDay').fill('11');
   await page.locator('#ccMonth').fill('01');
   await page.locator('#ccYear').fill('1994');
