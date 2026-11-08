@@ -56,6 +56,19 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.document.getElementById('vs-hud').getBoundingClientRect().height),0,'Native HUD chrome hidden, source systems retained');
  assert.equal(result.tutorialHidden,true);
  assert.ok(result.rendererSize[0]>300&&result.rendererSize[1]>200,'Native Semesta canvas must have real viewport');
+ const actionBridge=await page.evaluate(()=>{
+  const source=document.getElementById('semestaFrame').contentWindow.document.getElementById('ptActionBtn');
+  window.__mainkanActionEvents=[];
+  ['pointerdown','pointerup','click'].forEach(type=>source.addEventListener(type,()=>window.__mainkanActionEvents.push(type)));
+  return !!source;
+ });
+ assert.equal(actionBridge,true);
+ await page.locator('#gameAction').click();
+ const events=await page.evaluate(()=>window.__mainkanActionEvents);
+ assert.ok(events.includes('pointerdown')&&events.includes('pointerup')&&events.includes('click'),'Mainkan must bridge Action to native Jiwa input');
+ await page.locator('#gamePhone').click();
+ const phone=await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.VLNokiaPlay?.isOpen?.()||false);
+ assert.equal(phone,true,'Mainkan Phone button must open native Semesta Nokia');
  assert.equal(after,before,'Player entry must not overwrite the authoring working city');
  assert.ok(!errors.some(e=>/SyntaxError|ReferenceError/i.test(e)),errors.slice(0,4).join(' | '));
  fs.mkdirSync('screenshots',{recursive:true});
