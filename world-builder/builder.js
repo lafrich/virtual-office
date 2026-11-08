@@ -13,8 +13,8 @@ if(playerMode){
  try{
   for(const src of [
    '/virtual-life-asset-pipeline/v6p-compositor.js?v=genesis-player-20261108',
-   '../shared/genesis-source.js?v=genesis-player-20261108',
-   '../shared/emosi-source.js?v=genesis-player-20261108',
+   '/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108',
+   '/virtual-life-asset-pipeline/emosi-source.js?v=genesis-player-20261108',
    '../shared/genesis-player.js?v=genesis-player-20261108'
   ]){
    await new Promise((resolve,reject)=>{
