@@ -22,7 +22,7 @@ const map={unbounded:true,terrain:{default:'grass',cells:[]}};
 const walk=(dx,dz)=>physics.move(player,{x:0,z:0},dx,dz,items,map,catalog,style,new Map());
 assert.ok(walk(4,0).x<.75,'actor must stop at office wall');
 assert.ok(walk(-4,0).x>-.8,'actor must stop at bench');
-assert.ok(walk(0,-4).z>-.85,'actor must stop at tree');
+assert.ok(walk(0,-4).z>-1.05,'actor must stop at the tree trunk footprint');
 assert.ok(walk(0,4).z<1.4,'actor must stop at another actor');
 const diagonal=walk(1,1);
 assert.ok(diagonal.z>.5,'diagonal movement should slide along blocking object');
