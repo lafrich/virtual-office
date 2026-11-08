@@ -42,6 +42,24 @@
 .start{font-weight:bold;border:2px solid;border-color:#fff #6a6a6a #6a6a6a #fff;padding:5px 10px;background:#c5c5c5}.taskbar .appname{border:2px inset #888;padding:6px 12px;min-width:155px;background:#bbb}.taskbar .time{margin-left:auto;border:1px inset #777;padding:5px 9px;white-space:nowrap}
 @media(max-width:630px){#desktop{padding:6px 6px 45px}.window{width:100%;max-height:calc(100dvh - 54px)}.screen{padding:15px}.split{grid-template-columns:1fr;gap:14px}.hero{min-height:145px;padding:16px}.hero strong{font-size:35px}.choices{gap:5px}.choice{padding:8px 4px;min-height:125px}.choice img{height:72px}.game-top{padding:7px}.game-bottom{padding:6px}.game-bottom .micro{display:none}.taskbar{min-height:36px}.taskbar .appname{min-width:0}.titlebar{font-size:12px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* Mainkan's game viewport must have a definite flex height.
+   Without this, a nested Semesta canvas can collapse to 100px. */
+body.mainkan-playing .window{
+ height:calc(100dvh - 69px)!important;
+ max-height:calc(100dvh - 69px)!important;
+}
+body.mainkan-playing #gameScreen{
+ display:flex;flex:1 1 0!important;height:auto!important;min-height:0!important;
+}
+body.mainkan-playing #viewport{
+ flex:1 1 0!important;min-height:0!important;width:100%;
+}
+@media(max-width:630px){
+ body.mainkan-playing .window{
+  height:calc(100dvh - 52px)!important;
+  max-height:calc(100dvh - 52px)!important;
+ }
+}
 </style>
 <script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
 <script src="../shared/spawn-respawn.js?v=mainkan-20261108" defer></script>
