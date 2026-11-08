@@ -1,0 +1,26 @@
+name: Mainkan.exe Smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mainkan/**'
+      - 'tests/mainkan-smoke.test.cjs'
+      - 'membangun/index.html'
+      - '.github/workflows/mainkan-smoke.yml'
+  pull_request:
+    paths:
+      - 'mainkan/**'
+      - 'tests/mainkan-smoke.test.cjs'
+      - 'membangun/index.html'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/mainkan-smoke.test.cjs
