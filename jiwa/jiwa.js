@@ -169,7 +169,8 @@ async function save(){
   const result=saveGameUILayout();
   if(!result.ok)notice('Layout global belum tersimpan: '+result.reason);
  }
- try{window.VLHub&&window.VLHub.publish('gameplay',{cityId:p.cityId,at:p.updatedAt});}catch{}}
+ try{window.VLHub&&window.VLHub.publish('gameplay',{cityId:p.cityId,at:p.updatedAt});}catch{}
+ void window.JiwaCloudEntry?.projectSaved?.(p);}
  catch(e){notice('SAVE FAILED: '+e.message);}
 }
 async function listCities(){
@@ -601,6 +602,48 @@ if(window.VLHub){
  window.VLHub.subscribe(['rooms','objects'],msg=>void syncWorldFromHub(msg||{}));
  window.VLHub.subscribe(['characters','accessories','emotions'],()=>{window.JiwaActorLink&&window.JiwaActorLink.refresh&&window.JiwaActorLink.refresh();});
 }
+window.JiwaCloudProjects=Object.freeze({
+ async list(){
+  const rows=new Map();
+  try{
+   const db=await dbOpen();
+   try{const all=await new Promise((resolve,reject)=>{
+    const tx=db.transaction(TABLE,'readonly'),req=tx.objectStore(TABLE).getAll();
+    req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error);
+   });
+   for(const item of all)if(item?.cityId&&item.updatedAt)rows.set(item.cityId,item);
+   }finally{db.close()}
+  }catch(error){console.warn('Jiwa cloud: IndexedDB snapshot unavailable',error)}
+  try{
+   for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(!key?.startsWith(FALLBACK))continue;
+    const value=JSON.parse(localStorage.getItem(key));
+    if(!value?.cityId||!value.updatedAt)continue;
+    const other=rows.get(value.cityId);
+    if(other&&JSON.stringify(other)!==JSON.stringify(value))
+     throw Error('Different IndexedDB and localStorage Jiwa projects: '+value.cityId);
+    rows.set(value.cityId,value);
+   }
+  }catch(e){throw Error('Cannot safely enumerate legacy Jiwa projects: '+e.message)}
+  return [...rows.values()];
+ },
+ async putNew(project){
+  if(!project?.cityId||!project.updatedAt||typeof project.bindings!=='object')
+   throw Error('Invalid remote Jiwa mechanics project');
+  const local=(await this.list()).find(p=>p.cityId===project.cityId);
+  if(local){
+   if(JSON.stringify(local)===JSON.stringify(project))return false;
+   throw Error('Local Jiwa project differs: '+project.cityId+'; no browser data overwritten');
+  }
+  await writeProject(project);
+  const back=await readProject(project.cityId);
+  if(JSON.stringify(back)!==JSON.stringify(project))throw Error('Local Jiwa readback failed');
+  return true;
+ },
+ async reload(){await listCities()},
+ idFor:cityId=>cityId===GLOBAL_CITY?'global-foundation':cityId
+});
 window.addEventListener('beforeunload',ev=>{if(state.dirty){ev.preventDefault();ev.returnValue='';}});
 
 window.addEventListener('storage',ev=>{if(ev.key===CHANGE&&!state.dirty){notice('Mechanics changed in another tab. Click REFRESH to reload.');}});
