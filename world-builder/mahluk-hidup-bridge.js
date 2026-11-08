@@ -100,7 +100,9 @@ function localSync(){
      typeof row.sprite!=="string"||!DATA.test(row.sprite)||row.sprite.length>1250000)continue;
   const clips={};
   if(row.clips&&typeof row.clips==="object")for(const [id,c] of Object.entries(row.clips)){
-   if(!/^(idle|walk|talk|sit|lie|sleep|custom|pushup|yoga_sphinx_idle|yoga_puppy_idle|hip_shake|yoga_happy_baby_idle)$/.test(id)||!c||
+   const approvedUniversal=/^(?:clp|clip)_[a-z0-9_]{3,70}$/.test(id)&&
+      c?.source==="genesis-v6b-universal-motion-v1";
+    if(!(/^(idle|walk|talk|sit|lie|sleep|custom|pushup|yoga_sphinx_idle|yoga_puppy_idle|hip_shake|yoga_happy_baby_idle)$/.test(id)||approvedUniversal)||!c||
       !Number.isInteger(c.frames)||c.frames<1||c.frames>48||
       typeof c.sheet!=="string"||!DATA.test(c.sheet)||c.sheet.length>1250000)continue;
    clips[id]={url:c.sheet,frames:c.frames,
