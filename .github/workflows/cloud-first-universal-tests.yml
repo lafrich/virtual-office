@@ -1,0 +1,23 @@
+name: Cloud-first Universal Contract Tests
+on:
+  push:
+    branches: [feature/cloud-first-universal-v1]
+    paths:
+      - 'shared/cloud-first-*'
+      - 'tests/cloud-first-*'
+      - '.github/workflows/cloud-first-universal-tests.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Cloud-first import, startup, Drive and isolated UI tests
+        run: node --test tests/cloud-first-universal.test.cjs tests/cloud-first-drive-mock.test.cjs tests/cloud-first-startup.test.cjs tests/cloud-first-trial.test.cjs
+      - name: Cross-app regressions (Semesta, Mahluk, Jiwa, Emosi)
+        run: node --test tests/semesta-asset-library.test.cjs tests/mahluk-unified-bridge.test.cjs tests/jiwa-foundation-contract.test.cjs tests/emotion-drive-oauth.test.cjs
+      # A separate pre-existing launcher test currently fails on unmodified main too.
+      # Do not mask it as a new Cloud-first regression.
