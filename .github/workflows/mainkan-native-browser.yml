@@ -40,6 +40,8 @@ jobs:
         run: |
           ln -s site/media virtual-life-asset-pipeline/media
           ln -s site/v6p-compositor.js virtual-life-asset-pipeline/v6p-compositor.js
+          ln -s site/genesis-source.js virtual-life-asset-pipeline/genesis-source.js
+          ln -s site/emosi-source.js virtual-life-asset-pipeline/emosi-source.js
       - name: Serve apps from same origin
         run: |
           python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/mainkan-server.log 2>&1 &
