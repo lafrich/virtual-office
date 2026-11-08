@@ -167,6 +167,7 @@ async function syncOnConnect(){
   if(syncNotes.conflicts)
    window.alert("Drive found "+syncNotes.conflicts+" asset(s) edited differently on both devices. "+
     "Both copies remain unchanged. Compare and resolve them before saving over one another.");
+  return {...syncNotes};
  }finally{syncBusy=false}
 }
 
