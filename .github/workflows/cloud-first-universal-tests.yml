@@ -1,0 +1,19 @@
+name: Cloud-first Universal Contract Tests
+on:
+  push:
+    branches: [feature/cloud-first-universal-v1]
+    paths:
+      - 'shared/cloud-first-universal.js'
+      - 'tests/cloud-first-universal.test.cjs'
+      - '.github/workflows/cloud-first-universal-tests.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify cloud-first interchange and cleanup safety
+        run: node --test tests/cloud-first-universal.test.cjs
