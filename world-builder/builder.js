@@ -7,6 +7,29 @@ const $=id=>document.getElementById(id);
 // mainkan.exe reuses the native Semesta renderer, assets, physics and Jiwa play runtime.
 // Player entry is read-only and cannot enter authoring modes.
 const playerMode=new URLSearchParams(location.search).get('player')==='1';
+if(playerMode){
+ // Load player-only, immutable Genesis + Emosi sources on demand;
+ // Semesta edit mode must not download these heavy atlases.
+ try{
+  for(const src of [
+   '/virtual-life-asset-pipeline/v6p-compositor.js?v=genesis-player-20261108',
+   '../shared/genesis-source.js?v=genesis-player-20261108',
+   '../shared/emosi-source.js?v=genesis-player-20261108',
+   '../shared/genesis-player.js?v=genesis-player-20261108'
+  ]){
+   await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');script.src=src;script.onload=resolve;
+    script.onerror=()=>reject(Error('Failed to load player source '+src));
+    document.head.appendChild(script);
+   });
+  }
+ }catch(error){
+  if(window.parent!==window)window.parent.postMessage({
+   type:'mainkan:semesta-error',message:'Genesis/Emosi tidak dapat dimuat: '+error.message
+  },location.origin);
+  throw error;
+ }
+}
 // Mainkan provides the approved Genesis body + Emosi appearance by same-origin message.
 let mainkanPlayerProfile=null,finishMainkanProfile=null;
 const mainkanProfileGate=new Promise(resolve=>{finishMainkanProfile=resolve;});
