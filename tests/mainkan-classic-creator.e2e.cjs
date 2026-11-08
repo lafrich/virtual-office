@@ -18,6 +18,38 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   assert.equal(await title.textContent(),'untitled - Character Creator');
   assert.equal(await page.locator('#ccTools .cc-tool-btn').count(),10,'All classic Paint tools required');
   assert.equal(await page.locator('#ccSwatches .cc-swatch-row').count(),5,'Five color palettes required');
+  // Both approved Genesis bases expose their actual pixel-exact Custom Wear.
+  assert.equal(await page.locator('#topStyle').inputValue(),'custom');
+  assert.equal(await page.locator('#pantsStyle').inputValue(),'custom');
+  assert.equal(await page.locator('#shoesStyle').inputValue(),'custom');
+  await page.locator('#ccPreviewLoading[hidden]').waitFor({state:'attached',timeout:25000}).catch(()=>{});
+  // Short/Swept have deliberate 1x1 transparent back-hair files; they must
+  // render with real front hair, without blanking the whole avatar.
+  for(const [value,visibleText] of [['short','Short'],['swept','Short swept']]){
+   await page.locator('#ccOptions .cc-choice-btn').filter({hasText:visibleText,exact:true}).click();
+   assert.equal(await page.locator('#hairStyle').inputValue(),value);
+   await page.waitForFunction(()=>{
+    const el=document.getElementById('charPreview'),loading=document.getElementById('ccPreviewLoading'),
+      changing=document.getElementById('ccPreviewUpdating');
+    return loading.hidden&&changing.hidden&&
+     el.getContext('2d').getImageData(30,32,1,1).data[3]>0;
+   },null,{timeout:45000});
+  }
+  const custom=await page.evaluate(()=>{
+   const selected=document.querySelector('#characterChoices .choice.selected').dataset.character;
+   const profile={base:selected,appearance:{hairStyle:document.getElementById('hairStyle').value,
+    topStyle:document.getElementById('topStyle').value,pantsStyle:document.getElementById('pantsStyle').value,
+    shoesStyle:document.getElementById('shoesStyle').value}};
+   const parts=window.VLGenesisPlayer.debug(profile);
+   return {ready:window.VLGenesisPlayer.imageStatus(profile).ready,
+    custom:parts.filter(p=>p.part.includes('/custom')).map(p=>({part:p.part,source:p.code,ready:p.ready}))};
+  });
+  assert.equal(custom.ready,true,'Genesis frame must be complete');
+  assert.deepEqual(custom.custom.map(p=>p.part),['top/custom_back','shoes/custom','pants/custom','top/custom']);
+  assert.ok(custom.custom.every(p=>p.source==='Genesis source'&&p.ready),
+   'Approved custom layers must originate from Genesis actual source PNGs');
+  console.log('[ok] Short/Swept + Genesis Custom Wear + no blank preview ('+label+')');
+
   await page.locator('#ccOptions .cc-choice-btn').filter({hasText:'Long curtain'}).click();
   assert.equal(await page.locator('#hairStyle').inputValue(),'long_curtain');
   await page.locator('#ccSwatches .cc-swatch').filter({has:page.locator('svg')}).count();
