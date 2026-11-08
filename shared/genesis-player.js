@@ -111,14 +111,18 @@ function listParts(profile){
  parts.push("base/body"+f);
  if(a.topStyle==="custom")parts.push("top/custom_back");
  else if(a.topStyle!=="nude")parts.push("top/"+a.topStyle+"_back"+f);
- // Pants must be drawn before shoes. The previous stock shoe underlay was
- // overwritten by the Genesis custom pants on a variable number of pixels
- // between Idle, Walk and Sit, visibly flashing black shoe edges.
- if(a.pantsStyle==="custom")parts.push("pants/custom");
- else if(a.pantsStyle!=="nude")parts.push("pants/"+a.pantsStyle+f);
- // Exactly ONE shoe per slot: approved original custom/barefoot OR selected stock.
- if(a.shoesStyle==="custom")parts.push("shoes/custom");
- else if(a.shoesStyle!=="nude")parts.push("shoes/"+a.shoesStyle+f);
+ // Only mixed Genesis Custom Wear pants + selected stock shoes needs the
+ // shoe last; native Custom Wear shoes and ordinary outfits retain their
+ // approved ordering. Prevent black shoe edges being covered by pants on
+ // different Walk/Sit frames while preserving the original nude source art.
+ const shoeLast=a.pantsStyle==="custom"&&a.shoesStyle!=="custom";
+ const shoePart=a.shoesStyle==="custom"?"shoes/custom":
+  (a.shoesStyle!=="nude"?"shoes/"+a.shoesStyle+f:null);
+ const pantsPart=a.pantsStyle==="custom"?"pants/custom":
+  (a.pantsStyle!=="nude"?"pants/"+a.pantsStyle+f:null);
+ if(!shoeLast&&shoePart)parts.push(shoePart);
+ if(pantsPart)parts.push(pantsPart);
+ if(shoeLast&&shoePart)parts.push(shoePart);
  if(["boots","hightops"].includes(a.shoesStyle))parts.push("shoes/"+a.shoesStyle+"_over"+f);
  if(a.topStyle==="custom")parts.push("top/custom");
  else if(a.topStyle!=="nude")parts.push("top/"+a.topStyle+f);
