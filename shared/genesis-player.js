@@ -17,8 +17,15 @@ function normalizeProfile(input){
  if(!input||!IDs.includes(input.base))throw Error("Genesis base harus Male atau Female");
  if(!SOURCE?.bases?.[input.base])throw Error("Genesis asset belum tersedia");
  const gender=SOURCE.bases[input.base].gender;
- const defaults={hairStyle:"none",hairColor:"black",skinTone:"light",topStyle:"tee",topColor:"charcoal",
-  pantsStyle:"trousers",pantsColor:"slate",shoesStyle:"shoes",shoesColor:"walnut",glasses:"none",facialHair:"none"};
+ // Genesis assets already contain their own original pixel-exact Custom Wear.
+ // Use the source appearance as the default instead of silently putting stock
+ // clothes over its custom sheets.
+ const sourceLook=SOURCE.bases[input.base].appearance||{};
+ const defaults={hairStyle:sourceLook.hair||"none",hairColor:sourceLook.hairColor||"black",
+  skinTone:sourceLook.skin||"light",topStyle:"custom",topColor:sourceLook.topColor||"white",
+  pantsStyle:"custom",pantsColor:sourceLook.pantsColor||"slate",
+  shoesStyle:"custom",shoesColor:sourceLook.shoesColor||"black",
+  glasses:"none",facialHair:"none"};
  const fields={
   hairStyle:"hair",hairColor:"hairColor",skinTone:"skin",topStyle:"top",topColor:"topColor",
   pantsStyle:"pants",pantsColor:"pantsColor",shoesStyle:"shoes",shoesColor:"shoesColor",
@@ -51,7 +58,10 @@ function lookupImage(url){
   const img=new Image();value={img,ready:false,error:false};
   assets.set(url,value);
   if(!url.startsWith("data:"))img.crossOrigin="anonymous";
-  img.onload=()=>{value.ready=img.naturalWidth>=64&&img.naturalHeight>=112;};
+  img.onload=()=>{
+   value.ready=img.naturalWidth>=64&&img.naturalHeight>=112;
+   value.error=!value.ready; // A 1×1 PNG is not a playable frame.
+  };
   img.onerror=()=>{value.error=true;};
   img.src=url;
  }
@@ -92,17 +102,24 @@ function listParts(profile){
  const f=profile.gender==="female"?"_f":"",a=profile.appearance;
  const hair=a.hairStyle==="none"?null:"hair/"+a.hairStyle;
  const parts=[];
- if(hair)parts.push(hair+"_back");
+ // short_back.png and swept_back.png are intentionally transparent 1×1
+ // placeholders. Front sheets are real atlases. Requiring the blank backs
+ // previously made the *entire character* disappear for Short/Swept.
+ if(hair&&!["short","swept"].includes(a.hairStyle))parts.push(hair+"_back");
  parts.push("base/body"+f);
- parts.push("top/custom_back");
- if(profile.gender==="female"&&dataFor("shoes/underlay",profile))parts.push("shoes/underlay");
- parts.push("shoes/custom","pants/custom","top/custom");
- // Clothes in mainkan are modular garments over the exact Genesis nude base.
- if(a.shoesStyle&&a.shoesStyle!=="none")parts.push("shoes/"+a.shoesStyle+f);
- if(a.pantsStyle&&a.pantsStyle!=="none")parts.push("pants/"+a.pantsStyle+f);
- if(a.topStyle&&a.topStyle!=="none")parts.push("top/"+a.topStyle+"_back"+f,"top/"+a.topStyle+f);
- // Mahluk's body_front(.png/_f.png) is intentionally a transparent 1×1
- // placeholder, not a 384×4928 atlas. Never gate avatar readiness on it.
+ if(a.topStyle==="custom")parts.push("top/custom_back");
+ else if(a.topStyle!=="nude")parts.push("top/"+a.topStyle+"_back"+f);
+ // Exactly ONE garment per slot: Genesis custom wear OR chosen stock clothing.
+ // Never paint a stock outfit over custom wear and never drop custom layers.
+ if(a.shoesStyle==="custom")parts.push("shoes/custom");
+ else if(a.shoesStyle!=="nude")parts.push("shoes/"+a.shoesStyle+f);
+ if(a.pantsStyle==="custom")parts.push("pants/custom");
+ else if(a.pantsStyle!=="nude")parts.push("pants/"+a.pantsStyle+f);
+ if(["boots","hightops"].includes(a.shoesStyle))parts.push("shoes/"+a.shoesStyle+"_over"+f);
+ if(a.topStyle==="custom")parts.push("top/custom");
+ else if(a.topStyle!=="nude")parts.push("top/"+a.topStyle+f);
+ // Mahluk body_front is a valid transparent 1×1 placeholder: skip it.
+ // The face layer itself is strictly sourced from Emosi.exe.
  if(a.facialHair!=="none")parts.push("facial/"+a.facialHair);
  if(hair)parts.push(hair+"_front");
  if(a.glasses!=="none")parts.push("glasses/"+a.glasses);
@@ -112,7 +129,7 @@ function listParts(profile){
 function resolvePart(part,profile){
  // Genesis custom parts are exact backing-art from Mahluk's earlier workspace.
  // The bare "shoes/underlay" carries an independent female layer in that backup.
- if(part==="top/custom_back"||part==="top/custom"||part==="pants/custom"||part==="shoes/custom"||part==="shoes/underlay")return path(part,profile);
+ if(part==="top/custom_back"||part==="top/custom"||part==="pants/custom"||part==="shoes/custom")return path(part,profile);
  return CDN+part+".png";
 }
 function expressionFor(name){
@@ -120,31 +137,44 @@ function expressionFor(name){
  const key=EMOSI.contexts?.[name]||EMOSI.contexts?.neutral;
  return EMOSI.emotions?.find(e=>e.id===key)||null;
 }
+function imageStatus(input,emotion="neutral",dir="se"){
+ const profile=normalizeProfile(input);
+ const names=listParts(profile);
+ const items=names.map(part=>({part,image:lookupImage(resolvePart(part,profile))}));
+ if(dir==="se"||dir==="sw"){
+  const face=expressionFor(emotion)||expressionFor("neutral");
+  items.push({part:"emosi.exe/"+(face?.id||"missing"),image:lookupImage(face?.png)});
+ }
+ const failures=items.filter(x=>!x.image||x.image.error).map(x=>x.part);
+ return {ready:items.every(x=>x.image?.ready),loaded:items.filter(x=>x.image?.ready).length,
+  total:items.length,pending:items.filter(x=>x.image&&!x.image.ready&&!x.image.error).length,
+  errors:failures};
+}
 function draw(ctx,profile,dir="se",action="idle",frame=0,emotion="neutral",tick=0){
  const norm=normalizeProfile(profile);
  const d=DIRS.includes(dir)?dir:"se",a=Object.hasOwn(ROWS,action)?action:"idle";
  const f=Math.max(0,Math.min(FRAMES[a]-1,Math.floor(frame)||0));
- ctx.clearRect(0,0,64,112);ctx.imageSmoothingEnabled=false;
+ const status=imageStatus(norm,emotion,d);
+ // Keep the LAST complete picture during async loading. Never clear the visible
+ // canvas, and never commit a partially assembled frame or missing face.
+ if(!status.ready)return false;
+ const work=canvas(),g=work.getContext("2d",{alpha:true});g.imageSmoothingEnabled=false;
  const parts=listParts(norm);
- // Preload all layers before painting any, to avoid showing a headless body.
- // Kick off ALL source layers concurrently. Array.some() short-circuits and
- // previously caused dozens of heavyweight 384×4928 atlases to load serially.
- const sourceLayers=parts.map(part=>lookupImage(resolvePart(part,norm)));
- if(!sourceLayers.every(image=>image?.ready))return false;
  const shade=part=>compositedPixel(part,norm,a,d,f);
- const drawLayer=part=>{const cell=shade(part);if(cell)ctx.drawImage(cell,0,0);};
+ const drawLayer=part=>{const cell=shade(part);if(cell)g.drawImage(cell,0,0);};
  for(const part of parts.slice(0,-2))drawLayer(part);
- // Emosi.exe face atlas: no baked face/* or brows/* is ever drawn.
+ // Emosi.exe is the ONLY facial source.
  const e=expressionFor(emotion)||expressionFor("neutral");
  const face=lookupImage(e?.png);
  if(face?.ready&&(d==="se"||d==="sw")){
   const faceFrame=Math.floor(Math.max(0,tick)*Math.max(1,e?.fps||6))%Math.max(1,e?.frames||1);
-  ctx.drawImage(face.img,faceFrame*64,DIRS.indexOf(d)*112,64,112,0,0,64,112);
+  g.drawImage(face.img,faceFrame*64,DIRS.indexOf(d)*112,64,112,0,0,64,112);
  }
- // Shadow belongs underneath the character; environmental highlights are last.
  const shadow=shade("base/shadow"),fx=shade("base/fx");
- if(shadow){ctx.save();ctx.globalCompositeOperation="destination-over";ctx.drawImage(shadow,0,0);ctx.restore();}
- if(fx)ctx.drawImage(fx,0,0);
+ if(shadow){g.save();g.globalCompositeOperation="destination-over";g.drawImage(shadow,0,0);g.restore();}
+ if(fx)g.drawImage(fx,0,0);
+ // Atomic swap: a fully rendered canvas is committed in one operation.
+ ctx.clearRect(0,0,64,112);ctx.drawImage(work,0,0);
  return true;
 }
 function directPreview(canvasElement,profile,dir,action,frame,emotion,tick){
@@ -200,9 +230,11 @@ function createRig(THREE,input){
   const frame=Math.floor(state.time/speed)%count;
   const key=[action,state.direction,frame,state.emotion,Math.floor(sceneTime*6),profile.base].join("|");
   if(key!==previous){
-   state.loaded=draw(ctx,profile,state.direction,action,frame,state.emotion,sceneTime);
-   state.failed=false;
-   if(state.loaded){tex.needsUpdate=true;previous=key;}
+   const complete=draw(ctx,profile,state.direction,action,frame,state.emotion,sceneTime);
+   // Once the first frame was painted, a transient asset fetch can never
+   // make the mesh transparent. Only a fully composed frame replaces it.
+   if(complete){state.loaded=true;state.failed=false;tex.needsUpdate=true;previous=key;}
+   else state.failed=imageStatus(profile,state.emotion,state.direction).errors.length>0;
   }
   const yaw=camera?Math.atan2(camera.position.x-(position?.x||0),camera.position.z-(position?.z||0)):mesh.rotation.y||0;
   mesh.rotation.set(0,yaw,0);
@@ -219,5 +251,5 @@ function debug(profile){
    naturalWidth:asset?.img?.naturalWidth||0,naturalHeight:asset?.img?.naturalHeight||0};
  });
 }
-return Object.freeze({IDs,normalizeProfile,draw,directPreview,createRig,expressionFor,debug});
+return Object.freeze({IDs,normalizeProfile,draw,directPreview,createRig,expressionFor,imageStatus,debug});
 });
