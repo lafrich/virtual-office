@@ -151,7 +151,7 @@
   paintOptions();paintSwatches();paintSummary();status('Random look applied');
  }
  function resetLook(){
-  const defaults={hairStyle:'short',hairColor:'black',skinTone:'light',topStyle:'tee',topColor:'charcoal',
+  const defaults={hairStyle:'mid_curtain',hairColor:'navy',skinTone:'light',topStyle:'tee',topColor:'charcoal',
    pantsStyle:'trousers',pantsColor:'slate',shoesStyle:'shoes',shoesColor:'walnut',glasses:'none',facialHair:'none'};
   for(const [field,val] of Object.entries(defaults))setInput(field,val);
   setBody('ichsan');paintOptions();paintSwatches();paintSummary();status('Appearance reset');
@@ -268,6 +268,9 @@
  });
  observer.observe($('characterScreen'),{attributes:true,attributeFilter:['hidden']});
  root.querySelectorAll('select').forEach(s=>s.addEventListener('change',()=>{paintSwatches();paintSummary();}));
+ // Respect the original V6.DEF appearance from the source bundle.
+ if(getInput('hairStyle')==='short')setInput('hairStyle','mid_curtain');
+ if(getInput('hairColor')==='black')setInput('hairColor','navy');
  paintTools();paintOptions();paintSwatches();paintSummary();
  window.MainkanClassicCreator=Object.freeze({refresh:()=>{paintOptions();paintSwatches();paintSummary();},syncBirthday});
 })();
