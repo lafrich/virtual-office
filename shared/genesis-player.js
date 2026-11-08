@@ -101,7 +101,8 @@ function listParts(profile){
  if(a.shoesStyle&&a.shoesStyle!=="none")parts.push("shoes/"+a.shoesStyle+f);
  if(a.pantsStyle&&a.pantsStyle!=="none")parts.push("pants/"+a.pantsStyle+f);
  if(a.topStyle&&a.topStyle!=="none")parts.push("top/"+a.topStyle+"_back"+f,"top/"+a.topStyle+f);
- parts.push("base/body_front"+f);
+ // Mahluk's body_front(.png/_f.png) is intentionally a transparent 1×1
+ // placeholder, not a 384×4928 atlas. Never gate avatar readiness on it.
  if(a.facialHair!=="none")parts.push("facial/"+a.facialHair);
  if(hair)parts.push(hair+"_front");
  if(a.glasses!=="none")parts.push("glasses/"+a.glasses);
