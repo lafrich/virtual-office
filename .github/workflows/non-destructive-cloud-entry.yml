@@ -1,0 +1,17 @@
+name: Non-destructive Native Cloud Entry
+on:
+  push:
+    branches: [feature/nondestructive-cloud-entry-20261108]
+  workflow_dispatch:
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native cloud import/export and no-delete tests
+        run: node --test tests/cloud-first-native-entry.test.cjs tests/cloud-first-universal.test.cjs tests/cloud-first-drive-mock.test.cjs tests/cloud-first-startup.test.cjs
+      - name: Semesta, Bangun, Mahluk, Jiwa, Emosi regressions
+        run: node --test tests/semesta-asset-library.test.cjs tests/bangun-ruang-bridge.test.cjs tests/mahluk-unified-bridge.test.cjs tests/jiwa-foundation-contract.test.cjs tests/emotion-drive-oauth.test.cjs
