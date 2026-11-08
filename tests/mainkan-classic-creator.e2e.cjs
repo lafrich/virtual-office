@@ -29,10 +29,15 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
    assert.equal(await page.locator('#hairStyle').inputValue(),value);
    await page.waitForFunction(()=>{
     const el=document.getElementById('charPreview'),loading=document.getElementById('ccPreviewLoading'),
-      changing=document.getElementById('ccPreviewUpdating');
+      changing=document.getElementById('ccPreviewUpdating'),gen=window.VLGenesisPlayer;
+    const profile={base:document.querySelector('#characterChoices .choice.selected').dataset.character,
+     appearance:{hairStyle:document.getElementById('hairStyle').value,
+      topStyle:document.getElementById('topStyle').value,
+      pantsStyle:document.getElementById('pantsStyle').value,
+      shoesStyle:document.getElementById('shoesStyle').value}};
     const px=el.getContext('2d').getImageData(0,0,64,112).data;
     let opaque=0;for(let i=3;i<px.length;i+=4)if(px[i]>0)opaque++;
-    return loading.hidden&&changing.hidden&&opaque>100;
+    return gen.imageStatus(profile).ready&&loading.hidden&&changing.hidden&&opaque>100;
    },null,{timeout:45000});
   }
   const custom=await page.evaluate(()=>{
