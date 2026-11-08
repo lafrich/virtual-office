@@ -8,6 +8,11 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  const page=await browser.newPage({viewport:{width:1365,height:900},acceptDownloads:true});
  const errors=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));
  await page.goto(new URL('flow-editor.html',base).href,{waitUntil:'domcontentloaded',timeout:60000});
+ // Cloud-first startup now gates edits. This manual JSON export/import test
+ // explicitly chooses the existing OFFLINE recovery flow, without Drive writes.
+ page.on('dialog',dialog=>dialog.accept());
+ await page.getByRole('dialog',{name:'Cloud startup'}).getByRole('button',{name:/OPEN EXISTING DATA/}).click({timeout:15000});
+ await page.getByRole('dialog',{name:'Cloud startup'}).waitFor({state:'detached',timeout:10000});
  await page.locator('.node[data-id=welcome]').click({timeout:10000});
  const desc=page.locator('#inspector textarea');await desc.fill('Welcome khusus dari Flow Editor!');await desc.blur();
  assert.equal(await page.locator('.node').count(),10);
