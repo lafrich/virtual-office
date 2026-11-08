@@ -17,6 +17,7 @@ function message(id,text,error){
 }
 function screen(name){
  stage=name;
+ document.body.classList.toggle('mainkan-playing',name==='gameScreen');
  screens.forEach(id=>{$(id).hidden=id!==name;});
  $('statusText').textContent=name==='gameScreen'?'SEMESTA / LIVE PLAY':name==='characterScreen'?'CHARACTER PREVIEW':name==='loginScreen'?'ACCOUNT / GUEST':'BOOTING';
 }
