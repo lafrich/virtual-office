@@ -9,8 +9,10 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  for(const [name,page] of [['jiwa',jiwa],['semesta',semesta]])
   page.on('pageerror',e=>errors.push(name+': '+String(e.stack||e)));
  await jiwa.goto(base+'jiwa/',{waitUntil:'domcontentloaded',timeout:90000});
- // Explicit test-only cloud recovery; does not claim a cloud sync or delete data.
+ // Explicit test-only cloud recovery requires confirmation; never bypass Drive state in production.
+ jiwa.once('dialog',dialog=>dialog.accept());
  await jiwa.getByRole('button',{name:/OPEN EXISTING DATA.*OFFLINE/}).click({timeout:45000});
+ await jiwa.locator('[aria-label="Cloud startup"]').waitFor({state:'detached',timeout:10000});
  await semesta.goto(base+'world-builder/',{waitUntil:'domcontentloaded',timeout:90000});
  await jiwa.waitForFunction(()=>!!window.JiwaActivityEditor&&!!window.JiwaActivities&&
   document.querySelectorAll('#activityList .activity-row').length>0,null,{timeout:90000});
