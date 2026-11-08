@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 
 test('Membangun is the entry point with five current .EXE programs',()=>{
  const s=read('membangun/index.html');
- assert.ok(s.includes("const ids=['mahluk','bangun','semesta','jiwa'];"));
+ assert.ok(s.includes("const ids=['mahluk','bangun','semesta','jiwa','mainkan'];"));
  for(const [id,name] of [
   ['mahluk','MAHLUK HIDUP.EXE'],['bangun','BANGUN RUANG.EXE'],
   ['semesta','SEMESTA.EXE'],['jiwa','JIWA.EXE'],['mainkan','MAINKAN.EXE']
