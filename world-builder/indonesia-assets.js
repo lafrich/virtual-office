@@ -5,7 +5,7 @@
 (function(g){
 'use strict';
 const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/';
-const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json','indonesia_custom_catalog.json'];
+const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json','indonesia_custom_catalog.json','mainkan_gameplay_catalog.json'];
 let cached=null;
 const IMAGE_REV='indonesia200-wheel-horizontal-v8-20261106';
 function cacheBust(spec,url){
