@@ -132,9 +132,13 @@ $('confirmGo').addEventListener('click',async()=>{
  const button=$('confirmGo');button.disabled=true;
  try{
   if(!guest){
-   const data=await request('/players/profile',{method:'PUT',body:JSON.stringify({character:characterDraft})});
-   if(data.saved!==true)throw Error('Server belum mengonfirmasi penyimpanan karakter.');
-   profile={...(profile||{}),...(data.player||{}),character:characterDraft};
+   let data=null;
+   try{data=await request('/players/profile',{method:'PUT',body:JSON.stringify({character:characterDraft})});}
+   catch(err){if(![403,404,405,501].includes(err.status))throw err;}
+   if(data&&data.saved!==true)throw Error('Server belum mengonfirmasi penyimpanan karakter.');
+   // Test Worker has no profile route yet: keep the character on this device per player id.
+   if(!data&&!saveLocalCharacter(characterDraft))throw Error('Karakter tidak bisa disimpan di perangkat ini.');
+   profile={...(profile||{}),...(data?.player||{}),character:characterDraft};
   }else profile={character:characterDraft};
   const n=currentNode;showNode(nextFrom(n));
  }catch(err){message('confirmMessage',err.message,true);}
@@ -173,11 +177,14 @@ function setLoginMode(value){
 }
 $('loginTab').addEventListener('click',()=>setLoginMode('login'));
 $('registerTab').hidden=true;
+// Per-player character on this device, used while the test Worker has no profile route.
+function saveLocalCharacter(c){return !!window.MainkanLocalCharacter?.save(testPlayerId,c);}
+function loadLocalCharacter(){const c=window.MainkanLocalCharacter?.load(testPlayerId);return c&&allowed.includes(c.base)?c:null;}
 async function request(path,options){
  if(!apiReady)throw Error(unavailable);
  const response=await fetch(base+path,{credentials:'omit',headers:{'Content-Type':'application/json'},...options});
  let data={};try{data=await response.json();}catch{}
- if(!response.ok)throw Error(data.message||'Server menolak permintaan ('+response.status+').');
+ if(!response.ok){const err=Error(data.message||'Server menolak permintaan ('+response.status+').');err.status=response.status;throw err;}
  return data;
 }
 $('authForm').addEventListener('submit',async e=>{
@@ -192,6 +199,7 @@ $('authForm').addEventListener('submit',async e=>{
   if(result.authenticated!==true)throw Error('Server belum mengonfirmasi sesi login.');
   $('password').value='';guest=false;session=result;profile=result.player||null;
   testPlayerId=String(result.player?.id||result.id||id||'').toLowerCase();
+  if(!profile?.character){const local=loadLocalCharacter();if(local)profile={...(profile||{}),character:local};}
   firstTime=!allowed.includes(profile?.character?.base);
   if(!firstTime)selected=profile.character.base;
   const route=firstTime?'new_player':'returning';

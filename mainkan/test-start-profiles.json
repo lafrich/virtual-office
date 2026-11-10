@@ -2,12 +2,13 @@
  "format": "mainkan-test-start-v1",
  "note": "Start profiles for Mainkan test-login IDs (data only, no passwords). Applied once per player per version on first Play Mode load; bump 'version' or use RESET in Play Mode to re-apply. IDs not listed (t_guest1, t_guest2, guests) start as normal new players.",
  "profiles": {
-  "t_ichsan": {"version": 1, "label": "Ichsan · tes kaya + kost", "start": "rich_housed"},
-  "t_noor": {"version": 1, "label": "Noor · tes kaya + kost", "start": "rich_housed"}
+  "t_ichsan": {"version": 2, "label": "Ichsan · tes kaya + kost", "start": "rich_housed"},
+  "t_noor": {"version": 2, "label": "Noor · tes kaya + kost", "start": "rich_housed"}
  },
  "starts": {
   "rich_housed": {
    "wallet": 10000000,
+   "electricityUnits": 30,
    "energy": 100, "hygiene": 90, "bladder": 10, "fullness": 80, "moral": 60,
    "housing": {"room": true, "fridge": true},
    "furniture": ["bed", "chair", "stove", "wardrobe"],

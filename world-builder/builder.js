@@ -14,7 +14,7 @@ if(playerMode){
   for(const src of [
    '/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/emosi-source.js?v=genesis-player-20261108',
-   '../shared/genesis-player.js?v=lgr-player-2'
+   '../shared/genesis-player.js?v=lgr-player-3'
   ]){
    await new Promise((resolve,reject)=>{
     const script=document.createElement('script');script.src=src;script.onload=resolve;
@@ -3100,6 +3100,9 @@ if(window.SemestaLifePlay){
   getScene:()=>scene,
   getCityId:()=>activeDraftId||'__semesta_working_copy__',
   getPlayerId:()=>playerMode?mainkanPlayerId:'',
+  currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
+  playPose:(pose,seconds=4)=>{const r=(rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig;if(!r?.setPose)return false;r.setPose(pose);
+   clearTimeout(r._lifePoseTimer);r._lifePoseTimer=setTimeout(()=>{if(r.state?.pose===pose)r.setPose(null);},Math.max(1,seconds)*1000);return true;},
   getPosition:walkWorldPos,
   getRoot:()=>rigs.get(walkActorId)?.root||null,
   mountTo:()=>$('canvas-wrap'),

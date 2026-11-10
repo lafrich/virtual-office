@@ -84,6 +84,7 @@ function applyStart(s,id,force){
  const f=startFor(id);if(!f||!s)return false;
  if(!force&&s.testSeed&&s.testSeed.id===id&&s.testSeed.version===f.profile.version)return false;
  const st=f.start,base=RULES.stateFrom({},config);
+ if(Number.isFinite(Number(st.electricityUnits)))base.powerTokens=Math.max(0,Math.round(Number(st.electricityUnits)));
  for(const k of ['wallet','energy','hygiene','bladder','fullness','moral'])if(Number.isFinite(Number(st[k])))base[k]=Number(st[k]);
  base.housing={room:st.housing?.room===true,fridge:st.housing?.fridge===true};base.homeAccess=base.housing.room;
  base.furniture=(st.furniture||[]).filter(x=>(RULES.FURNITURE||[]).some(f=>f.id===x));
@@ -428,7 +429,9 @@ function nodeButtons(n){
  if(id==='kost')entries=ownsRoom()?
   [button('home_toilet','🚽 WC Kost'),button('home_shower','🚿 Mandi Kost'),button('sleep','💤 Tidur Kost'),
    '<select id="slpItem">'+itemOptions('any')+'</select>',
-   button('cook','🍳 Masak Ikan'),button('store_fridge','🧊 Simpan Kulkas'),button('store_home','📦 Simpan di Kost'),
+   button('cook','🍳 Masak Ikan'),
+   ...(kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
+    button('cook_recipe','🍳 Masak Resep')]:[]),button('store_fridge','🧊 Simpan Kulkas'),button('store_home','📦 Simpan di Kost'),
    '<select id="slpHomeItem">'+(state.homeStorage||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
    button('take_home','🎒 Ambil dari Kost'),
    '<select id="slpFridgeItem">'+(state.fridge||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
@@ -514,6 +517,7 @@ function click(ev){
   if(['sell_fish','sell_loak','cook','store_fridge','store_home'].includes(el.dataset.lifeAction)){
    args.itemId=outer.querySelector('#slpItem')?.value||'';
   }
+  if(el.dataset.lifeAction==='cook_recipe')args.activityId=outer.querySelector('#slpRecipe')?.value||'';
   if(el.dataset.lifeAction==='buy_furniture')args.itemId=outer.querySelector('#slpFurniture')?.value||'';
   runAction(el.dataset.lifeAction,args);
  }
@@ -560,6 +564,40 @@ function openBag(){
 }
 function actionDown(ev){workDown(ev);}
 function actionUp(ev){workUp(ev);}
+// Successful life actions play their LGR motion on the player (Bergerak DB id,
+// built-in or stand-in via LGRGame; never blocks when a motion is missing).
+const ACTION_POSE={cook:'cook',eat:'eat',eat_item:'eat',coffee:'drink_coffee',fish:'fishing_cast',scavenge:'mulung_pick',
+ public_toilet:'wc_squat',home_toilet:'wc_squat',public_shower:'mandi',home_shower:'mandi',pee_outside:'pee_stand',
+ worship:'pray_generic',charity:'give_sedekah',help:'hand_over',sell_fish:'hand_over',sell_loak:'hand_over',
+ store_fridge:'use_storage',take_fridge:'use_storage',store_home:'use_storage',take_home:'use_storage',catch_fruit:'pick_up'};
+const JOB_POSE={manusia_silver:'silver_pose',pak_ogah:'ogah_flag',kang_parkir:'parkir_whistle'};
+function actionPose(action,args){
+ if(action==='work')return JOB_POSE[args.jobId]||'talk';
+ if(action==='configured_activity'||action==='cook_recipe'){const a=config?.activities?.find(x=>x.id===args.activityId);return a?.actionAsset||(action==='cook_recipe'?'cook':null);}
+ return ACTION_POSE[action]||null;
+}
+// Kitchen recipes from the Jiwa activity catalog (ingredients -> output item), cooked
+// at the owned kost stove. Uses the same engine rule as a configured activity.
+const isRecipe=a=>a&&a.ingredients?.length&&a.outputItem&&['none','inventory','prop'].includes(a.grantType);
+function kitchenRecipes(){
+ const live=(config?.activities||[]).filter(isRecipe);
+ if(live.length||publishedCatalog)return live;
+ // Sandbox demo (nothing published in Jiwa yet): offer the catalog's default recipes.
+ try{return RULES.normalize({activities:(root.JiwaActivities?.readLocal?.(localStorage)?.activities||[])
+  .filter(a=>a.category==='cooking').map(a=>({...a,enabled:true}))}).activities.filter(isRecipe);}catch{return [];}
+}
+function cookRecipe(args){
+ const nodeHere=nearest();
+ if(nodeHere?.id!=='kost')return {ok:false,reason:'Dekati kost dahulu.'};
+ if(!ownsRoom()||!state.furniture.includes('stove'))return {ok:false,reason:'Masak membutuhkan kost dan kompor.'};
+ if((state.powerTokens||0)<1)return {ok:false,reason:'Token listrik habis.'};
+ const a=kitchenRecipes().find(x=>x.id===String(args.activityId||''));
+ if(!a)return {ok:false,reason:'Resep belum ada di katalog Jiwa.'};
+ const cfg=config.activities.some(x=>x.id===a.id)?config:{...config,activities:[...config.activities,a]};
+ const result=RULES.run(cfg,state,'configured_activity',{activityId:a.id,riskRoll:1});
+ if(result.ok){result.state.powerTokens=Math.max(0,(result.state.powerTokens||0)-1);result.changes.push('hasil: '+(a.outputLabel||a.outputItem));}
+ return result;
+}
 function afterLifeTransition(previous){
  if(!active||!state)return;
  if((state.faintCount||0)>(previous?.faintCount||0)&&state.restMinutes>0){
@@ -597,6 +635,7 @@ function runAction(action,args={}){
    if(target)node=target;
   }
  }
+ if(action==='cook_recipe'&&nearestNode?.id==='kost')node=nearestNode;
  if(['world_ambient','world_enter','world_quest'].includes(action)){
   const ruleId=String(args.ruleId||'');
   if(node?.worldRuleId!==ruleId||node.placeholder)
@@ -630,7 +669,7 @@ function runAction(action,args={}){
   fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
   eat:'warung',coffee:'coffee',public_toilet:'public_wc',public_shower:'public_bath',
   buy_room:'kost',home_toilet:'kost',home_shower:'kost',sleep:ownsRoom()?'kost':'tent',
-  cook:'kost',store_fridge:'kost',take_fridge:'kost',store_home:'kost',take_home:'kost',rest:'bench',help:'help',charity:'charity',
+  cook:'kost',cook_recipe:'kost',store_fridge:'kost',take_fridge:'kost',store_home:'kost',take_home:'kost',rest:'bench',help:'help',charity:'charity',
   worship:node?.id?.startsWith('prayer_')?node.id:'prayer'
  }[action];
  if(required&&node?.id!==required){
@@ -641,7 +680,7 @@ function runAction(action,args={}){
  }
  if(action==='worship'&&node){args={...args,placeReligion:node.religion};}
  const prior=state;
- const result=RULES.run(config,state,action,args);
+ const result=action==='cook_recipe'?cookRecipe(args):RULES.run(config,state,action,args);
  if(result.ok){
   state=result.state;
   if(['fish','work','scavenge','catch_fruit'].includes(action)&&!state.detained){
@@ -653,6 +692,7 @@ function runAction(action,args={}){
   if(action==='buy_room')message('🏠 Kost dibeli! Respawn berikutnya pindah ke kamar. WC dan mandi pribadi aktif.');
   else message('✅ '+result.changes.join(' · '));
  }else message('⛔ '+result.reason);
+ if(result.ok){const pose=actionPose(action,args);if(pose&&action!=='sleep')try{bridge?.playPose?.(pose,4);}catch{}}
  if(result.ok)afterLifeTransition(prior);
  else{notifyHud();paintPanel();}
  return result;
@@ -807,6 +847,6 @@ try{root.addEventListener?.('storage',ev=>{
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
  spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
- playerId,startProfiles:()=>startProfilesReady});
+ playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null});
 return api;
 });
