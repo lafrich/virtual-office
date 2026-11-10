@@ -1,4 +1,4 @@
-/* sw v16 2026-11-07: drop unused gpt-character-rig.js and refresh launcher Mahluk Hidup labels. Phones pick up the new files.
+/* sw v17 2026-11-10: Mainkan LGR-1 player + test start profiles. Phones pick up the new files.
    This worker no longer decrypts the old game page, loads cancelled patches, or redirects to the archive login.
    skipWaiting+clients.claim so visitors who registered the old decrypting SW drop it immediately.
    All same-origin requests pass through to the network. */
