@@ -146,9 +146,26 @@ function registerInto(assetCatalog,assetByName){
 // Ellen's Kali is authored as Jakarta "river" tiles. That texture is a gray
 // striped canal and reads as a road or rail. In this preview only, paint those
 // tiles with the existing Water terrain (still not walkable). Live maps are unchanged.
+// Sidewalks that touch the Kali use the existing sidewalk_edge_* curb so the
+// bank reads as land / turap, not as more blue water. Only type==="river"
+// is remapped to Water; bank tiles stay sidewalk.
 const DERMAGA_OVERHANG=0.8;
 function visualTerrainType(type){
  return type==='river'?'water':type;
+}
+function isWaterTerrain(type){
+ return type==='river'||type==='water';
+}
+function previewTile(kind,cell,tiles){
+ if(kind==='sidewalk'&&tiles&&cell){
+  const read=(c,r)=>tiles.get?.(c+','+r)||'grass';
+  const c=Number(cell.c),r=Number(cell.r);
+  if(isWaterTerrain(read(c-1,r)))return 'sidewalk_edge_w';
+  if(isWaterTerrain(read(c+1,r)))return 'sidewalk_edge_e';
+  if(isWaterTerrain(read(c,r-1)))return 'sidewalk_edge_n';
+  if(isWaterTerrain(read(c,r+1)))return 'sidewalk_edge_s';
+ }
+ return visualTerrainType(kind);
 }
 function dermagaOverhang(o){
  const dist=DERMAGA_OVERHANG;
@@ -177,7 +194,9 @@ function hookKebonTiles(){
   return baseUrl()+'terrain/'+leaf+'?v=njh-map-preview-terrain-1';
  }
  function tile(kind,cell,index){
-  return origTile?origTile(visualTerrainType(kind),cell,index):visualTerrainType(kind);
+  const preview=previewTile(kind,cell,index);
+  if(String(preview).startsWith('sidewalk_edge_'))return preview;
+  return origTile?origTile(visualTerrainType(kind),cell,index):preview;
  }
  try{
   g.VLKebonSirihStyle=Object.freeze({
@@ -390,7 +409,7 @@ if(enabled()){hookKebonTiles();}
  doorCandidates,nearestEnterable,doorAnchor,enterRadius:ENTER_RADIUS,
  worldBoundsOf,applyBounds,spawnPool,homeFor,resolveSpawn,imageUrl,
  wireDoors,resolveTemplate,readyTemplates:NJH_READY,pendingTemplates:NJH_PENDING,
- visualTerrainType,dermagaOverhang,applyDermagaOverhang,dermagaOverhangTiles:DERMAGA_OVERHANG,
+ visualTerrainType,previewTile,dermagaOverhang,applyDermagaOverhang,dermagaOverhangTiles:DERMAGA_OVERHANG,
  report:()=>cityCache?cityCache.doorReport:null,
  status(){
   return {

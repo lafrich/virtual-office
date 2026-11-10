@@ -206,6 +206,16 @@ test('dermaga 270 rotation swaps the 2x1 footprint; dock edge stays clear of obj
  assert.equal(api.visualTerrainType('river'),'water');
  assert.equal(api.visualTerrainType('water'),'water');
  assert.equal(api.visualTerrainType('drain'),'drain');
+ assert.equal(api.visualTerrainType('sidewalk'),'sidewalk');
+ const bank=new Map([
+  ['-57,44','sidewalk'],['-56,44','river'],['-53,44','river'],
+  ['-52,44','sidewalk'],['-51,44','sidewalk'],['-50,44','sidewalk']
+ ]);
+ assert.equal(api.previewTile('river',{c:-53,r:44},bank),'water');
+ assert.equal(api.previewTile('sidewalk',{c:-52,r:44},bank),'sidewalk_edge_w');
+ assert.equal(api.previewTile('sidewalk',{c:-51,r:44},bank),'sidewalk');
+ assert.equal(api.previewTile('sidewalk',{c:-57,r:44},bank),'sidewalk_edge_e');
+ assert.equal(api.previewTile('sidewalk',{c:-50,r:44},bank),'sidewalk');
  const offset=api.applyDermagaOverhang(city.record.document);
  assert.equal(JSON.stringify(offset),JSON.stringify({x:-0.8,z:0}));
  const placed=city.record.document.objects.find(o=>o.id==='njh-dermaga-mancing');

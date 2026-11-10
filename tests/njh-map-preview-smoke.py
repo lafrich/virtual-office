@@ -230,10 +230,10 @@ def main():
           rt.setGrid(false);
           rt.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a','njh-dermaga-mancing-anchor'], false);
           rt.teleport(-50.375, 44);
-          return rt.focus(-52.6, 43.8, 11);
+          return rt.focus(-51.9, 43.9, 11);
         }""")
         time.sleep(0.6)
-        page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-52.6, 43.8, 11)""")
+        page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-51.9, 43.9, 11)""")
         time.sleep(0.4)
         page.screenshot(path=str(SHOTS / 'dermaga-close-desktop.png'))
         rec('dermaga-close-desktop', (SHOTS / 'dermaga-close-desktop.png').exists(), {'path': 'dermaga-close-desktop.png'})
@@ -268,10 +268,10 @@ def main():
               rt.setGrid(false);
               rt.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a','njh-dermaga-mancing-anchor'], false);
               rt.teleport(-50.375, 44);
-              return rt.focus(-52.6, 43.8, 11);
+              return rt.focus(-51.9, 43.9, 11);
             }""")
             time.sleep(0.6)
-            page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-52.6, 43.8, 11)""")
+            page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-51.9, 43.9, 11)""")
             time.sleep(0.4)
             page.screenshot(path=str(SHOTS / 'dermaga-close-phone.png'))
             rec('dermaga-close-phone', (SHOTS / 'dermaga-close-phone.png').exists(), {'path': 'dermaga-close-phone.png'})
