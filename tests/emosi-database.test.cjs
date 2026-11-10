@@ -60,3 +60,54 @@ test('Emosi.exe has all database controls and old inline scripts still parse',()
   .map(x=>x[1]).filter(Boolean);
  for(const js of scripts)assert.doesNotThrow(()=>new Function(js));
 });
+
+test('starter catalog keeps the original 12 faces and adds 13 game placeholder slots',()=>{
+ const m=html.match(/const EMBEDDED_CATALOG=(\{.*?\});/);
+ assert.ok(m,'EMBEDDED_CATALOG missing');
+ const catalog=JSON.parse(m[1]);
+ const ids=catalog.entries.map(e=>e.id);
+ const original=[
+  'universal-neutral','universal-happy','universal-angry','universal-sad',
+  'universal-surprised','universal-shy','universal-cheeky','universal-bleh',
+  'universal-wink','universal-sleepy','universal-cry','universal-grimace'
+ ];
+ const needed={
+  'game-hungry':'Lapar (placeholder)',
+  'game-tired':'Lelah (placeholder)',
+  'game-sick':'Sakit (placeholder)',
+  'game-dirty':'Bau (placeholder)',
+  'game-laugh':'Tertawa (placeholder)',
+  'game-thinking':'Berpikir (placeholder)',
+  'game-bored':'Bosan (placeholder)',
+  'game-disgusted':'Jijik (placeholder)',
+  'game-embarrassed':'Malu ditangkap (placeholder)',
+  'game-pray':'Tenang berdoa (placeholder)',
+  'game-eat':'Makan (placeholder)',
+  'game-talk':'Bicara (placeholder)',
+  'game-faint':'Pingsan (placeholder)'
+ };
+ assert.equal(catalog.entries[0].id,'universal-neutral');
+ assert.deepEqual(ids.slice(0,12),original);
+ assert.equal(ids.length,25);
+ assert.equal(new Set(ids).size,25);
+ for(const entry of catalog.entries.slice(0,12)){
+  assert.equal(entry.base,'universal');
+  assert.ok(entry.template,'original starter lost its template');
+  assert.equal('png' in entry,false,'original starter must stay template-only');
+ }
+ const byId=Object.fromEntries(catalog.entries.map(e=>[e.id,e]));
+ assert.equal(byId['universal-happy'].name,'Happy');
+ assert.equal(byId['universal-shy'].name,'Blush / Shy');
+ assert.equal(byId['universal-cry'].name,'Crying');
+ for(const [id,name] of Object.entries(needed)){
+  const entry=byId[id];
+  assert.ok(entry,'missing placeholder '+id);
+  assert.equal(entry.name,name);
+  assert.equal(entry.base,'universal');
+  assert.equal(entry.frames,1);
+  assert.equal(entry.fps,6);
+  assert.equal(entry.template,'neutral');
+  assert.ok(name.endsWith('(placeholder)'));
+ }
+ assert.match(html,/KEBUTUHAN GAME · SLOT KOSONG/);
+});

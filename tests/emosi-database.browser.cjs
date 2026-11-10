@@ -14,6 +14,12 @@ const assert=require('node:assert/strict');
    {waitUntil:'domcontentloaded',timeout:90000});
   await page.waitForFunction(()=>window.EmosiDatabase&&
    document.querySelectorAll('#cards .emotion-card').length>0,null,{timeout:60000});
+  const gate=page.locator('[aria-label="Cloud startup"]');
+  if(await gate.count()){
+   page.once('dialog',d=>d.accept());
+   await page.getByRole('button',{name:/OPEN EXISTING DATA/}).click();
+   await gate.waitFor({state:'detached',timeout:20000});
+  }
   assert.match(await page.title(),/EMOSI\.EXE/);
   assert.match(await page.locator('.titlebar .brand').textContent(),/EMOSI/);
   async function currentId(){
@@ -28,8 +34,46 @@ const assert=require('node:assert/strict');
   }
   const sourceId=await currentId();
   assert.ok(sourceId,'No initial source emotion ID');
+  assert.equal(sourceId,'universal-neutral','First loaded emotion must stay Neutral');
+  const libraryNames=await page.locator('#cards .emotion-card b').allTextContents();
+  for(const keep of ['Neutral','Happy','Angry','Sad','Surprised','Blush / Shy',
+   'Cheeky','Bleh','Wink','Sleepy','Crying','Grimace']){
+   assert.ok(libraryNames.includes(keep),'Original face missing from library: '+keep);
+  }
+  const slots=[
+   ['Lapar (placeholder)','game-hungry'],
+   ['Lelah (placeholder)','game-tired'],
+   ['Sakit (placeholder)','game-sick'],
+   ['Bau (placeholder)','game-dirty'],
+   ['Tertawa (placeholder)','game-laugh'],
+   ['Berpikir (placeholder)','game-thinking'],
+   ['Bosan (placeholder)','game-bored'],
+   ['Jijik (placeholder)','game-disgusted'],
+   ['Malu ditangkap (placeholder)','game-embarrassed'],
+   ['Tenang berdoa (placeholder)','game-pray'],
+   ['Makan (placeholder)','game-eat'],
+   ['Bicara (placeholder)','game-talk'],
+   ['Pingsan (placeholder)','game-faint']
+  ];
+  for(const [label] of slots){
+   assert.ok(libraryNames.includes(label),'Missing game slot: '+label);
+  }
+  assert.ok((await page.locator('.emotion-group').textContent()).includes('KEBUTUHAN GAME'));
+  await page.locator('#cards .emotion-card',{hasText:'Lapar (placeholder)'}).click();
+  await page.waitForFunction(()=>document.getElementById('entryId')?.textContent.includes('game-hungry'),null,{timeout:20000});
+  assert.equal(await currentId(),'game-hungry');
+  await page.locator('#edit').click();
+  await page.locator('#pixelOverlay:not([hidden])').waitFor();
+  await page.locator('#pixelClose').click();
+  await page.waitForFunction(()=>document.getElementById('pixelOverlay').hidden,null,{timeout:20000});
+  const slotPng=await exportPng();
+  assert.equal(slotPng.width,64);
+  assert.equal(slotPng.height,448);
+  await page.locator('#cards .emotion-card',{hasText:'Neutral'}).first().click();
+  await page.waitForFunction(()=>document.getElementById('entryId')?.textContent.includes('universal-neutral'),null,{timeout:20000});
   const sourcePng=await exportPng();
   assert.equal(sourcePng.height,448);
+  assert.equal(await currentId(),'universal-neutral');
   await page.locator('#duplicateEmotion').click();
   await page.locator('#newEmotionDialog[open]').waitFor();
   await page.locator('#newEmotionName').fill('COPY TEST / SO HAPPY');

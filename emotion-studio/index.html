@@ -346,6 +346,9 @@ body{margin:0;background:#587bac;color:#202b40;min-height:100vh}
 .emotion-list{overflow:auto;flex:1;padding:6px;display:flex;flex-direction:column;gap:5px}
 .emotion-card{display:flex;align-items:center;gap:8px;width:100%;min-height:52px;text-align:left;border:1px solid #acbad1;background:#fff;color:#21354c;padding:5px;cursor:pointer}
 .emotion-card.active{background:#d8e8ff;border-color:#245db4;box-shadow:inset 0 0 0 1px #739ee4}
+.emotion-group{padding:8px 6px 2px;font:700 9px Consolas,monospace;letter-spacing:.08em;color:#3d5f86}
+.emotion-card.placeholder{border-style:dashed;background:#f7faf4}
+.emotion-card.placeholder small{color:#3d6a3a}
 .emotion-card canvas{height:42px;width:24px;image-rendering:pixelated;background:linear-gradient(45deg,#e1e1e1 25%,transparent 25%,transparent 75%,#e1e1e1 75%),linear-gradient(45deg,#e1e1e1 25%,#fff 25%,#fff 75%,#e1e1e1 75%);background-size:8px 8px;background-position:0 0,4px 4}
 .emotion-card b{display:block;font-size:11px}.emotion-card small{display:block;font-size:9px;color:#65758b;margin-top:4px}
 .filterbox{display:flex;align-items:center;gap:6px;background:white;border:1px solid #abbcd4;margin:7px;padding:4px}
@@ -1499,7 +1502,7 @@ async function renderAtlas(entry){if(!validEntry(entry))throw Error("Invalid emo
 }
 function decode64(s){const bin=atob(s.replace(/\s/g,""));const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}
 function encode64(s){const bytes=new TextEncoder().encode(s);let r="";for(let i=0;i<bytes.length;i+=8192)r+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(r)}
-const EMBEDDED_CATALOG={"format":"mahluk-2-universal-emotions-v1","cell":[64,112],"directions":["se","sw","ne","nw"],"updated":"2026-11-06","entries":[{"id":"universal-neutral","name":"Neutral","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"universal-happy","name":"Happy","base":"universal","frames":3,"fps":6,"template":"happy"},{"id":"universal-angry","name":"Angry","base":"universal","frames":3,"fps":6,"template":"angry"},{"id":"universal-sad","name":"Sad","base":"universal","frames":3,"fps":6,"template":"sad"},{"id":"universal-surprised","name":"Surprised","base":"universal","frames":3,"fps":6,"template":"surprised"},{"id":"universal-shy","name":"Blush / Shy","base":"universal","frames":3,"fps":6,"template":"shy"},{"id":"universal-cheeky","name":"Cheeky","base":"universal","frames":3,"fps":6,"template":"cheeky"},{"id":"universal-bleh","name":"Bleh","base":"universal","frames":4,"fps":6,"template":"bleh"},{"id":"universal-wink","name":"Wink","base":"universal","frames":3,"fps":6,"template":"wink"},{"id":"universal-sleepy","name":"Sleepy","base":"universal","frames":3,"fps":6,"template":"sleepy"},{"id":"universal-cry","name":"Crying","base":"universal","frames":4,"fps":6,"template":"cry"},{"id":"universal-grimace","name":"Grimace","base":"universal","frames":3,"fps":6,"template":"grimace"}]};
+const EMBEDDED_CATALOG={"format":"mahluk-2-universal-emotions-v1","cell":[64,112],"directions":["se","sw","ne","nw"],"updated":"2026-11-10","entries":[{"id":"universal-neutral","name":"Neutral","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"universal-happy","name":"Happy","base":"universal","frames":3,"fps":6,"template":"happy"},{"id":"universal-angry","name":"Angry","base":"universal","frames":3,"fps":6,"template":"angry"},{"id":"universal-sad","name":"Sad","base":"universal","frames":3,"fps":6,"template":"sad"},{"id":"universal-surprised","name":"Surprised","base":"universal","frames":3,"fps":6,"template":"surprised"},{"id":"universal-shy","name":"Blush / Shy","base":"universal","frames":3,"fps":6,"template":"shy"},{"id":"universal-cheeky","name":"Cheeky","base":"universal","frames":3,"fps":6,"template":"cheeky"},{"id":"universal-bleh","name":"Bleh","base":"universal","frames":4,"fps":6,"template":"bleh"},{"id":"universal-wink","name":"Wink","base":"universal","frames":3,"fps":6,"template":"wink"},{"id":"universal-sleepy","name":"Sleepy","base":"universal","frames":3,"fps":6,"template":"sleepy"},{"id":"universal-cry","name":"Crying","base":"universal","frames":4,"fps":6,"template":"cry"},{"id":"universal-grimace","name":"Grimace","base":"universal","frames":3,"fps":6,"template":"grimace"},{"id":"game-hungry","name":"Lapar (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-tired","name":"Lelah (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-sick","name":"Sakit (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-dirty","name":"Bau (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-laugh","name":"Tertawa (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-thinking","name":"Berpikir (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-bored","name":"Bosan (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-disgusted","name":"Jijik (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-embarrassed","name":"Malu ditangkap (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-pray","name":"Tenang berdoa (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-eat","name":"Makan (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-talk","name":"Bicara (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"},{"id":"game-faint","name":"Pingsan (placeholder)","base":"universal","frames":1,"fps":6,"template":"neutral"}]};
 async function loadCatalog(token=""){
  const headers={"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
  if(token)headers.Authorization="Bearer "+token;
@@ -1987,11 +1990,19 @@ async function renderList(){
  const q=$("filter").value.trim().toLowerCase();const entries=selected&&!catalog.entries.some(x=>x.id===selected.id)?[...catalog.entries,selected]:catalog.entries;
  const filtered=entries.filter(x=>x.name.toLowerCase().includes(q)||x.id.includes(q));
  $("count").textContent=filtered.length+" ASSETS";
- for(const item of filtered){const row=document.createElement("button");row.className="emotion-card"+(selected?.id===item.id?" active":"");
+ let headed=false;
+ for(const item of filtered){
+  const isGame=String(item.id||"").startsWith("game-");
+  const isSlot=isGame&&!!item.template;
+  if(isGame&&!headed){
+   const h=document.createElement("div");h.className="emotion-group";
+   h.textContent="KEBUTUHAN GAME · SLOT KOSONG";list.append(h);headed=true;
+  }
+  const row=document.createElement("button");row.className="emotion-card"+(selected?.id===item.id?" active":"")+(isSlot?" placeholder":"");
   const thumb=document.createElement("canvas");thumb.width=64;thumb.height=112;
   U.renderAtlas(item).then(src=>{const ctx=thumb.getContext("2d");ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,64,112);ctx.drawImage(src,0,0,64,112,0,0,64,112)}).catch(()=>{});
   const labels=document.createElement("span"),name=document.createElement("b"),info=document.createElement("small");
-  name.textContent=item.name;info.textContent=item.frames+" FRAMES · "+item.base.toUpperCase();labels.append(name,info);row.append(thumb,labels);
+  name.textContent=item.name;info.textContent=isSlot?"SLOT KOSONG · "+item.base.toUpperCase():item.frames+" FRAMES · "+item.base.toUpperCase();labels.append(name,info);row.append(thumb,labels);
   row.onclick=async()=>{await choose(item);if(selected?.id===item.id)setWorkspaceTab('preview')};
   list.append(row);
  }
