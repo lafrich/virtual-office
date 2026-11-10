@@ -105,6 +105,8 @@ body.mainkan-playing #viewport{
 #worldLoading .world-loader-card p{margin:13px 0;line-height:1.4}
 #worldLoading .world-loader-card small{display:block;margin-top:9px;line-height:1.4;color:#4c4c4c}
 #worldLoading .progress{height:19px}
+#retryWorld{display:block;margin-top:15px;width:100%;min-height:42px}
+#retryWorld[hidden]{display:none!important}
 
 /* Mainkan is the authoritative visible gameplay HUD. Positions are authored in UI Editor. */
 #viewport #mainkanGameBar{position:absolute;inset:0;z-index:3;display:block;width:100%;height:100%;background:transparent;padding:0;pointer-events:none}
@@ -273,6 +275,7 @@ body.mainkan-playing #viewport{
        <p id="worldLoadingText">Menyiapkan dunia dan karakter Genesis...</p>
        <div class="progress"><div id="worldProgress"></div></div>
        <small id="worldLoadingDetail">Karakter akan muncul setelah semua sprite siap.</small>
+        <button type="button" class="btn primary" id="retryWorld" hidden>Coba Muat Ulang Dunia</button>
       </div>
      </div>
   </div>
