@@ -1,11 +1,11 @@
 /* Semesta native Indonesian packs — published sprites only.
- * Loads both the original cultural pack and 200 additional native objects.
+ * Loads the original cultural pack, 200 additional objects and owner-approved V6B buildings.
  * Does not synthesize missing art, break old saved asset IDs or duplicate entries.
  */
 (function(g){
 'use strict';
 const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/';
-const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json'];
+const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json','indonesia_custom_catalog.json'];
 let cached=null;
 const IMAGE_REV='indonesia200-wheel-horizontal-v8-20261106';
 function cacheBust(spec,url){
