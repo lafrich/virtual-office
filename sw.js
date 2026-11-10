@@ -1,4 +1,4 @@
-/* sw v19 2026-11-10: Mainkan local character fallback + kost recipe cooking + life motions. Phones pick up the new files.
+/* sw v20 2026-11-10: Mainkan Confirm continues when the Worker profile save is blocked. Phones pick up the new files.
    This worker no longer decrypts the old game page, loads cancelled patches, or redirects to the archive login.
    skipWaiting+clients.claim so visitors who registered the old decrypting SW drop it immediately.
    All same-origin requests pass through to the network. */
