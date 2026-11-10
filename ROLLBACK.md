@@ -1,3 +1,24 @@
+# Rollback — Mainkan Confirm local-save fallback + kost recipe cooking + life motions
+
+Written 2026-11-10 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged.
+
+- Previous live `main`: `63133e4acec16e0705d96b6238054c09facbb7ca`
+- Feature commit: `f797be85b32585a83b9ef64648f870fa2c0a4cb2`
+- Service worker bump: `a25d26f22279bf5e9c4d7de1db4214580575d054`
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit a25d26f22279bf5e9c4d7de1db4214580575d054
+git revert --no-edit f797be85b32585a83b9ef64648f870fa2c0a4cb2
+git push origin main
+```
+
+What it changes: when `PUT /players/profile` answers 403/404/405/501 (test Worker v20 has no save route), Confirm stores the character on the device under `mainkan-character-v1:<player id>` (mainkan/local-character.js; character only, never credentials) and continues; login restores it. Kost panel gets "Masak Resep" (Jiwa cooking recipes, ingredients → item; sandbox demo offers the catalog's default recipes). Successful life actions play their LGR motion for 4 s. Test start profiles v2 (adds 30 electricity units so cooking works; re-applies once for t_ichsan/t_noor). Genesis player loads lgr-game-7. After rollback Confirm again needs the Worker save route.
+
+---
+
 # Rollback — Mainkan LGR-only player path (no V6P)
 
 Written 2026-11-10 (Asia/Jakarta). Worker, secrets and vault files unchanged.
