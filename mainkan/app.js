@@ -168,6 +168,7 @@ $('pauseExit').addEventListener('click',returnToMenu);
 $('exitGame').addEventListener('click',returnToMenu);
 $('homeButton').addEventListener('click',returnToMenu);
 $('reloadWorld').addEventListener('click',()=>{frame.removeAttribute('src');worldReady=false;startWorld(true);});
+$('retryWorld').addEventListener('click',()=>{frame.removeAttribute('src');worldReady=false;startWorld(true);});
 function setLoginMode(value){
  loginMode='login';
  const loginBtn=$('loginTab'),registerBtn=$('registerTab');
@@ -311,6 +312,7 @@ function startWorld(force=false){
   pauseRequested=false;return;
  }
  worldReady=false;$('worldLoading').hidden=false;
+ $('retryWorld').hidden=true;
  $('worldProgress').style.width='3%';
  $('worldLoadingText').textContent='Memuat world WebGL, Jiwa, physics dan asset Semesta...';
  $('worldLoadingDetail').textContent='Menghubungkan engine Semesta...';
@@ -319,6 +321,14 @@ function startWorld(force=false){
  url.searchParams.set('player','1');
  url.searchParams.set('v',String(++worldCounter));
  frame.src=url.href;
+ // Never mark an unfinished world as ready. Offer a non-destructive retry
+ // if native art or WebGL stalls on a slower connection.
+ setTimeout(()=>{
+  if(!worldReady&&stage==='gameScreen'&&frame.getAttribute('src')===url.href){
+   $('worldLoadingDetail').textContent='Masih menunggu Semesta / LGR-1. Coba muat ulang tanpa menghapus data.';
+   $('retryWorld').hidden=false;
+  }
+ },35000);
 }
 window.addEventListener('message',e=>{
  if(e.origin!==location.origin||!e.data)return;
@@ -337,7 +347,8 @@ window.addEventListener('message',e=>{
   }catch(err){
    frame.contentWindow?.postMessage({type:'mainkan:player-profile-error',message:String(err.message)},location.origin);
    $('worldLoadingText').textContent='Gagal memuat karakter Genesis: '+err.message;
-   $('worldLoadingDetail').textContent='Data karakter aman. Coba Reload.';
+   $('worldLoadingDetail').textContent='Data karakter aman. Coba muat ulang dunia.';
+    $('retryWorld').hidden=false;
   }
   return;
  }
@@ -350,6 +361,7 @@ window.addEventListener('message',e=>{
   worldReady=true;
   $('worldProgress').style.width='100%';
   $('worldLoading').hidden=true;
+  $('retryWorld').hidden=true;
   $('cityName').textContent=e.data.city||'SEMESTA • Native World';
   $('worldLabel').textContent='Semesta WebGL · '+Number(e.data.count||0)+' objek · '+(guest?'Guest':'Player');
   $('statusText').textContent='SEMESTA • PLAYER READY';
@@ -358,7 +370,8 @@ window.addEventListener('message',e=>{
  }else if(e.data.type==='mainkan:semesta-error'){
   $('worldLoading').hidden=false;
   $('worldLoadingText').textContent=e.data.message||'Semesta tidak bisa dimuat. Coba Reload.';
-  $('worldLoadingDetail').textContent='Karakter tidak diganti atau dihapus. Gunakan Reload.';
+  $('worldLoadingDetail').textContent='Karakter dan penyimpanan tidak dihapus. Coba muat ulang dunia.';
+  $('retryWorld').hidden=false;
   $('statusText').textContent='SEMESTA • ERROR';
  }
 });
