@@ -191,6 +191,10 @@ function expressionFor(name){
 function imageStatus(input,emotion="neutral",dir="se"){
  const profile=normalizeProfile(input);
  if(lgrPending())return {ready:false,loaded:0,total:2,pending:2,errors:[],renderer:"lgr"};
+ // Mainkan intentionally ships no V6P compositor. Surface a real LGR load
+ // failure instead of reporting V6P PNG progress for 90 seconds indefinitely.
+ if(lgr.error&&!V)return {ready:false,loaded:0,total:2,pending:0,
+  errors:["LGR-1 gagal: "+String(lgr.error.message||lgr.error)],renderer:"lgr"};
  if(useLGR()){
   const face=(dir==="se"||dir==="sw")?lookupImage((expressionFor(emotion)||expressionFor("neutral"))?.png):null;
   const faceOk=!face||face.ready,faceErr=face&&face.error;

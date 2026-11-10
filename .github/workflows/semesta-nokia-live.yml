@@ -47,6 +47,14 @@ jobs:
           ln -s site/v6p-compositor.js virtual-life-asset-pipeline/v6p-compositor.js
           ln -s site/genesis-source.js virtual-life-asset-pipeline/genesis-source.js
           ln -s site/emosi-source.js virtual-life-asset-pipeline/emosi-source.js
+          # Mainkan uses LGR-1 by default; old V6P-only fixtures left the player
+          # permanently waiting for a first frame in all three browser suites.
+          for file in lafrich-puppet-core.js lafrich-puppet-renderer.js lgr1-raster.js lgr1-motion.js lgr-skin.js lgr-wear.js lgr-actor.js lgr-db.js lgr-game.js; do
+            ln -s "site/$file" "virtual-life-asset-pipeline/$file"
+          done
+          test -f virtual-life-asset-pipeline/lgr-game.js
+          test -f virtual-life-asset-pipeline/media/lgr1/base/index.json
+          test -f virtual-life-asset-pipeline/media/lgr1/motions.json
       - name: Serve app and renderer from the same origin
         run: |
           python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/nokia-semesta-server.log 2>&1 &
