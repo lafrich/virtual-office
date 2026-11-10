@@ -1,3 +1,24 @@
+# Rollback — Emosi.exe game emotion placeholder slots
+
+Written 2026-11-10 (Asia/Jakarta). Cloudflare Worker and secrets were not changed. Drive masters in `Membangun / Emotion Studio` were not modified. A read-only copy of the 36 existing files (18 JSON + 18 PNG) is at `Membangun / Emotion-Studio-backup-20261110-before-game-slots`.
+
+## This deploy (Emosi game placeholder slots)
+
+- Previous live `main`: `78dc2c332a22455f30fb231fca8814da0e28bd01`
+- Feature commit: `40f129112f0fd89b7ac79dc78ccdfe3dcb9b5bb3`
+
+Restore this deploy (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 40f129112f0fd89b7ac79dc78ccdfe3dcb9b5bb3
+git push origin main
+```
+
+That removes the 13 `game-*` placeholder slots from the Emosi starter catalog and the "Kebutuhan game" list grouping. It does not change Drive-authored faces (Ahe, Sleep, Takut, Insecure, O, Kiss, or the 12 saved `universal-*` projects). After revert, existing faces remain as they are.
+
 # Rollback — Semesta hub + unused old-game cleanup
 
 Written 2026-11-07 (Asia/Jakarta). Cloudflare Worker and secrets were not changed.
