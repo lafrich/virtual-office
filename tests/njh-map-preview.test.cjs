@@ -76,55 +76,56 @@ test('city file uses real keys and is bounded; 6 interiors exist',()=>{
  assert.ok(wc.items.some(i=>i.assetId==='sekat_wc'));
 });
 
-test('wires the 6 NJH interiors and reports doors without a matching template',()=>{
+test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
  const {api}=loadPreview('?njhMap=1');
  const city=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
  const meta=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/njh-map-meta.json'),'utf8'));
  const interiors={};
- for(const id of ['njh_kos','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel']){
+ for(const id of api.readyTemplates){
   interiors[id]=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/interiors',id+'.interior-scene.json'),'utf8'));
  }
  const document=city.record.document;
- const report=api.status&&(function(){
-  // wireDoors is not exported directly; loadCity uses it. Re-run via eval of public report after calling internal?
-  return null;
- })();
- // Use nearestEnterable + object mutation by simulating loadCity's wire through a tiny copy of the contract:
- // Call load path internals by re-invoking register + attaching interiors the same way the module does,
- // via a local copy of the exported helpers after monkeypatching? Instead, duplicate the expected wiring using public APIs.
- // wireDoors isn't exported. Export was missed — use a direct test by importing functions through status after we expose wire via loadCity mock.
- // We'll test the exported door helpers with already-wired objects, and also assert the mapping table here.
- const expected={
+ const report=api.wireDoors(document,meta,interiors);
+ assert.equal(report.missingObject.length,0);
+ assert.equal(report.noInterior.length,0);
+ const wired=Object.fromEntries(report.wired.map(r=>[r.doorId,r.template]));
+ assert.deepEqual(wired,{
   njh_door_laundry:'njh_laundry',
   njh_door_warung_makan:'njh_warung_makan',
   njh_door_home_ichsan:'njh_rumah_biasa',
   njh_door_bengkel:'njh_bengkel',
   njh_door_wc_umum:'njh_wc_mandi_umum',
   njh_door_home_noor:'njh_kos'
- };
- const unmatched=[];
- for(const door of meta.doors){
-  const obj=document.objects.find(o=>o.id===door.objectId);
-  assert.ok(obj,door.doorId+' object '+door.objectId+' exists');
-  if(expected[door.doorId]){
-   // apply the same wrap the module uses by constructing floors
-   obj.enterable=true;
-   obj.njhUsePoint={x:door.usePoint[0],z:door.usePoint[1]};
-   obj.interior={format:'virtual-life-interiors-v1',floors:[interiors[expected[door.doorId]]]};
-   obj.njhInteriorTemplate=expected[door.doorId];
-  }else unmatched.push(door.doorId);
+ });
+ const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
+ assert.deepEqual(pending,{
+  njh_door_tenda_pecel_lele:'njh_pecel_lele_tenda',
+  njh_door_tenda_sate_madura:'njh_sate_madura_tenda',
+  njh_door_mushola:'njh_mushola',
+  njh_door_koperasi:'njh_koperasi',
+  njh_door_loak:'njh_toko_loak',
+  njh_door_warung_madura:'njh_warung_madura',
+  njh_door_warung_kopi:'njh_warung_kopi',
+  njh_door_nasi_sunda:'njh_nasi_sunda'
+ });
+ for(const row of report.pending){
+  const obj=document.objects.find(o=>o.id===row.objectId);
+  assert.equal(obj.enterable,true);
+  assert.equal(obj.njhInteriorPending,true);
+  assert.equal(obj.interior,null);
+  assert.equal(obj.njhInteriorTemplate,row.template);
+  assert.deepEqual([obj.njhUsePoint.x,obj.njhUsePoint.z],row.usePoint);
  }
- assert.deepEqual(unmatched.sort(),[
-  'njh_door_koperasi','njh_door_loak','njh_door_mushola','njh_door_nasi_sunda',
-  'njh_door_tenda_pecel_lele','njh_door_tenda_sate_madura',
-  'njh_door_warung_kopi','njh_door_warung_madura'
- ].sort());
+ // Aliases still resolve if a kit string sneaks back in.
+ assert.equal(api.resolveTemplate('bangun-ruang kit in br-warung-pecel-lele.json'),'njh_pecel_lele_tenda');
  const near=api.nearestEnterable(document.objects,-26.25,71.5,1.25);
  assert.equal(near.o.id,'njh-kos-noor');
  assert.ok(near.distance<0.01);
+ const tent=api.nearestEnterable(document.objects,-25.0,38.5,1.25);
+ assert.equal(tent.o.id,'njh-tenda-pecel-lele');
+ assert.equal(tent.o.njhInteriorPending,true);
  const far=api.nearestEnterable(document.objects,-26.25,71.5-3,1.25);
  assert.equal(far,null);
- // 2.1-from-center would miss Kos Noor (2.7). Use-tile still hits.
  const kos=document.objects.find(o=>o.id==='njh-kos-noor');
  const centerDist=Math.hypot((-26.25)-kos.x,(71.5)-kos.z);
  assert.ok(centerDist>2.1, 'Kos Noor use point is farther than 2.1 from centre ('+centerDist+')');
@@ -189,5 +190,16 @@ test('dermaga 270 rotation swaps the 2x1 footprint; dock edge stays clear of obj
    return Math.abs(o.x-(c+0.5))<w/2 && Math.abs(o.z-(r+0.5))<d/2;
   });
   assert.equal(hit,undefined,'water-side tile '+c+','+r+' should stay object-free');
+ }
+ // Footprint stays on the Kali bank (sidewalk), never grass or mid-river.
+ // min-corner (-52,43) 1x2 at rot 270: cells c=-52, r=43 and r=44.
+ const cells=new Map(city.record.document.map.terrain.cells.map(c=>[c.c+','+c.r,c.type]));
+ for(const [c,r] of [[-52,43],[-52,44]]){
+  const type=cells.get(c+','+r)||'grass';
+  assert.equal(type,'sidewalk','dock bank tile '+c+','+r+' should be sidewalk, got '+type);
+ }
+ for(const [c,r] of tiles){
+  const type=cells.get(c+','+r)||'grass';
+  assert.equal(type,'river','water-side tile '+c+','+r+' should be river, got '+type);
  }
 });

@@ -2395,12 +2395,16 @@ canvas.addEventListener('wheel',e=>{
 },{passive:false});
 // Walking near a Warteg doorway (rather than crossing solid wall collision)
  // opens the editor's authored interior preview; no multiplayer teleport.
+ let lastEnterReason='';
+ function buildingHasInterior(o){
+  return !!(o?.interior?.floors?.length||(o?.type==='sprite'&&assetByName.get(o.asset)?.interior?.floors?.length));
+ }
  function enterNearbyBuilding(){
   const root=owners.get(walkActorId);
-  if(!root||!interiorPreview)return false;
+  if(!root||!interiorPreview){lastEnterReason='unavailable';return false;}
   const candidates=documentMap.objects.filter(o=>
    o.enterable===true&&
-   (o.interior?.floors?.length||(o.type==='sprite'&&assetByName.get(o.asset)?.interior?.floors?.length)));
+   (buildingHasInterior(o)||(njhMapPreview&&o.njhInteriorTemplate)));
   const sorted=candidates.map(o=>{
    const spec=assetByName.get(o.asset);
    const door=njhMapPreview&&window.VLNjhMapPreview?.doorAnchor?
@@ -2412,11 +2416,18 @@ canvas.addEventListener('wheel',e=>{
   const nearest=sorted[0];
   const enterLimit=njhMapPreview?(window.VLNjhMapPreview?.enterRadius||1.25):2.1;
   if(!nearest||nearest.distance>enterLimit){
+   lastEnterReason='too-far';
    tell('Dekati pintu bangunan, lalu tekan E untuk masuk.');return false;
+  }
+  if(njhMapPreview&&!buildingHasInterior(nearest.o)){
+   lastEnterReason='missing-interior';
+   tell('interior belum ada');
+   return false;
   }
   for(const k of Object.keys(walkInput))walkInput[k]=false;
   rigs.get(walkActorId)?.rig.setMoving(0,0,false);
   interiorPreview.openFor(nearest.o);
+  lastEnterReason='opened';
   return true;
  }
  // Walk Test previews canonical movement and 3D occlusion without mutating
@@ -3154,6 +3165,25 @@ if(njhMapPreview){
    return true;
   },
   enter(){return enterNearbyBuilding();},
+  lastEnter(){return lastEnterReason;},
+  toast(){return document.getElementById('toast')?.textContent||'';},
+  focus(x,z,size){
+   cameraFollowId=null;lifeAutoCamera=false;
+   try{updateCharacterCameraUI();}catch{}
+   focusCameraAt(Number(x),Number(z),size||14);
+   try{renderer.render(scene,camera);}catch{}
+   return {x:cameraFocus.x,z:cameraFocus.z,viewSize,follow:!!cameraFollowId};
+  },
+  setVisible(ids,vis){
+   const show=vis!==false;
+   const out=[];
+   for(const id of ids||[]){
+    const root=owners.get(id);
+    if(root){root.visible=show;out.push(id);}
+   }
+   try{renderer.render(scene,camera);}catch{}
+   return out;
+  },
   closeInterior(){const d=document.getElementById('interiorWalkthrough');if(d?.open)d.close();return !d?.open;},
   interiorOpen(){return !!document.getElementById('interiorWalkthrough')?.open;},
   interiorTitle(){return document.getElementById('interiorWalkthroughTitle')?.textContent||'';},

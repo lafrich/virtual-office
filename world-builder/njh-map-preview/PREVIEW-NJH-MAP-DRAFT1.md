@@ -47,16 +47,16 @@ Use tiles come from `njh-map-meta.json`. Enter radius is 1.25 from the use point
 | Bengkel Motor (`njh-bengkel`) | -48.0, 71.5 | `njh_bengkel` | wired |
 | WC / Mandi Umum (`njh-wc-umum`) | -43.0, 71.5 | `njh_wc_mandi_umum` | wired |
 | Kos Noor (`njh-kos-noor`) | -26.25, 71.5 | `njh_kos` | wired |
-| Warung Madura (`ref-north-row-b`) | -43.5, 41.5 | — | no NJH interior |
-| Warung Kopi Pojok Gang (`ref-west-center-a`) | -38.5, 51.5 | — | no NJH interior |
-| Warung nasi Sunda (`jakarta-v3-13525`) | -21.15, 71.5 | — | no NJH interior |
-| Koperasi (`jakarta-v3-13541`) | -17.0, 71.5 | — | no NJH interior |
-| Toko Loak (`njh-toko-loak`) | -27.0, 26.0 | — | no NJH interior |
-| Mushola Kampung (`njh-mushola`) | -16.25, 26.6 | — | no NJH interior |
-| Warung Pecel Lele tenda (`njh-tenda-pecel-lele`) | -25.0, 38.5 | Bangun kit only | not wired (kit furniture types are not in the Bangun interior model) |
-| Lapak Sate Madura tenda (`njh-tenda-sate-madura`) | -20.0, 38.5 | Bangun kit only | not wired (same) |
+| Warung Madura (`ref-north-row-b`) | -43.5, 41.5 | `njh_warung_madura` | pre-wired, pending r6 (toast: interior belum ada) |
+| Warung Kopi Pojok Gang (`ref-west-center-a`) | -38.5, 51.5 | `njh_warung_kopi` | pre-wired, pending r6 |
+| Warung nasi Sunda (`jakarta-v3-13525`) | -21.15, 71.5 | `njh_nasi_sunda` | pre-wired, pending r6 |
+| Koperasi (`jakarta-v3-13541`) | -17.0, 71.5 | `njh_koperasi` | pre-wired, pending r6 |
+| Toko Loak (`njh-toko-loak`) | -27.0, 26.0 | `njh_toko_loak` | pre-wired, pending r6 |
+| Mushola Kampung (`njh-mushola`) | -16.25, 26.6 | `njh_mushola` | pre-wired, pending r6 |
+| Warung Pecel Lele tenda (`njh-tenda-pecel-lele`) | -25.0, 38.5 | `njh_pecel_lele_tenda` | pre-wired, pending r6 |
+| Lapak Sate Madura tenda (`njh-tenda-sate-madura`) | -20.0, 38.5 | `njh_sate_madura_tenda` | pre-wired, pending r6 |
 
-Of the seven doors that sit 2.1–2.7 from their building center, four are wired (Kos Noor, bengkel, WC, rumah Ichsan). Mushola, koperasi, and toko loak have use tiles but no NJH interior.
+All 14 doors have use tiles. The six ready interiors open now. The eight pending ones are enterable at their use tiles and toast `interior belum ada` until Ellen's r6 scenes land in `interiors/`.
 
 ## Spawns and homes
 
@@ -96,6 +96,6 @@ Playwright smoke (`tests/njh-map-preview-smoke.py`), desktop 1280×800 and phone
 
 1. No NJH interior yet for mushola, koperasi, toko loak, warung Madura, warung kopi, and nasi Sunda. Of the seven far doors, the first three still cannot be entered.
 2. Pecel lele and sate madura tents are registered and drawn, but their Bangun kits are not hooked up as enterable interiors (furniture types in those kits are not in the Bangun interior model).
-3. Please visually confirm `njh_dermaga_mancing` placement and the open space under the dock edge for `fishing_wait_sit` (shins hang 7–8 px below the deck).
+3. Dermaga check: the dock was already on the Kali bank, not grass. Footprint min-corner stays `(-52, 43)`, rot 270, center `(-51.5, 44)`, on sidewalk tiles `(-52,43)` and `(-52,44)`, immediately east of river tiles `(-53,43)` and `(-53,44)`. LFB rules keep the 2×1 jeja on walkable bank (not mid-river); the fishing use tile is on the land side at `[-50.375, 44]`. Water-side tiles stay object-free for `fishing_wait_sit` shin overhang. Close-ups: `/workspace/njh-map-preview-shots/dermaga-close-desktop.png` and `dermaga-close-phone.png`.
 4. Known leftover from the interior art preview: TV back-view still resembles the screen; furniture icons in the left panel may still use older art.
 5. Preview only — not live, and Ichsan has not reviewed the map.

@@ -21,6 +21,16 @@ DOORS = [
     ('jakarta-v3-13634', 'Laundry Kiloan', 'njh_laundry'),
     ('njh-bengkel', 'Bengkel Motor', 'njh_bengkel'),
 ]
+PENDING_DOORS = [
+    ('njh-tenda-pecel-lele', 'njh_pecel_lele_tenda'),
+    ('njh-tenda-sate-madura', 'njh_sate_madura_tenda'),
+    ('njh-mushola', 'njh_mushola'),
+    ('jakarta-v3-13541', 'njh_koperasi'),
+    ('njh-toko-loak', 'njh_toko_loak'),
+    ('ref-north-row-b', 'njh_warung_madura'),
+    ('ref-west-center-a', 'njh_warung_kopi'),
+    ('jakarta-v3-13525', 'njh_nasi_sunda'),
+]
 NEW_ASSETS = [
     'njh-dermaga-mancing', 'njh-lapak-silver', 'njh-tiang-ogah',
     'njh-kotak-amal', 'njh-penanda-doa',
@@ -80,6 +90,32 @@ def enter_door(page, object_id):
         template: obj.template
       };
     }""", object_id)
+
+
+def enter_pending(page, object_id):
+    return page.evaluate("""(id) => {
+      const rt = window.VLNjhMapPreviewRuntime;
+      const obj = rt.objects().find(o => o.id === id);
+      if (!obj) return {ok:false, reason:'missing-object'};
+      const report = window.VLNjhMapPreview?.report?.()||{};
+      const wired = (report.pending||[]).concat(report.wired||[]).find(d => d.objectId === id);
+      const x = wired ? wired.usePoint[0] : obj.x;
+      const z = wired ? wired.usePoint[1] : obj.z;
+      rt.setWalk();
+      rt.teleport(x, z);
+      const entered = rt.enter();
+      return {
+        entered: !!entered,
+        reason: rt.lastEnter(),
+        toast: rt.toast(),
+        open: !!rt.interiorOpen(),
+        template: obj.template,
+        enterable: obj.enterable,
+        hasInterior: obj.hasInterior,
+        use: [x, z]
+      };
+    }""", object_id)
+
 
 def main():
     results = {'ok': True, 'steps': []}
@@ -174,6 +210,33 @@ def main():
         time.sleep(0.3)
         page.screenshot(path=str(SHOTS / 'desktop-east-edge.png'))
 
+        # pending r6 doors: use tiles work, toast, no crash, no interior dialog
+        for obj_id, template in PENDING_DOORS:
+            got = enter_pending(page, obj_id)
+            ok = (got.get('entered') is False
+                  and got.get('reason') == 'missing-interior'
+                  and 'interior belum ada' in (got.get('toast') or '')
+                  and not got.get('open')
+                  and got.get('template') == template)
+            rec('pending-'+obj_id, ok, {'template': template, **got})
+            page.evaluate("""() => window.VLNjhMapPreviewRuntime.closeInterior()""")
+
+        # dermaga close-up: land-side use tile, camera pulled west over the Kali.
+        # Nearby rumah + pos ronda sprites otherwise occlude the 2x1 deck.
+        page.evaluate("""() => {
+          const rt = window.VLNjhMapPreviewRuntime;
+          rt.setWalk();
+          rt.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a'], false);
+          rt.teleport(-50.375, 44);
+          return rt.focus(-53.2, 43.6, 12);
+        }""")
+        time.sleep(0.5)
+        page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-53.2, 43.6, 12)""")
+        time.sleep(0.3)
+        page.screenshot(path=str(SHOTS / 'dermaga-close-desktop.png'))
+        rec('dermaga-close-desktop', (SHOTS / 'dermaga-close-desktop.png').exists(), {'path': 'dermaga-close-desktop.png'})
+        page.evaluate("""() => window.VLNjhMapPreviewRuntime.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a'], true)""")
+
         context.close()
 
         # ---- phone ----
@@ -197,6 +260,18 @@ def main():
             time.sleep(0.4)
             page.screenshot(path=str(SHOTS / 'phone-plaza.png'))
             rec('phone-map', True, info(page).get('map'))
+            page.evaluate("""() => {
+              const rt = window.VLNjhMapPreviewRuntime;
+              rt.setWalk();
+              rt.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a'], false);
+              rt.teleport(-50.375, 44);
+              return rt.focus(-53.2, 43.6, 12);
+            }""")
+            time.sleep(0.5)
+            page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-53.2, 43.6, 12)""")
+            time.sleep(0.3)
+            page.screenshot(path=str(SHOTS / 'dermaga-close-phone.png'))
+            rec('dermaga-close-phone', (SHOTS / 'dermaga-close-phone.png').exists(), {'path': 'dermaga-close-phone.png'})
         except PlaywrightTimeout:
             rec('phone-map', False, {'errors': 'timeout'})
             page.screenshot(path=str(SHOTS / 'phone-load-fail.png'))

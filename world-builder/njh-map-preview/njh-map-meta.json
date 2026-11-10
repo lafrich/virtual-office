@@ -215,7 +215,7 @@
       "doorId": "njh_door_warung_madura",
       "objectId": "ref-north-row-b",
       "role": "shop_kelontong",
-      "interiorTemplate": null,
+      "interiorTemplate": "njh_warung_madura",
       "owner": null,
       "label": "Warung Madura (warung pojok)",
       "facing": "sw",
@@ -238,7 +238,9 @@
         41.0
       ],
       "baymaxDoorId": null,
-      "baymaxInteractionId": null
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     },
     {
       "doorId": "njh_door_warung_makan",
@@ -273,7 +275,7 @@
       "doorId": "njh_door_warung_kopi",
       "objectId": "ref-west-center-a",
       "role": "warung_kopi",
-      "interiorTemplate": null,
+      "interiorTemplate": "njh_warung_kopi",
       "owner": null,
       "label": "Warung Kopi Pojok Gang",
       "facing": "sw",
@@ -296,7 +298,9 @@
         51.0
       ],
       "baymaxDoorId": null,
-      "baymaxInteractionId": null
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     },
     {
       "doorId": "njh_door_home_ichsan",
@@ -418,7 +422,7 @@
       "doorId": "njh_door_nasi_sunda",
       "objectId": "jakarta-v3-13525",
       "role": "warung_makan_alt",
-      "interiorTemplate": null,
+      "interiorTemplate": "njh_nasi_sunda",
       "owner": null,
       "label": "Warung nasi Sunda · Jakarta",
       "facing": "sw",
@@ -441,13 +445,15 @@
         71.0
       ],
       "baymaxDoorId": null,
-      "baymaxInteractionId": null
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     },
     {
       "doorId": "njh_door_koperasi",
       "objectId": "jakarta-v3-13541",
       "role": "koperasi",
-      "interiorTemplate": null,
+      "interiorTemplate": "njh_koperasi",
       "owner": null,
       "label": "Koperasi simpan pinjam · Jakarta",
       "facing": "sw",
@@ -470,13 +476,15 @@
         71.0
       ],
       "baymaxDoorId": null,
-      "baymaxInteractionId": null
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     },
     {
       "doorId": "njh_door_loak",
       "objectId": "njh-toko-loak",
       "role": "loak",
-      "interiorTemplate": null,
+      "interiorTemplate": "njh_toko_loak",
       "owner": null,
       "label": "Toko Loak",
       "facing": "sw",
@@ -499,13 +507,15 @@
         25.5
       ],
       "baymaxDoorId": null,
-      "baymaxInteractionId": null
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     },
     {
       "doorId": "njh_door_mushola",
       "objectId": "njh-mushola",
       "role": "ibadah",
-      "interiorTemplate": null,
+      "interiorTemplate": "njh_mushola",
       "owner": null,
       "label": "Mushola Kampung",
       "facing": "sw",
@@ -528,13 +538,15 @@
         26.1
       ],
       "baymaxDoorId": null,
-      "baymaxInteractionId": null
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     },
     {
       "doorId": "njh_door_tenda_pecel_lele",
       "objectId": "njh-tenda-pecel-lele",
       "role": "street_food",
-      "interiorTemplate": "bangun-ruang kit in br-warung-pecel-lele.json",
+      "interiorTemplate": "njh_pecel_lele_tenda",
       "owner": null,
       "label": "Warung Pecel Lele (tenda)",
       "pending": true,
@@ -558,13 +570,15 @@
         38.0
       ],
       "baymaxDoorId": null,
-      "baymaxInteractionId": null
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     },
     {
       "doorId": "njh_door_tenda_sate_madura",
       "objectId": "njh-tenda-sate-madura",
       "role": "street_food",
-      "interiorTemplate": "bangun-ruang kit in br-lapak-sate-madura.json",
+      "interiorTemplate": "njh_sate_madura_tenda",
       "owner": null,
       "label": "Lapak Sate Madura (tenda)",
       "pending": true,
@@ -588,7 +602,9 @@
         38.0
       ],
       "baymaxDoorId": null,
-      "baymaxInteractionId": null
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     }
   ],
   "interactables": [

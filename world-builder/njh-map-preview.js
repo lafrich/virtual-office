@@ -7,7 +7,17 @@
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'];
-const NJH_TEMPLATES=['njh_kos','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel'];
+const NJH_READY=['njh_kos','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel'];
+const NJH_PENDING=['njh_pecel_lele_tenda','njh_sate_madura_tenda','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_warung_kopi','njh_nasi_sunda'];
+const NJH_TEMPLATES=[...NJH_READY,...NJH_PENDING];
+const TEMPLATE_ALIASES=Object.freeze({
+ 'bangun-ruang kit in br-warung-pecel-lele.json':'njh_pecel_lele_tenda',
+ 'bangun-ruang kit in br-lapak-sate-madura.json':'njh_sate_madura_tenda'
+});
+function resolveTemplate(raw){
+ const id=TEMPLATE_ALIASES[raw]||raw||null;
+ return NJH_TEMPLATES.includes(id)?id:null;
+}
 const KEY_MAP=Object.freeze({
  'object:obj-njh-dermaga-mancing':'object:njh_dermaga_mancing',
  'object:obj-njh-lapak-silver':'object:njh_lapak_silver',
@@ -129,8 +139,30 @@ function registerInto(assetCatalog,assetByName){
   for(const e of list)if(e?.file)assetByName.set(e.file,e);
  }
  hookBuildingBridge();
+ hookKebonTiles();
  return result;
 }
+
+function hookKebonTiles(){
+ if(!enabled())return;
+ const api=g.VLKebonSirihStyle;
+ if(!api||api.__njhMapPreviewHooked)return;
+ const tiles=api.TILES||{};
+ function tileUrl(name){
+  const file=tiles[name];
+  if(!file)return null;
+  const leaf=String(file).split('/').pop();
+  return baseUrl()+'terrain/'+leaf+'?v=njh-map-preview-terrain-1';
+ }
+ try{
+  g.VLKebonSirihStyle=Object.freeze({
+   VERSION:api.VERSION,TILES:api.TILES,ROOT:api.ROOT,
+   tileUrl,tile:api.tile,category:api.category,eligible:api.eligible,
+   pick:api.pick,upgrade:api.upgrade,__njhMapPreviewHooked:true
+  });
+ }catch(e){console.warn('NJH preview could not wrap Kebon terrain URLs',e);}
+}
+
 function hookBuildingBridge(){
  const api=g.VLBuildingBridge;
  if(!api||api.__njhMapPreviewHooked||g.VLBuildingBridge?.__njhMapPreviewHooked)return;
@@ -171,7 +203,12 @@ async function loadInteriors(){
  if(interiorCache)return interiorCache;
  const out={};
  await Promise.all(NJH_TEMPLATES.map(async id=>{
-  out[id]=await fetchJson('interiors/'+id+'.interior-scene.json');
+  try{
+   const url=baseUrl()+'interiors/'+id+'.interior-scene.json';
+   const r=await fetch(url,{cache:'no-store'});
+   if(!r.ok)return;
+   out[id]=await r.json();
+  }catch(e){/* r6 scenes are optional until Ellen drops them in */}
  }));
  interiorCache=out;
  return out;
@@ -190,9 +227,10 @@ function wrapInterior(scene){
  };
 }
 function wireDoors(document,meta,interiors){
- const report={wired:[],noInterior:[],missingObject:[]};
+ const report={wired:[],pending:[],noInterior:[],missingObject:[]};
  const objects=document.objects||[];
  const byId=new Map(objects.map(o=>[o.id,o]));
+ const scenes=interiors||{};
  for(const door of meta.doors||[]){
   const obj=byId.get(door.objectId);
   if(!obj){report.missingObject.push(door);continue;}
@@ -200,26 +238,35 @@ function wireDoors(document,meta,interiors){
   obj.njhUsePoint=Array.isArray(door.usePoint)?{x:door.usePoint[0],z:door.usePoint[1]}:null;
   obj.njhDoorPoint=Array.isArray(door.doorPoint)?{x:door.doorPoint[0],z:door.doorPoint[1]}:null;
   obj.entranceFacing=door.facing||obj.entranceFacing||'sw';
-  const template=NJH_TEMPLATES.includes(door.interiorTemplate)?door.interiorTemplate:null;
+  const template=resolveTemplate(door.interiorTemplate);
   if(!template){
    report.noInterior.push({doorId:door.doorId,label:door.label,template:door.interiorTemplate||null});
    continue;
   }
-  const scene=interiors[template];
   obj.enterable=true;
   obj.interactive=true;
-  obj.interior=wrapInterior(scene);
   obj.njhInteriorTemplate=template;
   if(!Array.isArray(obj.interactions))obj.interactions=['enter'];
   else if(!obj.interactions.includes('enter'))obj.interactions=[...obj.interactions,'enter'];
-  report.wired.push({doorId:door.doorId,objectId:door.objectId,label:door.label,
-   template,usePoint:door.usePoint,useTile:door.useTile});
+  const scene=scenes[template];
+  const row={doorId:door.doorId,objectId:door.objectId,label:door.label,
+   template,usePoint:door.usePoint,useTile:door.useTile};
+  if(scene){
+   obj.interior=wrapInterior(scene);
+   obj.njhInteriorPending=false;
+   report.wired.push(row);
+  }else{
+   obj.interior=null;
+   obj.njhInteriorPending=true;
+   report.pending.push(row);
+  }
  }
  return report;
 }
 async function loadCity(){
  registerCatalog();
  hookBuildingBridge();
+ hookKebonTiles();
  const [raw,meta,interiors]=await Promise.all([
   fetchJson('city/njh-semesta-map-draft1.with-pending-assets.city.json'),
   loadMeta(),
@@ -310,11 +357,13 @@ function imageUrl(id,dir='sw'){
  return v?.url||null;
 }
 
-g.VLNjhMapPreview=Object.freeze({
+if(enabled()){hookKebonTiles();}
+ g.VLNjhMapPreview=Object.freeze({
  enabled,baseUrl,registerCatalog,registerInto,registerSekatType,
  loadCity,loadMeta,keyMap:KEY_MAP,specs:()=>SPECS,
  doorCandidates,nearestEnterable,doorAnchor,enterRadius:ENTER_RADIUS,
  worldBoundsOf,applyBounds,spawnPool,homeFor,resolveSpawn,imageUrl,
+ wireDoors,resolveTemplate,readyTemplates:NJH_READY,pendingTemplates:NJH_PENDING,
  report:()=>cityCache?cityCache.doorReport:null,
  status(){
   return {
