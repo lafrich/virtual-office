@@ -7,6 +7,19 @@
 const SOURCE=root?.VLGenesisSource;
 const EMOSI=root?.VLEmosiSource;
 const V=root?.V6PCompositor;
+// Appearance options (identical to the retired V6P customizer lists) so the
+// LGR path needs no V6P runtime.
+const OPT=Object.freeze({
+ hair:["none","short","swept","mid_curtain","mid","wavy","wavy_curtain","long","long_curtain"],
+ hairColor:["black","navy","brown","chestnut","blonde","red","white","pink"],
+ skin:["porcelain","light","tan","medium","brown","deep"],
+ top:["nude","tee","tee_long","tee_graphic","shirt","shirt_tie","cardigan","cardigan_dots","custom"],
+ topColor:["charcoal","white","navy","red","green","mustard","sky","pink"],
+ pants:["nude","trousers","trousers_ripped","baggy","baggy_ripped","custom"],
+ pantsColor:["slate","night","denim","khaki","olive","grey"],
+ shoes:["nude","shoes","sneakers","boots","hightops","custom"],
+ shoesColor:["walnut","black","white","red","navy","tan"],
+ glasses:["none","round","square"],facial:["none","mustache","stubble","both"]});
 const IDs=Object.freeze(["genesis_male_nude","genesis_female_nude"]);
 const DIRS=Object.freeze(["se","sw","ne","nw"]);
 const ROWS=Object.freeze({walk:0,idle:4,talk:8,sit:12,sit_type:16,sleep:20,tired:24,swim:28,float:32,lie:36,perch:40});
@@ -19,7 +32,7 @@ const assets=new Map(),pixels=new Map();
 // the old V6P sheets: open any page with ?renderer=v6p (remembered on this
 // device; ?renderer=lgr switches back), or set DEFAULT_RENDERER below.
 const DEFAULT_RENDERER="lgr";
-const RENDERER=(()=>{try{const q=new URLSearchParams(root.location.search).get("renderer");
+const RENDERER=!V?"lgr":(()=>{try{const q=new URLSearchParams(root.location.search).get("renderer");
  if(q==="v6p"||q==="lgr")root.localStorage.setItem("vl-character-renderer",q);
  const v=root.localStorage.getItem("vl-character-renderer");return v==="v6p"||v==="lgr"?v:DEFAULT_RENDERER}catch{return DEFAULT_RENDERER}})();
 const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-raster.js","lgr1-motion.js","lgr-skin.js","lgr-wear.js","lgr-actor.js","lgr-db.js","lgr-game.js"]
@@ -62,7 +75,7 @@ function normalizeProfile(input){
   hairStyle:"hair",hairColor:"hairColor",skinTone:"skin",topStyle:"top",topColor:"topColor",
   pantsStyle:"pants",pantsColor:"pantsColor",shoesStyle:"shoes",shoesColor:"shoesColor",
   glasses:"glasses",facialHair:"facial"};
- const opt=V?.OPT||{};
+ const opt=V?.OPT||OPT;
  const appearance={};
  for(const [key,vc] of Object.entries(fields)){
   const value=input.appearance?.[key]||defaults[key];
@@ -203,9 +216,9 @@ function drawLGR(ctx,norm,d,action,emotion,tick,actionTime){
  if(!c)return false;
  const work=canvas(),g=work.getContext("2d",{alpha:true});g.imageSmoothingEnabled=false;
  g.drawImage(c,0,0);
- // ground shadow from the V6P base (same ellipse as before), under the body
- const sh=compositedPixel("base/shadow",norm,"idle",d,0);
- if(sh){g.save();g.globalCompositeOperation="destination-over";g.drawImage(sh,0,0);g.restore();}
+ // ground shadow (pixel ellipse under the feet, anchor 32,101), under the body
+ g.save();g.globalCompositeOperation="destination-over";g.fillStyle="rgba(20,24,32,0.28)";
+ for(const [dy,hw] of [[-2,6],[-1,9],[0,11],[1,9],[2,6]])g.fillRect(32-hw,101+dy,hw*2,1);g.restore();
  ctx.clearRect(0,0,64,112);ctx.drawImage(work,0,0);
  return true;
 }
@@ -213,6 +226,7 @@ function draw(ctx,profile,dir="se",action="idle",frame=0,emotion="neutral",tick=
  const norm=normalizeProfile(profile);
  if(lgrPending())return false;
  if(useLGR())return drawLGR(ctx,norm,DIRS.includes(dir)?dir:"se",action,emotion,tick,actionTime);
+ if(!V)return false; // V6P sheets not loaded on the LGR-only (Mainkan) path
  const d=DIRS.includes(dir)?dir:"se",a=Object.hasOwn(ROWS,action)?action:"idle";
  const f=Math.max(0,Math.min(FRAMES[a]-1,Math.floor(frame)||0));
  const status=imageStatus(norm,emotion,d);

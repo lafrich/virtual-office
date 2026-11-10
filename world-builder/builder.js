@@ -12,10 +12,9 @@ if(playerMode){
  // Semesta edit mode must not download these heavy atlases.
  try{
   for(const src of [
-   '/virtual-life-asset-pipeline/v6p-compositor.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/emosi-source.js?v=genesis-player-20261108',
-   '../shared/genesis-player.js?v=lgr-player-1'
+   '../shared/genesis-player.js?v=lgr-player-2'
   ]){
    await new Promise((resolve,reject)=>{
     const script=document.createElement('script');script.src=src;script.onload=resolve;
