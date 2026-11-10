@@ -134,7 +134,9 @@ $('confirmGo').addEventListener('click',async()=>{
   if(!guest){
    let data=null;
    try{data=await request('/players/profile',{method:'PUT',body:JSON.stringify({character:characterDraft})});}
-   catch(err){if(![403,404,405,501].includes(err.status))throw err;}
+   // No status = the browser blocked/failed the request (CORS preflight on the test Worker);
+   // 403/404/405/501 = no save route. Either way keep the character on this device.
+   catch(err){if(err.status&&![403,404,405,501].includes(err.status))throw err;}
    if(data&&data.saved!==true)throw Error('Server belum mengonfirmasi penyimpanan karakter.');
    // Test Worker has no profile route yet: keep the character on this device per player id.
    if(!data&&!saveLocalCharacter(characterDraft))throw Error('Karakter tidak bisa disimpan di perangkat ini.');

@@ -32,6 +32,7 @@ test("Confirm falls back to a per-player local character when the Worker has no 
  const app=fs.readFileSync(path.join(__dirname,"../mainkan/app.js"),"utf8");
  const mod=fs.readFileSync(path.join(__dirname,"../mainkan/local-character.js"),"utf8");
  assert.match(app,/\[403,404,405,501\]\.includes\(err\.status\)/);
+ assert.match(app,/catch\(err\)\{if\(err\.status&&!/);
  assert.match(app,/saveLocalCharacter\(characterDraft\)/);
  assert.doesNotMatch(mod,/pass|token|secret/i);
  const store=new Map();const win={localStorage:{setItem:(k,v)=>store.set(k,v),getItem:k=>store.get(k)??null}};
