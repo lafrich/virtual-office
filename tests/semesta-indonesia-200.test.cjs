@@ -23,7 +23,8 @@ function mock(legacy=[],expansion=[],failNew=false){
   calls.push(url);
   const isNew=url.endsWith('indonesia_200_catalog.json');
   const isCustom=url.endsWith('indonesia_custom_catalog.json');
-  return {ok:!isCustom&&(!isNew||!failNew),status:isCustom||(isNew&&failNew)?404:200,
+  const isGameplay=url.endsWith('mainkan_gameplay_catalog.json');
+  return {ok:!isCustom&&!isGameplay&&(!isNew||!failNew),status:isCustom||isGameplay||(isNew&&failNew)?404:200,
    json:async()=>({projection:'isometric-2:1',assets:isNew?expansion:legacy})};
  };
  vm.runInNewContext(moduleSource,{window:g,fetch,URL,console:{warn(){}}});
@@ -46,7 +47,8 @@ test('200 named Indonesian sprites load from secondary published manifest',async
   'https://example.com/png.png?v='+g.VLIndonesiaAssets.IMAGE_REV);
  assert.equal(g.VLIndonesiaAssets.cacheBust({pack:'indonesia-v1'},'https://example.com/old.png'),
   'https://example.com/old.png');
- assert.equal(calls.length,3);
+ assert.equal(calls.length,4);
+ assert.ok(calls.some(x=>x.endsWith('mainkan_gameplay_catalog.json')));
  assert.ok(calls.some(x=>x.endsWith('indonesia_200_catalog.json')));
  assert.equal((await g.VLIndonesiaAssets.load()).count,200);
  assert.equal(g.VLAssetCatalog.length,200,'no duplicate on second call');
