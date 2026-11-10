@@ -222,17 +222,19 @@ def main():
             page.evaluate("""() => window.VLNjhMapPreviewRuntime.closeInterior()""")
 
         # dermaga close-up: land-side use tile, camera pulled west over the Kali.
-        # Nearby rumah + pos ronda sprites otherwise occlude the 2x1 deck.
+        # Nearby rumah + pos ronda otherwise occlude the deck; hide the grid
+        # so the Water texture is not mistaken for stripes.
         page.evaluate("""() => {
           const rt = window.VLNjhMapPreviewRuntime;
           rt.setWalk();
-          rt.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a'], false);
+          rt.setGrid(false);
+          rt.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a','njh-dermaga-mancing-anchor'], false);
           rt.teleport(-50.375, 44);
-          return rt.focus(-53.2, 43.6, 12);
+          return rt.focus(-52.6, 43.8, 11);
         }""")
-        time.sleep(0.5)
-        page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-53.2, 43.6, 12)""")
-        time.sleep(0.3)
+        time.sleep(0.6)
+        page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-52.6, 43.8, 11)""")
+        time.sleep(0.4)
         page.screenshot(path=str(SHOTS / 'dermaga-close-desktop.png'))
         rec('dermaga-close-desktop', (SHOTS / 'dermaga-close-desktop.png').exists(), {'path': 'dermaga-close-desktop.png'})
         page.evaluate("""() => window.VLNjhMapPreviewRuntime.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a'], true)""")
@@ -263,13 +265,14 @@ def main():
             page.evaluate("""() => {
               const rt = window.VLNjhMapPreviewRuntime;
               rt.setWalk();
-              rt.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a'], false);
+              rt.setGrid(false);
+              rt.setVisible(['ref-infill-extra-168','njh-sw1-h2','ref-north-row-a','njh-dermaga-mancing-anchor'], false);
               rt.teleport(-50.375, 44);
-              return rt.focus(-53.2, 43.6, 12);
+              return rt.focus(-52.6, 43.8, 11);
             }""")
-            time.sleep(0.5)
-            page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-53.2, 43.6, 12)""")
-            time.sleep(0.3)
+            time.sleep(0.6)
+            page.evaluate("""() => window.VLNjhMapPreviewRuntime.focus(-52.6, 43.8, 11)""")
+            time.sleep(0.4)
             page.screenshot(path=str(SHOTS / 'dermaga-close-phone.png'))
             rec('dermaga-close-phone', (SHOTS / 'dermaga-close-phone.png').exists(), {'path': 'dermaga-close-phone.png'})
         except PlaywrightTimeout:

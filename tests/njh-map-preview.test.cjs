@@ -200,6 +200,18 @@ test('dermaga 270 rotation swaps the 2x1 footprint; dock edge stays clear of obj
  }
  for(const [c,r] of tiles){
   const type=cells.get(c+','+r)||'grass';
-  assert.equal(type,'river','water-side tile '+c+','+r+' should be river, got '+type);
+  assert.equal(type,'river','water-side tile '+c+','+r+' should be river in the authored city, got '+type);
  }
+ // Preview only: Jakarta "river" paints as Water so the Kali reads as water, not a gray canal.
+ assert.equal(api.visualTerrainType('river'),'water');
+ assert.equal(api.visualTerrainType('water'),'water');
+ assert.equal(api.visualTerrainType('drain'),'drain');
+ const offset=api.applyDermagaOverhang(city.record.document);
+ assert.equal(JSON.stringify(offset),JSON.stringify({x:-0.8,z:0}));
+ const placed=city.record.document.objects.find(o=>o.id==='njh-dermaga-mancing');
+ assert.equal(placed.x,-51.5);
+ assert.equal(placed.z,44);
+ assert.equal(JSON.stringify(placed.njhDrawOffset),JSON.stringify({x:-0.8,z:0}));
+ // Footprint / collision stay on the bank. The draw offset is visual only.
+ assert.equal(JSON.stringify(style.footprint(placed,catalog)),'[1,2]');
 });

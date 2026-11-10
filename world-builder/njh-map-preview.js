@@ -143,21 +143,46 @@ function registerInto(assetCatalog,assetByName){
  return result;
 }
 
+// Ellen's Kali is authored as Jakarta "river" tiles. That texture is a gray
+// striped canal and reads as a road or rail. In this preview only, paint those
+// tiles with the existing Water terrain (still not walkable). Live maps are unchanged.
+const DERMAGA_OVERHANG=0.8;
+function visualTerrainType(type){
+ return type==='river'?'water':type;
+}
+function dermagaOverhang(o){
+ const dist=DERMAGA_OVERHANG;
+ const rot=((Number(o?.rotation)||0)%360+360)%360;
+ if(rot===270)return {x:-dist,z:0};
+ if(rot===90)return {x:dist,z:0};
+ if(rot===180)return {x:0,z:-dist};
+ return {x:0,z:dist};
+}
+function applyDermagaOverhang(document){
+ const o=(document?.objects||[]).find(x=>x.id==='njh-dermaga-mancing'||x.asset==='object:njh_dermaga_mancing');
+ if(!o)return null;
+ o.njhDrawOffset=dermagaOverhang(o);
+ return o.njhDrawOffset;
+}
 function hookKebonTiles(){
  if(!enabled())return;
  const api=g.VLKebonSirihStyle;
  if(!api||api.__njhMapPreviewHooked)return;
  const tiles=api.TILES||{};
+ const origTile=api.tile?.bind(api);
  function tileUrl(name){
   const file=tiles[name];
   if(!file)return null;
   const leaf=String(file).split('/').pop();
   return baseUrl()+'terrain/'+leaf+'?v=njh-map-preview-terrain-1';
  }
+ function tile(kind,cell,index){
+  return origTile?origTile(visualTerrainType(kind),cell,index):visualTerrainType(kind);
+ }
  try{
   g.VLKebonSirihStyle=Object.freeze({
    VERSION:api.VERSION,TILES:api.TILES,ROOT:api.ROOT,
-   tileUrl,tile:api.tile,category:api.category,eligible:api.eligible,
+   tileUrl,tile,category:api.category,eligible:api.eligible,
    pick:api.pick,upgrade:api.upgrade,__njhMapPreviewHooked:true
   });
  }catch(e){console.warn('NJH preview could not wrap Kebon terrain URLs',e);}
@@ -282,6 +307,7 @@ async function loadCity(){
   };
  }
  const doorReport=wireDoors(document,meta,interiors);
+ applyDermagaOverhang(document);
  registerSekatType();
  cityCache={document,meta,doorReport};
  return document;
@@ -364,6 +390,7 @@ if(enabled()){hookKebonTiles();}
  doorCandidates,nearestEnterable,doorAnchor,enterRadius:ENTER_RADIUS,
  worldBoundsOf,applyBounds,spawnPool,homeFor,resolveSpawn,imageUrl,
  wireDoors,resolveTemplate,readyTemplates:NJH_READY,pendingTemplates:NJH_PENDING,
+ visualTerrainType,dermagaOverhang,applyDermagaOverhang,dermagaOverhangTiles:DERMAGA_OVERHANG,
  report:()=>cityCache?cityCache.doorReport:null,
  status(){
   return {

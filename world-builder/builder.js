@@ -405,7 +405,7 @@ function sanitize(v){
    if(Object.hasOwn(p,key))e[key]=clone(p[key]);
   }
   if(njhMapPreview){
-   for(const key of ['njhDoorId','njhUsePoint','njhDoorPoint','njhInteriorTemplate']){
+   for(const key of ['njhDoorId','njhUsePoint','njhDoorPoint','njhInteriorTemplate','njhDrawOffset']){
     if(Object.hasOwn(p,key))e[key]=clone(p[key]);
    }
   }
@@ -1647,7 +1647,12 @@ function updateLargeOcclusion(dt){
 let highlight=null;
 function instantiate(o){
  const root=new THREE.Group();root.name=o.name;root.userData.itemId=o.id;
- root.position.set(o.x,o.y,o.z);root.rotation.y=actorType(o.type)?0:(o.rotation||0)*Math.PI/180;
+ root.position.set(o.x,o.y,o.z);
+ if(njhMapPreview&&o.njhDrawOffset){
+  root.position.x+=Number(o.njhDrawOffset.x)||0;
+  root.position.z+=Number(o.njhDrawOffset.z)||0;
+ }
+ root.rotation.y=actorType(o.type)?0:(o.rotation||0)*Math.PI/180;
  root.scale.setScalar(actorType(o.type)?1:(o.scale||1));
  switch(o.type){
   case 'building':case 'shop':makeBuilding(root,o);break;
@@ -3173,6 +3178,18 @@ if(njhMapPreview){
    focusCameraAt(Number(x),Number(z),size||14);
    try{renderer.render(scene,camera);}catch{}
    return {x:cameraFocus.x,z:cameraFocus.z,viewSize,follow:!!cameraFollowId};
+  },
+  setGrid(on){
+   gridShown=!!on;
+   gridOverlay.visible=gridShown;
+   try{
+    $('gridToggle')?.classList.toggle('active',gridShown);
+    $('gridToggle')?.setAttribute('aria-pressed',String(gridShown));
+    const bar=$('gridToolbar');
+    if(bar){bar.textContent='# Grid '+(gridShown?'ON':'OFF');bar.setAttribute('aria-pressed',String(gridShown));}
+   }catch{}
+   try{renderer.render(scene,camera);}catch{}
+   return gridShown;
   },
   setVisible(ids,vis){
    const show=vis!==false;
