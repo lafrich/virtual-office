@@ -1,3 +1,41 @@
+# Rollback — Retire the old Virtual Office, keep NJH apps
+
+Written 2026-11-10 (Asia/Jakarta).
+
+The encrypted office game front-end, office Worker login routes, seed-account HTTP access, and office WebSocket are retired. The repo root is now a simple NJH landing page. Semesta, Mainkan, Bangun Ruang, Jiwa, Membangun, and Emosi stay. The Semesta Virtual Life Assets vault (`manifest.enc`, `b/*.enc`, `world-builder/virtual-life-vault.js`) stays, because Semesta still unlocks those images in the browser. Emosi / Membangun Drive auth does not use office login or `SITE_KEY`.
+
+Git tag `office-final` (`4de02b74da451eb6c71fa4e61c2a46538f0be8e0`) is the last tip that still had the office redirect and office Worker routes. A copy is also at `/workspace/vo-office-retire-backup/` (chmod 700): git archive, vault files, Worker source, and SQL game-state tables. Account password hashes in Durable Object `_cf_KV` could not be exported (`SQLITE_AUTH`); that data remains in the live `ROOM` namespace, which was left in place and is no longer called.
+
+## Pages
+
+- Previous live `main`: `4de02b74da451eb6c71fa4e61c2a46538f0be8e0` (tag `office-final`)
+- Feature: commit titled "Retire the old Virtual Office front-end and replace the root with an NJH landing"
+
+Restore the previous root redirect to Membangun (fast-forward only — do not force-push). The cleanest path is to revert this retirement commit, or to check out the `office-final` tree into a new commit on top of `main`. Do not force-push the tag.
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit "$(git log --grep='Retire the old Virtual Office front-end' -1 --format=%H)"
+git push origin main
+```
+
+That does not restore deleted Worker secrets (see below) and does not change the vault files (they were never removed).
+
+## Worker (vo-multiplayer)
+
+- Code version that removed office routes: `fed4a95d-1c86-443c-b331-eef2e1ee1906` (version 16, 2026-11-10 21:18 Asia/Jakarta)
+- Live after deleting unused secrets: `fd62482d-52c3-4cb8-99cf-e199c3e0c0bd` (version 20, deployment `83646808-2314-437f-bd91-112e346746af`, 21:18 Asia/Jakarta)
+- Previous version that still had office `/login` `/register` `/char` `/ws`: `273aeb9c-91a1-4fcc-9c7c-810597e4c24a` (version 15)
+- Durable Object `ROOM` namespace still `119b66c0f7e34b81bb62e403d3fc45bd` (not deleted)
+
+Kept bindings: `TOKEN_KEY`, `MAINKAN_TEST_PW_HASH`, `MAINKAN_TEST_LOGIN=1`, and `ROOM`. Removed after grep showed no remaining app or Worker-code references: `OFFICE_PASS`, `INVITE_PASS`, `GATE_H`, `SITE_KEY`. Those secret values are not in the git backup; `OFFICE_PASS` still exists only in the private box file `/home/box/.config/vo/office_pass`. Rolling the Worker back to version 15 would restore office routes in code, but the deleted secrets would not come back.
+
+To turn only the test login off: set `MAINKAN_TEST_LOGIN` to `0`.
+
+---
+
 # Rollback — Mainkan test login + vo-multiplayer /auth/login
 
 Written 2026-11-10 (Asia/Jakarta).

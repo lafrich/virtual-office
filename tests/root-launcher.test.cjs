@@ -4,11 +4,18 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 
-test('root index always sends people to Membangun and no longer routes through the archive',()=>{
+test('root index is the NJH landing and no longer routes through the archive or office login',()=>{
  const html=fs.readFileSync('index.html','utf8');
- assert.match(html,/Namanya Juga Hidup: The Game/);
- assert.match(html,/location\.replace\('\.\/membangun\/'/);
+ assert.match(html,/Namanya Juga Hidup/);
+ assert.match(html,/>NJH</);
+ assert.doesNotMatch(html,/location\.replace\('\.\/membangun\/'/);
+ assert.match(html,/href="\.\/mainkan\/"/);
+ assert.match(html,/href="\.\/world-builder\/"/);
+ assert.match(html,/href="\.\/world-builder\/bangun-ruang\/"/);
+ assert.match(html,/href="\.\/jiwa\/"/);
  assert.match(html,/href="\.\/membangun\/"/);
+ assert.match(html,/href="\.\/emotion-studio\/"/);
+ assert.match(html,/shared\/hub-registry\.js/);
  assert.doesNotMatch(html,/arsip\.html/);
  assert.doesNotMatch(html,/q\.has\('next'\)/);
  assert.doesNotMatch(html,/name="password"/);
@@ -21,6 +28,13 @@ test('archive login page is gone',()=>{
  assert.equal(fs.existsSync('game-core'),false);
  assert.equal(fs.existsSync('game-assets'),false);
  assert.equal(fs.existsSync('staging'),false);
+});
+
+test('Semesta asset vault ciphertext is kept',()=>{
+ assert.equal(fs.existsSync('manifest.enc'),true);
+ assert.equal(fs.existsSync('world-builder/virtual-life-vault.js'),true);
+ const blobs=fs.readdirSync('b').filter(name=>name.endsWith('.enc'));
+ assert.ok(blobs.length>0,'expected b/*.enc vault blobs');
 });
 
 test('service worker v7 no longer decrypts or redirects to arsip.html',()=>{

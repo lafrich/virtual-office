@@ -12,7 +12,8 @@ const PAGES=[
  ['semesta','world-builder/index.html'],
  ['bangun ruang','world-builder/bangun-ruang/index.html'],
  ['emosi','emotion-studio/index.html'],
- ['jiwa','jiwa/index.html']
+ ['jiwa','jiwa/index.html'],
+ ['njh landing','index.html']
 ];
 
 test('watermark lives in the shared module and is non-interactive',()=>{
