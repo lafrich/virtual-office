@@ -13,6 +13,36 @@ const ROWS=Object.freeze({walk:0,idle:4,talk:8,sit:12,sit_type:16,sleep:20,tired
 const FRAMES=Object.freeze({walk:6,idle:4,talk:4,sit:4,sit_type:4,sleep:4,tired:4,swim:6,float:4,lie:4,perch:4});
 const CDN="/virtual-life-asset-pipeline/media/v6p/";
 const assets=new Map(),pixels=new Map();
+// ── LGR-1 character runtime (default) ───────────────────────────────────────
+// Official LGR-1 base + baked outfits + hair + keyframe motions + Emosi face,
+// rasterised by the pipeline's LGR runtime (joint fill on). Instant rollback to
+// the old V6P sheets: open any page with ?renderer=v6p (remembered on this
+// device; ?renderer=lgr switches back), or set DEFAULT_RENDERER below.
+const DEFAULT_RENDERER="lgr";
+const RENDERER=(()=>{try{const q=new URLSearchParams(root.location.search).get("renderer");
+ if(q==="v6p"||q==="lgr")root.localStorage.setItem("vl-character-renderer",q);
+ const v=root.localStorage.getItem("vl-character-renderer");return v==="v6p"||v==="lgr"?v:DEFAULT_RENDERER}catch{return DEFAULT_RENDERER}})();
+const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-raster.js","lgr1-motion.js","lgr-skin.js","lgr-wear.js","lgr-actor.js","lgr-db.js","lgr-game.js"]
+ .map(f=>"/virtual-life-asset-pipeline/"+f+"?v=lgr-game-6");
+const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};
+function loadLGR(){
+ if(!lgr.wanted)return null;
+ if(lgr.promise)return lgr.promise;
+ lgr.promise=(async()=>{
+  for(const src of LGR_SCRIPTS){
+   const name=src.split("/").pop().split("?")[0];
+   if(name==="lgr-game.js"&&root.LGRGame)continue;
+   await new Promise((resolve,reject)=>{const el=root.document.createElement("script");el.src=src;el.onload=resolve;
+    el.onerror=()=>reject(Error("LGR runtime "+name+" missing"));root.document.head.appendChild(el)});
+  }
+  await root.LGRGame.load();lgr.ready=true;
+ })().catch(e=>{lgr.error=e;console.warn("LGR runtime failed; using V6P sheets",e);});
+ return lgr.promise;
+}
+const useLGR=()=>lgr.wanted&&lgr.ready&&!lgr.error;
+const lgrPending=()=>lgr.wanted&&!lgr.ready&&!lgr.error;
+if(lgr.wanted)loadLGR();
+function lgrProfile(p){return {gender:p.gender==="female"?"female":"male",appearance:p.appearance}}
 function normalizeProfile(input){
  if(!input||!IDs.includes(input.base))throw Error("Genesis base harus Male atau Female");
  if(!SOURCE?.bases?.[input.base])throw Error("Genesis asset belum tersedia");
@@ -147,6 +177,12 @@ function expressionFor(name){
 }
 function imageStatus(input,emotion="neutral",dir="se"){
  const profile=normalizeProfile(input);
+ if(lgrPending())return {ready:false,loaded:0,total:2,pending:2,errors:[],renderer:"lgr"};
+ if(useLGR()){
+  const face=(dir==="se"||dir==="sw")?lookupImage((expressionFor(emotion)||expressionFor("neutral"))?.png):null;
+  const faceOk=!face||face.ready,faceErr=face&&face.error;
+  return {ready:faceOk,loaded:faceOk?2:1,total:2,pending:faceOk?0:1,errors:faceErr?["emosi.exe/"+emotion]:[],renderer:"lgr"};
+ }
  const names=listParts(profile);
  const items=names.map(part=>({part,image:lookupImage(resolvePart(part,profile))}));
  if(dir==="se"||dir==="sw"){
@@ -158,8 +194,25 @@ function imageStatus(input,emotion="neutral",dir="se"){
   total:items.length,pending:items.filter(x=>x.image&&!x.image.ready&&!x.image.error).length,
   errors:failures};
 }
-function draw(ctx,profile,dir="se",action="idle",frame=0,emotion="neutral",tick=0){
+function drawLGR(ctx,norm,d,action,emotion,tick,actionTime){
+ const e=expressionFor(emotion)||expressionFor("neutral");
+ const face=(d==="se"||d==="sw")?lookupImage(e?.png):null;
+ if(face&&!face.ready)return false;
+ const faceFrame=Math.floor(Math.max(0,tick)*Math.max(1,e?.fps||6))%Math.max(1,e?.frames||1);
+ const c=root.LGRGame.frame(lgrProfile(norm),d,action,actionTime??tick,face?face.img:null,faceFrame);
+ if(!c)return false;
+ const work=canvas(),g=work.getContext("2d",{alpha:true});g.imageSmoothingEnabled=false;
+ g.drawImage(c,0,0);
+ // ground shadow from the V6P base (same ellipse as before), under the body
+ const sh=compositedPixel("base/shadow",norm,"idle",d,0);
+ if(sh){g.save();g.globalCompositeOperation="destination-over";g.drawImage(sh,0,0);g.restore();}
+ ctx.clearRect(0,0,64,112);ctx.drawImage(work,0,0);
+ return true;
+}
+function draw(ctx,profile,dir="se",action="idle",frame=0,emotion="neutral",tick=0,actionTime=null){
  const norm=normalizeProfile(profile);
+ if(lgrPending())return false;
+ if(useLGR())return drawLGR(ctx,norm,DIRS.includes(dir)?dir:"se",action,emotion,tick,actionTime);
  const d=DIRS.includes(dir)?dir:"se",a=Object.hasOwn(ROWS,action)?action:"idle";
  const f=Math.max(0,Math.min(FRAMES[a]-1,Math.floor(frame)||0));
  const status=imageStatus(norm,emotion,d);
@@ -206,6 +259,7 @@ function createRig(THREE,input){
  mesh.userData.nativeFrame={w:64,h:112,pivotX:32,pivotY:100};
  const state={profile,loaded:false,failed:false,direction:"se",moving:false,pose:null,emotion:"neutral",time:0};
  let previous="",sceneTime=0,lastAction="idle",emotionUntil=0;
+ let lastLGR=null,lgrTime=0;
  const DIRSPEED={walk:0.14,idle:0.24,talk:0.22,sit:0.24,sleep:0.32};
  function setMoving(dx,dz,active){
   state.moving=!!active;if(active){
@@ -241,9 +295,13 @@ function createRig(THREE,input){
   state.time+=delta;
   const count=FRAMES[action]||4,speed=DIRSPEED[action]||.24;
   const frame=Math.floor(state.time/speed)%count;
-  const key=[action,state.direction,frame,state.emotion,Math.floor(sceneTime*6),profile.base].join("|");
+  const lgrOn=useLGR(),lgrAction=lgrOn?requested:action;
+  if(lgrOn&&lastLGR!==requested){lastLGR=requested;lgrTime=0;}
+  lgrTime+=delta;
+  const key=lgrOn?["lgr",requested,state.direction,Math.floor(lgrTime*20),state.emotion,Math.floor(sceneTime*6),profile.base].join("|")
+   :[action,state.direction,frame,state.emotion,Math.floor(sceneTime*6),profile.base].join("|");
   if(key!==previous){
-   const complete=draw(ctx,profile,state.direction,action,frame,state.emotion,sceneTime);
+   const complete=draw(ctx,profile,state.direction,lgrAction,frame,state.emotion,sceneTime,lgrOn?lgrTime:null);
    // Once the first frame was painted, a transient asset fetch can never
    // make the mesh transparent. Only a fully composed frame replaces it.
    if(complete){state.loaded=true;state.failed=false;tex.needsUpdate=true;previous=key;}
@@ -264,5 +322,6 @@ function debug(profile){
    naturalWidth:asset?.img?.naturalWidth||0,naturalHeight:asset?.img?.naturalHeight||0};
  });
 }
-return Object.freeze({IDs,normalizeProfile,draw,directPreview,createRig,expressionFor,imageStatus,debug});
+function renderer(){return {wanted:RENDERER,active:useLGR()?"lgr":(lgrPending()?"lgr-loading":"v6p"),error:lgr.error?String(lgr.error.message||lgr.error):null,lgr:root?.LGRGame?.status?.()||null}}
+return Object.freeze({IDs,normalizeProfile,draw,directPreview,createRig,expressionFor,imageStatus,debug,renderer,loadLGR});
 });

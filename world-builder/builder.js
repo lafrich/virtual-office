@@ -15,7 +15,7 @@ if(playerMode){
    '/virtual-life-asset-pipeline/v6p-compositor.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/emosi-source.js?v=genesis-player-20261108',
-   '../shared/genesis-player.js?v=genesis-footwear-v2'
+   '../shared/genesis-player.js?v=lgr-player-1'
   ]){
    await new Promise((resolve,reject)=>{
     const script=document.createElement('script');script.src=src;script.onload=resolve;
@@ -31,13 +31,14 @@ if(playerMode){
  }
 }
 // Mainkan provides the approved Genesis body + Emosi appearance by same-origin message.
-let mainkanPlayerProfile=null,finishMainkanProfile=null;
+let mainkanPlayerProfile=null,finishMainkanProfile=null,mainkanPlayerId='';
 const mainkanProfileGate=new Promise(resolve=>{finishMainkanProfile=resolve;});
 if(playerMode)window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.source!==window.parent)return;
  if(event.data?.type==='mainkan:player-profile'){
   try{
    mainkanPlayerProfile=window.VLGenesisPlayer.normalizeProfile(event.data.profile);
+   mainkanPlayerId=/^[a-z0-9_-]{1,40}$/i.test(String(event.data.playerId||''))?String(event.data.playerId).toLowerCase():'';
    finishMainkanProfile(true);
   }catch(error){console.warn('Mainkan Genesis player rejected',error);finishMainkanProfile(false);}
  }else if(event.data?.type==='mainkan:player-profile-error'){
@@ -3055,6 +3056,10 @@ window.SemestaPlay=Object.freeze({
    source:rig.mesh?.userData?.characterSource||'',emotion:rig.state?.emotion||'neutral'}:null;
  },
  setPlayerEmotion:(name,duration=3)=>playerMode?!!rigs.get(LIFE_TEST_ACTOR_ID)?.rig?.setEmotion?.(name,duration):false,
+ // Test-play preview of a pose / facing on the ephemeral player only (never saved).
+ previewPlayerPose:(pose,dir)=>{if(!playerMode)return false;const r=rigs.get(LIFE_TEST_ACTOR_ID)?.rig;if(!r)return false;
+  r.setPose(pose||null);if(dir)r.setDirection?.(dir);return true;},
+ playerRenderer:()=>window.VLGenesisPlayer?.renderer?.()||null,
  gameplay:currentPlayGameplay,
  refreshHud:syncPlayHud,
  worldSpeed:playWorldSpeed,
@@ -3095,6 +3100,7 @@ if(window.SemestaLifePlay){
   getWorld:()=>documentMap,
   getScene:()=>scene,
   getCityId:()=>activeDraftId||'__semesta_working_copy__',
+  getPlayerId:()=>playerMode?mainkanPlayerId:'',
   getPosition:walkWorldPos,
   getRoot:()=>rigs.get(walkActorId)?.root||null,
   mountTo:()=>$('canvas-wrap'),

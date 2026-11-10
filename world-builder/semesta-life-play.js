@@ -67,7 +67,34 @@ function getScene(){return bridge&&bridge.getScene?bridge.getScene():null;}
 function visible(){return !!active;}
 function ownsRoom(){return !!(state&&state.housing&&state.housing.room);}
 function cityId(){return bridge&&bridge.getCityId?String(bridge.getCityId()||'__working_copy__'):'__working_copy__';}
-function dataKey(){return STORAGE+projectId;}
+function playerId(){try{const v=bridge&&bridge.getPlayerId?bridge.getPlayerId():'';return /^[a-z0-9_-]{1,40}$/i.test(String(v||''))?String(v).toLowerCase():'';}catch{return '';}}
+// Logged-in test players keep their own save per city; guests keep the old key.
+function dataKey(){const id=playerId();return STORAGE+projectId+(id?'@'+id:'');}
+/* Test start profiles (mainkan/test-start-profiles.json, data only): a listed
+   test-login ID gets its start (money, kost, furniture, items) once per
+   profile version; RESET re-applies it. Unlisted IDs start as new players. */
+let startProfiles=null;
+const startProfilesReady=(async()=>{
+ try{const r=await fetch(new URL('../mainkan/test-start-profiles.json',root.location.href).href,{cache:'no-cache'});
+  const d=r.ok?await r.json():null;startProfiles=d&&d.format==='mainkan-test-start-v1'?d:null;}catch{startProfiles=null;}
+ return startProfiles;
+})();
+function startFor(id){const p=id&&startProfiles?.profiles?.[id];const st=p&&startProfiles.starts?.[p.start];return st?{profile:p,start:st}:null;}
+function applyStart(s,id,force){
+ const f=startFor(id);if(!f||!s)return false;
+ if(!force&&s.testSeed&&s.testSeed.id===id&&s.testSeed.version===f.profile.version)return false;
+ const st=f.start,base=RULES.stateFrom({},config);
+ for(const k of ['wallet','energy','hygiene','bladder','fullness','moral'])if(Number.isFinite(Number(st[k])))base[k]=Number(st[k]);
+ base.housing={room:st.housing?.room===true,fridge:st.housing?.fridge===true};base.homeAccess=base.housing.room;
+ base.furniture=(st.furniture||[]).filter(x=>(RULES.FURNITURE||[]).some(f=>f.id===x));
+ const make=list=>(list||[]).map(it=>{const iid='life:'+String(it.type).replace(/[^a-z0-9_]/gi,'')+':'+(++base.itemSequence);
+  base.itemMeta[iid]={species:String(it.type),label:String(it.label||it.type).slice(0,60),expiresAt:base.elapsedMinutes+Math.max(1,Number(it.minutes)||1440),inFridge:false};return iid;});
+ base.inventory=make(st.inventory).slice(0,8);base.homeStorage=make(st.homeStorage).slice(0,24);
+ base.identity=s.identity||base.identity;base.identityChosen=s.identityChosen;
+ base.testSeed={id,version:f.profile.version,appliedAt:new Date().toISOString()};
+ Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,RULES.stateFrom(base,config));s.testSeed=base.testSeed;
+ return true;
+}
 function persist(){
  if(!state||!active)return;
  try{localStorage.setItem(dataKey(),JSON.stringify({schema:1,cityId:projectId,state}));}catch{}
@@ -77,6 +104,15 @@ function restore(){
  let saved=null;
  try{const raw=JSON.parse(localStorage.getItem(dataKey())||'null');if(raw?.cityId===projectId)saved=raw.state;}catch{}
  state=RULES.stateFrom(saved||{wallet:6000,energy:80,hygiene:75,bladder:20,moral:50,experience:0},config);
+ if(saved&&saved.testSeed)state.testSeed=saved.testSeed;
+ const id=playerId(),rev=sessionRevision;
+ if(id)startProfilesReady.then(()=>{if(!active||rev!==sessionRevision)return;
+  if(applyStart(state,id,false)){persist();try{bridge.respawn&&bridge.respawn();}catch{}paintPanel();message('🧪 Start tes '+id+' diterapkan: uang, kost, dan bahan masak.');}});
+}
+function resetSave(){
+ const id=playerId();state=RULES.stateFrom({wallet:6000},config);
+ if(id&&startFor(id))applyStart(state,id,true);
+ persist();
 }
 function openDb(){
  return new Promise((ok,no)=>{
@@ -468,7 +504,7 @@ function click(ev){
  if(el.id==='slpBag'){bagOpen=!bagOpen;paintPanel();return;}
  if(el.id==='slpReset'){
   if(!confirm('Reset semua uang, inventori, status, dan akses kost untuk test kota ini?'))return;
-  state=RULES.stateFrom({wallet:6000},config);persist();bridge.respawn();paintPanel();return;
+  resetSave();bridge.respawn();paintPanel();return;
  }
  if(el.dataset.lifeAction){
   let args={};try{args=JSON.parse(el.dataset.args||'{}');}catch{}
@@ -770,6 +806,7 @@ try{root.addEventListener?.('storage',ev=>{
 });}catch(_e){}
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
  spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
- reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;state=RULES.stateFrom({wallet:6000},config);persist();paintPanel();}});
+ reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
+ playerId,startProfiles:()=>startProfilesReady});
 return api;
 });

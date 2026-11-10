@@ -14,6 +14,7 @@ const frame=$('semestaFrame');
 const unavailable='Login tes belum terhubung. Gunakan Mainkan Preview.';
 const previewMode=new URLSearchParams(location.search).get('flowPreview')==='1';
 let graph=F.preset('default'),currentNode=null,stage='splashScreen',loginMode='login';
+let testPlayerId='';
 let guest=true,session=null,selected='genesis_male_nude',profile=null,characterDraft=null,worldCounter=0;
 let previewApplied=false,booted=false,sequence=0,firstTime=true,worldReady=false;
 let splashSeen=new Set(),pauseRequested=false;
@@ -115,7 +116,7 @@ function showType(type){
  if(id)showNode(id);
 }
 function switchGuest(){
- guest=true;session=null;profile=null;firstTime=true;
+ guest=true;session=null;profile=null;testPlayerId='';firstTime=true;
  const auth=currentNode?.type==='auth'?currentNode:graph.nodes.find(n=>n.type==='auth');
  if(auth)showNode(nextFrom(auth,'guest'));
  else showType('character');
@@ -190,6 +191,7 @@ $('authForm').addEventListener('submit',async e=>{
   });
   if(result.authenticated!==true)throw Error('Server belum mengonfirmasi sesi login.');
   $('password').value='';guest=false;session=result;profile=result.player||null;
+  testPlayerId=String(result.player?.id||result.id||id||'').toLowerCase();
   firstTime=!allowed.includes(profile?.character?.base);
   if(!firstTime)selected=profile.character.base;
   const route=firstTime?'new_player':'returning';
@@ -321,7 +323,7 @@ window.addEventListener('message',e=>{
   try{
    const data=profile?.character||characterDraft||currentGenesisProfile();
    const normalized=window.VLGenesisPlayer.normalizeProfile(data);
-   frame.contentWindow?.postMessage({type:'mainkan:player-profile',profile:normalized},location.origin);
+   frame.contentWindow?.postMessage({type:'mainkan:player-profile',profile:normalized,playerId:guest?'':testPlayerId},location.origin);
   }catch(err){
    frame.contentWindow?.postMessage({type:'mainkan:player-profile-error',message:String(err.message)},location.origin);
    $('worldLoadingText').textContent='Gagal memuat karakter Genesis: '+err.message;
