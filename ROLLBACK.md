@@ -1,3 +1,24 @@
+# Rollback — Mainkan LGR-only player path (no V6P)
+
+Written 2026-11-10 (Asia/Jakarta). Worker, secrets and vault files unchanged.
+
+- Previous live `main`: `a3fecc26cc8284e1abfa5a24eb306be8e92c1442`
+- Feature commit: `b473581d3a2e435bffd8360c7458af46f73f7dfc`
+- Service worker bump: `02a9de487edcf596a9fb7c3317a17b7fa14e4b9b`
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 02a9de487edcf596a9fb7c3317a17b7fa14e4b9b
+git revert --no-edit b473581d3a2e435bffd8360c7458af46f73f7dfc
+git push origin main
+```
+
+After this change `?renderer=v6p` no longer applies on the Mainkan path (v6p-compositor.js is not loaded); rollback is the revert above.
+
+---
+
 # Rollback — Mainkan LGR-1 player + test start profiles
 
 Written 2026-11-10 (Asia/Jakarta). Worker, secrets, passwords and vault files were not changed.
