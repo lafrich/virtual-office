@@ -1,3 +1,51 @@
+# Rollback — Mainkan test login + vo-multiplayer /auth/login
+
+Written 2026-11-10 (Asia/Jakarta).
+
+Mainkan now calls `https://vo-multiplayer.lafrich.workers.dev/auth/login` with a plain player ID. Email registration is hidden. This path is gated by Worker flag `MAINKAN_TEST_LOGIN=1` and a salted password hash in secret `MAINKAN_TEST_PW_HASH`. Tokens are `aud: "mainkan"` and do not include `SITE_KEY`, so they cannot open the encrypted office world. Office `/login`, `/register`, seed accounts `ichsan`/`noorz`, and the 8-character registration rule were not changed.
+
+## Pages (Mainkan client)
+
+- Previous live `main`: `f74234917a70b243e3adf4184e992223f7a2e042`
+- Feature: commit titled "Add Mainkan test login against vo-multiplayer /auth/login"
+
+Restore the Mainkan client (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit "$(git log --grep='Add Mainkan test login against vo-multiplayer /auth/login' -1 --format=%H)"
+git push origin main
+```
+
+That points `mainkan/config.js` `apiBase` back to empty, restores the email/register form, and does not change the Worker.
+
+## Worker (vo-multiplayer)
+
+- Previous live version (office-only, schema 4): `78481157-346f-41e6-bc56-27043643de66` (version 13, deployed 2026-11-01)
+- Current version: `273aeb9c-91a1-4fcc-9c7c-810597e4c24a` (version 15, message: "Mainkan test login path; office auth unchanged.")
+- Deployment: `5a0e2b1f-8412-4e24-83b7-6b8eebe269a9` at 2026-11-10 21:10 Asia/Jakarta
+- Durable Object `ROOM` namespace stays `119b66c0f7e34b81bb62e403d3fc45bd` (do not migrate or recreate)
+
+Turn the test login off without rolling back code (preferred):
+
+- Set Worker plain-text binding `MAINKAN_TEST_LOGIN` to `0`. `/auth/login` then returns 404. Office `/login` is unaffected.
+
+Full Worker rollback to the pre-test-login script (version 13). This is not a force-push; it creates a new deployment of the older version. Existing office secrets stay in place:
+
+```bash
+# Use the Cloudflare dashboard (Workers → vo-multiplayer → Deployments → rollback to version 13)
+# or the API: POST /accounts/<account>/workers/scripts/vo-multiplayer/deployments
+# with versions: [{ version_id: "78481157-346f-41e6-bc56-27043643de66", percentage: 100 }]
+```
+
+After a version-13 rollback, `/auth/login` no longer exists. To delete the test-login secret later: remove `MAINKAN_TEST_PW_HASH` only after the flag is off or the old version is live. Do not delete `OFFICE_PASS`, `TOKEN_KEY`, `SITE_KEY`, `GATE_H`, or `INVITE_PASS` as part of this rollback.
+
+Worker source used for this deploy lives on the box at `/workspace/vo-mainkan-auth/` (not in this git tree). Unit tests: `node --test /workspace/vo-mainkan-auth/test_mainkan_auth.mjs`.
+
+---
+
 # Rollback — Emosi.exe game emotion placeholder slots
 
 Written 2026-11-10 (Asia/Jakarta). Cloudflare Worker and secrets were not changed. Drive masters in `Membangun / Emotion Studio` were not modified. A read-only copy of the 36 existing files (18 JSON + 18 PNG) is at `Membangun / Emotion-Studio-backup-20261110-before-game-slots`.

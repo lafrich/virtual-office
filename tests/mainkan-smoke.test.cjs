@@ -114,3 +114,16 @@ test('Genesis is the only player body; all player faces are Emosi.exe sources',(
  assert.match(app,/mainkan:player-loading/);
  assert.match(semesta,/function reportPlayerReady\(\)/);
 });
+
+test('test login accepts a plain ID, hides email registration, and points at the Worker',()=>{
+ const cfg=read('mainkan/config.js');
+ assert.match(cfg,/apiBase:'https:\/\/vo-multiplayer\.lafrich\.workers\.dev'/);
+ assert.match(html,/label for="email">ID</);
+ assert.match(html,/id="email" type="text"/);
+ assert.match(html,/id="registerTab"[^>]*hidden/);
+ assert.match(html,/autocomplete="username"/);
+ assert.doesNotMatch(html,/placeholder="Minimal 8 karakter"/);
+ assert.match(app,/credentials:'omit'/);
+ assert.match(app,/request\('\/auth\/login'/);
+ assert.match(app,/registerTab'\)\.hidden=true/);
+});

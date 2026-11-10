@@ -1,5 +1,4 @@
 /* Public client configuration. No passwords, API keys, or secrets belong here.
- * Populate apiBase only after a real player backend is deployed over HTTPS.
- * GitHub Pages alone cannot authenticate players or run multiplayer.
+ * apiBase points at the vo-multiplayer Worker for the Mainkan test-login path only.
  */
-window.MAINKAN_CONFIG=Object.freeze({apiBase:''});
+window.MAINKAN_CONFIG=Object.freeze({apiBase:'https://vo-multiplayer.lafrich.workers.dev'});

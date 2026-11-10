@@ -11,7 +11,7 @@ const base=String(window.MAINKAN_CONFIG?.apiBase||'').replace(/\/$/,'');
 const apiReady=/^https:\/\//i.test(base)||/^http:\/\/localhost(?::\d+)?$/i.test(base);
 const allowed=['genesis_male_nude','genesis_female_nude'];
 const frame=$('semestaFrame');
-const unavailable='Login online belum tersedia. Backend autentikasi belum dikonfigurasi. Gunakan Mainkan Preview.';
+const unavailable='Login tes belum terhubung. Gunakan Mainkan Preview.';
 const previewMode=new URLSearchParams(location.search).get('flowPreview')==='1';
 let graph=F.preset('default'),currentNode=null,stage='splashScreen',loginMode='login';
 let guest=true,session=null,selected='genesis_male_nude',profile=null,characterDraft=null,worldCounter=0;
@@ -162,20 +162,19 @@ $('exitGame').addEventListener('click',returnToMenu);
 $('homeButton').addEventListener('click',returnToMenu);
 $('reloadWorld').addEventListener('click',()=>{frame.removeAttribute('src');worldReady=false;startWorld(true);});
 function setLoginMode(value){
- loginMode=value;
- for(const name of ['login','register']){
-  const button=$(name+'Tab'),active=name===value;
-  button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));
- }
- $('authSubmit').textContent=value==='register'?'Daftar':'Login';
- $('password').autocomplete=value==='register'?'new-password':'current-password';
+ loginMode='login';
+ const loginBtn=$('loginTab'),registerBtn=$('registerTab');
+ if(loginBtn){loginBtn.classList.add('active');loginBtn.setAttribute('aria-selected','true');}
+ if(registerBtn){registerBtn.classList.remove('active');registerBtn.setAttribute('aria-selected','false');registerBtn.hidden=true;}
+ $('authSubmit').textContent='Login';
+ $('password').autocomplete='current-password';
  message('authMessage',apiReady?'':unavailable,!apiReady);
 }
 $('loginTab').addEventListener('click',()=>setLoginMode('login'));
-$('registerTab').addEventListener('click',()=>setLoginMode('register'));
+$('registerTab').hidden=true;
 async function request(path,options){
  if(!apiReady)throw Error(unavailable);
- const response=await fetch(base+path,{credentials:'include',headers:{'Content-Type':'application/json'},...options});
+ const response=await fetch(base+path,{credentials:'omit',headers:{'Content-Type':'application/json'},...options});
  let data={};try{data=await response.json();}catch{}
  if(!response.ok)throw Error(data.message||'Server menolak permintaan ('+response.status+').');
  return data;
@@ -185,8 +184,9 @@ $('authForm').addEventListener('submit',async e=>{
  if(!apiReady){message('authMessage',unavailable,true);return;}
  const button=$('authSubmit');button.disabled=true;
  try{
-  const result=await request(loginMode==='register'?'/auth/register':'/auth/login',{
-   method:'POST',body:JSON.stringify({email:$('email').value.trim(),password:$('password').value})
+  const id=$('email').value.trim();
+  const result=await request('/auth/login',{
+   method:'POST',body:JSON.stringify({id,email:id,password:$('password').value})
   });
   if(result.authenticated!==true)throw Error('Server belum mengonfirmasi sesi login.');
   $('password').value='';guest=false;session=result;profile=result.player||null;

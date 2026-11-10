@@ -141,11 +141,11 @@ body.mainkan-playing #viewport{
   <div class="split"><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Game dunia virtual Indonesia<br>mainkan.exe / player client</small></div>
   <div><h1>Memuat dunia...</h1><p class="muted">Memeriksa peta dan aset game. Ini aplikasi untuk pemain, bukan editor.</p><div class="progress" role="progressbar" aria-label="Persiapan game"><div id="progressFill"></div></div><p id="bootText" class="micro" aria-live="polite">Starting mainkan.exe...</p><button id="skipSplash" type="button" class="btn compact">Lewati intro</button></div></div>
 </section>
-<section id="loginScreen" class="screen" hidden aria-label="Login dan Register">
-<div class="split"><div><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Virtual life • Indonesia<br>Player login</small></div><p class="micro">Versi preview — akun online dan multiplayer memerlukan server terpisah.</p></div>
-<div><h1>Selamat datang.</h1><p class="muted">Masuk untuk melanjutkan kehidupanmu di kota.</p>
-<div class="tabs" role="tablist" aria-label="Pilihan akun"><button type="button" class="tab active" id="loginTab" aria-selected="true">Login</button><button type="button" class="tab" id="registerTab" aria-selected="false">Daftar</button></div>
-<form id="authForm"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" placeholder="email@contoh.com" required></div><div class="field"><label for="password">Password</label><input id="password" type="password" minlength="8" autocomplete="current-password" placeholder="Minimal 8 karakter" required></div><div class="actions"><button class="btn primary" id="authSubmit" type="submit">Login</button><button class="btn" id="guestButton" type="button">▶ Mainkan Preview</button></div><p id="authMessage" class="status" aria-live="polite"></p></form>
+<section id="loginScreen" class="screen" hidden aria-label="Login tes">
+<div class="split"><div><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Virtual life • Indonesia<br>Player login</small></div><p class="micro">Login tes 4 pemain. Pendaftaran email ditunda dulu.</p></div>
+<div><h1>Selamat datang.</h1><p class="muted">Masuk dengan ID tes (bukan email).</p>
+<div class="tabs" role="tablist" aria-label="Pilihan akun"><button type="button" class="tab active" id="loginTab" aria-selected="true">Login</button><button type="button" class="tab" id="registerTab" aria-selected="false" hidden>Daftar</button></div>
+<form id="authForm"><div class="field"><label for="email">ID</label><input id="email" type="text" autocomplete="username" placeholder="ID tes" required></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><div class="actions"><button class="btn primary" id="authSubmit" type="submit">Login</button><button class="btn" id="guestButton" type="button">▶ Mainkan Preview</button></div><p id="authMessage" class="status" aria-live="polite"></p></form>
 </div></div>
 </section>
 <section id="welcomeScreen" class="screen" hidden aria-label="Welcome">
