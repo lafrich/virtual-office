@@ -41,6 +41,47 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
     return gen.imageStatus(profile).ready&&loading.hidden&&changing.hidden&&opaque>100;
    },null,{timeout:45000});
   }
+
+  // LGR-1 is now the shipping renderer. Old V6P layer debug URLs remain a
+  // compatibility inspection surface, not the pixels used by the game.
+  // Check REAL raster output in both genders and four native view directions.
+  const nativeLGR=await page.evaluate(()=>window.VLGenesisPlayer.renderer().active==='lgr');
+  if(nativeLGR){
+   const proofHandle=await page.waitForFunction(()=>{
+    const player=window.VLGenesisPlayer, dirs=['se','sw','ne','nw'];
+    function render(gender,dir,shoes){
+     const c=document.createElement('canvas');c.width=64;c.height=112;
+     const p={base:'genesis_'+gender+'_nude',appearance:{
+      skinTone:'light',hairStyle:'short',topStyle:'tee',pantsStyle:'trousers',shoesStyle:shoes,
+      topColor:'white',pantsColor:'denim',shoesColor:'black'}};
+     if(!player.directPreview(c,p,dir,'idle',0,'neutral',0))return null;
+     const d=c.getContext('2d').getImageData(0,0,64,112).data;
+     let opaque=0,hash=2166136261>>>0;
+     for(let i=0;i<d.length;i+=4){
+      if(d[i+3])opaque++;
+      hash=Math.imul(hash^((d[i]<<24)|(d[i+1]<<16)|(d[i+2]<<8)|d[i+3]),16777619)>>>0;
+     }
+     return {opaque,hash};
+    }
+    const out=[];
+    for(const gender of ['male','female']){
+     for(const dir of dirs){
+      const bare=render(gender,dir,'nude');
+      const shod=dir==='se'||dir==='sw'?render(gender,dir,'shoes'):null;
+      if(!bare||((dir==='se'||dir==='sw')&&!shod))return false;
+      out.push({gender,dir,bare,shod});
+     }
+    }
+    return out;
+   },null,{timeout:90000});
+   const proof=await proofHandle.jsonValue();
+   assert.equal(proof.length,8,'LGR must render male/female in all four directions');
+   assert.ok(proof.every(p=>p.bare.opaque>100),
+    'LGR cannot mark an empty sprite as ready: '+JSON.stringify(proof));
+   assert.ok(proof.filter(p=>p.shod).every(p=>p.shod.opaque>100&&p.shod.hash!==p.bare.hash),
+    'LGR footwear must change actual native rendered pixels, not only a dropdown: '+JSON.stringify(proof));
+   console.log('[ok] LGR native four-view, both genders and visible shoes ('+label+')');
+  }else{
   const custom=await page.evaluate(()=>{
    const selected=document.querySelector('#characterChoices .choice.selected').dataset.character;
    const profile={base:selected,appearance:{hairStyle:document.getElementById('hairStyle').value,
@@ -177,6 +218,7 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   await page.locator('#ccOptions').getByRole('button',{name:/Genesis Custom Wear/}).click();
   assert.equal(await page.locator('#shoesStyle').inputValue(),'custom');
   await page.locator('#ccTools [data-tool=hair]').click();
+  }
   await page.locator('#ccDay').fill('11');
   await page.locator('#ccMonth').fill('01');
   await page.locator('#ccYear').fill('1994');
