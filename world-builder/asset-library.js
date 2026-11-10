@@ -2,9 +2,10 @@
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'],BUILD=new Set(['jalan','kampung','loak']);
-const CATS={all:'ALL ASSETS',indo200:'INDONESIA / 200 ASET',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
+const CATS={all:'ALL ASSETS',indo200:'INDONESIA / 200 ASET',gameplay:'MAINkan / MEKANIK',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
  interior:'INTERIOR',object:'OBJEK / ITEM',vehicle:'KENDARAAN',character:'KARAKTER',custom:'CUSTOM',grok:'GROK / NEW ASSETS'};
 function category(spec){
+ if(spec?.pack==='mainkan-gameplay-v6b-r4-20261110')return 'gameplay';
  if(spec?.objectCategory==='vehicle')return 'vehicle';
  if(spec?.source==='custom-building'||(spec?.source==='bangun-object'&&!spec.builtIn))return 'custom';
  if(spec?.source==='pipeline-vegetation'||spec?.objectCategory==='plant')return 'vegetation';
