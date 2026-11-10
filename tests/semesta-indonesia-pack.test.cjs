@@ -60,7 +60,10 @@ test('Semesta loads the Indonesia pack before caching catalog, exposes placement
  assert.match(builder,/await window\.VLIndonesiaAssets\?\.load\(\)/);
  assert.ok(builder.indexOf('await window.VLIndonesiaAssets?.load()')<
    builder.indexOf('let assetCatalog=window.VLAssetCatalog||[]'));
- assert.match(builder,/if\(spec\.pack==='indonesia-v1'\|\|spec\.pack==='indonesia-200-v1'\|\|spec\.pack==='semesta-custom-v6b-20261110'\)return 'indonesia'/);
+ assert.match(builder,/spec\.pack==='indonesia-v1'/);
+ assert.match(builder,/spec\.pack==='indonesia-200-v1'/);
+ assert.match(builder,/spec\.pack==='semesta-custom-v6b-20261110'/);
+ assert.match(builder,/spec\.pack==='mainkan-gameplay-v6b-r4-20261110'/);
  assert.match(thumbs,/source==='pipeline-street'/);
  assert.ok(fs.readFileSync('world-builder/indonesia-assets.js','utf8').includes('indonesia_custom_catalog.json'));
 
