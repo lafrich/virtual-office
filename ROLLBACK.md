@@ -1,3 +1,24 @@
+# Rollback — Mainkan Confirm network fallback ('Failed to fetch')
+
+Written 2026-11-10 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged.
+
+- Previous live `main`: `e4fcca85006373ae27005e6d3f1b882e4e5082c2`
+- Fix commit: `c2761e774d42f1ca9bf4797f5a88b067dcd4da8b`
+- Service worker bump: `7892deb351bf0d0f0a77a3ca6809cd9980728590`
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit 7892deb351bf0d0f0a77a3ca6809cd9980728590
+git revert --no-edit c2761e774d42f1ca9bf4797f5a88b067dcd4da8b
+git push origin main
+```
+
+Worker v20 preflight allows only POST/OPTIONS, so the browser blocks `PUT /players/profile` ("Failed to fetch"). Confirm now treats a blocked request like a missing route and keeps the character on the device per player id. Reverting brings back the stuck Confirm.
+
+---
+
 # Rollback — Mainkan Confirm local-save fallback + kost recipe cooking + life motions
 
 Written 2026-11-10 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged.
