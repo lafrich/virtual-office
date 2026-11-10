@@ -1,0 +1,4593 @@
+{
+  "scope": "NJH interior PREVIEW only. Not live. Redrawn I1\u2013I6 furniture from /workspace/semesta-interior-i1, sha256-verified against INTERIOR-61-INVENTORY-MANIFEST.json. Stale out_i2_ext leftovers that do not match the inventory hash were skipped. Later hash-verified batch wins (out < out_i2 < out_i2_ext < out_i3 < out_i4 < out_i5 < out_i6). r4 added sekat_wc (preview only) from njh-interior-templates-r4/new/sekat_wc, sha256-verified against sekat_wc.type.json.",
+  "items": {
+    "chair": {
+      "se": {
+        "file": "furniture-chair_se.png",
+        "sha256": "cc0a1997a5cad56ea65bc854521dd3edaec8bce1c3a49716d25a417786a33684",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-chair_sw.png",
+        "sha256": "d33ce45a3c64b5c5f77a6aaef1f2fb5f53d19c6dd2372832ff7bb4d2b1426389",
+        "size": [
+          69,
+          76
+        ],
+        "pivot": [
+          34,
+          55
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-chair_ne.png",
+        "sha256": "d602a8f21fa495d77f87deeb3f06358141a17c1765e6f1fd5076078fc26b24fe",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-chair_nw.png",
+        "sha256": "d6fd141a3a5a77aee8d279a2918afce82c3c20403fe54906d45dd391262c447c",
+        "size": [
+          69,
+          76
+        ],
+        "pivot": [
+          34,
+          55
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "office_chair": {
+      "se": {
+        "file": "furniture-office_chair_se.png",
+        "sha256": "c39bf38218ee0732162ebb28b06ac1512566cf1eef8263cd81b812f3c6d83b25",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-office_chair_sw.png",
+        "sha256": "550a14ba23c1280dab98372505253e5f5cfe120ae1bffb12b499b645545a76ce",
+        "size": [
+          69,
+          76
+        ],
+        "pivot": [
+          34,
+          55
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-office_chair_ne.png",
+        "sha256": "72140935eafb36f4c9cca0b27604d8bcf3c7035cd90b1f0f0f78aca5bf9012d7",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-office_chair_nw.png",
+        "sha256": "083015fb710f0426e7f92368bbe10841111c21ff26ef6c0dcfd933db33377fce",
+        "size": [
+          69,
+          76
+        ],
+        "pivot": [
+          34,
+          55
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "sofa": {
+      "se": {
+        "file": "furniture-sofa_se.png",
+        "sha256": "022e2844a9ee7fc047267e7ee55a13edc80112f5439edb4bf0610b0b62797b50",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-sofa_sw.png",
+        "sha256": "abb14fa091b7bd3788182eab2edb29d5df2b7ed3fb27e8a11263392af19f39ef",
+        "size": [
+          101,
+          93
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-sofa_ne.png",
+        "sha256": "ed36ec97a67f8d7514b6d57f4897a4a6518f3f09599751b049d211917754335d",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-sofa_nw.png",
+        "sha256": "2b38486fb9b76a1ac105af004879a613e5137262f6df124dce49baea9baffaf5",
+        "size": [
+          101,
+          93
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "table": {
+      "se": {
+        "file": "furniture-table_se.png",
+        "sha256": "ceb8015782dc7c1bf06ecc1f24fc83348ba6a2c4e77aa201e1e379e1503dd056",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-table_sw.png",
+        "sha256": "5f892a27cefd8159bd0a610e7da1add309674da391bb88b5d19649a3c1699953",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-table_ne.png",
+        "sha256": "5f892a27cefd8159bd0a610e7da1add309674da391bb88b5d19649a3c1699953",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-table_nw.png",
+        "sha256": "ceb8015782dc7c1bf06ecc1f24fc83348ba6a2c4e77aa201e1e379e1503dd056",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "desk": {
+      "se": {
+        "file": "furniture-desk_se.png",
+        "sha256": "37459ca9856bb9fa1e606e270c8dada94246ea39962c13a91a00d209621ead42",
+        "size": [
+          101,
+          88
+        ],
+        "pivot": [
+          50,
+          59
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-desk_sw.png",
+        "sha256": "d7af9bf36b9176ed9565bfa6dc120494fc02479ca90016483c965b2807b49cd0",
+        "size": [
+          101,
+          94
+        ],
+        "pivot": [
+          50,
+          65
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-desk_ne.png",
+        "sha256": "6258f28922c10d759e4c31d5e5c513037a10cb093518b65e4a93d41bcd974d9a",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-desk_nw.png",
+        "sha256": "81a44eb3a8758ee8a6a4c46e89cf77a516e6591ac03c16202e29a5cff3aab3b6",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "bed": {
+      "se": {
+        "file": "furniture-bed_se.png",
+        "sha256": "115373d1cf7006e90123c97a62e79517a5e9ae307283e7b397868edf5ff4abbe",
+        "size": [
+          133,
+          89
+        ],
+        "pivot": [
+          66,
+          52
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-bed_sw.png",
+        "sha256": "d11b2d5a79818e6fb2126154b521037713fd3ac5bc42f8a2abc5c8b0cfc8ff29",
+        "size": [
+          133,
+          103
+        ],
+        "pivot": [
+          66,
+          66
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-bed_ne.png",
+        "sha256": "9ff96f7fcd143c5f30bbc2fd02972797d908422dfd29476851d4313379894d06",
+        "size": [
+          133,
+          89
+        ],
+        "pivot": [
+          66,
+          52
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-bed_nw.png",
+        "sha256": "aa3a68c6ca1f26c8157652e5a508e8d453434601d0bc8a84647a3c1d5205d3e5",
+        "size": [
+          133,
+          103
+        ],
+        "pivot": [
+          66,
+          66
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "wardrobe": {
+      "se": {
+        "file": "furniture-wardrobe_se.png",
+        "sha256": "5b5bf3cd682d85bb596868049cb2911140c9364a70d1dc231fc0bd0094d762da",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-wardrobe_sw.png",
+        "sha256": "b6e0cb2249ce5ccdc5fbd186434af82ca79c2e36002b1b62f059fcd0034cf3b4",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-wardrobe_ne.png",
+        "sha256": "b6e0cb2249ce5ccdc5fbd186434af82ca79c2e36002b1b62f059fcd0034cf3b4",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-wardrobe_nw.png",
+        "sha256": "5b5bf3cd682d85bb596868049cb2911140c9364a70d1dc231fc0bd0094d762da",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "shelf": {
+      "se": {
+        "file": "furniture-shelf_se.png",
+        "sha256": "f5b35de7fef063ce67999c93a9c2dba6734095b0582593dd812060b0bc773a5f",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-shelf_sw.png",
+        "sha256": "458debc751364ba8761e6eba3af5d9612b5a834c19d748774990c6a2f92cbf77",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-shelf_ne.png",
+        "sha256": "d770d76a89f2429aac3485d9425b0e4741dd8faa40268c27a8dcbbc133b1f9df",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-shelf_nw.png",
+        "sha256": "81edd9381fbae06db7bdf50a006914406896aa6d9964c798e73b60a3cce2e5b8",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "fridge": {
+      "se": {
+        "file": "furniture-fridge_se.png",
+        "sha256": "f1848372888599b541135c69e23456b39f85f74bde986bfbc3d1a2d3194555e9",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-fridge_sw.png",
+        "sha256": "f1848372888599b541135c69e23456b39f85f74bde986bfbc3d1a2d3194555e9",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-fridge_ne.png",
+        "sha256": "f1848372888599b541135c69e23456b39f85f74bde986bfbc3d1a2d3194555e9",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-fridge_nw.png",
+        "sha256": "f1848372888599b541135c69e23456b39f85f74bde986bfbc3d1a2d3194555e9",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "stove": {
+      "se": {
+        "file": "furniture-stove_se.png",
+        "sha256": "97a54d3df4c7bbb9c0d3fc31f0e00f5ced0b4cff6442d88c9e4e0c5ffd999f08",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "sw": {
+        "file": "furniture-stove_sw.png",
+        "sha256": "97a54d3df4c7bbb9c0d3fc31f0e00f5ced0b4cff6442d88c9e4e0c5ffd999f08",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "ne": {
+        "file": "furniture-stove_ne.png",
+        "sha256": "97a54d3df4c7bbb9c0d3fc31f0e00f5ced0b4cff6442d88c9e4e0c5ffd999f08",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      },
+      "nw": {
+        "file": "furniture-stove_nw.png",
+        "sha256": "97a54d3df4c7bbb9c0d3fc31f0e00f5ced0b4cff6442d88c9e4e0c5ffd999f08",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I1",
+        "sourceFolder": "out"
+      }
+    },
+    "bathtub": {
+      "se": {
+        "file": "furniture-bathtub_se.png",
+        "sha256": "84d2939f3e49ae93e06ebb2ac7485db5e65facc620f42adfdfcf6c502761655b",
+        "size": [
+          101,
+          74
+        ],
+        "pivot": [
+          50,
+          45
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "sw": {
+        "file": "furniture-bathtub_sw.png",
+        "sha256": "fbbc4aa953a8a848b42e2ac88db64d3e284463a15c3db8b12ad6deb40a6b9565",
+        "size": [
+          101,
+          78
+        ],
+        "pivot": [
+          50,
+          49
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "ne": {
+        "file": "furniture-bathtub_ne.png",
+        "sha256": "21eb8e7ade4160e18cea5997b248ff8a3337b53d7c30a5570f2c08659dd78f00",
+        "size": [
+          101,
+          74
+        ],
+        "pivot": [
+          50,
+          45
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "nw": {
+        "file": "furniture-bathtub_nw.png",
+        "sha256": "84d2939f3e49ae93e06ebb2ac7485db5e65facc620f42adfdfcf6c502761655b",
+        "size": [
+          101,
+          74
+        ],
+        "pivot": [
+          50,
+          45
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      }
+    },
+    "wc": {
+      "se": {
+        "file": "furniture-wc_se.png",
+        "sha256": "c61b304cf581201e1ac2da941734aeb59db4e2f826a035b8ba724449ebcf5e17",
+        "size": [
+          69,
+          66
+        ],
+        "pivot": [
+          34,
+          45
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "sw": {
+        "file": "furniture-wc_sw.png",
+        "sha256": "c4ef22c6de839f7a1187f1a7faa74d4fc77714189d6ddb3a95122d7f8fe1047f",
+        "size": [
+          69,
+          77
+        ],
+        "pivot": [
+          34,
+          56
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "ne": {
+        "file": "furniture-wc_ne.png",
+        "sha256": "dbc683efa387d36ac7bb8812e9be0f181d426066a251cd53e20aebfe719a31e8",
+        "size": [
+          69,
+          66
+        ],
+        "pivot": [
+          34,
+          45
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "nw": {
+        "file": "furniture-wc_nw.png",
+        "sha256": "2f2073732be026a1d4fe4dc025f7a5835498f4953f3a797cc473e8e73972418c",
+        "size": [
+          69,
+          77
+        ],
+        "pivot": [
+          34,
+          56
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      }
+    },
+    "shower": {
+      "se": {
+        "file": "furniture-shower_se.png",
+        "sha256": "92103ba83ee044b0e6ea44c3d1636cbf37d51c7746f3af8b7abfd4070bafce32",
+        "size": [
+          69,
+          84
+        ],
+        "pivot": [
+          34,
+          63
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "sw": {
+        "file": "furniture-shower_sw.png",
+        "sha256": "732ab65202d3ab51b1a8096f10358b5c54cb2858670bbbc04b1c3b49e8d19a5d",
+        "size": [
+          69,
+          84
+        ],
+        "pivot": [
+          34,
+          63
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "ne": {
+        "file": "furniture-shower_ne.png",
+        "sha256": "f1d907e25dd594af0205eaec32704f6e1036202a7d5c5575becd69b6f831cbbd",
+        "size": [
+          69,
+          72
+        ],
+        "pivot": [
+          34,
+          51
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "nw": {
+        "file": "furniture-shower_nw.png",
+        "sha256": "e02fdb19a1d0e4a31fda71a1ea5739092ff655e8edd908b10df4938ed747e123",
+        "size": [
+          69,
+          83
+        ],
+        "pivot": [
+          34,
+          62
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      }
+    },
+    "sink": {
+      "se": {
+        "file": "furniture-sink_se.png",
+        "sha256": "f9d7599dbd33848c3591feb324cd5fe66b5bb7383ee2a1cd59dc9754a5750c3e",
+        "size": [
+          69,
+          64
+        ],
+        "pivot": [
+          34,
+          43
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "sw": {
+        "file": "furniture-sink_sw.png",
+        "sha256": "95e9a47fed2550cf4b3ba8cd363d3b203cebe2341784f67f1d7f7091ce22c6df",
+        "size": [
+          69,
+          69
+        ],
+        "pivot": [
+          34,
+          48
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "ne": {
+        "file": "furniture-sink_ne.png",
+        "sha256": "22964ec434aad144aa77689c8eafb398ddfe5b94e1271e6791a19a02f7e790e9",
+        "size": [
+          69,
+          64
+        ],
+        "pivot": [
+          34,
+          43
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "nw": {
+        "file": "furniture-sink_nw.png",
+        "sha256": "c84f07eb499eeb8c48596a366d75fda09894cb7b7cc502bb38779542e5edd4ea",
+        "size": [
+          69,
+          68
+        ],
+        "pivot": [
+          34,
+          47
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      }
+    },
+    "kitchen_sink": {
+      "se": {
+        "file": "furniture-kitchen_sink_se.png",
+        "sha256": "b1a027c5dc230c0377aa90f6faddaf0fda8689eced556b5db1eab082c396f2de",
+        "size": [
+          69,
+          64
+        ],
+        "pivot": [
+          34,
+          43
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "sw": {
+        "file": "furniture-kitchen_sink_sw.png",
+        "sha256": "0a2880aeb5f0be5a26e904dd3627fbfb8ed92db6ae952c88e3082394989234b6",
+        "size": [
+          69,
+          69
+        ],
+        "pivot": [
+          34,
+          48
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "ne": {
+        "file": "furniture-kitchen_sink_ne.png",
+        "sha256": "b1a027c5dc230c0377aa90f6faddaf0fda8689eced556b5db1eab082c396f2de",
+        "size": [
+          69,
+          64
+        ],
+        "pivot": [
+          34,
+          43
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "nw": {
+        "file": "furniture-kitchen_sink_nw.png",
+        "sha256": "eb110d109b3207b2e36c30adf55cf442a080091b4e12be871da16329839581cb",
+        "size": [
+          69,
+          68
+        ],
+        "pivot": [
+          34,
+          47
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      }
+    },
+    "computer": {
+      "se": {
+        "file": "furniture-computer_se.png",
+        "sha256": "d63a99a8effe334719c1c064593b19e0e0ab20c4646580f800ab3ae243d27548",
+        "size": [
+          69,
+          69
+        ],
+        "pivot": [
+          34,
+          48
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "sw": {
+        "file": "furniture-computer_sw.png",
+        "sha256": "d41e826b48719e39bc3484078f76d7993ad435c4ebddaff9b09ab8cd247c1103",
+        "size": [
+          69,
+          79
+        ],
+        "pivot": [
+          34,
+          58
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "ne": {
+        "file": "furniture-computer_ne.png",
+        "sha256": "eecda869dd59b144bab690979d5902b6d14d97258784c57a815644c4d3118b5b",
+        "size": [
+          69,
+          69
+        ],
+        "pivot": [
+          34,
+          48
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "nw": {
+        "file": "furniture-computer_nw.png",
+        "sha256": "e3e9a6608b5ebcd04ba1c46ed02f5bdd34f84d995c8c0799c4c2beeff6c4b93a",
+        "size": [
+          69,
+          79
+        ],
+        "pivot": [
+          34,
+          58
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      }
+    },
+    "cashier": {
+      "se": {
+        "file": "furniture-cashier_se.png",
+        "sha256": "3f2c6896c269deca34b25eba6dccb7e1193016cb98240be87e4a5e18592c4e96",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "sw": {
+        "file": "furniture-cashier_sw.png",
+        "sha256": "12e905ec9d41b93226377e4937f8ecd39ec7fda7a9e6b52d8595e7a5379e2836",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "ne": {
+        "file": "furniture-cashier_ne.png",
+        "sha256": "119da951aad5b5b0b5db2b4fd1b70a6445b9f75091282bf3f7942a8ccc128d46",
+        "size": [
+          101,
+          87
+        ],
+        "pivot": [
+          50,
+          58
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "nw": {
+        "file": "furniture-cashier_nw.png",
+        "sha256": "27e6d8181e95a425f061a9aa7f93a1ea029e63a07c267c9fd33adc3b367fa30c",
+        "size": [
+          101,
+          90
+        ],
+        "pivot": [
+          50,
+          61
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      }
+    },
+    "counter": {
+      "se": {
+        "file": "furniture-counter_se.png",
+        "sha256": "09eeeefac37c016bccae43f68fce5fbcb9cde035fdba52c86d14c23fc2b475e1",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "sw": {
+        "file": "furniture-counter_sw.png",
+        "sha256": "3d44ddf8245af3414f95371e02b5c2052751aa7aed4617c79cb532cac3c4d091",
+        "size": [
+          101,
+          85
+        ],
+        "pivot": [
+          50,
+          56
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "ne": {
+        "file": "furniture-counter_ne.png",
+        "sha256": "b096f21b0eac8ee60e4106ad34af99fbae92befdc62cb89e3e555408cc571204",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      },
+      "nw": {
+        "file": "furniture-counter_nw.png",
+        "sha256": "cfcef03a0bef2f91c4c66c34cf90c6e211179f3726e14082b89ac1f4a01319de",
+        "size": [
+          101,
+          85
+        ],
+        "pivot": [
+          50,
+          56
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I2",
+        "sourceFolder": "out_i2"
+      }
+    },
+    "dining_table": {
+      "se": {
+        "file": "furniture-dining_table_se.png",
+        "sha256": "8114f0b08da68249ccc91a928ca1a14aa6d3330cf006aa6da501ed26c93568b3",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-dining_table_sw.png",
+        "sha256": "7208938b44164791d2d962b27f9765621b8542a73307cb2f8109f8e8f9bfee01",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-dining_table_ne.png",
+        "sha256": "b463e852b3b2dfa0f378eefa5ebc07b15eb215b3fc7ee32e34be20961813232c",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-dining_table_nw.png",
+        "sha256": "f720a8dbfefd9f8e7f06c4ddce86289daf8d81de97ee1fb8ddd837dc918d585f",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "wooden_bench": {
+      "se": {
+        "file": "furniture-wooden_bench_se.png",
+        "sha256": "8376f81e395471ec5e96d9c8f37fb3171800b648f5ea92c7e5f724c7ef79d583",
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          51
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-wooden_bench_sw.png",
+        "sha256": "2ef6f695a2c58fb783cf9ef32d45f86c91de07ffd0aae0911a309a7af177c9bb",
+        "size": [
+          101,
+          90
+        ],
+        "pivot": [
+          50,
+          61
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-wooden_bench_ne.png",
+        "sha256": "2a63c7c1e1e7295e93cfa57a980d17bb5adf0d0df673559bca026aa26ff33b9b",
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          51
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-wooden_bench_nw.png",
+        "sha256": "43da75fee874a251847454ee26d17ba1e232e8540d2de5d1122e4f781ab399e6",
+        "size": [
+          101,
+          90
+        ],
+        "pivot": [
+          50,
+          61
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "tv": {
+      "se": {
+        "file": "furniture-tv_se.png",
+        "sha256": "f0a60bfb98436c0d91c57870f7272f900c1d98fc11e8683d91fe6e1c10e5f097",
+        "size": [
+          101,
+          111
+        ],
+        "pivot": [
+          50,
+          82
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-tv_sw.png",
+        "sha256": "7765e845ef83e3e082dcef41c96873dc6ade7d57fbe5d0b6a981102a7e7a29bb",
+        "size": [
+          101,
+          118
+        ],
+        "pivot": [
+          50,
+          89
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-tv_ne.png",
+        "sha256": "f981f79809a80498121c2cef7fbeaeec84e17e3578ccbb3e533d80cf17580f54",
+        "size": [
+          101,
+          111
+        ],
+        "pivot": [
+          50,
+          82
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-tv_nw.png",
+        "sha256": "9da46dccb748742ea5fbb6bf848b7d21bb93bec9ab9a38aa0f5855440c6bdf4d",
+        "size": [
+          101,
+          118
+        ],
+        "pivot": [
+          50,
+          89
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "fan": {
+      "se": {
+        "file": "furniture-fan_se.png",
+        "sha256": "b466dfd38fb493fc4f84e81357f5a71cd311624d103e59b7292b285db678922d",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-fan_sw.png",
+        "sha256": "a604c4679f0fd96cd683c4dcc4220f7d4579d9487d9213e1586afcc982adeca3",
+        "size": [
+          69,
+          78
+        ],
+        "pivot": [
+          34,
+          57
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-fan_ne.png",
+        "sha256": "c0e60d71ea51a4bc4a289e44aa43155cac6612c3e97d4420b0023f8d6d80b43a",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-fan_nw.png",
+        "sha256": "a5d5d3fc5d871603c48c303c1a6d8d6bcdc84ec51ee7aa47f03932c1d6008dab",
+        "size": [
+          69,
+          78
+        ],
+        "pivot": [
+          34,
+          57
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "shoe_rack": {
+      "se": {
+        "file": "furniture-shoe_rack_se.png",
+        "sha256": "5f4d04260e2af0d2ee0f2a1b6a99b1d59759c380f64ee967027868bb49d7c6c0",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-shoe_rack_sw.png",
+        "sha256": "08195fed593e4f8044f693516f14d3fbae92138c23cbc368dd3be790f862b917",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-shoe_rack_ne.png",
+        "sha256": "2faf6eee3dbd5b920e6553e25403c1dec3c0989509f31f725b60008db39f2195",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-shoe_rack_nw.png",
+        "sha256": "de9f804d3f1cb73feee704528210d19432b4deb6cec2acda7fb175a1dd6859ac",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "bookshelf": {
+      "se": {
+        "file": "furniture-bookshelf_se.png",
+        "sha256": "2e2af6ab47b32aade793f76eb57feb9d5b50990edf1a1279ac40790411aed7af",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-bookshelf_sw.png",
+        "sha256": "b24e290edc8dd77e8dc665b2bd67a820baf03b6d90646d57364bb76473348d5c",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-bookshelf_ne.png",
+        "sha256": "e05149b89ccdf4cc1063d50eb08219cb3258f2d8d4e5f645f057449aec01957d",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-bookshelf_nw.png",
+        "sha256": "57f7dad73a7a70549dc7ebc64b685237c44cda97ea97f74c15bd95d3cbb0ca69",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "study_desk": {
+      "se": {
+        "file": "furniture-study_desk_se.png",
+        "sha256": "999514e3df6f8df08e8c8e6801ef4c4b5d5a9de1c460ad4d272066e5ff03e49c",
+        "size": [
+          101,
+          88
+        ],
+        "pivot": [
+          50,
+          59
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-study_desk_sw.png",
+        "sha256": "2697484277e5b3e40e46b62a430a7da923d9b0d5cc67d84234a270e58ac1683a",
+        "size": [
+          101,
+          94
+        ],
+        "pivot": [
+          50,
+          65
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-study_desk_ne.png",
+        "sha256": "0c422bd933b89288015bc95e28b34591408834a8a5add7b51df112428b28d8b1",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-study_desk_nw.png",
+        "sha256": "e9cf31285dc0e75b13c99c3674993b210b71e9153949a1bc01459c94f03a4be7",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "locker": {
+      "se": {
+        "file": "furniture-locker_se.png",
+        "sha256": "4ba96f3ce4e634962e7b368f70da1abfbace9eb889dc92627c91f210b4f5f640",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-locker_sw.png",
+        "sha256": "c6250e922c3e6ca4468fa16073410825542e9c8da3bf4b71da77f43625c53756",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-locker_ne.png",
+        "sha256": "3d33c71fa4908450568e285943f19a8b05e3b9d331b0246109b53c7a5eb04682",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-locker_nw.png",
+        "sha256": "b2325dd63bbb87d990334dd915ba9ad8c6dfc4ed7e42f6b41cf88e215387bd3a",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "washing_machine": {
+      "se": {
+        "file": "furniture-washing_machine_se.png",
+        "sha256": "08bab343e575d4498219296985851a6298d60a3992f1924c543a719aee644c23",
+        "size": [
+          69,
+          78
+        ],
+        "pivot": [
+          34,
+          57
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-washing_machine_sw.png",
+        "sha256": "4679bcc9fd0c55b3f69bc104790866383dbee482c2c5f5f1bc89658bb3c8b846",
+        "size": [
+          69,
+          78
+        ],
+        "pivot": [
+          34,
+          57
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-washing_machine_ne.png",
+        "sha256": "c5469d66d4343f845ac6be78c1640659fb11cc77f59a6a7721caecb3d173eb81",
+        "size": [
+          69,
+          78
+        ],
+        "pivot": [
+          34,
+          57
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-washing_machine_nw.png",
+        "sha256": "87ac292969291445830ed2b1ce159bc346c36f683da1db0fdec28a483f2c80b7",
+        "size": [
+          69,
+          78
+        ],
+        "pivot": [
+          34,
+          57
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "water_dispenser": {
+      "se": {
+        "file": "furniture-water_dispenser_se.png",
+        "sha256": "bf32d2720a99d6996d2aa0fe94abe554c3912a8f2ee30ce96e734a4d65f162fc",
+        "size": [
+          69,
+          91
+        ],
+        "pivot": [
+          34,
+          70
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "sw": {
+        "file": "furniture-water_dispenser_sw.png",
+        "sha256": "a37b211e74f85c7945145266b864b8a707ba1a8f0702d275c2d2bdb94a29ef64",
+        "size": [
+          69,
+          89
+        ],
+        "pivot": [
+          34,
+          68
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "ne": {
+        "file": "furniture-water_dispenser_ne.png",
+        "sha256": "bf32d2720a99d6996d2aa0fe94abe554c3912a8f2ee30ce96e734a4d65f162fc",
+        "size": [
+          69,
+          91
+        ],
+        "pivot": [
+          34,
+          70
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      },
+      "nw": {
+        "file": "furniture-water_dispenser_nw.png",
+        "sha256": "563a845d2922db1fc8bc6d937bd368d0f1a690c08222eba9655086f182d78434",
+        "size": [
+          69,
+          89
+        ],
+        "pivot": [
+          34,
+          68
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I3",
+        "sourceFolder": "out_i3"
+      }
+    },
+    "floor_mattress": {
+      "se": {
+        "file": "furniture-floor_mattress_se.png",
+        "sha256": "3c1e729ec037f74ce99533ae0c600b9ff77db293f447fe57d51c565647f388be",
+        "size": [
+          133,
+          77
+        ],
+        "pivot": [
+          66,
+          40
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-floor_mattress_sw.png",
+        "sha256": "00449bfa355ade2fffc675a2a9938fa5078b22411401fd721a6eb7a2685c4bec",
+        "size": [
+          133,
+          77
+        ],
+        "pivot": [
+          66,
+          40
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-floor_mattress_ne.png",
+        "sha256": "6be99fde5a47459fb486501189008a02f44976bde72b6a355fd8b1cf10cc624b",
+        "size": [
+          133,
+          77
+        ],
+        "pivot": [
+          66,
+          40
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-floor_mattress_nw.png",
+        "sha256": "bdf00775dd87d5bd09facf740db9b8c2fa9ca4cc2966803b9846ac1f36a8a094",
+        "size": [
+          133,
+          77
+        ],
+        "pivot": [
+          66,
+          40
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "prayer_mat": {
+      "se": {
+        "file": "furniture-prayer_mat_se.png",
+        "sha256": "623aa77a394ea6d273228c09d070b1b50c82064d1a6507336a48e9f5d02238d1",
+        "size": [
+          101,
+          56
+        ],
+        "pivot": [
+          50,
+          27
+        ],
+        "footprint": [
+          1,
+          2
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-prayer_mat_sw.png",
+        "sha256": "9dfb54c92db50b147760824094d866f989bb8f644a32c852114bfd0f9df940fb",
+        "size": [
+          101,
+          56
+        ],
+        "pivot": [
+          50,
+          27
+        ],
+        "footprint": [
+          1,
+          2
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-prayer_mat_ne.png",
+        "sha256": "748132791f1c086856269f4b9456cbdcb2c1c4deda7458801fbe0ee1b4f1ec77",
+        "size": [
+          101,
+          56
+        ],
+        "pivot": [
+          50,
+          27
+        ],
+        "footprint": [
+          1,
+          2
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-prayer_mat_nw.png",
+        "sha256": "9c5549a4b7ebda3b5e6ce51476b21109d2f0ad76dca57a10649768833a918a2e",
+        "size": [
+          101,
+          56
+        ],
+        "pivot": [
+          50,
+          27
+        ],
+        "footprint": [
+          1,
+          2
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "rice_cooker": {
+      "se": {
+        "file": "furniture-rice_cooker_se.png",
+        "sha256": "7d617327023f2fa01c5c57dc68cdc414403ac3e2fc15d23438177b6f20ff9b05",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-rice_cooker_sw.png",
+        "sha256": "462152df97e214edc446f28d53ff2bf307c3adc702bdf0b8a190105fa88e4d0c",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-rice_cooker_ne.png",
+        "sha256": "287c0df05c196eb3b387699201ac4b20e4810d7f14543c457cba4ad869d8ce3f",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-rice_cooker_nw.png",
+        "sha256": "537e6eb40fcb8256784b91d6c86f6a3c607a4063a4c548c575ce90071804cf2e",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "dish_rack": {
+      "se": {
+        "file": "furniture-dish_rack_se.png",
+        "sha256": "e8c9ce664232b3a4fa298df2db2bea6d940d38d06a004131f23a4561e50fec4e",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-dish_rack_sw.png",
+        "sha256": "3489117a691c53fb49012a462cb35718567e0f673c62e88b3dfd7bde21b628d4",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-dish_rack_ne.png",
+        "sha256": "707ab540212a534ef89fbfc705eb7011b531b491d17be87c4c421d59f34a98cf",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-dish_rack_nw.png",
+        "sha256": "9f8461acce266a7ca20ee996d85291910dcc8334c8abfbd30539f3b060fcd9d5",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "drink_cooler": {
+      "se": {
+        "file": "furniture-drink_cooler_se.png",
+        "sha256": "300b8fbc09977841987ba983f61a3dcb97f3dfa24e15e056d5141198055b4f11",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-drink_cooler_sw.png",
+        "sha256": "5c11cf15c1b2099c1e98b75afd540c22ce552f8ba71bad30b9d4c47dcb2b988d",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-drink_cooler_ne.png",
+        "sha256": "905dfb773f9878a6b2e0f48afd5eb0c58aeb5c7086b3d8c33aad94439fa4e663",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-drink_cooler_nw.png",
+        "sha256": "ccb9d1ceddcf36be6be92a9141f5f65136afe3c9fd8e3b08a44b3ba1c49fc5b7",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "fridge_drinks": {
+      "se": {
+        "file": "furniture-fridge_drinks_se.png",
+        "sha256": "17d335c94e72199ddba397db4e7a5a7052e1dcd2ed07175500c4e5b9adedcb51",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-fridge_drinks_sw.png",
+        "sha256": "28780269e35d135babe245b2c568a1a60dbf788f2a0feae6942c2ef86b84c8e9",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-fridge_drinks_ne.png",
+        "sha256": "899122f62e6b21a78d1b40b4cc770a6e5e68e666649a0780cdab8bcfc0261dd2",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-fridge_drinks_nw.png",
+        "sha256": "9c9e62aeb778d36e50e5ca2ea191dbc6a6b673fd2714271b8ac1ca3e14b5b15f",
+        "size": [
+          69,
+          93
+        ],
+        "pivot": [
+          34,
+          72
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "aisle_rack": {
+      "se": {
+        "file": "furniture-aisle_rack_se.png",
+        "sha256": "250cff4f3a48948241dd5a17d35ca2117d3ae485c1df6a5be963510b231c3a71",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-aisle_rack_sw.png",
+        "sha256": "4fd955530bb6c4eaa3180c8a82c90172aeb84651908b94fcf5752a236135d6e6",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-aisle_rack_ne.png",
+        "sha256": "13c400c1e621d28fa180357e241403837302fefdf24b370107641d7a76f4627e",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-aisle_rack_nw.png",
+        "sha256": "ec66ed7ed6b8f2fc1b22aebc26e876b34dab593f6643a128fd7320033752605f",
+        "size": [
+          101,
+          107
+        ],
+        "pivot": [
+          50,
+          78
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "checkout": {
+      "se": {
+        "file": "furniture-checkout_se.png",
+        "sha256": "c7cb8168e9ebbc780f882365509582faa9945648feb9730616df7ead9e19ea90",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-checkout_sw.png",
+        "sha256": "e028753091f513250353735efc98b3f642cde1acc1aa361ad3f00a947dac0dc6",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-checkout_ne.png",
+        "sha256": "eff75aac3f07c2e248236fa3c7918215082ebda2a5ae757de71b9bd068bda6f0",
+        "size": [
+          101,
+          87
+        ],
+        "pivot": [
+          50,
+          58
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-checkout_nw.png",
+        "sha256": "d8ee4f0d67a99b4c220b212317068f0f5693cd731c0be2306d13a5edb3a27b74",
+        "size": [
+          101,
+          90
+        ],
+        "pivot": [
+          50,
+          61
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "waiting_bench": {
+      "se": {
+        "file": "furniture-waiting_bench_se.png",
+        "sha256": "dbf4071a97cdf7e4830704733c33df422dabc5c9592aa5753fa6d1ae06f5af59",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-waiting_bench_sw.png",
+        "sha256": "ff436fc19d870871c8d7f8c42ef90ccf85a9899c2b7ac4faade507195b89e28f",
+        "size": [
+          101,
+          93
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-waiting_bench_ne.png",
+        "sha256": "0cff7fa52506f96226be5b430afa10847dc579696d3e0014e8a9979fbcfcfb1c",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-waiting_bench_nw.png",
+        "sha256": "5c4ebe2ccd29cce936cf55a2a853834b4130ca7269c7ef0ca340a419f76c1284",
+        "size": [
+          101,
+          93
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "whiteboard": {
+      "se": {
+        "file": "furniture-whiteboard_se.png",
+        "sha256": "958cc90fbb51ecf14957085cd36294c22a6ad1ecbbccd12cc3843541c04de7a4",
+        "size": [
+          101,
+          127
+        ],
+        "pivot": [
+          50,
+          98
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "sw": {
+        "file": "furniture-whiteboard_sw.png",
+        "sha256": "f27073b2a7cd23d44a6353179ff48499a235453727f374918b917a591e458a6c",
+        "size": [
+          101,
+          140
+        ],
+        "pivot": [
+          50,
+          111
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "ne": {
+        "file": "furniture-whiteboard_ne.png",
+        "sha256": "8d0f883fd0113d9ca223b957ce741a9efefdccdbff1b591b448cf581b700657a",
+        "size": [
+          101,
+          127
+        ],
+        "pivot": [
+          50,
+          98
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      },
+      "nw": {
+        "file": "furniture-whiteboard_nw.png",
+        "sha256": "324e43bb70b6f67069e77fff8fa750b5be2c4672656acf6fca49f192107c97a8",
+        "size": [
+          101,
+          140
+        ],
+        "pivot": [
+          50,
+          111
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I4",
+        "sourceFolder": "out_i4"
+      }
+    },
+    "food_vitrine": {
+      "se": {
+        "file": "furniture-food_vitrine_se.png",
+        "sha256": "0530eab13ee9be6a0f233ca1043b5c60d3cc167f4b58b12767ccec439a2b369a",
+        "size": [
+          101,
+          110
+        ],
+        "pivot": [
+          50,
+          81
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-food_vitrine_sw.png",
+        "sha256": "53c93b7fad94491c10fb2c5e8ae20f4383bdb01b68f9b57b236676f76ba8950b",
+        "size": [
+          101,
+          110
+        ],
+        "pivot": [
+          50,
+          81
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-food_vitrine_ne.png",
+        "sha256": "968aa5156f47deb965a0a525b66af719a8f45ecdf180759cbfa1cfc3be719df5",
+        "size": [
+          101,
+          110
+        ],
+        "pivot": [
+          50,
+          81
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-food_vitrine_nw.png",
+        "sha256": "8153ddee90125882ab455ad57e4b2e5a5de8143b1dcc1a7730e6dbaeda515407",
+        "size": [
+          101,
+          110
+        ],
+        "pivot": [
+          50,
+          81
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "food_cart": {
+      "se": {
+        "file": "furniture-food_cart_se.png",
+        "sha256": "476c6567f3dea8cb3cf60fb902d99fda910962c1474c877bf539c9b32103d6ba",
+        "size": [
+          101,
+          104
+        ],
+        "pivot": [
+          50,
+          75
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-food_cart_sw.png",
+        "sha256": "c8d2369e50bc36a32aa3990c03ad17ad506475140e0360b4dfc3faa7ba741a46",
+        "size": [
+          101,
+          116
+        ],
+        "pivot": [
+          50,
+          87
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-food_cart_ne.png",
+        "sha256": "8a018ced660002a36a88cb357db3563dbd9da800470acf28f13b6974e03516d0",
+        "size": [
+          101,
+          104
+        ],
+        "pivot": [
+          50,
+          75
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-food_cart_nw.png",
+        "sha256": "ecd56879adc964888efd63366a49b63669e442e49e51bbc2e353ab29c51b51f9",
+        "size": [
+          101,
+          116
+        ],
+        "pivot": [
+          50,
+          87
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "noodle_pot": {
+      "se": {
+        "file": "furniture-noodle_pot_se.png",
+        "sha256": "7d22374bf9541e9202ebf6f8eeb543fb2cd1e4230576bf57501fd46585738726",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-noodle_pot_sw.png",
+        "sha256": "347ded161be4d0866a58e7d577dccdddfbd73a372522fd9072ff472285603c33",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-noodle_pot_ne.png",
+        "sha256": "a5cea9b6000ae247e87fea61ad7a168798b5479568c9090d80a8d4a8dbbff7f0",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-noodle_pot_nw.png",
+        "sha256": "b177f5e8757620f7ceceadd0c4e1e9368ee6f087e7e058b3ae8a3b756433d8fc",
+        "size": [
+          69,
+          75
+        ],
+        "pivot": [
+          34,
+          54
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "coffee_machine": {
+      "se": {
+        "file": "furniture-coffee_machine_se.png",
+        "sha256": "0f2365c08809e852cce2e11099ba544e5206c67401a64589259a471daac22c90",
+        "size": [
+          69,
+          82
+        ],
+        "pivot": [
+          34,
+          61
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-coffee_machine_sw.png",
+        "sha256": "a79556961a93ecf7792161983afd0c321fdc29c539fd0259368cb125cb499bc2",
+        "size": [
+          69,
+          87
+        ],
+        "pivot": [
+          34,
+          66
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-coffee_machine_ne.png",
+        "sha256": "73bd4d2a90f9455c51194937597cac91d2f66ffdacc4b8427cebaf86d628028d",
+        "size": [
+          69,
+          82
+        ],
+        "pivot": [
+          34,
+          61
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-coffee_machine_nw.png",
+        "sha256": "2c6af14178adba22d035fa2926193a79c88510fc77030970f802d3401a2a7bed",
+        "size": [
+          69,
+          87
+        ],
+        "pivot": [
+          34,
+          66
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "display_freezer": {
+      "se": {
+        "file": "furniture-display_freezer_se.png",
+        "sha256": "1f21fd04d7399801b936b88f5509544fb97fb9134ef85bce13b807e8a5feeadb",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-display_freezer_sw.png",
+        "sha256": "d053e35344644c8a0d074df707aef94d2c6c686c5066bb7dc717b43e92a32e4a",
+        "size": [
+          101,
+          85
+        ],
+        "pivot": [
+          50,
+          56
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-display_freezer_ne.png",
+        "sha256": "7272e3e744177954d9b38eaddc273af21240e4b3e85d4d352246f7e1b0ea5385",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-display_freezer_nw.png",
+        "sha256": "00032f7e3f482382b740e6a3f06fc2e32eaa02bb5979f350d649e5bee501ddb1",
+        "size": [
+          101,
+          85
+        ],
+        "pivot": [
+          50,
+          56
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "market_crate": {
+      "se": {
+        "file": "furniture-market_crate_se.png",
+        "sha256": "a4f92bb552330ab7df13b196a24251bbf8392ed62ce9378cbd45457748fa54b0",
+        "size": [
+          69,
+          62
+        ],
+        "pivot": [
+          34,
+          41
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-market_crate_sw.png",
+        "sha256": "a3b5512fb07fd2dec34b0b5e8222d9908ecfef84eae9a56e729e5c0688abd47f",
+        "size": [
+          69,
+          61
+        ],
+        "pivot": [
+          34,
+          40
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-market_crate_ne.png",
+        "sha256": "bfe804c25971cc4b4af595d1b43c76d6047d6849a80ac9feaa35c0bfeec8bba0",
+        "size": [
+          69,
+          62
+        ],
+        "pivot": [
+          34,
+          41
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-market_crate_nw.png",
+        "sha256": "1e4d81adf476abb37f398e94b9978879d06370d43b28ef0bc53b6a75195b8bf2",
+        "size": [
+          69,
+          61
+        ],
+        "pivot": [
+          34,
+          40
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "atm": {
+      "se": {
+        "file": "furniture-atm_se.png",
+        "sha256": "77e7774c08e4663ba8c9140abcb94c58a5e77c856be48a89c65472da756dbe6f",
+        "size": [
+          69,
+          99
+        ],
+        "pivot": [
+          34,
+          78
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-atm_sw.png",
+        "sha256": "d22b9eec4dec74335564fa793fcf5a25a3eeea89281cf12a51f2defda2a2f14b",
+        "size": [
+          69,
+          99
+        ],
+        "pivot": [
+          34,
+          78
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-atm_ne.png",
+        "sha256": "6af3af55258d90ff9d20c04959acb5a167f9a3ab1706a1527bcf6fec77eb0629",
+        "size": [
+          69,
+          99
+        ],
+        "pivot": [
+          34,
+          78
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-atm_nw.png",
+        "sha256": "ad42f4eec8ca39f40a865ea18be65fd3f6e23ffbdf9374858c83e973bc00dd68",
+        "size": [
+          69,
+          99
+        ],
+        "pivot": [
+          34,
+          78
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "registration_desk": {
+      "se": {
+        "file": "furniture-registration_desk_se.png",
+        "sha256": "cb2b3be7fd30ac5f53669efc2cc9aea0ae0a2151458f98e6416b291ef2866c01",
+        "size": [
+          101,
+          88
+        ],
+        "pivot": [
+          50,
+          59
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-registration_desk_sw.png",
+        "sha256": "9cec421716e0fc9d946d76ab9a0dbf1015351d14a51cf28b3fce01da3d7e9071",
+        "size": [
+          101,
+          94
+        ],
+        "pivot": [
+          50,
+          65
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-registration_desk_ne.png",
+        "sha256": "d31143c82f0c3c45fc23c154b14cc0d01639ae206b0825a5b982605d267124cb",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-registration_desk_nw.png",
+        "sha256": "76c853eccd5be4963bb5f99098454b8cdcda64cf6e2f1ee3fa2379ef279353cf",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "clinic_bed": {
+      "se": {
+        "file": "furniture-clinic_bed_se.png",
+        "sha256": "2fd7f9dcd3eb39a4f0ed24615ab13b4b8beee4baad72de4c7d7383ec2532801d",
+        "size": [
+          133,
+          89
+        ],
+        "pivot": [
+          66,
+          52
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-clinic_bed_sw.png",
+        "sha256": "a02a5b6a8580a2f722f25a1ed03d564f923550417f2c30bf7f94724cb967cbe2",
+        "size": [
+          133,
+          103
+        ],
+        "pivot": [
+          66,
+          66
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-clinic_bed_ne.png",
+        "sha256": "d0b6a8aa40bf31df46417a997b96ef3f19fd17fb7b4605157f71e6bcd7b74a23",
+        "size": [
+          133,
+          89
+        ],
+        "pivot": [
+          66,
+          52
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-clinic_bed_nw.png",
+        "sha256": "c7217c1a2743497424d107668a4b4082cc662bf08c078e5ebc3f89d945081203",
+        "size": [
+          133,
+          103
+        ],
+        "pivot": [
+          66,
+          66
+        ],
+        "footprint": [
+          2,
+          2
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "medicine_rack": {
+      "se": {
+        "file": "furniture-medicine_rack_se.png",
+        "sha256": "9b3e82e38e56989a16996e0e3b9cf783042619f61697e72f22638d43cc7be906",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "sw": {
+        "file": "furniture-medicine_rack_sw.png",
+        "sha256": "f6956dfad0938658570c973f67b8ebd5f6df8eba96a38180f9a6906f3e67f178",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "ne": {
+        "file": "furniture-medicine_rack_ne.png",
+        "sha256": "f047baa9522a92ecc89f6af84c1773d9e5a0ba6c85ca68030f5fc199f438c6d3",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      },
+      "nw": {
+        "file": "furniture-medicine_rack_nw.png",
+        "sha256": "e1ba441db1f9be5ce47758cb76d59ef13870a024e8acbaca47059828a5df8a43",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I5",
+        "sourceFolder": "out_i5"
+      }
+    },
+    "squat_toilet": {
+      "se": {
+        "file": "furniture-squat_toilet_se.png",
+        "sha256": "89589b0a89a9a6acb57a4b4717a696e09db2d1319f1bf34b8d823584f7656591",
+        "size": [
+          69,
+          41
+        ],
+        "pivot": [
+          34,
+          20
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-squat_toilet_sw.png",
+        "sha256": "56323c093299e2594756dcfe93bf0d5073c89f0e8e28d710f03e69dc32050b8b",
+        "size": [
+          69,
+          42
+        ],
+        "pivot": [
+          34,
+          21
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-squat_toilet_ne.png",
+        "sha256": "cc68bed77becf764f1c86396516d5a5c643881047bcb5a543d605006ddc879b2",
+        "size": [
+          69,
+          41
+        ],
+        "pivot": [
+          34,
+          20
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-squat_toilet_nw.png",
+        "sha256": "7902f4ce34e3ffb484ada4cf3b61cec8b4bfe31182094d36fb5092212a167657",
+        "size": [
+          69,
+          42
+        ],
+        "pivot": [
+          34,
+          21
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "water_tub": {
+      "se": {
+        "file": "furniture-water_tub_se.png",
+        "sha256": "48238c7327610bfb54069cb11a38c3ac57ec045ba7f000840828b5affb7478fa",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-water_tub_sw.png",
+        "sha256": "9c807c598d4bd492fd4a6058e89f4af7a6630dd95e322dd2c83168886277e645",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-water_tub_ne.png",
+        "sha256": "c8a5f1d5f188badcd90dfdcd7616ea6bc03d0be713db8c4ed7e48628b3a5e259",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-water_tub_nw.png",
+        "sha256": "eab6bd3c88a6ea83f4afd9bd9cb57830dd2b7a0c45dce2b5070a881b19fb5d65",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "wudhu_tap": {
+      "se": {
+        "file": "furniture-wudhu_tap_se.png",
+        "sha256": "9a147d39b52b972ee0b5c03b6d49b3a1b3ba59c0307b1febc7c2401a03490a29",
+        "size": [
+          69,
+          64
+        ],
+        "pivot": [
+          34,
+          43
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-wudhu_tap_sw.png",
+        "sha256": "9224de2addb954eba18ba3311ffed604997bfa3a51d427e7d045650222330fdb",
+        "size": [
+          69,
+          69
+        ],
+        "pivot": [
+          34,
+          48
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-wudhu_tap_ne.png",
+        "sha256": "0c8cd13fe93b73ccddb75f763ff55ff3fdf69f0ea235f7ce78c0964707153bcd",
+        "size": [
+          69,
+          64
+        ],
+        "pivot": [
+          34,
+          43
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-wudhu_tap_nw.png",
+        "sha256": "fd6ee16d1e1d16cbacf974932cd1d3f154a267de8618a951a95c6ee0d0d1330c",
+        "size": [
+          69,
+          68
+        ],
+        "pivot": [
+          34,
+          47
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "arcade": {
+      "se": {
+        "file": "furniture-arcade_se.png",
+        "sha256": "3a9d226144a212b695d45948b43220d069f598930b5d085239eb16688a6674c6",
+        "size": [
+          69,
+          101
+        ],
+        "pivot": [
+          34,
+          80
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-arcade_sw.png",
+        "sha256": "c285fc65ad99ca138417548b8c1c8406bd60fe82b77f4b3d4ae06e7cabd873c3",
+        "size": [
+          69,
+          101
+        ],
+        "pivot": [
+          34,
+          80
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-arcade_ne.png",
+        "sha256": "2725030e50ce73242bd244fa8676c60de89d167a34492b253533a72e5061b6e6",
+        "size": [
+          69,
+          101
+        ],
+        "pivot": [
+          34,
+          80
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-arcade_nw.png",
+        "sha256": "7e8964fea1937531ea9f608101ad66733d105d7358cfd756daea0ffc9e058d6c",
+        "size": [
+          69,
+          101
+        ],
+        "pivot": [
+          34,
+          80
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "game_console": {
+      "se": {
+        "file": "furniture-game_console_se.png",
+        "sha256": "08c2f976e7559b0e0815054b09125f1534337e78a1e9591b78c23e5109e3bd32",
+        "size": [
+          101,
+          111
+        ],
+        "pivot": [
+          50,
+          82
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-game_console_sw.png",
+        "sha256": "a55f45fff6c4b057e2d0c4daabecb8a146fc82d00e7de6b52202a9da87d90bab",
+        "size": [
+          101,
+          118
+        ],
+        "pivot": [
+          50,
+          89
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-game_console_ne.png",
+        "sha256": "188ebb8c9d1110721c70472e37b3da955c385bd18e092836bdc2e01ac7a3ceba",
+        "size": [
+          101,
+          111
+        ],
+        "pivot": [
+          50,
+          82
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-game_console_nw.png",
+        "sha256": "ce113333c58b5746ac32fc0a0e6f7f5ce157900d47164f3e786d00484c3198ad",
+        "size": [
+          101,
+          118
+        ],
+        "pivot": [
+          50,
+          89
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "salon_chair": {
+      "se": {
+        "file": "furniture-salon_chair_se.png",
+        "sha256": "9ddee57c6fbc9cab0c34a0ee1cc654e9787bda7a5b06f50239c97529f08cf609",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-salon_chair_sw.png",
+        "sha256": "f3b035f3bf2c8aa6da641c2805f06ea9f85c1c23b5513ae8c930afc2b6e845d4",
+        "size": [
+          69,
+          76
+        ],
+        "pivot": [
+          34,
+          55
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-salon_chair_ne.png",
+        "sha256": "9524e20aaa0a4cea60e5f68c587fc5bab6b2e7ad1044389ebff8e64e34ee1417",
+        "size": [
+          69,
+          67
+        ],
+        "pivot": [
+          34,
+          46
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-salon_chair_nw.png",
+        "sha256": "f6bf84e2143f723acbc3a0c1aac576317814c137e0c7b41a10742b4b79697ae6",
+        "size": [
+          69,
+          76
+        ],
+        "pivot": [
+          34,
+          55
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "salon_mirror": {
+      "se": {
+        "file": "furniture-salon_mirror_se.png",
+        "sha256": "a8fa451e5a36a867562723d9e157f849bb6141ae2e0468e5f0c20df7f0f2f30d",
+        "size": [
+          69,
+          111
+        ],
+        "pivot": [
+          34,
+          90
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-salon_mirror_sw.png",
+        "sha256": "e3c16e027aa6baaefdeb79752074788aad593fbe67f7d0fd36d2f2fed74f5436",
+        "size": [
+          69,
+          124
+        ],
+        "pivot": [
+          34,
+          103
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-salon_mirror_ne.png",
+        "sha256": "5497c3b60b6a29863d902d930f22394a176daa5d5b551559ba3a3e4abed32c0c",
+        "size": [
+          69,
+          111
+        ],
+        "pivot": [
+          34,
+          90
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-salon_mirror_nw.png",
+        "sha256": "d1600f5a2a6fb0f8b3e4658f219730de7afaceb718df2145ffe083891b0a8e84",
+        "size": [
+          69,
+          124
+        ],
+        "pivot": [
+          34,
+          103
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "laundry_counter": {
+      "se": {
+        "file": "furniture-laundry_counter_se.png",
+        "sha256": "bd4d6382cc126dd9656838908a7d94bcd9660dc1a54ffd8dbe8e0c2ee5d64b49",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-laundry_counter_sw.png",
+        "sha256": "2c159baac63244713bb19777522aee3825bb0ab4c59a1ba523025623d28f5f2a",
+        "size": [
+          101,
+          85
+        ],
+        "pivot": [
+          50,
+          56
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-laundry_counter_ne.png",
+        "sha256": "be0635f2880e08c6041a13a92733d545144e463e0d3c3ac3fec01b1f4e682092",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-laundry_counter_nw.png",
+        "sha256": "9cc2706f3eb1d994e1799b6cba60a124a170d67a4b3215ca219a60effc0c67d2",
+        "size": [
+          101,
+          85
+        ],
+        "pivot": [
+          50,
+          56
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "workbench": {
+      "se": {
+        "file": "furniture-workbench_se.png",
+        "sha256": "fa172c53be09fbed720bd84ef9eaadd6c3279982e099298cbd79006fa97104ab",
+        "size": [
+          101,
+          88
+        ],
+        "pivot": [
+          50,
+          59
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-workbench_sw.png",
+        "sha256": "c86bec30f2632eed93e871dd7d646ee59597f3d75ea4b3ca894dcdb77d1357be",
+        "size": [
+          101,
+          94
+        ],
+        "pivot": [
+          50,
+          65
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-workbench_ne.png",
+        "sha256": "8deb5aa4ee7904da998ea4b92e5be842dc8ea1e82b6d974bc8ed56dbe6748620",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-workbench_nw.png",
+        "sha256": "f51ed458bd7752fbfcd18aad3bb6476ee8e52a39a288a392a6ac02460a556248",
+        "size": [
+          101,
+          83
+        ],
+        "pivot": [
+          50,
+          54
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "tool_rack": {
+      "se": {
+        "file": "furniture-tool_rack_se.png",
+        "sha256": "aa1f7398582c48e7a35aec3c0aa16a5d17aef50b31ce8aac90794a567448db62",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-tool_rack_sw.png",
+        "sha256": "f3547273616be95f7352b3a7cade4551483a92b06c69985faa458379e1cc6b5d",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-tool_rack_ne.png",
+        "sha256": "e9a53668d66b57b27dc0c5a3786ae642da6b2b1034509822fa5226d34c89f0dc",
+        "size": [
+          101,
+          103
+        ],
+        "pivot": [
+          50,
+          74
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-tool_rack_nw.png",
+        "sha256": "ef8fde687530538b00928eb533d4916ec81b1fff89a9ab1168dd48b774b044b7",
+        "size": [
+          101,
+          102
+        ],
+        "pivot": [
+          50,
+          73
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "gym_mat": {
+      "se": {
+        "file": "furniture-gym_mat_se.png",
+        "sha256": "52927a8630cf5fbe6f08a54dd9875e8b7141b4a91a43f059b9dd0c5e4314bd61",
+        "size": [
+          101,
+          56
+        ],
+        "pivot": [
+          50,
+          27
+        ],
+        "footprint": [
+          1,
+          2
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-gym_mat_sw.png",
+        "sha256": "460c207cb069168a45b57b4d8facb67f8ebfa8022ef96458c1e73373a3b76bd5",
+        "size": [
+          101,
+          56
+        ],
+        "pivot": [
+          50,
+          27
+        ],
+        "footprint": [
+          1,
+          2
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-gym_mat_ne.png",
+        "sha256": "f4f4f5cba15c65647b39890986fa713478acededdaf607bad8bc7d0c5b1553d4",
+        "size": [
+          101,
+          56
+        ],
+        "pivot": [
+          50,
+          27
+        ],
+        "footprint": [
+          1,
+          2
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-gym_mat_nw.png",
+        "sha256": "7d89f4b2d370907462f5d631a8145d1d436e611090f4aaf8a903dfc074ed736b",
+        "size": [
+          101,
+          56
+        ],
+        "pivot": [
+          50,
+          27
+        ],
+        "footprint": [
+          1,
+          2
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "treadmill": {
+      "se": {
+        "file": "furniture-treadmill_se.png",
+        "sha256": "ebcaaf829104691afd0e8192b3057e64b800e3fe1334e16efc6bde7c9131b3b0",
+        "size": [
+          101,
+          63
+        ],
+        "pivot": [
+          50,
+          34
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-treadmill_sw.png",
+        "sha256": "0f50d33b0ef70af9c79f62e1966b9c4e80049657613ce49cd7b08883e8f31eb3",
+        "size": [
+          101,
+          63
+        ],
+        "pivot": [
+          50,
+          34
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-treadmill_ne.png",
+        "sha256": "acacf3cd0028f478abb18e21f2503e7477c8aeac3d5830459da5242a4f1b169e",
+        "size": [
+          101,
+          63
+        ],
+        "pivot": [
+          50,
+          34
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-treadmill_nw.png",
+        "sha256": "a1e7cd40d28f5c1160e97606f67d5defaa53a8bf76447a3d85076060a16988e7",
+        "size": [
+          101,
+          63
+        ],
+        "pivot": [
+          50,
+          34
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "trash_bin": {
+      "se": {
+        "file": "furniture-trash_bin_se.png",
+        "sha256": "d4343117c0180508d29c7e941ecfc838d44bb38aeffe44654ab4269088d9988d",
+        "size": [
+          69,
+          61
+        ],
+        "pivot": [
+          34,
+          40
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "sw": {
+        "file": "furniture-trash_bin_sw.png",
+        "sha256": "834ce63904adad4d2b5a38d688939c3c27e58be365eb9fc068d738f7797598d9",
+        "size": [
+          69,
+          60
+        ],
+        "pivot": [
+          34,
+          39
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "ne": {
+        "file": "furniture-trash_bin_ne.png",
+        "sha256": "a5dd978f3b8048973d568b2716d48e70da536e3acb96dd84653d06997bc24b19",
+        "size": [
+          69,
+          61
+        ],
+        "pivot": [
+          34,
+          40
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      },
+      "nw": {
+        "file": "furniture-trash_bin_nw.png",
+        "sha256": "693db5b149c606b31513adf25f0dbd5bad9260a4c6b73a6466e8ee28303d8c3b",
+        "size": [
+          69,
+          60
+        ],
+        "pivot": [
+          34,
+          39
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "I6",
+        "sourceFolder": "out_i6"
+      }
+    },
+    "sekat_wc": {
+      "sw": {
+        "file": "furniture-sekat_wc_sw.png",
+        "sha256": "63b7e51735ff7fcc2f75faef5ab804ffa0869c7af69d31c8a62da51fc8b4a5b1",
+        "size": [
+          69,
+          92
+        ],
+        "pivot": [
+          34,
+          71
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "r4-sekat_wc",
+        "sourceFolder": "njh-interior-templates-r4/new/sekat_wc"
+      },
+      "se": {
+        "file": "furniture-sekat_wc_se.png",
+        "sha256": "d90eb6e983ecdf93d139945c042a0e0226e0d71d750a2bba21df9c5d0553708c",
+        "size": [
+          69,
+          92
+        ],
+        "pivot": [
+          34,
+          71
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "r4-sekat_wc",
+        "sourceFolder": "njh-interior-templates-r4/new/sekat_wc"
+      },
+      "ne": {
+        "file": "furniture-sekat_wc_ne.png",
+        "sha256": "d2268912772c530a152d9203d10af31bedc63d8547d4c2c3d170c893b8c00d3b",
+        "size": [
+          69,
+          92
+        ],
+        "pivot": [
+          34,
+          71
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "r4-sekat_wc",
+        "sourceFolder": "njh-interior-templates-r4/new/sekat_wc"
+      },
+      "nw": {
+        "file": "furniture-sekat_wc_nw.png",
+        "sha256": "acb752e7ac27c8f119b700873ff0f9be396b08c91f175fc5d930c01f10dc3231",
+        "size": [
+          69,
+          92
+        ],
+        "pivot": [
+          34,
+          71
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "r4-sekat_wc",
+        "sourceFolder": "njh-interior-templates-r4/new/sekat_wc"
+      }
+    }
+  }
+}

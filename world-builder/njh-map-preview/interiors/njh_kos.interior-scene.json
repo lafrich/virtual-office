@@ -1,0 +1,226 @@
+{
+  "id": "njh_kos",
+  "label": "NJH · Kos",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "items": [
+    {
+      "id": "njh-kos-bed-1",
+      "assetId": "bed",
+      "name": "Kasur",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sleep",
+      "pose": "lie",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "lie_sleep"
+      ],
+      "fx": [
+        {
+          "id": "njh_fx_sleep_z",
+          "layer": "__fx",
+          "file": "fx/njh_fx_sleep_z__fx_sheet_6x1.png",
+          "source": "/workspace/lfb-placeholders-v2/fx/njh_fx_sleep_z__fx_sheet_6x1.png",
+          "motions": [
+            "lie_sleep",
+            "tent_sleep",
+            "bench_sleep"
+          ],
+          "note": "Hook only; playback is Baymax. Not a furniture TYPE."
+        }
+      ]
+    },
+    {
+      "id": "njh-kos-wardrobe-1",
+      "assetId": "wardrobe",
+      "name": "Lemari",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    },
+    {
+      "id": "njh-kos-stove-1",
+      "assetId": "stove",
+      "name": "Kompor",
+      "c": 4,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-kos-fridge-1",
+      "assetId": "fridge",
+      "name": "Kulkas",
+      "c": 5,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    },
+    {
+      "id": "njh-kos-shower-1",
+      "assetId": "shower",
+      "name": "Shower",
+      "c": 6,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "bathe",
+      "pose": "bathe",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "mandi"
+      ],
+      "fx": [
+        {
+          "id": "njh_fx_water_shower",
+          "layer": "__fx",
+          "file": "fx/njh_fx_water_shower__fx_sheet_6x1.png",
+          "source": "/workspace/lfb-placeholders-v2/fx/njh_fx_water_shower__fx_sheet_6x1.png",
+          "motions": [
+            "mandi"
+          ],
+          "note": "Hook only; attach at shower head. Playback is Baymax. Not a furniture TYPE."
+        }
+      ]
+    },
+    {
+      "id": "njh-kos-squat_toilet-1",
+      "assetId": "squat_toilet",
+      "name": "WC Jongkok",
+      "c": 7,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "use_toilet",
+      "pose": "toilet",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wc_squat"
+      ]
+    },
+    {
+      "id": "njh-kos-sink-1",
+      "assetId": "sink",
+      "name": "Wastafel",
+      "c": 6,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-kos-chair-1",
+      "assetId": "chair",
+      "name": "Kursi Makan",
+      "c": 0,
+      "r": 3,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit",
+        "eat"
+      ]
+    },
+    {
+      "id": "njh-kos-dining_table-1",
+      "assetId": "dining_table",
+      "name": "Meja Makan",
+      "c": 2,
+      "r": 3,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat"
+      ]
+    }
+  ],
+  "floor": 1,
+  "notes": "r3 facing fix of njh_kos. Chair rot 90 (visual front +c) with a 1-tile gap, dining table at (2,3) so the seat visibly faces the table. Back-wall stove/shower/WC stay rot 0 (fronts into the room, WC stays SW). I1 chair has no true back view; rot 180 was not used.",
+  "adaptedFrom": "/workspace/njh-interior-templates-r1/scenes/njh_kos.interior-scene.json",
+  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema)."
+}

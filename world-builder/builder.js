@@ -7,6 +7,7 @@ const $=id=>document.getElementById(id);
 // mainkan.exe reuses the native Semesta renderer, assets, physics and Jiwa play runtime.
 // Player entry is read-only and cannot enter authoring modes.
 const playerMode=new URLSearchParams(location.search).get('player')==='1';
+const njhMapPreview=new URLSearchParams(location.search).get('njhMap')==='1'||window.VLNjhMapPreview?.enabled?.()===true;
 if(playerMode){
  // Load player-only, immutable Genesis + Emosi sources on demand;
  // Semesta edit mode must not download these heavy atlases.
@@ -73,6 +74,13 @@ const indonesiaSync=await window.VLIndonesiaAssets?.load();
 const jakartaUrbanSync=await window.VLJakartaUrban?.load();
 let assetCatalog=window.VLAssetCatalog||[];
 const assetByName=new Map(assetCatalog.map(x=>[x.file,x]));
+if(njhMapPreview){
+ try{
+  window.VLNjhMapPreview?.registerInto?.(assetCatalog,assetByName);
+  assetCatalog=Array.isArray(window.VLAssetCatalog)?[...window.VLAssetCatalog]:assetCatalog;
+  for(const e of assetCatalog)if(e?.file&&!assetByName.has(e.file))assetByName.set(e.file,e);
+ }catch(err){console.warn('NJH map preview catalog',err);}
+}
 if(window.VLSemestaTrafficLights){
  window.VLSemestaTrafficLights.registerCatalog();
  assetCatalog=window.VLAssetCatalog||assetCatalog;
@@ -288,27 +296,34 @@ const seed={
 };
 let documentMap=clone(seed),defaultSeed=clone(seed),selectedId=null,mode='select',snap=true,undoStack=[],redoStack=[];
 try{
- const r=await fetch('./world.json?v=p3',{cache:'no-store'});
- if(r.ok){defaultSeed=sanitize(await r.json());documentMap=clone(defaultSeed);}
+ if(njhMapPreview&&window.VLNjhMapPreview?.loadCity){
+  const njhCity=await window.VLNjhMapPreview.loadCity();
+  defaultSeed=sanitize(njhCity);documentMap=clone(defaultSeed);
+ }else{
+  const r=await fetch('./world.json?v=p3',{cache:'no-store'});
+  if(r.ok){defaultSeed=sanitize(await r.json());documentMap=clone(defaultSeed);}
+ }
 }catch(err){console.warn('Using built-in map if world.json is unavailable',err);}
 // Fresh installations start on the editable reference city; existing local
 // editing sessions are restored below without overwriting their work.
+// NJH map preview must not be replaced by Reference City, Kebon Sirih, or
+// a leftover localStorage draft.
 try{
- if(window.VLReferenceCity){
+ if(!njhMapPreview&&window.VLReferenceCity){
   defaultSeed=sanitize(window.VLReferenceCity.create(defaultSeed,assetByName,style,schema));
   documentMap=clone(defaultSeed);
  }
 }catch(error){console.warn('Could not seed Reference City; original map remains',error);}
 // Upgrade the built-in template immediately, without touching authored city data.
 try{
- const starter=window.VLKebonSirihStyle?.upgrade(defaultSeed,assetCatalog);
+ const starter=njhMapPreview?null:window.VLKebonSirihStyle?.upgrade(defaultSeed,assetCatalog);
  if(starter?.map){defaultSeed=sanitize(starter.map);documentMap=clone(defaultSeed);}
 }catch(error){console.warn('Kebon Sirih starter upgrade',error);}
 // Existing working drafts keep their coordinates, IDs and custom sprites.
 // Only recognizable proxy objects are migrated; preserve their old draft.
 try{
  const previousRaw=localStorage.getItem(STORE),saved=JSON.parse(previousRaw||'null');
- if(saved&&saved.format===seed.format&&Array.isArray(saved.objects)){
+ if(!njhMapPreview&&saved&&saved.format===seed.format&&Array.isArray(saved.objects)){
   const upgrade=window.VLKebonSirihStyle?.upgrade(saved,assetCatalog);
   if(upgrade?.changed&&previousRaw&&!playerMode){
    try{
@@ -323,9 +338,9 @@ try{
   }
  }
 }catch(e){console.warn('World Builder previous draft',e);}
-documentMap.map.unbounded=true;
+documentMap.map.unbounded=njhMapPreview?false:true;
 documentMap.map.terrain=terrain.normalize(documentMap.map.terrain||terrain.seeded(documentMap.map.worldBounds,documentMap.map.road),null);
-defaultSeed.map.unbounded=true;
+defaultSeed.map.unbounded=njhMapPreview?false:true;
 defaultSeed.map.terrain=terrain.normalize(defaultSeed.map.terrain||terrain.seeded(defaultSeed.map.worldBounds,defaultSeed.map.road),null);
 const dayClock=window.VLSemestaDayNight.makeClock(documentMap.map.environmentClock);
 function syncClockToMap(){documentMap.map.environmentClock=dayClock.snapshot();}
@@ -389,16 +404,22 @@ function sanitize(v){
   for(const key of ['layer','subtype','tags','interactions','capacity','entranceFacing','markerKind','blocking','notes','interactive','enterable','entrance','interior','actionSlots']){
    if(Object.hasOwn(p,key))e[key]=clone(p[key]);
   }
+  if(njhMapPreview){
+   for(const key of ['njhDoorId','njhUsePoint','njhDoorPoint','njhInteriorTemplate']){
+    if(Object.hasOwn(p,key))e[key]=clone(p[key]);
+   }
+  }
   style.normalize(e,assetByName);schema.normalize(e,assetByName,style);
   out.objects.push(e);
  }
  if(v.map&&typeof v.map==='object')out.map={...out.map,...clone(v.map)};
- out.map.unbounded=true;
+ out.map.unbounded=njhMapPreview?false:true;
  out.map.terrain=terrain.normalize(v.map?.terrain||terrain.seeded(out.map.worldBounds,out.map.road),null);
  return out;
 }
 let cloudCitySaveTimer=null;
 async function persistWorkingCityForCloud(){
+ if(njhMapPreview||playerMode)return null;
  if(!activeDraftId||!draftDirty||!window.VLCityDrafts)return null;
  const id=activeDraftId;
  const name=window.VLCityDrafts.cleanName(documentMap.map?.name);
@@ -425,7 +446,7 @@ function scheduleCloudCitySave(){
  },3200);
 }
 function saved(){
- if(playerMode)return; // Preview must not mutate Semesta's authoring draft or Drive.
+ if(playerMode||njhMapPreview)return; // Preview must not mutate Semesta's authoring draft or Drive.
  syncClockToMap();
  draftDirty=true;
  try{
@@ -451,7 +472,7 @@ function tell(msg){
 }
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xbed8de);
-const renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'high-performance'});
+const renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'high-performance',preserveDrawingBuffer:njhMapPreview});
 renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.setClearColor(0xbad0d8,1);
@@ -697,13 +718,13 @@ function pixelTexture(name,dir='sw'){
  const view=spec?.variants?.[dir]?dir:spec?.variants?.sw?'sw':spec?.variants?.se?'se':dir;
  const id=name+'|'+view;
  if(!spriteTexture.has(id)){
-  const src=spec?.source==='loak-v2'?(spec.url||window.VLLoakV2?.image(spec)||('./legacy-assets/loak-v2/'+(spec.relativeFile||''))):
+  const src=spec?.variants?.[view]?.url||spec?.url||(spec?.source==='loak-v2'?(spec.url||window.VLLoakV2?.image(spec)||('./legacy-assets/loak-v2/'+(spec.relativeFile||''))):
     spec?.source==='legacy-local'?(spec.url||window.VLLegacyObjects?.image(spec)||('./legacy-assets/virtual-life-legacy/'+(spec.relativeFile||''))):
     spec?.source==='traffic-light'?(spec.url||window.VLSemestaTrafficLights?.spriteUrl(spec.facing||'sw','red')||('./legacy-assets/traffic-light/'+(spec.relativeFile||''))):
     spec?.source==='bangun-object'?window.VLBangunObjects?.image(spec.id,view):
      spec?.source==='custom-building'?window.VLBuildingBridge?.image(spec.id,view):
     spec?.source==='pipeline-street'?window.VLPipelineAssets.building(spec.id,view):
-    spec?.source==='pipeline-vegetation'?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+spec.relativeFile:'../assets/'+name;
+    spec?.source==='pipeline-vegetation'?'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/vegetation_kebonsirih/'+spec.relativeFile:'../assets/'+name);
   const t=texLoader.load(src,()=>renderer.render(scene,camera),undefined,()=>console.warn('Missing sprite',name));
   t.colorSpace=THREE.SRGBColorSpace;t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
   spriteTexture.set(id,t);
@@ -2382,12 +2403,15 @@ canvas.addEventListener('wheel',e=>{
    (o.interior?.floors?.length||(o.type==='sprite'&&assetByName.get(o.asset)?.interior?.floors?.length)));
   const sorted=candidates.map(o=>{
    const spec=assetByName.get(o.asset);
-   const door=window.VLWarteg3D?.supported(spec)?
-    window.VLWarteg3D.doorPosition(o):{x:o.x,z:o.z};
+   const door=njhMapPreview&&window.VLNjhMapPreview?.doorAnchor?
+    window.VLNjhMapPreview.doorAnchor(o):
+    (window.VLWarteg3D?.supported(spec)?
+     window.VLWarteg3D.doorPosition(o):{x:o.x,z:o.z});
    return {o,distance:Math.hypot(root.position.x-door.x,root.position.z-door.z)};
   }).sort((a,b)=>a.distance-b.distance);
   const nearest=sorted[0];
-  if(!nearest||nearest.distance>2.1){
+  const enterLimit=njhMapPreview?(window.VLNjhMapPreview?.enterRadius||1.25):2.1;
+  if(!nearest||nearest.distance>enterLimit){
    tell('Dekati pintu bangunan, lalu tekan E untuk masuk.');return false;
   }
   for(const k of Object.keys(walkInput))walkInput[k]=false;
@@ -2945,6 +2969,19 @@ function spawnModule(){
  return SR?SR.normalizeModule(raw):raw||{};
 }
 function beginSpawnRespawn(actor,trigger){
+ if(njhMapPreview&&window.VLNjhMapPreview?.resolveSpawn){
+  const id=mainkanPlayerId||window.SemestaLifePlay?.playerId?.()||'';
+  const decision=window.VLNjhMapPreview.resolveSpawn(id);
+  window.__semestaLastSpawn=decision;
+  window.SemestaLifePlay?.onSpawn?.(decision);
+  const holder=actor&&rigs.get(actor.id);
+  if(decision?.ok&&decision.point&&holder){
+   holder.root.position.set(decision.point.x,holder.root.position.y||0,decision.point.z);
+   if(decision.point.facing)holder.rig?.setDirection?.(decision.point.facing);
+   tell((decision.kind==='home'?'Spawn rumah · ':'Spawn plaza · ')+decision.point.x.toFixed(1)+', '+decision.point.z.toFixed(1));
+  }
+  return decision;
+ }
  const SR=window.VLSpawnRespawn;
  if(!SR)return null;
  const rawMod=spawnModule();
@@ -3092,6 +3129,58 @@ window.SemestaPlay=Object.freeze({
   return inspectTrafficLights();
  }
 });
+
+if(njhMapPreview){
+ try{document.documentElement.dataset.njhMap='1';}catch{}
+ try{
+  const label=document.querySelector('.canvas-head .right');
+  if(label)label.textContent='BOUNDED MAP · PINCH TO ZOOM';
+ }catch{}
+ window.VLNjhMapPreviewRuntime=Object.freeze({
+  map(){return {name:documentMap.map?.name||'',unbounded:documentMap.map?.unbounded===true,
+   worldBounds:documentMap.map?.worldBounds||null,count:documentMap.objects.length};},
+  objects(){return documentMap.objects.map(o=>({id:o.id,name:o.name,type:o.type,asset:o.asset||'',
+   x:Number(o.x)||0,z:Number(o.z)||0,enterable:o.enterable===true,
+   hasInterior:!!o.interior?.floors?.length,doorId:o.njhDoorId||null,
+   template:o.njhInteriorTemplate||null}));},
+  walkPos(){const r=rigs.get(walkActorId)?.root;return r?{x:r.position.x,z:r.position.z,id:walkActorId,mode}:null;},
+  setWalk(){setMode('walk');return !!walkActorId;},
+  teleport(x,z){
+   if(mode!=='walk')setMode('walk');
+   const holder=rigs.get(walkActorId);
+   if(!holder)return false;
+   holder.root.position.set(Number(x),holder.root.position.y||0,Number(z));
+   focusCameraAt(Number(x),Number(z),16);
+   return true;
+  },
+  enter(){return enterNearbyBuilding();},
+  closeInterior(){const d=document.getElementById('interiorWalkthrough');if(d?.open)d.close();return !d?.open;},
+  interiorOpen(){return !!document.getElementById('interiorWalkthrough')?.open;},
+  interiorTitle(){return document.getElementById('interiorWalkthroughTitle')?.textContent||'';},
+  tryMove(dx,dz){
+   if(mode!=='walk')setMode('walk');
+   const holder=rigs.get(walkActorId),actor=documentMap.objects.find(o=>o.id===walkActorId);
+   if(!holder||!actor||!physics)return null;
+   const live=new Map([...rigs].map(([id,rec])=>[id,rec.root.position]));
+   const start={x:holder.root.position.x,z:holder.root.position.z};
+   const next=physics.move(actor,start,Number(dx)||0,Number(dz)||0,
+    documentMap.objects,documentMap.map,assetByName,style,live);
+   holder.root.position.x=next.x;holder.root.position.z=next.z;
+   return {start,next,moved:!!next.moved,blocked:!!next.blocked};
+  },
+  spriteDrawn(id){
+   const root=owners.get(id);
+   if(!root)return {ok:false,reason:'no-root'};
+   let textured=false,file=null;
+   root.traverse(n=>{
+    const map=n.material?.map;
+    if(map&&(map.image||map.source))textured=true;
+    if(n.userData?.assetFile)file=n.userData.assetFile;
+   });
+   return {ok:!!root,textured,file,visible:root.visible!==false};
+  }
+ });
+}
 
 if(window.SemestaLifePlay){
  window.SemestaLifePlay.attach({
@@ -4428,7 +4517,7 @@ function frame(now){
  clockLastSaved+=elapsedReal;
  // Save the running virtual time at low frequency, without dirtying the
  // geometry/draft or hammering localStorage at 60 frames per second.
- if(clockLastSaved>=25&&!playerMode){
+ if(clockLastSaved>=25&&!playerMode&&!njhMapPreview){
   clockLastSaved=0;
   try{syncClockToMap();localStorage.setItem(STORE,JSON.stringify(mapForPersist()));}catch{}
  }

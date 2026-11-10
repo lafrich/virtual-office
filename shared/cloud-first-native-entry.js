@@ -13,7 +13,8 @@
   const params=new URLSearchParams(root.location?.search||"");
   // Player and device previews are read-only gameplay surfaces. Never block
   // Mainkan gameplay, phone previews, or isolated browser regression sessions.
-  if(app==="semesta"&&(params.get("player")==="1"||params.get("deviceFrame")==="1"))
+  // ?njhMap=1 is the local NJH Semesta map preview (no Drive, no persist).
+  if(app==="semesta"&&(params.get("player")==="1"||params.get("deviceFrame")==="1"||params.get("njhMap")==="1"))
    return Object.freeze({isReady:()=>true,mode:"read-only-player"});
   // Explicit opt-out for legacy smoke tests and emergency recovery only.
   // Ordinary editor URLs always get the Drive-first startup.

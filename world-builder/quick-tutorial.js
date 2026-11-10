@@ -69,6 +69,8 @@ g.addEventListener('keydown',event=>{
 g.addEventListener('load',()=>{
  // mainkan.exe uses this exact world in player mode; never show editor tutorial.
  if(document.documentElement.classList.contains('semesta-player-mode'))return;
+ // Local NJH map preview is a playable walkthrough, not a first-run editor tour.
+ if(new URLSearchParams(g.location.search).get('njhMap')==='1')return;
  let seen=false;try{seen=localStorage.getItem(KEY)==='done';}catch{}
  if(!seen)open();
 },{once:true});

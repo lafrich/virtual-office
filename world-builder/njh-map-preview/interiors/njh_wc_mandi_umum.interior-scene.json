@@ -1,0 +1,280 @@
+{
+  "id": "njh_wc_mandi_umum",
+  "label": "NJH · WC / Mandi Umum",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "aqua",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "items": [
+    {
+      "id": "njh-wc-squat_toilet-1",
+      "assetId": "squat_toilet",
+      "name": "WC Jongkok 1",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "use_toilet",
+      "pose": "toilet",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wc_squat"
+      ]
+    },
+    {
+      "id": "njh-wc-sekat_wc-1",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC 1",
+      "c": 1,
+      "r": 0,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 0,
+      "blocking": true,
+      "triggerRadius": 0,
+      "actionAdjustments": {}
+    },
+    {
+      "id": "njh-wc-squat_toilet-2",
+      "assetId": "squat_toilet",
+      "name": "WC Jongkok 2",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "use_toilet",
+      "pose": "toilet",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wc_squat"
+      ]
+    },
+    {
+      "id": "njh-wc-sekat_wc-2",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC 2",
+      "c": 3,
+      "r": 0,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 0,
+      "blocking": true,
+      "triggerRadius": 0,
+      "actionAdjustments": {}
+    },
+    {
+      "id": "njh-wc-squat_toilet-3",
+      "assetId": "squat_toilet",
+      "name": "WC Jongkok 3",
+      "c": 4,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "use_toilet",
+      "pose": "toilet",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wc_squat"
+      ]
+    },
+    {
+      "id": "njh-wc-sekat_wc-3",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC 3 (penutup)",
+      "c": 5,
+      "r": 0,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 0,
+      "blocking": true,
+      "triggerRadius": 0,
+      "actionAdjustments": {}
+    },
+    {
+      "id": "njh-wc-water_tub-1",
+      "assetId": "water_tub",
+      "name": "Kamar Mandi 1 (Bak + Gayung)",
+      "c": 7,
+      "r": 0,
+      "rotation": 270,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "bathe",
+      "pose": "bathe",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "mandi"
+      ]
+    },
+    {
+      "id": "njh-wc-sekat_wc-4",
+      "assetId": "sekat_wc",
+      "name": "Sekat Mandi 1",
+      "c": 7,
+      "r": 1,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 0,
+      "blocking": true,
+      "triggerRadius": 0,
+      "actionAdjustments": {}
+    },
+    {
+      "id": "njh-wc-water_tub-2",
+      "assetId": "water_tub",
+      "name": "Kamar Mandi 2 (Bak + Gayung)",
+      "c": 7,
+      "r": 2,
+      "rotation": 270,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "bathe",
+      "pose": "bathe",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "mandi"
+      ]
+    },
+    {
+      "id": "njh-wc-sekat_wc-5",
+      "assetId": "sekat_wc",
+      "name": "Sekat Mandi 2 (penutup)",
+      "c": 7,
+      "r": 3,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 0,
+      "blocking": true,
+      "triggerRadius": 0,
+      "actionAdjustments": {}
+    },
+    {
+      "id": "njh-wc-sink-1",
+      "assetId": "sink",
+      "name": "Wastafel 1",
+      "c": 0,
+      "r": 2,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-wc-sink-2",
+      "assetId": "sink",
+      "name": "Wastafel 2",
+      "c": 0,
+      "r": 3,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-wc-wudhu_tap-1",
+      "assetId": "wudhu_tap",
+      "name": "Keran / Tap",
+      "c": 7,
+      "r": 5,
+      "rotation": 180,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "mandi",
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-wc-trash_bin-1",
+      "assetId": "trash_bin",
+      "name": "Tempat Sampah",
+      "c": 0,
+      "r": 5,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    }
+  ],
+  "floor": 1,
+  "notes": "r5 of njh_wc_mandi_umum (Ichsan t470). Waiting_bench removed (it read as a train-station bench and did not belong in a WC). Shower removed — kamar mandi uses water_tub (bak + gayung); water_tub's native action is bathe, so mandi still works. Three squat WC stalls stay on the back wall at (0,0)/(2,0)/(4,0) with sekat_wc at (1,0)/(3,0)/(5,0) rot 90. Two kamar mandi stalls on the right wall: water_tub at (7,0) and (7,2) rot 270 (entry at (6,0)/(6,2)), sekat_wc at (7,1) and closing (7,3) rot 0. Sinks flush on the left wall at (0,2)/(0,3) rot 90 (backsplash against the wall, fronts into the room). wudhu_tap on the door-wall corner (7,5) rot 180 (I1 has a true back; side-wall rot 90/270 visual front disagrees with t394). Trash bin in the left-front corner (0,5). Clear central aisle. Toilets stay rot 0 / SW. r4 untouched.",
+  "adaptedFrom": "/workspace/njh-interior-templates-r4/scenes/njh_wc_mandi_umum.interior-scene.json",
+  "adaption": "r5 layout fix of the r4 WC scene. Reuses r4 sekat_wc TYPE/art (copied into new/sekat_wc/, not redrawn). No shower, no waiting_bench. Kamar mandi is water_tub + sekat_wc. Review only; sekat_wc is not in the live Bangun TYPES registry."
+}
