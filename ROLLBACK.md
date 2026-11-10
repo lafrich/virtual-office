@@ -1,3 +1,29 @@
+# Rollback — Mainkan LGR-1 player + test start profiles
+
+Written 2026-11-10 (Asia/Jakarta). Worker, secrets, passwords and vault files were not changed.
+
+- Previous live `main`: `f4adb239d1d4917642408f3355698ed25fb0d1aa`
+- Feature commit: `79dca8c29bc23243bec218b6fc20d8b6021b8417` (shared/genesis-player.js LGR path + pipeline lgr-game.js loader, Semesta test hooks, mainkan/test-start-profiles.json, per-player life save, cache busters)
+- Service worker bump: `f50e94ee72ef39b85c02f0fad9b1baa454106da9`
+
+Restore (fast-forward only — do not force-push):
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit f50e94ee72ef39b85c02f0fad9b1baa454106da9
+git revert --no-edit 79dca8c29bc23243bec218b6fc20d8b6021b8417
+git push origin main
+```
+
+Instant per-device switch without a revert: open any page with `?renderer=v6p` (`?renderer=lgr` switches back).
+Test start profiles only: empty `profiles` in `mainkan/test-start-profiles.json`. Seeded saves are per player
+(`semesta-life-play-v1:<city>@<id>` in the browser); guests keep the old key.
+Pipeline side (lgr-game.js) rollback: see virtual-life-asset-pipeline ROLLBACK.md.
+
+---
+
 # Rollback — Retire the old Virtual Office, keep NJH apps
 
 Written 2026-11-10 (Asia/Jakarta).
