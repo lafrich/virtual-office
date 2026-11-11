@@ -46,3 +46,11 @@ test('desktop, virtual mouse and virtual keyboard are present', () => {
   assert.match(laptop, /overflow:auto;overscroll-behavior:contain/);
   assert.match(laptop, /repeat\(5,minmax\(0,1fr\)\)/);
 });
+
+test('one touch sequence maps to one tap even when pointer events coexist', () => {
+  assert.match(laptop, /touchEventsSeen=true/);
+  assert.match(laptop, /if\(!touchEventsSeen&&touchPointerState\.size===0\)finishTouch\(false\)/);
+  assert.match(laptop, /function finishTouch\(cancelled=false\)/);
+  assert.match(laptop, /const TAP_SLOP=12/);
+  assert.match(laptop, /control\.click\(\)/);
+});

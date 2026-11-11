@@ -72,6 +72,50 @@ const assert=require('node:assert/strict');
   assert.ok(Math.abs(cursorMovement.afterPointer.x-cursorMovement.before.x)>10,'PointerEvent touch moves cursor X');
   assert.ok(Math.abs(cursorMovement.afterPointer.y-cursorMovement.before.y)>10,'PointerEvent touch moves cursor Y');
   assert.deepEqual(cursorMovement.afterPointer,cursorMovement.afterDuplicate,'Touch duplicates do not double cursor movement');
+  // Verify single tap invokes a button inside the app, including hybrid
+  // Android PointerEvent+TouchEvent sequences and a PointerEvent-only fallback.
+  const tapState=await page.evaluate(async()=>{
+   const pad=document.getElementById('touchpad');
+   const scroll=document.getElementById('screenScroll');
+   const frame=[...document.querySelectorAll('#frameWrap iframe')].find(f=>f.style.display!=='none');
+   const doc=frame.contentDocument;
+   const cursor=document.getElementById('cursor');
+   const scale=new DOMMatrixReadOnly(getComputedStyle(frame).transform).a;
+   const x=(parseFloat(cursor.style.left)+scroll.scrollLeft)/scale;
+   const y=(parseFloat(cursor.style.top)+scroll.scrollTop)/scale;
+   const button=doc.createElement('button');button.id='membangun-tap-regression';
+   Object.assign(button.style,{position:'fixed',left:(x-30)+'px',top:(y-20)+'px',
+     width:'60px',height:'40px',zIndex:'2147483647'});
+   button.textContent='TEST TAP';doc.body.appendChild(button);
+   let clicks=0;button.addEventListener('click',()=>clicks++);
+   const touch=(type)=>{
+    const t=new Touch({identifier:86,target:pad,clientX:130,clientY:125});
+    pad.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,
+      touches:type==='touchend'?[]:[t],targetTouches:type==='touchend'?[]:[t],changedTouches:[t]}));
+   };
+   const pointer=(type)=>{
+    pad.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,
+     pointerId:86,pointerType:'touch',isPrimary:true,clientX:130,clientY:125}));
+   };
+   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+   const hit=doc.elementFromPoint(x,y)?.closest('button')?.id;
+   touch('touchstart');touch('touchend');await pause(350);
+   const touchOnly=clicks;
+   pointer('pointerdown');touch('touchstart');pointer('pointerup');touch('touchend');
+   await pause(350);const hybrid=clicks;
+   pointer('pointerdown');pointer('pointerup');
+   await pause(350);const pointerOnly=clicks;
+   const hold=document.getElementById('holdClick').getAttribute('aria-pressed');
+   button.remove();
+   return {hit,touchOnly,hybrid,pointerOnly,hold};
+  });
+  console.log('SINGLE_TAP_BUTTON',tapState);
+  assert.equal(tapState.hit,'membangun-tap-regression','Cursor points at the test button');
+  assert.equal(tapState.touchOnly,1,'TouchEvent tap clicks once');
+  assert.equal(tapState.hybrid,2,'Hybrid pointer/touch tap clicks once');
+  assert.equal(tapState.pointerOnly,3,'Pointer-only tap clicks once');
+  assert.equal(tapState.hold,'false','Single taps must not toggle HOLD');
+
   // User wants to move the whole clipped desktop image, NOT the app's inner tabs.
   const scrollState=await page.evaluate(()=>{
    const scroll=document.getElementById('screenScroll');

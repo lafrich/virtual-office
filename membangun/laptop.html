@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#071d55">
 <meta name="color-scheme" content="only light">
-<title>Membangun Mini Laptop v1.8 — Samsung Fold</title>
+<title>Membangun Mini Laptop v1.9 — Samsung Fold</title>
 <style>
 :root{font-family:Tahoma,"MS Sans Serif",Verdana,Arial,sans-serif;color:#192338;--xp:#d6d5ce;--line:#75859a;--blue:#154c9f;--paper:#f9f9f3}
 *{box-sizing:border-box}
@@ -88,7 +88,7 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
 <div class="laptop" id="laptop">
  <section class="display" aria-label="Tampilan aplikasi desktop">
   <header class="topbar">
-   <div class="brand">✳ MEMBANGUN.EXE <small>FOLD EDITION · v1.8</small></div>
+   <div class="brand">✳ MEMBANGUN.EXE <small>FOLD EDITION · v1.9</small></div>
    <div class="right">
     <button id="zoomOut" title="Perkecil seluruh viewport laptop (bukan zoom denah)">−</button><span id="zoomText" aria-label="Zoom">FIT</span>
     <button id="zoomIn" title="Perbesar seluruh viewport laptop (bukan zoom denah)">＋</button>
@@ -290,7 +290,9 @@ function clickMouse(button=0){
  }
  pressMouse(0);releaseMouse(0);
  const doc=currentDocument(),w=doc.defaultView,p=pointInFrame();
- t.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true,view:w,button:0,buttons:0,clientX:p.x,clientY:p.y}));
+ const control=t.closest?.('button,a[href],summary,label,input[type="checkbox"],input[type="radio"]');
+ if(control&&typeof control.click==='function')control.click();
+ else t.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true,view:w,button:0,buttons:0,clientX:p.x,clientY:p.y}));
  if(t.closest&&t.closest('input,textarea,[contenteditable="true"]'))lastFocus=t.closest('input,textarea,[contenteditable="true"]');
 }
 function scrollContent(deltaY,deltaX=0){
@@ -532,32 +534,59 @@ let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0,scrol
 function clearLongPress(){clearTimeout(longPressTimer);longPressTimer=null}
 function recordTap(){
  const now=Date.now();
- // A pan can move the cursor far away: detect double taps from timing,
- // not from the last synthetic mouse coordinate.
- if(lastTap&&now-lastTap.time<420){
+ // Resolve a double tap before triggering any single-click side effect.
+ if(lastTap && now-lastTap.time<=300){
   clearTimeout(tapTimer);tapTimer=null;lastTap=null;
-  setHold(!holdLocked);return;
+  setHold(!holdLocked);
+  return;
  }
  clearTimeout(tapTimer);
  const tap={time:now};lastTap=tap;
  tapTimer=setTimeout(()=>{
   tapTimer=null;
-  if(lastTap===tap){
-   lastTap=null;
-   if(!holdLocked)clickMouse(0);
-  }
- },320);
+  if(lastTap!==tap)return;
+  lastTap=null;
+  if(!holdLocked)clickMouse(0);
+ },300);
 }
 const pad=$('touchpad');
-// TouchEvent and PointerEvent can both fire on Android WebView.
-// Shared coordinates avoid moving the cursor twice for one finger motion.
+// One physical gesture may emit both PointerEvents and TouchEvents.
+// Every completed gesture has ONE owner, preventing a single tap becoming HOLD.
 const touchPointerState=new Map();
-let pointerTouchFallback=false;
+let touchEventsSeen=false,gestureStart=null;
+let pointerGesture=null;
+const TAP_SLOP=12;
+function clearTouchState(){
+ touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
+ moved=false;gestureStart=null;touchEventsSeen=false;touchPointerState.clear();
+}
+function beginTouch(x,y){
+ if(touching)return;
+ touching=true;scrolling=false;moved=false;longHeld=false;
+ gestureStart={x,y};prevTouches={x,y};startTime=Date.now();
+ clearLongPress();
+ longPressTimer=setTimeout(()=>{
+  if(touching&&!scrolling&&!moved&&!pressed){
+   pressMouse(0);
+   longHeld=pressed;
+  }
+ },390);
+}
+function finishTouch(cancelled=false){
+ if(!touching)return;
+ clearLongPress();
+ const wasTap=!cancelled&&!scrolling&&!moved&&!longHeld&&Date.now()-startTime<600;
+ if(longHeld)releaseMouse(0);
+ clearTouchState();
+ if(wasTap)recordTap();
+}
 function moveFromTouch(x,y){
- if(scrolling||touchPointerState.size>1)return;
+ if(!touching||scrolling||touchPointerState.size>1)return;
+ const traveled=gestureStart?Math.hypot(x-gestureStart.x,y-gestureStart.y):0;
+ if(traveled>TAP_SLOP)moved=true;
+ if(traveled>6)clearLongPress();
  if(prevTouches){
   const dx=x-prevTouches.x,dy=y-prevTouches.y;
-  if(Math.abs(dx)+Math.abs(dy)>1.5){moved=true;clearLongPress()}
   if(dx||dy){
    const d=gestureDelta(dx,dy);
    setCursor(cx+d.dx*1.5,cy+d.dy*1.5);
@@ -573,22 +602,17 @@ function pairTouch(touches){
 }
 pad.addEventListener('touchstart',e=>{
  e.preventDefault();
- pointerTouchFallback=false;
+ touchEventsSeen=true;
  if(e.touches.length>=2){
   clearLongPress();scrolling=true;moved=true;
-  // Reinitialize on the second finger; one-finger long-press must not remain held.
   const pair=pairTouch(e.touches);
   twoFinger={start:pair,prev:pair,zoomDistance:pair.distance,kind:'pending'};
   prevTouches={x:pair.x,y:pair.y};
   if(longHeld){releaseMouse();longHeld=false}
   return;
  }
- if(scrolling)return; // A remaining finger after pinch should not trigger a click.
- clearLongPress();touching=true;scrolling=false;moved=false;longHeld=false;startTime=Date.now();
- prevTouches={x:e.touches[0].clientX,y:e.touches[0].clientY};
- longPressTimer=setTimeout(()=>{
-  if(touching&&!scrolling&&!moved&&!pressed){pressMouse();longHeld=true}
- },360);
+ if(scrolling||!e.touches.length)return;
+ beginTouch(e.touches[0].clientX,e.touches[0].clientY);
 },{passive:false});
 pad.addEventListener('touchmove',e=>{
  e.preventDefault();
@@ -600,13 +624,10 @@ pad.addEventListener('touchmove',e=>{
   if(g.kind==='pending'){
    const pinchChange=Math.abs(pair.distance-g.start.distance);
    const centerTravel=Math.hypot(pair.x-g.start.x,pair.y-g.start.y);
-   // Ratio-based pinch detection avoids confusing a two-finger swipe with zoom.
    if(pinchChange>Math.max(6,g.start.distance*.055)&&pinchChange>centerTravel*.65)g.kind='pinch';
    else if(centerTravel>5&&centerTravel>pinchChange*.8)g.kind='pan';
   }
   if(g.kind==='pinch'){
-   // Send discrete mouse-wheel zoom steps to the editor, not the outer page.
-   // A threshold avoids runaway zoom at high Android touch sample rates.
    const spacing=14;
    const ticks=Math.max(-4,Math.min(4,Math.trunc((pair.distance-g.zoomDistance)/spacing)));
    if(ticks){
@@ -621,39 +642,29 @@ pad.addEventListener('touchmove',e=>{
   prevTouches={x:pair.x,y:pair.y};moved=true;scrolling=true;return;
  }
  if(!e.touches.length||scrolling)return;
- const t=e.touches[0];
- moveFromTouch(t.clientX,t.clientY);
+ moveFromTouch(e.touches[0].clientX,e.touches[0].clientY);
 },{passive:false});
 pad.addEventListener('touchend',e=>{
- e.preventDefault();clearLongPress();
+ e.preventDefault();
  if(e.touches.length){prevTouches=null;return}
- touchPointerState.clear();pointerTouchFallback=false;
- if(longHeld)releaseMouse();
- else if(!scrolling&&!moved&&Date.now()-startTime<350)recordTap();
- touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
+ finishTouch(false);
 },{passive:false});
-pad.addEventListener('touchcancel',()=>{
- touchPointerState.clear();pointerTouchFallback=false;
- clearLongPress();if(longHeld)releaseMouse();
- touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
-});
-let pointerGesture=null;
+pad.addEventListener('touchcancel',()=>finishTouch(true));
 pad.addEventListener('pointerdown',e=>{
  if(e.pointerType==='touch'){
   touchPointerState.set(e.pointerId,{x:e.clientX,y:e.clientY});
   try{pad.setPointerCapture(e.pointerId)}catch{}
-  if(touchPointerState.size===1){
-   pointerTouchFallback=true;
-   if(!touching){
-    touching=true;scrolling=false;moved=false;longHeld=false;startTime=Date.now();
-    prevTouches={x:e.clientX,y:e.clientY};
-   }
-  }else{pointerTouchFallback=false;scrolling=true;moved=true}
+  if(touchPointerState.size===1)beginTouch(e.clientX,e.clientY);
+  else{
+   scrolling=true;moved=true;clearLongPress();
+   if(longHeld){releaseMouse();longHeld=false}
+  }
   return;
  }
  e.preventDefault();
  try{pad.setPointerCapture(e.pointerId)}catch{}
- pointerGesture={x:e.clientX,y:e.clientY,moved:false};startTime=Date.now();
+ pointerGesture={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY};
+ startTime=Date.now();
 });
 pad.addEventListener('pointermove',e=>{
  if(e.pointerType==='touch'){
@@ -664,33 +675,26 @@ pad.addEventListener('pointermove',e=>{
  }
  if(!pointerGesture)return;
  const dx=e.clientX-pointerGesture.x,dy=e.clientY-pointerGesture.y;
- if(Math.abs(dx)+Math.abs(dy)>2)pointerGesture.moved=true;
  pointerGesture.x=e.clientX;pointerGesture.y=e.clientY;
  const d=gestureDelta(dx,dy);setCursor(cx+d.dx*1.3,cy+d.dy*1.3);movePointer();
 });
 pad.addEventListener('pointerup',e=>{
  if(e.pointerType==='touch'){
   touchPointerState.delete(e.pointerId);
-  if(pointerTouchFallback&&touchPointerState.size===0){
-   clearLongPress();
-   if(longHeld)releaseMouse();
-   else if(!scrolling&&!moved&&Date.now()-startTime<350)recordTap();
-   touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
-  }
+  // TouchEvent owns completion whenever that event stream exists.
+  // pointerup must never generate a second tap before touchend.
+  if(!touchEventsSeen&&touchPointerState.size===0)finishTouch(false);
   return;
  }
  if(!pointerGesture)return;
- if(!pointerGesture.moved)recordTap();
+ if(Math.hypot(e.clientX-pointerGesture.startX,e.clientY-pointerGesture.startY)<=TAP_SLOP)recordTap();
  pointerGesture=null;
 });
 pad.addEventListener('pointercancel',e=>{
  if(e.pointerType==='touch'){
   touchPointerState.delete(e.pointerId);
-  if(!touchPointerState.size&&pointerTouchFallback){
-   clearLongPress();if(longHeld)releaseMouse();
-   touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
-  }
- }
+  if(!touchPointerState.size)finishTouch(true);
+ }else pointerGesture=null;
 });
 pad.addEventListener('wheel',e=>{e.preventDefault();panScreen(e.deltaY,e.deltaX)},{passive:false});
 $('holdClick').addEventListener('click',()=>setHold(!holdLocked));
