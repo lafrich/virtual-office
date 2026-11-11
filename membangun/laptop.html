@@ -627,6 +627,7 @@ pad.addEventListener('touchmove',e=>{
 pad.addEventListener('touchend',e=>{
  e.preventDefault();clearLongPress();
  if(e.touches.length){prevTouches=null;return}
+ touchPointerState.clear();pointerTouchFallback=false;
  if(longHeld)releaseMouse();
  else if(!scrolling&&!moved&&Date.now()-startTime<350)recordTap();
  touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
