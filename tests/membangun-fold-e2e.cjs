@@ -8,7 +8,7 @@ const assert=require('node:assert/strict');
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
   const root='http://127.0.0.1:8080/';
-  await page.goto(root+'virtual-office/membangun/laptop.html?app=semesta',{waitUntil:'domcontentloaded'});
+  await page.goto(root+'virtual-office/membangun/laptop.html?app=semesta&touchdebug=1',{waitUntil:'domcontentloaded'});
   await page.evaluate((root)=>{
    const urls={
     mahluk:'virtual-life-asset-pipeline/site/index.html',
@@ -236,7 +236,8 @@ const assert=require('node:assert/strict');
    hold.click();const buttonOn=hold.getAttribute('aria-pressed');
    hold.click();const buttonOff=hold.getAttribute('aria-pressed');
    const result={beforePan,duringPan,afterPan,afterLock,afterDrag,afterUnlock,
-      buttonOn,buttonOff,events:afterDouble,extraEvents:events.slice(afterDouble.length)};
+      buttonOn,buttonOff,events:afterDouble,extraEvents:events.slice(afterDouble.length),
+      tapTrace:window.__membangunTapTrace?.slice(-80)};
    for(const [type,handler] of Object.entries(handlers))world.removeEventListener(type,handler,true);
    return result;
   });
