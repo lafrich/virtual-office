@@ -159,6 +159,9 @@ const apps=[
  {id:'mainkan',label:'MAINKAN',url:'https://lafrich.github.io/virtual-office/mainkan/'}
 ];
 const params=new URLSearchParams(location.search);
+const tapTraceLog=[];
+if(params.has('touchdebug'))window.__membangunTapTrace=tapTraceLog;
+function tapTrace(type,data){if(params.has('touchdebug'))tapTraceLog.push({type,time:Date.now(),...data})}
 let selected=apps.find(a=>a.id===params.get('app'))?.id || 'semesta';
 let zoom=1,scale=1,frameWidth=1180,frameHeight=660,rotated=false;
 let cx=0,cy=0,pressed=false,dragTarget=null,holdLocked=false,restoreSemestaMode=null,shift=false,symbols=false,ctrl=false;
@@ -250,6 +253,7 @@ function releaseMouse(button=0){
 }
 function setHold(value){
  const next=!!value;
+ tapTrace('setHold',{next,holdLocked});
  if(holdLocked===next)return;
  if(next){
   if(!canBridge){message('Buka aplikasi terlebih dahulu');return}
@@ -534,9 +538,11 @@ let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0,scrol
 function clearLongPress(){clearTimeout(longPressTimer);longPressTimer=null}
 function recordTap(){
  const now=Date.now();
+ tapTrace('recordTap',{sinceLast:lastTap?now-lastTap.time:null,holdLocked});
  // Resolve a double tap before triggering any single-click side effect.
  if(lastTap && now-lastTap.time<=300){
   clearTimeout(tapTimer);tapTimer=null;lastTap=null;
+  tapTrace('doubleTap',{previousHold:holdLocked});
   setHold(!holdLocked);
   return;
  }
@@ -546,7 +552,7 @@ function recordTap(){
   tapTimer=null;
   if(lastTap!==tap)return;
   lastTap=null;
-  if(!holdLocked)clickMouse(0);
+  if(!holdLocked){tapTrace('singleClick',{});clickMouse(0)}
  },300);
 }
 const pad=$('touchpad');
@@ -573,6 +579,7 @@ function beginTouch(x,y){
  },390);
 }
 function finishTouch(cancelled=false){
+ tapTrace('finishTouch',{cancelled,touching,scrolling,moved,longHeld,startTime,delta:Date.now()-startTime});
  // A two-finger gesture can start without a prior single-finger touchstart.
  // Its end must still clear scrolling so the next single tap is clickable.
  if(!touching){clearLongPress();clearTouchState();return}
