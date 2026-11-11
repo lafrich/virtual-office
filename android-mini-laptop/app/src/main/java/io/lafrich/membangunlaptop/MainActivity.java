@@ -21,7 +21,7 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
     private static final String START_URL =
-        "https://lafrich.github.io/virtual-office/membangun/laptop.html?v=1.7.0&app=semesta";
+        "https://lafrich.github.io/virtual-office/membangun/laptop.html?v=1.8.0&app=semesta";
     private WebView webView;
     private ValueCallback<Uri[]> pendingFileSelection;
     private static final int FILE_PICKER_REQUEST = 5417;

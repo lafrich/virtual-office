@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#071d55">
 <meta name="color-scheme" content="only light">
-<title>Membangun Mini Laptop v1.7 — Samsung Fold</title>
+<title>Membangun Mini Laptop v1.8 — Samsung Fold</title>
 <style>
 :root{font-family:Tahoma,"MS Sans Serif",Verdana,Arial,sans-serif;color:#192338;--xp:#d6d5ce;--line:#75859a;--blue:#154c9f;--paper:#f9f9f3}
 *{box-sizing:border-box}
@@ -34,7 +34,7 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
 .screen-scroll{position:absolute;inset:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#5b84bc #cdd8e8;touch-action:pan-x pan-y}
 .frame-wrap{position:relative;transform-origin:0 0}
 .embedded-frame{display:block;position:absolute;top:0;left:0;transform-origin:0 0;border:0;background:#fff}
-#cursor{position:absolute;left:50%;top:50%;width:13px;height:16px;pointer-events:none;z-index:6;filter:drop-shadow(1px 2px 1px #101c3290)}
+#cursor{position:absolute;left:50%;top:50%;width:20px;height:25px;pointer-events:none;z-index:9;filter:drop-shadow(1px 2px 2px #101c32ad);will-change:left,top}
 #cursor svg{width:100%;height:100%}
 .viewport-nav{position:absolute;right:4px;top:50%;transform:translateY(-50%);z-index:7;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 3px;background:#e2e9f2e8;border:1px solid #778fae;border-radius:6px;box-shadow:0 1px 5px #10294b30}
 .viewport-nav button{width:26px;height:28px;min-width:26px;padding:0;font-size:17px;font-weight:bold;line-height:1}
@@ -88,7 +88,7 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
 <div class="laptop" id="laptop">
  <section class="display" aria-label="Tampilan aplikasi desktop">
   <header class="topbar">
-   <div class="brand">✳ MEMBANGUN.EXE <small>FOLD EDITION · v1.7</small></div>
+   <div class="brand">✳ MEMBANGUN.EXE <small>FOLD EDITION · v1.8</small></div>
    <div class="right">
     <button id="zoomOut" title="Perkecil seluruh viewport laptop (bukan zoom denah)">−</button><span id="zoomText" aria-label="Zoom">FIT</span>
     <button id="zoomIn" title="Perbesar seluruh viewport laptop (bukan zoom denah)">＋</button>
@@ -549,6 +549,23 @@ function recordTap(){
  },320);
 }
 const pad=$('touchpad');
+// TouchEvent and PointerEvent can both fire on Android WebView.
+// Shared coordinates avoid moving the cursor twice for one finger motion.
+const touchPointerState=new Map();
+let pointerTouchFallback=false;
+function moveFromTouch(x,y){
+ if(scrolling||touchPointerState.size>1)return;
+ if(prevTouches){
+  const dx=x-prevTouches.x,dy=y-prevTouches.y;
+  if(Math.abs(dx)+Math.abs(dy)>1.5){moved=true;clearLongPress()}
+  if(dx||dy){
+   const d=gestureDelta(dx,dy);
+   setCursor(cx+d.dx*1.5,cy+d.dy*1.5);
+   movePointer();
+  }
+ }
+ prevTouches={x,y};
+}
 function pairTouch(touches){
  const a=touches[0],b=touches[1];
  return {x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2,
@@ -556,6 +573,7 @@ function pairTouch(touches){
 }
 pad.addEventListener('touchstart',e=>{
  e.preventDefault();
+ pointerTouchFallback=false;
  if(e.touches.length>=2){
   clearLongPress();scrolling=true;moved=true;
   // Reinitialize on the second finger; one-finger long-press must not remain held.
@@ -604,12 +622,7 @@ pad.addEventListener('touchmove',e=>{
  }
  if(!e.touches.length||scrolling)return;
  const t=e.touches[0];
- if(prevTouches){
-  const dx=t.clientX-prevTouches.x,dy=t.clientY-prevTouches.y;
-  if(Math.abs(dx)+Math.abs(dy)>1.5){moved=true;clearLongPress()}
-  const d=gestureDelta(dx,dy);setCursor(cx+d.dx*1.5,cy+d.dy*1.5);movePointer();
- }
- prevTouches={x:t.clientX,y:t.clientY};
+ moveFromTouch(t.clientX,t.clientY);
 },{passive:false});
 pad.addEventListener('touchend',e=>{
  e.preventDefault();clearLongPress();
@@ -619,26 +632,64 @@ pad.addEventListener('touchend',e=>{
  touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
 },{passive:false});
 pad.addEventListener('touchcancel',()=>{
+ touchPointerState.clear();pointerTouchFallback=false;
  clearLongPress();if(longHeld)releaseMouse();
  touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
 });
 let pointerGesture=null;
 pad.addEventListener('pointerdown',e=>{
- if(e.pointerType==='touch')return;
- e.preventDefault();pad.setPointerCapture(e.pointerId);
+ if(e.pointerType==='touch'){
+  touchPointerState.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  try{pad.setPointerCapture(e.pointerId)}catch{}
+  if(touchPointerState.size===1){
+   pointerTouchFallback=true;
+   if(!touching){
+    touching=true;scrolling=false;moved=false;longHeld=false;startTime=Date.now();
+    prevTouches={x:e.clientX,y:e.clientY};
+   }
+  }else{pointerTouchFallback=false;scrolling=true;moved=true}
+  return;
+ }
+ e.preventDefault();
+ try{pad.setPointerCapture(e.pointerId)}catch{}
  pointerGesture={x:e.clientX,y:e.clientY,moved:false};startTime=Date.now();
 });
 pad.addEventListener('pointermove',e=>{
- if(e.pointerType==='touch'||!pointerGesture)return;
+ if(e.pointerType==='touch'){
+  if(!touchPointerState.has(e.pointerId))return;
+  touchPointerState.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(touchPointerState.size===1)moveFromTouch(e.clientX,e.clientY);
+  return;
+ }
+ if(!pointerGesture)return;
  const dx=e.clientX-pointerGesture.x,dy=e.clientY-pointerGesture.y;
  if(Math.abs(dx)+Math.abs(dy)>2)pointerGesture.moved=true;
  pointerGesture.x=e.clientX;pointerGesture.y=e.clientY;
  const d=gestureDelta(dx,dy);setCursor(cx+d.dx*1.3,cy+d.dy*1.3);movePointer();
 });
 pad.addEventListener('pointerup',e=>{
- if(e.pointerType==='touch'||!pointerGesture)return;
+ if(e.pointerType==='touch'){
+  touchPointerState.delete(e.pointerId);
+  if(pointerTouchFallback&&touchPointerState.size===0){
+   clearLongPress();
+   if(longHeld)releaseMouse();
+   else if(!scrolling&&!moved&&Date.now()-startTime<350)recordTap();
+   touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
+  }
+  return;
+ }
+ if(!pointerGesture)return;
  if(!pointerGesture.moved)recordTap();
  pointerGesture=null;
+});
+pad.addEventListener('pointercancel',e=>{
+ if(e.pointerType==='touch'){
+  touchPointerState.delete(e.pointerId);
+  if(!touchPointerState.size&&pointerTouchFallback){
+   clearLongPress();if(longHeld)releaseMouse();
+   touching=false;prevTouches=null;longHeld=false;scrolling=false;twoFinger=null;
+  }
+ }
 });
 pad.addEventListener('wheel',e=>{e.preventDefault();panScreen(e.deltaY,e.deltaX)},{passive:false});
 $('holdClick').addEventListener('click',()=>setHold(!holdLocked));

@@ -54,6 +54,24 @@ const assert=require('node:assert/strict');
   const keyboardHeight=await page.locator('#keyboardPage').evaluate(el=>el.offsetHeight);
   console.log('KEYBOARD_RATIO',keyboardHeight,panelHeight,(keyboardHeight/panelHeight).toFixed(2));
   assert.ok(keyboardHeight/panelHeight<.57,'Keyboard must leave room for touchpad');
+  // Regression: touch PointerEvents must move the cursor even without touchmove.
+  const cursorMovement=await page.evaluate(()=>{
+   const pad=document.getElementById('touchpad'),cursor=document.getElementById('cursor');
+   const before={x:parseFloat(cursor.style.left),y:parseFloat(cursor.style.top)};
+   const opts={bubbles:true,cancelable:true,pointerId:78,pointerType:'touch',isPrimary:true};
+   pad.dispatchEvent(new PointerEvent('pointerdown',{...opts,clientX:110,clientY:110}));
+   pad.dispatchEvent(new PointerEvent('pointermove',{...opts,clientX:130,clientY:130}));
+   const afterPointer={x:parseFloat(cursor.style.left),y:parseFloat(cursor.style.top)};
+   const t=new Touch({identifier:78,target:pad,clientX:130,clientY:130});
+   pad.dispatchEvent(new TouchEvent('touchmove',{bubbles:true,cancelable:true,touches:[t],targetTouches:[t],changedTouches:[t]}));
+   const afterDuplicate={x:parseFloat(cursor.style.left),y:parseFloat(cursor.style.top)};
+   pad.dispatchEvent(new PointerEvent('pointerup',{...opts,clientX:130,clientY:130}));
+   return {before,afterPointer,afterDuplicate};
+  });
+  console.log('ANDROID_POINTER_CURSOR',cursorMovement);
+  assert.ok(cursorMovement.afterPointer.x>cursorMovement.before.x+10,'PointerEvent touch moves cursor X');
+  assert.ok(cursorMovement.afterPointer.y>cursorMovement.before.y+10,'PointerEvent touch moves cursor Y');
+  assert.deepEqual(cursorMovement.afterPointer,cursorMovement.afterDuplicate,'Touch duplicates do not double cursor movement');
   // User wants to move the whole clipped desktop image, NOT the app's inner tabs.
   const scrollState=await page.evaluate(()=>{
    const scroll=document.getElementById('screenScroll');
