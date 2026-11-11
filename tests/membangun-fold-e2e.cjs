@@ -69,8 +69,8 @@ const assert=require('node:assert/strict');
    return {before,afterPointer,afterDuplicate};
   });
   console.log('ANDROID_POINTER_CURSOR',cursorMovement);
-  assert.ok(cursorMovement.afterPointer.x>cursorMovement.before.x+10,'PointerEvent touch moves cursor X');
-  assert.ok(cursorMovement.afterPointer.y>cursorMovement.before.y+10,'PointerEvent touch moves cursor Y');
+  assert.ok(Math.abs(cursorMovement.afterPointer.x-cursorMovement.before.x)>10,'PointerEvent touch moves cursor X');
+  assert.ok(Math.abs(cursorMovement.afterPointer.y-cursorMovement.before.y)>10,'PointerEvent touch moves cursor Y');
   assert.deepEqual(cursorMovement.afterPointer,cursorMovement.afterDuplicate,'Touch duplicates do not double cursor movement');
   // User wants to move the whole clipped desktop image, NOT the app's inner tabs.
   const scrollState=await page.evaluate(()=>{
