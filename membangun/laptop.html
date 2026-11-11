@@ -573,7 +573,9 @@ function beginTouch(x,y){
  },390);
 }
 function finishTouch(cancelled=false){
- if(!touching)return;
+ // A two-finger gesture can start without a prior single-finger touchstart.
+ // Its end must still clear scrolling so the next single tap is clickable.
+ if(!touching){clearLongPress();clearTouchState();return}
  clearLongPress();
  const wasTap=!cancelled&&!scrolling&&!moved&&!longHeld&&Date.now()-startTime<600;
  if(longHeld)releaseMouse(0);
