@@ -15,14 +15,15 @@ const assert=require('node:assert/strict');
     emotion:'virtual-office/emotion-studio/',
     bangun:'virtual-office/world-builder/bangun-ruang/',
     semesta:'virtual-office/world-builder/',
-    jiwa:'virtual-office/jiwa/'
+    jiwa:'virtual-office/jiwa/',
+    mainkan:'virtual-office/mainkan/'
    };
    for(const [id,path] of Object.entries(urls))localStorage.setItem('membangun-link-'+id,root+path);
   },root);
   await page.reload({waitUntil:'domcontentloaded'});
   const cases=[
    ['semesta','Semesta'],['mahluk','Mahluk'],['emotion','EMOSI'],
-   ['bangun','Bangun'],['jiwa','JIWA']
+   ['bangun','Bangun'],['jiwa','JIWA'],['mainkan','Mainkan']
   ];
   for(const [id,expected] of cases){
    await page.locator('#quickApps button[data-app="'+id+'"]').click();
@@ -37,9 +38,9 @@ const assert=require('node:assert/strict');
    });
    console.log('LOADED_APP',id,title);
   }
-  assert.equal(await page.locator('#frameWrap iframe').count(),5,'one persistent frame per app');
+  assert.equal(await page.locator('#frameWrap iframe').count(),6,'one persistent frame per app');
   await page.locator('#quickApps button[data-app=semesta]').click();
-  assert.equal(await page.locator('#frameWrap iframe').count(),5,'switching back does not create duplicate frame');
+  assert.equal(await page.locator('#frameWrap iframe').count(),6,'switching back does not create duplicate frame');
   await page.setViewportSize({width:480,height:920});
   await page.locator('#rotate90').click();
   assert.equal(await page.locator('body').evaluate(x=>x.classList.contains('rotated')),true);

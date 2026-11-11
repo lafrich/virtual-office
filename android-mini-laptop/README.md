@@ -4,8 +4,12 @@ A lightweight installable Android WebView shell for Samsung Galaxy Fold. It open
 the existing [Membangun Mini Laptop](https://lafrich.github.io/virtual-office/membangun/laptop.html)
 with its viewport oriented **90 degrees (landscape)**. The top of the unfolded
 screen is the editor; the bottom is a virtual touchpad and keyboard. Use the
-bottom app switcher to navigate between **Mahluk Hidup, Emosi, Bangun Ruang,
-Semesta, and Jiwa** without reloading the others.
+bottom app switcher to navigate between **Mahluk Hidup, Emosi.exe, Bangun Ruang,
+Semesta, Jiwa.exe, and Mainkan** without reloading the others.
+
+On the touchpad: single tap clicks, double tap toggles HOLD for dragging/panning,
+two fingers scroll the clipped desktop, and pinch zooms the active app canvas
+(not the whole page).
 
 ## Install
 

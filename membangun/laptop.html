@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#071d55">
 <meta name="color-scheme" content="only light">
-<title>Namanya Juga Hidup: The Game — Mini Laptop</title>
+<title>Membangun Mini Laptop v1.7 — Samsung Fold</title>
 <style>
 :root{font-family:Tahoma,"MS Sans Serif",Verdana,Arial,sans-serif;color:#192338;--xp:#d6d5ce;--line:#75859a;--blue:#154c9f;--paper:#f9f9f3}
 *{box-sizing:border-box}
@@ -88,7 +88,7 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
 <div class="laptop" id="laptop">
  <section class="display" aria-label="Tampilan aplikasi desktop">
   <header class="topbar">
-   <div class="brand">✳ MEMBANGUN.EXE <small>MINI LAPTOP MODE</small></div>
+   <div class="brand">✳ MEMBANGUN.EXE <small>FOLD EDITION · v1.7</small></div>
    <div class="right">
     <button id="zoomOut" title="Perkecil seluruh viewport laptop (bukan zoom denah)">−</button><span id="zoomText" aria-label="Zoom">FIT</span>
     <button id="zoomIn" title="Perbesar seluruh viewport laptop (bukan zoom denah)">＋</button>
@@ -152,6 +152,7 @@ body.rotated .laptop{position:fixed;left:100dvw;top:0;width:100dvh;height:100dvw
 const $=id=>document.getElementById(id);
 const apps=[
  {id:'mahluk',label:'MAHLUK HIDUP',url:'https://lafrich.github.io/virtual-life-asset-pipeline/mahluk-hidup.html'},
+ {id:'emotion',label:'EMOSI',url:'https://lafrich.github.io/virtual-office/emotion-studio/'},
  {id:'bangun',label:'BANGUN RUANG',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
  {id:'semesta',label:'SEMESTA',url:'https://lafrich.github.io/virtual-office/world-builder/'},
  {id:'jiwa',label:'JIWA',url:'https://lafrich.github.io/virtual-office/jiwa/'},
@@ -525,8 +526,8 @@ function configure(){
  }
  renderKeyboard();layout();setApp(selected);
 }
-// Touch gestures: 1 tap = left click, double tap = right click.
-// Press and hold then move = drag; 2-finger swipe = scroll in selected editor.
+// Touchpad: 1 tap = left click; 2 taps = persistent HOLD for drag/pan.
+// Long press = temporary drag; 2-finger swipe scrolls the desktop; pinch targets app zoom.
 let touching=false,prevTouches=null,moved=false,longHeld=false,startTime=0,scrolling=false,twoFinger=null;
 function clearLongPress(){clearTimeout(longPressTimer);longPressTimer=null}
 function recordTap(){
