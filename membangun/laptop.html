@@ -540,7 +540,7 @@ function recordTap(){
  const now=Date.now();
  tapTrace('recordTap',{sinceLast:lastTap?now-lastTap.time:null,holdLocked});
  // Resolve a double tap before triggering any single-click side effect.
- if(lastTap && now-lastTap.time<=300){
+ if(lastTap && now-lastTap.time<=(holdLocked?800:300)){
   clearTimeout(tapTimer);tapTimer=null;lastTap=null;
   tapTrace('doubleTap',{previousHold:holdLocked});
   setHold(!holdLocked);
@@ -553,7 +553,7 @@ function recordTap(){
   if(lastTap!==tap)return;
   lastTap=null;
   if(!holdLocked){tapTrace('singleClick',{});clickMouse(0)}
- },300);
+ },holdLocked?820:300);
 }
 const pad=$('touchpad');
 // One physical gesture may emit both PointerEvents and TouchEvents.
