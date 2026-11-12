@@ -48,7 +48,7 @@ function loadLGR(){
    await new Promise((resolve,reject)=>{const el=root.document.createElement("script");el.src=src;el.onload=resolve;
     el.onerror=()=>reject(Error("LGR runtime "+name+" missing"));root.document.head.appendChild(el)});
   }
-  await root.LGRGame.load();lgr.ready=true;
+  await root.LGRGame.load();lgr.ready=true;try{root.dispatchEvent(new CustomEvent("lgr-game-ready"))}catch{}
  })().catch(e=>{lgr.error=e;console.warn("LGR runtime failed; using V6P sheets",e);});
  return lgr.promise;
 }
