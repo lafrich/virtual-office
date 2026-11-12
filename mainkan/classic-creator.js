@@ -98,8 +98,36 @@
  // No old wardrobe choice is selectable unless Pakaian v2 was approved
  // for this exact Genesis fingerprint.
  let officialIndex=null;
- fetch("/virtual-life-asset-pipeline/media/lgr1/base/index.json",{cache:"no-store"})
-  .then(r=>r.ok?r.json():null).then(j=>{officialIndex=j;paintOptions()}).catch(()=>{});
+ let publishedWardrobe=new Set();
+ const referenceRoot="/virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/";
+ const referenceIds=new Set([
+  "male_top_tee","female_top_tee",
+  "male_pants_trousers","female_pants_trousers",
+  "male_shoes_shoes","female_shoes_shoes"
+ ]);
+ const readJSON=url=>fetch(url,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null);
+ Promise.all([
+  readJSON("/virtual-life-asset-pipeline/media/lgr1/base/index.json"),
+  readJSON(referenceRoot+"index.json")
+ ]).then(async ([base,catalog])=>{
+  officialIndex=base;
+  if(catalog?.format==="lgr1-wardrobe-official-reference-index-v1"&&
+     catalog.baseVersion===base?.version&&Array.isArray(catalog.entries)){
+   const entries=catalog.entries.filter(e=>referenceIds.has(e?.id)&&
+    e.id===e.gender+"_"+e.group+"_"+e.variant&&e.path===e.id+".json");
+   const verified=await Promise.all(entries.map(async e=>{
+    const item=await readJSON(referenceRoot+e.path);
+    const front=e.group+"/"+e.variant+(e.gender==="female"?"_f":"");
+    return item?.format==="lgr1-pakaian-v2"&&item.id===e.id&&
+     item.gender===e.gender&&item.group===e.group&&item.variant===e.variant&&
+     item.approved===true&&item.baseVersion===base.version&&
+     item.baseRigSha256===base.bases?.[e.gender]?.rigSha256&&
+     typeof item.files?.[front]==="string"?e.id:null;
+   }));
+   publishedWardrobe=new Set(verified.filter(Boolean));
+  }
+  paintOptions();
+ }).catch(()=>paintOptions());
  window.addEventListener("storage",e=>{if(e.key==="lgr1-db-cache-v1")paintOptions()});
  window.addEventListener("lgr-game-ready",()=>paintOptions());
  function styleOptions(field){
@@ -111,8 +139,11 @@
     if(!value)return false;
     if(!group)return true;
     if(value==="nude"||value==="none")return true;
-    const e=window.LGRDB?.get?.("pakaian",gender+"_"+group+"_"+value);
-    return !!e&&e.approved&&e.format==="lgr1-pakaian-v2"&&e.baseRigSha256===base?.rigSha256&&e.baseVersion===officialIndex?.version;
+    const id=gender+"_"+group+"_"+value;
+    const e=window.LGRDB?.get?.("pakaian",id);
+    const approved=!!e&&e.approved&&e.format==="lgr1-pakaian-v2"&&
+     e.baseRigSha256===base?.rigSha256&&e.baseVersion===officialIndex?.version;
+    return approved||publishedWardrobe.has(id);
   }).map(option=>[option.value,option.textContent]);
  }
  function chooseOption(field,value){
