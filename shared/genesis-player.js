@@ -36,7 +36,7 @@ const RENDERER=!V?"lgr":(()=>{try{const q=new URLSearchParams(root.location.sear
  if(q==="v6p"||q==="lgr")root.localStorage.setItem("vl-character-renderer",q);
  const v=root.localStorage.getItem("vl-character-renderer");return v==="v6p"||v==="lgr"?v:DEFAULT_RENDERER}catch{return DEFAULT_RENDERER}})();
 const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-raster.js","lgr1-motion.js","lgr-skin.js","lgr-wear.js","lgr-actor.js","lgr-db.js","lgr-game.js"]
- .map(f=>"/virtual-life-asset-pipeline/"+f+"?v=lgr-game-7");
+ .map(f=>"/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2");
 const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};
 function loadLGR(){
  if(!lgr.wanted)return null;
