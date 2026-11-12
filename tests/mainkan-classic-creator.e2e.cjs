@@ -18,11 +18,11 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   assert.equal(await title.textContent(),'untitled - Character Creator');
   assert.equal(await page.locator('#ccTools .cc-tool-btn').count(),10,'All classic Paint tools required');
   assert.equal(await page.locator('#ccSwatches .cc-swatch-row').count(),5,'Five color palettes required');
-  // Genesis Nude retains its original Custom Wear source by default.
-  // Black stock shoes are opt-in, with pants/shoe ordering guarded separately.
-  assert.equal(await page.locator('#topStyle').inputValue(),'custom');
-  assert.equal(await page.locator('#pantsStyle').inputValue(),'custom');
-  assert.equal(await page.locator('#shoesStyle').inputValue(),'custom');
+  // LGR-1 Genesis starts without clothing; approved clothes and shoes are opt-in.
+  // The actual native renderer is validated below for both genders/four views.
+  assert.equal(await page.locator('#topStyle').inputValue(),'nude');
+  assert.equal(await page.locator('#pantsStyle').inputValue(),'nude');
+  assert.equal(await page.locator('#shoesStyle').inputValue(),'nude');
   // Short/Swept have deliberate 1x1 transparent back-hair files; they must
   // render with real front hair, without blanking the whole avatar.
   for(const [value,visibleText] of [['short','Short'],['swept','Short swept']]){
