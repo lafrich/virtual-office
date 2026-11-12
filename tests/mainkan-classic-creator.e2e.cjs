@@ -47,6 +47,14 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   // Check REAL raster output in both genders and four native view directions.
   const nativeLGR=await page.evaluate(()=>window.VLGenesisPlayer.renderer().active==='lgr');
   if(nativeLGR){
+   // Only shipped Genesis-compatible approved v2 shoes may be selectable.
+   await page.locator('#ccTools [data-tool=shoes]').click();
+   const approvedShoes=page.locator('#ccOptions').getByRole('button',{name:/Mahluk Shoes/});
+   await approvedShoes.waitFor({state:'visible',timeout:45000});
+   await approvedShoes.click();
+   assert.equal(await page.locator('#shoesStyle').inputValue(),'shoes');
+   await page.locator('#ccOptions').getByRole('button',{name:/Tanpa sepatu/}).click();
+   assert.equal(await page.locator('#shoesStyle').inputValue(),'nude');
    const proofHandle=await page.waitForFunction(()=>{
     const player=window.VLGenesisPlayer, dirs=['se','sw','ne','nw'];
     function render(gender,dir,shoes){
@@ -72,6 +80,9 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
       out.push({gender,dir,bare,shod});
      }
     }
+    // LGR wardrobe layers are fetched asynchronously. Waiting only for a
+    // non-empty body could mistake the initial nude frame for approved shoes.
+    if(out.some(p=>p.shod&&p.shod.hash===p.bare.hash))return false;
     return out;
    },null,{timeout:90000});
    const proof=await proofHandle.jsonValue();
