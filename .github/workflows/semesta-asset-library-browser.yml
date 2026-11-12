@@ -203,7 +203,7 @@ jobs:
             await page.waitForFunction(()=>[...document.querySelectorAll('#salGallery .sal-card')].some(x=>x.textContent.includes('Custom')),null,{timeout:120000});
             const customs=await page.locator('#salGallery .sal-card').count();
             await page.screenshot({path:'screenshots/semesta-custom-asset-library.png',fullPage:false});
-            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,indonesia200,modularNPC,vehicleCheck,allVehicles,carAudit,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
+            console.log('ASSET_LIBRARY_SMOKE',JSON.stringify({cards,audit,emptyThumbnails,indonesia200,vehicleCheck,allVehicles,carAudit,riderAudit,views,detail,customs,description:desc.slice(0,90),faults:faults.slice(0,8)}));
             await browser.close();
             if(faults.some(x=>/SyntaxError|Cannot read properties|is not defined/i.test(x)))
               throw Error('Browser JS crash: '+faults.join('; '));
