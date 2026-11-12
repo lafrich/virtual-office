@@ -65,11 +65,11 @@ function normalizeProfile(input){
  // clothes over its custom sheets.
  const sourceLook=SOURCE.bases[input.base].appearance||{};
  const defaults={hairStyle:sourceLook.hair||"none",hairColor:sourceLook.hairColor||"black",
-  skinTone:sourceLook.skin||"light",topStyle:"custom",topColor:sourceLook.topColor||"white",
-  pantsStyle:"custom",pantsColor:sourceLook.pantsColor||"slate",
+  skinTone:sourceLook.skin||"light",topStyle:"nude",topColor:sourceLook.topColor||"white",
+  pantsStyle:"nude",pantsColor:sourceLook.pantsColor||"slate",
   // Genesis Nude must open with its own immutable Custom Wear barefoot sheet.
   // Native Mahluk black shoes remain opt-in, not silently worn over a nude base.
-  shoesStyle:"custom",shoesColor:sourceLook.shoesColor||"black",
+  shoesStyle:"nude",shoesColor:sourceLook.shoesColor||"black",
   glasses:"none",facialHair:"none"};
  const fields={
   hairStyle:"hair",hairColor:"hairColor",skinTone:"skin",topStyle:"top",topColor:"topColor",
