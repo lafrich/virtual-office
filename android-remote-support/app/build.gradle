@@ -1,0 +1,23 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.lafrich.remotesupport'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.lafrich.remotesupport'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+    flavorDimensions += 'role'
+    productFlavors {
+        client { dimension 'role'; applicationIdSuffix '.client'; buildConfigField 'boolean', 'IS_CLIENT', 'true' }
+        controller { dimension 'role'; applicationIdSuffix '.controller'; buildConfigField 'boolean', 'IS_CLIENT', 'false' }
+    }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+dependencies { implementation 'com.squareup.okhttp3:okhttp:4.12.0' }

@@ -1,0 +1,3 @@
+<resources>
+    <string name="a11y_description">Only sends tap and swipe gestures while a visible, locally approved screen-sharing session is active.</string>
+</resources>

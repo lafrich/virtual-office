@@ -1,0 +1,10 @@
+{
+  "name": "lafrich-remote-relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ephemeral WebSocket relay for consensual Android remote-support sessions.",
+  "type": "module",
+  "scripts": { "start": "node index.js", "check": "node --check index.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": { "ws": "^8.18.0" }
+}
