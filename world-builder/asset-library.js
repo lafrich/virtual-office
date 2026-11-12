@@ -2,7 +2,7 @@
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'],BUILD=new Set(['jalan','kampung','loak']);
-const CATS={all:'ALL ASSETS',indo200:'INDONESIA / 200 ASET',gameplay:'MAINkan / MEKANIK',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
+const CATS={all:'ALL ASSETS',indo200:'INDONESIA / WORLD PACK',gameplay:'MAINkan / MEKANIK',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
  interior:'INTERIOR',object:'OBJEK / ITEM',vehicle:'KENDARAAN',character:'KARAKTER',custom:'CUSTOM',grok:'GROK / NEW ASSETS'};
 function category(spec){
  if(spec?.pack==='mainkan-gameplay-v6b-r4-20261110')return 'gameplay';
@@ -27,7 +27,8 @@ function route(spec){
  return './bangun-ruang/?sourceAsset='+encodeURIComponent(id);
 }
 function entries(catalog,vehicles=[],characters=[],grokVehicles=[]){
- const items=(catalog||[]).filter(s=>s?.id&&s?.file&&s.published!==false).map(s=>({
+ const oldVehicle=s=>/^id200_transport_/.test(String(s?.id||''))||/^pipeline:id200_transport_/.test(String(s?.file||''));
+ const items=(catalog||[]).filter(s=>s?.id&&s?.file&&s.published!==false&&!oldVehicle(s)).map(s=>({
   ...s,kind:'sprite',category:category(s),editTarget:route(s)
  }));
  for(const v of vehicles||[])if(v?.id)items.push({
@@ -39,7 +40,7 @@ function entries(catalog,vehicles=[],characters=[],grokVehicles=[]){
   category:'character',kind:'character',published:true,editTarget:null
  });
  // B4 vehicle artwork appears as four-view preview only, not driveable gameplay.
- for(const v of grokVehicles||[])if(v?.category==='vehicle'&&v.id&&v.views)items.push({
+ for(const v of grokVehicles||[])if(v?.category==='vehicle'&&v.id&&v.views&&!oldVehicle(v))items.push({
   id:'grok-'+v.id,file:'grok-archive:'+v.id,label:'Grok · '+v.label,
   source:'grok-v6b',pack:'grok-v6b-review',kind:'grok-vehicle',
   category:'vehicle',views:v.views,published:true,collision:false,

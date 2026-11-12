@@ -7,6 +7,9 @@
 const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/';
 const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json','indonesia_custom_catalog.json','mainkan_gameplay_catalog.json'];
 let cached=null;
+// Retired Indonesia 200 vehicle sprites must never re-enter live catalogs,
+// including through stale browser caches or previously published manifests.
+const retired=s=>/^id200_transport_/.test(String(s?.id||''))||/^pipeline:id200_transport_/.test(String(s?.file||''));
 const IMAGE_REV='indonesia200-wheel-horizontal-v8-20261106';
 function cacheBust(spec,url){
  if(!url)return url;
@@ -14,6 +17,7 @@ function cacheBust(spec,url){
  return url+(url.includes('?')?'&':'?')+'v='+IMAGE_REV;
 }
 function valid(s){
+ if(retired(s))return false;
  if(!/^id(?:200)?_[a-z0-9_]+$/.test(s?.id||''))return false;
  if(s.file!=='pipeline:'+s.id||s.source!=='pipeline-street'||s.published!==true)return false;
  if(!['jalan','kampung','prop'].includes(s.group))return false;
@@ -53,20 +57,22 @@ async function load(){
   console.warn('Indonesia native packs not published:',failures.join('; '));
   return {loaded:false,count:0,error:failures.join('; ')||'No valid Indonesia assets'};
  }
- const prior=Array.isArray(g.VLAssetCatalog)?g.VLAssetCatalog:[];
+ const priorAll=Array.isArray(g.VLAssetCatalog)?g.VLAssetCatalog:[];
+ const prior=priorAll.filter(s=>!retired(s));
  const existing=new Set(prior.map(x=>x.file));
  const unique=entries.filter(x=>!existing.has(x.file));
  const index=new Map();
  for(const e of unique){index.set(e.id,e);index.set(e.file,e);}
- if(unique.length){
+ const previous=g.VLPipelineAssets||{};
+ if(unique.length||prior.length!==priorAll.length||(previous.prefabs||[]).some(retired)){
   g.VLAssetCatalog=Object.freeze([...prior,...unique.map(e=>Object.freeze(e))]);
-  const previous=g.VLPipelineAssets||{};
   const legacy=typeof previous.building==='function'?
    previous.building.bind(previous):()=>null;
   g.VLPipelineAssets=Object.freeze({
    ...previous,
-   prefabs:Object.freeze([...(previous.prefabs||[]),...unique]),
+   prefabs:Object.freeze([...(previous.prefabs||[]).filter(s=>!retired(s)),...unique]),
    building(id,dir='sw'){
+    if(/^(?:pipeline:)?id200_transport_/.test(String(id||'')))return null;
     const item=index.get(id);
     if(item){
      const v=item.variants[dir]||item.variants.sw||item.variants.se;
