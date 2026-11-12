@@ -58,6 +58,16 @@ jobs:
           test -f virtual-life-asset-pipeline/lgr-game.js
           test -f virtual-life-asset-pipeline/media/lgr1/base/index.json
           test -f virtual-life-asset-pipeline/media/lgr1/motions.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build Genesis-approved wardrobe fixtures from artist references
+        run: |
+          python -m pip install pillow
+          python virtual-life-asset-pipeline/tools/build_lgr_wardrobe_reference_v2.py --out virtual-life-asset-pipeline/site/media/lgr1/wardrobe-approved
+          test -s virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/index.json
+          test -s virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/male_shoes_shoes.json
+          test -s virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/female_shoes_shoes.json
       - name: Serve apps from same origin
         run: |
           python3 -m http.server 8091 --bind 127.0.0.1 >/tmp/mainkan-server.log 2>&1 &
