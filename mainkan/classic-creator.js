@@ -101,6 +101,7 @@
  fetch("/virtual-life-asset-pipeline/media/lgr1/base/index.json",{cache:"no-store"})
   .then(r=>r.ok?r.json():null).then(j=>{officialIndex=j;paintOptions()}).catch(()=>{});
  window.addEventListener("storage",e=>{if(e.key==="lgr1-db-cache-v1")paintOptions()});
+ window.addEventListener("lgr-game-ready",()=>paintOptions());
  function styleOptions(field){
   const input=$(field);if(!input)return [];
   const group={topStyle:"top",pantsStyle:"pants",shoesStyle:"shoes",glasses:"glasses",facialHair:"facial"}[field];
