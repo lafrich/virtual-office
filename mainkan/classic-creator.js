@@ -95,10 +95,24 @@
    parent.append(btn);
   });
  }
+ // No old wardrobe choice is selectable unless Pakaian v2 was approved
+ // for this exact Genesis fingerprint.
+ let officialIndex=null;
+ fetch("/virtual-life-asset-pipeline/media/lgr1/base/index.json",{cache:"no-store"})
+  .then(r=>r.ok?r.json():null).then(j=>{officialIndex=j;paintOptions()}).catch(()=>{});
+ window.addEventListener("storage",e=>{if(e.key==="lgr1-db-cache-v1")paintOptions()});
  function styleOptions(field){
-  const input=$(field);
-  if(!input)return [];
-  return Array.from(input.options).filter(option=>option.value!=='').map(option=>[option.value,option.textContent]);
+  const input=$(field);if(!input)return [];
+  const group={topStyle:"top",pantsStyle:"pants",shoesStyle:"shoes",glasses:"glasses",facialHair:"facial"}[field];
+  const gender=currentBody().includes("female")?"female":"male",base=officialIndex?.bases?.[gender];
+  return Array.from(input.options).filter(option=>{
+    const value=option.value;
+    if(!value)return false;
+    if(!group)return true;
+    if(value==="nude"||value==="none")return true;
+    const e=window.LGRDB?.get?.("pakaian",gender+"_"+group+"_"+value);
+    return !!e&&e.approved&&e.format==="lgr1-pakaian-v2"&&e.baseRigSha256===base?.rigSha256&&e.baseVersion===officialIndex?.version;
+  }).map(option=>[option.value,option.textContent]);
  }
  function chooseOption(field,value){
   if(field==='body')setBody(value);
@@ -151,8 +165,8 @@
   paintOptions();paintSwatches();paintSummary();status('Random look applied');
  }
  function resetLook(){
-  const defaults={hairStyle:'mid_curtain',hairColor:'navy',skinTone:'light',topStyle:'custom',topColor:'white',
-   pantsStyle:'custom',pantsColor:'slate',shoesStyle:'custom',shoesColor:'black',glasses:'none',facialHair:'none'};
+  const defaults={hairStyle:'mid_curtain',hairColor:'navy',skinTone:'light',topStyle:'nude',topColor:'white',
+   pantsStyle:'nude',pantsColor:'slate',shoesStyle:'nude',shoesColor:'black',glasses:'none',facialHair:'none'};
   for(const [field,val] of Object.entries(defaults))setInput(field,val);
   setBody('genesis_male_nude');paintOptions();paintSwatches();paintSummary();status('Appearance reset');
  }
