@@ -32,9 +32,9 @@ const assets=new Map(),pixels=new Map();
 // the old V6P sheets: open any page with ?renderer=v6p (remembered on this
 // device; ?renderer=lgr switches back), or set DEFAULT_RENDERER below.
 const DEFAULT_RENDERER="lgr";
-const RENDERER=!V?"lgr":(()=>{try{const q=new URLSearchParams(root.location.search).get("renderer");
- if(q==="v6p"||q==="lgr")root.localStorage.setItem("vl-character-renderer",q);
- const v=root.localStorage.getItem("vl-character-renderer");return v==="v6p"||v==="lgr"?v:DEFAULT_RENDERER}catch{return DEFAULT_RENDERER}})();
+// Retired V6P preference cannot reactivate OLD wardrobe on Mainkan/Semesta.
+// An explicit ?renderer=v6p remains a developer-only rollback for debugging.
+const RENDERER=(()=>{try{return new URLSearchParams(root.location.search).get("renderer")==="v6p"&&V?"v6p":"lgr"}catch{return DEFAULT_RENDERER}})();
 const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-raster.js","lgr1-motion.js","lgr-skin.js","lgr-wear.js","lgr-actor.js","lgr-db.js","lgr-game.js"]
  .map(f=>"/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2");
 const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};
