@@ -878,6 +878,14 @@ function makePixelProp(root,type,item){
 }
 function makeSprite(root,item){
  const spec=assetByName.get(item.asset);if(!spec)return;
+ // L3D has physical geometry and WebGL depth; the old sprite pipeline stays intact.
+ if(spec.source==='l3d-3d'){
+  if(!window.VLL3DLibrary?.attach(THREE,root,spec)){
+   makeBox(root,{...item,color:'#7897ad'});
+   root.userData.l3dMissing=true;
+  }
+  return;
+ }
  if((spec.source==='pipeline-street'||spec.source==='pipeline-vegetation')&&!spec.published){
   const kind=style.category(item,assetByName);
   if(kind==='building'){
@@ -3345,6 +3353,7 @@ $('motionEnabled').onchange=()=>changeMotion('enabled',$('motionEnabled').checke
 
 function assetCategory(spec){
  if(!spec)return 'street';
+ if(spec.source==='l3d-3d')return 'l3d';
  if(spec.pack==='indonesia-v1'||spec.pack==='indonesia-200-v1'||spec.pack==='semesta-custom-v6b-20261110'||spec.pack==='mainkan-gameplay-v6b-r4-20261110')return 'indonesia';
  if(spec.source==='bangun-object')return spec.objectCategory==='plant'?'vegetation':
   spec.objectCategory==='furniture'?'interior':'street';
@@ -3592,6 +3601,7 @@ function renderAssetList(){
     (spec.enterable?'BANGUN RUANG / ENTERABLE':'BANGUN RUANG / DECORATIVE'):
     spec.source==='loak-v2'?'LOAK OBJECTS / ITEM':
     spec.source==='gpt-original'?'GPT / ORIGINAL · login':
+    spec.source==='l3d-3d'?'L3D / NATIVE MESH':
     spec.published?'PIPELINE / PNG':'PIPELINE / MANIFEST ONLY',
    origin:spec.source==='gpt-original'?'original':spec.published?'published':'unpublished'
   }))
