@@ -228,14 +228,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <div class="desktop">
 <main class="window" aria-label="Membangun Launcher">
 <header class="titlebar"><div class="window-icon" aria-hidden="true">✳</div><div class="window-title"><strong>MEMBANGUN</strong><span> .EXE — Namanya Juga Hidup: The Game</span></div><div class="window-controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
-<nav class="menubar" aria-label="Menu"><button id="fileMenu"><u>F</u>ile</button><button id="viewMenu"><u>V</u>iew</button><button id="helpMenu"><u>H</u>elp</button><button id="laptopMode" class="laptop-entry" title="Galaxy Fold: layar atas desktop, bawah touchpad dan keyboard">▣ MINI LAPTOP</button><span class="version">V1.5 / 05 PROGRAMS</span></nav>
+<nav class="menubar" aria-label="Menu"><button id="fileMenu"><u>F</u>ile</button><button id="viewMenu"><u>V</u>iew</button><button id="helpMenu"><u>H</u>elp</button><button id="laptopMode" class="laptop-entry" title="Galaxy Fold: layar atas desktop, bawah touchpad dan keyboard">▣ MINI LAPTOP</button><span class="version">V1.6 / 06 PROGRAMS</span></nav>
 <section class="workspace">
 <aside class="file-panel">
-<div class="panel-heading"><strong>FILES</strong><small>05</small></div>
+<div class="panel-heading"><strong>FILES</strong><small>06</small></div>
 <div class="file-list" role="group" aria-label="Pilih aplikasi">
 <button class="file active" data-app="mahluk" aria-pressed="true"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-mahluk"/></svg></span><span class="file-txt"><span class="file-name">MAHLUK HIDUP.EXE</span><span class="file-kind">MAHLUK HIDUP</span></span></button>
 <button class="file" data-app="bangun" aria-pressed="false"><span class="file-thumb"><img class="warteg-thumb" alt="Warteg Kharisma Bahari" hidden></span><span class="file-txt"><span class="file-name">BANGUN RUANG.EXE</span><span class="file-kind">BUILDING STUDIO</span></span></button>
 <button class="file" data-app="semesta" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-semesta"/></svg></span><span class="file-txt"><span class="file-name">SEMESTA.EXE</span><span class="file-kind">WORLD BUILDER</span></span></button><button class="file" data-app="jiwa" aria-pressed="false"><span class="file-thumb"><svg aria-hidden="true"><use href="#icon-jiwa"/></svg></span><span class="file-txt"><span class="file-name">JIWA.EXE</span><span class="file-kind">MECHANICS STUDIO</span></span></button>
+<button class="file" data-app="l3d" aria-pressed="false"><span class="file-thumb" style="font:bold 34px Tahoma;color:#346aa0">◇</span><span class="file-txt"><span class="file-name">L3D.EXE</span><span class="file-kind">3D + JSON STUDIO</span></span></button>
 <button class="file" data-app="mainkan" aria-pressed="false"><span class="file-thumb" style="font:bold 32px Tahoma;color:#003d70">▶</span><span class="file-txt"><span class="file-name">MAINKAN.EXE</span><span class="file-kind">PLAYER / GAME</span></span></button>
 </div>
 <div class="file-hint">DOUBLE CLICK TO OPEN</div>
@@ -246,6 +247,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <div class="art active" data-art="mahluk"><svg role="img" aria-label="Mahluk Hidup 2.0 modular pixel character"><use href="#icon-mahluk"/></svg></div>
 <div class="art" data-art="bangun"><img class="warteg-thumb" role="img" alt="Warteg Kharisma Bahari — aset bangunan isometrik dari Bangun Ruang" hidden></div>
 <div class="art" data-art="semesta"><svg role="img" aria-label="Pixel art isometric world"><use href="#icon-semesta"/></svg></div><div class="art" data-art="jiwa"><svg role="img" aria-label="Pixel-art node based mechanics editor"><use href="#icon-jiwa"/></svg></div>
+<div class="art" data-art="l3d"><div style="text-align:center;color:#20588c;display:grid;gap:12px;justify-items:center"><div style="font:bold 120px/1 Tahoma">◇</div><strong style="font:900 23px Tahoma">L3D.EXE</strong><span style="font:12px Tahoma">3D Model + JSON · Semesta Pipeline</span></div></div>
 <div class="art" data-art="mainkan"><div style="text-align:center;color:#003e77;display:grid;gap:15px;justify-items:center"><div style="font:bold 100px/1 Tahoma">▶</div><strong style="font:900 23px Tahoma">MAINKAN.EXE</strong><span style="font:12px Tahoma">Namanya Juga Hidup · Player Client</span></div></div>
 <div class="canvas-corner">MEMBANGUN® / STUDIO</div>
 </div>
@@ -289,7 +291,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px dotted #151
 <form class="modal-body" id="linkForm">
 <label>MAHLUK HIDUP<input id="url-mahluk" type="url" placeholder="https://..."></label>
 <label>BANGUN RUANG<input id="url-bangun" type="url" placeholder="https://..."></label>
-<label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label><label>JIWA<input id="url-jiwa" type="url" placeholder="https://..."></label>
+<label>SEMESTA<input id="url-semesta" type="url" placeholder="https://..."></label><label>L3D<input id="url-l3d" type="url" placeholder="https://..."></label><label>JIWA<input id="url-jiwa" type="url" placeholder="https://..."></label>
 <div class="modal-error" id="urlError" role="alert"></div>
 <div class="modal-buttons"><button type="button" class="chrome-button" id="cancel">CANCEL</button><button type="submit" class="chrome-button main">SAVE</button></div>
 </form>
@@ -316,13 +318,14 @@ const $=id=>document.getElementById(id);
   });
  }catch(error){console.warn('Warteg preview unavailable.',error);}
 })();
-const ids=['mahluk','bangun','semesta','jiwa','mainkan'];
+const ids=['mahluk','bangun','semesta','jiwa','mainkan','l3d'];
 // Deep links only select a program; opening it remains a deliberate user action.
 const requestedApp=new URLSearchParams(location.search).get('app');
 const data={
 mahluk:{name:'MAHLUK HIDUP.EXE',type:'MAHLUK HIDUP',desc:'Satu aplikasi: Emosi, Character, Action dan Animation. Pixel Editor tetap lengkap, termasuk empat arah, frame timeline dan sinkronisasi Drive.',url:'https://lafrich.github.io/virtual-life-asset-pipeline/mahluk-hidup.html'},
 bangun:{name:'BANGUN RUANG.EXE',type:'BUILDING',desc:'Siapkan aset bangunan untuk kota.',url:'https://lafrich.github.io/virtual-office/world-builder/bangun-ruang/'},
-semesta:{name:'SEMESTA.EXE',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'},jiwa:{name:'JIWA.EXE',type:'MECHANICS',desc:'Atur rules dan Play Test dari kota Semesta.',url:'https://lafrich.github.io/virtual-office/jiwa/'},
+semesta:{name:'SEMESTA.EXE',type:'WORLD',desc:'Rancang kota, jalan, dan NPC.',url:'https://lafrich.github.io/virtual-office/world-builder/'},
+l3d:{name:'L3D.EXE',type:'3D / JSON',desc:'Import OBJ, FBX, GLB dan GLTF; lihat dan edit JSON, buat box enam sisi, simpan native mesh ke Asset Library Semesta.',url:'https://lafrich.github.io/virtual-office/l3d/'},jiwa:{name:'JIWA.EXE',type:'MECHANICS',desc:'Atur rules dan Play Test dari kota Semesta.',url:'https://lafrich.github.io/virtual-office/jiwa/'},
 mainkan:{name:'MAINKAN.EXE',type:'PLAYER',desc:'Mainkan game: splash screen, login/register, buat karakter, dan preview dunia Semesta. Versi awal masih guest preview.',url:'https://lafrich.github.io/virtual-office/mainkan/'}
 };
 let selected=ids.includes(requestedApp)?requestedApp:'mahluk';
