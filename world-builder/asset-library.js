@@ -2,9 +2,10 @@
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'],BUILD=new Set(['jalan','kampung','loak']);
-const CATS={all:'ALL ASSETS',indo200:'INDONESIA / WORLD PACK',gameplay:'MAINkan / MEKANIK',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
+const CATS={l3d:'L3D / 3D MESH',all:'ALL ASSETS',indo200:'INDONESIA / WORLD PACK',gameplay:'MAINkan / MEKANIK',building:'BANGUNAN',street:'ATRIBUT KOTA',vegetation:'TANAMAN',
  interior:'INTERIOR',object:'OBJEK / ITEM',vehicle:'KENDARAAN',character:'KARAKTER',custom:'CUSTOM',grok:'GROK / NEW ASSETS'};
 function category(spec){
+ if(spec?.source==='l3d-3d')return 'l3d';
  if(spec?.pack==='mainkan-gameplay-v6b-r4-20261110')return 'gameplay';
  if(spec?.objectCategory==='vehicle')return 'vehicle';
  if(spec?.source==='custom-building'||(spec?.source==='bangun-object'&&!spec.builtIn))return 'custom';
@@ -111,6 +112,7 @@ function checkImage(url,geometry=null){
  return done;
 }
 async function assetHealthy(spec,imageUrl){
+ if(spec?.source==='l3d-3d')return !!g.VLL3DLibrary?.get?.(spec.l3dId||spec.id);
  if(!spec?.id||!spec?.file||spec.published===false)return false;
  if(spec.kind==='grok-vehicle'){
   const urls=await Promise.all(DIR.map(d=>imageUrl(spec,d)));
