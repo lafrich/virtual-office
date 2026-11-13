@@ -9,10 +9,10 @@ const raw='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline
 const cachedVehicles=new Map();
 const terrainNames={road:'road_asphalt',sidewalk:'sidewalk',grass:'grass',
  water:'water',drain:'drain',river:'river',plaza:'plaza',soil:'soil'};
-const symbols={indonesia:'▥',terrain:'▦',custom:'⌂',building:'▥',street:'♧',
+const symbols={l3d:'◇',indonesia:'▥',terrain:'▦',custom:'⌂',building:'▥',street:'♧',
  vegetation:'♣',interior:'▤',object:'▣',character:'◉',vehicles:'▰',
  people:'♙',quest:'⚑',logic:'◇'};
-const labels={indonesia:'INDONESIA',terrain:'TERRAIN',custom:'BUILDING',building:'BUILDING',
+const labels={l3d:'3D MESH',indonesia:'INDONESIA',terrain:'TERRAIN',custom:'BUILDING',building:'BUILDING',
  street:'STREET',vegetation:'VEGETATION',interior:'INTERIOR',object:'LOAK',
  character:'CHARACTER',vehicles:'VEHICLE',people:'NPC',quest:'QUEST',logic:'LOGIC'};
 function validUrl(url){
@@ -29,6 +29,7 @@ function fallbackIcon(category){return symbols[category]||'◇';}
 function sourceFor(spec,env=g){
  if(!spec||spec.published===false)return null;
  const id=String(spec.id||'');
+ if(spec.source==='l3d-3d')return validUrl(spec.thumbnail||'');
  if(spec.source==='pipeline-street'){
   const view=spec.variants?.sw||spec.variants?.se||spec.variants?.ne||spec.variants?.nw;
   return validUrl(view?.file?env.VLIndonesiaAssets?.cacheBust?.(spec,raw+'assets/street_buildings/'+view.file)||raw+'assets/street_buildings/'+view.file:null);
