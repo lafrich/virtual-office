@@ -3901,7 +3901,9 @@ function refreshBangunRuang(){
  const oldByName=new Map(assetByName);
  const summary=bridge.refresh();
  const objects=window.VLBangunObjects?.refresh();
- assetCatalog=window.VLAssetCatalog||[];
+ assetCatalog=[...(window.VLAssetCatalog||[]).filter(s=>s.source!=='l3d-3d'),
+  ...(window.VLL3DLibrary?.catalogEntries?.()||[])];
+ window.VLAssetCatalog=Object.freeze(assetCatalog);
  assetByName.clear();
  for(const spec of assetCatalog)assetByName.set(spec.file,spec);
  let updated=0,missing=0;
