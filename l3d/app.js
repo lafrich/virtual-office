@@ -243,7 +243,7 @@ async function applyJsonObject(doc){
 }
 function loadRecord(record){
  library.validate(record);setMeta(record);currentId=record.id;
- if(THREE)setModel(new THREE.ObjectLoader().parse(record.model),'L3D ASSET '+record.id);
+ if(THREE)setModel(new THREE.ObjectLoader().parse(record.model),'L3D ASSET '+record.id,false);
  currentDocument=null;listAssets();updateJSON();
  status('LOADED '+record.name+' · LOCAL L3D ASSET');
 }
