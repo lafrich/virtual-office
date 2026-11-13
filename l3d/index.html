@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<title>L3D.EXE — JSON & 3D Model Viewer / Semesta</title>
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<main class="app">
+ <header class="titlebar">
+  <span class="title-icon">◇</span>
+  <strong>L3D.EXE</strong><span class="title-sub">LAFRICH 3D / SEMESTA ASSET PIPELINE</span>
+  <span class="title-spacer"></span><a href="../membangun/?app=l3d" title="Back to Membangun">⌂ Membangun</a>
+ </header>
+ <nav class="menu" aria-label="Actions">
+  <label class="btn primary" for="modelInput">↥ IMPORT 3D</label>
+  <input id="modelInput" type="file" multiple accept=".glb,.gltf,.obj,.fbx,.mtl,.png,.jpg,.jpeg,.webp,.bin" hidden>
+  <label class="btn" for="jsonInput">⌁ OPEN JSON</label><input id="jsonInput" type="file" accept=".json,application/json" hidden>
+  <button id="newBox">▣ NEW LFC BOX</button>
+  <button id="saveAsset" class="primary">▤ SAVE TO SEMESTA</button>
+  <button id="downloadAsset">↓ EXPORT ASSET JSON</button>
+ </nav>
+ <div class="workspace">
+  <aside class="library panel">
+   <header class="panel-title">L3D LIBRARY <small id="assetCount">0</small></header>
+   <div class="library-hint">Satu asset 3D = satu sumber mesh, pivot, footprint, dan metadata Semesta.</div>
+   <div class="list" id="assetList" role="list"></div>
+   <div class="library-footer">
+    <button id="fresh">＋ NEW ASSET</button>
+    <button id="removeAsset" title="Remove local saved version">× REMOVE</button>
+   </div>
+   <details class="face-panel">
+    <summary>▦ LFC / 6-SIDE TEXTURES</summary>
+    <p>Untuk box 3D: gambar per sisi, termasuk atap dan bawah. Tekstur pixel tetap tajam.</p>
+    <div class="face-files">
+     <label>RIGHT (+X)<input type="file" accept="image/*" data-face="0"></label>
+     <label>LEFT (-X)<input type="file" accept="image/*" data-face="1"></label>
+     <label>TOP (+Y)<input type="file" accept="image/*" data-face="2"></label>
+     <label>BOTTOM (-Y)<input type="file" accept="image/*" data-face="3"></label>
+     <label>FRONT (+Z)<input type="file" accept="image/*" data-face="4"></label>
+     <label>BACK (-Z)<input type="file" accept="image/*" data-face="5"></label>
+    </div>
+    <button id="clearFaces">RESET TEXTURES</button>
+   </details>
+  </aside>
+  <section class="viewport panel">
+   <header class="panel-title"><span>3D MODEL VIEWER</span><span class="light-status"><i></i><span id="engineStatus">INITIALIZING</span></span></header>
+   <div class="viewport-controls">
+    <label>CAMERA <select id="cameraType"><option value="iso">ISOMETRIC</option><option value="persp">PERSPECTIVE</option></select></label>
+    <button id="cameraReset">◎ FRAME</button>
+    <button id="toggleGrid" aria-pressed="true"># GRID</button>
+    <button id="toggleWire" aria-pressed="false">◇ WIREFRAME</button>
+   </div>
+   <div class="stage" id="stage">
+    <canvas id="view" aria-label="Rotatable 3D model preview"></canvas>
+    <div id="stageEmpty" class="empty" hidden>3D preview unavailable. JSON viewer tetap bisa digunakan.</div>
+    <div class="axis">Y ↑<span>X → &nbsp; Z ↗</span></div>
+    <div class="stage-tip">Drag: orbit · Scroll / pinch: zoom · Right drag: pan</div>
+   </div>
+   <div class="viewer-foot"><span id="modelStats">MODEL / LFC BOX</span><span id="modelOrigin">LOCAL / NO UPLOAD</span></div>
+   <section class="json-panel" aria-label="JSON Viewer">
+    <header class="panel-title">JSON VIEWER <span class="tab-buttons"><button id="treeTab" class="tab active">TREE</button><button id="rawTab" class="tab">RAW / EDIT</button></span></header>
+    <div id="jsonTree" class="json-scroll" role="tree"></div>
+    <textarea id="jsonRaw" spellcheck="false" aria-label="Editable JSON" hidden></textarea>
+    <div class="json-actions"><button id="formatJSON">{} FORMAT</button><button id="applyJSON">✓ APPLY JSON</button><button id="copyJSON">▢ COPY</button><span id="jsonInfo">VALID JSON</span></div>
+   </section>
+  </section>
+  <aside class="properties panel">
+   <header class="panel-title">PROPERTIES <small>ASSET / WORLD UNITS</small></header>
+   <form id="metadataForm">
+    <label>ASSET ID<input id="assetId" value="lfc_box_01" maxlength="64" pattern="[a-z][a-z0-9_-]{1,63}" required></label>
+    <label>DISPLAY NAME<input id="assetName" value="LFC Box 01" maxlength="100" required></label>
+    <label>SEMESTA CATEGORY<select id="assetKind"><option value="vehicle">Vehicle / Static Prop</option><option value="building">Building</option><option value="prop" selected>Object / Prop</option><option value="furniture">Furniture</option></select></label>
+    <fieldset><legend>FOOTPRINT / Y-HEIGHT (TILES)</legend>
+     <div class="triple">
+      <label>WIDTH / X<input id="sizeW" type="number" min=".1" max="100" step=".1" value="2.8" required></label>
+      <label>DEPTH / Z<input id="sizeD" type="number" min=".1" max="100" step=".1" value="1.3" required></label>
+      <label>HEIGHT / Y<input id="sizeH" type="number" min=".1" max="100" step=".1" value="1.5" required></label>
+     </div>
+    </fieldset>
+    <label class="check"><input id="collision" type="checkbox" checked> Collision / Blocking</label>
+    <label class="check"><input id="pixelated" type="checkbox" checked> Nearest texture / Pixel Art</label>
+    <button id="applyDimensions" class="wide primary" type="button">⌗ FIT MODEL TO FOOTPRINT</button>
+   </form>
+   <div class="inspector-note">
+    <strong>SEMESTA CONTRACT</strong>
+    <p>3D mesh memakai depth test asli. Titik tanah di <code>Y = 0</code>; footprint tetap grid isometrik 64×32. Rotasi 90° dilakukan di Semesta, tanpa sprite empat arah.</p>
+    <p>Library tersimpan lokal di browser yang sama. Export JSON untuk dipindahkan atau diarsipkan; aset besar bisa melewati batas local storage.</p>
+   </div>
+  </aside>
+ </div>
+ <footer class="statusbar"><span id="status" role="status">L3D READY · DRAG A MODEL OR USE LFC BOX</span><span>SEMESTA / 3D PIPELINE V1</span></footer>
+</main>
+<script src="../shared/hub-registry.js"></script>
+<script src="../shared/l3d-library.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
