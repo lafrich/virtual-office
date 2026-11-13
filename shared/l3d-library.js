@@ -12,7 +12,7 @@
  const KINDS=['building','vehicle','prop','furniture'];
  const sane=n=>Number.isFinite(Number(n))?Number(n):0;
  const copy=v=>JSON.parse(JSON.stringify(v));
- function validate(input){
+ function validate(input,options={}){
   if(!input||typeof input!=='object'||Array.isArray(input))throw Error('L3D record must be an object');
   if(input.format!==FORMAT)throw Error('Unsupported L3D format');
   if(!/^[a-z][a-z0-9_-]{1,63}$/.test(input.id||''))throw Error('Asset ID: use 2–64 lowercase letters/numbers/_/-');
@@ -25,7 +25,7 @@
    throw Error('Missing Three.js Object3D JSON');
   if(typeof input.thumbnail==='string'&&input.thumbnail&&!/^data:image\/png;base64,/.test(input.thumbnail))throw Error('Invalid thumbnail');
   const payload=JSON.stringify(input);
-  if(payload.length>MAX_RECORD)throw Error('Model too large for browser library; use Export JSON');
+  if(options.enforceStorageLimit&&payload.length>MAX_RECORD)throw Error('Model too large for browser library; use Export JSON');
   return true;
  }
  function read(){
@@ -38,7 +38,7 @@
  function list(){return read().map(copy)}
  function get(id){const r=read().find(x=>x.id===id);return r?copy(r):null}
  function save(record){
-  validate(record);
+  validate(record,{enforceStorageLimit:true});
   const assets=read().filter(x=>x.id!==record.id);
   assets.push(copy(record));
   try{localStorage.setItem(KEY,JSON.stringify({format:FORMAT,version:1,assets}));}
