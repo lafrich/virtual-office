@@ -1,0 +1,33 @@
+name: Semesta Y Elevation — tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - "world-builder/builder.js"
+      - "world-builder/index.html"
+      - "world-builder/semesta-elevation.js"
+      - "world-builder/semesta-elevation.css"
+      - "world-builder/style-rules.js"
+      - "world-builder/world-physics.js"
+      - "tests/semesta-elevation.test.cjs"
+      - ".github/workflows/semesta-elevation.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  elevation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Parse scripts
+        run: |
+          node --input-type=module --check < world-builder/builder.js
+          node --check world-builder/semesta-elevation.js
+          node --check world-builder/style-rules.js
+          node --check world-builder/world-physics.js
+      - name: Run elevation and existing world physics regression tests
+        run: node --test tests/semesta-elevation.test.cjs tests/world-physics.test.cjs

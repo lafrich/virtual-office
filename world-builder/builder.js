@@ -1785,6 +1785,7 @@ function updateSelection(){
  for(const k of ['x','z','y','rotation','scale']){
   $(k).value=cur?String(round(cur[k]??0)):'';
   $(k).disabled=!cur||(actorType(cur?.type)&&['rotation','scale'].includes(k))||
+   (cur&&elevation.movingType(cur.type)&&k==='y')||
    (cur?.type==='vehicle'&&k==='rotation');
  }
  $('tools').querySelectorAll('button').forEach(b=>b.disabled=!cur);
@@ -3188,6 +3189,7 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
  const v=Number($(prop).value);
  if(!Number.isFinite(v)||!item())return;
  if((actorType(item().type)&&['rotation','scale'].includes(prop))||
+  (elevation.movingType(item().type)&&prop==='y')||
   (item().type==='vehicle'&&prop==='rotation')){updateSelection();return;}
  if(prop==='scale'&&item().type==='vehicle'){
   editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(v);});return;
