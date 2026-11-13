@@ -35,6 +35,8 @@ function category(o,catalog){
  if(o?.type==='marker')return 'marker';
  if(PROP_NAMES.has(o?.type))return o.type==='box'?'prop':o.type;
  if(spec){
+  if(spec.source==='l3d-3d')return spec.objectCategory==='building'?'building':
+   spec.objectCategory==='furniture'?'furniture':'prop';
   if(spec.source==='bangun-object')return ({plant:'tree',lamp:'lamp',furniture:'furniture',street:'prop',decor:'prop'})[spec.objectCategory]||'prop';
   if(spec.source==='pipeline-vegetation')return spec.group.includes('trees')?'tree':'ground';
   const id=String(spec.id||'').toLowerCase(),file=String(o.asset||'').toLowerCase();
@@ -91,7 +93,7 @@ function normalize(o,catalog){
  }
  const s=o.type==='sprite'?catalog?.get(o.asset):null;
  const hasViews=s?.variants&&Object.keys(s.variants).length>1;
- const lockRotation=o.type==='sprite'&&!hasViews;
+ const lockRotation=o.type==='sprite'&&!hasViews&&s?.source!=='l3d-3d';
  o.rotation=lockRotation?0:((Math.round((Number(o.rotation)||0)/90)*90)%360+360)%360;
  // Published prefab dimensions must remain comparable to the native world;
  // no freeform squashing, and scaling is always uniform.

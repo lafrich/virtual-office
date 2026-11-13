@@ -1,0 +1,48 @@
+name: L3D Native Mesh Pipeline QA
+on:
+  pull_request:
+    paths:
+      - "l3d/**"
+      - "shared/l3d-library.js"
+      - "world-builder/l3d-intake.js"
+      - "world-builder/builder.js"
+      - "world-builder/style-rules.js"
+      - "world-builder/index.html"
+      - "membangun/index.html"
+      - "membangun/laptop.html"
+      - "tests/l3d-integration.test.cjs"
+      - "tests/membangun-launcher.test.cjs"
+      - ".github/workflows/l3d-qa.yml"
+  push:
+    branches: ["main", "feature/l3d-semesta-20261113"]
+    paths:
+      - "l3d/**"
+      - "shared/l3d-library.js"
+      - "world-builder/l3d-intake.js"
+      - "world-builder/builder.js"
+      - "world-builder/style-rules.js"
+      - "world-builder/index.html"
+      - "membangun/index.html"
+      - "membangun/laptop.html"
+      - "tests/l3d-integration.test.cjs"
+      - "tests/membangun-launcher.test.cjs"
+      - ".github/workflows/l3d-qa.yml"
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run L3D plus Membangun regression smoke
+        run: node --test tests/l3d-integration.test.cjs tests/membangun-launcher.test.cjs
+      - name: Syntax check native browser scripts
+        run: |
+          node --check shared/l3d-library.js
+          node --check world-builder/l3d-intake.js
+          node --check l3d/app.js
+          node --check world-builder/style-rules.js
