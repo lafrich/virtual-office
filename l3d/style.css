@@ -1,0 +1,54 @@
+:root{font:12px/1.4 Tahoma,"MS Sans Serif",Arial,sans-serif;color:#252936;background:#063a7c}
+*{box-sizing:border-box}html,body{height:100%;margin:0}button,input,select,textarea{font:inherit}button,.btn{cursor:pointer}button:focus-visible,.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #eeb343;outline-offset:1px}
+button,.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:30px;padding:5px 9px;background:linear-gradient(#fff,#d8d9df);border:2px solid;border-color:#fff #7c8390 #737987 #fff;box-shadow:inset 0 1px #fff;color:#1d3150;font-weight:700;text-decoration:none;white-space:nowrap}
+button:hover,.btn:hover{background:linear-gradient(#fff,#b4d4ff)}button:active,.btn:active{border-color:#778392 #fff #fff #778392}
+button.primary,.btn.primary{background:linear-gradient(#ecf6ff,#a3c7f7);color:#123c76;border-color:#fff #5174a7 #5174a7 #fff}
+.app{height:100dvh;display:flex;flex-direction:column;min-width:320px;background:#d0d4dd}
+.titlebar{display:flex;align-items:center;gap:10px;padding:7px 14px;min-height:43px;background:linear-gradient(90deg,#002787,#0860bc 65%,#439bec);border-bottom:2px solid #053478;color:white}
+.titlebar strong{font:900 18px/1 Tahoma;letter-spacing:-.035em}
+.title-icon{display:grid;place-items:center;width:27px;height:27px;background:#e8e5cd;color:#13407b;border:2px solid #fff;font-size:21px}
+.title-sub{font:10px "Courier New",monospace;letter-spacing:.08em;opacity:.82}
+.title-spacer{flex:1}.titlebar a{color:white;text-decoration:none;padding:4px 8px;border:1px solid #cbdaf788}
+.menu{display:flex;gap:6px;align-items:center;min-height:51px;padding:6px 12px;background:#dfe2e7;border-bottom:2px solid #959ba3;overflow-x:auto}
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(190px,19%) minmax(340px,1fr) minmax(218px,21%);gap:2px;background:#9199a5}
+.panel{display:flex;flex-direction:column;min-width:0;min-height:0;background:#e6e7eb}
+.panel-title{height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:7px;padding:0 11px;background:linear-gradient(#fcfcfd,#cbd2de);border-bottom:2px solid #9ba3ad;color:#15325a;font:700 11px/1 "Courier New",monospace;letter-spacing:.06em}
+.panel-title small{font:10px "Courier New",monospace;color:#65707b}
+.library-hint{padding:13px;color:#525e6c;font-size:11px;line-height:1.55;background:#eff2f5}
+.list{padding:9px;overflow:auto;flex:1;display:grid;align-content:start;gap:6px}
+.asset-row{display:flex;align-items:center;text-align:left;gap:8px;min-width:0;width:100%;padding:8px;min-height:57px;background:#f5f6f8;border:1px solid #8f9dab;white-space:normal}
+.asset-row.active{background:#c5d9ff;border:2px solid #2151a1}.asset-ico{font-size:24px;color:#315f9d}
+.asset-row strong{font-size:11px;overflow-wrap:anywhere}.asset-row small{display:block;margin-top:4px;color:#637387;font-size:9px}
+.list-empty{padding:15px;color:#5a6471;background:#f9fafb;border:1px dashed #a3acb7;line-height:1.5}
+.library-footer{display:flex;gap:5px;padding:9px;border-top:1px solid #aaa}.library-footer button{flex:1;min-width:0;font-size:10px}
+.face-panel{border-top:2px solid #949dad;max-height:40%;overflow:auto;background:#edf1f7}
+.face-panel summary{padding:10px;background:#d6deeb;font:bold 11px "Courier New",monospace;cursor:pointer}.face-panel p{padding:0 10px;color:#667;font-size:10px}
+.face-files{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:8px}.face-files label{font:bold 9px "Courier New",monospace}
+.face-files input{width:100%;font:9px Arial;margin-top:3px}.face-panel>button{margin:5px 8px 10px}
+.viewport{background:#d1d6df}.light-status{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:0}.light-status i{width:8px;height:8px;border-radius:50%;background:#48ba79;box-shadow:0 0 0 2px #c5ead4}
+.viewport-controls{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:7px 10px;border-bottom:1px solid #a3b0c0}
+.viewport-controls label{font:bold 10px "Courier New",monospace}.viewport-controls select{margin-left:5px;padding:5px;background:#fff;border:1px solid #889bba;color:#163861}
+.viewport-controls button{font-size:10px;min-height:26px}.viewport-controls button[aria-pressed=true]{background:#8cb6ee}
+.stage{position:relative;flex:1;min-height:160px;margin:9px;background:radial-gradient(circle at 50% 36%,#30445a,#162437 70%);border:2px inset #9ca7b4;overflow:hidden}
+.stage canvas{width:100%;height:100%;display:block;touch-action:none}.axis{position:absolute;top:12px;left:13px;pointer-events:none;color:#b2dbfc;font:bold 12px "Courier New"}.axis span{display:block;color:#89a6c5;font-size:10px;margin-top:4px}
+.stage-tip{position:absolute;bottom:12px;right:13px;pointer-events:none;color:#b7c9d9;font-size:10px}
+.empty{position:absolute;inset:0;display:grid;place-items:center;padding:25px;text-align:center;color:#fff;background:#21374b;z-index:3}
+.viewer-foot{display:flex;justify-content:space-between;gap:12px;padding:0 11px 9px;color:#516275;font:bold 10px "Courier New",monospace}
+.json-panel{height:min(34%,285px);min-height:160px;border-top:2px solid #9099a9;display:flex;flex-direction:column;background:#f5f7fa}
+.tab-buttons{display:flex;gap:3px}.tab{padding:3px 10px;min-height:25px;font-size:10px;background:#e2e5ec}.tab.active{background:#9dbfea}
+.json-scroll{flex:1;min-height:0;padding:7px 13px;overflow:auto;font:11px/1.5 Consolas,"Courier New",monospace;background:#f9fafb}
+.json-scroll details{margin-left:10px}.json-scroll summary{cursor:pointer;color:#26518f}.json-scroll .jkey{color:#7d3873}.json-scroll .jstr{color:#20804c}.json-scroll .jnum{color:#ac6630}.json-scroll .jnull{color:#a73b55}.json-scroll .jleaf{padding-left:15px;overflow-wrap:anywhere}
+#jsonRaw{flex:1;min-height:0;resize:none;width:100%;padding:10px 13px;color:#1b3447;background:#fbfcfd;border:0;outline:0;font:11px/1.5 Consolas,"Courier New",monospace}
+.json-actions{display:flex;align-items:center;gap:5px;min-height:39px;padding:5px 9px;background:#e3e7ec;border-top:1px solid #bdc6ce}
+.json-actions button{font-size:10px;min-height:25px}.json-actions span{margin-left:auto;color:#647285;font:9px "Courier New",monospace}
+.properties{overflow:auto}.properties form{padding:13px;display:flex;flex-direction:column;gap:11px}
+.properties form>label,.properties fieldset label{display:flex;flex-direction:column;gap:5px;font:700 10px "Courier New",monospace;color:#3a5068}
+.properties input:not([type=checkbox]),.properties select{min-width:0;width:100%;padding:8px;background:#fff;border:2px inset #a9b0b7;border-radius:0;color:#173a5e;font:12px Tahoma}
+.properties fieldset{margin:4px 0;padding:10px 8px;border:1px solid #a4b0bf}
+.properties legend{font:bold 10px "Courier New",monospace;color:#45678a}.triple{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.properties .check{flex-direction:row;align-items:center;gap:8px}.properties input[type=checkbox]{width:15px;height:15px;accent-color:#1261ad}
+.wide{width:100%;white-space:normal}.inspector-note{margin:auto 12px 13px;padding:12px;border:1px solid #adb9c9;background:#f6f7f9;font-size:10px;color:#617086}
+.inspector-note strong{color:#2b4c71}.inspector-note p{line-height:1.6}.inspector-note code{font:bold 10px Consolas}
+.statusbar{display:flex;justify-content:space-between;gap:10px;padding:6px 11px;background:#dee2e8;border-top:2px solid #9ba1ad;color:#3e5875;font:10px "Courier New",monospace}
+@media(max-width:900px){.workspace{grid-template-columns:180px minmax(270px,1fr)}.properties{grid-column:1/-1;max-height:175px}.properties form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end}.properties form fieldset{grid-column:1/-1}.inspector-note{display:none}.menu{min-height:44px}.stage{min-height:230px}}
+@media(max-width:650px){.title-sub{display:none}.workspace{display:flex;flex-direction:column;overflow:auto}.library{min-height:120px;max-height:200px}.library-hint{display:none}.list{display:flex;overflow:auto;min-height:65px;padding:6px}.asset-row{min-width:155px}.library-footer{display:none}.face-panel{display:none}.viewport{min-height:570px;flex:none}.stage{min-height:260px}.json-panel{height:220px}.properties{max-height:none;overflow:visible}.properties form{display:grid;grid-template-columns:1fr 1fr}.properties form label:nth-child(2){grid-column:2}.properties form fieldset{grid-column:1/-1}.properties form button{grid-column:1/-1}.stage-tip{font-size:8px}.statusbar span:last-child{display:none}.menu button,.menu .btn{font-size:10px}.panel-title{height:30px}}
