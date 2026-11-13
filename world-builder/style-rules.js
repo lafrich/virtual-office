@@ -132,9 +132,9 @@ function reason(o,objects,map,catalog){
  if(!map?.unbounded&&(x-w/2<bounds.minX||x+w/2>bounds.maxX||z-d/2<bounds.minZ||z+d/2>bounds.maxZ))
   return 'Di luar batas map/footprint.';
  const road=map?.road||{z0:ROAD[0],z1:ROAD[1]};
- if(!isActor&&!map?.terrain&&z+d/2>road.z0+.25&&z-d/2<road.z1-.25)
+ if(!isActor&&(Number(o.y)||0)<.05&&!map?.terrain&&z+d/2>road.z0+.25&&z-d/2<road.z1-.25)
   return 'Objek statis tidak boleh menutup badan jalan.';
- if(map?.terrain&&Array.isArray(map.terrain.cells)){
+ if((Number(o.y)||0)<.05&&map?.terrain&&Array.isArray(map.terrain.cells)){
   const tiles=getTerrainIndex(map.terrain);
   const minC=Math.floor(x-w/2+.08),maxC=Math.ceil(x+w/2-.08);
   const minR=Math.floor(z-d/2+.08),maxR=Math.ceil(z+d/2-.08);
@@ -152,6 +152,7 @@ function reason(o,objects,map,catalog){
  for(const other of objects||[]){
   if(other.id===o.id||category(other,catalog)==='marker'||
      other.collision===false||other.blocking==='no')continue;
+  if(g.VLSemestaElevation&&!g.VLSemestaElevation.verticalOverlap(o,other,catalog,g.VLWorldStyle))continue;
   const [ow,od]=footprint(other,catalog),pad=(k==='building'||category(other,catalog)==='building')?0.2:0.12;
   if(Math.abs(x-other.x)<(w+ow)/2+pad&&Math.abs(z-other.z)<(d+od)/2+pad)
    return 'Footprint bertabrakan dengan '+(other.name||other.id)+'.';

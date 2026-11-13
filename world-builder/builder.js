@@ -92,6 +92,7 @@ const trafficLights=window.VLSemestaTrafficLights;
 const trafficCatalog=window.VLSemestaCatalog;
 const trafficArt=window.VLSemestaArt;
 const vehiclePlacement=window.VLSemestaVehiclePlacement;
+const elevation=window.VLSemestaElevation;
 const schema=window.VLMapSchema;
 const PIXEL_WORLD=Math.SQRT2/64, VERTICAL_COMP=2/Math.sqrt(3);
 const actorType=t=>t==='avatar'||t==='npc';
@@ -348,6 +349,8 @@ function sanitize(v){
    rotation:actorType(p.type)?0:((Number(p.rotation)||0)%360+360)%360,
    scale:actorType(p.type)?1:clamp(Number(p.scale)||1,.1,8)
   };
+  if(['land','level','custom','surface'].includes(p.elevationMode))e.elevationMode=p.elevationMode;
+  if(Number.isInteger(p.elevationLevel)&&p.elevationLevel>=0&&p.elevationLevel<=elevation.MAX_LEVEL)e.elevationLevel=p.elevationLevel;
   for(const k of ['w','d','h','width','height'])if(Number.isFinite(Number(p[k])))e[k]=clamp(Number(p[k]),.2,80);
   if(typeof p.color==='string'&&/^#[0-9a-fA-F]{6}$/.test(p.color))e.color=p.color;
   if(typeof p.assetPath==='string'&&p.assetPath.length<=240&&!p.assetPath.includes('..')&&
@@ -1773,6 +1776,12 @@ function updateSelection(){
  $('selectedName').textContent=cur?cur.name:'Belum ada objek dipilih';
  $('selectedType').textContent=cur?cur.type.toUpperCase():'MAP DRAFT';
  $('objectId').value=cur?.id||'';
+ const elevationLocked=!cur||elevation.movingType(cur.type);
+ $('objectElevationLevel').disabled=elevationLocked;
+ $('objectElevationLevel').value=cur?elevation.selection(cur):'land';
+ $('objectElevationSlider').disabled=elevationLocked;
+ $('objectElevationSlider').value=String(clamp(Number(cur?.y)||0,elevation.MIN_Y,elevation.MAX_Y));
+ $('objectElevationValue').textContent=round(Number(cur?.y)||0).toFixed(1);
  for(const k of ['x','z','y','rotation','scale']){
   $(k).value=cur?String(round(cur[k]??0)):'';
   $(k).disabled=!cur||(actorType(cur?.type)&&['rotation','scale'].includes(k))||
@@ -1997,6 +2006,22 @@ function applyItem(){
  updateSelection();renderer.render(scene,camera);
 }
 function id(type){return type+'-'+Math.random().toString(36).slice(2,8);}
+function applyPlacementElevation(o,point){
+ const choice=$('placementLevel').value;
+ elevation.apply(o,choice,$('placementY').value,documentMap.objects,assetByName,style,point);
+}
+function syncPlacementElevationUI(){
+ const choice=$('placementLevel').value;
+ const custom=choice==='custom';
+ $('placementY').disabled=!custom;
+ if(choice==='land')$('placementY').value='0';
+ else if(choice.startsWith('level:'))$('placementY').value=String(elevation.desiredHeight(choice));
+ $('placementY').title=choice==='surface'?'Auto surface height':custom?'Manual world Y coordinate':'World Y for selected level';
+ if(mode==='place'&&placementType)placementPreview.visible=false;
+}
+$('placementLevel').addEventListener('change',syncPlacementElevationUI);
+$('placementY').addEventListener('change',()=>{$('placementY').value=String(clamp(Number($('placementY').value),elevation.MIN_Y,elevation.MAX_Y));});
+syncPlacementElevationUI();
 function makeObject(type,point){
  if(hideLegacyCharacters&&(
   type==='avatar'||type==='npc'||type.startsWith('character:')||
@@ -2122,6 +2147,7 @@ function snapAutomaticToSurface(o,point){
 }
 function add(type,point=null){
  const obj=makeObject(type,point);
+ if(obj)applyPlacementElevation(obj,point);
  if(!obj){tell('Asset/prefab belum tersedia');return false;}
  if(point){
   if(automaticType(obj.type)){
@@ -2162,9 +2188,19 @@ function mouseRay(e){
  mouse.y=-((e.clientY-r.top)/r.height)*2+1;
  ray.setFromCamera(mouse,camera);
 }
-function floorPoint(e){
+function floorPoint(e,height=0){
  mouseRay(e);let p=new THREE.Vector3();
+ groundPlane.constant=-clamp(height,elevation.MIN_Y,elevation.MAX_Y);
  return ray.ray.intersectPlane(groundPlane,p)?p:null;
+}
+function screenPlacementPoint(e){
+ const choice=$('placementLevel').value;
+ if(choice==='surface'){
+  mouseRay(e);
+  return elevation.surfaceAtRay(ray.ray,documentMap.objects,assetByName,style);
+ }
+ const height=elevation.desiredHeight(choice,$('placementY').value);
+ return floorPoint(e,height);
 }
 function pick(e){
  mouseRay(e);
@@ -2199,6 +2235,7 @@ placementPreview.visible=false;placementPreview.position.y=.065;scene.add(placem
 function previewPlace(point){
  if(!placementType||!point){placementPreview.visible=false;return;}
  const test=makeObject(placementType,point);if(!test)return;
+ applyPlacementElevation(test,point);
  const [fw,fd]=style.footprint(test,assetByName);
  if(automaticType(test.type)){
   if(!snapAutomaticToSurface(test,point)){placementPreview.visible=false;return;}
@@ -2206,7 +2243,7 @@ function previewPlace(point){
   test.x=Math.floor(point.x-fw/2)+fw/2;test.z=Math.floor(point.z-fd/2)+fd/2;
  }
  const reason=style.reason(test,documentMap.objects,documentMap.map,assetByName);
- placementPreview.position.set(test.x,.065,test.z);placementPreview.scale.set(fw,1,fd);
+ placementPreview.position.set(test.x,test.y+.065,test.z);placementPreview.scale.set(fw,1,fd);
  placementPreview.material.color.setHex(reason?0xe35f5f:0x50e677);placementPreview.visible=true;
 }
 function paintAt(point,fill=false){
@@ -2232,7 +2269,7 @@ function onDown(e){
   for(const holder of rigs.values())holder.rig.setMoving(0,0,false);
   drag=null;placementPreview.visible=false;return;
  }
- const point=floorPoint(e);
+ const point=mode==='place'&&placementType?screenPlacementPoint(e):floorPoint(e);
  // Explicit Pan mode must never select or move a clicked object.
  // Unlike Select, dragging over vehicles, buildings or NPCs always pans.
  if(mode==='pan'){
@@ -2262,7 +2299,7 @@ function onDown(e){
  }else if(mode==='walk'&&playControllerOnly()){
   // controllerOnly: no tap-to-move player. Ground presses only pan the camera.
  }
- const p=floorPoint(e);
+ const p=floorPoint(e,mode==='move'&&hit?(item()?.y||0):0);
  if(mode==='move'&&hit&&p){
   undoPoint();const o=item();
   // For an already-driving car, anchor Move to its LIVE road position,
@@ -2277,7 +2314,7 @@ function onDown(e){
 }
 function onMove(e){
  if(!pointers.has(e.pointerId)){
-  if(mode==='place'&&placementType)previewPlace(floorPoint(e));
+  if(mode==='place'&&placementType)previewPlace(screenPlacementPoint(e));
   return;
  }
  const old=pointers.get(e.pointerId);old.x=e.clientX;old.y=e.clientY;
@@ -2299,9 +2336,9 @@ function onMove(e){
   }
   fitCamera();return;
  }
- if(mode==='place'&&placementType&&pointers.size===1)previewPlace(floorPoint(e));
+ if(mode==='place'&&placementType&&pointers.size===1)previewPlace(screenPlacementPoint(e));
  if(!drag||drag.id!==e.pointerId)return;
- const p=floorPoint(e);
+ const p=floorPoint(e,drag.kind==='move'?(item()?.y||0):0);
  if(drag.kind==='paint'&&p){
   const cell=Math.floor(p.x)+','+Math.floor(p.z);
   if(cell!==drag.last){drag.last=cell;drag.changed=!!paintAt(p)||drag.changed;}
@@ -3155,7 +3192,24 @@ for(const prop of ['x','z','y','rotation','scale'])$(prop).addEventListener('cha
  if(prop==='scale'&&item().type==='vehicle'){
   editVehicleVisual(o=>{o.scale=vehiclePlacement.scale(v);});return;
  }
- edit(o=>{o[prop]=prop==='scale'?clamp(v,.1,1.15):prop==='rotation'?((v%360)+360)%360:clamp(v,-1000000,1000000);});
+ edit(o=>{
+  o[prop]=prop==='scale'?clamp(v,.1,1.15):prop==='rotation'?((v%360)+360)%360:
+   prop==='y'?clamp(v,elevation.MIN_Y,elevation.MAX_Y):clamp(v,-1000000,1000000);
+  if(prop==='y'){o.elevationMode=Math.abs(o.y)<.025?'land':'custom';o.elevationLevel=0;}
+ });
+});
+$('objectElevationLevel').addEventListener('change',()=>{
+ if(!item()||elevation.movingType(item().type))return;
+ const choice=$('objectElevationLevel').value;
+ edit(o=>{elevation.apply(o,choice,o.y,documentMap.objects,assetByName,style);});
+});
+$('objectElevationSlider').addEventListener('input',()=>{
+ $('objectElevationValue').textContent=Number($('objectElevationSlider').value).toFixed(1);
+});
+$('objectElevationSlider').addEventListener('change',()=>{
+ if(!item()||elevation.movingType(item().type))return;
+ const y=Number($('objectElevationSlider').value);
+ edit(o=>{elevation.apply(o,'custom',y,documentMap.objects,assetByName,style);});
 });
 // Vehicle size and art offsets do not affect road route, footprint, or
 // existing instance motion. Position C/X and R/Z above remains the spawn.

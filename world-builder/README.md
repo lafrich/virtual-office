@@ -175,3 +175,10 @@ The vehicle display uses the correct sprite art aspect ratio plus transparent-pi
 - **Mainkan (`/mainkan/`)** starts the **same native WebGL renderer** under `?player=1`, which is the only entry that activates Jiwa's survival, jobs, inventory, respawn and full gameplay interaction system.
 - **Global HUD editing lives in `/mainkan/ui-editor.html`**, not in Semesta's inspector; saved layout is compatible with the shared `jiwa-game-ui-global-v2` contract.
 - This mode split does not delete authored maps, asset catalogs, Bangun Ruang interiors, entity markers or Jiwa's rules.
+
+
+## Y-axis elevation and multi-level placement (2026-11-13)
+
+Semesta retains the real world coordinates C/X, R/Z and H/Y. The canvas toolbar now offers **Land (L0), Levels 1–8 (each 3.2 world units apart), Top Surface Snap, and Custom Y** for new placement. The selected-object LAYOUT inspector has matching level choices plus a continuous Y slider (−20 to +45); the existing numeric H/Y field remains available. A placement ray intersects the requested horizontal Y plane, not just the ground, so cursor alignment and horizontal dragging of elevated objects remain accurate. A surface hit selects the highest visible eligible roof/tabletop or falls back to land. Surface snapping is an authoring-time position, not a persistent parent/attachment.
+
+Y heights and optional elevationMode/elevationLevel metadata round-trip through working-copy autosave, Undo, named City Drafts, Drive JSON and map export/import. Older objects with no elevation metadata keep their original Y unchanged. World footprint collision now checks vertical overlap, with terrain blocking evaluated on land. Automatic road vehicles / sidewalk agents remain on ground to protect authored paths; no route, renderer, rig or gameplay state changes are introduced. Elevated collision is an authoring/preview approximation based on asset metadata, **not** a structural floor/navigation or physics engine.

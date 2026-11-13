@@ -43,6 +43,7 @@ function check(actor,point,objects,map,catalog,style,livePositions){
  const old=area(actor,catalog,style,livePositions?.get(actor.id)||{x:actor.x,z:actor.z});
  for(const o of objects||[]){
   if(o.id===actor.id||!solid(o))continue;
+  if(g.VLSemestaElevation&&!g.VLSemestaElevation.verticalOverlap(actor,o,catalog,style))continue;
   const obstacle=area(o,catalog,style,livePositions?.get(o.id));
   if(!intersect(candidate,obstacle))continue;
   const prior=overlapDepth(old,obstacle),after=overlapDepth(candidate,obstacle);

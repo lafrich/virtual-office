@@ -9,7 +9,7 @@
 <script>if(new URLSearchParams(location.search).get('player')==='1')document.documentElement.classList.add('semesta-player-mode');</script>
 <link rel="stylesheet" href="./semesta-player.css?v=mainkan-native-semesta-20261108">
 <link rel="stylesheet" href="./asset-library.css?v=sal-v1">
-<link rel="stylesheet" href="./drive-ui.css?v=drive-20261106"></head>
+<link rel="stylesheet" href="./drive-ui.css?v=drive-20261106"><link rel="stylesheet" href="./semesta-elevation.css?v=20261113-y-level-1"></head>
 <body><div id="desktop"><div id="app">
 <header id="titlebar">
  <span class="window-icon" aria-hidden="true">✳</span>
@@ -162,6 +162,8 @@
    <label id="brushSettings">BRUSH <select id="brushSize"><option value="1">1×1</option><option value="2">2×2</option><option value="4">4×4</option></select></label>
    <label id="roadSettings">ROAD <select id="roadClass"><option value="two_lane">2 Lane</option><option value="local">Local</option><option value="service">Service</option><option value="pedestrian">Pedestrian</option></select></label>
    <label class="toggle"><input id="autoSidewalk" type="checkbox" checked> Auto Sidewalk</label>
+   <label class="elevation-picker" for="placementLevel">ELEVATION <select id="placementLevel" aria-label="Placement height or surface"><option value="land">Land · L0</option><option value="level:1">Level 1 · +3.2</option><option value="level:2">Level 2 · +6.4</option><option value="level:3">Level 3 · +9.6</option><option value="level:4">Level 4 · +12.8</option><option value="level:5">Level 5 · +16.0</option><option value="level:6">Level 6 · +19.2</option><option value="level:7">Level 7 · +22.4</option><option value="level:8">Level 8 · +25.6</option><option value="surface">Top Surface · Snap</option><option value="custom">Custom Y</option></select></label>
+   <label class="elevation-picker" for="placementY">Y <input id="placementY" type="number" min="-20" max="45" step=".1" value="0" disabled title="Custom world Y coordinate"></label>
    <span id="terrainLabel" aria-live="polite">GRASS</span><button type="button" id="gridToolbar" class="chrome-button" aria-pressed="true"># Grid ON</button>
    <label class="building-view-setting" for="buildingViewMode">BUILDING VIEW
     <select id="buildingViewMode" aria-label="Building appearance" title="Choose solid buildings or detailed architectural line outlines">
@@ -204,10 +206,16 @@
     <div id="detail">
      <label>C / X <input id="x" type="number" step=".5"></label>
      <label>R / Z <input id="z" type="number" step=".5"></label>
-     <label>H / Y <input id="y" type="number" step=".1"></label>
+     <label>H / Y <input id="y" type="number" step=".1" min="-20" max="45"></label>
      <label id="rotationField">Rotation ° <input id="rotation" type="number" step="90"></label>
      <label>Scale <input id="scale" type="number" step=".05" min=".1" max="1.15"></label>
      <label>Object ID <input id="objectId" type="text" readonly></label>
+    </div>
+    <div id="elevationControls" aria-label="Selected object elevation">
+     <div class="section-label">Y AXIS / SURFACE LEVEL</div>
+     <div class="elevation-line"><label>DROP ON <select id="objectElevationLevel" aria-label="Selected object height level"><option value="land">Land · L0</option><option value="level:1">Level 1 · +3.2</option><option value="level:2">Level 2 · +6.4</option><option value="level:3">Level 3 · +9.6</option><option value="level:4">Level 4 · +12.8</option><option value="level:5">Level 5 · +16.0</option><option value="level:6">Level 6 · +19.2</option><option value="level:7">Level 7 · +22.4</option><option value="level:8">Level 8 · +25.6</option><option value="surface">Top Surface · Snap</option><option value="custom">Custom Y</option></select></label></div>
+     <div class="elevation-line"><label for="objectElevationSlider">HEIGHT Y</label><input id="objectElevationSlider" type="range" min="-20" max="45" step=".1" value="0" aria-label="Selected object's vertical Y position"><output id="objectElevationValue">0.0</output></div>
+     <small>Land = ground plane. Level = 3.2 unit steps. Top Surface snaps to a roof or tabletop. Custom Y moves vertically. Existing map objects stay where they are.</small>
     </div>
     <div id="buildingControls" hidden>
       <div class="section-label">BUILDING FOOTPRINT · PLACEHOLDER</div>
@@ -471,6 +479,7 @@
 <script src="./semesta-vehicle-placement.js?v=auto-wheel-ground-v2"></script>
 <script src="./semesta-wheel-ground.js?v=wheel-contact-v1"></script>
 <script src="./semesta-vegetation-ground.js?v=tree-ground-contact-v1"></script>
+<script src="./semesta-elevation.js?v=20261113-y-level-1"></script>
 <script src="./style-rules.js?v=semesta-scale-small-20261107"></script>
 <script src="./map-terrain.js?v=kebon-sirih-concrete-v1"></script>
 <script src="./kebon-sirih-style.js?v=terrain-grass-v2-20261107"></script>
@@ -511,7 +520,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="./drive-sync.js?v=cloud-autosync-20261106"></script>
 <script src="./drive-ui.js?v=semesta-bangun-furniture-cloud-20261107" defer></script>
-<script type="module" src="./builder.js?v=world-entity-interiors-v2&amp;semesta-ground-contact-20261107&amp;trees-grounded-v1&amp;warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1&amp;kebon-sirih-city-v2&amp;city-building-sync-v1&amp;native-pixel-depth-v3&amp;asset-thumbnails-v1&amp;indonesia-pack=v1&amp;asset-library=v1&amp;preview-parity=20261105&amp;native-riders=v3-20261105&amp;native-cars=20261105&amp;indonesia-200=20261105&amp;quality-v3=20261105&amp;quality-v4=20261105&amp;quality-v5=20261105&amp;quality-v6=20261105&amp;vegetation-hifi=20261105&amp;transport-npc=20261105&amp;mahluk2-approved-v1&amp;cloud-auto-v3&amp;jakarta-city=v6-bus-tree-depth&amp;scale-small-v1&amp;replace-selected=20261107&amp;loak-visible=20261107&amp;spawn-hobo=noshadow-20261107&amp;bed-lie=20261107&amp;jiwa-directory-metadata=v1&amp;genesis-custom-wear-loading-v2&amp;mainkan-fixtures=v6b-r4-20261110&amp;pakaian-v2"></script>
+<script type="module" src="./builder.js?v=elevation-y-levels-20261113&amp;world-entity-interiors-v2&amp;semesta-ground-contact-20261107&amp;trees-grounded-v1&amp;warteg-3d-mesh-v1&amp;pan-camera-v1&amp;transport-flip-v1&amp;tree-batch-replacement-v1&amp;placeholder-category-v1&amp;kebon-sirih-city-v2&amp;city-building-sync-v1&amp;native-pixel-depth-v3&amp;asset-thumbnails-v1&amp;indonesia-pack=v1&amp;asset-library=v1&amp;preview-parity=20261105&amp;native-riders=v3-20261105&amp;native-cars=20261105&amp;indonesia-200=20261105&amp;quality-v3=20261105&amp;quality-v4=20261105&amp;quality-v5=20261105&amp;quality-v6=20261105&amp;vegetation-hifi=20261105&amp;transport-npc=20261105&amp;mahluk2-approved-v1&amp;cloud-auto-v3&amp;jakarta-city=v6-bus-tree-depth&amp;scale-small-v1&amp;replace-selected=20261107&amp;loak-visible=20261107&amp;spawn-hobo=noshadow-20261107&amp;bed-lie=20261107&amp;jiwa-directory-metadata=v1&amp;genesis-custom-wear-loading-v2&amp;mainkan-fixtures=v6b-r4-20261110&amp;pakaian-v2"></script>
 <script src="./jiwa-link.js?v=jiwa-launch-v1" defer></script>
 <script src="../shared/cloud-first-universal.js?v=nondestructive-20261108"></script>
 <script src="../shared/cloud-first-native-entry.js?v=nondestructive-20261108"></script>
