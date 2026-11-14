@@ -3,23 +3,25 @@
 Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged. No storage migration.
 
 - Previous live `origin/main` (before this step): `53cfe59be06b567a6ad2f51c84ea0e68eb5120b8`
-- Integration branch: `integ/step1` (tip will be the latest commit on this branch; revert newest first, then the three merges with `-m 1`)
-- Merge order (do not force-push): ours `preview/main-interiors-kost-warteg` (`0dcc793c`) → Ellen `preview/njh-gameplay-sites` (`8e099eb9`, frozen) → Layar `layar/win98-ui` (`6ffffc8e99a50839a53b9e770319056e4c3c3c65`, `?v=njh98-5`, sw v23)
+- Integration branch: `integ/step1` (tip will be the latest commit on this branch; revert newest first, then the merges with `-m 1`)
+- Merge order (do not force-push): ours `preview/main-interiors-kost-warteg` (`0dcc793c`) → Ellen `preview/njh-gameplay-sites` (`8e099eb9`, frozen) → Layar `layar/win98-ui` (`6ffffc8e99a50839a53b9e770319056e4c3c3c65`, `?v=njh98-5`, sw v23) → Layar follow-up `a953045acbedf1096cf8765758df53b22979d0be` (`?v=njh98-6`, sw v24; merge `212c84a6`; committed objects only, uncommitted `shared/genesis-player.js` was not included)
 - Ellen park-bench scale fix `fix/njh-bangku-taman-scale` had **no unique commit** at merge time (still at `8e099eb9`); it was **not** included and should ship as a follow-up.
 
-If `origin/main` has been fast-forwarded to this step, revert the three merge commits in reverse order (`-m 1` keeps the first parent, which is `origin/main` / the previous merge):
+If `origin/main` has been fast-forwarded to this step, revert the merge commits in reverse order (`-m 1` keeps the first parent, which is `origin/main` / the previous merge). Also revert the builder-string fix if it is still on `main`:
 
 ```bash
 git fetch origin
 git checkout main
 git pull --ff-only origin main
-git revert --no-edit -m 1 9e222a90   # Layar win98-ui 6ffffc8
+git revert --no-edit -m 1 212c84a6   # Layar win98-ui a953045 (?v=njh98-6, sw v24)
+git revert --no-edit 2c81b154        # builder.js playerMode / openFor(nearest.o) restore
+git revert --no-edit -m 1 9e222a90   # Layar win98-ui 6ffffc8 (?v=njh98-5, sw v23)
 git revert --no-edit -m 1 9dc66aeb   # Ellen map 8e099eb
 git revert --no-edit -m 1 85f28c3d   # ours 0dcc793
-# then bump sw.js if a rollback build must drop v23, and push --ff-only
+# then bump sw.js if a rollback build must drop v24, and push --ff-only
 ```
 
-Layar-only rollback (the UI commits on top of `726fde70`) is: revert `6ffffc8e`, `dfd8cae7`, and `8eb65938`. Those three are what Layar named as the step-1 UI; the earlier Win98 commits (`dd3396a2`, `2b92b91d`, `726fde70`) came in with the same merge.
+Layar-only rollback (the UI commits on top of `726fde70`) is: revert `a953045a`, then `6ffffc8e`, `dfd8cae7`, and `8eb65938`. `a953045a` is the final step-1 UI (Alat Dev only with `?dev=1`, no lone Login tab, sticky window OK row on phone, reachable Pipis di Tembok). The earlier Win98 commits (`dd3396a2`, `2b92b91d`, `726fde70`) came in with the 6ffffc8 merge.
 
 ---
 
