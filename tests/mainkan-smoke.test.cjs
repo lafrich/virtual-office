@@ -49,7 +49,10 @@ test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entr
  assert.match(interiors,/function moveInside\(start,dx,dz\)/);
  assert.match(semesta,/scheduleNjhHomeSpawn\(\)/);
  assert.match(semesta,/interior\.moveInside\(start/);
- assert.match(semesta,/if\(studio&&!playerMode\)/);
+ // Studio sprite grounding remains a separate compositing path in all modes.
+ // No opaque depth-test workaround is allowed to clip the lower facade.
+ assert.match(semesta,/const flags=studio\?studioSprites\.spriteMaterial\(\)/);
+ assert.match(semesta,/if\(studio\)/);
  assert.match(semesta,/collectObject:id=>/);
  assert.match(life,/const door=I\?\.nearestDoor\?\.\(\)\|\|null/);
  assert.doesNotMatch(life,/const door=inside\?\(bridge\?\.exitInterior/);
