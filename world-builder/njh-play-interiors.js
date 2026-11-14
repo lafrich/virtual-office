@@ -97,7 +97,7 @@ function create(opts){
  opts=opts||{};
  const THREE=opts.THREE,scene=opts.scene;
  let catalog=opts.catalog||null,scenes=opts.scenes||{},images=new Map();
- let group=null,session=null,hidden=[],billboards=[],buildings={};
+ let group=null,session=null,hidden=[],outdoorHidden=false,billboards=[],buildings={};
  const storage=opts.storage||(typeof localStorage!=='undefined'?localStorage:null);
 
  async function loadAssets(){
@@ -442,12 +442,16 @@ function create(opts){
 
  function hideOutdoor(hide){
   if(!hide){
+   if(!outdoorHidden)return;
+   // Restore the original street visibility captured on the FIRST entry.
+   // Room → lobby → room transitions must not overwrite it with false.
    for(const rec of hidden){if(rec.obj)rec.obj.visible=rec.prev;}
-   hidden=[];
+   hidden=[];outdoorHidden=false;
    try{opts.setGroundVisible?.(true);}catch(_e){}try{opts.setGroundDepthWrite?.(true);}catch(_e){}
    return;
   }
-  hidden=[];
+  if(outdoorHidden)return; // Idempotent across indoor-to-indoor transitions.
+  outdoorHidden=true;hidden=[];
   const roots=typeof opts.getRoots==='function'?opts.getRoots():[];
   const playerId=opts.playerObjectId?.()||'';
   const keep=new Set([playerId,'__semesta_life_temporary_player__'].filter(Boolean));
