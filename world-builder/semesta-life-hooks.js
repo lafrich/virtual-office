@@ -742,6 +742,11 @@ function create(ctx){
  }
  function listSites(){
   return getSites().map(s=>({id:s.id,label:s.label,x:num(s.x,0),z:num(s.z,0),
+   // Stable gameplay provenance is required by Jiwa, Nokia and editor QA.
+   // Keep actions private to the engine; expose only their safe IDs and flags.
+   sourceId:String(s.sourceId||''),activityId:s.activityId||null,
+   worldRuleId:s.worldRuleId||null,ambient:s.ambient===true,
+   operation:s.operation||null,action:s.action||null,
    placeholder:s.placeholder===true,npc:!!(s.npc||s.npcId||s.jobId||s.role==='quest'||s.id==='hansip'||s.id==='loak'||s.id==='help'||s.id==='siomay_batagor'||s.id==='pasar_ikan'),
    points:Array.isArray(s.points)&&s.points.length?s.points.map(p=>({id:p.id||s.id,x:num(p.x,s.x),z:num(p.z,s.z)})):[{id:s.sourceId||s.id,x:num(s.x,0),z:num(s.z,0)}]}));
  }

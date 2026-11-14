@@ -7,8 +7,14 @@ on:
     paths:
       - "world-builder/**"
       - "membangun/**"
-      - "tests/membangun-launcher.test.cjs"
+      - "tests/**"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/njh-guide-map-guard.test.cjs"
+      - "tests/njh-mart-registry.test.cjs"
+      - "tests/njh-mart-paint.test.cjs"
+      - "tests/njh-wc-privacy.test.cjs"
+      - "tests/njh-interior-art-catalog.test.cjs"
+      - "tests/njh-play-interiors.test.cjs"
       - "tests/faceless-v6b-cross-app.test.cjs"
       - "tests/semesta-base-human-gameplay.test.cjs"
       - "tests/semesta-custom-wardrobe-depth.test.cjs"
@@ -44,8 +50,14 @@ on:
     paths:
       - "world-builder/**"
       - "membangun/**"
-      - "tests/membangun-launcher.test.cjs"
+      - "tests/**"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/njh-guide-map-guard.test.cjs"
+      - "tests/njh-mart-registry.test.cjs"
+      - "tests/njh-mart-paint.test.cjs"
+      - "tests/njh-wc-privacy.test.cjs"
+      - "tests/njh-interior-art-catalog.test.cjs"
+      - "tests/njh-play-interiors.test.cjs"
       - "tests/faceless-v6b-cross-app.test.cjs"
       - "tests/semesta-base-human-gameplay.test.cjs"
       - "tests/semesta-custom-wardrobe-depth.test.cjs"
@@ -163,6 +175,24 @@ jobs:
           node tests/semesta-simple-effects.test.cjs
           node tests/semesta-daynight.test.cjs
           node tests/semesta-sidewalk-and-lighting.test.cjs
+
+      - name: NJH guide compliance — ground, drainage, Mart furniture
+        run: |
+          node --check world-builder/map-terrain.js
+          node --check world-builder/vegetation-catalog.js
+          node --check world-builder/bangun-ruang/indonesia-interior-templates.js
+          node --check world-builder/bangun-ruang/njh-interior-art-preview.js
+          node --check world-builder/njh-map-preview.js
+          node --test tests/njh-guide-map-guard.test.cjs tests/njh-mart-registry.test.cjs tests/njh-mart-paint.test.cjs tests/njh-wc-privacy.test.cjs tests/njh-interior-art-catalog.test.cjs tests/njh-play-interiors.test.cjs
+
+      # All edited tests must retrigger this gate, not just the handpicked smoke suite.
+      # Full unit baseline is a hard release gate (not only selected smoke tests).
+      # The six artist-owned Beraksi fixtures are skipped with an explicit reason
+      # if absent; gameplay semantics remain tested in CI.
+      - name: NJH full repository unit baseline (required)
+        timeout-minutes: 8
+        run: |
+          node --test tests/*.test.cjs
 
       - name: Jiwa Survival V1 Play integration and business rules
         run: |

@@ -24,7 +24,21 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  const before=await page.evaluate(()=>localStorage.getItem('virtual-life-gpt-world-builder-pipeline-v3'));
  await page.locator('#characterForm button[type=submit]').click();
  await page.locator('#confirmGo').click({timeout:15000});
- await page.locator('#tutorialDone').click({timeout:15000});
+ // Tutorial is a three-page wizard: 'Mulai Main' stays hidden until
+ // the last page. Wait for loading to finish, then follow its supported flow.
+ await page.waitForFunction(()=>['tutorialScreen','gameScreen'].some(id=>{
+  const e=document.getElementById(id);return e&&!e.hidden;
+ }),null,{timeout:30000});
+ if(await page.locator('#tutorialScreen').isVisible()){
+  if(await page.locator('#tutorialSkip').isVisible())
+   await page.locator('#tutorialSkip').click({timeout:10000});
+  else{
+   for(let i=0;i<3&&!(await page.locator('#tutorialDone').isVisible());i++)
+    await page.locator('#tutorialScreen [data-howto="next"]').click({timeout:10000});
+   await page.locator('#tutorialDone').click({timeout:10000});
+  }
+ }
+ await page.locator('#gameScreen').waitFor({state:'visible',timeout:30000});
  await page.waitForFunction(()=>{
    const el=document.getElementById('semestaFrame');
    const win=el?.contentWindow;
@@ -87,6 +101,11 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.ok(genesis.faces>=18);
  assert.equal(genesis.faceSource,'mainkan-emosi-published-v1');
  assert.equal(genesis.rig.source,'genesis','Player geometry must be Genesis pixels');
+ assert.equal(genesis.rig.visible,true,'Genesis mesh must remain visible in the player world');
+ assert.ok(genesis.rig.opaquePixels>350,
+  'Player CanvasTexture must contain an actual opaque LGR character, not just an empty loaded canvas');
+ assert.ok(genesis.rig.visibleHeight>=60,
+  'LGR character must be visibly tall next to NJH scenery');
  assert.notEqual(genesis.actor.profile,'ichsan');
  assert.equal(result.hasNativeHUD,true);
  assert.equal(result.hiddenEditor,true);
@@ -107,16 +126,73 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(respawn.before,'genesis_male_nude');
  assert.equal(respawn.after,'genesis_male_nude');
  assert.equal(respawn.happyAvailable,true,'Emosi happy context must be selectable');
- const actionBridge=await page.evaluate(()=>{
-  const source=document.getElementById('semestaFrame').contentWindow.document.getElementById('ptActionBtn');
-  window.__mainkanActionEvents=[];
-  ['pointerdown','pointerup','click'].forEach(type=>source.addEventListener(type,()=>window.__mainkanActionEvents.push(type)));
-  return !!source;
+ // NJH98 uses a single context-sensitive AKSI button. Clicking it opens
+ // the sliding icon bar, not an immediate click on the retired ptActionBtn.
+ const actionBefore=await page.evaluate(()=>{
+  const w=document.getElementById('semestaFrame').contentWindow;
+  return w.SemestaLifePlay.nearbyActions().some(x=>x.id==='fart');
  });
- assert.equal(actionBridge,true);
+ assert.equal(actionBefore,true,'Fart remains an always-offered context action');
  await page.locator('#gameAction').click();
- const events=await page.evaluate(()=>window.__mainkanActionEvents);
- assert.ok(events.includes('pointerdown')&&events.includes('pointerup')&&events.includes('click'),'Mainkan must bridge Action to native Jiwa input');
+ const bar=page.locator('#njhActBar');
+ await bar.waitFor({state:'visible',timeout:10000});
+ const options=await page.locator('#njhActBar [data-njh-act]').count();
+ assert.ok(options>=1,'Single AKSI must expose contextual entries');
+ const fart=page.locator('#njhActBar [data-njh-act="fart"]');
+ assert.ok(await fart.isVisible(),'Fart must be offered inside the same AKSI bar');
+ await fart.click();
+ await bar.waitFor({state:'hidden',timeout:8000});
+ // Hobo spawn intentionally conceals the actor during its authored
+ // five-phase exit-tent animation. The gameplay is only VISIBLY ready after
+ // its last frame; checking a loaded atlas alone misses this failure.
+ await page.waitForFunction(()=>{
+  const w=document.getElementById('semestaFrame')?.contentWindow;
+  const r=w?.SemestaPlay?.playerRigStatus?.();
+  return r?.loaded===true&&r.visible===true&&r.clipPlaying===false;
+ },null,{timeout:30000});
+ const readyPlayer=await page.evaluate(()=>{
+  const w=document.getElementById('semestaFrame').contentWindow;
+  return {rig:w.SemestaPlay.playerRigStatus(),spawn:w.VLSpawnHobo?.snapshot?.()||null,
+   camera:w.VLNjhMapPreviewRuntime?.camera?.()||null};
+ });
+ console.log('VISIBLE_GENESIS_AFTER_SPAWN',JSON.stringify(readyPlayer));
+ assert.equal(readyPlayer.rig.visible,true,'Genesis must become visible after tent intro');
+ assert.equal(readyPlayer.rig.clipPlaying,false,'Tent exit must finish before gameplay visibility QA');
+ assert.equal(readyPlayer.rig.screen.visible,true,'Genesis world position must project onto the playable viewport');
+ assert.equal(readyPlayer.rig.editorOutline,false,
+  'Mainkan must not draw the yellow Semesta editor BoxHelper around Genesis');
+ assert.equal(readyPlayer.rig.editorGrid,false,
+  'Mainkan must hide the full-screen isometric placement grid');
+ assert.equal(readyPlayer.rig.editorMarkersVisible,0,
+  'Mainkan must not render authored yellow logic-marker pins or floating exclamation points');
+ fs.mkdirSync('screenshots',{recursive:true});
+ await page.screenshot({path:'screenshots/mainkan-world-genesis-visible.png',fullPage:true});
+ // Mobile viewport QA must use the same real Genesis world, not a mock screenshot.
+ // Preserve the original wide-screen editor/game settings after the check.
+ for(const v of [{name:'mobile-portrait',w:390,h:844},{name:'mobile-landscape',w:844,h:390}]){
+  await page.setViewportSize({width:v.w,height:v.h});
+  await page.waitForTimeout(180);
+  const mobile=await page.evaluate(()=>{
+   const frame=document.getElementById('semestaFrame');
+   const win=frame?.contentWindow,world=win?.document?.getElementById('world');
+   const rig=win?.SemestaPlay?.playerRigStatus?.();
+   const action=document.getElementById('gameAction');
+   const rect=action?.getBoundingClientRect?.();
+   return {ready:!!rig?.loaded,screenVisible:!!rig?.screen?.visible,
+    editorGrid:rig?.editorGrid,editorOutline:rig?.editorOutline,
+    canvasW:world?.width||0,canvasH:world?.height||0,
+    actionVisible:!!rect&&rect.width>0&&rect.height>0&&rect.left>=-1&&rect.right<=innerWidth+1};
+  });
+  console.log('MAINKAN_MOBILE_VIEWPORT',v.name,JSON.stringify(mobile));
+  assert.equal(mobile.ready,true,v.name+' Genesis not loaded');
+  assert.equal(mobile.screenVisible,true,v.name+' player outside viewport');
+  assert.equal(mobile.editorGrid,false,v.name+' editor grid visible');
+  assert.equal(mobile.editorOutline,false,v.name+' editor selection visible');
+  assert.ok(mobile.canvasW>=100&&mobile.canvasH>=100,v.name+' WebGL canvas collapsed');
+  assert.equal(mobile.actionVisible,true,v.name+' AKSI button offscreen');
+  await page.screenshot({path:'screenshots/mainkan-world-'+v.name+'.png',fullPage:true});
+ }
+ await page.setViewportSize({width:1280,height:800});
  await page.locator('#gamePhone').click();
  const phone=await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.VLNokiaPlay?.isOpen?.()||false);
  assert.equal(phone,true,'Mainkan Phone button must open native Semesta Nokia');

@@ -3,9 +3,15 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const crypto=require('node:crypto');
 const Scenes=require('../world-builder/semesta-int-scenes.js');
-const LGR=require('/workspace/lgr-joint-wt/site/lgr-db.js');
-const SLOT_DIR='/workspace/beraksi-int-slots';
+// Optional artist-owned Beraksi fixtures live outside this repository.
+ // Gate them explicitly instead of hard-coding an agent's /workspace path.
 const IDS=['njh_int_wc','njh_int_bed','njh_int_tree','njh_int_room','njh_int_npc_f','njh_int_npc_m'];
+const SLOT_DIR=process.env.BERAKSI_SLOT_DIR||path.resolve(__dirname,'../fixtures/beraksi-int-slots');
+const LGR_FILE=process.env.LGR_DB_FILE||path.resolve(__dirname,'../../virtual-life-asset-pipeline/site/lgr-db.js');
+const hasFixtures=fs.existsSync(LGR_FILE)&&IDS.every(id=>fs.existsSync(path.join(SLOT_DIR,id+'.json')));
+const LGR=hasFixtures?require(LGR_FILE):null;
+const fixtureTest=hasFixtures?test:test.skip;
+
 
 function canonical(v){
  if(Array.isArray(v))return '['+v.map(canonical).join(',')+']';
@@ -14,7 +20,7 @@ function canonical(v){
 }
 function sha256(s){return crypto.createHash('sha256').update(s).digest('hex');}
 
-test('6 slot files are importable lgr1-db beraksi and checksum matches',()=>{
+fixtureTest('6 slot files are importable lgr1-db beraksi and checksum matches',()=>{
  for(const id of IDS){
   const raw=JSON.parse(fs.readFileSync(path.join(SLOT_DIR,id+'.json'),'utf8'));
   assert.equal(raw.schema,'lgr1-db-file-v1');
@@ -40,7 +46,7 @@ test('partner slots only offered to pacaran pairs; NPC slots need NPC gender',()
  assert.ok(!acts.some(a=>a.id==='scene:njh_int_bed'));
 });
 
-test('DB scene version replaces the in-code fallback after sync',()=>{
+fixtureTest('DB scene version replaces the in-code fallback after sync',()=>{
  Scenes.cache.clear();
  const first=Scenes.load('njh_int_wc');
  assert.equal(first.source,'fallback');

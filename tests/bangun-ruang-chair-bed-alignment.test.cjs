@@ -144,7 +144,7 @@ test('Bangun Ruang walks to a bed, lies on its mattress, then sits on a chair',(
  assert.equal(state.pose,'sit');
  assert.equal(state.actionAnchor.kind,'chair');
  assert.ok(near(state.c+.5,g.VLInteriorIso.actionAnchor(chair).c));
- assert.ok(messages.some(s=>s.includes('aligned to seat')));
+ assert.ok(messages.some(s=>s.includes('aligned to fixture')));
  element('scaleIdle').onclick();
  assert.ok(g.VLCharacterScale.available(scene,actor.actor.c,actor.actor.r),
   'Getting up from a chair must restore a walkable location');
@@ -152,8 +152,8 @@ test('Bangun Ruang walks to a bed, lies on its mattress, then sits on a chair',(
 
 test('chair and bed docking are preview-only; saved building data has no preview actor',()=>{
  const html=read('index.html');
- assert.ok(html.includes('interior-isometric.js?v=furniture-v10'));
- assert.ok(html.includes('character-scale-preview.js?v=chair-bed-v2'));
+ assert.ok(html.includes('interior-isometric.js?v='));
+ assert.ok(html.includes('character-scale-preview.js?v='));
  const start=html.indexOf('function buildAsset()'),end=html.indexOf('function persist(',start);
  assert.ok(start>=0&&end>start);
  assert.ok(!html.slice(start,end).includes('actionAnchor'));

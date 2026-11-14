@@ -22,7 +22,21 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  await page.locator('#ccYear').dispatchEvent('input');
  await page.locator('#characterForm button[type=submit]').click();
  await page.locator('#confirmGo').click({timeout:15000});
- await page.locator('#tutorialDone').click({timeout:15000});
+ // Tutorial is a three-page wizard: 'Mulai Main' stays hidden until
+ // the last page. Wait for loading to finish, then follow its supported flow.
+ await page.waitForFunction(()=>['tutorialScreen','gameScreen'].some(id=>{
+  const e=document.getElementById(id);return e&&!e.hidden;
+ }),null,{timeout:30000});
+ if(await page.locator('#tutorialScreen').isVisible()){
+  if(await page.locator('#tutorialSkip').isVisible())
+   await page.locator('#tutorialSkip').click({timeout:10000});
+  else{
+   for(let i=0;i<3&&!(await page.locator('#tutorialDone').isVisible());i++)
+    await page.locator('#tutorialScreen [data-howto="next"]').click({timeout:10000});
+   await page.locator('#tutorialDone').click({timeout:10000});
+  }
+ }
+ await page.locator('#gameScreen').waitFor({state:'visible',timeout:30000});
  await page.waitForFunction(()=>{
   const win=document.getElementById('semestaFrame')?.contentWindow;
   try{return !!win?.document?.documentElement?.dataset?.mainkanReady&&
@@ -50,6 +64,9 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(synced.siteCount,synced.mapSiteCount);
  assert.equal(synced.matching,true,'Nokia activity pins must use real gameplay action coordinates');
  assert.ok(synced.siteCount>=12,'Expected playable V1 activity sites');
+ assert.equal(synced.placeholderSites,0,
+  'Only real placed NJH locations may appear as interactive sites or Nokia pins');
+ assert.ok(synced.realSites>=12,'Real gameplay sites must survive the fallback cleanup');
  assert.ok(synced.terrainCount>0,'Nokia map should use real Semesta terrain rather than a fake grid');
  await page.locator('#gamePhone').click({timeout:10000});
  await frame.waitForFunction(()=>window.VLNokiaPlay?.isOpen?.(),null,{timeout:15000});
@@ -63,16 +80,39 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   return {depth,wallet,rgba:[...before.data]};
  });
  assert.equal(token.depth,3,'Nokia must navigate to Dompet within original handset');
- const trade=await frame.evaluate(()=>{
-  const E=window.VLPhoneEllen;E.press('R');E.press('4');E.press('1');E.press('L');E.press('L');
+ // First purchase attempt must fail safely: new Guest starts on Rp6.000
+ // while Jiwa's official price is Rp20.000. No negative balance or token grant.
+ const rejected=await frame.evaluate(()=>{
+  const E=window.VLPhoneEllen;
+  E.press('R');E.press('4');E.press('1');E.press('L');E.press('L');
   const game=window.SemestaLifePlay,live=E.gameSnapshot();
-  return {wallet:game.state().wallet,nokiaWallet:live.wallet,token:game.state().powerTokens,
-   ledger:live.transactions,stillOpen:window.VLNokiaPlay.isOpen(),depth:E.depth()};
+  return {wallet:game.state().wallet,token:game.state().powerTokens,
+   ledger:live.transactions,depth:E.depth()};
  });
- console.log('REAL_NOKIA_PURCHASE',JSON.stringify(trade));
- assert.equal(trade.wallet,token.wallet-1000,'Original Nokia marketplace must debit Jiwa wallet');
+ assert.equal(rejected.wallet,token.wallet,'Insufficient funds must not debit wallet');
+ assert.equal(rejected.token,0,'Insufficient funds must not grant token units');
+ assert.ok(!rejected.ledger.some(t=>t.action==='buy_token'&&t.delta<0),
+  'Rejected token purchase cannot create a receipt');
+ // Fund only this disposable CI browser state, not production or Drive.
+ // Retry the same native Nokia purchase using real Jiwa hooks.
+ const trade=await frame.evaluate(()=>{
+  const E=window.VLPhoneEllen,game=window.SemestaLifePlay;
+  E.press('L'); // dismiss rejection message
+  E.press('R'); // back to marketplace
+  game.state().wallet=50000;
+  const startingWallet=game.state().wallet;
+  E.press('1');E.press('L');E.press('L');
+  const live=E.gameSnapshot();
+  return {startingWallet,wallet:game.state().wallet,nokiaWallet:live.wallet,
+   token:game.state().powerTokens,ledger:live.transactions,
+   stillOpen:window.VLNokiaPlay.isOpen(),depth:E.depth()};
+ });
+ console.log('REAL_NOKIA_PURCHASE',JSON.stringify({rejected,trade}));
+ assert.equal(trade.wallet,trade.startingWallet-20000,
+  'Nokia must debit Jiwa Rp20.000 for five token units');
  assert.equal(trade.nokiaWallet,trade.wallet,'Nokia and Jiwa balances must match after buying');
- assert.ok(trade.ledger.some(t=>t.action==='buy_token'&&t.delta===-1000),'Dompet must reflect real transaction');
+ assert.ok(trade.ledger.some(t=>t.action==='topup_token'&&t.delta===-20000),
+  'Dompet must record the authoritative Rp20.000 token purchase');
  assert.equal(trade.stillOpen,true,'Nokia must remain open after game HUD refresh');
  assert.ok(trade.depth>=3,'Nokia must not reset to standby during purchase');
  const mapResult=await frame.evaluate(()=>{

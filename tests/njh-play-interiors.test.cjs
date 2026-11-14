@@ -23,9 +23,10 @@ function THREE(){
  class Mesh extends Object3D{constructor(geometry,material){super();this.geometry=geometry;this.material=material;}}
  class Group extends Object3D{}
  class PlaneGeometry{constructor(){this.type='PlaneGeometry';}dispose(){this.disposed=true;}}
+ class BoxGeometry{constructor(){this.type='BoxGeometry';}dispose(){this.disposed=true;}}
  class MeshBasicMaterial{constructor(opts){Object.assign(this,opts||{});}dispose(){this.disposed=true;}}
  class Texture{constructor(){this.needsUpdate=false;}dispose(){this.disposed=true;}}
- return {Group,Mesh,PlaneGeometry,MeshBasicMaterial,Texture,DoubleSide:2,NearestFilter:1003,SRGBColorSpace:'srgb'};
+ return {Group,Mesh,PlaneGeometry,BoxGeometry,MeshBasicMaterial,Texture,DoubleSide:2,NearestFilter:1003,SRGBColorSpace:'srgb'};
 }
 
 function kit(opts={}){
@@ -65,12 +66,14 @@ test('preview wires Ellen kost and Kharisma warteg; Ellen warung remains fallbac
  assert.equal(Interiors.FALLBACK.warteg,'njh_warung_makan');
  assert.equal(kos.width,8);assert.equal(kos.depth,6);assert.equal(kos.entrance.c,4);assert.equal(kos.entrance.r,5);
  assert.equal(warteg.width,8);assert.equal(warteg.depth,6);
- assert.deepEqual(kos.items.map(i=>i.assetId),[
+ assert.deepEqual(kos.items.slice(0,9).map(i=>i.assetId),[
   'bed','wardrobe','stove','fridge','shower','squat_toilet','sink','chair','dining_table']);
+ assert.equal(kos.items.filter(i=>i.assetId==='sekat_wc').length,5,'kost bathroom has solid privacy walls');
+ assert.ok(kos.doors?.some(d=>d.role==='bathroom'&&d.privacy&&d.walkable),'kost bathroom has a privacy curtain');
  assert.deepEqual(warteg.items.map(i=>i.assetId),[
   'stove','noodle_pot','kitchen_sink','dish_rack','fridge','coffee_machine','water_dispenser',
   'wooden_bench','dining_table','food_vitrine','cashier','dining_table','chair']);
- assert.equal(kos.items.length,9);
+ assert.equal(kos.items.length,14);
  assert.equal(warteg.items.length,13);
  assert.equal(kharisma.name,'Warteg Kharisma Bahari');
  assert.equal(kharisma.width,8);assert.equal(kharisma.depth,6);

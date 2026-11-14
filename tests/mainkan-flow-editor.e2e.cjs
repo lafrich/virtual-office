@@ -40,8 +40,11 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  await page.locator('#fileIn').setInputFiles(path);
  await page.locator('.node[data-id=splash]').click();
  assert.equal(await page.locator('#inspector').locator('select').nth(1).inputValue(),'welcome');
- const saved=await page.evaluate(()=>localStorage.length);
- assert.equal(saved,0,'Flow editor must use file import/export, not localStorage autosave');
+ // Cloud startup is allowed to remember an explicit OFFLINE recovery choice.
+ // The graph itself must never be auto-saved to browser storage.
+ const storedFlow=await page.evaluate(()=>Object.entries(localStorage)
+  .filter(([k,v])=>/mainkan-flow-v1|Welcome khusus dari Flow Editor!/.test(k+' '+v)));
+ assert.equal(storedFlow.length,0,'Flow graph edits must use JSON/Drive, not localStorage autosave');
  assert.equal(errors.length,0,'Browser errors: '+errors.join(' | '));
  fs.mkdirSync('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/mainkan-flow-editor.png'});

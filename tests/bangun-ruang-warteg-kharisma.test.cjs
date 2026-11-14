@@ -50,7 +50,7 @@ test('Warteg interior items fit, do not overlap, and have action slots',()=>{
  const scene=pack.interior.floors[0],occ=new Set();
  assert.equal(scene.width,8);assert.equal(scene.depth,6);
  assert.equal(scene.entrance.c,3);assert.equal(scene.entrance.r,5);
- assert.equal(scene.items.length,10);
+ assert.equal(scene.items.length,14,'Kharisma master specifies fourteen furniture placements');
  for(const item of scene.items){
   for(const cell of m.occupied(item)){
    assert.notEqual(cell,'3,5');

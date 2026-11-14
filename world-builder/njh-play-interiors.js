@@ -120,7 +120,8 @@ function create(opts){
    if(images.has(file))return resolve();
    const img=new Image();
    let tried=0;
-   const srcs=[file.startsWith('art/')?base+file:base+'art/'+file, base+file];
+   const srcs=file.startsWith('../')?[base+file]:
+    [file.startsWith('art/')?base+file:base+'art/'+file,base+file];
    img.onload=()=>{images.set(file,img);resolve();};
    img.onerror=()=>{if(tried<srcs.length-1){img.src=srcs[++tried];}else resolve();};
    img.src=srcs[0];
@@ -258,11 +259,64 @@ function create(opts){
   const paint=root?.VLWartegInteriorArt;
   const bake=side=>((sc.theme==='warteg'||themeKind==='warteg'||kind==='warteg')&&View?.bakeWallTexture)
    ?View.bakeWallTexture(side,{width:w,depth:d},paint):null;
-  // Minimarket paint (scene.paint): white tile dado + teal band; flat preview colours until a baked hook exists.
+  // NJH MART mandatory five-layer wall paint (Kharisma layout standard).
+  // The source is the scene's published paint declaration, not a new asset.
+  // Pixel geometry is baked to a nearest-filtered CanvasTexture once per room.
   const MART_WALL={back:0xf3f5f2,left:0xe2ece8};
+  function bakeMartWall(side){
+   const declared=new Set((sc.paint?.layers||[]).map(x=>x.layer));
+   if(!['dado','trim','midDisplay','identity','ceiling'].every(x=>declared.has(x)))return null;
+   const unit=64,ww=side==='back'?w:d;
+   const c=document.createElement('canvas');c.width=Math.max(64,Math.round(ww*unit));c.height=128;
+   const ctx=c.getContext('2d',{alpha:false});ctx.imageSmoothingEnabled=false;
+   const W=c.width,H=c.height,fromFloor=z=>H-z;
+   ctx.fillStyle=side==='back'?'#F3F5F2':'#E2ECE8';ctx.fillRect(0,0,W,H);
+   // DADO — glazed white tiles, with a teal belt across both far walls.
+   ctx.fillStyle='#F6FAF7';ctx.fillRect(0,fromFloor(49),W,49);
+   ctx.fillStyle='#CDDAD8';
+   for(let x=0;x<W;x+=16)ctx.fillRect(x,fromFloor(49),1,49);
+   for(let y=fromFloor(49);y<H;y+=12)ctx.fillRect(0,y,W,1);
+   ctx.fillStyle='#22A094';ctx.fillRect(0,fromFloor(46),W,6);
+   // TRIM — continuous orange identity rail at z=50.
+   ctx.fillStyle='#F59E0B';ctx.fillRect(0,fromFloor(52),W,3);
+   ctx.fillStyle='#B77811';ctx.fillRect(0,fromFloor(49),W,1);
+   // MID DISPLAY — shelf-top shelf tickets, not floating pseudo-products.
+   ctx.fillStyle='#CBD9D5';ctx.fillRect(0,fromFloor(70),W,2);
+   for(let x=8;x+25<W;x+=48){
+    ctx.fillStyle='#FEF9DE';ctx.fillRect(x,fromFloor(64),26,8);
+    ctx.fillStyle='#164F50';ctx.fillRect(x+3,fromFloor(61),12,2);
+   }
+   // IDENTITY — an anchored NJH MART sign and category bands.
+   if(side==='back'){
+    const sw=Math.min(W-18,235),sx=Math.round((W-sw)/2);
+    ctx.fillStyle='#0D635F';ctx.fillRect(sx,fromFloor(109),sw,35);
+    ctx.fillStyle='#EAF5EC';ctx.fillRect(sx+4,fromFloor(106),sw-8,27);
+    ctx.fillStyle='#123F42';ctx.font='bold 21px monospace';ctx.textAlign='center';
+    ctx.fillText('NJH MART',Math.round(W/2),fromFloor(85));
+    ctx.textAlign='left';
+   }else{
+    ctx.fillStyle='#0D635F';ctx.fillRect(8,fromFloor(106),W-16,26);
+    ctx.fillStyle='#F1FCF8';ctx.font='bold 12px monospace';ctx.textAlign='center';
+    ctx.fillText('SEGAR   SEMBAKO   MINUMAN',Math.round(W/2),fromFloor(90));
+    ctx.textAlign='left';
+   }
+   // CEILING — three LED strips in the height band z=108–120.
+   for(const u of [0.18,0.5,0.82]){
+    const cx=Math.round(u*W),lx=Math.max(4,Math.min(W-42,cx-18));
+    ctx.fillStyle='#718C90';ctx.fillRect(lx,fromFloor(120),37,7);
+    ctx.fillStyle='#FAFFF6';ctx.fillRect(lx+3,fromFloor(118),31,3);
+   }
+   if(side==='back'){
+    // CCTV dome above the cashier end, still part of paint/art dressing.
+    const x=Math.round(W*.84);ctx.fillStyle='#345054';
+    ctx.fillRect(x-6,fromFloor(115),12,5);
+    ctx.fillStyle='#232E36';ctx.fillRect(x-4,fromFloor(110),8,4);
+   }
+   return c;
+  }
   const wallMaterial=(side,fallback)=>{
    if(themeKind==='minimarket')fallback=MART_WALL[side]||fallback;
-   const can=bake(side);
+   const can=themeKind==='minimarket'?bakeMartWall(side):bake(side);
    if(can&&THREE){
     const tex=new THREE.CanvasTexture(can);
     tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
@@ -306,7 +360,8 @@ function create(opts){
    const img=view?.file?images.get(view.file):null;
    const size=view?.size||(img?[img.naturalWidth||img.width,img.naturalHeight||img.height]:[64,64]);
    const pivot=view?.pivot||[size[0]/2,size[1]*0.8];
-   const width=size[0]*PIXEL_WORLD,height=size[1]*PIXEL_WORLD*VERTICAL_COMP;
+   const width=size[0]*PIXEL_WORLD;
+   const height=size[1]*PIXEL_WORLD*VERTICAL_COMP;
    const py=pivot[1]/size[1],px=(size[0]/2-pivot[0])/size[0]*width;
    const root=new THREE.Group();root.position.set(pos.x,0,pos.z);
    if(img&&THREE){
@@ -315,6 +370,17 @@ function create(opts){
     plane.position.set(px,height*(py-.5)+.04,0);
     plane.userData.billboard=true;plane.renderOrder=1;plane.rotation.y=View?.isoBillboardYaw?.()||Math.PI/4;
     root.add(plane);billboards.push({root,plane,item,height});
+   }
+   // An authored sekat_wc must be a REAL solid privacy panel in play,
+   // never the invisible footprint-stub that used to leave toilets exposed.
+   if(item.assetId==='sekat_wc'&&!img){
+    const alongC=((Number(item.rotation)||0)%180)===0;
+    const dims=[alongC?.94:.12,alongC?.12:.94];
+    for(const [lo,hi,color] of [[0,.78,0x58a3a2],[.78,2.2,0xe8eee7]]){
+     const wall=new THREE.Mesh(new THREE.BoxGeometry(dims[0],hi-lo,dims[1]),
+      new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide}));
+     wall.position.y=(lo+hi)/2;wall.renderOrder=2;root.add(wall);
+    }
    }
    group.add(root);
    furniture.push({
@@ -329,8 +395,19 @@ function create(opts){
   const doorRecs=sceneDoors(sc).map(d=>{
    const use=doorUseWorld(origin,d);
    const rec=Object.assign({},d,{wx:use.x,wz:use.z});
-   const spr=A?A.doorSprite(d,pid()):(d.sprite||null);
-   const file=spr||d.sprite;
+   const privacy=d.role==='bathroom'||d.role==='stall';
+   // Bathroom curtain/stall is NOT a locked lobby door. It is a walkable
+   // privacy screen on the only opening, with no "Masuk Kamar" action.
+   const spr=privacy?null:(A?A.doorSprite(d,pid()):(d.sprite||null));
+   const file=privacy?null:(spr||d.sprite);
+   if(privacy){
+    const curtain=new THREE.Mesh(new THREE.PlaneGeometry(.94,2.05),
+     new THREE.MeshBasicMaterial({color:0xc4dad6,transparent:true,opacity:.94,
+      depthTest:true,depthWrite:false,side:THREE.DoubleSide}));
+    curtain.rotation.y=(Number(d.rotation)||0)%180===90?Math.PI/2:0;
+    curtain.position.set(origin.x+num(d.c,0)+.5,1.025,origin.z+num(d.r,0)+.5);
+    curtain.renderOrder=3;group.add(curtain);
+   }
    const img=file?images.get(file):null;
    if(img&&THREE){
     const size=[img.naturalWidth||img.width||64,img.naturalHeight||img.height||96];
@@ -511,7 +588,9 @@ function create(opts){
 
  function furniture(){
   if(!session)return [];
-  const items=session.furniture.map(f=>({...f}));
+  // Privacy panels are physical collision, never interactive furniture.
+  // They remain in session.furniture for obstacle/pathfinding checks.
+  const items=session.furniture.filter(f=>f.assetId!=='sekat_wc').map(f=>({...f}));
   try{
    if(root.SemestaLifeHooks?.furnitureFromInteriorItems)
     return root.SemestaLifeHooks.furnitureFromInteriorItems(items);
@@ -531,6 +610,7 @@ function create(opts){
   const doors=session.doors||[];
   let offeredDoor=false;
   for(const d of doors){
+   if(d.role==='bathroom'||d.role==='stall')continue; // curtain has no room-transition action
    if(Math.hypot(p.x-d.wx,p.z-d.wz)>1.4)continue;
    const acc=A?A.doorAccess(pid(),d):{canEnter:d.state!=='locked',label:d.label,reason:d.state==='locked'?'Terkunci':null};
    const isExit=isExitDoor(d);

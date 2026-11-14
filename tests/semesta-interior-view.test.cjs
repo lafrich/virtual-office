@@ -35,7 +35,8 @@ test('sprite plane size is at least the PNG opaque height in world units',()=>{
  for(const [id,views] of Object.entries(catalog.items||catalog)){
   const view=views.sw||views.se||Object.values(views)[0];
   if(!view||!view.file)continue; // footprint stubs have no sprite yet
-  const file=path.join(DIR,'art',view.file);
+  const file=path.resolve(DIR,
+   view.file.startsWith('../')?view.file:path.join('art',view.file));
   assert.equal(fs.existsSync(file),true,id+' art missing');
   const size=view.size;assert.ok(size&&size[1]>0,id+' has size');
   const plane=V.spriteSize(size[0],size[1]);

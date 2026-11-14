@@ -36,6 +36,40 @@ function dirFor(item){
   (Math.round((((Number(item?.rotation)||0)%360+360)%360)/90)%4);
  return DIR[rot]||'sw';
 }
+// Shared NJH Mart art is already in the playable interior pack. Reuse its
+// metadata and four-view PNGs for Bangun Ruang preview instead of redrawing.
+const MART_IDS=Object.freeze([
+ 'njh_rak_sembako','njh_rak_bumbu_mi','njh_rak_snack','njh_chiller_segar',
+ 'njh_display_sayur_buah','njh_keranjang_belanja','njh_troli',
+ 'njh_papan_promo','njh_counter_kasir','njh_counter_kopi','njh_mesin_kopi'
+]);
+let martKitStatus='unrequested',martKitError=null,martKitPromise=null;
+function martKitBase(){
+ return new URL('../../njh-play-interiors/',new URL(baseUrl(),g.location?.href||document.baseURI)).href;
+}
+function loadMartKit(){
+ if(martKitPromise||!enabled())return martKitPromise;
+ martKitStatus='loading';
+ const base=martKitBase();
+ martKitPromise=fetch(base+'catalog.json',{cache:'no-cache'})
+  .then(r=>{if(!r.ok)throw Error('NJH Mart catalog HTTP '+r.status);return r.json();})
+  .then(data=>{
+   const items=data?.items||{};
+   for(const id of MART_IDS){
+    const row=items[id];
+    if(!row||DIR.some(d=>!row[d]?.file||!Array.isArray(row[d].footprint)))
+     throw Error('NJH Mart missing four-view source '+id);
+   }
+   for(const id of MART_IDS){
+    CATALOG[id]=Object.fromEntries(DIR.map(d=>[d,{...items[id][d],sourceBase:base}]));
+    if(preloaded)for(const d of DIR){total++;load(base+CATALOG[id][d].file);}
+   }
+   martKitStatus='ready';
+  })
+  .catch(err=>{martKitStatus='error';martKitError=String(err.message||err);console.warn('NJH Mart art preview unavailable',err);})
+  .finally(notify);
+ return martKitPromise;
+}
 const imageCache=new Map();
 let loaded=0,failed=0,total=0,preloaded=false,notifyScheduled=false;
 function notify(){
@@ -66,7 +100,7 @@ function viewOf(assetId,dir){
  if(!row)return null;
  const v=row[dir]||row.sw||row.se;
  if(!v)return null;
- return {url:baseUrl()+v.file,size:v.size,pivot:v.pivot,footprint:v.footprint};
+ return {url:(v.sourceBase||baseUrl())+v.file,size:v.size,pivot:v.pivot,footprint:v.footprint};
 }
 function get(assetId){
  if(!enabled())return null;
@@ -86,19 +120,20 @@ function preload(){
  if(preloaded||!enabled())return;
  preloaded=true;
  total=0;
+ loadMartKit();
  const base=baseUrl();
  for(const row of Object.values(CATALOG)){
   for(const d of DIR){
    if(!row[d])continue;
    total++;
-   load(base+row[d].file);
+   load((row[d].sourceBase||base)+row[d].file);
   }
  }
 }
 function ready(){
  if(!enabled())return true;
  if(!preloaded)preload();
- return loaded+failed>=total;
+ return martKitStatus!=='loading'&&loaded+failed>=total;
 }
 function whenReady(){
  return new Promise(resolve=>{
@@ -108,7 +143,7 @@ function whenReady(){
  });
 }
 function status(){
- return {enabled:enabled(),loaded,failed,total,ready:ready(),types:Object.keys(CATALOG).length};
+ return {enabled:enabled(),loaded,failed,total,ready:ready(),types:Object.keys(CATALOG).length,martKitStatus,martKitError};
 }
 function drawPlan(ctx,item,x,y,w,h){
  if(!enabled()||!item||!ctx)return false;

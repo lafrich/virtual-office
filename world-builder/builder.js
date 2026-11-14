@@ -71,6 +71,10 @@ const STORE='virtual-life-gpt-world-builder-pipeline-v3';
 const ACTIVE_DRAFT_KEY='virtual-life-active-city-draft';
 let activeDraftId=null,draftDirty=true;
 try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
+// NJH is the only playable city. Jiwa-authored targets use its canonical ID;
+// a temporary authoring copy ID must never leak into Mainkan's gameplay hooks.
+const activeGameCityId=()=>playerMode&&njhMapPreview
+ ?'city-njh-semesta-draft1-with-pending':(activeDraftId||'__semesta_working_copy__');
 // Read the published Mahluk Hidup catalog and local Character Storage
 // before loading any saved city, so custom profiles survive import.
 const mahluk=window.VLMahlukHidup;
@@ -544,7 +548,7 @@ function plate(x,z,w,d,y,kind){
 
 const tileGround=new THREE.Group();tileGround.name='Editable terrain';scene.add(tileGround);
 const gridOverlay=new THREE.Group();gridOverlay.name='Grid overlay';scene.add(gridOverlay);
-let gridShown=true;
+let gridShown=!playerMode;
 const cityStyle=window.VLKebonSirihStyle;
 // Material sprites are built from the Virtual Life Asset Pipeline; 3D planes
 // project the tile textures into the editor's fixed 2:1 orthographic world.
@@ -623,7 +627,7 @@ function rebuildGrid(b){
  const lines=new THREE.LineSegments(geo,new THREE.LineBasicMaterial({
   color:0xf8f4da,transparent:true,opacity:.4,depthTest:true,depthWrite:false}));
  lines.frustumCulled=false;lines.renderOrder=4;gridOverlay.add(lines);
- gridOverlay.visible=gridShown;
+ gridOverlay.visible=!playerMode&&gridShown;
 }
 function rebuildTerrain(force=true){
  const v=visibleWorldBounds(),b=chunkWindow(v),key=[b.minX,b.maxX,b.minZ,b.maxZ].join(':');
@@ -637,6 +641,7 @@ function rebuildTerrain(force=true){
  clearTerrain();
  const t=documentMap.map.terrain||{default:'grass',cells:[]};
  const tileIndex=new Map(t.cells.map(o=>[o.c+','+o.r,o.type]));
+ const drainCells=terrain.dict(t);
  const byVisualTile=new Map();
  for(const cell of t.cells){
   if(cell.c<b.minX||cell.c>=b.maxX||cell.r<b.minZ||cell.r>=b.maxZ||cell.type===t.default)continue;
@@ -659,7 +664,12 @@ function rebuildTerrain(force=true){
   for(let i=0;i<items.length;i++){
    const cell=items[i],y=kind==='road'?.024:kind==='sidewalk'?.036:['water','river','drain'].includes(kind)?.015:.026;
    tmp.position.set(cell.c+.5,y,cell.r+.5);
-   tmp.rotation.set(-Math.PI/2,0,0);tmp.scale.set(1,1,1);tmp.updateMatrix();
+   tmp.rotation.set(-Math.PI/2,0,0);
+   // Drain.png runs along r. Rotate the plane itself for a connected along-c run.
+   // A junction needs dedicated art; do not fake one by rotating a straight.
+   if(kind==='drain'&&terrain.drainAxis?.(t,cell.c,cell.r,drainCells)==='along_c')
+    tmp.rotateZ(Math.PI/2);
+   tmp.scale.set(1,1,1);tmp.updateMatrix();
    mesh.setMatrixAt(i,tmp.matrix);
    if(['grass','water','river','soil'].includes(kind)){
     const variation=((cell.c*12347+cell.r*2917)>>>0)%9;
@@ -1483,8 +1493,8 @@ function makeMarker(root,item){
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
 const MARKER_VIEW_KEY='semesta-logic-marker-visible-v1';
-let markerShown=true;
-try{markerShown=localStorage.getItem(MARKER_VIEW_KEY)!=='false';}catch{}
+let markerShown=!playerMode; // Logic pins are editor-only, never gameplay sprites.
+if(!playerMode)try{markerShown=localStorage.getItem(MARKER_VIEW_KEY)!=='false';}catch{}
 function visibleMarkerCount(){return documentMap.objects.filter(o=>o.type==='marker').length;}
 function syncMarkerButtons(){
  const count=visibleMarkerCount();
@@ -1495,6 +1505,7 @@ function syncMarkerButtons(){
  $('markerVisibilityTool').title='Yellow logic markers '+(markerShown?'visible':'hidden')+' · '+count+' total';
 }
 function setMarkerVisible(show){
+ if(playerMode)return; // Do not let a hidden editor control turn logic pins on in Mainkan.
  markerShown=!!show;
  for(const o of documentMap.objects)if(o.type==='marker'){
   const root=owners.get(o.id);if(root)root.visible=markerShown;
@@ -1667,7 +1678,7 @@ function instantiate(o){
    makeAutomated(root,o);
    if(hideLegacyCharacters&&o.type!=='vehicle'&&!approvedCharacter(o.profile))root.visible=false;
    break;
-  case 'marker':makeMarker(root,o);root.visible=markerShown;break;
+  case 'marker':makeMarker(root,o);root.visible=!playerMode&&markerShown;break;
  }
  assetRoots.add(root);owners.set(o.id,root);
  if(o.type==='sprite'&&playPickedIds.has(String(o.id)))root.visible=mode!=='walk';
@@ -1924,11 +1935,11 @@ function updateSelection(){
  $('editInBangunRuang').disabled=!canEditInterior;
  $('quickEditBuilding').hidden=!canEditInterior;
  $('quickEditBuilding').disabled=!canEditInterior;
- if(highlight&&highlight.userData.selected===cur?.id){
+ if(!playerMode&&highlight&&highlight.userData.selected===cur?.id){
    highlight.update();
  }else{
    if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
-   if(cur&&owners.has(cur.id)){
+   if(!playerMode&&cur&&owners.has(cur.id)){
      highlight=selectionGuide(cur);
      highlight.userData.selected=cur.id;
      highlight.material.depthTest=false;highlight.material.transparent=true;
@@ -1944,7 +1955,7 @@ function select(id,options={}){
  }
  updateSelection();
  if(id&&options.focus)focusPlacedAsset(id,false);
- if(id)tell(owners.get(id)?.userData?.pendingPipelineImage?'Preview sementara: PNG sumber belum dipublikasikan.':'Selected: '+item()?.name+'. Pilih Move lalu drag.');
+ if(id&&!playerMode)tell(owners.get(id)?.userData?.pendingPipelineImage?'Preview sementara: PNG sumber belum dipublikasikan.':'Selected: '+item()?.name+'. Pilih Move lalu drag.');
  renderer.render(scene,camera);
 }
 // Contextual Semesta -> Bangun Ruang editor: a city instance is identified by
@@ -2761,7 +2772,7 @@ function setMode(m){
        THREE,
        getWorld:()=>documentMap,
        getScene:()=>scene,
-       getCityId:()=>activeDraftId||'__semesta_working_copy__',
+       getCityId:activeGameCityId,
        getPlayerId:()=>playerMode?mainkanPlayerId:'',
        currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
        playPose:(pose,seconds=4)=>{const r=(rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig;if(!r?.setPose)return false;r.setPose(pose);
@@ -2896,6 +2907,7 @@ $('panMode').onclick=()=>{
 $('paintMode').onclick=()=>setMode('paint');
 $('fillMode').onclick=()=>setMode('fill');
 function toggleGrid(){
+ if(playerMode)return; // Editor grid is never part of Mainkan gameplay.
  gridShown=!gridShown;gridOverlay.visible=gridShown;
  $('gridToggle').classList.toggle('active',gridShown);
  $('gridToggle').setAttribute('aria-pressed',String(gridShown));
@@ -3230,8 +3242,35 @@ window.SemestaPlay=Object.freeze({
  playerActor:()=>playerMode?documentMap.objects.find(o=>o.id===LIFE_TEST_ACTOR_ID)||null:null,
  playerRigStatus:()=>{
   const rig=playerMode?rigs.get(LIFE_TEST_ACTOR_ID)?.rig:null;
-  return rig?{loaded:!!rig.state?.loaded,failed:!!rig.state?.failed,
-   source:rig.mesh?.userData?.characterSource||'',emotion:rig.state?.emotion||'neutral'}:null;
+  if(!rig)return null;
+  // A loaded CanvasTexture is not proof of an actual visible pixel character.
+  // Inspect only the small 64×112 approved Genesis texture, read-only.
+  let opaquePixels=0,visibleHeight=0;
+  try{
+   const cv=rig.mesh?.material?.map?.image;
+   if(cv?.getContext){
+    const d=cv.getContext('2d',{willReadFrequently:true}).getImageData(0,0,cv.width,cv.height).data;
+    let minY=cv.height,maxY=-1;
+    for(let y=0;y<cv.height;y++)for(let x=0;x<cv.width;x++){
+     if(d[(y*cv.width+x)*4+3]<128)continue;
+     opaquePixels++;minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+    }
+    if(maxY>=minY)visibleHeight=maxY-minY+1;
+   }
+  }catch(_e){}
+  const root=rigs.get(LIFE_TEST_ACTOR_ID)?.root;
+  const p=root?.position;
+  const screen=p?worldToScreen(p.x,1.1,p.z):{visible:false};
+  const clipPlaying=window.VLSpawnHobo?.busy?.()===true;
+  return {loaded:!!rig.state?.loaded,failed:!!rig.state?.failed,
+   source:rig.mesh?.userData?.characterSource||'',
+   emotion:rig.state?.emotion||'neutral',
+   visible:rig.mesh?.visible!==false&&root?.visible!==false,
+   clipPlaying,world:p?{x:p.x,y:p.y,z:p.z}:null,
+   screen,opaquePixels,visibleHeight,
+   editorOutline:!!(highlight&&highlight.userData.selected===LIFE_TEST_ACTOR_ID),
+   editorGrid:!!gridOverlay.visible,
+   editorMarkersVisible:documentMap.objects.filter(o=>o.type==='marker'&&owners.get(o.id)?.visible!==false).length};
  },
  setPlayerEmotion:(name,duration=3)=>playerMode?!!rigs.get(LIFE_TEST_ACTOR_ID)?.rig?.setEmotion?.(name,duration):false,
  // Test-play preview of a pose / facing on the ephemeral player only (never saved).
@@ -3342,7 +3381,7 @@ if(njhMapPreview){
    return {x:cameraFocus.x,z:cameraFocus.z,viewSize,follow:!!cameraFollowId};
   },
   setGrid(on){
-   gridShown=!!on;
+   gridShown=!playerMode&&!!on;
    gridOverlay.visible=gridShown;
    try{
     $('gridToggle')?.classList.toggle('active',gridShown);
@@ -3396,7 +3435,7 @@ if(window.SemestaLifePlay){
   THREE,
   getWorld:()=>documentMap,
   getScene:()=>scene,
-  getCityId:()=>activeDraftId||'__semesta_working_copy__',
+  getCityId:activeGameCityId,
   getPlayerId:()=>playerMode?mainkanPlayerId:'',
   currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
   getFacing:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.direction)||null,
@@ -3493,7 +3532,7 @@ function bootNjhPlayInteriors(){
   playerObjectId:()=>walkActorId||LIFE_TEST_ACTOR_ID,
   getRoots:()=>[...owners.entries()].map(([id,root])=>({id,root})),
   onAddObject:o=>{if(!Number.isFinite(Number(o.y)))o.y=0;if(!owners.has(o.id))instantiate(o);},
-  setGroundVisible:on=>{try{baseGround.visible=!!on;if(typeof gridOverlay!=='undefined'&&gridOverlay)gridOverlay.visible=!!on&&(typeof gridShown==='undefined'||gridShown);}catch{}},
+  setGroundVisible:on=>{try{baseGround.visible=!!on;if(typeof gridOverlay!=='undefined'&&gridOverlay)gridOverlay.visible=!playerMode&&!!on&&(typeof gridShown==='undefined'||gridShown);}catch{}},
   setGroundDepthWrite:on=>{
    try{
     const write=!!on;

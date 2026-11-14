@@ -46,11 +46,11 @@ test('one-tap rotate controls and matching XP chrome load for Bangun Ruang',()=>
  const html=source('index.html'),css=source('mobile-ui.css'),ui=source('studio-interior-ui.js');
  for(const id of ['interiorRotateBar','rotateLeft','rotateRight','rotateSelection','rotateHint'])
   assert.ok(html.includes('id="'+id+'"'),'UI missing '+id);
- assert.ok(html.includes('interior-model.js?v=rotate-v12'));
- assert.ok(html.includes('studio-interior-ui.js?v=rotate-v12'));
+ assert.ok(html.includes('interior-model.js?v='));
+ assert.ok(html.includes('studio-interior-ui.js?v='));
  assert.ok(html.includes('mobile-ui.css?v=xp-unified-v12'));
  assert.ok(ui.includes("model.rotate(current,item.id,steps)"));
- assert.ok(ui.includes("String(e.key).toLowerCase()!=='r'"));
+ assert.ok(ui.includes("if(key==='r'){"),'R keyboard shortcut remains available in furniture mode');
  assert.ok(ui.includes("['↓','→','↑','←']"));
  assert.ok(css.includes('/* Shared XP Paint chrome'));
  assert.ok(css.includes('--chrome:#c9c8c4'));

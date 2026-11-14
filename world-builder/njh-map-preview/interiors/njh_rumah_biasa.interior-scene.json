@@ -100,8 +100,8 @@
       "id": "njh-rumah-rice_cooker-1",
       "assetId": "rice_cooker",
       "name": "Rice Cooker",
-      "c": 5,
-      "r": 0,
+      "c": 1,
+      "r": 4,
       "rotation": 0,
       "flipX": false,
       "flipY": false,
@@ -171,7 +171,7 @@
       "name": "Kasur",
       "c": 0,
       "r": 2,
-      "rotation": 0,
+      "rotation": 90,
       "flipX": false,
       "flipY": false,
       "actionId": "sleep",
@@ -222,9 +222,9 @@
       "id": "njh-rumah-chair-1",
       "assetId": "chair",
       "name": "Kursi Makan",
-      "c": 4,
-      "r": 2,
-      "rotation": 90,
+      "c": 7,
+      "r": 3,
+      "rotation": 0,
       "flipX": false,
       "flipY": false,
       "actionId": "sit",
@@ -243,7 +243,7 @@
       "assetId": "dining_table",
       "name": "Meja Makan",
       "c": 6,
-      "r": 2,
+      "r": 4,
       "rotation": 0,
       "flipX": false,
       "flipY": false,
@@ -275,10 +275,66 @@
       "motions": [
         "watch"
       ]
+    },
+    {
+      "id": "njh-rumah-sekat_wc-5-0",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 5,
+      "r": 0,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh-rumah-sekat_wc-5-1",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 5,
+      "r": 1,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh-rumah-sekat_wc-5-2",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 5,
+      "r": 2,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh-rumah-sekat_wc-7-2",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 7,
+      "r": 2,
+      "rotation": 0,
+      "blocking": true
     }
   ],
   "floor": 1,
-  "notes": "r3 facing fix of njh_rumah_biasa. I1 sofa has no true back view (rot 180 still shows the cushions toward +r), so the sofa stays rot 0 (visible front +r) and the TV moves to higher r with rot 180 (true screen-back sprite) so the screen faces the sofa. Kursi rot 90 faces the meja across a 1-tile gap. Kompor/bak/shower rot 0 into the room; WC stays SW. flipX/flipY were inspected and rejected (flipX only mirrors L-R; flipY is upside-down).",
+  "notes": "r3 facing fix of njh_rumah_biasa. I1 sofa has no true back view (rot 180 still shows the cushions toward +r), so the sofa stays rot 0 (visible front +r) and the TV moves to higher r with rot 180 (true screen-back sprite) so the screen faces the sofa. Kursi rot 90 faces the meja across a 1-tile gap. Kompor/bak/shower rot 0 into the room; WC stays SW. flipX/flipY were inspected and rejected (flipX only mirrors L-R; flipY is upside-down). · Interior privacy r6: shower and WC share an enclosed room at c6–7 r0–1, walled c5 and r2 with curtain at c6r2; bed headboard faces west wall; dining seat faces its table at c6r4. · Dining chair moved to c7r3 to keep walkable approach to the bathroom curtain c6r2.",
   "adaptedFrom": "/workspace/njh-interior-templates-r2/scenes/njh_rumah_biasa.interior-scene.json",
-  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema)."
+  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema).",
+  "doors": [
+    {
+      "id": "njh-rumah-bathroom-curtain",
+      "role": "bathroom",
+      "label": "Tirai Kamar Mandi",
+      "c": 6,
+      "r": 2,
+      "rotation": 0,
+      "useTile": [
+        6,
+        2
+      ],
+      "usePoint": [
+        6.5,
+        2.5
+      ],
+      "privacy": true,
+      "walkable": true
+    }
+  ]
 }

@@ -5,7 +5,8 @@
  */
 (function(g){
 'use strict';
-if(g.VLIndonesiaInteriorPack?.version===1)return;
+// Upstream may already register v1. This local extension merges only NJH Mart
+// IDs when upstream is present; it must not overwrite canonical templates.
 const action=(label,pose=null)=>({label,pose,description:pose?'Existing rig preview; gameplay integration remains separate':'Interaction slot / gameplay hook; animation not authored'});
 const actions={
  eat:action('Makan'),drink:action('Minum'),pray:action('Salat'),watch:action('Nonton','idle'),
@@ -63,7 +64,20 @@ const types={
  gym_mat:prop('Matras Olahraga','Jasa','▧',1,2,'exercise','prayer_mat'),
  treadmill:prop('Treadmill','Jasa','▰',2,1,'exercise','treadmill'),
  trash_bin:prop('Tempat Sampah','Jasa','▣',1,1,'open','trash_bin'),
- locker:prop('Loker','Jasa','▥',2,1,'open,store','wardrobe')
+ locker:prop('Loker','Jasa','▥',2,1,'open,store','wardrobe'),
+ // NJH MART: dimensions and stable IDs match njh-play-interiors/catalog.json.
+ // Keep art in the existing Step-2 four-view catalog, not generated substitutes.
+ njh_rak_sembako:prop('Rak Sembako NJH Mart','Toko','▥',2,1,'browse,collect','aisle_rack'),
+ njh_rak_bumbu_mi:prop('Rak Bumbu & Mi NJH Mart','Toko','▥',2,1,'browse,collect','aisle_rack'),
+ njh_rak_snack:prop('Rak Snack NJH Mart','Toko','▥',2,1,'browse,collect','aisle_rack'),
+ njh_chiller_segar:prop('Chiller Segar NJH Mart','Toko','▣',2,1,'browse,open,buy','display_freezer'),
+ njh_display_sayur_buah:prop('Sayur & Buah NJH Mart','Toko','▤',2,1,'browse,collect','market_crate'),
+ njh_keranjang_belanja:prop('Keranjang Belanja NJH Mart','Toko','▥',1,1,'collect','market_crate'),
+ njh_troli:prop('Troli NJH Mart','Toko','▥',1,1,'collect','market_crate'),
+ njh_papan_promo:prop('Papan Promo NJH Mart','Toko','▣',1,1,'browse','whiteboard'),
+ njh_counter_kasir:prop('Meja Kasir NJH Mart','Toko','▣',2,1,'pay,buy,sell','cashier'),
+ njh_counter_kopi:prop('Counter Kopi NJH Mart','Toko','▤',3,1,'brew,pay','counter'),
+ njh_mesin_kopi:prop('Mesin Kopi NJH Mart','Toko','◈',1,1,'brew','coffee_machine')
 };
 const templates={};
 const rows=[
@@ -216,5 +230,12 @@ function pairTemplateChairs(){
  }
 }
 pairTemplateChairs();
-g.VLIndonesiaInteriorPack=Object.freeze({version:1,source:'lafrich/virtual-life-asset-pipeline',tilePixels:[64,32],actions:Object.freeze(actions),types:Object.freeze(types),templates:Object.freeze(templates),count:Object.keys(templates).length});
+const previous=g.VLIndonesiaInteriorPack;
+if(previous?.version===1){
+ const martOnly=Object.fromEntries(Object.entries(types).filter(([id])=>id.startsWith('njh_')));
+ g.VLIndonesiaInteriorPack=Object.freeze({...previous,
+  types:Object.freeze({...previous.types,...martOnly}),njhMartVersion:1});
+ return;
+}
+g.VLIndonesiaInteriorPack=Object.freeze({version:1,source:'lafrich/virtual-life-asset-pipeline',tilePixels:[64,32],actions:Object.freeze(actions),types:Object.freeze(types),templates:Object.freeze(templates),count:Object.keys(templates).length,njhMartVersion:1});
 })(window);

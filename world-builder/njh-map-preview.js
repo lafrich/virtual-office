@@ -130,9 +130,6 @@ function propSpec(def){
   variants:Object.freeze(variants)
  });
 }
-function tentHeight(pivotY){
- return Math.max(1,pivotY*Math.SQRT2/64*2/Math.sqrt(3));
-}
 function tentSpec(def){
  const variants={};
  for(const d of DIR){
@@ -144,7 +141,8 @@ function tentSpec(def){
   id:def.id,file:'studio:'+def.id,label:def.label,group:'kampung',
   source:'custom-building',published:true,collision:true,
   footprint:def.footprint.slice(),size:sw.size.slice(),pivot:sw.pivot.slice(),
-  width:sw.size[0]/50,height:tentHeight(sw.pivot[1]),
+  // Tent billboard keeps the full PNG iso aspect like all other NJH LFB assets.
+  width:isoWidth(sw.size[0]),height:isoHeight(sw.size[1]),
   enterable:false,interactive:true,
   interactions:['enter'],blocking:'yes',
   variants:Object.freeze(variants),
