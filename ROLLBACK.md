@@ -2,12 +2,12 @@
 
 Written 2026-11-14 (Asia/Jakarta). CSS + check tool + docs only; no logic, Worker or storage change.
 
-- Previous live `origin/main`: `9196c5923c61e2b4ad07d9e5a8b92a9b96ff1b83` (Step 2 + CHECKPOINT STEP 2, sw v28, `?v=njh-step2-2`)
+- Previous live `origin/main`: `9196c592d814f4e4faaa95d01291fe07ad71043b` (Step 2 + CHECKPOINT STEP 2, sw v28, `?v=njh-step2-2`)
 - Hotfix commit: `0f4681caa18e4d2ee8d0f852a8518c6e70085886` (sw v29, mainkan `?v=njh-step2-3`)
 
 ```bash
 git fetch origin && git checkout main && git pull --ff-only origin main
-git revert --no-edit <rollback-notes commit> 0f4681caa18e4d2ee8d0f852a8518c6e70085886
+git revert --no-edit 932b8182 0f4681caa18e4d2ee8d0f852a8518c6e70085886
 # bump sw.js to v30, push --ff-only
 ```
 
