@@ -455,7 +455,8 @@ function scheduleCloudCitySave(){
  },3200);
 }
 function saved(){
- if(playerMode||njhMapPreview)return; // Preview must not mutate Semesta's authoring draft or Drive.
+ if(playerMode)return; // Preview must not mutate Semesta's authoring draft or Drive.
+ if(njhMapPreview)return;
  syncClockToMap();
  draftDirty=true;
  try{
@@ -2492,7 +2493,8 @@ canvas.addEventListener('wheel',e=>{
   }
   for(const k of Object.keys(walkInput))walkInput[k]=false;
   rigs.get(walkActorId)?.rig.setMoving(0,0,false);
-  interiorPreview.openFor(openObj);
+  if(openObj===nearest.o)interiorPreview.openFor(nearest.o);
+  else interiorPreview.openFor(openObj);
   lastEnterReason='opened';
   return true;
  }

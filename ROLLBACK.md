@@ -3,7 +3,7 @@
 Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged. No storage migration.
 
 - Previous live `origin/main` (before this step): `53cfe59be06b567a6ad2f51c84ea0e68eb5120b8`
-- Integration branch: `integ/step1`
+- Integration branch: `integ/step1` (tip will be the latest commit on this branch; revert newest first, then the three merges with `-m 1`)
 - Merge order (do not force-push): ours `preview/main-interiors-kost-warteg` (`0dcc793c`) → Ellen `preview/njh-gameplay-sites` (`8e099eb9`, frozen) → Layar `layar/win98-ui` (`6ffffc8e99a50839a53b9e770319056e4c3c3c65`, `?v=njh98-5`, sw v23)
 - Ellen park-bench scale fix `fix/njh-bangku-taman-scale` had **no unique commit** at merge time (still at `8e099eb9`); it was **not** included and should ship as a follow-up.
 
