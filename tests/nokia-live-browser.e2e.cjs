@@ -64,6 +64,9 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(synced.siteCount,synced.mapSiteCount);
  assert.equal(synced.matching,true,'Nokia activity pins must use real gameplay action coordinates');
  assert.ok(synced.siteCount>=12,'Expected playable V1 activity sites');
+ assert.equal(synced.placeholderSites,0,
+  'Only real placed NJH locations may appear as interactive sites or Nokia pins');
+ assert.ok(synced.realSites>=12,'Real gameplay sites must survive the fallback cleanup');
  assert.ok(synced.terrainCount>0,'Nokia map should use real Semesta terrain rather than a fake grid');
  await page.locator('#gamePhone').click({timeout:10000});
  await frame.waitForFunction(()=>window.VLNokiaPlay?.isOpen?.(),null,{timeout:15000});
