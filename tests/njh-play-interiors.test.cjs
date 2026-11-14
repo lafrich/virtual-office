@@ -129,7 +129,8 @@ test('owner can enter kost, guest cannot; warteg is open; enter/exit and save re
  assert.ok(owned.api.furniture().some(f=>f.kind==='bathroom'),'shower maps to bathroom for Mandi');
  assert.ok(owned.api.furniture().some(f=>f.kind==='stove'));
  const door=owned.api.active().door;
- assert.equal(owned.pos.x,door.x);assert.equal(owned.pos.z,door.z);
+ assert.equal(owned.api.freeInside(owned.pos.x,owned.pos.z),true,'spawned on a walkable interior floor tile');
+ assert.ok(Math.hypot(owned.pos.x-door.x,owned.pos.z-door.z)<=3,'spawn remains near authored entrance');
  const clamped=owned.api.constrain({x:door.x,z:door.z},{x:door.x+80,z:door.z-80});
  const room=owned.api.active();
  assert.ok(clamped.x<=room.origin.x+room.width-0.35);
@@ -154,6 +155,30 @@ test('owner can enter kost, guest cannot; warteg is open; enter/exit and save re
  shop.state.interior={kind:'warteg',exit:{x:31.8,z:27}};
  const restored=shop.api.restoreIfNeeded();
  assert.equal(restored.ok,true);assert.equal(shop.api.kind(),'warteg');
+});
+
+test('contextual E never enters a remote building and room movement uses indoor collision',()=>{
+ const h=kit({room:true,pos:{x:100,z:100}});
+ assert.equal(h.api.nearestDoor(),null,'Cove must not be selectable from across the map');
+ assert.equal(h.api.enterNearby().ok,false,'E with no door nearby cannot enter');
+ const w=h.api.findBuilding('warteg',h.world);
+ h.pos={x:w.njhUsePoint.x,z:w.njhUsePoint.z};
+ assert.equal(h.api.nearestDoor().kind,'warteg');
+ const opened=h.api.enterNearby();
+ assert.equal(opened.ok,true);
+ const start={...h.pos};
+ assert.equal(h.api.freeInside(start.x,start.z),true);
+ const moved=h.api.moveInside(start,.1,0);
+ assert.equal(h.api.freeInside(moved.x,moved.z),true);
+ assert.ok(Math.abs(moved.x-start.x)<=.11);
+ assert.equal(h.api.enterNearby().ok,false,'interior E away from a door must not exit');
+});
+test('authored room assets exist for Ichsan, Noor, Cove and NJH Mart',()=>{
+ for(const name of ['njh_kos_ichsan','njh_kos_noor','njh_kos_cove_lobby','njh_minimarket']){
+  const scene=JSON.parse(fs.readFileSync(path.join(DIR,name+'.interior-scene.json'),'utf8'));
+  assert.ok(scene.width>=5&&scene.depth>=5);
+  assert.ok(Array.isArray(scene.items)&&scene.items.length);
+ }
 });
 
 test('warteg extra action is Makan at Rp12.000; eat spends that price',()=>{
