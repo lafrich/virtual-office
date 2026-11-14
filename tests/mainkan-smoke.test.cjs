@@ -37,7 +37,7 @@ test('Mainkan enters playable landscape world before slow Genesis art completes'
  assert.match(app,/\},18000\)/);
  assert.match(htmlWorld,/mainkan-startup-20261115/);
  assert.match(html,/landscape-startup-unblock-20261115/);
- assert.match(html,/game menggunakan tampilan landscape/);
+ assert.match(html,/layout landscape/);
 });
 
 test('login requires real server; browser never stores Mainkan passwords',()=>{
