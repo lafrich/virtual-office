@@ -942,8 +942,13 @@ function makeSprite(root,item){
  // depth test causes grass to erase the front wall and entrance.
  const studio=studioSprites?.isStudio(spec)===true;
  for(const part of [{file:item.asset,off:0},...(spec.front?[{file:spec.front,off:.025}]:[])]){
-  const flags=studio?studioSprites.spriteMaterial():
+  const flags=studio?{...studioSprites.spriteMaterial()}:
    {transparent:false,depthTest:true,depthWrite:true,alphaTest:.5};
+  if(studio&&playerMode){
+   // Keep studio apron pixels above terrain, but use the opaque render queue
+   // so player and each building can be ordered per footprint during play.
+   flags.transparent=false;flags.alphaTest=.5;flags.depthWrite=false;
+  }
   const mat=new THREE.MeshBasicMaterial({map:pixelTexture(part.file,view),...flags,side:THREE.DoubleSide});
   const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
   if(studio){
@@ -1641,6 +1646,37 @@ function updateLargeOcclusion(dt){
    mat.opacity=original.opacity*entry.alpha;
   }
  }
+}
+function updateStudioActorLayer(){
+ // Custom Bangun Ruang buildings are flat isometric cards without native
+ // per-pixel depth. Sort player and *each* card by their ground footprints,
+ // not by a permanently frontmost transparent pass. No Genesis changes.
+ if(!playerMode||mode!=='walk')return;
+ const actor=owners.get(walkActorId);
+ if(!actor)return;
+ const p={x:actor.position.x,z:actor.position.z};
+ let nearStudio=false;
+ for(const {root,plane} of billboardSprites){
+  if(!plane.userData.studioGroundComposite)continue;
+  const o=documentMap.objects.find(item=>item.id===root.userData.itemId);
+  if(!o||root.visible===false){plane.renderOrder=2;continue;}
+  const foot=style.footprint(o,assetByName);
+  const close=Math.abs(p.x-o.x)<=foot[0]/2+1.25&&
+   Math.abs(p.z-o.z)<=foot[1]/2+1.25;
+  if(close)nearStudio=true;
+  // Groundward structure renders before a foreground player (1), after
+  // a player behind it (3), and after terrain when not near the player (2).
+  plane.renderOrder=close?
+   (studioSprites.actorInFront(p,o,direction,foot)?1:3):2;
+ }
+ if(actor.userData.njhStudioNear===nearStudio)return;
+ actor.userData.njhStudioNear=nearStudio;
+ actor.traverse(node=>{
+  if(!node.isGroup&&!node.isMesh)return;
+  if(node.userData.njhBaseOrder===undefined)
+   node.userData.njhBaseOrder=node.renderOrder;
+  node.renderOrder=nearStudio?2:node.userData.njhBaseOrder;
+ });
 }
 let highlight=null;
 function instantiate(o){
@@ -4939,6 +4975,7 @@ function frame(now){
  }
  try{window.__njhPlayInteriors?.update?.(camera);}catch{}
  updateLargeOcclusion(dt);
+ updateStudioActorLayer();
  try{window.VLSpawnHobo&&window.VLSpawnHobo.tick(dt,camera);}catch{}
  try{window.SemestaLifePlay?.tick?.(dt);}catch(err){console.warn('life play tick',err);}
  worldEffects.update(elapsedReal,dayClock.solar());
