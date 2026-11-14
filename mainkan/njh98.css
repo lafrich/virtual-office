@@ -583,3 +583,5 @@ body.njh-indoor .njh-joy,body.njh-indoor.njh-play #viewport #gameAction,body.njh
  .screen h1{font-size:15px}
  #pauseScreen .njh-menu .btn{min-height:32px}
 }
+/* Status: wide enough that Skill / Reputasi labels show in full (no ellipsis) */
+#njhStatusWin{width:min(500px,calc(100% - 16px))}
