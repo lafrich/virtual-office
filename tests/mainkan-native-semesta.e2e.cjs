@@ -142,7 +142,23 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.ok(await fart.isVisible(),'Fart must be offered inside the same AKSI bar');
  await fart.click();
  await bar.waitFor({state:'hidden',timeout:8000});
- // Inspect actual unobscured Genesis in the world before the large Nokia overlay.
+ // Hobo spawn intentionally conceals the actor during its authored
+ // five-phase exit-tent animation. The gameplay is only VISIBLY ready after
+ // its last frame; checking a loaded atlas alone misses this failure.
+ await page.waitForFunction(()=>{
+  const w=document.getElementById('semestaFrame')?.contentWindow;
+  const r=w?.SemestaPlay?.playerRigStatus?.();
+  return r?.loaded===true&&r.visible===true&&r.clipPlaying===false;
+ },null,{timeout:30000});
+ const readyPlayer=await page.evaluate(()=>{
+  const w=document.getElementById('semestaFrame').contentWindow;
+  return {rig:w.SemestaPlay.playerRigStatus(),spawn:w.VLSpawnHobo?.snapshot?.()||null,
+   camera:w.VLNjhMapPreviewRuntime?.camera?.()||null};
+ });
+ console.log('VISIBLE_GENESIS_AFTER_SPAWN',JSON.stringify(readyPlayer));
+ assert.equal(readyPlayer.rig.visible,true,'Genesis must become visible after tent intro');
+ assert.equal(readyPlayer.rig.clipPlaying,false,'Tent exit must finish before gameplay visibility QA');
+ assert.equal(readyPlayer.rig.screen.visible,true,'Genesis world position must project onto the playable viewport');
  fs.mkdirSync('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/mainkan-world-genesis-visible.png',fullPage:true});
  await page.locator('#gamePhone').click();
