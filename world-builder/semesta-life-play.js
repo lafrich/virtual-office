@@ -920,7 +920,7 @@ function handleAction(){
   if(result?.reason)message('⛔ '+result.reason);
   return !!result;
  }
- if(!node){
+ {
   // Native loose pickups and NPCs are context interactions, not building
   // entry. Never remove a city asset unless Jiwa accepts the pickup.
   const items=(getWorld().objects||[]).filter(o=>o&&o.type!=='marker'&&o.type!=='avatar');
@@ -933,19 +933,19 @@ function handleAction(){
    const d=Math.hypot((Number(o.x)||0)-p.x,(Number(o.z)||0)-p.z);
    if(d<bestDistance){best={o,pickup,npc};bestDistance=d;}
   }
-  if(best?.pickup){
+  if(best&&bestDistance<nodeDistance-.12&&best.pickup){
    const result=runAction('scavenge',{sourceId:best.o.id,objectId:best.o.id});
    if(result?.ok)bridge?.collectObject?.(best.o.id);
    return true;
   }
-  if(best?.npc){
+  if(best&&bestDistance<nodeDistance-.12&&best.npc){
    const actions=getHooks()?.nearbyActions?.()||[];
    const talk=actions.find(a=>['talk','world_quest','npc_talk'].includes(a.id));
    if(talk){runAction(talk.id,talk.args||{npcId:best.o.id});return true;}
    message('Bicara dengan '+(best.o.name||'NPC'));paintPanel();return true;
   }
-  return false;
  }
+ if(!node)return false;
  if(node.jobId){
   if(performance.now()-justWorkedAt<550)return true;
   message('TAHAN tombol Action (atau tombol KERJA di panel) sampai progress penuh.');
