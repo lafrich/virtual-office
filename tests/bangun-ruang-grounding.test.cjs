@@ -32,10 +32,11 @@ test('only custom-building art is composited above ground; all other sprites ret
   transparent:true,depthTest:false,depthWrite:false,alphaTest:.5});
  const builder=get('builder.js');
  assert.match(builder,/const studio=studioSprites\?\.isStudio\(spec\)===true/);
- // Editor keeps the 2D authored apron; player mode restores real depth
- // so a facade behind the player does not render over their Genesis mesh.
- assert.match(builder,/studio&&!playerMode\?studioSprites\.spriteMaterial\(\)/);
- assert.match(builder,/if\(studio&&!playerMode\)/);
+ // Ground contact uses Semesta's world Y and authored pivot. The
+ // facade composite must not become an opaque depth-tested plane in play.
+ assert.match(builder,/studio\?studioSprites\.spriteMaterial\(\)/);
+ assert.match(builder,/if\(studio\)/);
+ assert.doesNotMatch(builder,/studio&&!playerMode\?studioSprites\.spriteMaterial\(\)/);
  assert.match(builder,/\{transparent:false,depthTest:true,depthWrite:true,alphaTest:\.5\}/);
  assert.match(builder,/plane\.renderOrder=2/);
 });
