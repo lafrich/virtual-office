@@ -302,3 +302,57 @@ test('Ibu Warteg stands behind the etalase and offers Makan Warteg via nearby/ex
  assert.equal(eat.furnitureId,'npc_ibu_warteg');
  assert.match(String(eat.spotLabel||''),/Ibu Warteg/i);
 });
+
+test('NJH public door stays mapped to its own room and never redirects to Cove',()=>{
+ const coffeeScene={id:'njh_warung_kopi',width:8,depth:6,theme:'coffee',entrance:{c:4,r:5},items:[]};
+ const lobby=JSON.parse(fs.readFileSync(path.join(DIR,'njh_kos_cove_lobby.interior-scene.json'),'utf8'));
+ const obj=(id,name,x,z,template,doorId,scene,pending=false)=>({
+  id,type:'sprite',name,x,z,enterable:true,njhInteriorTemplate:template,
+  njhUsePoint:{x,z:z+1},interior:scene?{floors:[scene]}:null,
+  njhDoors:[{doorId,template,pending,label:name,use:{x,z:z+1}}]
+ });
+ const world=[
+  obj('njh-kos-noor','Kost Cove',-26.25,70.5,'njh_kos_cove_lobby','njh_door_kos_cove_lobby',lobby),
+  obj('jakarta-v3-18446','Warteg Kharisma',-39.5,40.5,'njh_warung_makan','njh_door_warung_makan',warteg),
+  obj('ref-west-center-a','Warung Kopi Pojok Gang',-38.5,50.5,'njh_warung_kopi','njh_door_warung_kopi',coffeeScene),
+  obj('ref-kiosk','Warung Madura',-43.5,40.5,'njh_warung_madura','njh_door_warung_madura',null,true)
+ ];
+ const k=kit({objects:world,scenes:{
+  njh_kos_cove_lobby:lobby,njh_warteg_kharisma:kharisma,
+  njh_warung_makan:warteg,njh_warung_kopi:coffeeScene
+ }});
+ assert.equal(k.api.buildings().warteg.object.id,'jakarta-v3-18446');
+ assert.equal(world[2].njhInteriorTemplate,'njh_warung_kopi','coffee metadata is not overwritten by warteg fallback');
+ k.pos={x:-38.5,z:51.5};
+ const coffee=k.api.enterNearby();
+ assert.equal(coffee.ok,true);assert.equal(coffee.roomId,'njh_warung_kopi');
+ assert.equal(k.api.kind(),'building');
+ assert.equal(k.api.active().buildingId,'ref-west-center-a');
+ assert.equal(k.api.exit().ok,true);
+ const wartegIn=k.api.openInteriorById('njh_door_warung_makan');
+ assert.equal(wartegIn.ok,true);
+ assert.equal(k.api.roomId(),'njh_warteg_kharisma','official Warteg uses Kharisma benchmark');
+ k.api.exit();
+ const pending=k.api.openInteriorById('njh_door_warung_madura');
+ assert.equal(pending.ok,false);
+ assert.match(pending.reason,/belum tersedia/i);
+ assert.equal(k.api.active(),null,'pending door must not secretly open Cove');
+ const unknown=k.api.openInteriorById('does-not-exist');
+ assert.equal(unknown.ok,false);
+ assert.equal(k.api.active(),null,'unknown door never chooses a default Kost');
+});
+
+test('interior collision uses actual furniture footprint and not outside city objects',()=>{
+ const owned=kit({room:true});
+ assert.equal(owned.api.enter('kost').ok,true);
+ const chair=owned.api.active().furniture.find(f=>f.assetId==='chair');
+ assert.ok(chair);
+ const collider=owned.api.obstacles().find(o=>o.id===chair.id);
+ assert.equal(collider.type,'virtual_asset');
+ assert.equal(collider.w,chair.fw);assert.equal(collider.d,chair.fd);
+ const code=fs.readFileSync(path.join(R,'world-builder/builder.js'),'utf8');
+ assert.match(code,/if\(interior\?\.active\?\.\(\)\)return interior\.obstacles\?\.\(\)\|\|\[\]/);
+ assert.match(code,/inside\?indoorMap:documentMap\.map/);
+ assert.match(code,/if\(!inside&&TL&&tlPhase\)/);
+ assert.match(code,/if\(playerMode&&I\)/);
+});

@@ -39,5 +39,17 @@ function spriteMaterial(){
  // Distinct Semesta real meshes keep their normal depth policy.
  return {transparent:true,depthTest:false,depthWrite:false,alphaTest:.5};
 }
-g.VLSemestaStudioSprite=Object.freeze({version:1,isStudio,metrics,native,direction,spriteMaterial});
+// A custom-building billboard has no per-pixel depth map. In Mainkan, sort its
+// draw pass against the *player's ground footprint* instead of painting every
+// building on top regardless of where the character is standing.
+function actorInFront(actor,building,camera,footprint=[3,3],clearance=1.25){
+ if(!actor||!building)return false;
+ const ax=Number(actor.x),az=Number(actor.z),bx=Number(building.x),bz=Number(building.z);
+ const fw=Math.max(1,Number(footprint[0])||1),fd=Math.max(1,Number(footprint[1])||1);
+ if(![ax,az,bx,bz].every(Number.isFinite))return false;
+ if(Math.abs(ax-bx)>fw/2+clearance||Math.abs(az-bz)>fd/2+clearance)return false;
+ const dx=Number(camera?.x)||1,dz=Number(camera?.z)||1;
+ return (ax-bx)*dx+(az-bz)*dz>0.075;
+}
+g.VLSemestaStudioSprite=Object.freeze({version:2,isStudio,metrics,native,direction,spriteMaterial,actorInFront});
 })(window);

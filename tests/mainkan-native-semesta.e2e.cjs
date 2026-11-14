@@ -24,7 +24,11 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  const before=await page.evaluate(()=>localStorage.getItem('virtual-life-gpt-world-builder-pipeline-v3'));
  await page.locator('#characterForm button[type=submit]').click();
  await page.locator('#confirmGo').click({timeout:15000});
- await page.locator('#tutorialDone').click({timeout:15000});
+ // "Cara Main" may be skipped automatically or hidden after a saved tutorial.
+ if(await page.locator('#tutorialDone').isVisible().catch(()=>false))
+  await page.locator('#tutorialDone').click();
+ else if(await page.locator('#tutorialSkip').isVisible().catch(()=>false))
+  await page.locator('#tutorialSkip').click();
  await page.waitForFunction(()=>{
    const el=document.getElementById('semestaFrame');
    const win=el?.contentWindow;
@@ -120,6 +124,38 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  await page.locator('#gamePhone').click();
  const phone=await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.VLNokiaPlay?.isOpen?.()||false);
  assert.equal(phone,true,'Mainkan Phone button must open native Semesta Nokia');
+ // Regression: enter the intended building, do not teleport to Cove, and
+ // indoor movement must not consult NJH outdoor worldBounds at x=-50..0.
+ await page.waitForFunction(()=>{
+  const w=document.getElementById('semestaFrame')?.contentWindow;
+  return !!(w?.VLNjhMapPreviewRuntime?.teleport&&w.__njhPlayInteriors?.buildings?.()?.kost);
+ },null,{timeout:30000});
+ const doorFlow=await page.evaluate(()=>{
+  const w=document.getElementById('semestaFrame').contentWindow;
+  const qa=w.VLNjhMapPreviewRuntime,I=w.__njhPlayInteriors,out={};
+  qa.teleport(-38.5,51.5);out.coffee=I.enterNearby();out.coffeeRoom=I.roomId();out.coffeeKind=I.kind();
+  if(I.active())out.coffeeExit=I.exit();
+  qa.teleport(-43.5,41.5);out.madura=I.enterNearby();out.afterMadura=I.roomId();
+  if(I.active())I.exit();
+  qa.teleport(-26.25,71.5);out.cove=I.enterNearby();out.coveRoom=I.roomId();
+  if(I.active()){
+   const before=qa.walkPos();out.walk=qa.tryMove(0,-0.6);const after=qa.walkPos();
+   out.walkDelta=Math.hypot((after?.x||0)-(before?.x||0),(after?.z||0)-(before?.z||0));
+   out.guestRoom=I.openInteriorById('njh_door_home_ichsan');
+  }
+  if(I.active())I.exit();
+  return out;
+ });
+ console.log('NJH_DOORS_AND_WALK',JSON.stringify(doorFlow));
+ assert.equal(doorFlow.coffee?.ok,true,'Warung Kopi entrance is public');
+ assert.equal(doorFlow.coffeeRoom,'njh_warung_kopi','Warung Kopi must not enter Cove');
+ assert.equal(doorFlow.coffeeKind,'building');
+ assert.equal(doorFlow.madura?.ok,false,'Pending Madura must be explicitly unavailable');
+ assert.equal(doorFlow.afterMadura,null,'Pending door never opens Cove or a random room');
+ assert.equal(doorFlow.cove?.ok,true,'Cove street door enters lobby');
+ assert.equal(doorFlow.coveRoom,'njh_kos_cove_lobby');
+ assert.ok(doorFlow.walk?.moved&&doorFlow.walkDelta>0.1,'Cove lobby is walkable and not bounded by outdoor city');
+ assert.equal(doorFlow.guestRoom?.ok,false,'A guest cannot enter Ichsan private room');
  assert.equal(after,before,'Player entry must not overwrite the authoring working city');
  assert.ok(!errors.some(e=>/SyntaxError|ReferenceError/i.test(e)),errors.slice(0,4).join(' | '));
  fs.mkdirSync('screenshots',{recursive:true});

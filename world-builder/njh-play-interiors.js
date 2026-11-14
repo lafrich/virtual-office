@@ -17,6 +17,9 @@ const DIR=['sw','se','ne','nw'];
 const TEMPLATES={kost:'njh_kos',warteg:'njh_warteg_kharisma',minimarket:'njh_minimarket'};
 const FALLBACK={warteg:'njh_warung_makan'};
 const ROOM_SCENES=['njh_kos_cove_lobby','njh_kos_ichsan','njh_kos_noor'];
+// Explicit public templates from NJH map metadata. Missing scenes must stay pending,
+// never inherit Cove/Kharisma as a silent fallback.
+const PUBLIC_SCENES=['njh_laundry','njh_warung_makan','njh_warung_kopi','njh_rumah_biasa','njh_bengkel','njh_wc_mandi_umum','njh_warung_madura','njh_nasi_sunda','njh_koperasi','njh_toko_loak','njh_mushola','njh_pecel_lele_tenda','njh_sate_madura_tenda'];
 const LOBBY_ID='njh_kos_cove_lobby';
 const ACTION_LABELS={sleep:'Tidur',store_fridge:'Simpan Kulkas',take_fridge:'Ambil dari Kulkas',
  store_home:'Simpan di Kost',take_home:'Ambil dari Kost',cook:'Masak Ikan',cook_recipe:'Masak Resep',
@@ -100,11 +103,13 @@ function create(opts){
    catalog=r.ok?await r.json():{items:{}};
   }
   const items=catalog.items||catalog;
-  const wanted=new Set([...Object.values(TEMPLATES),...Object.values(FALLBACK),...ROOM_SCENES]);
+  const wanted=new Set([...Object.values(TEMPLATES),...Object.values(FALLBACK),...ROOM_SCENES,...PUBLIC_SCENES]);
+  const previewBase=base.replace(/njh-play-interiors\/?$/,'njh-map-preview/interiors/');
   await Promise.all([...wanted].map(async id=>{
    if(scenes[id])return;
-   try{const r=await fetch(base+id+'.interior-scene.json',{cache:'no-cache'});
-    if(r.ok)scenes[id]=await r.json();}catch(_e){}
+   for(const url of [base+id+'.interior-scene.json',previewBase+id+'.interior-scene.json']){
+    try{const r=await fetch(url,{cache:'no-cache'});if(r.ok){scenes[id]=await r.json();break;}}catch(_e){}
+   }
   }));
   const files=new Set();
   for(const typ of Object.values(items)){
@@ -133,7 +138,13 @@ function create(opts){
   const objects=world?.objects||opts.getWorld?.()?.objects||[];
   const pat=kind==='kost'?KOST_PATTERN:kind==='minimarket'?MINIMARKET_PATTERN:WARTEG_PATTERN;
   const notMart=o=>kind==='minimarket'||!MINIMARKET_PATTERN.test(textOf(o));
-  return objects.find(o=>o.id!==PLAY_KOST_ID&&o.type==='sprite'&&pat.test(textOf(o))&&notMart(o))
+  // A coffee shop or Madura kiosk must not become the Kharisma warteg
+  // just because its name contains "warung".
+  const notOtherDoor=o=>kind!=='warteg'||!o.njhDoors?.length||
+   ['njh_warung_makan','njh_warteg_kharisma'].includes(o.njhInteriorTemplate);
+  const preferred={kost:'njh-kos-noor',warteg:'jakarta-v3-18446',minimarket:'njh-minimarket'}[kind];
+  return objects.find(o=>o.id===preferred&&o.type==='sprite')
+   ||objects.find(o=>o.id!==PLAY_KOST_ID&&o.type==='sprite'&&pat.test(textOf(o))&&notMart(o)&&notOtherDoor(o))
    ||objects.find(o=>o.id===PLAY_KOST_ID&&kind==='kost')
    ||null;
  }
@@ -156,6 +167,12 @@ function create(opts){
 
  function wireWorld(world){
   if(!world)return buildings;
+  // Map loader has already bound the actual scene to each object. Keep that
+  // per-door identity instead of reassigning every building to a shared preset.
+  for(const obj of world.objects||[]){
+   const floor=obj.interior?.floors?.[0],template=obj.njhInteriorTemplate;
+   if(template&&floor&&!scenes[template])scenes[template]=floor;
+  }
   const kost=ensureKost(world);
   const warteg=findBuilding('warteg',world);
   const minimarket=findBuilding('minimarket',world);
@@ -167,8 +184,10 @@ function create(opts){
     template=LOBBY_ID;
    const sceneData=scenes[template];
    obj.enterable=true;obj.interactive=true;
+   // Cove, Mart and Warteg can use a specialized playable scene, but do not
+   // erase the authored door anchor or the source metadata of another site.
    obj.njhInteriorTemplate=template;
-   obj.njhUsePoint=doorWorld(obj);
+   obj.njhUsePoint=obj.njhUsePoint||doorWorld(obj);
    if(sceneData)obj.interior=wrapInterior(sceneData);
    if(!Array.isArray(obj.interactions))obj.interactions=['enter'];
    else if(!obj.interactions.includes('enter'))obj.interactions=[...obj.interactions,'enter'];
@@ -229,7 +248,8 @@ function create(opts){
   if(id==='minimarket'||id===TEMPLATES.minimarket)return 'minimarket';
   const A=AccessApi();
   if(id===LOBBY_ID||id==='njh-kos-noor'||A?.isLobby?.(id))return 'lobby';
-  return 'kost';
+  if(id==='kost'||id===TEMPLATES.kost||id==='njh_kos_ichsan'||id==='njh_kos_noor'||A?.isRoom?.(id))return 'kost';
+  return 'building'; // an unknown template must never resolve to the Kost Cove
  }
  function pid(){return String(opts.getPlayerId?.()||opts.playerId?.()||'');}
  function rels(){return opts.getRelationships?.()||AccessApi()?.DEFAULT_RELATIONSHIPS||[];}
@@ -386,7 +406,7 @@ function create(opts){
 
  function canEnterRoom(roomId){
   const kind=kindOfRoom(roomId);
-  if(kind==='warteg')return {ok:true};
+  if(kind==='warteg'||kind==='minimarket'||kind==='building')return {ok:true};
   const A=AccessApi();
   if(!A)return canEnter(kind==='lobby'?'kost':kind);
   A.setRelationships?.(rels());
@@ -395,7 +415,7 @@ function create(opts){
   return {ok:true,acc};
  }
 
- function enterInterior(roomId,reason){
+ function enterInterior(roomId,reason,source){
   const A=AccessApi();
   const resolved=A?.resolveId?.(roomId)||roomId;
   const sc=sceneOf(resolved);
@@ -403,19 +423,19 @@ function create(opts){
   const gate=canEnterRoom(resolved);if(!gate.ok)return gate;
   const kind=kindOfRoom(resolved);
   const pos=opts.getPos?.()||{x:0,z:0};
-  const streetExit=(session&&session.exit)?session.exit:{x:pos.x,z:pos.z};
+  const streetExit=(session&&session.exit)?session.exit:(source?.door?.use||{x:pos.x,z:pos.z});
   const lobbyReturn=session&&(session.kind==='lobby'||session.roomId===LOBBY_ID)
    ?{x:session.door.x,z:session.door.z,roomId:session.roomId||LOBBY_ID}
    :(session&&session.lobbyReturn)||null;
   const built=buildRoom(kind,sc,resolved);if(!built)return {ok:false,reason:'Gagal membangun interior'};
   hideOutdoor(true);
   session={kind,roomId:resolved,template:resolved,
-   buildingId:buildings.kost?.object?.id||'njh-kos-noor',
+   buildingId:source?.object?.id||((kind==='kost'||kind==='lobby')?buildings.kost?.object?.id:null),
    exit:streetExit,lobbyReturn,...built};
   opts.teleport?.(built.door.x,built.door.z,8,{keepView:true});
   fitRoomCamera();
   persistSession();
-  const msg=kind==='lobby'?'🏠 Masuk lobi kost':kind==='warteg'?'🍚 Masuk warteg':'🏠 Masuk kamar';
+  const msg=kind==='lobby'?'🏠 Masuk lobi kost':kind==='warteg'?'🍚 Masuk warteg':kind==='kost'?'🏠 Masuk kamar':'🚪 Masuk '+(sc.label||resolved);
   opts.message?.(msg+(reason?' · '+reason:''));
   opts.onEnter?.(session);
   return {ok:true,kind,roomId:resolved,session};
@@ -423,15 +443,42 @@ function create(opts){
 
  function openInteriorById(id){
   const A=AccessApi();
-  const raw=String(id||'');
+  const raw=String(id||'').replace(/^d:/,'');
   const resolved=A?.resolveId?.(raw)||raw;
+  if(!raw)return {ok:false,reason:'Pintu tidak dikenal'};
+  // Keep the old, explicit Cove building ID readable for 4P and saved games.
+  // Do this BEFORE reading a fresh getWorld() snapshot that might not have
+  // wireWorld() metadata; never apply it to unrelated building names.
   if(raw==='njh-kos-noor'||resolved===LOBBY_ID||A?.isLobby?.(raw))
    return enterInterior(LOBBY_ID);
-  if(sceneOf(resolved))return enterInterior(resolved);
+  // Lobby doors are different from street doors. Respect per-player access.
+  if(session){
+   const indoorDoor=(session.doors||[]).find(d=>d.id===raw);
+   if(indoorDoor){
+    if(isExitDoor(indoorDoor))return exit();
+    const access=A?.doorAccess?.(pid(),indoorDoor);
+    if(access?.canEnter===false||indoorDoor.state==='locked')
+     return {ok:false,reason:access?.reason||'Terkunci'};
+    const next=indoorDoor.interiorTemplate||indoorDoor.to;
+    return next&&sceneOf(next)?enterInterior(next):{ok:false,reason:'Kamar belum tersedia'};
+   }
+  }
+  // The official city stores one specific template on every exterior door.
+  const world=opts.getWorld?.()?.objects||[];
+  const obj=world.find(o=>o.id===raw||(o.njhDoors||[]).some(d=>d.doorId===raw));
+  if(obj){
+   const choices=obj.njhDoors||[];
+   const door=choices.find(d=>d.doorId===raw)||choices[0]||null;
+   const canonicalWarteg=obj.id===buildings.warteg?.object?.id&&
+    door?.template===FALLBACK.warteg&&!!scenes[TEMPLATES.warteg];
+   const template=canonicalWarteg?TEMPLATES.warteg:(door?.template||obj.njhInteriorTemplate);
+   if(!template||door?.pending||!sceneOf(template))
+    return {ok:false,reason:'Interior belum tersedia untuk '+(door?.label||obj.name||raw)};
+   return enterInterior(template,undefined,{object:obj,door});
+  }
   if(raw==='kost'||raw==='warteg'||raw==='minimarket')return enter(raw);
-  const k=kindOfBuilding({id:raw,name:raw})||kindOfRoom(resolved);
-  if(k==='warteg'||k==='kost'||k==='minimarket')return enter(k);
-  return {ok:false,reason:'Interior tidak dikenal'};
+  if(sceneOf(resolved))return enterInterior(resolved);
+  return {ok:false,reason:'Interior tidak dikenal: '+raw};
  }
 
  function enter(kind,reason){
@@ -455,20 +502,35 @@ function create(opts){
  }
 
  function enterNearby(){
-  if(session){
-   const p=opts.getPos?.()||{x:0,z:0};
-   if(Math.hypot(p.x-session.door.x,p.z-session.door.z)<=1.4)return exit();
-   return {ok:false,reason:'Dekati pintu untuk keluar'};
-  }
   const p=opts.getPos?.()||{x:0,z:0};
+  if(session){
+   const closest=(session.doors||[]).map(d=>({door:d,dist:Math.hypot(p.x-d.wx,p.z-d.wz)}))
+    .sort((a,b)=>a.dist-b.dist)[0];
+   if(closest?.dist<=1.4)return openInteriorById(closest.door.id);
+   if(Math.hypot(p.x-session.door.x,p.z-session.door.z)<=1.4)return exit();
+   return {ok:false,reason:'Dekati pintu ruangan'};
+  }
+  const candidates=[];
+  for(const o of opts.getWorld?.()?.objects||[]){
+   if(o.enterable!==true)continue;
+   for(const d of o.njhDoors||[]){
+    const use=d.use||{x:Number(d.usePoint?.[0]),z:Number(d.usePoint?.[1])};
+    if(Number.isFinite(use.x)&&Number.isFinite(use.z))
+     candidates.push({id:d.doorId,x:use.x,z:use.z});
+   }
+  }
+  candidates.sort((a,b)=>Math.hypot(p.x-a.x,p.z-a.z)-Math.hypot(p.x-b.x,p.z-b.z));
+  if(candidates.length){
+   const best=candidates[0];
+   if(Math.hypot(p.x-best.x,p.z-best.z)<=ENTER_RADIUS)return openInteriorById(best.id);
+  }
   let best=null,bestD=ENTER_RADIUS;
   for(const kind of Object.keys(buildings)){
-   const b=buildings[kind];
-   const door=b.door||doorWorld(b.object);
+   const b=buildings[kind],door=b.door||doorWorld(b.object);
    const d=Math.hypot(p.x-door.x,p.z-door.z);
    if(d<bestD){best=kind;bestD=d;}
   }
-  if(!best)return {ok:false,reason:'Dekati pintu kost atau warteg'};
+  if(!best)return {ok:false,reason:'Dekati pintu bangunan'};
   return enter(best);
  }
 
@@ -573,7 +635,9 @@ function create(opts){
  function obstacles(){
   if(!session)return [];
   return session.furniture.filter(f=>f.blocking).map(f=>({
-   id:f.id,type:'sprite',collision:true,blocking:'auto',name:f.label,
+   // Physics reads explicit w/d only for virtual_asset, not for a sprite
+   // without an asset catalog entry. This keeps chair/bed footprints exact.
+   id:f.id,type:'virtual_asset',assetCategory:'prop',collision:true,blocking:'auto',name:f.label,
    x:f.x,z:f.z,w:f.fw,d:f.fd
   }));
  }

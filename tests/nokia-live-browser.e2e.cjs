@@ -22,7 +22,10 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  await page.locator('#ccYear').dispatchEvent('input');
  await page.locator('#characterForm button[type=submit]').click();
  await page.locator('#confirmGo').click({timeout:15000});
- await page.locator('#tutorialDone').click({timeout:15000});
+ if(await page.locator('#tutorialDone').isVisible().catch(()=>false))
+  await page.locator('#tutorialDone').click();
+ else if(await page.locator('#tutorialSkip').isVisible().catch(()=>false))
+  await page.locator('#tutorialSkip').click();
  await page.waitForFunction(()=>{
   const win=document.getElementById('semestaFrame')?.contentWindow;
   try{return !!win?.document?.documentElement?.dataset?.mainkanReady&&

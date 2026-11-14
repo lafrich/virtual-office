@@ -32,7 +32,10 @@ test('only custom-building art is composited above ground; all other sprites ret
   transparent:true,depthTest:false,depthWrite:false,alphaTest:.5});
  const builder=get('builder.js');
  assert.match(builder,/const studio=studioSprites\?\.isStudio\(spec\)===true/);
- assert.match(builder,/studio\?studioSprites\.spriteMaterial\(\)/);
+ assert.match(builder,/studio\?\{\.\.\.studioSprites\.spriteMaterial\(\)\}/);
+ assert.match(builder,/if\(studio&&playerMode\)/);
+ assert.match(builder,/flags\.transparent=false;flags\.alphaTest=\.5;flags\.depthWrite=false/);
+ assert.match(builder,/updateStudioActorLayer\(\)/);
  assert.match(builder,/\{transparent:false,depthTest:true,depthWrite:true,alphaTest:\.5\}/);
  assert.match(builder,/plane\.renderOrder=2/);
 });
@@ -72,4 +75,16 @@ test('Semesta saves custom building collision and entrance metadata while correc
 test('Semesta loads studio sprite grounding before its world renderer',()=>{
  const html=get('index.html');
  assert(html.indexOf('studio-sprite-grounding.js')<html.indexOf('builder.js?v='));
+});
+
+test('studio camera sort draws player ahead of building only on its foreground footprint',()=>{
+ const b={x:0,z:0},camera={x:1,z:1};
+ assert.equal(helper.actorInFront({x:1.5,z:1.5},b,camera,[5,4]),true);
+ assert.equal(helper.actorInFront({x:-1.5,z:-1.5},b,camera,[5,4]),false);
+ assert.equal(helper.actorInFront({x:20,z:20},b,camera,[5,4]),false);
+ assert.equal(helper.actorInFront({x:1,z:-1},b,camera,[5,4]),false);
+ const builder=get('builder.js');
+ assert.match(builder,/plane\.renderOrder=close\?/);
+ assert.match(builder,/studioSprites\.actorInFront\(p,o,direction,foot\)/);
+ assert.match(builder,/node\.renderOrder=nearStudio\?2:node\.userData\.njhBaseOrder/);
 });
