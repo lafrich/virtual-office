@@ -121,7 +121,14 @@ function restore(){
  if(saved&&saved.testSeed)state.testSeed=saved.testSeed;
  const id=playerId(),rev=sessionRevision;
  if(id)startProfilesReady.then(()=>{if(!active||rev!==sessionRevision)return;
-  if(applyStart(state,id,false)){persist();try{bridge.respawn&&bridge.respawn();}catch{}paintPanel();message('🧪 Start tes '+id+' diterapkan: uang, kost, dan bahan masak.');}});
+  if(applyStart(state,id,false)){
+    persist();
+    try{
+     if(state.housing?.roomId&&bridge?.spawnAtOwnRoom)bridge.spawnAtOwnRoom();
+     else bridge?.respawn?.();
+    }catch{}
+    paintPanel();message('🧪 Start tes '+id+' diterapkan: uang, kost, dan bahan masak.');
+   }});
 }
 function resetSave(){
  const id=playerId();state=RULES.stateFrom({wallet:6000},config);
@@ -880,13 +887,65 @@ function runAction(action,args={}){
 }
 function handleAction(){
  if(!active)return false;
- try{
-  const inside=bridge?.interiorKind?.();
-  const door=inside?(bridge?.exitInterior?.()):(bridge?.enterInterior?.());
-  if(door?.ok)return true;
- }catch{}
- const node=nearest();
- if(!node)return false;
+ const p=getPos(),I=bridge?.playInteriors;
+ const door=I?.nearestDoor?.()||null;
+ const inside=!!I?.active?.();
+ const node=inside?null:nearest();
+ // Interior movement and doorway use are local to the currently visible
+ // room. Never call bridge.exitInterior() as an unqualified global E action.
+ if(inside){
+  if(door){
+   const result=I.enterNearby();
+   if(result?.ok)return true;
+   if(result?.reason)message('⛔ '+result.reason);
+   return !!result;
+  }
+  const nearby=(I.extraActions?.()||[]).filter(a=>!['exit_interior','enter_room'].includes(a.id));
+  if(nearby.length){
+   // Multiple fridge/wardrobe choices belong in the single contextual AKSI
+   // menu. E surfaces the actual nearby object; it must not trigger Cove.
+   if(nearby.length===1&&['eat','home_toilet','home_shower','sleep','wash'].includes(nearby[0].id))
+    return !!runAction(nearby[0].id,nearby[0].args||{}).ok;
+   message('AKSI: '+(nearby[0].spotLabel||nearby[0].label)+' · pilih interaksi');
+   paintPanel();return true;
+  }
+  return false;
+ }
+ // Exterior: a REAL door only wins while within reach and nearer than an
+ // authored NPC/activity. This keeps E from teleporter-style Cove entry.
+ const nodeDistance=node?Math.hypot(p.x-node.x,p.z-node.z):Infinity;
+ if(door&&door.distance<=nodeDistance+.15){
+  const result=I.enterNearby();
+  if(result?.ok)return true;
+  if(result?.reason)message('⛔ '+result.reason);
+  return !!result;
+ }
+ if(!node){
+  // Native loose pickups and NPCs are context interactions, not building
+  // entry. Never remove a city asset unless Jiwa accepts the pickup.
+  const items=(getWorld().objects||[]).filter(o=>o&&o.type!=='marker'&&o.type!=='avatar');
+  let best=null,bestDistance=1.8;
+  for(const o of items){
+   const label=[o.name,o.id,o.asset,o.label].join(' ');
+   const pickup=o.interactions?.includes?.('pickup')||/botol|kardus|barang.?bekas|scavenge|sampah.?ambil/i.test(label);
+   const npc=['npc','quest_npc','pedestrian'].includes(o.type);
+   if(!pickup&&!npc)continue;
+   const d=Math.hypot((Number(o.x)||0)-p.x,(Number(o.z)||0)-p.z);
+   if(d<bestDistance){best={o,pickup,npc};bestDistance=d;}
+  }
+  if(best?.pickup){
+   const result=runAction('scavenge',{sourceId:best.o.id,objectId:best.o.id});
+   if(result?.ok)bridge?.collectObject?.(best.o.id);
+   return true;
+  }
+  if(best?.npc){
+   const actions=getHooks()?.nearbyActions?.()||[];
+   const talk=actions.find(a=>['talk','world_quest','npc_talk'].includes(a.id));
+   if(talk){runAction(talk.id,talk.args||{npcId:best.o.id});return true;}
+   message('Bicara dengan '+(best.o.name||'NPC'));paintPanel();return true;
+  }
+  return false;
+ }
  if(node.jobId){
   if(performance.now()-justWorkedAt<550)return true;
   message('TAHAN tombol Action (atau tombol KERJA di panel) sampai progress penuh.');
@@ -901,7 +960,8 @@ function handleAction(){
   message('Pilih barang dari tas, kemudian klik JUAL di panel.');paintPanel();return true;
  }
  const action=node.action;
- if(node.id==='kost'&&ownsRoom()){bagOpen=false;message('Pilih WC, mandi, tidur, atau penyimpanan di panel.');paintPanel();return true;}
+ if(node.id==='kost'&&ownsRoom()){bagOpen=false;message('Dekati pintu atau furnitur untuk berinteraksi.');paintPanel();return true;}
+ if(!action)return false;
  runAction(action,node.id==='fish'?{spotId:node.sourceId||'river'}:
   node.id==='bench'?{seatId:node.sourceId||'bangku_preview'}:
   node.id==='public_wc'||node.id==='public_bath'?{facilityId:node.sourceId||node.id}:{});return true;
