@@ -92,11 +92,10 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
  assert.deepEqual(wired,{
   njh_door_laundry:'njh_laundry',
   njh_door_warung_makan:'njh_warung_makan',
-  njh_door_home_ichsan:'njh_kos_ichsan',
+  njh_door_kos_cove_lobby:'njh_kos_cove_lobby',
   njh_door_rumah_biasa:'njh_rumah_biasa',
   njh_door_bengkel:'njh_bengkel',
   njh_door_wc_umum:'njh_wc_mandi_umum',
-  njh_door_home_noor:'njh_kos_noor',
   njh_door_warung_kopi:'njh_warung_kopi'
  });
  const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
@@ -121,14 +120,11 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
  assert.equal(api.resolveTemplate('bangun-ruang kit in br-warung-pecel-lele.json'),'njh_pecel_lele_tenda');
  const near=api.nearestEnterable(document.objects,-26.25,71.5,1.25);
  assert.equal(near.o.id,'njh-kos-noor');
- assert.equal(near.anchor.doorId,'njh_door_home_noor');
- assert.equal(near.anchor.template,'njh_kos_noor');
+ assert.equal(near.anchor.doorId,'njh_door_kos_cove_lobby');
+ assert.equal(near.anchor.template,'njh_kos_cove_lobby');
  assert.ok(near.distance<0.01);
- const nearIchsan=api.nearestEnterable(document.objects,-28.25,71.5,1.25);
- assert.equal(nearIchsan.o.id,'njh-kos-noor');
- assert.equal(nearIchsan.anchor.doorId,'njh_door_home_ichsan');
- assert.equal(nearIchsan.anchor.template,'njh_kos_ichsan');
- assert.ok(nearIchsan.distance<0.01);
+ const oldIchsanStreet=api.nearestEnterable(document.objects,-28.25,71.5,1.25);
+ assert.equal(oldIchsanStreet,null);
  assert.equal(api.resolveTemplate('njh_kos'),'njh_kos_noor');
  const tent=api.nearestEnterable(document.objects,-25.0,38.5,1.25);
  assert.equal(tent.o.id,'njh-tenda-pecel-lele');
@@ -145,17 +141,59 @@ test('spawns and homes resolve per test player',()=>{
  const meta=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/njh-map-meta.json'),'utf8'));
  const ichsan=api.resolveSpawn('t_ichsan',meta);
  assert.equal(ichsan.kind,'home');
- assert.equal(ichsan.point.x,-28.25);
+ assert.equal(ichsan.point.x,-26.25);
  assert.equal(ichsan.point.z,71.5);
  assert.equal(ichsan.point.template,'njh_kos_ichsan');
  const noor=api.resolveSpawn('t_noor',meta);
  assert.equal(noor.kind,'home');
  assert.deepEqual([noor.point.x,noor.point.z],[-26.25,71.5]);
+ assert.equal(noor.point.template,'njh_kos_noor');
  const g1=api.resolveSpawn('guest1',meta);
  assert.equal(g1.kind,'plaza');
  assert.equal(g1.point.id,'njh_spawn_3');
  const g2=api.resolveSpawn('guest2',meta);
  assert.equal(g2.point.id,'njh_spawn_4');
+});
+
+
+test('kost rooms use bathtub+shower, a cookable kitchen, and a lobby-first door',()=>{
+ const rootInteriors=path.join(root,'njh-map-preview/interiors');
+ const lobby=JSON.parse(fs.readFileSync(path.join(rootInteriors,'njh_kos_cove_lobby.interior-scene.json'),'utf8'));
+ assert.equal(lobby.id,'njh_kos_cove_lobby');
+ const roomDoors=Object.fromEntries(lobby.doors.filter(d=>d.role==='room').map(d=>[d.id,d]));
+ assert.equal(roomDoors.njh_door_home_ichsan.interiorTemplate,'njh_kos_ichsan');
+ assert.equal(roomDoors.njh_door_home_noor.interiorTemplate,'njh_kos_noor');
+ assert.equal(roomDoors.njh_door_cove_room_1.state,'locked');
+ const streetExit=lobby.doors.find(d=>d.role==='exit');
+ assert.equal(streetExit.streetDoorId,'njh_door_kos_cove_lobby');
+ assert.equal(streetExit.exitTo,'street');
+ for(const id of ['njh_kos_ichsan','njh_kos_noor','njh_kos']){
+  const scene=JSON.parse(fs.readFileSync(path.join(rootInteriors,id+'.interior-scene.json'),'utf8'));
+  const types=scene.items.map(i=>i.assetId);
+  assert.ok(types.includes('bathtub'),id+' needs bathtub');
+  assert.ok(types.includes('shower'),id+' needs shower');
+  assert.ok(!types.includes('water_tub'),id+' must not use bak+gayung');
+  assert.ok(types.includes('fridge')&&types.includes('wardrobe')&&types.includes('stove')&&types.includes('kitchen_sink'),id+' needs kitchen+storage');
+  const by=Object.fromEntries(scene.items.map(i=>[i.assetId,i]));
+  const owner=id==='njh_kos_ichsan'?'ichsan':'noor';
+  assert.equal(by.fridge.access,'owner_only');
+  assert.equal(by.wardrobe.access,'owner_only');
+  assert.equal(by.stove.access,'owner_only');
+  assert.equal(by.kitchen_sink.access,'owner_only');
+  assert.equal(by.bed.access,'shared_partner');
+  assert.equal(by.bathtub.access,'shared_partner');
+  assert.equal(by.shower.access,'shared_partner');
+  assert.equal(by.fridge.actionId,'open');
+  assert.equal(by.wardrobe.actionId,'open');
+  assert.equal(by.stove.actionId,'cook');
+  assert.equal(by.kitchen_sink.actionId,'wash');
+  assert.ok(by.fridge.tags.includes('open_fridge'));
+  assert.ok(by.wardrobe.tags.includes('open_storage'));
+  assert.ok(by.stove.tags.includes('cook'));
+  assert.equal(by.fridge.ownerId,owner);
+  const exit=scene.doors.find(d=>d.role==='exit');
+  assert.equal(exit.exitTo,'njh_kos_cove_lobby');
+ }
 });
 
 test('physics blocks walking off a bounded map; unbounded maps stay free',()=>{

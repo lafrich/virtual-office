@@ -46,7 +46,7 @@ Use tiles come from `njh-map-meta.json`. Enter radius is 1.25 from the use point
 | Rumah Ichsan (`ref-gas-station`) | -45.5, 57.5 | `njh_rumah_biasa` | wired |
 | Bengkel Motor (`njh-bengkel`) | -48.0, 71.5 | `njh_bengkel` | wired |
 | WC Umum / Mandi Umum (`njh-wc-umum`) | -43.0, 71.5 | `njh_wc_mandi_umum` | wired |
-| Kost Ichsan & Noor (`njh-kos-noor`) | -26.25, 71.5 | `njh_kos` | wired |
+| Kost Cove (Ichsan & Noor) (`njh-kos-noor`) | -26.25, 71.5 | `njh_kos_cove_lobby` | wired (lobby first; room doors inside) |
 | Warung Madura (`ref-north-row-b`) | -43.5, 41.5 | `njh_warung_madura` | pre-wired, pending r6 (toast: interior belum ada) |
 | Warung Kopi Pojok Gang (`ref-west-center-a`) | -38.5, 51.5 | `njh_warung_kopi` | pre-wired, pending r6 |
 | Warung nasi Sunda (`jakarta-v3-13525`) | -21.15, 71.5 | `njh_nasi_sunda` | pre-wired, pending r6 |
@@ -109,6 +109,6 @@ Name/tag fixes on existing buildings: Kost Noor, WC Umum / Mandi Umum, Pasar Ika
 
 New objects: Tenda Hobo, Lapak Siomay Batagor (reuses `pipeline:lapak_tas`), Pak Ogah NPC, and 16 scavenge points (tong sampah, botol, kardus) spread across the gangs, Kali bank, and pasar edges — not clustered at the loak. See `GAMEPLAY-SITES.md` and `renders/njh-gameplay-sites-overview.png`.
 
-## Kost rooms (Ichsan & Noor)
+## Kost Cove (lobby + Ichsan & Noor rooms)
 
-Two rooms in the same kost building, for the 4-player preview test. See `KOST-ROOMS.md`. Ichsan's home spawn is now `njh_door_home_ichsan` at -28.25, 71.5 (`njh_kos_ichsan`). The standalone house stays enterable as `njh_door_rumah_biasa`.
+Street enter opens `njh_kos_cove_lobby` at -26.25, 71.5 (`njh_door_kos_cove_lobby`). Room doors `njh_door_home_ichsan` / `njh_door_home_noor` live in the lobby. Both players spawn at the lobby sidewalk tile; `homes[].interiorTemplate` stays the room id. Rooms use bathtub + shower (not bak+gayung; public WC is unchanged) and a complete owner_only kitchenette. See `KOST-ROOMS.md`. The standalone house stays enterable as `njh_door_rumah_biasa`. Exterior art stays `pipeline:id200_bangunan_rumah_kos_dua_lantai` — there is no Cove facade sprite.

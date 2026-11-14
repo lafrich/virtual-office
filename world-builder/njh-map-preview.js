@@ -1,13 +1,13 @@
 /* NJH Semesta map draft1 PREVIEW only. Activated by ?njhMap=1.
  * Registers 7 catalog assets, loads Ellen's district map, wires door
- * use-tiles to the 6 NJH interiors, and clamps actors to worldBounds.
+ * use-tiles to the NJH interiors (including the Cove kost lobby), and clamps actors to worldBounds.
  * Live Semesta / Mainkan behavior is unchanged when the flag is off.
  * Not pushed, not deployed.
  */
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'];
-const NJH_READY=['njh_kos','njh_kos_noor','njh_kos_ichsan','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi'];
+const NJH_READY=['njh_kos','njh_kos_noor','njh_kos_ichsan','njh_kos_cove_lobby','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi'];
 const NJH_PENDING=['njh_pecel_lele_tenda','njh_sate_madura_tenda','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda'];
 const NJH_TEMPLATES=[...NJH_READY,...NJH_PENDING];
 const TEMPLATE_ALIASES=Object.freeze({

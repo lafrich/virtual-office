@@ -54,10 +54,12 @@
       "objectId": "njh-kos-noor",
       "interiorTemplate": "njh_kos_ichsan",
       "homeSpawn": [
-        -28.25,
+        -26.25,
         71.5
       ],
-      "partnerPlayer": "t_noor"
+      "partnerPlayer": "t_noor",
+      "lobbyDoorId": "njh_door_kos_cove_lobby",
+      "lobbyTemplate": "njh_kos_cove_lobby"
     },
     {
       "player": "t_noor",
@@ -69,7 +71,9 @@
         -26.25,
         71.5
       ],
-      "partnerPlayer": "t_ichsan"
+      "partnerPlayer": "t_ichsan",
+      "lobbyDoorId": "njh_door_kos_cove_lobby",
+      "lobbyTemplate": "njh_kos_cove_lobby"
     }
   ],
   "locations": [
@@ -153,13 +157,15 @@
     {
       "id": "njh_loc_home_ichsan",
       "members": [
-        "njh_door_home_ichsan"
+        "njh_door_home_ichsan",
+        "njh_door_kos_cove_lobby"
       ]
     },
     {
       "id": "njh_loc_home_noor",
       "members": [
-        "njh_door_home_noor"
+        "njh_door_home_noor",
+        "njh_door_kos_cove_lobby"
       ]
     },
     {
@@ -241,6 +247,12 @@
       "id": "njh_loc_rumah_biasa",
       "members": [
         "njh_door_rumah_biasa"
+      ]
+    },
+    {
+      "id": "njh_loc_kos_cove",
+      "members": [
+        "njh_door_kos_cove_lobby"
       ]
     }
   ],
@@ -453,12 +465,12 @@
       "baymaxInteractionId": null
     },
     {
-      "doorId": "njh_door_home_noor",
+      "doorId": "njh_door_kos_cove_lobby",
       "objectId": "njh-kos-noor",
-      "role": "home",
-      "interiorTemplate": "njh_kos_noor",
-      "owner": "t_noor",
-      "label": "Kost Noor",
+      "role": "lobby",
+      "interiorTemplate": "njh_kos_cove_lobby",
+      "owner": null,
+      "label": "Kost Cove (lobi)",
       "facing": "sw",
       "doorPoint": [
         -26.25,
@@ -470,37 +482,6 @@
       ],
       "usePoint": [
         -26.25,
-        71.5
-      ],
-      "footprintRect": [
-        -29.0,
-        -23.5,
-        66.4,
-        71.0
-      ],
-      "baymaxDoorId": null,
-      "baymaxInteractionId": null,
-      "partnerOwner": "t_ichsan"
-    },
-    {
-      "doorId": "njh_door_home_ichsan",
-      "objectId": "njh-kos-noor",
-      "role": "home",
-      "interiorTemplate": "njh_kos_ichsan",
-      "owner": "t_ichsan",
-      "partnerOwner": "t_noor",
-      "label": "Kost Ichsan",
-      "facing": "sw",
-      "doorPoint": [
-        -28.25,
-        71.0
-      ],
-      "useTile": [
-        -28,
-        71
-      ],
-      "usePoint": [
-        -28.25,
         71.5
       ],
       "footprintRect": [

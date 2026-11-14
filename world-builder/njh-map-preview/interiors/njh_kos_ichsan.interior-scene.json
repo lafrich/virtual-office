@@ -2,9 +2,9 @@
   "id": "njh_kos_ichsan",
   "label": "NJH · Kost Ichsan",
   "format": "virtual-life-interior-v1",
-  "version": 2,
-  "width": 8,
-  "depth": 6,
+  "version": 3,
+  "width": 10,
+  "depth": 8,
   "theme": "warm",
   "tilePixels": [
     64,
@@ -12,12 +12,12 @@
   ],
   "unit": "semesta-ground-tile",
   "sourceFootprint": [
-    8,
-    6
+    10,
+    8
   ],
   "entrance": {
     "c": 4,
-    "r": 5
+    "r": 7
   },
   "items": [
     {
@@ -60,15 +60,15 @@
       ]
     },
     {
-      "id": "njh_kos_ichsan-wardrobe",
-      "assetId": "wardrobe",
-      "name": "Lemari",
+      "id": "njh_kos_ichsan-stove",
+      "assetId": "stove",
+      "name": "Kompor",
       "c": 2,
       "r": 0,
       "rotation": 0,
       "flipX": false,
       "flipY": false,
-      "actionId": "open",
+      "actionId": "cook",
       "pose": null,
       "capacity": 1,
       "blocking": true,
@@ -78,10 +78,40 @@
       "access": "owner_only",
       "tags": [
         "owner:ichsan",
-        "access:owner_only"
+        "access:owner_only",
+        "cook",
+        "cook_recipe",
+        "dapur"
       ],
       "motions": [
-        "open"
+        "cook"
+      ]
+    },
+    {
+      "id": "njh_kos_ichsan-kitchen_sink",
+      "assetId": "kitchen_sink",
+      "name": "Bak Cuci",
+      "c": 3,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "ownerId": "ichsan",
+      "access": "owner_only",
+      "tags": [
+        "owner:ichsan",
+        "access:owner_only",
+        "wash",
+        "dapur"
+      ],
+      "motions": [
+        "wash"
       ]
     },
     {
@@ -103,7 +133,11 @@
       "access": "owner_only",
       "tags": [
         "owner:ichsan",
-        "access:owner_only"
+        "access:owner_only",
+        "open_fridge",
+        "store_fridge",
+        "take_fridge",
+        "dapur"
       ],
       "motions": [
         "open"
@@ -128,14 +162,54 @@
       "access": "shared_partner",
       "tags": [
         "owner:ichsan",
-        "access:shared_partner"
+        "access:shared_partner",
+        "bathroom"
+      ]
+    },
+    {
+      "id": "njh_kos_ichsan-shower",
+      "assetId": "shower",
+      "name": "Shower",
+      "c": 7,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "bathe",
+      "pose": "bathe",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "ownerId": "ichsan",
+      "access": "shared_partner",
+      "tags": [
+        "owner:ichsan",
+        "access:shared_partner",
+        "bathroom",
+        "home_shower"
+      ],
+      "motions": [
+        "mandi"
+      ],
+      "fx": [
+        {
+          "id": "njh_fx_water_shower",
+          "layer": "__fx",
+          "file": "fx/njh_fx_water_shower__fx_sheet_6x1.png",
+          "source": "/workspace/lfb-placeholders-v2/fx/njh_fx_water_shower__fx_sheet_6x1.png",
+          "motions": [
+            "mandi"
+          ],
+          "note": "Hook only; attach at shower head. Playback is Baymax. Not a furniture TYPE."
+        }
       ]
     },
     {
       "id": "njh_kos_ichsan-squat_toilet",
       "assetId": "squat_toilet",
       "name": "WC Jongkok",
-      "c": 7,
+      "c": 9,
       "r": 0,
       "rotation": 0,
       "flipX": false,
@@ -150,7 +224,9 @@
       "access": "shared_partner",
       "tags": [
         "owner:ichsan",
-        "access:shared_partner"
+        "access:shared_partner",
+        "bathroom",
+        "home_toilet"
       ],
       "motions": [
         "wc_squat"
@@ -160,7 +236,7 @@
       "id": "njh_kos_ichsan-sink",
       "assetId": "sink",
       "name": "Wastafel",
-      "c": 6,
+      "c": 7,
       "r": 2,
       "rotation": 90,
       "flipX": false,
@@ -175,23 +251,24 @@
       "access": "shared_partner",
       "tags": [
         "owner:ichsan",
-        "access:shared_partner"
+        "access:shared_partner",
+        "bathroom"
       ],
       "motions": [
         "wash"
       ]
     },
     {
-      "id": "njh_kos_ichsan-water_tub",
-      "assetId": "water_tub",
-      "name": "Bak + Gayung",
+      "id": "njh_kos_ichsan-bathtub",
+      "assetId": "bathtub",
+      "name": "Bathtub / Bak Mandi",
       "c": 7,
       "r": 3,
-      "rotation": 270,
+      "rotation": 0,
       "flipX": false,
       "flipY": false,
       "actionId": "bathe",
-      "pose": "bathe",
+      "pose": "bathtub_bathe",
       "capacity": 1,
       "blocking": true,
       "triggerRadius": 1.15,
@@ -200,18 +277,49 @@
       "access": "shared_partner",
       "tags": [
         "owner:ichsan",
-        "access:shared_partner"
+        "access:shared_partner",
+        "bathroom",
+        "home_shower",
+        "bathtub_bathe"
       ],
       "motions": [
         "mandi"
       ]
     },
     {
+      "id": "njh_kos_ichsan-wardrobe",
+      "assetId": "wardrobe",
+      "name": "Lemari",
+      "c": 0,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "ownerId": "ichsan",
+      "access": "owner_only",
+      "tags": [
+        "owner:ichsan",
+        "access:owner_only",
+        "open_storage",
+        "store_home",
+        "take_home"
+      ],
+      "motions": [
+        "open"
+      ]
+    },
+    {
       "id": "njh_kos_ichsan-fan",
       "assetId": "fan",
       "name": "Kipas",
-      "c": 4,
-      "r": 2,
+      "c": 2,
+      "r": 6,
       "rotation": 0,
       "flipX": false,
       "flipY": false,
@@ -229,62 +337,11 @@
       ]
     },
     {
-      "id": "njh_kos_ichsan-chair",
-      "assetId": "chair",
-      "name": "Kursi",
-      "c": 0,
-      "r": 3,
-      "rotation": 90,
-      "flipX": false,
-      "flipY": false,
-      "actionId": "sit",
-      "pose": "sit",
-      "capacity": 1,
-      "blocking": true,
-      "triggerRadius": 1.15,
-      "actionAdjustments": {},
-      "ownerId": "ichsan",
-      "access": "shared_partner",
-      "tags": [
-        "owner:ichsan",
-        "access:shared_partner"
-      ],
-      "motions": [
-        "sit",
-        "eat"
-      ]
-    },
-    {
-      "id": "njh_kos_ichsan-dining_table",
-      "assetId": "dining_table",
-      "name": "Meja",
-      "c": 2,
-      "r": 3,
-      "rotation": 0,
-      "flipX": false,
-      "flipY": false,
-      "actionId": "eat",
-      "pose": null,
-      "capacity": 1,
-      "blocking": true,
-      "triggerRadius": 1.15,
-      "actionAdjustments": {},
-      "ownerId": "ichsan",
-      "access": "shared_partner",
-      "tags": [
-        "owner:ichsan",
-        "access:shared_partner"
-      ],
-      "motions": [
-        "eat"
-      ]
-    },
-    {
       "id": "njh_kos_ichsan-shoe_rack",
       "assetId": "shoe_rack",
       "name": "Rak Sepatu",
       "c": 0,
-      "r": 5,
+      "r": 7,
       "rotation": 180,
       "flipX": false,
       "flipY": false,
@@ -302,10 +359,31 @@
       ]
     }
   ],
+  "doors": [
+    {
+      "id": "njh_kos_ichsan-exit",
+      "role": "exit",
+      "label": "Keluar ke lobi",
+      "c": 4,
+      "r": 7,
+      "useTile": [
+        4,
+        7
+      ],
+      "usePoint": [
+        4.5,
+        7.5
+      ],
+      "exitTo": "njh_kos_cove_lobby",
+      "lobbyDoorId": "njh_door_home_ichsan"
+    }
+  ],
   "floor": 1,
-  "notes": "Per-owner kost room for the 4-player preview test. Based on Baymax njh_kos (preview/main-interiors-kost-warteg, same layout as draft1 njh_kos) but the shower is replaced by a WC/kamar mandi: sekat_wc partition, squat_toilet, water_tub (bak + gayung, no separate gayung TYPE), wall-mounted sink (rot 90). No shower. Furniture types are all in the NJH preview catalog. ownerId is 'ichsan' (player t_ichsan). access=shared_partner for kasur and WC; owner_only for kulkas and lemari. Dressing props are shared_partner. Schema has no official owner field, so ownerId, access, and tags are all set. Paths stay clear; each used item has a free interaction-side tile. Preview only.",
-  "adaptedFrom": "world-builder/njh-play-interiors/njh_kos.interior-scene.json on preview/main-interiors-kost-warteg (read via git show, worktree not touched)",
-  "adaption": "Split into per-owner rooms; WC revised to bak+gayung + sekat, no shower; owner/access metadata added for Baymax.",
+  "notes": "Per-owner kost room for the 4-player preview test, rebuilt from Ellen's Cove kamar plan (bed left, bathroom right of sekat; sources: kamar_cove_kosong + old VO p_cove.py / index.html). t519: bathtub + shower instead of bak+gayung; this is an explicit exception — public WC (njh_wc_mandi_umum) stays water_tub. t520: complete interactable kitchenette (stove + kitchen_sink + fridge) and lemari storage, all with free reachable use tiles. Kitchen + kulkas + lemari are owner_only (partner may use kasur and kamar mandi, not the owner's food/storage/cook station). ownerId is 'ichsan' (player t_ichsan). Existing catalog TYPEs only. Preview only.",
+  "adaptedFrom": "Ellen kamar_cove_kosong (virtual-office-assets/kamar_cove_kosong) + Cove geometry in vo-mp/ind/p_cove.py and virtual-office/index.html. Previous Baymax njh_kos (preview/main-interiors-kost-warteg) was the earlier base; rooms are now rebuilt on the Cove plan.",
+  "adaption": "Cove plan (kasur left, sekat + bathroom right). t519 bathtub+shower, no water_tub. t520 kitchenette stove+kitchen_sink+fridge and wardrobe storage with action tags. doors[] exit back to njh_kos_cove_lobby. owner/access metadata kept for Baymax.",
   "ownerId": "ichsan",
-  "partnerOwnerId": "noor"
+  "partnerOwnerId": "noor",
+  "bathroomException": "bathtub_and_shower",
+  "kitchenAccess": "owner_only"
 }
