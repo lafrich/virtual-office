@@ -954,11 +954,12 @@ function makeSprite(root,item){
  // depth test causes grass to erase the front wall and entrance.
  const studio=studioSprites?.isStudio(spec)===true;
  for(const part of [{file:item.asset,off:0},...(spec.front?[{file:spec.front,off:.025}]:[])]){
-  const flags=studio?studioSprites.spriteMaterial():
+  // Editor-only studio composite can cover a player even in front of it.
+  const flags=studio&&!playerMode?studioSprites.spriteMaterial():
    {transparent:false,depthTest:true,depthWrite:true,alphaTest:.5};
   const mat=new THREE.MeshBasicMaterial({map:pixelTexture(part.file,view),...flags,side:THREE.DoubleSide});
   const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
-  if(studio){
+  if(studio&&!playerMode){
    // Render after terrain and ordinary opaque meshes. Custom studio buildings
    // are 2D isometric compositing layers, not full 3D opaque volumes.
    plane.renderOrder=2;
@@ -2635,7 +2636,7 @@ function ensurePlayHud(){
   onAction:()=>{
    if(window.SemestaLifePlay?.active?.()){
     if(window.SemestaLifePlay.handleAction())return;
-    if(!enterNearbyBuilding())tell('ACTION · lihat Nokia → Peta untuk lokasi aktivitas');
+    tell('Dekati pintu, NPC, atau objek untuk berinteraksi.');
     return;
    }
    // Legacy Loak preview has its own money system; do not mix it with
@@ -2764,8 +2765,9 @@ function setMode(m){
        interiorFurniture:()=>I.furniture(),
        interiorKind:()=>I.kind(),
        extraActions:()=>I.extraActions(),
-       enterInterior:id=>id?(I.enterInterior?.(id)||I.openInteriorById?.(id)||I.enterNearby()):I.enterNearby(),
-       exitInterior:()=>I.exit(),
+       enterInterior:id=>id?I.openInteriorById(id):I.enterNearby(),
+       exitInterior:()=>I.enterNearby(),
+       spawnAtOwnRoom:()=>scheduleNjhHomeSpawn(),
        playInteriors:I,
        doorAnchor:o=>I.doorWorld(o)
       };
@@ -2817,11 +2819,12 @@ function setMode(m){
        interiorFurniture:()=>I.furniture(),
        interiorKind:()=>I.kind(),
        extraActions:()=>I.extraActions(),
-       enterInterior:id=>id?(I.enterInterior?.(id)||I.openInteriorById?.(id)||I.enterNearby()):I.enterNearby(),
-       exitInterior:()=>I.exit(),
+       enterInterior:id=>id?I.openInteriorById(id):I.enterNearby(),
+       exitInterior:()=>I.enterNearby(),
+       spawnAtOwnRoom:()=>scheduleNjhHomeSpawn(),
        playInteriors:I
       });
-      I.restoreIfNeeded();
+      // Room restored only after its scene files and profile are ready.
      }
     }catch(err){console.warn('njh play interiors start',err);}
    }
@@ -2833,7 +2836,7 @@ function setMode(m){
    focusCameraAt(where.x,where.z,16);updateCharacterCameraUI();
    rigs.get(walkActorId)?.rig.setPose(null);
    tell('Walk Test: WASD / arrow keys / touch D-pad. Edits are not saved.');
-   if(playerMode)try{beginSpawnRespawn(first,'playStart');}catch(err){console.warn('spawn/respawn preview',err);}
+   if(playerMode)try{beginSpawnRespawn(first,'playStart');scheduleNjhHomeSpawn();}catch(err){console.warn('spawn/respawn preview',err);}
  }
  syncPlayHud();
  applyDevicePreview();
@@ -3500,6 +3503,31 @@ if(playerMode){
  window.addEventListener('mainkan:resume',onLifePause);
 }
 
+let njhInteriorsReady=null,njhHomeSpawnTicket=0;
+function scheduleNjhHomeSpawn(){
+ if(!playerMode||!njhInteriorsReady)return false;
+ const ticket=++njhHomeSpawnTicket;
+ Promise.all([njhInteriorsReady,window.SemestaLifePlay?.startProfiles?.()||Promise.resolve()])
+ .then(([I])=>{
+  if(ticket!==njhHomeSpawnTicket||mode!=='walk'||!I)return;
+  const state=window.SemestaLifePlay?.state?.();
+  const who=String(mainkanPlayerId||'').toLowerCase();
+  const room=state?.housing?.roomId;
+  if(!room||!['t_ichsan','t_noor','ichsan','noor'].includes(who)){
+   if(state?.interior&&!I.active?.())I.restoreIfNeeded();
+   return;
+  }
+  if(I.active?.()?.roomId===room)return;
+  const entered=I.enterInterior(room,'spawn pemilik kamar');
+  if(!entered?.ok){tell('Spawn kamar gagal: '+(entered?.reason||room));return;}
+  const holder=rigs.get(walkActorId);
+  holder?.rig?.setMoving?.(0,0,false);
+  window.__semestaLastSpawn={ok:true,kind:'home',roomId:room,playExitTent:false,
+   point:{x:holder?.root?.position.x||0,z:holder?.root?.position.z||0},reason:'owned-room'};
+  window.SemestaLifePlay?.onSpawn?.(window.__semestaLastSpawn);
+ }).catch(err=>console.warn('NJH room spawn',err));
+ return true;
+}
 function bootNjhPlayInteriors(){
  if(!playerMode||!window.VLNjhPlayInteriors||window.__njhPlayInteriors)return;
  const api=window.VLNjhPlayInteriors.create({
@@ -3559,12 +3587,12 @@ function bootNjhPlayInteriors(){
  try{
   const hook=life&&life.attach;
  }catch{}
- api.loadAssets().then(()=>{
+ njhInteriorsReady=api.loadAssets().then(()=>{
   api.wireWorld(documentMap);
   const kost=api.findBuilding('kost',documentMap);
   if(kost){if(!Number.isFinite(Number(kost.y)))kost.y=0;if(!owners.has(kost.id))instantiate(kost);}
-  if(window.SemestaLifePlay?.active?.())api.restoreIfNeeded();
- }).catch(err=>console.warn('njh play interiors',err));
+  return api;
+ }).catch(err=>{console.warn('njh play interiors',err);return null;});
 }
 
 if(playerMode)bootNjhPlayInteriors();
@@ -4655,7 +4683,9 @@ window.addEventListener('keydown',e=>{
  if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||
   e.target instanceof HTMLTextAreaElement||e.target?.isContentEditable)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();restoreStack(undoStack,redoStack);}
-  else if(playerMode&&e.key.toLowerCase()==='e'&&mode==='walk'){e.preventDefault();if(!window.SemestaLifePlay?.handleAction?.())enterNearbyBuilding();}
+  else if(playerMode&&e.key.toLowerCase()==='e'&&mode==='walk'&&!e.repeat){
+   e.preventDefault();if(!window.SemestaLifePlay?.handleAction?.())tell('Tidak ada interaksi di dekatmu.');
+  }
  else if(e.key.toLowerCase()==='h'){toggleGrid();}
  else if(e.key==='Delete'&&item())remove();
  else if(e.key.toLowerCase()==='g')setMode('move');
@@ -4842,12 +4872,15 @@ function frame(now){
      if(actor){
       const live=new Map([...rigs].map(([id,rec])=>[id,rec.root.position]));
       const start={x:holder.root.position.x,z:holder.root.position.z};
-      let next=physics.move(actor,start,dx*speed*dt,dz*speed*dt,
-       simulationObstacles(),documentMap.map,assetByName,style,live);
+      const interior=window.__njhPlayInteriors;
+      // Off-map interior coordinates must not go through street collision.
+      const next=interior?.active?.()?interior.moveInside(start,dx*speed*dt,dz*speed*dt):
+       physics.move(actor,start,dx*speed*dt,dz*speed*dt,
+        simulationObstacles(),documentMap.map,assetByName,style,live);
       const TL=window.VLSemestaTrafficLights;
       const tlSet=trafficLightSettings();
       const tlPhase=tlSet.enabled&&TL?TL.phaseAt(trafficLightTime,tlSet.cycleSeconds):null;
-      if(TL&&tlPhase){
+      if(!interior?.active?.()&&TL&&tlPhase){
        const held=TL.constrainPlayer(start,next,documentMap.map,documentMap.objects,tlPhase);
        if(held.x!==next.x||held.z!==next.z){
         next={x:held.x,z:held.z,moved:held.x!==start.x||held.z!==start.z};
