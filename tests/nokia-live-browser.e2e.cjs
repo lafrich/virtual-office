@@ -108,7 +108,7 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(trade.wallet,trade.startingWallet-20000,
   'Nokia must debit Jiwa Rp20.000 for five token units');
  assert.equal(trade.nokiaWallet,trade.wallet,'Nokia and Jiwa balances must match after buying');
- assert.ok(trade.ledger.some(t=>t.action==='buy_token'&&t.delta===-20000),
+ assert.ok(trade.ledger.some(t=>t.action==='topup_token'&&t.delta===-20000),
   'Dompet must record the authoritative Rp20.000 token purchase');
  assert.equal(trade.stillOpen,true,'Nokia must remain open after game HUD refresh');
  assert.ok(trade.depth>=3,'Nokia must not reset to standby during purchase');
