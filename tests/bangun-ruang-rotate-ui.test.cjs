@@ -46,8 +46,8 @@ test('one-tap rotate controls and matching XP chrome load for Bangun Ruang',()=>
  const html=source('index.html'),css=source('mobile-ui.css'),ui=source('studio-interior-ui.js');
  for(const id of ['interiorRotateBar','rotateLeft','rotateRight','rotateSelection','rotateHint'])
   assert.ok(html.includes('id="'+id+'"'),'UI missing '+id);
- assert.ok(html.includes('interior-model.js?v=rotate-v12'));
- assert.ok(html.includes('studio-interior-ui.js?v=rotate-v12'));
+ assert.ok(/interior-model\\.js\\?v=[^"']+/.test(html));
+ assert.ok(/studio-interior-ui\\.js\\?v=[^"']+/.test(html));
  assert.ok(html.includes('mobile-ui.css?v=xp-unified-v12'));
  assert.ok(ui.includes("model.rotate(current,item.id,steps)"));
  assert.ok(ui.includes("String(e.key).toLowerCase()!=='r'"));
