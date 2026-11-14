@@ -167,6 +167,32 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   'Mainkan must not render authored yellow logic-marker pins or floating exclamation points');
  fs.mkdirSync('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/mainkan-world-genesis-visible.png',fullPage:true});
+ // Mobile viewport QA must use the same real Genesis world, not a mock screenshot.
+ // Preserve the original wide-screen editor/game settings after the check.
+ for(const v of [{name:'mobile-portrait',w:390,h:844},{name:'mobile-landscape',w:844,h:390}]){
+  await page.setViewportSize({width:v.w,height:v.h});
+  await page.waitForTimeout(180);
+  const mobile=await page.evaluate(()=>{
+   const frame=document.getElementById('semestaFrame');
+   const win=frame?.contentWindow,world=win?.document?.getElementById('world');
+   const rig=win?.SemestaPlay?.playerRigStatus?.();
+   const action=document.getElementById('gameAction');
+   const rect=action?.getBoundingClientRect?.();
+   return {ready:!!rig?.loaded,screenVisible:!!rig?.screen?.visible,
+    editorGrid:rig?.editorGrid,editorOutline:rig?.editorOutline,
+    canvasW:world?.width||0,canvasH:world?.height||0,
+    actionVisible:!!rect&&rect.width>0&&rect.height>0&&rect.left>=-1&&rect.right<=innerWidth+1};
+  });
+  console.log('MAINKAN_MOBILE_VIEWPORT',v.name,JSON.stringify(mobile));
+  assert.equal(mobile.ready,true,v.name+' Genesis not loaded');
+  assert.equal(mobile.screenVisible,true,v.name+' player outside viewport');
+  assert.equal(mobile.editorGrid,false,v.name+' editor grid visible');
+  assert.equal(mobile.editorOutline,false,v.name+' editor selection visible');
+  assert.ok(mobile.canvasW>=100&&mobile.canvasH>=100,v.name+' WebGL canvas collapsed');
+  assert.equal(mobile.actionVisible,true,v.name+' AKSI button offscreen');
+  await page.screenshot({path:'screenshots/mainkan-world-'+v.name+'.png',fullPage:true});
+ }
+ await page.setViewportSize({width:1280,height:800});
  await page.locator('#gamePhone').click();
  const phone=await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.VLNokiaPlay?.isOpen?.()||false);
  assert.equal(phone,true,'Mainkan Phone button must open native Semesta Nokia');
