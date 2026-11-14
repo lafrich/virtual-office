@@ -79,8 +79,11 @@ function footprint(o,catalog){
   prop:[1.25,1],furniture:[1.4,1.2]
  }[kind]||[1.2,1.2];
  const dims=s?.footprint||native;
- return [Math.max(.5,Number(dims[0]||native[0]))*Number(o.scale||1),
-         Math.max(.5,Number(dims[1]||native[1]))*Number(o.scale||1)];
+ let width=Math.max(.5,Number(dims[0]||native[0]));
+ let depth=Math.max(.5,Number(dims[1]||native[1]));
+ if(s?.rotateFootprint===true&&[90,270].includes(((Number(o.rotation)||0)%360+360)%360))
+  [width,depth]=[depth,width];
+ return [width*Number(o.scale||1),depth*Number(o.scale||1)];
 }
 function normalize(o,catalog){
  if(o.type==='vehicle'){

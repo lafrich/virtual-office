@@ -1,0 +1,182 @@
+{
+  "id": "njh_laundry",
+  "label": "NJH · Laundry",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "cream",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "items": [
+    {
+      "id": "njh-laundry-washing_machine-1",
+      "assetId": "washing_machine",
+      "name": "Mesin Cuci 1",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "laundry",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "laundry"
+      ]
+    },
+    {
+      "id": "njh-laundry-washing_machine-2",
+      "assetId": "washing_machine",
+      "name": "Mesin Cuci 2",
+      "c": 1,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "laundry",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "laundry"
+      ]
+    },
+    {
+      "id": "njh-laundry-washing_machine-3",
+      "assetId": "washing_machine",
+      "name": "Mesin Cuci 3",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "laundry",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "laundry"
+      ]
+    },
+    {
+      "id": "njh-laundry-laundry_counter-1",
+      "assetId": "laundry_counter",
+      "name": "Loket Laundry",
+      "c": 4,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "pay",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "pay",
+        "collect"
+      ]
+    },
+    {
+      "id": "njh-laundry-locker-1",
+      "assetId": "locker",
+      "name": "Loker Cucian",
+      "c": 6,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open",
+        "store"
+      ]
+    },
+    {
+      "id": "njh-laundry-table-1",
+      "assetId": "table",
+      "name": "Meja Lipat / Setrika",
+      "c": 2,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": "idle",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-laundry-shelf-1",
+      "assetId": "shelf",
+      "name": "Rak Deterjen",
+      "c": 6,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": "idle",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-laundry-waiting_bench-1",
+      "assetId": "waiting_bench",
+      "name": "Bangku Tunggu",
+      "c": 0,
+      "r": 3,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    }
+  ],
+  "floor": 1,
+  "notes": "r3 facing fix of njh_laundry. Bangku tunggu di dinding kiri, rot 90 (front +c) menghadap loket / tengah ruangan, bukan ke pintu. Meja lipat tetap TYPE table with actionId browse (native table action). desk (work) has a computer on the sprite; workbench (repair,work) is a tool bench — neither fits an ironing/fold surface visually, so table+browse was kept (Baymax t457). Mesin cuci dan loket rot 0, sisi depan ke dalam ruangan. GAP dryer/jemuran unchanged.",
+  "adaptedFrom": "/workspace/njh-interior-templates-r2/scenes/njh_laundry.interior-scene.json",
+  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema)."
+}

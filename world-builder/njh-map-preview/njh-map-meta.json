@@ -1,0 +1,1871 @@
+{
+  "format": "njh-map-meta-v1",
+  "map": "njh-semesta-map-draft1",
+  "status": "DRAFT, preview only (preview/njh-gameplay-sites, ?njhMap=1), not live, not uploaded",
+  "createdAt": "2026-11-10T22:30:00+07:00",
+  "runtimeFormat": {
+    "document": "virtual-life-world-builder-v1 (map+objects), wrapped as membangun-cloud-1 / vl-city-draft-1 like the live Drive city",
+    "coordinates": "objects x=c, z=r are footprint CENTERS in tile units; terrain cells integer c,r cover [c,c+1)x[r,r+1)",
+    "iso": "64x32 tiles, screen x=(c-r)*32, y=(c+r)*16-z; sprite pivot = footprint center at ground",
+    "facing": "rotation 0 -> sw view, front on +r; rotation 90 -> se view, front on +c (pipeline-street art has only sw/se views)",
+    "collision": "world-physics.js: solid unless marker / collision:false / blocking:no; water/river/drain cells block; player box 0.65x0.65"
+  },
+  "bounds": {
+    "minC": -57,
+    "maxC": -6,
+    "minR": 14,
+    "maxR": 76
+  },
+  "spawns": [
+    {
+      "id": "njh_spawn_1",
+      "markerId": "njh-spawn-1",
+      "x": -14.5,
+      "z": 30.5,
+      "baymaxSpawnId": null
+    },
+    {
+      "id": "njh_spawn_2",
+      "markerId": "njh-spawn-2",
+      "x": -12.5,
+      "z": 30.5,
+      "baymaxSpawnId": null
+    },
+    {
+      "id": "njh_spawn_3",
+      "markerId": "njh-spawn-3",
+      "x": -14.5,
+      "z": 32.5,
+      "baymaxSpawnId": null
+    },
+    {
+      "id": "njh_spawn_4",
+      "markerId": "njh-spawn-4",
+      "x": -12.5,
+      "z": 32.5,
+      "baymaxSpawnId": null
+    }
+  ],
+  "homes": [
+    {
+      "player": "t_ichsan",
+      "name": "Ichsan",
+      "doorId": "njh_door_home_ichsan",
+      "objectId": "njh-kos-noor",
+      "interiorTemplate": "njh_kos_ichsan",
+      "homeSpawn": [
+        -26.25,
+        71.5
+      ],
+      "partnerPlayer": "t_noor",
+      "lobbyDoorId": "njh_door_kos_cove_lobby",
+      "lobbyTemplate": "njh_kos_cove_lobby"
+    },
+    {
+      "player": "t_noor",
+      "name": "Noor",
+      "doorId": "njh_door_home_noor",
+      "objectId": "njh-kos-noor",
+      "interiorTemplate": "njh_kos_noor",
+      "homeSpawn": [
+        -26.25,
+        71.5
+      ],
+      "partnerPlayer": "t_ichsan",
+      "lobbyDoorId": "njh_door_kos_cove_lobby",
+      "lobbyTemplate": "njh_kos_cove_lobby"
+    }
+  ],
+  "locations": [
+    {
+      "id": "njh_loc_warung_makan",
+      "members": [
+        "njh_door_warung_makan"
+      ]
+    },
+    {
+      "id": "njh_loc_wc_mandi_umum",
+      "members": [
+        "njh_door_wc_umum"
+      ]
+    },
+    {
+      "id": "njh_loc_laundry",
+      "members": [
+        "njh_door_laundry"
+      ]
+    },
+    {
+      "id": "njh_loc_bengkel",
+      "members": [
+        "njh_door_bengkel"
+      ]
+    },
+    {
+      "id": "njh_loc_pasar_loak",
+      "members": [
+        "njh_door_loak",
+        "njh_lapak_bekas",
+        "njh_pasar_1_1",
+        "njh_pasar_1_2",
+        "njh_pasar_1_3",
+        "njh_pasar_1_4",
+        "njh_pasar_2_1",
+        "njh_pasar_2_2",
+        "njh_pasar_2_3",
+        "njh_pasar_2_4"
+      ]
+    },
+    {
+      "id": "njh_loc_mushola",
+      "members": [
+        "njh_door_mushola",
+        "njh_kotak_amal",
+        "njh_penanda_doa"
+      ]
+    },
+    {
+      "id": "njh_loc_dermaga",
+      "members": [
+        "njh_dermaga_mancing"
+      ]
+    },
+    {
+      "id": "njh_loc_lapak_silver",
+      "members": [
+        "njh_lapak_silver"
+      ]
+    },
+    {
+      "id": "njh_loc_tiang_ogah",
+      "members": [
+        "njh_tiang_ogah"
+      ]
+    },
+    {
+      "id": "njh_loc_tenda_pecel_lele",
+      "members": [
+        "njh_door_tenda_pecel_lele"
+      ]
+    },
+    {
+      "id": "njh_loc_tenda_sate_madura",
+      "members": [
+        "njh_door_tenda_sate_madura"
+      ]
+    },
+    {
+      "id": "njh_loc_home_ichsan",
+      "members": [
+        "njh_door_home_ichsan",
+        "njh_door_kos_cove_lobby"
+      ]
+    },
+    {
+      "id": "njh_loc_home_noor",
+      "members": [
+        "njh_door_home_noor",
+        "njh_door_kos_cove_lobby"
+      ]
+    },
+    {
+      "id": "njh_loc_warung_kopi",
+      "members": [
+        "njh_door_warung_kopi"
+      ]
+    },
+    {
+      "id": "njh_loc_warung_madura",
+      "members": [
+        "njh_door_warung_madura"
+      ]
+    },
+    {
+      "id": "njh_loc_pos_ronda",
+      "members": [
+        "njh_pos_ronda_kali",
+        "njh_pos_ronda_lapangan",
+        "njh_pos_ronda_pasar"
+      ]
+    },
+    {
+      "id": "njh_loc_pasar_ikan",
+      "members": [
+        "jakarta-v3-4942"
+      ]
+    },
+    {
+      "id": "njh_loc_siomay_batagor",
+      "members": [
+        "njh-lapak-siomay-batagor"
+      ]
+    },
+    {
+      "id": "njh_loc_tenda_hobo",
+      "members": [
+        "njh-tenda-hobo"
+      ]
+    },
+    {
+      "id": "njh_loc_hansip",
+      "members": [
+        "ref-north-row-a"
+      ]
+    },
+    {
+      "id": "njh_loc_pak_ogah",
+      "members": [
+        "njh-npc-pak-ogah",
+        "njh-tiang-ogah"
+      ]
+    },
+    {
+      "id": "njh_loc_scavenge",
+      "members": [
+        "njh-scavenge-tong-nw-1",
+        "njh-scavenge-botol-nw-1",
+        "njh-scavenge-kardus-nw-1",
+        "njh-scavenge-tong-sw-1",
+        "njh-scavenge-botol-sw-1",
+        "njh-scavenge-kardus-sw-1",
+        "njh-scavenge-tong-sw-2",
+        "njh-scavenge-botol-sw-2",
+        "njh-scavenge-kardus-sw-2",
+        "njh-scavenge-tong-se-1",
+        "njh-scavenge-botol-se-1",
+        "njh-scavenge-kardus-se-1",
+        "njh-scavenge-botol-pasar-1",
+        "njh-scavenge-kardus-pasar-1",
+        "njh-scavenge-tong-kali-1",
+        "njh-scavenge-botol-kali-1",
+        "jakarta-v3-22020",
+        "sprite-zhf6zq",
+        "njh-lapak-bekas"
+      ]
+    },
+    {
+      "id": "njh_loc_rumah_biasa",
+      "members": [
+        "njh_door_rumah_biasa"
+      ]
+    },
+    {
+      "id": "njh_loc_kos_cove",
+      "members": [
+        "njh_door_kos_cove_lobby"
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "doorId": "njh_door_laundry",
+      "objectId": "jakarta-v3-13634",
+      "role": "laundry",
+      "interiorTemplate": "njh_laundry",
+      "owner": null,
+      "label": "Laundry Kiloan",
+      "facing": "sw",
+      "doorPoint": [
+        -46.5,
+        41.0
+      ],
+      "useTile": [
+        -47,
+        41
+      ],
+      "usePoint": [
+        -46.5,
+        41.5
+      ],
+      "footprintRect": [
+        -48.0,
+        -45.0,
+        37.0,
+        41.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null
+    },
+    {
+      "doorId": "njh_door_warung_madura",
+      "objectId": "ref-north-row-b",
+      "role": "shop_kelontong",
+      "interiorTemplate": "njh_warung_madura",
+      "owner": null,
+      "label": "Warung Madura (warung pojok)",
+      "facing": "sw",
+      "doorPoint": [
+        -43.5,
+        41.0
+      ],
+      "useTile": [
+        -44,
+        41
+      ],
+      "usePoint": [
+        -43.5,
+        41.5
+      ],
+      "footprintRect": [
+        -45.0,
+        -42.0,
+        38.0,
+        41.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    },
+    {
+      "doorId": "njh_door_warung_makan",
+      "objectId": "jakarta-v3-18446",
+      "role": "warung_makan",
+      "interiorTemplate": "njh_warung_makan",
+      "owner": null,
+      "label": "Warteg (warung makan)",
+      "facing": "sw",
+      "doorPoint": [
+        -39.5,
+        41.0
+      ],
+      "useTile": [
+        -40,
+        41
+      ],
+      "usePoint": [
+        -39.5,
+        41.5
+      ],
+      "footprintRect": [
+        -41.0,
+        -38.0,
+        38.0,
+        41.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null
+    },
+    {
+      "doorId": "njh_door_warung_kopi",
+      "objectId": "ref-west-center-a",
+      "role": "warung_kopi",
+      "interiorTemplate": "njh_warung_kopi",
+      "owner": null,
+      "label": "Warung Kopi Pojok Gang",
+      "facing": "sw",
+      "doorPoint": [
+        -38.5,
+        51.0
+      ],
+      "useTile": [
+        -39,
+        51
+      ],
+      "usePoint": [
+        -38.5,
+        51.5
+      ],
+      "footprintRect": [
+        -40.0,
+        -37.0,
+        48.0,
+        51.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    },
+    {
+      "doorId": "njh_door_rumah_biasa",
+      "objectId": "ref-gas-station",
+      "role": "house",
+      "interiorTemplate": "njh_rumah_biasa",
+      "owner": null,
+      "label": "Rumah Ichsan",
+      "facing": "sw",
+      "doorPoint": [
+        -45.5,
+        57.0
+      ],
+      "useTile": [
+        -46,
+        57
+      ],
+      "usePoint": [
+        -45.5,
+        57.5
+      ],
+      "footprintRect": [
+        -47.0,
+        -44.0,
+        53.8,
+        57.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null
+    },
+    {
+      "doorId": "njh_door_bengkel",
+      "objectId": "njh-bengkel",
+      "role": "bengkel",
+      "interiorTemplate": "njh_bengkel",
+      "owner": null,
+      "label": "Bengkel Motor",
+      "facing": "sw",
+      "doorPoint": [
+        -48.0,
+        71.0
+      ],
+      "useTile": [
+        -48,
+        71
+      ],
+      "usePoint": [
+        -48.0,
+        71.5
+      ],
+      "footprintRect": [
+        -50.0,
+        -46.0,
+        67.0,
+        71.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null
+    },
+    {
+      "doorId": "njh_door_wc_umum",
+      "objectId": "njh-wc-umum",
+      "role": "wc_mandi_umum",
+      "interiorTemplate": "njh_wc_mandi_umum",
+      "owner": null,
+      "label": "WC / Mandi Umum",
+      "facing": "sw",
+      "doorPoint": [
+        -43.0,
+        71.0
+      ],
+      "useTile": [
+        -43,
+        71
+      ],
+      "usePoint": [
+        -43.0,
+        71.5
+      ],
+      "footprintRect": [
+        -45.0,
+        -41.0,
+        67.3,
+        71.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null
+    },
+    {
+      "doorId": "njh_door_kos_cove_lobby",
+      "objectId": "njh-kos-noor",
+      "role": "lobby",
+      "interiorTemplate": "njh_kos_cove_lobby",
+      "owner": null,
+      "label": "Kost Cove (lobi)",
+      "facing": "sw",
+      "doorPoint": [
+        -26.25,
+        71.0
+      ],
+      "useTile": [
+        -27,
+        71
+      ],
+      "usePoint": [
+        -26.25,
+        71.5
+      ],
+      "footprintRect": [
+        -29.0,
+        -23.5,
+        66.4,
+        71.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null
+    },
+    {
+      "doorId": "njh_door_nasi_sunda",
+      "objectId": "jakarta-v3-13525",
+      "role": "warung_makan_alt",
+      "interiorTemplate": "njh_nasi_sunda",
+      "owner": null,
+      "label": "Warung nasi Sunda · Jakarta",
+      "facing": "sw",
+      "doorPoint": [
+        -21.15,
+        71.0
+      ],
+      "useTile": [
+        -22,
+        71
+      ],
+      "usePoint": [
+        -21.15,
+        71.5
+      ],
+      "footprintRect": [
+        -23.0,
+        -19.3,
+        67.6,
+        71.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    },
+    {
+      "doorId": "njh_door_koperasi",
+      "objectId": "jakarta-v3-13541",
+      "role": "koperasi",
+      "interiorTemplate": "njh_koperasi",
+      "owner": null,
+      "label": "Koperasi simpan pinjam · Jakarta",
+      "facing": "sw",
+      "doorPoint": [
+        -17.0,
+        71.0
+      ],
+      "useTile": [
+        -17,
+        71
+      ],
+      "usePoint": [
+        -17.0,
+        71.5
+      ],
+      "footprintRect": [
+        -19.0,
+        -15.0,
+        67.3,
+        71.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    },
+    {
+      "doorId": "njh_door_loak",
+      "objectId": "njh-toko-loak",
+      "role": "loak",
+      "interiorTemplate": "njh_toko_loak",
+      "owner": null,
+      "label": "Toko Loak",
+      "facing": "sw",
+      "doorPoint": [
+        -27.0,
+        25.5
+      ],
+      "useTile": [
+        -27,
+        26
+      ],
+      "usePoint": [
+        -27.0,
+        26.0
+      ],
+      "footprintRect": [
+        -29.0,
+        -25.0,
+        22.0,
+        25.5
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    },
+    {
+      "doorId": "njh_door_mushola",
+      "objectId": "njh-mushola",
+      "role": "ibadah",
+      "interiorTemplate": "njh_mushola",
+      "owner": null,
+      "label": "Mushola Kampung",
+      "facing": "sw",
+      "doorPoint": [
+        -16.25,
+        26.1
+      ],
+      "useTile": [
+        -17,
+        26
+      ],
+      "usePoint": [
+        -16.25,
+        26.6
+      ],
+      "footprintRect": [
+        -19.0,
+        -13.5,
+        21.5,
+        26.1
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    },
+    {
+      "doorId": "njh_door_tenda_pecel_lele",
+      "objectId": "njh-tenda-pecel-lele",
+      "role": "street_food",
+      "interiorTemplate": "njh_pecel_lele_tenda",
+      "owner": null,
+      "label": "Warung Pecel Lele (tenda)",
+      "pending": true,
+      "facing": "sw",
+      "doorPoint": [
+        -25.0,
+        38.0
+      ],
+      "useTile": [
+        -25,
+        38
+      ],
+      "usePoint": [
+        -25.0,
+        38.5
+      ],
+      "footprintRect": [
+        -25.625,
+        -24.375,
+        37.0,
+        38.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    },
+    {
+      "doorId": "njh_door_tenda_sate_madura",
+      "objectId": "njh-tenda-sate-madura",
+      "role": "street_food",
+      "interiorTemplate": "njh_sate_madura_tenda",
+      "owner": null,
+      "label": "Lapak Sate Madura (tenda)",
+      "pending": true,
+      "facing": "sw",
+      "doorPoint": [
+        -20.0,
+        38.0
+      ],
+      "useTile": [
+        -20,
+        38
+      ],
+      "usePoint": [
+        -20.0,
+        38.5
+      ],
+      "footprintRect": [
+        -20.625,
+        -19.375,
+        37.0,
+        38.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    }
+  ],
+  "interactables": [
+    {
+      "id": "njh_pos_ronda_kali",
+      "objectId": "ref-north-row-a",
+      "kind": "sit",
+      "side": "front",
+      "usePoint": [
+        -49.0,
+        41.5
+      ],
+      "asset": "pipeline:pos_ronda",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pos_ronda_lapangan",
+      "objectId": "ref-infill-extra-136",
+      "kind": "sit",
+      "side": "front",
+      "usePoint": [
+        -19.0,
+        58.5
+      ],
+      "asset": "pipeline:pos_ronda",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_lapak_bekas",
+      "objectId": "njh-lapak-bekas",
+      "kind": "buy_sell",
+      "side": "front",
+      "usePoint": [
+        -23.0,
+        25.5
+      ],
+      "asset": "pipeline:lapak_barang_bekas",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pasar_1_1",
+      "objectId": "jakarta-v3-5046",
+      "kind": "buy",
+      "side": "front",
+      "usePoint": [
+        -27.5,
+        31.3
+      ],
+      "asset": "pipeline:id200_pasar_lapak_sayur_segar",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pasar_1_2",
+      "objectId": "jakarta-v3-13369",
+      "kind": "buy",
+      "side": "front",
+      "usePoint": [
+        -24.0,
+        31.3
+      ],
+      "asset": "pipeline:id200_pasar_lapak_buah_lokal",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pasar_1_3",
+      "objectId": "jakarta-v3-4942",
+      "kind": "buy",
+      "side": "front",
+      "usePoint": [
+        -20.5,
+        31.3
+      ],
+      "asset": "pipeline:id200_pasar_lapak_ikan_basah",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pasar_1_4",
+      "objectId": "jakarta-v3-20101",
+      "kind": "buy",
+      "side": "front",
+      "usePoint": [
+        -17.0,
+        31.3
+      ],
+      "asset": "pipeline:id200_pasar_lapak_bumbu_dapur",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pasar_2_1",
+      "objectId": "jakarta-v3-20110",
+      "kind": "buy",
+      "side": "front",
+      "usePoint": [
+        -27.5,
+        35.3
+      ],
+      "asset": "pipeline:id200_pasar_lapak_ikan_basah",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pasar_2_2",
+      "objectId": "jakarta-v3-20125",
+      "kind": "buy",
+      "side": "front",
+      "usePoint": [
+        -24.0,
+        35.3
+      ],
+      "asset": "pipeline:id200_pasar_lapak_bumbu_dapur",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pasar_2_3",
+      "objectId": "jakarta-v3-18928",
+      "kind": "buy",
+      "side": "front",
+      "usePoint": [
+        -20.5,
+        35.3
+      ],
+      "asset": "pipeline:id200_pasar_lapak_ayam_potong",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pasar_2_4",
+      "objectId": "njh-pasar-tenda-biru",
+      "kind": "buy",
+      "side": "front",
+      "usePoint": [
+        -17.0,
+        35.3
+      ],
+      "asset": "pipeline:id200_pasar_tenda_biru_pasar",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_pos_ronda_pasar",
+      "objectId": "ref-hospital",
+      "kind": "sit",
+      "side": "front",
+      "usePoint": [
+        -13.0,
+        38.5
+      ],
+      "asset": "pipeline:pos_ronda",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_dermaga_mancing",
+      "objectId": "njh-dermaga-mancing",
+      "kind": "fish",
+      "side": "front",
+      "pending": true,
+      "usePoint": [
+        -50.375,
+        44.0
+      ],
+      "asset": "object:njh_dermaga_mancing",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null,
+      "waterSideTiles": [
+        [
+          -53,
+          43
+        ],
+        [
+          -53,
+          44
+        ]
+      ],
+      "legDangleClearance": "river tiles directly -c of the deck edge stay object-free",
+      "facing": "nw (rot 270: deck front toward the river, -c)"
+    },
+    {
+      "id": "njh_lapak_silver",
+      "objectId": "njh-lapak-silver",
+      "kind": "silver_pose",
+      "side": "front",
+      "pending": true,
+      "usePoint": [
+        -27.5,
+        40.5
+      ],
+      "asset": "object:njh_lapak_silver",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_tiang_ogah",
+      "objectId": "njh-tiang-ogah",
+      "kind": "ogah_flag",
+      "side": "front",
+      "pending": true,
+      "usePoint": [
+        -28.5,
+        41.5
+      ],
+      "asset": "object:njh_tiang_ogah",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_kotak_amal",
+      "objectId": "njh-kotak-amal",
+      "kind": "give_sedekah",
+      "side": "front",
+      "pending": true,
+      "usePoint": [
+        -19.5,
+        26.5
+      ],
+      "asset": "object:njh_kotak_amal",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_penanda_doa",
+      "objectId": "njh-penanda-doa",
+      "kind": "pray_generic",
+      "side": "front",
+      "pending": true,
+      "usePoint": [
+        -11.5,
+        24.5
+      ],
+      "asset": "object:njh_penanda_doa",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null
+    },
+    {
+      "id": "njh_manusia_silver",
+      "objectId": "ref-ambient-9",
+      "kind": "talk",
+      "side": "any",
+      "usePoint": [
+        -12.5,
+        40.5
+      ],
+      "questId": "manusia_silver",
+      "baymaxInteractionId": null
+    },
+    {
+      "id": "njh_kang_parkir",
+      "objectId": "ref-ambient-11",
+      "kind": "talk",
+      "side": "any",
+      "usePoint": [
+        -15.5,
+        40.5
+      ],
+      "questId": "kang_parkir",
+      "baymaxInteractionId": null
+    },
+    {
+      "id": "njh_trash_jakarta-v3-22020",
+      "objectId": "jakarta-v3-22020",
+      "kind": "dispose",
+      "side": "any",
+      "usePoint": null,
+      "baymaxInteractionId": null
+    },
+    {
+      "id": "njh_trash_sprite-zhf6zq",
+      "objectId": "sprite-zhf6zq",
+      "kind": "dispose",
+      "side": "any",
+      "usePoint": null,
+      "baymaxInteractionId": null
+    },
+    {
+      "id": "njh_pasar_ikan",
+      "objectId": "jakarta-v3-4942",
+      "kind": "sell_fish",
+      "side": "front",
+      "usePoint": [
+        -20.5,
+        31.0
+      ],
+      "asset": "pipeline:id200_pasar_lapak_ikan_basah"
+    },
+    {
+      "id": "njh_siomay_batagor",
+      "objectId": "njh-lapak-siomay-batagor",
+      "kind": "sell_fish",
+      "side": "front",
+      "usePoint": [
+        -22.5,
+        38.5
+      ],
+      "asset": "pipeline:lapak_tas"
+    },
+    {
+      "id": "njh_tenda_hobo",
+      "objectId": "njh-tenda-hobo",
+      "kind": "sleep",
+      "side": "front",
+      "usePoint": [
+        -51.5,
+        64.5
+      ],
+      "asset": "pipeline:id200_pasar_tenda_biru_pasar"
+    },
+    {
+      "id": "njh_hansip",
+      "objectId": "ref-north-row-a",
+      "kind": "arrest",
+      "side": "front",
+      "usePoint": [
+        -49.0,
+        41.5
+      ],
+      "asset": "pipeline:pos_ronda"
+    },
+    {
+      "id": "njh_pak_ogah",
+      "objectId": "njh-npc-pak-ogah",
+      "kind": "work",
+      "side": "north",
+      "usePoint": [
+        -29.5,
+        40.5
+      ],
+      "questId": "pak_ogah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-nw-1",
+      "objectId": "njh-scavenge-tong-nw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -47.5,
+        26.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-nw-1",
+      "objectId": "njh-scavenge-botol-nw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -41.5,
+        26.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_bening.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-nw-1",
+      "objectId": "njh-scavenge-kardus-nw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -37.5,
+        26.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-sw-1",
+      "objectId": "njh-scavenge-tong-sw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -47.5,
+        52.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-sw-1",
+      "objectId": "njh-scavenge-botol-sw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -41.5,
+        52.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_hijau.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-sw-1",
+      "objectId": "njh-scavenge-kardus-sw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -36.5,
+        52.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-sw-2",
+      "objectId": "njh-scavenge-tong-sw-2",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -47.5,
+        64.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-sw-2",
+      "objectId": "njh-scavenge-botol-sw-2",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -45.5,
+        64.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_bening.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-sw-2",
+      "objectId": "njh-scavenge-kardus-sw-2",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -37.5,
+        64.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-se-1",
+      "objectId": "njh-scavenge-tong-se-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -24.5,
+        65.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-se-1",
+      "objectId": "njh-scavenge-botol-se-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -18.5,
+        65.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_hijau.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-se-1",
+      "objectId": "njh-scavenge-kardus-se-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -13.5,
+        65.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-pasar-1",
+      "objectId": "njh-scavenge-botol-pasar-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -13.5,
+        23.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_bening.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-pasar-1",
+      "objectId": "njh-scavenge-kardus-pasar-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -29.5,
+        37.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-kali-1",
+      "objectId": "njh-scavenge-tong-kali-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -51.5,
+        29.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-kali-1",
+      "objectId": "njh-scavenge-botol-kali-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -51.5,
+        57.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_hijau.png"
+    }
+  ],
+  "crossings": [
+    {
+      "id": "njh_simpang",
+      "kind": "intersection",
+      "name": "Simpang Kebon Sirih - Kebon Kacang (Pak Ogah spot)",
+      "roadCells": [
+        [
+          -34,
+          42
+        ],
+        [
+          -34,
+          43
+        ],
+        [
+          -34,
+          44
+        ],
+        [
+          -34,
+          45
+        ],
+        [
+          -33,
+          42
+        ],
+        [
+          -33,
+          43
+        ],
+        [
+          -33,
+          44
+        ],
+        [
+          -33,
+          45
+        ],
+        [
+          -32,
+          42
+        ],
+        [
+          -32,
+          43
+        ],
+        [
+          -32,
+          44
+        ],
+        [
+          -32,
+          45
+        ],
+        [
+          -31,
+          42
+        ],
+        [
+          -31,
+          43
+        ],
+        [
+          -31,
+          44
+        ],
+        [
+          -31,
+          45
+        ]
+      ],
+      "from": [
+        -30.5,
+        41.5
+      ],
+      "to": [
+        -36.5,
+        41.5
+      ],
+      "zebraObjectId": null
+    },
+    {
+      "id": "njh_cross_w",
+      "kind": "zebra",
+      "name": "Zebra barat (Jl. Kebon Sirih Raya)",
+      "roadCells": [
+        [
+          -37,
+          42
+        ],
+        [
+          -37,
+          43
+        ],
+        [
+          -37,
+          44
+        ],
+        [
+          -37,
+          45
+        ],
+        [
+          -36,
+          42
+        ],
+        [
+          -36,
+          43
+        ],
+        [
+          -36,
+          44
+        ],
+        [
+          -36,
+          45
+        ]
+      ],
+      "from": [
+        -36.5,
+        41.5
+      ],
+      "to": [
+        -36.5,
+        46.5
+      ],
+      "zebraObjectId": "njh_cross_w-zebra"
+    },
+    {
+      "id": "njh_cross_e",
+      "kind": "zebra",
+      "name": "Zebra timur (Jl. Kebon Sirih Raya)",
+      "roadCells": [
+        [
+          -26,
+          42
+        ],
+        [
+          -26,
+          43
+        ],
+        [
+          -26,
+          44
+        ],
+        [
+          -26,
+          45
+        ],
+        [
+          -25,
+          42
+        ],
+        [
+          -25,
+          43
+        ],
+        [
+          -25,
+          44
+        ],
+        [
+          -25,
+          45
+        ]
+      ],
+      "from": [
+        -25.5,
+        41.5
+      ],
+      "to": [
+        -25.5,
+        47.5
+      ],
+      "zebraObjectId": "njh_cross_e-zebra"
+    },
+    {
+      "id": "njh_cross_n",
+      "kind": "zebra",
+      "name": "Zebra utara (Jl. Kebon Kacang)",
+      "roadCells": [
+        [
+          -34,
+          32
+        ],
+        [
+          -34,
+          33
+        ],
+        [
+          -33,
+          32
+        ],
+        [
+          -33,
+          33
+        ],
+        [
+          -32,
+          32
+        ],
+        [
+          -32,
+          33
+        ],
+        [
+          -31,
+          32
+        ],
+        [
+          -31,
+          33
+        ]
+      ],
+      "from": [
+        -35.5,
+        32.5
+      ],
+      "to": [
+        -30.5,
+        32.5
+      ],
+      "zebraObjectId": "njh_cross_n-zebra"
+    },
+    {
+      "id": "njh_cross_s",
+      "kind": "zebra",
+      "name": "Zebra selatan (Jl. Kebon Kacang)",
+      "roadCells": [
+        [
+          -34,
+          57
+        ],
+        [
+          -34,
+          58
+        ],
+        [
+          -33,
+          57
+        ],
+        [
+          -33,
+          58
+        ],
+        [
+          -32,
+          57
+        ],
+        [
+          -32,
+          58
+        ],
+        [
+          -31,
+          57
+        ],
+        [
+          -31,
+          58
+        ]
+      ],
+      "from": [
+        -35.5,
+        57.5
+      ],
+      "to": [
+        -30.5,
+        58.5
+      ],
+      "zebraObjectId": "njh_cross_s-zebra"
+    }
+  ],
+  "npcPaths": [
+    {
+      "id": "npc_simpang_kali",
+      "name": "Simpang - gang selatan - kali - jalan raya",
+      "loop": true,
+      "uses": [
+        "njh_cross_w"
+      ],
+      "points": [
+        [
+          -36.5,
+          41.5
+        ],
+        [
+          -36.5,
+          46.5
+        ],
+        [
+          -36.5,
+          57.5
+        ],
+        [
+          -50.5,
+          57.5
+        ],
+        [
+          -50.5,
+          41.5
+        ],
+        [
+          -36.5,
+          41.5
+        ]
+      ]
+    },
+    {
+      "id": "npc_gang_utara",
+      "name": "Gang N1/N2 loop",
+      "loop": true,
+      "uses": [],
+      "points": [
+        [
+          -36.5,
+          25.5
+        ],
+        [
+          -50.5,
+          25.5
+        ],
+        [
+          -50.5,
+          32.5
+        ],
+        [
+          -36.5,
+          32.5
+        ],
+        [
+          -36.5,
+          25.5
+        ]
+      ]
+    },
+    {
+      "id": "npc_pasar",
+      "name": "Pasar aisles loop",
+      "loop": true,
+      "uses": [],
+      "points": [
+        [
+          -29.5,
+          27.5
+        ],
+        [
+          -12.5,
+          27.5
+        ],
+        [
+          -12.5,
+          35.5
+        ],
+        [
+          -29.5,
+          35.5
+        ],
+        [
+          -29.5,
+          27.5
+        ]
+      ]
+    },
+    {
+      "id": "npc_nyebrang_timur",
+      "name": "Plaza - zebra timur - gang timur loop",
+      "loop": true,
+      "uses": [
+        "njh_cross_e"
+      ],
+      "points": [
+        [
+          -25.5,
+          40.5
+        ],
+        [
+          -25.5,
+          47.5
+        ],
+        [
+          -13.5,
+          47.5
+        ],
+        [
+          -13.5,
+          64.5
+        ],
+        [
+          -29.5,
+          64.5
+        ],
+        [
+          -29.5,
+          47.5
+        ],
+        [
+          -25.5,
+          47.5
+        ],
+        [
+          -25.5,
+          40.5
+        ]
+      ]
+    },
+    {
+      "id": "npc_kebon_kacang",
+      "name": "Gang N2 - zebra utara - plaza - zebra selatan - gang S2",
+      "loop": false,
+      "uses": [
+        "njh_cross_n",
+        "njh_cross_e",
+        "njh_cross_s"
+      ],
+      "points": [
+        [
+          -40.5,
+          32.5
+        ],
+        [
+          -35.5,
+          32.5
+        ],
+        [
+          -30.5,
+          32.5
+        ],
+        [
+          -29.5,
+          32.5
+        ],
+        [
+          -29.5,
+          41.5
+        ],
+        [
+          -25.5,
+          41.5
+        ],
+        [
+          -25.5,
+          47.5
+        ],
+        [
+          -29.5,
+          47.5
+        ],
+        [
+          -29.5,
+          58.5
+        ],
+        [
+          -30.5,
+          58.5
+        ],
+        [
+          -35.5,
+          58.5
+        ],
+        [
+          -35.5,
+          57.5
+        ],
+        [
+          -40.5,
+          57.5
+        ]
+      ]
+    }
+  ],
+  "pendingAssets": [
+    {
+      "id": "njh-dermaga-mancing",
+      "asset": "object:njh_dermaga_mancing",
+      "source": "/workspace/lfb-placeholders-v2 (njh_dermaga_mancing)",
+      "minCorner": {
+        "c": -52,
+        "r": 43
+      },
+      "footprintRotated": [
+        1,
+        2
+      ],
+      "rotation": 270,
+      "collision": true,
+      "anchorMarkerId": "njh-dermaga-mancing-anchor",
+      "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
+    },
+    {
+      "id": "njh-lapak-silver",
+      "asset": "object:njh_lapak_silver",
+      "source": "/workspace/lfb-placeholders-v2 (njh_lapak_silver)",
+      "minCorner": {
+        "c": -28,
+        "r": 39
+      },
+      "footprintRotated": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "collision": true,
+      "anchorMarkerId": "njh-lapak-silver-anchor",
+      "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
+    },
+    {
+      "id": "njh-tiang-ogah",
+      "asset": "object:njh_tiang_ogah",
+      "source": "/workspace/lfb-placeholders-v2 (njh_tiang_ogah)",
+      "minCorner": {
+        "c": -29,
+        "r": 40
+      },
+      "footprintRotated": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "collision": true,
+      "anchorMarkerId": "njh-tiang-ogah-anchor",
+      "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
+    },
+    {
+      "id": "njh-kotak-amal",
+      "asset": "object:njh_kotak_amal",
+      "source": "/workspace/lfb-placeholders-v2 (njh_kotak_amal)",
+      "minCorner": {
+        "c": -20,
+        "r": 25
+      },
+      "footprintRotated": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "collision": true,
+      "anchorMarkerId": "njh-kotak-amal-anchor",
+      "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
+    },
+    {
+      "id": "njh-penanda-doa",
+      "asset": "object:njh_penanda_doa",
+      "source": "/workspace/lfb-placeholders-v2 (njh_penanda_doa)",
+      "minCorner": {
+        "c": -12,
+        "r": 23
+      },
+      "footprintRotated": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "collision": false,
+      "anchorMarkerId": "njh-penanda-doa-anchor",
+      "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
+    },
+    {
+      "id": "njh-tenda-pecel-lele",
+      "asset": "studio:br-warung-pecel-lele",
+      "source": "/workspace/lfb-quality-guide/demo/bangunan-tenda/br-warung-pecel-lele.json",
+      "minCorner": {
+        "c": -27,
+        "r": 36
+      },
+      "footprintRotated": [
+        4,
+        3
+      ],
+      "rotation": 0,
+      "collision": true,
+      "anchorMarkerId": "njh-tenda-pecel-lele-anchor",
+      "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
+    },
+    {
+      "id": "njh-tenda-sate-madura",
+      "asset": "studio:br-lapak-sate-madura",
+      "source": "/workspace/lfb-quality-guide/demo/bangunan-tenda/br-lapak-sate-madura.json",
+      "minCorner": {
+        "c": -22,
+        "r": 36
+      },
+      "footprintRotated": [
+        4,
+        3
+      ],
+      "rotation": 0,
+      "collision": true,
+      "anchorMarkerId": "njh-tenda-sate-madura-anchor",
+      "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
+    }
+  ],
+  "baymaxPlaceholders": {
+    "note": "Fill baymaxDoorId / baymaxInteractionId / baymaxAnchorId / baymaxSpawnId when the Mainkan spec lands. Nothing here is wired to gameplay.",
+    "doorIdFields": "doors[].baymaxDoorId",
+    "interactionIdFields": "interactables[].baymaxInteractionId",
+    "actionAnchorFields": "interactables[].baymaxAnchorId"
+  },
+  "zones": [
+    {
+      "id": "zone_kali",
+      "name": "Kali + jalan inspeksi",
+      "rect": [
+        -57,
+        -49,
+        14,
+        76
+      ]
+    },
+    {
+      "id": "zone_gang_utara",
+      "name": "Gang Kali Utara (NW)",
+      "rect": [
+        -50,
+        -36,
+        21,
+        40
+      ]
+    },
+    {
+      "id": "zone_gang_selatan",
+      "name": "Gang Kali Selatan (SW)",
+      "rect": [
+        -50,
+        -36,
+        47,
+        70
+      ]
+    },
+    {
+      "id": "zone_pasar",
+      "name": "Pasar / Loak / Mushola (NE plaza)",
+      "rect": [
+        -30,
+        -12,
+        21,
+        40
+      ]
+    },
+    {
+      "id": "zone_gang_timur",
+      "name": "Gang Timur (SE)",
+      "rect": [
+        -29,
+        -12,
+        47,
+        70
+      ]
+    },
+    {
+      "id": "zone_jalan",
+      "name": "Jl. Kebon Sirih Raya / Jl. Kebon Kacang",
+      "rect": [
+        -48,
+        -7,
+        42,
+        45
+      ]
+    }
+  ],
+  "assetKeyMapping": {
+    "object:obj-njh-dermaga-mancing": "object:njh_dermaga_mancing",
+    "object:obj-njh-lapak-silver": "object:njh_lapak_silver",
+    "object:obj-njh-tiang-ogah": "object:njh_tiang_ogah",
+    "object:obj-njh-kotak-amal": "object:njh_kotak_amal",
+    "object:obj-njh-penanda-doa": "object:njh_penanda_doa",
+    "studio:br-warung-pecel-lele": "studio:br-warung-pecel-lele",
+    "studio:br-lapak-sate-madura": "studio:br-lapak-sate-madura"
+  },
+  "gameplaySites": {
+    "branch": "preview/njh-gameplay-sites",
+    "basedOn": "preview/njh-map-draft1 @ ffc76e6",
+    "note": "Function-first Semesta Life Play sites. Rumah ibadah extras skipped. No push, no deploy."
+  }
+}

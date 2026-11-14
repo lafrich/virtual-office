@@ -1,0 +1,246 @@
+{
+  "id": "njh_warung_kopi",
+  "label": "NJH · Warung Kopi",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "items": [
+    {
+      "id": "njh-kopi-stove-1",
+      "assetId": "stove",
+      "name": "Kompor / Roti Bakar",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-kopi-coffee_machine-1",
+      "assetId": "coffee_machine",
+      "name": "Mesin Kopi",
+      "c": 1,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "brew",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "drink_coffee"
+      ]
+    },
+    {
+      "id": "njh-kopi-fridge_drinks-1",
+      "assetId": "fridge_drinks",
+      "name": "Kulkas Minuman",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse",
+        "open",
+        "buy"
+      ]
+    },
+    {
+      "id": "njh-kopi-drink_cooler-1",
+      "assetId": "drink_cooler",
+      "name": "Cooler",
+      "c": 3,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "drink",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "drink",
+        "buy"
+      ]
+    },
+    {
+      "id": "njh-kopi-water_dispenser-1",
+      "assetId": "water_dispenser",
+      "name": "Dispenser",
+      "c": 5,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "drink",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "drink"
+      ]
+    },
+    {
+      "id": "njh-kopi-cashier-1",
+      "assetId": "cashier",
+      "name": "Kasir / Konter",
+      "c": 6,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell",
+        "pay"
+      ]
+    },
+    {
+      "id": "njh-kopi-wooden_bench-1",
+      "assetId": "wooden_bench",
+      "name": "Bangku Nonton",
+      "c": 0,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit",
+        "drink_coffee"
+      ]
+    },
+    {
+      "id": "njh-kopi-tv-1",
+      "assetId": "tv",
+      "name": "TV Warkop",
+      "c": 0,
+      "r": 4,
+      "rotation": 180,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "watch",
+      "pose": "idle",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "watch"
+      ]
+    },
+    {
+      "id": "njh-kopi-wooden_bench-2",
+      "assetId": "wooden_bench",
+      "name": "Bangku Meja",
+      "c": 5,
+      "r": 2,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit",
+        "eat",
+        "drink_coffee"
+      ]
+    },
+    {
+      "id": "njh-kopi-dining_table-1",
+      "assetId": "dining_table",
+      "name": "Meja Warkop",
+      "c": 7,
+      "r": 2,
+      "rotation": 270,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat",
+        "drink"
+      ]
+    },
+    {
+      "id": "njh-kopi-trash_bin-1",
+      "assetId": "trash_bin",
+      "name": "Tempat Sampah",
+      "c": 7,
+      "r": 5,
+      "rotation": 180,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    }
+  ],
+  "floor": 1,
+  "notes": "Warung kopi 8x6. Back-wall brew/cook line (stove, coffee machine, fridge, cooler, dispenser, cashier). TV corner on the left: wooden_bench rot 0 faces the TV; TV rot 180 (true back, r6 ne art in previews) faces the bench. Dining on the right: wooden_bench rot 90 faces the dining table across a 1-tile gap. I1 wooden_bench has no true back view, so rot 180 was not used on the bench. Door-front (4,4) free.",
+  "source": "njh-interior-templates-r6",
+  "scope": "REVIEW, NOT LIVE, not imported into Bangun registry or app code"
+}

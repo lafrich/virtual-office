@@ -1,0 +1,14 @@
+NJH interior PREVIEW only. Not live. Redrawn I1–I6 furniture from /workspace/semesta-interior-i1, sha256-verified against INTERIOR-61-INVENTORY-MANIFEST.json. Stale out_i2_ext leftovers that do not match the inventory hash were skipped. Later hash-verified batch wins (out < out_i2 < out_i2_ext < out_i3 < out_i4 < out_i5 < out_i6).
+
+Copied 244 PNGs.
+Counts by source folder: {
+  "out": 40,
+  "out_i2": 32,
+  "out_i3": 40,
+  "out_i4": 40,
+  "out_i5": 40,
+  "out_i6": 52
+}
+Skipped stale (hash mismatch): out_i2_ext/furniture-shower_{se,sw,ne}.png and out_i2_ext/furniture-sink_{sw,nw}.png. The official I2 inventory (and i2-manifest) uses the unextended out_i2 canvases with 0 lost opaque pixels.
+
+ r4: added furniture-sekat_wc_{sw,se,ne,nw}.png from /workspace/njh-interior-templates-r4/new/sekat_wc (sha256 verified against sekat_wc.type.json). Preview only.

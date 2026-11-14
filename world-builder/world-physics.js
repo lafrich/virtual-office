@@ -32,6 +32,11 @@ function tileIndex(terrain){
 }
 function check(actor,point,objects,map,catalog,style,livePositions){
  const candidate=area(actor,catalog,style,point);
+ if(map&&map.unbounded===false&&map.worldBounds){
+  const b=map.worldBounds;
+  if(candidate.minX<b.minX||candidate.maxX>b.maxX||candidate.minZ<b.minZ||candidate.maxZ>b.maxZ)
+   return {ok:false,reason:'bounds',id:'worldBounds'};
+ }
  const terrain=map?.terrain||{default:'grass',cells:[]};
  const at=tileIndex(terrain);
  const minC=Math.floor(candidate.minX+EPS),maxC=Math.ceil(candidate.maxX-EPS);

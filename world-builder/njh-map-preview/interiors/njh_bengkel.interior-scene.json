@@ -1,0 +1,165 @@
+{
+  "id": "njh_bengkel",
+  "label": "NJH · Bengkel Motor",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "items": [
+    {
+      "id": "njh-bengkel-workbench-1",
+      "assetId": "workbench",
+      "name": "Meja Bengkel",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "repair",
+      "pose": "work",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "repair",
+        "work"
+      ]
+    },
+    {
+      "id": "njh-bengkel-tool_rack-1",
+      "assetId": "tool_rack",
+      "name": "Rak Perkakas 1",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "repair",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "repair",
+        "collect"
+      ]
+    },
+    {
+      "id": "njh-bengkel-shelf-1",
+      "assetId": "shelf",
+      "name": "Rak Ban / Sparepart",
+      "c": 4,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": "idle",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-bengkel-tool_rack-2",
+      "assetId": "tool_rack",
+      "name": "Rak Perkakas 2",
+      "c": 6,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "repair",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "repair",
+        "collect"
+      ]
+    },
+    {
+      "id": "njh-bengkel-cashier-1",
+      "assetId": "cashier",
+      "name": "Kasir",
+      "c": 5,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell"
+      ]
+    },
+    {
+      "id": "njh-bengkel-waiting_bench-1",
+      "assetId": "waiting_bench",
+      "name": "Bangku Tunggu",
+      "c": 0,
+      "r": 3,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-bengkel-trash_bin-1",
+      "assetId": "trash_bin",
+      "name": "Tempat Sampah",
+      "c": 7,
+      "r": 3,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    }
+  ],
+  "floor": 1,
+  "notes": "r3 facing fix of njh_bengkel. Bangku tunggu di dinding kiri, rot 90 (front +c) menghadap kasir / tengah ruangan, bukan ke pintu. Kasir rot 0, sisi pelanggan ke lorong pintu. Meja bengkel / rak rot 0 ke dalam ruangan. Rak barang tetap REUSE (flag rak ban).",
+  "adaptedFrom": "/workspace/njh-interior-templates-r2/scenes/njh_bengkel.interior-scene.json",
+  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema)."
+}

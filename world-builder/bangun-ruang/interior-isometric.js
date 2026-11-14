@@ -193,8 +193,15 @@ function actionAnchor(item,opts={}){
  // A missing PNG stays an explicitly generic room preview; source artwork
  // is never recreated as an invented replacement.
 const imageCache=new Map();
+function furnitureSource(item){
+ // Preview-only redrawn sprites (njhPreview / njhFurniturePreview / njhMap).
+ // Live Semesta furniture sources are unchanged when the gate is off.
+ if(g.VLNjhInteriorArtPreview?.owns?.(item.assetId))
+  return g.VLNjhInteriorArtPreview.get(item.assetId);
+ return g.VLSemestaFurnitureSources?.get(item.assetId)||null;
+}
 function nativeFurniture(ctx,geo,item,fw,fd){
- const row=g.VLSemestaFurnitureSources?.get(item.assetId);
+ const row=furnitureSource(item);
  if(!row)return false;
  const dir=['sw','se','ne','nw'][fixtureRotation(item)];
  const view=row.views[dir]||row.views.sw;
@@ -210,9 +217,10 @@ function nativeFurniture(ctx,geo,item,fw,fd){
   img.onerror=()=>{state.error=true};
   if(view.url.startsWith('https:'))img.crossOrigin='anonymous';
   img.src=view.url;
-  return false;
+  return g.VLNjhInteriorArtPreview?.owns?.(item.assetId)?'pending':false;
  }
- if(!state.ready)return false;
+ if(!state.ready)
+  return g.VLNjhInteriorArtPreview?.owns?.(item.assetId)?'pending':false;
  const width=Number(view.size?.[0])||state.img.naturalWidth;
  const height=Number(view.size?.[1])||state.img.naturalHeight;
  const pivot=view.pivot||[width/2,height-5];
@@ -233,8 +241,12 @@ function furniture(ctx,geo,item,selected=false,warteg=false){
  if(!Number.isFinite(c)||!Number.isFinite(r))return null;
  const inset=.08;
  // Physical shadow is pixel geometry projected at ground level.
- polygon(ctx,polyPoint(geo,[[c+.1,r+.08,1],[c+fw+.1,r+.08,1],
-  [c+fw+.1,r+fd+.08,1],[c+.1,r+fd+.08,1]]),'#9B866F');
+ // Preview sprites already sit on the tile via their manifest pivot.
+ const usePreviewArt=g.VLNjhInteriorArtPreview?.owns?.(item.assetId);
+ if(!usePreviewArt){
+  polygon(ctx,polyPoint(geo,[[c+.1,r+.08,1],[c+fw+.1,r+.08,1],
+   [c+fw+.1,r+fd+.08,1],[c+.1,r+fd+.08,1]]),'#9B866F');
+ }
  const hitPolygons=[];
  const B=(x,y,cw,rd,low,top,material,outline=false)=>{
   const p=fixtureBox(item,x,y,cw,rd);
@@ -402,7 +414,8 @@ function furniture(ctx,geo,item,selected=false,warteg=false){
   B(.10,.10,w-.20,d-.20,0,30,'wood');
  }
  };
- if(!nativeFurniture(ctx,geo,item,fw,fd))place();
+ const usedNative=nativeFurniture(ctx,geo,item,fw,fd);
+ if(usedNative!==true&&usedNative!=='pending')place();
  if(warteg&&g.VLWartegInteriorArt?.fixture&&!TYPES[item.assetId]?.external){
   g.VLWartegInteriorArt.fixture(ctx,geo,item,{fixtureBox,fixturePoint,box,point,line,polygon});
  }
@@ -424,6 +437,8 @@ function furniture(ctx,geo,item,selected=false,warteg=false){
 // character's lower body goes under the duvet instead of floating above it.
 function drawSeatForeground(ctx,geometry,item){
  if(!item)return;
+ // Preview sprites already include the full fixture.
+ if(g.VLNjhInteriorArtPreview?.owns?.(item.assetId))return;
  const part=(x,y,w,d,low,top,material)=>{
   const p=fixtureBox(item,x,y,w,d);
   box(ctx,geometry,p.c,p.r,p.w,p.d,low,top,material);
