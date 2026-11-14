@@ -36,7 +36,7 @@ const playing=()=>N.current()==='gameScreen';
 const SET_KEY='njh98:settings';
 function settings(){try{return {sound:true,lang:'id',scale:100,...JSON.parse(localStorage.getItem(SET_KEY)||'{}')};}catch{return {sound:true,lang:'id',scale:100};}}
 function saveSettings(v){try{localStorage.setItem(SET_KEY,JSON.stringify(v));}catch{}applySettings();}
-const EN={'Nokia':'Phone','Tas':'Bag','Status':'Status','Peta':'Map','Menu':'Menu','Layar':'Screen','Kondisi':'Needs','Energi':'Energy','Kebersihan':'Hygiene',
+const EN={'Nokia':'Phone','Tas':'Bag','Status':'Status','Peta':'Map','Menu':'Menu','Layar':'Screen','Profil':'Profile','Kondisi':'Needs','Energi':'Energy','Kebersihan':'Hygiene',
  'Buang Air':'Bladder','Kenyang':'Fullness','Moral':'Morale','▶ Lanjut Main':'▶ Resume','Lihat Tutorial':'Tutorial','Muat Ulang Kota':'Reload City','Simpan':'Save','Muat':'Load',
  'Laporan Hari':'Day Report','Pengaturan':'Settings','Keluar ke Menu Utama':'Quit to Main Menu','▶ Mulai Main':'▶ Play','Main Tanpa Akun':'Play as Guest',
  'Lanjutkan':'Continue','Mulai Baru':'New Game','Kredit':'Credits','Menu Utama':'Main Menu','Menu Jeda':'Pause Menu','Status Pemain':'Player Status'};
@@ -44,7 +44,7 @@ function applySettings(){
  const v=settings();
  document.documentElement.style.setProperty('--njh-ui',String(v.scale/100));
  document.documentElement.lang=v.lang==='en'?'en':'id';
- document.querySelectorAll('.njh-app span,.njh-needs .w98-title span,.njh-need label,.njh-menu .btn>span:first-child,#njhStatusTitle,.screen h1').forEach(el=>{
+ document.querySelectorAll('.njh-app span,#njhTabProfil,#njhTabKondisi,.njh-need label,.njh-menu .btn>span:first-child,#njhStatusTitle,.screen h1').forEach(el=>{
   if(el.dataset.njhId==null)el.dataset.njhId=el.textContent;
   const id=el.dataset.njhId;el.textContent=v.lang==='en'&&EN[id]?EN[id]:id;
  });
