@@ -79,6 +79,13 @@ function tilePos(origin,item,foot){
  return {x:origin.x+num(item.c,0)+fw/2,z:origin.z+num(item.r,0)+fd/2,fw,fd,rot};
 }
 function doorWorld(building){
+ // Prefer Ellen's authored use tile; the art pivot / building centre is NOT a door.
+ const authored=(building?.njhDoors||[]).find(d=>d&&!d.pending&&(d.use||d.usePoint));
+ const point=authored?.use||authored?.usePoint;
+ if(point){
+  const x=Array.isArray(point)?point[0]:point.x,z=Array.isArray(point)?point[1]:point.z;
+  if(Number.isFinite(Number(x))&&Number.isFinite(Number(z)))return {x:Number(x),z:Number(z)};
+ }
  if(building?.njhUsePoint&&Number.isFinite(Number(building.njhUsePoint.x)))
   return {x:Number(building.njhUsePoint.x),z:Number(building.njhUsePoint.z)};
  const x=num(building?.x,0),z=num(building?.z,0);
@@ -134,9 +141,11 @@ function create(opts){
   const objects=world?.objects||opts.getWorld?.()?.objects||[];
   const pat=kind==='kost'?KOST_PATTERN:kind==='minimarket'?MINIMARKET_PATTERN:WARTEG_PATTERN;
   const notMart=o=>kind==='minimarket'||!MINIMARKET_PATTERN.test(textOf(o));
-  return objects.find(o=>o.id!==PLAY_KOST_ID&&o.type==='sprite'&&pat.test(textOf(o))&&notMart(o))
-   ||objects.find(o=>o.id===PLAY_KOST_ID&&kind==='kost')
-   ||null;
+  const matches=objects.filter(o=>o.id!==PLAY_KOST_ID&&o.type==='sprite'&&pat.test(textOf(o))&&notMart(o));
+  // An authored NJH entrance must win over a generic "warung" label.
+  const primary=matches.find(o=>kind==='warteg'?(/warteg/i.test(textOf(o))||o.njhInteriorTemplate===TEMPLATES.warteg):
+   kind==='minimarket'?(/minimarket|njh.?mart/i.test(textOf(o))):(/cove|njh-kos-noor/i.test(textOf(o))));
+  return primary||matches[0]||objects.find(o=>o.id===PLAY_KOST_ID&&kind==='kost')||null;
  }
 
  function ensureKost(world){
@@ -463,7 +472,7 @@ function create(opts){
 
  function canEnterRoom(roomId){
   const kind=kindOfRoom(roomId);
-  if(kind==='warteg')return {ok:true};
+  if(kind==='warteg'||kind==='minimarket')return {ok:true};
   const A=AccessApi();
   if(!A)return canEnter(kind==='lobby'?'kost':kind);
   A.setRelationships?.(rels());
@@ -489,7 +498,8 @@ function create(opts){
   session={kind,roomId:resolved,template:resolved,
    buildingId:buildings.kost?.object?.id||'njh-kos-noor',
    exit:streetExit,lobbyReturn,...built};
-  opts.teleport?.(built.door.x,built.door.z,8,{keepView:true});
+  const landing=spawnInside();
+  opts.teleport?.(landing.x,landing.z,8,{keepView:true});
   fitRoomCamera();
   persistSession();
   const msg=kind==='lobby'?'🏠 Masuk lobi kost':kind==='warteg'?'🍚 Masuk warteg':'🏠 Masuk kamar';
@@ -522,8 +532,8 @@ function create(opts){
   hideOutdoor(true);
   session={kind,template:rec.template,roomId:rec.template,buildingId:rec.object.id,
    exit:session?.exit||{x:pos.x,z:pos.z},...built};
-  const spawn=built.door;
-  opts.teleport?.(spawn.x,spawn.z,8,{keepView:true});
+  const landing=spawnInside();
+  opts.teleport?.(landing.x,landing.z,8,{keepView:true});
   fitRoomCamera();
   persistSession();
   opts.message?.((kind==='kost'?'🏠 Masuk kost':kind==='minimarket'?'🛒 Masuk NJH Mart':'🍚 Masuk warteg')+(reason?' · '+reason:''));
@@ -531,22 +541,92 @@ function create(opts){
   return {ok:true,kind,session};
  }
 
- function enterNearby(){
-  if(session){
-   const p=opts.getPos?.()||{x:0,z:0};
-   if(Math.hypot(p.x-session.door.x,p.z-session.door.z)<=1.4)return exit();
-   return {ok:false,reason:'Dekati pintu untuk keluar'};
-  }
+ // One E press targets ONE nearby physical doorway. Never select Cove by
+ // a saved room id, an unrelated UI button, or a building's remote pivot.
+ function nearestDoor(){
   const p=opts.getPos?.()||{x:0,z:0};
-  let best=null,bestD=ENTER_RADIUS;
+  let best=null,limit=ENTER_RADIUS;
+  if(session){
+   for(const d of session.doors||[]){
+    if(d.role==='bathroom'||d.role==='stall')continue;
+    const distance=Math.hypot(p.x-d.wx,p.z-d.wz);
+    if(distance>=Math.min(limit,1.45))continue;
+    best={inside:true,door:d,kind:session.kind,distance};limit=distance;
+   }
+   if(!best){
+    const distance=Math.hypot(p.x-session.door.x,p.z-session.door.z);
+    if(distance<=1.4)best={inside:true,exit:true,kind:session.kind,distance};
+   }
+   return best;
+  }
   for(const kind of Object.keys(buildings)){
    const b=buildings[kind];
-   const door=b.door||doorWorld(b.object);
-   const d=Math.hypot(p.x-door.x,p.z-door.z);
-   if(d<bestD){best=kind;bestD=d;}
+   const candidates=(b.object.njhDoors||[]).filter(d=>!d.pending&&(d.use||d.usePoint));
+   const points=candidates.length?candidates.map(d=>{
+    const u=d.use||d.usePoint;
+    return Array.isArray(u)?{x:num(u[0]),z:num(u[1])}:{x:num(u.x),z:num(u.z)};
+   }):[b.door||doorWorld(b.object)];
+   for(const door of points){
+    const distance=Math.hypot(p.x-door.x,p.z-door.z);
+    if(distance<limit){best={inside:false,kind,door,distance,objectId:b.object.id};limit=distance;}
+   }
   }
-  if(!best)return {ok:false,reason:'Dekati pintu kost atau warteg'};
-  return enter(best);
+  return best;
+ }
+
+ function enterNearby(){
+  const target=nearestDoor();
+  if(!target)return {ok:false,reason:session?'Dekati pintu untuk berinteraksi':'Tidak ada pintu dalam jangkauan'};
+  if(target.inside){
+   const d=target.door;
+   if(!d||isExitDoor(d))return exit();
+   const A=AccessApi();
+   const access=A?.doorAccess?.(pid(),d);
+   if(access&&access.canEnter===false)return {ok:false,reason:access.reason||'Pintu terkunci'};
+   return enterInterior(d.interiorTemplate||d.to,'pintu terdekat');
+  }
+  return enter(target.kind);
+ }
+
+ // Interior rooms are separate from the street worldBounds. Check furniture
+ // and walls here instead of running the city road/terrain collision solver.
+ function freeInside(x,z,radius=.22){
+  if(!session)return true;
+  if(x<session.origin.x+.30||z<session.origin.z+.30||
+     x>session.origin.x+session.width-.30||z>session.origin.z+session.depth-.30)return false;
+  for(const f of session.furniture||[]){
+   if(!f.blocking)continue;
+   const left=f.x-f.fw/2-.10,right=f.x+f.fw/2+.10;
+   const top=f.z-f.fd/2-.10,bottom=f.z+f.fd/2+.10;
+   if(x+radius>left&&x-radius<right&&z+radius>top&&z-radius<bottom)return false;
+  }
+  return true;
+ }
+ function spawnInside(){
+  if(!session)return null;
+  const d=session.door,o=session.origin;
+  const candidates=[
+   {x:d.x,z:d.z-.55}, {x:d.x,z:d.z-.9}, {x:d.x,z:d.z},
+   {x:o.x+session.width/2,z:o.z+session.depth/2}
+  ];
+  for(let r=1;r<=Math.max(session.width,session.depth);r+=1){
+   for(let c=0;c<session.width;c++)for(let z=0;z<session.depth;z++){
+    if(Math.abs(c+.5-(d.x-o.x))+Math.abs(z+.5-(d.z-o.z))<=r)
+     candidates.push({x:o.x+c+.5,z:o.z+z+.5});
+   }
+  }
+  return candidates.find(v=>freeInside(v.x,v.z))||{x:o.x+.5,z:o.z+.5};
+ }
+ function moveInside(start,dx,dz){
+  if(!session)return null;
+  let x=start.x,z=start.z,moved=false;
+  const steps=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.16));
+  for(let i=0;i<steps;i++){
+   const nx=x+dx/steps,nz=z+dz/steps;
+   if(freeInside(nx,z)){x=nx;moved=true;}
+   if(freeInside(x,nz)){z=nz;moved=true;}
+  }
+  return {x,z,moved};
  }
 
  function exit(){
@@ -711,7 +791,7 @@ function create(opts){
  }
 
  return {
-  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,canEnter,canEnterRoom,enter,enterInterior,openInteriorById,enterNearby,exit,fitRoomCamera,cameraLocked,
+  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,canEnter,canEnterRoom,enter,enterInterior,openInteriorById,nearestDoor,enterNearby,exit,fitRoomCamera,cameraLocked,moveInside,freeInside,spawnInside,
   restoreIfNeeded,furniture,extraActions,obstacles,constrain,update,candidates,
   doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,MINIMARKET_PATTERN,
   place:(x,z,size)=>{if(!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return {ok:false};opts.teleport?.(Number(x),Number(z),size||12,{keepView:!!session});return {ok:true,x:Number(x),z:Number(z)};},
