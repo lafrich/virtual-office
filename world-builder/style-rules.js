@@ -83,6 +83,9 @@ function footprint(o,catalog){
  let depth=Math.max(.5,Number(dims[1]||native[1]));
  if(s?.rotateFootprint===true&&[90,270].includes(((Number(o.rotation)||0)%360+360)%360))
   [width,depth]=[depth,width];
+ // Tree visual scaling must never enlarge its physical trunk footprint.
+ // Players can walk under the canopy, never through the trunk.
+ if(kind==='tree')return [width,depth];
  return [width*Number(o.scale||1),depth*Number(o.scale||1)];
 }
 function normalize(o,catalog){
@@ -100,8 +103,15 @@ function normalize(o,catalog){
  o.rotation=lockRotation?0:((Math.round((Number(o.rotation)||0)/90)*90)%360+360)%360;
  // Published prefab dimensions must remain comparable to the native world;
  // no freeform squashing, and scaling is always uniform.
- const authoredLargeTree=o.type==='sprite'&&s?.source==='pipeline-vegetation'&&Array.isArray(o.tags)&&o.tags.includes('large-canopy');
- o.scale=Math.max(.1,Math.min(authoredLargeTree?2.65:1.15,Math.round((Number(o.scale)||1)*100)/100));
+ const isTree=category(o,catalog)==='tree'&&s?.source==='pipeline-vegetation';
+ const authoredLargeTree=isTree&&Array.isArray(o.tags)&&o.tags.includes('large-canopy');
+ // Genesis LGR is 88 play-px tall. The canopy-to-trunk measurement must
+ // read >=176 play-px; count the authored pivot, not empty canvas padding.
+ const pivotPixels=Number(s?.pivot?.[1]);
+ const minScale=isTree&&pivotPixels>0
+  ?Math.max(1,Math.ceil(176/(pivotPixels*Math.SQRT2/64*2/Math.sqrt(3)*50)*1.05*100)/100):1;
+ const maxScale=isTree?Math.max(minScale,2.65):(authoredLargeTree?2.65:1.15);
+ o.scale=Math.max(isTree?minScale:.1,Math.min(maxScale,Math.round((Number(o.scale)||1)*100)/100));
  if(s){o.width=Number(s.width||o.width||2);o.height=Number(s.height||o.height||2);}
  return o;
 }

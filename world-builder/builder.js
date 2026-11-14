@@ -71,6 +71,10 @@ const STORE='virtual-life-gpt-world-builder-pipeline-v3';
 const ACTIVE_DRAFT_KEY='virtual-life-active-city-draft';
 let activeDraftId=null,draftDirty=true;
 try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
+// NJH is the only playable city. Jiwa-authored targets use its canonical ID;
+// a temporary authoring copy ID must never leak into Mainkan's gameplay hooks.
+const activeGameCityId=()=>playerMode&&njhMapPreview
+ ?'city-njh-semesta-draft1-with-pending':(activeDraftId||'__semesta_working_copy__');
 // Read the published Mahluk Hidup catalog and local Character Storage
 // before loading any saved city, so custom profiles survive import.
 const mahluk=window.VLMahlukHidup;
@@ -637,6 +641,7 @@ function rebuildTerrain(force=true){
  clearTerrain();
  const t=documentMap.map.terrain||{default:'grass',cells:[]};
  const tileIndex=new Map(t.cells.map(o=>[o.c+','+o.r,o.type]));
+ const drainCells=terrain.dict(t);
  const byVisualTile=new Map();
  for(const cell of t.cells){
   if(cell.c<b.minX||cell.c>=b.maxX||cell.r<b.minZ||cell.r>=b.maxZ||cell.type===t.default)continue;
@@ -659,7 +664,12 @@ function rebuildTerrain(force=true){
   for(let i=0;i<items.length;i++){
    const cell=items[i],y=kind==='road'?.024:kind==='sidewalk'?.036:['water','river','drain'].includes(kind)?.015:.026;
    tmp.position.set(cell.c+.5,y,cell.r+.5);
-   tmp.rotation.set(-Math.PI/2,0,0);tmp.scale.set(1,1,1);tmp.updateMatrix();
+   tmp.rotation.set(-Math.PI/2,0,0);
+   // Drain.png runs along r. Rotate the plane itself for a connected along-c run.
+   // A junction needs dedicated art; do not fake one by rotating a straight.
+   if(kind==='drain'&&terrain.drainAxis?.(t,cell.c,cell.r,drainCells)==='along_c')
+    tmp.rotateZ(Math.PI/2);
+   tmp.scale.set(1,1,1);tmp.updateMatrix();
    mesh.setMatrixAt(i,tmp.matrix);
    if(['grass','water','river','soil'].includes(kind)){
     const variation=((cell.c*12347+cell.r*2917)>>>0)%9;
@@ -2761,7 +2771,7 @@ function setMode(m){
        THREE,
        getWorld:()=>documentMap,
        getScene:()=>scene,
-       getCityId:()=>activeDraftId||'__semesta_working_copy__',
+       getCityId:activeGameCityId,
        getPlayerId:()=>playerMode?mainkanPlayerId:'',
        currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
        playPose:(pose,seconds=4)=>{const r=(rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig;if(!r?.setPose)return false;r.setPose(pose);
@@ -3396,7 +3406,7 @@ if(window.SemestaLifePlay){
   THREE,
   getWorld:()=>documentMap,
   getScene:()=>scene,
-  getCityId:()=>activeDraftId||'__semesta_working_copy__',
+  getCityId:activeGameCityId,
   getPlayerId:()=>playerMode?mainkanPlayerId:'',
   currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
   getFacing:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.direction)||null,
