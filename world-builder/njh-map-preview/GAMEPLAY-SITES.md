@@ -17,7 +17,7 @@ Semesta Life Play matches sites with `name(o) = name + label + asset + subtype +
 | Warung Kopi | `coffee` | `ref-west-center-a` | Warung Kopi Pojok Gang | -38.5, 49.5 | `pipeline:warung_madura` | `njh_door_warung_kopi` | `njh_warung_kopi` | no |
 | WC Umum | `public_wc` | `njh-wc-umum` | WC Umum / Mandi Umum | -43.0, 69.15 | `pipeline:id200_publik_toilet_umum_kampung` | `njh_door_wc_umum` | `njh_wc_mandi_umum` | no |
 | Mandi Umum | `public_bath` | `njh-wc-umum` | WC Umum / Mandi Umum | -43.0, 69.15 | `pipeline:id200_publik_toilet_umum_kampung` | `njh_door_wc_umum` | `njh_wc_mandi_umum` | no |
-| Kost | `kost` | `njh-kos-noor` | Kost Cove (Ichsan & Noor) | -26.25, 68.7 | `pipeline:id200_bangunan_rumah_kos_dua_lantai` | `njh_door_kos_cove_lobby` | `njh_kos_cove_lobby` | no (facade is the existing dua-lantai sprite; see KOST-ROOMS.md) |
+| Kost | `kost` | `njh-kos-noor` | Kost Cove (Ichsan & Noor) | -26.25, 68.7 | `object:njh_kost_cove` | `njh_door_kos_cove_lobby` | `njh_kos_cove_lobby` | no (simple LFB Cove facade; footprint matches the old dua-lantai lot — see KOST-ROOMS.md) |
 | Tenda Hobo | `tent` | `njh-tenda-hobo` | Tenda Hobo | -51.5, 63.5 | `pipeline:id200_pasar_tenda_biru_pasar` | `—` | `—` | stand-in / see notes |
 | Hansip | `hansip` | `ref-north-row-a` | Pos Hansip Kali | -49.0, 40.0 | `pipeline:pos_ronda` | `—` | `—` | no |
 | Mulung (first of 19) | `scavenge` | `njh-lapak-bekas` | Lapak Barang Bekas | -23.0, 24.25 | `pipeline:lapak_barang_bekas` | `—` | `—` | no |

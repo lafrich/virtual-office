@@ -70,6 +70,17 @@ const TENT_DEFS=[
  {id:'br-lapak-sate-madura',label:'Lapak Sate Madura',folder:'sate',
   footprint:[4,3],size:[242,236],pivot:[121,164]}
 ];
+const BUILDING_DEFS=[
+ {id:'njh_kost_cove',label:'Kost Cove',folder:'njh_kost_cove',
+  footprint:[5.5,4.6],sizeClass:'medium',levelCount:2,placement:'ground',
+  interactions:['enter'],
+  variants:{
+   sw:{size:[338,352],pivot:[159,272]},
+   se:{size:[338,350],pivot:[160,270]},
+   ne:{size:[338,352],pivot:[159,272]},
+   nw:{size:[338,350],pivot:[160,270]}
+  }}
+];
 
 function propSpec(def){
  const variants={};
@@ -113,8 +124,28 @@ function tentSpec(def){
   njhPreview:true
  });
 }
+function buildingSpec(def){
+ const variants={};
+ for(const d of DIR){
+  const v=(def.variants&&def.variants[d])||def.variants.sw;
+  const file='buildings/'+def.folder+'/'+def.id+'_'+d+'.png';
+  variants[d]={file,size:v.size.slice(),pivot:v.pivot.slice(),url:baseUrl()+file};
+ }
+ const sw=variants.sw;
+ return Object.freeze({
+  id:def.id,file:'object:'+def.id,label:def.label,group:'kampung',
+  source:'njh-preview',published:true,collision:true,
+  footprint:def.footprint.slice(),size:sw.size.slice(),pivot:sw.pivot.slice(),
+  width:sw.size[0]/50,height:sw.size[1]/50,
+  sizeClass:def.sizeClass,levelCount:def.levelCount,placement:def.placement,
+  enterable:true,interactive:true,
+  interactions:(def.interactions||['enter']).slice(),blocking:'yes',
+  variants:Object.freeze(variants),
+  njhPreview:true
+ });
+}
 
-const SPECS=[...PROP_DEFS.map(propSpec),...TENT_DEFS.map(tentSpec)];
+const SPECS=[...PROP_DEFS.map(propSpec),...TENT_DEFS.map(tentSpec),...BUILDING_DEFS.map(buildingSpec)];
 const TENT_IMAGES=Object.fromEntries(TENT_DEFS.map(def=>[
  def.id,Object.fromEntries(DIR.map(d=>[d,baseUrl()+'tents/'+def.folder+'_'+d+'.png']))
 ]));
