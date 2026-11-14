@@ -51,6 +51,22 @@ function examine(p){
   // Every wet fixture must have a reachable free approach tile.
   const around=cells(item).flatMap(([c,r])=>[[c+1,r],[c-1,r],[c,r+1],[c,r-1]]);
   assert.ok(around.some(([c,r])=>seen.has(key(c,r))),sc.id+' inaccessible wet fixture '+item.id);
+  // The entrance must never directly see a toilet/tub, even diagonally.
+  // Super-sample the line of sight through the same 1-tile partition grid.
+  const barriers=new Set(sc.items.filter(i=>i.assetId==='sekat_wc')
+   .flatMap(x=>cells(x).map(([c,r])=>key(c,r))));
+  for(const d of curtains)barriers.add(key(d.c,d.r));
+  const foot=catalog[item.assetId]?.sw?.footprint||[1,1];
+  const tx=item.c+foot[0]/2,ty=item.r+foot[1]/2;
+  const sx=sc.entrance.c+.5,sy=sc.entrance.r+.5;
+  let hidden=false;
+  for(let n=0;n<=1000;n++){
+   const u=n/1000;
+   if(barriers.has(key(Math.floor(sx+(tx-sx)*u),Math.floor(sy+(ty-sy)*u)))){
+    hidden=true;break;
+   }
+  }
+  assert.ok(hidden,sc.id+' entrance can see wet fixture '+item.id);
  }
  return {sc,used,seen,curtains};
 }
