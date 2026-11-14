@@ -163,19 +163,20 @@ def face_step(cv, c, r, z, axis="c"):
     return x0, y0, x1 - x0, y1 - y0
 
 
-def blit_iso(cv, c, r, z, rows, color, axis="c", scale=1):
-    """Bitmap on a vertical wall, stepped in screen space along the face."""
-    x0, y0, dx, dy = face_step(cv, c, r, z, axis)
-    # per-pixel along the face (1 tile = 32 px)
-    sx, sy = dx / 32.0, dy / 32.0
+def blit_on_plane(cv, c, r, z_top, rows, color, axis="c", scale=1, u_sign=1):
+    """Bitmap painted on a vertical wall plane (world u,z), not a flat screen block."""
     for j, row in enumerate(rows):
         for i, ch in enumerate(row):
             if ch != "#":
                 continue
             for ky in range(scale):
                 for kx in range(scale):
-                    x = int(round(x0 + (i * scale + kx) * sx))
-                    y = int(round(y0 + (i * scale + kx) * sy - (j * scale + ky)))
+                    u = (i * scale + kx) * u_sign
+                    v = j * scale + ky
+                    if axis == "c":
+                        x, y = cv.xy(c + u / 32.0, r, z_top - v)
+                    else:
+                        x, y = cv.xy(c, r + u / 32.0, z_top - v)
                     cv.put(x, y, color)
 
 
@@ -183,42 +184,51 @@ def glyph_w(ch):
     return len(FONT3.get(ch, FONT3[" "])[0])
 
 
-def text_upright(cv, c, r, z, text, color, scale=2, tracking=1, align="center"):
-    """Upright pixel type, like the existing LFB kost 'KOSTAN 24H' sign. Readable."""
-    x0, y0 = cv.xy(c, r, z)
-    width = text_width(text, scale, tracking)
-    if align == "center":
-        x0 -= width // 2
-        y0 -= (5 * scale) // 2
-    x = 0
-    for ch in text:
-        glyph = FONT3.get(ch, FONT3[" "])
-        for j, row in enumerate(glyph):
-            for i, pix in enumerate(row):
-                if pix != "#":
-                    continue
-                for ky in range(scale):
-                    for kx in range(scale):
-                        cv.put(x0 + x + i * scale + kx, y0 + j * scale + ky, color)
-        x += (glyph_w(ch) + tracking) * scale
-
-
-def text_on_face(cv, c, r, z, text, color, axis="c", scale=1, tracking=1):
-    # Kept for any along-face use; sign and window numbers use text_upright.
-    x = 0
-    for ch in text:
-        glyph = FONT3.get(ch, FONT3[" "])
-        if axis == "c":
-            blit_iso(cv, c + x / 32.0, r, z, glyph, color, axis=axis, scale=scale)
-        else:
-            blit_iso(cv, c, r + x / 32.0, z, glyph, color, axis=axis, scale=scale)
-        x += (glyph_w(ch) + tracking) * scale
-
-
 def text_width(text, scale=1, tracking=1):
     if not text:
         return 0
     return (sum(glyph_w(ch) for ch in text) + tracking * (len(text) - 1)) * scale
+
+
+def _along_screen_x(cv, c, r, z, axis, step):
+    if axis == "c":
+        x0, _ = cv.xy(c, r, z)
+        x1, _ = cv.xy(c + step, r, z)
+    else:
+        x0, _ = cv.xy(c, r, z)
+        x1, _ = cv.xy(c, r + step, z)
+    return x1 - x0
+
+
+def text_centered_on_face(cv, text, a0, a1, c, r, z0, z1, color, axis="c", scale=1, tracking=1):
+    """Centre a phrase on a wall band. Glyphs sit on the iso plane, left→right on screen."""
+    z_mid = (z0 + z1) / 2.0
+    z_top = int(round(z_mid + (5 * scale - 1) / 2.0))
+    bottom = z_top - (5 * scale - 1)
+    if bottom < z0:
+        z_top += z0 - bottom
+    if z_top > z1:
+        z_top = z1
+    wpx = text_width(text, scale, tracking)
+    span = abs(a1 - a0) * 32.0
+    pad = max(0.0, (span - wpx) / 2.0) / 32.0
+    # Walk toward increasing screen-x so the word is never mirrored.
+    if _along_screen_x(cv, (a0 + a1) / 2.0 if axis == "c" else c,
+                       r if axis == "c" else (a0 + a1) / 2.0,
+                       z_mid, axis, 1) >= 0:
+        start, u_sign = min(a0, a1) + pad, 1
+    else:
+        start, u_sign = max(a0, a1) - pad, -1
+    cursor = 0
+    for ch in text:
+        glyph = FONT3.get(ch, FONT3[" "])
+        if axis == "c":
+            blit_on_plane(cv, start + u_sign * cursor / 32.0, r, z_top, glyph, color,
+                          axis="c", scale=scale, u_sign=u_sign)
+        else:
+            blit_on_plane(cv, c, start + u_sign * cursor / 32.0, z_top, glyph, color,
+                          axis="r", scale=scale, u_sign=u_sign)
+        cursor += (glyph_w(ch) + tracking) * scale
 
 
 def pots(cv, c, r):
@@ -257,9 +267,10 @@ def window(cv, c0, c1, r, z0, z1, occupied, number):
             x1, y1 = cv.xy(cc, r, z1 - 4)
             cv.line(x0, y0, x1, y1, GLASS_DRAPE if frac != 0.50 else GLASS_DARK2)
     face_s(cv, c0 - 0.04, c1 + 0.04, r, z0 - 4, z0, SILL)
-    # number at the top of the pane
+    # number at the top of the pane, on the glass plane, inside the frame
     num_col = FRAME if occupied else hx("#E8ECF2")
-    text_upright(cv, (c0 + c1) / 2, r, z1 - 10, str(number), num_col, scale=2, tracking=1, align="center")
+    text_centered_on_face(cv, str(number), c0 + 0.12, c1 - 0.12, None, r, z1 - 16, z1 - 4,
+                          num_col, axis="c", scale=1, tracking=1)
 
 
 def side_window(cv, c, r0, r1, z0, z1, occupied=False):
@@ -320,50 +331,96 @@ def dish(cv):
                 cv.put(cx + xx, cy + yy, ROOF if abs((xx / 7.5) ** 2 + (yy / 4.0) ** 2) < 0.7 else ROOF_EDGE)
 
 
+def north_window(cv, c0, c1, z0, z1, occupied=False):
+    r = 0
+    face_n(cv, c0, c1, r, z0, z1, FRAME)
+    col = GLASS_WARM if occupied else GLASS_DARK
+    face_n(cv, c0 + 0.08, c1 - 0.08, r, z0 + 4, z1 - 4, col)
+    if not occupied:
+        face_n(cv, c0 + 0.08, c0 + 0.16, r, z0 + 4, z1 - 4, GLASS_DRAPE)
+        face_n(cv, c1 - 0.16, c1 - 0.08, r, z0 + 4, z1 - 4, GLASS_DRAPE)
+    face_n(cv, c0 - 0.04, c1 + 0.04, r, z0 - 4, z0, SILL)
+
+
+def back_door(cv):
+    """Plain steel service door on the north wall, slightly off-centre."""
+    r = 0
+    c0, c1 = 2.05, 2.95
+    face_n(cv, c0 - 0.08, c1 + 0.08, r, 0, 86, FRAME)
+    face_n(cv, c0, c1, r, 2, 82, MAT)
+    mid = (c0 + c1) / 2
+    x0, y0 = cv.xy(mid, r, 10)
+    x1, y1 = cv.xy(mid, r, 78)
+    cv.line(x0, y0, x1, y1, FRAME_MID)
+    face_n(cv, c1 - 0.18, c1 - 0.10, r, 40, 54, HANDLE)
+    # tiny step at the threshold
+    slab(cv, c0, -0.16, c1 - c0, 0.18, 0, 3, shade(PLINTH, 0.9), PLINTH)
+
+
+def utility_box(cv):
+    """Small meter box on the north wall, west of the service door."""
+    r = 0
+    face_n(cv, 0.45, 0.95, r, 36, 64, FRAME_MID)
+    face_n(cv, 0.50, 0.90, r, 40, 60, SILL)
+    x0, y0 = cv.xy(0.70, r, 44)
+    x1, y1 = cv.xy(0.70, r, 56)
+    cv.line(x0, y0, x1, y1, FRAME)
+
+
+def drainpipe(cv, c, r, axis="e"):
+    """1-px downpipe on a side wall, shoe kicking out at grade."""
+    z0, z1 = 2, Z_PARAPET + 1
+    x0, y0 = cv.xy(c, r, z1)
+    x1, y1 = cv.xy(c, r, z0)
+    cv.line(x0, y0, x1, y1, FRAME_MID)
+    if axis == "e":
+        x2, y2 = cv.xy(c, r + 0.22, 1)
+    else:
+        x2, y2 = cv.xy(c, r + 0.22, 1)
+    cv.line(x1, y1, x2, y2, FRAME_MID)
+
+
 def draw(facing):
     size, pivot = CANVAS[facing]["size"], CANVAS[facing]["pivot"]
     cv = Canvas(facing, size[0], size[1], FW, FD, pivot)
     south, east, west, north, top = wall_colors(facing)
     shadow(cv)
 
+    # Near faces after rot(): view always shows the rotated south+east pair.
+    # SW: south left + east right (street front + right side) — official id200 SW.
+    # SE: west left + south right (left side + street front) — official id200 SE.
+    # NE: north left + west right (back + left side).
+    # NW: east left + north right (right side + back).
+    # Do not draw far faces: they read as an inside-out open box.
     see_s = facing in ("sw", "se")
-    see_e = facing in ("sw", "ne")
-    see_w = facing in ("se", "nw")
+    see_e = facing in ("sw", "nw")
+    see_w = facing in ("se", "ne")
     see_n = facing in ("ne", "nw")
 
-    # Back walls first so street-facade details cannot punch through the roof.
-    back, front = [], []
-    back.append(lambda: face_n(cv, 0, FW, 0, 0, Z_PARAPET, north))
-    back.append(lambda: face_w(cv, 0, 0, FD, 0, Z_PARAPET, west) if not see_w else None)
-    back.append(lambda: face_e(cv, FW, 0, FD, 0, Z_PARAPET, east) if not see_e else None)
-    back.append(lambda: face_s(cv, 0, FW, FD, 0, Z_PARAPET, south) if not see_s else None)
+    # Near wall whose screen-y is larger (closer) is painted second.
+    near = []
     if see_n:
-        front.append(lambda: face_n(cv, 0, FW, 0, 0, Z_PARAPET, north))
+        near.append(("n", lambda: face_n(cv, 0, FW, 0, 0, Z_PARAPET, north)))
     if see_w:
-        front.append(lambda: face_w(cv, 0, 0, FD, 0, Z_PARAPET, west))
+        near.append(("w", lambda: face_w(cv, 0, 0, FD, 0, Z_PARAPET, west)))
     if see_e:
-        front.append(lambda: face_e(cv, FW, 0, FD, 0, Z_PARAPET, east))
+        near.append(("e", lambda: face_e(cv, FW, 0, FD, 0, Z_PARAPET, east)))
     if see_s:
-        front.append(lambda: face_s(cv, 0, FW, FD, 0, Z_PARAPET, south))
-    # Simpler explicit order:
-    order = []
-    if not see_n:
-        order.append(("n", lambda: face_n(cv, 0, FW, 0, 0, Z_PARAPET, north)))
-    if not see_w:
-        order.append(("w", lambda: face_w(cv, 0, 0, FD, 0, Z_PARAPET, west)))
-    if not see_e:
-        order.append(("e", lambda: face_e(cv, FW, 0, FD, 0, Z_PARAPET, east)))
-    if not see_s:
-        order.append(("s", lambda: face_s(cv, 0, FW, FD, 0, Z_PARAPET, south)))
-    if see_n:
-        order.append(("n", lambda: face_n(cv, 0, FW, 0, 0, Z_PARAPET, north)))
-    if see_w:
-        order.append(("w", lambda: face_w(cv, 0, 0, FD, 0, Z_PARAPET, west)))
-    if see_e:
-        order.append(("e", lambda: face_e(cv, FW, 0, FD, 0, Z_PARAPET, east)))
-    if see_s:
-        order.append(("s", lambda: face_s(cv, 0, FW, FD, 0, Z_PARAPET, south)))
-    for _, fn in order:
+        near.append(("s", lambda: face_s(cv, 0, FW, FD, 0, Z_PARAPET, south)))
+
+    def _face_depth(name):
+        if name == "s":
+            pts = [cv.xy(0, FD, 0), cv.xy(FW, FD, 0), cv.xy(FW, FD, Z_PARAPET), cv.xy(0, FD, Z_PARAPET)]
+        elif name == "n":
+            pts = [cv.xy(0, 0, 0), cv.xy(FW, 0, 0), cv.xy(FW, 0, Z_PARAPET), cv.xy(0, 0, Z_PARAPET)]
+        elif name == "e":
+            pts = [cv.xy(FW, 0, 0), cv.xy(FW, FD, 0), cv.xy(FW, FD, Z_PARAPET), cv.xy(FW, 0, Z_PARAPET)]
+        else:
+            pts = [cv.xy(0, 0, 0), cv.xy(0, FD, 0), cv.xy(0, FD, Z_PARAPET), cv.xy(0, 0, Z_PARAPET)]
+        return sum(p[1] for p in pts) / 4
+
+    near.sort(key=lambda item: _face_depth(item[0]))
+    for _, fn in near:
         fn()
 
     # Plinth on visible faces
@@ -373,6 +430,8 @@ def draw(facing):
         face_e(cv, FW, 0, FD, 0, Z_PLINTH, shade(PLINTH, 0.88))
     if see_w:
         face_w(cv, 0, 0, FD, 0, Z_PLINTH, shade(PLINTH, 0.92))
+    if see_n:
+        face_n(cv, 0, FW, 0, 0, Z_PLINTH, shade(PLINTH, 0.90))
 
     if see_s:
         face_s(cv, 0, FW, FD, Z_L2, Z_L2 + 3, shade(south, 0.92))
@@ -387,21 +446,30 @@ def draw(facing):
         slab(cv, -0.05, FD - 0.05, FW + 0.10, 0.70, Z_CANOPY0, Z_CANOPY1, CANOPY_TOP, CANOPY, CANOPY_EDGE)
         for i, c0 in enumerate(WIN_CS, start=1):
             window(cv, c0, c0 + WIN_W, FD, Z_WIN0, Z_WIN1, occupied=(i >= 4), number=i)
-        # Full-width sign band under the parapet
+        # Full-width sign band under the parapet; letters sit on the wall plane.
         face_s(cv, 0.15, FW - 0.15, FD, Z_SIGN0, Z_SIGN1, SIGN_EDGE)
         face_s(cv, 0.20, FW - 0.20, FD, Z_SIGN0 + 2, Z_SIGN1 - 2, SIGN_BG)
-        # Mid-band, upright type so the name stays readable on the diagonal wall.
-        text_upright(cv, FW / 2, FD, (Z_SIGN0 + Z_SIGN1) // 2 + 1,
-                     "COVE", SIGN_FG, scale=2, tracking=2, align="center")
+        text_centered_on_face(cv, "COVE", 0.20, FW - 0.20, None, FD,
+                              Z_SIGN0 + 4, Z_SIGN1 - 4, SIGN_FG,
+                              axis="c", scale=2, tracking=2)
         pots(cv, 1.55, FD + 0.18)
         pots(cv, 3.95, FD + 0.18)
 
     if see_e:
         side_window(cv, FW, 1.4, 2.2, Z_WIN0, Z_WIN1, occupied=False)
         side_window(cv, FW, 2.6, 3.4, 16, Z_DOOR - 8, occupied=False)
+        drainpipe(cv, FW, 0.35, axis="e")
     if see_w:
         side_window_w(cv, 0, 1.4, 2.2, Z_WIN0, Z_WIN1, occupied=False)
         side_window_w(cv, 0, 2.6, 3.4, 16, Z_DOOR - 8, occupied=False)
+        drainpipe(cv, 0, 0.35, axis="w")
+    if see_n:
+        face_n(cv, 0, FW, 0, Z_L2, Z_L2 + 3, shade(north, 0.92))
+        north_window(cv, 0.55, 1.35, Z_WIN0, Z_WIN1, occupied=False)
+        north_window(cv, 3.95, 4.75, Z_WIN0, Z_WIN1, occupied=False)
+        north_window(cv, 3.95, 4.55, 20, 70, occupied=False)
+        back_door(cv)
+        utility_box(cv)
 
     # Parapet + flat roof + small dish (after walls so the shell is solid)
     slab(cv, 0.0, 0.0, FW, FD, Z_PARAPET, Z_ROOF, top, PARAPET, ROOF_EDGE)
@@ -412,19 +480,25 @@ def draw(facing):
 
 
 def qa(im, label):
+    from lfb_canvas import PALETTE, KNOWN
     px = im.load()
     w, h = im.size
     alphas = set()
     off = 0
+    pal_off = 0
     for y in range(h):
         for x in range(w):
             r, g, b, a = px[x, y]
             alphas.add(a)
             if a not in (0, 56, 255):
                 off += 1
-    print(f"QA {label}: size={im.size} alphas={sorted(alphas)} bad_alpha={off}")
+            if a and ("%02X%02X%02X" % (r, g, b)) not in KNOWN:
+                pal_off += 1
+    print(f"QA {label}: size={im.size} alphas={sorted(alphas)} bad_alpha={off} off_palette={pal_off}")
     if off:
         raise SystemExit(f"non LFB alpha in {label}")
+    if pal_off:
+        raise SystemExit(f"off-palette pixels in {label}: {pal_off}")
     return True
 
 
