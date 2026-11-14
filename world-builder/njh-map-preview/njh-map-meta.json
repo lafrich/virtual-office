@@ -51,23 +51,25 @@
       "player": "t_ichsan",
       "name": "Ichsan",
       "doorId": "njh_door_home_ichsan",
-      "objectId": "ref-gas-station",
-      "interiorTemplate": "njh_rumah_biasa",
+      "objectId": "njh-kos-noor",
+      "interiorTemplate": "njh_kos_ichsan",
       "homeSpawn": [
-        -45.5,
-        57.5
-      ]
+        -28.25,
+        71.5
+      ],
+      "partnerPlayer": "t_noor"
     },
     {
       "player": "t_noor",
       "name": "Noor",
       "doorId": "njh_door_home_noor",
       "objectId": "njh-kos-noor",
-      "interiorTemplate": "njh_kos",
+      "interiorTemplate": "njh_kos_noor",
       "homeSpawn": [
         -26.25,
         71.5
-      ]
+      ],
+      "partnerPlayer": "t_ichsan"
     }
   ],
   "locations": [
@@ -234,6 +236,12 @@
         "sprite-zhf6zq",
         "njh-lapak-bekas"
       ]
+    },
+    {
+      "id": "njh_loc_rumah_biasa",
+      "members": [
+        "njh_door_rumah_biasa"
+      ]
     }
   ],
   "doors": [
@@ -358,11 +366,11 @@
       "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
     },
     {
-      "doorId": "njh_door_home_ichsan",
+      "doorId": "njh_door_rumah_biasa",
       "objectId": "ref-gas-station",
-      "role": "home",
+      "role": "house",
       "interiorTemplate": "njh_rumah_biasa",
-      "owner": "t_ichsan",
+      "owner": null,
       "label": "Rumah Ichsan",
       "facing": "sw",
       "doorPoint": [
@@ -448,9 +456,9 @@
       "doorId": "njh_door_home_noor",
       "objectId": "njh-kos-noor",
       "role": "home",
-      "interiorTemplate": "njh_kos",
+      "interiorTemplate": "njh_kos_noor",
       "owner": "t_noor",
-      "label": "Kos Noor",
+      "label": "Kost Noor",
       "facing": "sw",
       "doorPoint": [
         -26.25,
@@ -462,6 +470,37 @@
       ],
       "usePoint": [
         -26.25,
+        71.5
+      ],
+      "footprintRect": [
+        -29.0,
+        -23.5,
+        66.4,
+        71.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "partnerOwner": "t_ichsan"
+    },
+    {
+      "doorId": "njh_door_home_ichsan",
+      "objectId": "njh-kos-noor",
+      "role": "home",
+      "interiorTemplate": "njh_kos_ichsan",
+      "owner": "t_ichsan",
+      "partnerOwner": "t_noor",
+      "label": "Kost Ichsan",
+      "facing": "sw",
+      "doorPoint": [
+        -28.25,
+        71.0
+      ],
+      "useTile": [
+        -28,
+        71
+      ],
+      "usePoint": [
+        -28.25,
         71.5
       ],
       "footprintRect": [

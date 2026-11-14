@@ -14,7 +14,7 @@ SHOTS = Path(os.environ.get('NJH_MAP_PREVIEW_SHOTS', '/workspace/njh-map-preview
 SHOTS.mkdir(parents=True, exist_ok=True)
 
 DOORS = [
-    ('njh-kos-noor', 'Kost Noor', 'njh_kos'),
+    ('njh-kos-noor', 'Kost Ichsan & Noor', 'njh_kos_noor'),
     ('jakarta-v3-18446', 'Warteg (warung makan)', 'njh_warung_makan'),
     ('njh-wc-umum', 'WC Umum / Mandi Umum', 'njh_wc_mandi_umum'),
     ('ref-gas-station', 'Rumah Ichsan', 'njh_rumah_biasa'),

@@ -7,12 +7,13 @@
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'];
-const NJH_READY=['njh_kos','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi'];
+const NJH_READY=['njh_kos','njh_kos_noor','njh_kos_ichsan','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi'];
 const NJH_PENDING=['njh_pecel_lele_tenda','njh_sate_madura_tenda','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda'];
 const NJH_TEMPLATES=[...NJH_READY,...NJH_PENDING];
 const TEMPLATE_ALIASES=Object.freeze({
  'bangun-ruang kit in br-warung-pecel-lele.json':'njh_pecel_lele_tenda',
- 'bangun-ruang kit in br-lapak-sate-madura.json':'njh_sate_madura_tenda'
+ 'bangun-ruang kit in br-lapak-sate-madura.json':'njh_sate_madura_tenda',
+ 'njh_kos':'njh_kos_noor'
 });
 function resolveTemplate(raw){
  const id=TEMPLATE_ALIASES[raw]||raw||null;
@@ -278,32 +279,42 @@ function wireDoors(document,meta,interiors){
  for(const door of meta.doors||[]){
   const obj=byId.get(door.objectId);
   if(!obj){report.missingObject.push(door);continue;}
-  obj.njhDoorId=door.doorId;
-  obj.njhUsePoint=Array.isArray(door.usePoint)?{x:door.usePoint[0],z:door.usePoint[1]}:null;
-  obj.njhDoorPoint=Array.isArray(door.doorPoint)?{x:door.doorPoint[0],z:door.doorPoint[1]}:null;
-  obj.entranceFacing=door.facing||obj.entranceFacing||'sw';
   const template=resolveTemplate(door.interiorTemplate);
   if(!template){
    report.noInterior.push({doorId:door.doorId,label:door.label,template:door.interiorTemplate||null});
    continue;
   }
+  const scene=scenes[template];
+  const usePoint=Array.isArray(door.usePoint)?{x:door.usePoint[0],z:door.usePoint[1]}:null;
+  const doorPoint=Array.isArray(door.doorPoint)?{x:door.doorPoint[0],z:door.doorPoint[1]}:null;
+  if(!Array.isArray(obj.njhDoors))obj.njhDoors=[];
+  obj.njhDoors.push({
+   doorId:door.doorId,objectId:door.objectId,label:door.label,
+   template,owner:door.owner||null,facing:door.facing||obj.entranceFacing||'sw',
+   usePoint:door.usePoint,useTile:door.useTile,
+   use:{x:usePoint?usePoint.x:Number(obj.x)||0,z:usePoint?usePoint.z:Number(obj.z)||0},
+   doorPoint,interior:scene?wrapInterior(scene):null,pending:!scene
+  });
   obj.enterable=true;
   obj.interactive=true;
-  obj.njhInteriorTemplate=template;
   if(!Array.isArray(obj.interactions))obj.interactions=['enter'];
   else if(!obj.interactions.includes('enter'))obj.interactions=[...obj.interactions,'enter'];
-  const scene=scenes[template];
   const row={doorId:door.doorId,objectId:door.objectId,label:door.label,
    template,usePoint:door.usePoint,useTile:door.useTile};
-  if(scene){
-   obj.interior=wrapInterior(scene);
-   obj.njhInteriorPending=false;
-   report.wired.push(row);
-  }else{
-   obj.interior=null;
-   obj.njhInteriorPending=true;
-   report.pending.push(row);
-  }
+  if(scene)report.wired.push(row);
+  else report.pending.push(row);
+ }
+ for(const obj of objects){
+  const doors=obj.njhDoors;
+  if(!doors||!doors.length)continue;
+  const primary=doors.find(d=>!d.pending)||doors[0];
+  obj.njhDoorId=primary.doorId;
+  obj.njhUsePoint=primary.use||null;
+  obj.njhDoorPoint=primary.doorPoint;
+  obj.entranceFacing=primary.facing||obj.entranceFacing||'sw';
+  obj.njhInteriorTemplate=primary.template;
+  if(primary.interior){obj.interior=primary.interior;obj.njhInteriorPending=false;}
+  else {obj.interior=null;obj.njhInteriorPending=true;}
  }
  return report;
 }
@@ -354,7 +365,19 @@ const ENTER_RADIUS=1.25;
 function doorCandidates(objects){
  return (objects||[]).filter(o=>o.enterable===true&&(o.interior?.floors?.length||o.njhInteriorTemplate));
 }
-function doorAnchor(o){
+function doorAnchor(o,x,z){
+ const doors=o?.njhDoors;
+ if(Array.isArray(doors)&&doors.length){
+  let pick=doors[0];
+  if(Number.isFinite(x)&&Number.isFinite(z)){
+   pick=doors.slice().sort((a,b)=>{
+    const da=Math.hypot(x-a.use.x,z-a.use.z),db=Math.hypot(x-b.use.x,z-b.use.z);
+    return da-db;
+   })[0];
+  }
+  return {x:pick.use.x,z:pick.use.z,doorId:pick.doorId,template:pick.template,
+   interior:pick.interior,pending:pick.pending,label:pick.label,owner:pick.owner};
+ }
  if(o?.njhUsePoint&&Number.isFinite(o.njhUsePoint.x))return o.njhUsePoint;
  const door=(metaCache?.doors||[]).find(d=>d.objectId===o?.id||d.doorId===o?.njhDoorId);
  if(door&&Array.isArray(door.usePoint)&&door.usePoint.length>=2)
@@ -363,7 +386,7 @@ function doorAnchor(o){
 }
 function nearestEnterable(objects,x,z,radius=ENTER_RADIUS){
  const list=doorCandidates(objects).map(o=>{
-  const p=doorAnchor(o);
+  const p=doorAnchor(o,x,z);
   return {o,anchor:p,distance:Math.hypot(x-p.x,z-p.z)};
  }).sort((a,b)=>a.distance-b.distance);
  const nearest=list[0];

@@ -92,10 +92,11 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
  assert.deepEqual(wired,{
   njh_door_laundry:'njh_laundry',
   njh_door_warung_makan:'njh_warung_makan',
-  njh_door_home_ichsan:'njh_rumah_biasa',
+  njh_door_home_ichsan:'njh_kos_ichsan',
+  njh_door_rumah_biasa:'njh_rumah_biasa',
   njh_door_bengkel:'njh_bengkel',
   njh_door_wc_umum:'njh_wc_mandi_umum',
-  njh_door_home_noor:'njh_kos',
+  njh_door_home_noor:'njh_kos_noor',
   njh_door_warung_kopi:'njh_warung_kopi'
  });
  const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
@@ -120,7 +121,15 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
  assert.equal(api.resolveTemplate('bangun-ruang kit in br-warung-pecel-lele.json'),'njh_pecel_lele_tenda');
  const near=api.nearestEnterable(document.objects,-26.25,71.5,1.25);
  assert.equal(near.o.id,'njh-kos-noor');
+ assert.equal(near.anchor.doorId,'njh_door_home_noor');
+ assert.equal(near.anchor.template,'njh_kos_noor');
  assert.ok(near.distance<0.01);
+ const nearIchsan=api.nearestEnterable(document.objects,-28.25,71.5,1.25);
+ assert.equal(nearIchsan.o.id,'njh-kos-noor');
+ assert.equal(nearIchsan.anchor.doorId,'njh_door_home_ichsan');
+ assert.equal(nearIchsan.anchor.template,'njh_kos_ichsan');
+ assert.ok(nearIchsan.distance<0.01);
+ assert.equal(api.resolveTemplate('njh_kos'),'njh_kos_noor');
  const tent=api.nearestEnterable(document.objects,-25.0,38.5,1.25);
  assert.equal(tent.o.id,'njh-tenda-pecel-lele');
  assert.equal(tent.o.njhInteriorPending,true);
@@ -136,8 +145,9 @@ test('spawns and homes resolve per test player',()=>{
  const meta=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/njh-map-meta.json'),'utf8'));
  const ichsan=api.resolveSpawn('t_ichsan',meta);
  assert.equal(ichsan.kind,'home');
- assert.equal(ichsan.point.x,-45.5);
- assert.equal(ichsan.point.z,57.5);
+ assert.equal(ichsan.point.x,-28.25);
+ assert.equal(ichsan.point.z,71.5);
+ assert.equal(ichsan.point.template,'njh_kos_ichsan');
  const noor=api.resolveSpawn('t_noor',meta);
  assert.equal(noor.kind,'home');
  assert.deepEqual([noor.point.x,noor.point.z],[-26.25,71.5]);

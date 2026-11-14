@@ -14054,9 +14054,9 @@
             "jakarta",
             "jakarta-pusat",
             "kebon-sirih",
-            "njh-door:njh_door_home_ichsan",
             "pipeline-native",
-            "service"
+            "service",
+            "njh-door:njh_door_rumah_biasa"
           ],
           "interactions": [
             "enter"
@@ -14630,6 +14630,7 @@
           "layer": "structure",
           "tags": [
             "njh-door:njh_door_home_noor",
+            "njh-door:njh_door_home_ichsan",
             "njh-draft1"
           ],
           "interactions": [
@@ -14639,14 +14640,14 @@
           "entranceFacing": "sw",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "",
+          "notes": " Two street doors on the same building: njh_door_home_noor → njh_kos_noor, njh_door_home_ichsan → njh_kos_ichsan. Preview only.",
           "asset": "pipeline:id200_bangunan_rumah_kos_dua_lantai",
           "x": -26.25,
           "z": 68.7,
           "rotation": 0,
           "width": 6.76,
           "height": 7.04,
-          "name": "Kost Noor",
+          "name": "Kost Ichsan & Noor",
           "subtype": "id200_bangunan_rumah_kos_dua_lantai",
           "collision": true
         },

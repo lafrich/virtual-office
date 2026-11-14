@@ -1,6 +1,6 @@
 {
   "id": "njh_kos",
-  "label": "NJH · Kos",
+  "label": "NJH · Kos (alias of njh_kos_noor)",
   "format": "virtual-life-interior-v1",
   "version": 2,
   "width": 8,
@@ -21,7 +21,7 @@
   },
   "items": [
     {
-      "id": "njh-kos-bed-1",
+      "id": "njh-kos-bed",
       "assetId": "bed",
       "name": "Kasur",
       "c": 0,
@@ -35,6 +35,12 @@
       "blocking": true,
       "triggerRadius": 1.15,
       "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
+      ],
       "motions": [
         "lie_sleep"
       ],
@@ -54,7 +60,7 @@
       ]
     },
     {
-      "id": "njh-kos-wardrobe-1",
+      "id": "njh-kos-wardrobe",
       "assetId": "wardrobe",
       "name": "Lemari",
       "c": 2,
@@ -68,34 +74,21 @@
       "blocking": true,
       "triggerRadius": 1.15,
       "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "owner_only",
+      "tags": [
+        "owner:noor",
+        "access:owner_only"
+      ],
       "motions": [
         "open"
       ]
     },
     {
-      "id": "njh-kos-stove-1",
-      "assetId": "stove",
-      "name": "Kompor",
-      "c": 4,
-      "r": 0,
-      "rotation": 0,
-      "flipX": false,
-      "flipY": false,
-      "actionId": "cook",
-      "pose": null,
-      "capacity": 1,
-      "blocking": true,
-      "triggerRadius": 1.15,
-      "actionAdjustments": {},
-      "motions": [
-        "cook"
-      ]
-    },
-    {
-      "id": "njh-kos-fridge-1",
+      "id": "njh-kos-fridge",
       "assetId": "fridge",
       "name": "Kulkas",
-      "c": 5,
+      "c": 4,
       "r": 0,
       "rotation": 0,
       "flipX": false,
@@ -106,43 +99,40 @@
       "blocking": true,
       "triggerRadius": 1.15,
       "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "owner_only",
+      "tags": [
+        "owner:noor",
+        "access:owner_only"
+      ],
       "motions": [
         "open"
       ]
     },
     {
-      "id": "njh-kos-shower-1",
-      "assetId": "shower",
-      "name": "Shower",
+      "id": "njh-kos-sekat_wc",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC / Kamar Mandi",
       "c": 6,
       "r": 0,
-      "rotation": 0,
+      "rotation": 90,
       "flipX": false,
       "flipY": false,
-      "actionId": "bathe",
-      "pose": "bathe",
-      "capacity": 1,
+      "actionId": null,
+      "pose": null,
+      "capacity": 0,
       "blocking": true,
-      "triggerRadius": 1.15,
+      "triggerRadius": 0,
       "actionAdjustments": {},
-      "motions": [
-        "mandi"
-      ],
-      "fx": [
-        {
-          "id": "njh_fx_water_shower",
-          "layer": "__fx",
-          "file": "fx/njh_fx_water_shower__fx_sheet_6x1.png",
-          "source": "/workspace/lfb-placeholders-v2/fx/njh_fx_water_shower__fx_sheet_6x1.png",
-          "motions": [
-            "mandi"
-          ],
-          "note": "Hook only; attach at shower head. Playback is Baymax. Not a furniture TYPE."
-        }
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
       ]
     },
     {
-      "id": "njh-kos-squat_toilet-1",
+      "id": "njh-kos-squat_toilet",
       "assetId": "squat_toilet",
       "name": "WC Jongkok",
       "c": 7,
@@ -156,17 +146,23 @@
       "blocking": true,
       "triggerRadius": 1.15,
       "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
+      ],
       "motions": [
         "wc_squat"
       ]
     },
     {
-      "id": "njh-kos-sink-1",
+      "id": "njh-kos-sink",
       "assetId": "sink",
       "name": "Wastafel",
       "c": 6,
       "r": 2,
-      "rotation": 0,
+      "rotation": 90,
       "flipX": false,
       "flipY": false,
       "actionId": "wash",
@@ -175,14 +171,67 @@
       "blocking": true,
       "triggerRadius": 1.15,
       "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
+      ],
       "motions": [
         "wash"
       ]
     },
     {
-      "id": "njh-kos-chair-1",
+      "id": "njh-kos-water_tub",
+      "assetId": "water_tub",
+      "name": "Bak + Gayung",
+      "c": 7,
+      "r": 3,
+      "rotation": 270,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "bathe",
+      "pose": "bathe",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
+      ],
+      "motions": [
+        "mandi"
+      ]
+    },
+    {
+      "id": "njh-kos-fan",
+      "assetId": "fan",
+      "name": "Kipas",
+      "c": 4,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
+      ]
+    },
+    {
+      "id": "njh-kos-chair",
       "assetId": "chair",
-      "name": "Kursi Makan",
+      "name": "Kursi",
       "c": 0,
       "r": 3,
       "rotation": 90,
@@ -194,15 +243,21 @@
       "blocking": true,
       "triggerRadius": 1.15,
       "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
+      ],
       "motions": [
         "sit",
         "eat"
       ]
     },
     {
-      "id": "njh-kos-dining_table-1",
+      "id": "njh-kos-dining_table",
       "assetId": "dining_table",
-      "name": "Meja Makan",
+      "name": "Meja",
       "c": 2,
       "r": 3,
       "rotation": 0,
@@ -214,13 +269,43 @@
       "blocking": true,
       "triggerRadius": 1.15,
       "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
+      ],
       "motions": [
         "eat"
+      ]
+    },
+    {
+      "id": "njh-kos-shoe_rack",
+      "assetId": "shoe_rack",
+      "name": "Rak Sepatu",
+      "c": 0,
+      "r": 5,
+      "rotation": 180,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "ownerId": "noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
       ]
     }
   ],
   "floor": 1,
-  "notes": "r3 facing fix of njh_kos. Chair rot 90 (visual front +c) with a 1-tile gap, dining table at (2,3) so the seat visibly faces the table. Back-wall stove/shower/WC stay rot 0 (fronts into the room, WC stays SW). I1 chair has no true back view; rot 180 was not used.",
-  "adaptedFrom": "/workspace/njh-interior-templates-r1/scenes/njh_kos.interior-scene.json",
-  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema)."
+  "notes": "Compatibility alias of njh_kos_noor. Prefer njh_kos_noor for new wiring. Per-owner kost room for the 4-player preview test. Based on Baymax njh_kos (preview/main-interiors-kost-warteg, same layout as draft1 njh_kos) but the shower is replaced by a WC/kamar mandi: sekat_wc partition, squat_toilet, water_tub (bak + gayung, no separate gayung TYPE), wall-mounted sink (rot 90). No shower. Furniture types are all in the NJH preview catalog. ownerId is 'noor' (player t_noor). access=shared_partner for kasur and WC; owner_only for kulkas and lemari. Dressing props are shared_partner. Schema has no official owner field, so ownerId, access, and tags are all set. Paths stay clear; each used item has a free interaction-side tile. Preview only.",
+  "adaptedFrom": "world-builder/njh-play-interiors/njh_kos.interior-scene.json on preview/main-interiors-kost-warteg (read via git show, worktree not touched)",
+  "adaption": "Split into per-owner rooms; WC revised to bak+gayung + sekat, no shower; owner/access metadata added for Baymax.",
+  "ownerId": "noor",
+  "partnerOwnerId": "ichsan"
 }

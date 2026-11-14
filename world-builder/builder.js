@@ -2413,10 +2413,10 @@ canvas.addEventListener('wheel',e=>{
   const sorted=candidates.map(o=>{
    const spec=assetByName.get(o.asset);
    const door=njhMapPreview&&window.VLNjhMapPreview?.doorAnchor?
-    window.VLNjhMapPreview.doorAnchor(o):
+    window.VLNjhMapPreview.doorAnchor(o,root.position.x,root.position.z):
     (window.VLWarteg3D?.supported(spec)?
      window.VLWarteg3D.doorPosition(o):{x:o.x,z:o.z});
-   return {o,distance:Math.hypot(root.position.x-door.x,root.position.z-door.z)};
+   return {o,door,distance:Math.hypot(root.position.x-door.x,root.position.z-door.z)};
   }).sort((a,b)=>a.distance-b.distance);
   const nearest=sorted[0];
   const enterLimit=njhMapPreview?(window.VLNjhMapPreview?.enterRadius||1.25):2.1;
@@ -2424,14 +2424,21 @@ canvas.addEventListener('wheel',e=>{
    lastEnterReason='too-far';
    tell('Dekati pintu bangunan, lalu tekan E untuk masuk.');return false;
   }
-  if(njhMapPreview&&!buildingHasInterior(nearest.o)){
+  const openObj=nearest.door?.interior?
+   Object.assign({},nearest.o,{
+    interior:nearest.door.interior,
+    njhInteriorTemplate:nearest.door.template,
+    njhDoorId:nearest.door.doorId,
+    njhInteriorPending:!!nearest.door.pending
+   }):nearest.o;
+  if(njhMapPreview&&!buildingHasInterior(openObj)){
    lastEnterReason='missing-interior';
    tell('interior belum ada');
    return false;
   }
   for(const k of Object.keys(walkInput))walkInput[k]=false;
   rigs.get(walkActorId)?.rig.setMoving(0,0,false);
-  interiorPreview.openFor(nearest.o);
+  interiorPreview.openFor(openObj);
   lastEnterReason='opened';
   return true;
  }
