@@ -185,6 +185,15 @@ jobs:
           node --check world-builder/njh-map-preview.js
           node --test tests/njh-guide-map-guard.test.cjs tests/njh-mart-registry.test.cjs tests/njh-mart-paint.test.cjs tests/njh-wc-privacy.test.cjs tests/njh-interior-art-catalog.test.cjs tests/njh-play-interiors.test.cjs
 
+      # Legacy unit tests were not all in the seven green browser workflows.
+      # Report the entire baseline before considering release. This is
+      # diagnostic, non-deploying, and will be promoted to a hard gate after triage.
+      - name: NJH full repository unit baseline (diagnostic)
+        continue-on-error: true
+        timeout-minutes: 8
+        run: |
+          node --test tests/*.test.cjs
+
       - name: Jiwa Survival V1 Play integration and business rules
         run: |
           node --check world-builder/semesta-life-play.js
