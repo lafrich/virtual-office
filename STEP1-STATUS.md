@@ -1,57 +1,56 @@
 # Step 1 status (untuk Layar)
 
-Ditulis 14 Nov 2026, Asia/Jakarta. **Belum di-push ke `origin/main`.**
+Ditulis 14 Nov 2026, Asia/Jakarta.
 
 ## SHA
 
-- Tip lokal `integ/step1`: lihat `git rev-parse HEAD` di `/workspace/integ-step1` (docs ini ikut di-commit di atasnya).
-- `origin/main` sebelumnya (live sekarang): `53cfe59be06b567a6ad2f51c84ea0e68eb5120b8`
-- Rollback: `ROLLBACK.md` di repo yang sama. Revert terbaru dulu, lalu merge dengan `-m 1`.
-- Fast-forward ke `origin/main` masih aman selama origin belum bergerak.
+- Pushed tip `integ/step1` → `origin/main`: the commit on `origin/main` after the 14 Nov 2026 (Asia/Jakarta) Step 1 fast-forward (this file rides in that tip). Previous live sha: `53cfe59be06b567a6ad2f51c84ea0e68eb5120b8`.
+- `origin/main` sebelumnya (sebelum Step 1): `53cfe59be06b567a6ad2f51c84ea0e68eb5120b8`
+- Rollback: `ROLLBACK.md`. Revert terbaru dulu (`31e74f50` Layar `27a820b`, lalu `212c84a6` `a953045`, perbaikan builder, lalu merge Ellen dan ours) dengan `-m 1` pada merge. Jangan force-push.
+- Fast-forward only; no force.
 
 ## UI Layar yang masuk Step 1
 
-- Final Step 1: `a953045acbedf1096cf8765758df53b22979d0be` (`?v=njh98-6`, sw v24).
-- Parent: `6ffffc8e99a50839a53b9e770319056e4c3c3c65` (`?v=njh98-5`, sw v23).
+- Final Step 1 HUD: `27a820b2a8792c4bc2de945856d71dd410708925` (`?v=njh98-7`, sw v25; merge `31e74f50`).
+- Parent: `a953045acbedf1096cf8765758df53b22979d0be` (`?v=njh98-6`, sw v24) di atas `6ffffc8e` (sw v23).
 - `shared/genesis-player.js` yang kotor di tree Layar **tidak** ikut.
-- Saat dicek sebelum keputusan push, `layar/win98-ui` masih di `a953045` — belum ada commit HUD/taskbar baru. Kalau datang belakangan, itu follow-up 1a.
+- Saat push, `layar/win98-ui` masih di `27a820b` — belum ada commit lebih baru. Kalau datang belakangan, itu follow-up **1a**.
 
-Perilaku UI yang sudah masuk: Alat Dev hanya dengan `?dev=1`; tab Login tunggal disembunyikan (id tetap ada); baris tombol OK jendela menempel di ponsel; Pipis di Tembok bisa dipilih. Saat interior 3D Kost/Warteg aktif, jendela placeholder Kost.exe / Warteg.exe tidak terbuka — itu disengaja.
+Perilaku UI: taskbar 28px, bar ikon Aksi, tab Kondisi, AKSI/LARI ikon transparan. Alat Dev hanya dengan `?dev=1`; tab Login tunggal disembunyikan (id tetap); baris tombol OK menempel di ponsel; Pipis di Tembok bisa dipilih. Saat interior 3D Kost/Warteg aktif, jendela placeholder Kost.exe / Warteg.exe tidak terbuka — itu disengaja.
 
 ## Yang nyata vs stub
 
-Nyata di tip ini:
+Nyata:
 
 - Kursi dipasangkan ke meja + seni Ibu Warteg.
-- Kost Cove resmi Ellen `8e099eb` (lobby dulu, `doors[]` / akses pacar, peta `?njhMap=1`).
+- Kost Cove resmi Ellen `8e099eb` (lobby dulu, akses pacar, peta `?njhMap=1`).
 - Seed 4P + profil start (Ichsan/Noor ke kamar kost sendiri, tamu hobo).
 - Penguatan pencocokan site.
-- UI Win98 Layar di atas.
-- Perbaikan skala Bangku Taman Ellen `5c6de78` (katalog 1.591×1.888, collision, blocking, sit) plus `world.json` tanpa override 2.19×2.251. Facade Cove `4c3dc4d` **tidak** masuk (itu Step 2).
+- UI Win98 sampai `27a820b`.
+- Perbaikan skala Bangku Taman Ellen `5c6de78` plus `world.json` tanpa override 2.19×2.251. Facade Cove `4c3dc4d` **tidak** masuk (Step 2).
 
-Masih stub / follow-up:
+Stub / follow-up:
 
-- Enam JSON Beraksi hanya di `/workspace/beraksi-int-slots/` (tidak di repo, tidak ditulis ke Drive). Play memakai fallback in-code `scene:njh_int_*`.
-- Catalog `file:null` untuk bathtub / sekat / fan / shoe_rack / registration_desk / water_tub.
+- Enam JSON Beraksi hanya di `/workspace/beraksi-int-slots/` (bukan di repo). Play memakai fallback `scene:njh_int_*`.
+- Catalog `file:null` untuk beberapa furnitur kamar.
 - Masak / minimarket / fishing = Step 2.
 - Outfit LGR v4 masih ditunda.
-- Perbaikan HUD/taskbar Layar setelah `a953045`, kalau ada, = follow-up 1a.
+- HUD/taskbar Layar setelah `27a820b`, kalau ada, = follow-up 1a.
+- Cuplikan visual `wall_pee` (hadap tembok) dan re-audit overflow ponsel Guest1 setelah load = follow-up, bukan blocker push.
 
-## Tes
+## Tes (sebelum push)
 
-- Suite unit integ (tanpa e2e/browser): **514 tes, 505 lulus, 9 gagal** — hanya 9 kegagalan lama yang sudah diizinkan. Tes regresi bangku lulus.
-- Password: tidak ada nilai rahasia `office_pass` (0/0). Pola 4 angka sandi tes muncul mentah 5 kali sebagai kebetulan (seed, versi build, placeholder OAuth, warna hex, pengali hash), bukan kredensial tersimpan.
-- Smoke 4 ID (login tes lewat worker lokal, bukan akun office): Ichsan/Noor/Guest1/Guest2 lolos login + creator + spawn (kost `njh_kos_ichsan` / `njh_kos_noor`, tamu hobo). Aturan pacar: Noor di kamar Ichsan boleh kasur/WC, kulkas/lemari "Punya pacar"; tamu "Terkunci". Warteg makan **-Rp12.000** (Ibu Warteg `npc_ibu_warteg` ada di peta). Kentut dan stub adegan (`scene:njh_int_wc`, sumber fallback) oke. Duduk di bangku (`rest` / Duduk sebentar) oke.
-- `wall_pee` terpasang (dekat + hadap tembok, kandung kemih ≥ 65) tetapi otomatisasi teleport belum memenuhi syarat hadap, jadi belum tertangkap di cuplikan.
-- Overflow audit: 0 di desktop ke-4 ID dan ponsel Ichsan; 3 flag di ponsel Guest1 (diambil terlalu awal, kemungkinan overlay muat — detail tidak tersimpan).
-- 404 konsol di dev: PNG kendaraan/pengendara yang belum ada di `origin/main` pipeline `site/`. Genesis/Emosi mencapai 2/2 jika pipeline disajikan.
+- Suite unit integ (tanpa e2e/browser): **514 tes, 505 lulus, 9 gagal** — hanya 9 kegagalan lama yang sudah diizinkan.
+- Password: `office_pass` 0/0. Pola 4 angka sandi tes muncul mentah 5 kali sebagai kebetulan (bukan kredensial tersimpan). Hits rahasia nyata: 0.
+- Smoke 4 ID (worker lokal, bukan akun office): login + creator + spawn kost/hobo, aturan pacar (Noor: kasur/WC ya, kulkas/lemari "Punya pacar"; tamu "Terkunci"), warteg Rp12.000, kentut, stub adegan, duduk bangku, HUD baru (tab Kondisi, bar Aksi, ikon AKSI/LARI) terlihat di desktop. `wall_pee` terpasang tapi hadap otomatis belum tertangkap. Overflow 0 di beberapa jalan desktop; re-audit ponsel Guest1 menyusul.
 
-## Cuplikan
+## Cuplikan lokal
 
 - Bangku: `/workspace/integ-step1-shots/bangku-taman-sit.png`
-- 4 ID desktop/ponsel: `/workspace/integ-step1-shots/desktop-t_*` dan `phone-t_*`
-- Ichsan siap di kota + kamar kost: `desktop-t_ichsan-spawn.png`, `desktop-t_ichsan-kost.png`
+- Ichsan kota + kamar: `desktop-t_ichsan-spawn.png`, `desktop-t_ichsan-kost.png`
+- HUD baru: `/workspace/integ-step1-shots/hud-desktop-t_*.png` (dan phone jika ada)
+- Live Pages: `/workspace/integ-step1-shots/live-*.png` (diisi setelah verifikasi)
 
 ## Worker
 
-Tidak ada deploy Worker ke produksi. Login tes sudah ada di live Worker; smoke lokal memakai salinan wrangler di `/tmp/step1-worker` (bukan `srv/.dev.vars`, bukan akun office). Live Pages belum diverifikasi karena tip ini belum di-push.
+Tidak ada deploy Worker ke produksi. Login tes sudah hidup di Worker yang ada.
