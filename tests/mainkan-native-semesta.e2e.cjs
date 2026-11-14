@@ -142,6 +142,9 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.ok(await fart.isVisible(),'Fart must be offered inside the same AKSI bar');
  await fart.click();
  await bar.waitFor({state:'hidden',timeout:8000});
+ // Inspect actual unobscured Genesis in the world before the large Nokia overlay.
+ fs.mkdirSync('screenshots',{recursive:true});
+ await page.screenshot({path:'screenshots/mainkan-world-genesis-visible.png',fullPage:true});
  await page.locator('#gamePhone').click();
  const phone=await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.VLNokiaPlay?.isOpen?.()||false);
  assert.equal(phone,true,'Mainkan Phone button must open native Semesta Nokia');
