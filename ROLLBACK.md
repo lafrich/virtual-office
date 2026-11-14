@@ -1,3 +1,19 @@
+# Rollback — Step 2a UI polish (Layar `layar/step2a`)
+
+Written 2026-11-14 (Asia/Jakarta). UI + check tool only (leftover wake toast, legacy AKSI dedupe, no-crop windows); no logic, Worker or storage change. `shared/genesis-player.js` not included.
+
+- Previous live `origin/main`: `704e969e9730e7c3ca3ef84c72ffb8741a43e8f7` (hotfix rollback notes, sw v29, `?v=njh-step2-3`)
+- Step 2a commit: `65994f956c459811f72fe06263ca5376682a9dbf` (sw v30, mainkan `?v=njh-step2-4`), fast-forwarded onto main
+- Gates before push: unit suite (same 7 failures as 704e969e, within the 9 known), `AUDIT=1 node mainkan/tools/njh98-window-fit.mjs` local (88 checks, 0 cropped, 0 flags), 4-ID desktop + phone smoke on a local worker, secret scan clean
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git revert --no-edit 65994f956c459811f72fe06263ca5376682a9dbf
+# bump sw.js to v31 so phones drop v30, then push --ff-only
+```
+
+---
+
 # Rollback — hotfix Minimarket.exe crop + window-fit gate
 
 Written 2026-11-14 (Asia/Jakarta). CSS + check tool + docs only; no logic, Worker or storage change.
