@@ -45,8 +45,8 @@ Use tiles come from `njh-map-meta.json`. Enter radius is 1.25 from the use point
 | Warteg / warung makan (`jakarta-v3-18446`) | -39.5, 41.5 | `njh_warung_makan` | wired |
 | Rumah Ichsan (`ref-gas-station`) | -45.5, 57.5 | `njh_rumah_biasa` | wired |
 | Bengkel Motor (`njh-bengkel`) | -48.0, 71.5 | `njh_bengkel` | wired |
-| WC / Mandi Umum (`njh-wc-umum`) | -43.0, 71.5 | `njh_wc_mandi_umum` | wired |
-| Kos Noor (`njh-kos-noor`) | -26.25, 71.5 | `njh_kos` | wired |
+| WC Umum / Mandi Umum (`njh-wc-umum`) | -43.0, 71.5 | `njh_wc_mandi_umum` | wired |
+| Kost Noor (`njh-kos-noor`) | -26.25, 71.5 | `njh_kos` | wired |
 | Warung Madura (`ref-north-row-b`) | -43.5, 41.5 | `njh_warung_madura` | pre-wired, pending r6 (toast: interior belum ada) |
 | Warung Kopi Pojok Gang (`ref-west-center-a`) | -38.5, 51.5 | `njh_warung_kopi` | pre-wired, pending r6 |
 | Warung nasi Sunda (`jakarta-v3-13525`) | -21.15, 71.5 | `njh_nasi_sunda` | pre-wired, pending r6 |
@@ -99,3 +99,12 @@ Playwright smoke (`tests/njh-map-preview-smoke.py`), desktop 1280×800 and phone
 3. Kali / dermaga (preview only): authored tiles at the channel, including `(-53,43)` and `(-53,44)`, are type `river` (252 river cells, 0 water). Only those `river` cells are painted with Water (`water.png`, still not walkable). The bank at `c=-52` and the use tile `[-50.375, 44]` (`c=-51, r=44`) stay sidewalk; they were never remapped. The sidewalk looked too close in color to the water, so river-adjacent sidewalks use the existing `sidewalk_edge_*` curb as a turap (yellow edge toward the Kali). The dock footprint stays on the bank; a 0.8-tile draw offset puts the deck out over the water, starting at the turap. Live maps are unchanged. Close-ups: `/workspace/njh-map-preview-shots/dermaga-close-desktop.png` and `dermaga-close-phone.png`.
 4. Known leftover from the interior art preview: TV back-view still resembles the screen; furniture icons in the left panel may still use older art.
 5. Preview only — not live, and Ichsan has not reviewed the map.
+
+
+## Gameplay sites (preview/njh-gameplay-sites)
+
+Function-first additions on top of draft1, so Semesta Life Play can resolve activity spots by object name instead of fallback pins. Preview only; not live. Rumah ibadah and extras (kotak sedekah, relawan, kursus, kantor premium) were skipped.
+
+Name/tag fixes on existing buildings: Kost Noor, WC Umum / Mandi Umum, Pasar Ikan (lapak ikan basah), Pos Hansip Kali. The `cafe` tag was removed from Warung Madura so the coffee site binds to Warung Kopi Pojok Gang.
+
+New objects: Tenda Hobo, Lapak Siomay Batagor (reuses `pipeline:lapak_tas`), Pak Ogah NPC, and 16 scavenge points (tong sampah, botol, kardus) spread across the gangs, Kali bank, and pasar edges — not clustered at the loak. See `GAMEPLAY-SITES.md` and `renders/njh-gameplay-sites-overview.png`.

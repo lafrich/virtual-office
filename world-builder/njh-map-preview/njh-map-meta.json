@@ -1,7 +1,7 @@
 {
   "format": "njh-map-meta-v1",
   "map": "njh-semesta-map-draft1",
-  "status": "DRAFT, preview only (njhMap=1), not live, not uploaded",
+  "status": "DRAFT, preview only (preview/njh-gameplay-sites, ?njhMap=1), not live, not uploaded",
   "createdAt": "2026-11-10T22:30:00+07:00",
   "runtimeFormat": {
     "document": "virtual-life-world-builder-v1 (map+objects), wrapped as membangun-cloud-1 / vl-city-draft-1 like the live Drive city",
@@ -178,6 +178,61 @@
         "njh_pos_ronda_kali",
         "njh_pos_ronda_lapangan",
         "njh_pos_ronda_pasar"
+      ]
+    },
+    {
+      "id": "njh_loc_pasar_ikan",
+      "members": [
+        "jakarta-v3-4942"
+      ]
+    },
+    {
+      "id": "njh_loc_siomay_batagor",
+      "members": [
+        "njh-lapak-siomay-batagor"
+      ]
+    },
+    {
+      "id": "njh_loc_tenda_hobo",
+      "members": [
+        "njh-tenda-hobo"
+      ]
+    },
+    {
+      "id": "njh_loc_hansip",
+      "members": [
+        "ref-north-row-a"
+      ]
+    },
+    {
+      "id": "njh_loc_pak_ogah",
+      "members": [
+        "njh-npc-pak-ogah",
+        "njh-tiang-ogah"
+      ]
+    },
+    {
+      "id": "njh_loc_scavenge",
+      "members": [
+        "njh-scavenge-tong-nw-1",
+        "njh-scavenge-botol-nw-1",
+        "njh-scavenge-kardus-nw-1",
+        "njh-scavenge-tong-sw-1",
+        "njh-scavenge-botol-sw-1",
+        "njh-scavenge-kardus-sw-1",
+        "njh-scavenge-tong-sw-2",
+        "njh-scavenge-botol-sw-2",
+        "njh-scavenge-kardus-sw-2",
+        "njh-scavenge-tong-se-1",
+        "njh-scavenge-botol-se-1",
+        "njh-scavenge-kardus-se-1",
+        "njh-scavenge-botol-pasar-1",
+        "njh-scavenge-kardus-pasar-1",
+        "njh-scavenge-tong-kali-1",
+        "njh-scavenge-botol-kali-1",
+        "jakarta-v3-22020",
+        "sprite-zhf6zq",
+        "njh-lapak-bekas"
       ]
     }
   ],
@@ -885,6 +940,237 @@
       "side": "any",
       "usePoint": null,
       "baymaxInteractionId": null
+    },
+    {
+      "id": "njh_pasar_ikan",
+      "objectId": "jakarta-v3-4942",
+      "kind": "sell_fish",
+      "side": "front",
+      "usePoint": [
+        -20.5,
+        31.0
+      ],
+      "asset": "pipeline:id200_pasar_lapak_ikan_basah"
+    },
+    {
+      "id": "njh_siomay_batagor",
+      "objectId": "njh-lapak-siomay-batagor",
+      "kind": "sell_fish",
+      "side": "front",
+      "usePoint": [
+        -22.5,
+        38.5
+      ],
+      "asset": "pipeline:lapak_tas"
+    },
+    {
+      "id": "njh_tenda_hobo",
+      "objectId": "njh-tenda-hobo",
+      "kind": "sleep",
+      "side": "front",
+      "usePoint": [
+        -51.5,
+        64.5
+      ],
+      "asset": "pipeline:id200_pasar_tenda_biru_pasar"
+    },
+    {
+      "id": "njh_hansip",
+      "objectId": "ref-north-row-a",
+      "kind": "arrest",
+      "side": "front",
+      "usePoint": [
+        -49.0,
+        41.5
+      ],
+      "asset": "pipeline:pos_ronda"
+    },
+    {
+      "id": "njh_pak_ogah",
+      "objectId": "njh-npc-pak-ogah",
+      "kind": "work",
+      "side": "north",
+      "usePoint": [
+        -29.5,
+        40.5
+      ],
+      "questId": "pak_ogah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-nw-1",
+      "objectId": "njh-scavenge-tong-nw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -47.5,
+        26.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-nw-1",
+      "objectId": "njh-scavenge-botol-nw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -41.5,
+        26.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_bening.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-nw-1",
+      "objectId": "njh-scavenge-kardus-nw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -37.5,
+        26.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-sw-1",
+      "objectId": "njh-scavenge-tong-sw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -47.5,
+        52.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-sw-1",
+      "objectId": "njh-scavenge-botol-sw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -41.5,
+        52.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_hijau.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-sw-1",
+      "objectId": "njh-scavenge-kardus-sw-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -36.5,
+        52.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-sw-2",
+      "objectId": "njh-scavenge-tong-sw-2",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -47.5,
+        64.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-sw-2",
+      "objectId": "njh-scavenge-botol-sw-2",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -45.5,
+        64.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_bening.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-sw-2",
+      "objectId": "njh-scavenge-kardus-sw-2",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -37.5,
+        64.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-se-1",
+      "objectId": "njh-scavenge-tong-se-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -24.5,
+        65.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-se-1",
+      "objectId": "njh-scavenge-botol-se-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -18.5,
+        65.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_hijau.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-se-1",
+      "objectId": "njh-scavenge-kardus-se-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -13.5,
+        65.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-pasar-1",
+      "objectId": "njh-scavenge-botol-pasar-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -13.5,
+        23.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_bening.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-kardus-pasar-1",
+      "objectId": "njh-scavenge-kardus-pasar-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -29.5,
+        37.25
+      ],
+      "asset": "loak-v2/ground/kardus_lipat.png"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-tong-kali-1",
+      "objectId": "njh-scavenge-tong-kali-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -51.5,
+        29.25
+      ],
+      "asset": "pipeline:tong_sampah"
+    },
+    {
+      "id": "njh_scavenge_njh-scavenge-botol-kali-1",
+      "objectId": "njh-scavenge-botol-kali-1",
+      "kind": "scavenge",
+      "side": "any",
+      "usePoint": [
+        -51.5,
+        57.25
+      ],
+      "asset": "loak-v2/ground/botol_plastik_hijau.png"
     }
   ],
   "crossings": [
@@ -1556,5 +1842,10 @@
     "object:obj-njh-penanda-doa": "object:njh_penanda_doa",
     "studio:br-warung-pecel-lele": "studio:br-warung-pecel-lele",
     "studio:br-lapak-sate-madura": "studio:br-lapak-sate-madura"
+  },
+  "gameplaySites": {
+    "branch": "preview/njh-gameplay-sites",
+    "basedOn": "preview/njh-map-draft1 @ ffc76e6",
+    "note": "Function-first Semesta Life Play sites. Rumah ibadah extras skipped. No push, no deploy."
   }
 }

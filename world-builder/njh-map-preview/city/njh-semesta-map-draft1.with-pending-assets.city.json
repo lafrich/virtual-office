@@ -7,7 +7,7 @@
     "id": "city-njh-semesta-draft1-with-pending",
     "name": "NJH · Kampung Kali Kebon Sirih (draft1)",
     "createdAt": "2026-11-10T22:30:00+07:00",
-    "updatedAt": "2026-11-10T22:30:00+07:00",
+    "updatedAt": "2026-11-14T11:50:00+07:00",
     "document": {
       "format": "virtual-life-world-builder-v1",
       "version": 1,
@@ -13495,6 +13495,61 @@
       },
       "objects": [
         {
+          "id": "njh-tenda-hobo",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "sleep"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Function-first hobo tent for Semesta Life Play (pattern /tenda|hobo.?tent/). Reuses the existing pasar tenda asset as a stand-in; aesthetics later. Collision off so the Kali inspection path stays clear.",
+          "asset": "pipeline:id200_pasar_tenda_biru_pasar",
+          "x": -51.5,
+          "z": 63.5,
+          "rotation": 0,
+          "width": 3.36,
+          "height": 3.8,
+          "name": "Tenda Hobo",
+          "subtype": "id200_pasar_tenda_biru_pasar",
+          "collision": false
+        },
+        {
+          "id": "njh-npc-pak-ogah",
+          "name": "Pak Ogah",
+          "type": "quest_npc",
+          "x": -29.5,
+          "z": 41.5,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1,
+          "questId": "pak_ogah",
+          "collision": true,
+          "layer": "character",
+          "subtype": "pak_ogah",
+          "tags": [
+            "njh-gameplay-sites",
+            "semesta"
+          ],
+          "interactions": [
+            "talk",
+            "accept_job"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "auto",
+          "notes": "Job NPC for Semesta Life Play (pattern /pak.?ogah/). Placed on the sidewalk south of Tiang Pak Ogah, not on the road."
+        },
+        {
           "id": "njh-nw1-h1",
           "type": "sprite",
           "y": 0,
@@ -13704,7 +13759,7 @@
         },
         {
           "id": "ref-north-row-a",
-          "name": "Pos Ronda Kali",
+          "name": "Pos Hansip Kali",
           "type": "sprite",
           "x": -49.0,
           "z": 40.0,
@@ -13785,7 +13840,6 @@
           "layer": "structure",
           "subtype": "warung_madura",
           "tags": [
-            "cafe",
             "kebon-sirih",
             "njh-door:njh_door_warung_madura",
             "pipeline-native",
@@ -14223,7 +14277,7 @@
           "rotation": 0,
           "width": 5.2,
           "height": 5.24,
-          "name": "WC / Mandi Umum",
+          "name": "WC Umum / Mandi Umum",
           "subtype": "id200_publik_toilet_umum_kampung",
           "collision": true
         },
@@ -14592,7 +14646,7 @@
           "rotation": 0,
           "width": 6.76,
           "height": 7.04,
-          "name": "Kos Noor",
+          "name": "Kost Noor",
           "subtype": "id200_bangunan_rumah_kos_dua_lantai",
           "collision": true
         },
@@ -14808,7 +14862,7 @@
         },
         {
           "id": "jakarta-v3-4942",
-          "name": "Lapak ikan basah · Jakarta",
+          "name": "Pasar Ikan (lapak ikan basah)",
           "type": "sprite",
           "x": -20.5,
           "z": 29.9,
@@ -17229,10 +17283,486 @@
           "d": 3,
           "interactive": true,
           "enterable": true
+        },
+        {
+          "id": "njh-lapak-siomay-batagor",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "structure",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "sell_fish"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "auto",
+          "notes": "Function-first siomay/batagor stall. Reuses pipeline:lapak_tas (no dedicated siomay asset in the catalog). Front/interaction side is +z (south), tile (-22.5, 38.5) left free.",
+          "asset": "pipeline:lapak_tas",
+          "x": -22.5,
+          "z": 37.5,
+          "rotation": 0,
+          "width": 2.55,
+          "height": 3.593,
+          "name": "Lapak Siomay Batagor",
+          "subtype": "lapak_tas",
+          "collision": true
+        },
+        {
+          "id": "njh-scavenge-tong-nw-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_utara). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "pipeline:tong_sampah",
+          "x": -47.5,
+          "z": 25.5,
+          "rotation": 0,
+          "width": 1.2374,
+          "height": 1.8371,
+          "name": "Tong Sampah Gang Utara",
+          "subtype": "tong_sampah",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-botol-nw-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_utara). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/botol_plastik_bening.png",
+          "x": -41.5,
+          "z": 25.5,
+          "rotation": 0,
+          "width": 0.55,
+          "height": 0.7,
+          "name": "Botol bekas Gang Utara",
+          "subtype": "botol_plastik_bening",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-kardus-nw-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_utara). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/kardus_lipat.png",
+          "x": -37.5,
+          "z": 25.5,
+          "rotation": 0,
+          "width": 0.625,
+          "height": 0.7,
+          "name": "Kardus bekas Gang Utara",
+          "subtype": "kardus_lipat",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-tong-sw-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_selatan). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "pipeline:tong_sampah",
+          "x": -47.5,
+          "z": 51.5,
+          "rotation": 0,
+          "width": 1.2374,
+          "height": 1.8371,
+          "name": "Tong Sampah Gang Selatan",
+          "subtype": "tong_sampah",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-botol-sw-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_selatan). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/botol_plastik_hijau.png",
+          "x": -41.5,
+          "z": 51.5,
+          "rotation": 0,
+          "width": 0.55,
+          "height": 0.7,
+          "name": "Botol bekas dekat Warung Kopi",
+          "subtype": "botol_plastik_hijau",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-kardus-sw-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_selatan). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/kardus_lipat.png",
+          "x": -36.5,
+          "z": 51.5,
+          "rotation": 0,
+          "width": 0.625,
+          "height": 0.7,
+          "name": "Kardus bekas Gang Selatan",
+          "subtype": "kardus_lipat",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-tong-sw-2",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_selatan). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "pipeline:tong_sampah",
+          "x": -47.5,
+          "z": 63.5,
+          "rotation": 0,
+          "width": 1.2374,
+          "height": 1.8371,
+          "name": "Tong Sampah Gang Selatan 2",
+          "subtype": "tong_sampah",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-botol-sw-2",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_selatan). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/botol_plastik_bening.png",
+          "x": -45.5,
+          "z": 63.5,
+          "rotation": 0,
+          "width": 0.55,
+          "height": 0.7,
+          "name": "Botol bekas dekat Tenda Hobo",
+          "subtype": "botol_plastik_bening",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-kardus-sw-2",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_selatan). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/kardus_lipat.png",
+          "x": -37.5,
+          "z": 63.5,
+          "rotation": 0,
+          "width": 0.625,
+          "height": 0.7,
+          "name": "Kardus bekas Gang Selatan 2",
+          "subtype": "kardus_lipat",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-tong-se-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_timur). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "pipeline:tong_sampah",
+          "x": -24.5,
+          "z": 64.5,
+          "rotation": 0,
+          "width": 1.2374,
+          "height": 1.8371,
+          "name": "Tong Sampah Gang Timur",
+          "subtype": "tong_sampah",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-botol-se-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_timur). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/botol_plastik_hijau.png",
+          "x": -18.5,
+          "z": 64.5,
+          "rotation": 0,
+          "width": 0.55,
+          "height": 0.7,
+          "name": "Botol bekas Gang Timur",
+          "subtype": "botol_plastik_hijau",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-kardus-se-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (gang_timur). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/kardus_lipat.png",
+          "x": -13.5,
+          "z": 64.5,
+          "rotation": 0,
+          "width": 0.625,
+          "height": 0.7,
+          "name": "Kardus bekas dekat Kost",
+          "subtype": "kardus_lipat",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-botol-pasar-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (pasar_edge). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/botol_plastik_bening.png",
+          "x": -13.5,
+          "z": 22.5,
+          "rotation": 0,
+          "width": 0.55,
+          "height": 0.7,
+          "name": "Botol bekas tepi pasar",
+          "subtype": "botol_plastik_bening",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-kardus-pasar-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (pasar_edge). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/kardus_lipat.png",
+          "x": -29.5,
+          "z": 36.5,
+          "rotation": 0,
+          "width": 0.625,
+          "height": 0.7,
+          "name": "Kardus bekas tepi plaza",
+          "subtype": "kardus_lipat",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-tong-kali-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (kali). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "pipeline:tong_sampah",
+          "x": -51.5,
+          "z": 28.5,
+          "rotation": 0,
+          "width": 1.2374,
+          "height": 1.8371,
+          "name": "Tong Sampah tepi Kali utara",
+          "subtype": "tong_sampah",
+          "collision": false
+        },
+        {
+          "id": "njh-scavenge-botol-kali-1",
+          "type": "sprite",
+          "y": 0,
+          "scale": 1,
+          "replaceable": true,
+          "layer": "prop",
+          "tags": [
+            "njh-gameplay-sites"
+          ],
+          "interactions": [
+            "scavenge"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "blocking": "no",
+          "notes": "Mulung point (kali). Function-first placement on sidewalk/plaza, paths left clear.",
+          "asset": "loak-v2/ground/botol_plastik_hijau.png",
+          "x": -51.5,
+          "z": 56.5,
+          "rotation": 0,
+          "width": 0.55,
+          "height": 0.7,
+          "name": "Botol bekas tepi Kali selatan",
+          "subtype": "botol_plastik_hijau",
+          "collision": false
         }
       ]
     },
     "format": "vl-city-draft-1"
   },
-  "savedAt": "2026-11-10T22:30:00+07:00"
+  "savedAt": "2026-11-14T11:50:00+07:00"
 }
