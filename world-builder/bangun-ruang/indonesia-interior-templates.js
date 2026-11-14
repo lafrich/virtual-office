@@ -63,7 +63,20 @@ const types={
  gym_mat:prop('Matras Olahraga','Jasa','▧',1,2,'exercise','prayer_mat'),
  treadmill:prop('Treadmill','Jasa','▰',2,1,'exercise','treadmill'),
  trash_bin:prop('Tempat Sampah','Jasa','▣',1,1,'open','trash_bin'),
- locker:prop('Loker','Jasa','▥',2,1,'open,store','wardrobe')
+ locker:prop('Loker','Jasa','▥',2,1,'open,store','wardrobe'),
+ // NJH MART: dimensions and stable IDs match njh-play-interiors/catalog.json.
+ // Keep art in the existing Step-2 four-view catalog, not generated substitutes.
+ njh_rak_sembako:prop('Rak Sembako NJH Mart','Toko','▥',2,1,'browse,collect','aisle_rack'),
+ njh_rak_bumbu_mi:prop('Rak Bumbu & Mi NJH Mart','Toko','▥',2,1,'browse,collect','aisle_rack'),
+ njh_rak_snack:prop('Rak Snack NJH Mart','Toko','▥',2,1,'browse,collect','aisle_rack'),
+ njh_chiller_segar:prop('Chiller Segar NJH Mart','Toko','▣',2,1,'browse,open,buy','display_freezer'),
+ njh_display_sayur_buah:prop('Sayur & Buah NJH Mart','Toko','▤',2,1,'browse,collect','market_crate'),
+ njh_keranjang_belanja:prop('Keranjang Belanja NJH Mart','Toko','▥',1,1,'collect','market_crate'),
+ njh_troli:prop('Troli NJH Mart','Toko','▥',1,1,'collect','market_crate'),
+ njh_papan_promo:prop('Papan Promo NJH Mart','Toko','▣',1,1,'browse','whiteboard'),
+ njh_counter_kasir:prop('Meja Kasir NJH Mart','Toko','▣',2,1,'pay,buy,sell','cashier'),
+ njh_counter_kopi:prop('Counter Kopi NJH Mart','Toko','▤',3,1,'brew,pay','counter'),
+ njh_mesin_kopi:prop('Mesin Kopi NJH Mart','Toko','◈',1,1,'brew','coffee_machine')
 };
 const templates={};
 const rows=[
