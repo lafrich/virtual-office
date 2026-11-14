@@ -199,9 +199,15 @@ body.njh-paused .menubar,body.njh-paused .njh-steps,body.njh-paused .taskbar,bod
 .w98-body{padding:5px 4px 3px}
 .w98-well{background:#fff;padding:2px 4px;box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh),inset -2px -2px var(--w-lt),inset 2px 2px var(--w-dk)}
 
-/* profile (top-left) */
+/* profile + kondisi (top-left, one window with tabs) */
 .njh-profile{left:calc(8px + var(--sal));top:calc(8px + var(--sat));width:270px}
-.njh-profile .w98-body{display:grid;grid-template-columns:44px 1fr;gap:6px;align-items:center}
+.njh-profile>.njh-hudtabs{display:flex;gap:0;padding:2px 3px 0;margin:0;position:relative;z-index:1}
+.njh-profile>.njh-hudtabs button{min-height:18px;padding:2px 10px;font:11px var(--w-font);color:#000;background:var(--w-face);border:0;cursor:pointer;
+ box-shadow:inset 1px 1px var(--w-hl),inset -1px 0 var(--w-dk),inset -2px 0 var(--w-sh)}
+.njh-profile>.njh-hudtabs button[aria-selected=true]{font-weight:bold;padding-bottom:5px;margin-top:-2px;z-index:2}
+#njhProfilePane{display:grid;grid-template-columns:44px 1fr;gap:6px;align-items:center}
+#njhNeedsBody{display:grid;gap:3px}
+#njhProfilePane[hidden],#njhNeedsBody[hidden]{display:none!important}
 .njh-avatar{width:44px;height:64px;background:#008080;display:grid;place-items:end center;overflow:hidden;
  box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh),inset 2px 2px var(--w-dk)}
 .njh-avatar canvas{width:36px;height:63px;image-rendering:pixelated;display:block}
@@ -214,9 +220,7 @@ body.njh-paused .menubar,body.njh-paused .njh-steps,body.njh-paused .taskbar,bod
 .njh-clockbtn b{font-family:var(--w-mono);font-weight:normal}
 .njh-wallet{font:bold 13px/18px var(--w-mono);text-align:right;color:#000}
 
-/* needs (top-right) */
-.njh-needs{right:calc(8px + var(--sar));top:calc(8px + var(--sat));width:236px}
-.njh-needs .w98-body{display:grid;gap:3px}
+/* needs rows live in #njhNeedsBody (tab in the left window) */
 .njh-need{display:grid;grid-template-columns:70px 1fr 26px;gap:5px;align-items:center}
 .njh-need label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .njh-need output{text-align:right;font-family:var(--w-mono)}
@@ -231,28 +235,36 @@ body.njh-paused .menubar,body.njh-paused .njh-steps,body.njh-paused .taskbar,bod
 .njh-keys kbd{display:inline-block;min-width:18px;padding:0 4px;font:10px/15px var(--w-font);text-align:center;background:var(--w-face);margin-right:2px;
  box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl)}
 
-/* dock (bottom-right) */
-.njh-dock{right:calc(8px + var(--sar));bottom:calc(8px + var(--sab));display:flex;gap:2px;padding:3px}
+/* dock (bottom-right) — compact Win98 taskbar: 28px bar, 22px buttons, 11px font, 16px icons */
+.njh-dock{right:calc(8px + var(--sar));bottom:calc(8px + var(--sab));display:flex;align-items:center;gap:2px;height:28px;box-sizing:border-box;padding:2px 3px;
+ max-width:calc(100% - 16px - var(--sal) - var(--sar))}
 .njh-dock .njh-app,#njhDock #gamePhone,#njhDock #gameBag{position:static!important;transform:none!important;left:auto!important;top:auto!important;
- display:grid!important;grid-template-rows:20px auto;place-items:center;gap:1px;width:58px;min-width:0!important;min-height:46px;padding:3px 2px!important;
- font:11px/1.1 var(--w-font)!important;color:#000;background:var(--w-face)!important;border:0!important;cursor:pointer;
+ display:inline-flex!important;flex-direction:row;align-items:center;justify-content:center;gap:3px;
+ width:auto;max-width:78px;min-width:0!important;height:22px;min-height:22px;padding:1px 5px!important;
+ font:11px/1 var(--w-font)!important;color:#000;background:var(--w-face)!important;border:0!important;cursor:pointer;
  box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)!important}
+.njh-dock .njh-app span,#njhDock #gamePhone span,#njhDock #gameBag span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .njh-dock .njh-app:active,#njhDock #gamePhone:active,#njhDock #gameBag:active,.njh-dock .njh-app.is-on{
  box-shadow:inset 1px 1px var(--w-dk),inset -1px -1px var(--w-hl),inset 2px 2px var(--w-sh),inset -2px -2px var(--w-lt)!important}
-.njh-dock svg{width:20px;height:20px;display:block}
-.njh-dock .njh-dsep{width:0;margin:2px 3px;border-left:1px solid var(--w-sh);border-right:1px solid var(--w-hl)}
+.njh-dock svg{width:16px;height:16px;display:block;flex:none}
+.njh-dock .njh-dsep{width:0;align-self:stretch;margin:2px 3px;border-left:1px solid var(--w-sh);border-right:1px solid var(--w-hl)}
 
-/* Action / Run (existing Mainkan buttons, fixed Win98 placement) */
+/* Action / Run — compact, icon-only, semi-transparent (no text labels) */
 body.njh-play #viewport #mainkanGameBar [data-hud-item]{transform:none!important}
 body.njh-play #viewport #gameWallet{display:none!important}
-body.njh-play #viewport #gameAction,body.njh-play #viewport #gameRun{left:auto!important;top:auto!important;bottom:calc(72px + var(--sab));
- min-height:40px;font:bold 12px var(--w-font)!important;color:#000;background:var(--w-face)!important;border:0!important;padding:4px 12px!important;
- box-shadow:0 0 0 1px var(--w-dk),inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)!important}
-body.njh-play #viewport #gameAction{right:calc(8px + var(--sar));min-width:104px}
-body.njh-play #viewport #gameRun{right:calc(124px + var(--sar));min-width:76px;font-weight:normal!important}
+body.njh-play #viewport #gameAction,body.njh-play #viewport #gameRun{left:auto!important;top:auto!important;bottom:calc(40px + var(--sab));
+ width:28px;height:28px;min-width:0!important;min-height:0!important;padding:0!important;
+ display:grid!important;place-items:center;overflow:hidden;
+ font:0/0 var(--w-font)!important;color:transparent!important;
+ background:rgba(192,192,192,.38)!important;border:0!important;
+ box-shadow:0 0 0 1px rgba(0,0,0,.45),inset 1px 1px rgba(255,255,255,.65),inset -1px -1px rgba(128,128,128,.75)!important}
+body.njh-play #viewport #gameAction{right:calc(8px + var(--sar))}
+body.njh-play #viewport #gameRun{right:calc(40px + var(--sar))}
+body.njh-play #viewport #gameAction svg,body.njh-play #viewport #gameRun svg{width:16px;height:16px;display:block;pointer-events:none;text-indent:0}
 body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
- box-shadow:0 0 0 1px var(--w-dk),inset 1px 1px var(--w-dk),inset -1px -1px var(--w-hl),inset 2px 2px var(--w-sh)!important}
-#gameAction small,#gameRun small{display:block;font:10px var(--w-font);font-weight:normal}
+ background:rgba(192,192,192,.55)!important;
+ box-shadow:0 0 0 1px rgba(0,0,0,.5),inset 1px 1px rgba(128,128,128,.75),inset -1px -1px rgba(255,255,255,.5)!important}
+#gameAction small,#gameRun small{display:none!important}
 
 /* floating Win98 windows (Status, placeholders, toasts) */
 .njh-win{left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100% - 16px));max-height:calc(100% - 24px);display:flex;flex-direction:column;z-index:5}
@@ -267,7 +279,7 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 .njh-row{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 
 /* near-spot hint (one line above AKSI) */
-.njh-near{position:absolute;right:calc(8px + var(--sar));bottom:calc(122px + var(--sab));max-width:300px;padding:2px 6px;background:var(--w-tip);border:1px solid #000;
+.njh-near{position:absolute;right:calc(8px + var(--sar));bottom:calc(72px + var(--sab));max-width:300px;padding:2px 6px;background:var(--w-tip);border:1px solid #000;
  font:11px var(--w-font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 .njh-near[hidden]{display:none!important}
 /* progress window */
@@ -276,7 +288,7 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 .njh-progress .w98-body{display:grid;gap:4px}
 .njh-bar-lg{height:18px}
 .njh-progress small{font-size:11px}
-.njh-toast{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(140px + var(--sab));z-index:6;pointer-events:none;background:var(--w-tip);color:#000;border:1px solid #000;padding:3px 6px;font:11px var(--w-font);max-width:calc(100% - 24px)}
+.njh-toast{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(80px + var(--sab));z-index:6;pointer-events:none;background:var(--w-tip);color:#000;border:1px solid #000;padding:3px 6px;font:11px var(--w-font);max-width:calc(100% - 24px)}
 .njh-toast[hidden]{display:none!important}
 /* Tas grid */
 .njh-bagwin{width:min(340px,calc(100% - 16px))}
@@ -348,11 +360,13 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 @media (pointer:coarse){
  .w98-title button{width:28px;height:24px;font-size:12px}
  .njh-keys{display:none!important}
- body.njh-play #viewport #gameAction,body.njh-play #viewport #gameRun{border-radius:50%!important;padding:0!important;min-width:0!important}
- body.njh-play #viewport #gameAction{width:64px;height:64px;right:calc(12px + var(--sar));bottom:calc(66px + var(--sab))}
- body.njh-play #viewport #gameRun{width:50px;height:50px;right:calc(86px + var(--sar));bottom:calc(72px + var(--sab));font-size:11px!important}
- .njh-near{bottom:calc(136px + var(--sab))}
- body.njh-modal .njh-profile,body.njh-modal .njh-needs,body.njh-modal .njh-dock,body.njh-modal .njh-joy,body.njh-modal .njh-near,
+ body.njh-play #viewport #gameAction,body.njh-play #viewport #gameRun{border-radius:50%!important;padding:0!important;min-width:0!important;text-indent:0}
+ body.njh-play #viewport #gameAction{width:48px;height:48px;right:calc(10px + var(--sar));bottom:calc(54px + var(--sab))}
+ body.njh-play #viewport #gameRun{width:44px;height:44px;right:calc(62px + var(--sar));bottom:calc(56px + var(--sab))}
+ body.njh-play #viewport #gameAction svg{width:22px;height:22px}
+ body.njh-play #viewport #gameRun svg{width:20px;height:20px}
+ .njh-near{bottom:calc(106px + var(--sab))}
+ body.njh-modal .njh-profile,body.njh-modal .njh-dock,body.njh-modal .njh-joy,body.njh-modal .njh-near,body.njh-modal .njh-actbar,
  body.njh-modal.njh-play #viewport #gameAction,body.njh-modal.njh-play #viewport #gameRun{visibility:hidden}
 }
 .njh-modal-close{position:absolute;pointer-events:auto;right:calc(6px + var(--sar));top:calc(6px + var(--sat));z-index:7;font-weight:bold}
@@ -364,20 +378,21 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
  .njh-hud{font-size:10px}
  .w98-title{min-height:15px;font-size:10px}
  .njh-profile{width:214px;left:calc(6px + var(--sal));top:calc(6px + var(--sat))}
- .njh-profile .w98-body{grid-template-columns:30px 1fr;padding:2px;gap:4px}
+ #njhProfilePane{grid-template-columns:30px 1fr;padding:2px;gap:4px}
+ .njh-profile>.njh-hudtabs button{min-height:28px;padding:4px 10px}
  .njh-avatar{width:30px;height:44px}.njh-avatar canvas{width:25px;height:43px}
  .njh-pname{font-size:11px}.njh-wallet{font-size:11px;line-height:15px}
  .njh-clockbtn{font-size:10px;padding:1px 3px}
- .njh-needs{width:184px;right:calc(6px + var(--sar));top:calc(6px + var(--sat))}
- .njh-needs .w98-body{gap:1px;padding:3px 3px 2px}
+ #njhNeedsBody{gap:1px;padding:3px 3px 2px}
  .njh-need{grid-template-columns:58px 1fr 20px;gap:3px}
  .njh-bar{height:9px;padding:1px}
- .njh-dock{right:calc(6px + var(--sar));bottom:calc(6px + var(--sab));padding:2px}
- .njh-dock .njh-app,#njhDock #gamePhone,#njhDock #gameBag{width:46px;min-height:44px;font-size:9px!important;grid-template-rows:18px auto}
- .njh-dock svg{width:18px;height:18px}
- body.njh-play #viewport #gameAction{width:58px;height:58px;bottom:calc(60px + var(--sab))}
- body.njh-play #viewport #gameRun{width:46px;height:46px;right:calc(78px + var(--sar));bottom:calc(66px + var(--sab))}
- .njh-near{bottom:calc(124px + var(--sab))}
+ .njh-dock{right:calc(6px + var(--sar));bottom:calc(6px + var(--sab));height:40px;padding:2px}
+ .njh-dock .njh-app,#njhDock #gamePhone,#njhDock #gameBag{height:36px;min-height:36px;font-size:10px!important;padding:1px 4px!important;max-width:70px}
+ .njh-dock svg{width:16px;height:16px}
+ body.njh-play #viewport #gameAction{width:48px;height:48px;bottom:calc(50px + var(--sab))}
+ body.njh-play #viewport #gameRun{width:44px;height:44px;right:calc(62px + var(--sar));bottom:calc(52px + var(--sab))}
+ .njh-near{bottom:calc(102px + var(--sab))}
+ .njh-toast{bottom:calc(100px + var(--sab))}
  .njh-progress{top:calc(50% - 100px)}
  .njh-win{max-height:calc(100% - 12px)}
  /* onboarding in landscape */
@@ -590,3 +605,31 @@ html:not(.njh-devmode) .njh-dev{display:none!important}
 #loginScreen .tabs{display:none}
 /* the last button row of a floating window (OK / Tutup / Keluar) sticks to the bottom while the body scrolls */
 .njh-win>.w98-body>.njh-row:last-child{position:sticky;bottom:-3px;z-index:2;margin:0 -4px -3px;padding:4px 4px 3px;background:var(--w-face)}
+/* ---------- njh98-7 · compact tray, Sims action bar, Kondisi tab, icon-only AKSI/LARI ---------- */
+/* slide-out action options (not a window) */
+.njh-actbar{position:absolute;z-index:6;pointer-events:auto;max-width:min(420px,calc(100% - 16px - var(--sal) - var(--sar)))}
+.njh-actbar[hidden]{display:none!important}
+.njh-actbar-inner{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:stretch;gap:2px;padding:3px;
+ background:rgba(192,192,192,.94);
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-lt),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-hl);
+ animation:njhActSlide .16s steps(4)}
+@keyframes njhActSlide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.njh-actbar-inner{animation:none}}
+.njh-act{position:relative;width:56px;min-width:0;min-height:44px;padding:3px 2px 2px;border:0;cursor:pointer;
+ display:grid;grid-template-rows:16px auto;place-items:center;gap:1px;box-sizing:border-box;
+ font:11px/1.1 var(--w-font);color:#000;background:var(--w-face);
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)}
+.njh-act:active{box-shadow:inset 1px 1px var(--w-dk),inset -1px -1px var(--w-hl)}
+.njh-act:disabled{color:var(--w-sh);text-shadow:1px 1px var(--w-hl);cursor:default}
+.njh-act>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.njh-act svg{width:16px;height:16px;display:block}
+.njh-act .njh-sim{position:absolute;top:1px;right:1px;font:bold 6px/8px var(--w-font);padding:0 2px;background:#008080;color:#fff;letter-spacing:0;
+ max-width:calc(100% - 2px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.njh-actbar select{font:11px var(--w-font);min-height:28px;max-width:120px;background:#fff;border:0;color:#000;
+ box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl)}
+@media (pointer:coarse){
+ .njh-act{width:60px;min-height:36px;padding:4px 2px}
+}
+@media (pointer:coarse) and (max-height:500px){
+ .njh-act{min-height:36px;width:56px;font-size:10px}
+}

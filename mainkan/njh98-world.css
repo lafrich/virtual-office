@@ -25,14 +25,11 @@ html.semesta-player-mode.njh98 #worldClockHud button,html.semesta-player-mode.nj
 html.semesta-player-mode.njh98 #worldClockHud .clock-panel{position:static!important;background:var(--w-face)!important;border:0!important;box-shadow:none!important;margin-top:4px}
 
 /* ---- native life panel ----
-   Player view: no persistent window. It becomes a small context menu (title = spot, actions, Batal)
-   only while html.njh-ctx-open is set by the parent (AKSI / E near a spot).
-   ?dev=1 (html.njh-devtools) keeps the full panel with test tools on the left. */
+   Player view: the panel stays hidden. Action options are a slide-out icon bar in the parent HUD
+   (not a window). ?dev=1 (html.njh-devtools) keeps the full panel with test tools on the left. */
 html.semesta-player-mode.njh98 #semestaLifePlayPanel.slp{transform:none!important;background:var(--w-face)!important;border:0!important;outline:0!important;padding:3px!important;
  box-shadow:var(--win)!important;color:#000!important;font:11px/1.3 var(--w-font)!important;flex-direction:column;overflow:hidden!important;right:auto!important;bottom:auto!important}
 html.semesta-player-mode.njh98:not(.njh-devtools) #semestaLifePlayPanel.slp{display:none!important}
-html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) #semestaLifePlayPanel.slp{display:flex!important;left:calc(50% + 34px)!important;top:20%!important;
- width:236px;max-width:calc(50% - 44px)!important;max-height:calc(80% - 96px)!important}
 html.semesta-player-mode.njh98.njh-devtools #semestaLifePlayPanel.slp{display:flex;left:calc(8px + env(safe-area-inset-left,0px))!important;top:var(--hud-top)!important;
  width:300px;max-width:calc(100% - 16px)!important;max-height:calc(100% - var(--hud-top) - 72px)!important}
 html.semesta-player-mode.njh98 .slp .slp-head{background:linear-gradient(90deg,var(--w-t0),var(--w-t1))!important;padding:1px 2px 1px 4px!important;min-height:18px;flex:none}
@@ -79,16 +76,14 @@ html.semesta-player-mode.njh98 #ptWindow .pt-slot{background:#fff!important;bord
 /* ---- toasts / tips ---- */
 html.semesta-player-mode.njh98 #toast,html.semesta-player-mode.njh98 #vs-tip:not(:empty){background:var(--w-tip)!important;color:#000!important;border:1px solid #000!important;
  box-shadow:none!important;font:11px var(--w-font)!important;padding:3px 6px!important;text-shadow:none!important}
-html.semesta-player-mode.njh98 #toast{top:auto!important;bottom:calc(150px + env(safe-area-inset-bottom,0px))!important;left:50%!important;transform:translateX(-50%)!important;max-width:min(420px,calc(100% - 24px))}
+html.semesta-player-mode.njh98 #toast{top:auto!important;bottom:calc(80px + env(safe-area-inset-bottom,0px))!important;left:50%!important;transform:translateX(-50%)!important;max-width:min(420px,calc(100% - 24px))}
 
 /* ---- by Lafrich watermark stays visible between the corners ---- */
 html.semesta-player-mode.njh98 #vl-lafrich-mark{left:50%!important;right:auto!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;
  transform:translateX(-50%);opacity:.6!important;color:#fff!important;text-shadow:1px 1px 0 #000!important;z-index:70!important}
 
 @media (pointer:coarse) and (max-height:500px){
- /* never under the Kondisi window (≈190px wide, top-right) */
- html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) #semestaLifePlayPanel.slp{top:12%!important;max-height:calc(88% - 70px)!important;left:calc(50% + 24px)!important;width:auto!important;max-width:calc(50% - 24px - 198px - env(safe-area-inset-right,0px))!important;min-width:180px}
- html.semesta-player-mode.njh98 #toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
+ html.semesta-player-mode.njh98 #toast{bottom:calc(110px + env(safe-area-inset-bottom,0px))!important}
 }
 /* one toast only: #toast carries the same tell() text as the play-hud tip */
 html.semesta-player-mode.njh98:not(.njh-devtools) #vs-tip{display:none!important}

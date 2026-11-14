@@ -28,10 +28,10 @@ Satu-satunya pengecualian bentuk bulat: joystick dan tombol AKSI/LARI di HP (kon
 ### Satu pintu per fitur
 - **Dock kanan bawah adalah satu-satunya tempat** untuk Nokia, Tas, Status, Peta, Menu, Layar. Tombol **Peta** di dock membuka jendela *Peta Kota*. (Catatan untuk Baymax: Nokia masih punya app Peta bawaan → nanti cukup satu; usul: app Nokia memanggil jendela yang sama.)
 - Tidak boleh ada tombol kembar (contoh: Nokia di atas *dan* di bawah). Sebelum menambah tombol, cek apakah fitur itu sudah punya pintu.
-- Kondisi (Energi, Kebersihan, Buang Air, Kenyang, Moral, EXP) hanya di jendela **Kondisi** kanan atas; uang hanya di jendela profil kiri atas.
+- Kondisi (Energi, Kebersihan, Buang Air, Kenyang, Moral, EXP) ada di **tab Kondisi** pada jendela kiri (bersama tab Profil). Tidak ada jendela Kondisi terpisah di kanan atas. Uang hanya di tab Profil.
 
 ### Aksi kontekstual
-- **Tidak ada panel "Aksi & Tas" permanen.** Aksi muncul sebagai menu pop-up Win98 kecil hanya saat dekat objek/orang (AKSI / `E`), lalu hilang (Batal / `Esc`).
+- **Tidak ada panel "Aksi & Tas" permanen.** Aksi muncul sebagai **bar ikon yang geser dari tombol AKSI** (gaya The Sims, bukan jendela/tab Win98) hanya saat dekat objek/orang (AKSI / `E`), lalu hilang (ketuk di luar, `Esc`, atau setelah memilih). Tag **SIMULASI** tetap tampil di opsi placeholder.
 - Di tempat kerja: tahan AKSI → jendela progres.
 - **Jangan pernah menambah tombol baru untuk aksi.** Semua aksi (termasuk *Pipis di Tembok* `wall_pee` dan *Kentut* `fart`) hanya jadi **opsi di dalam menu Aksi yang sama** (satu tombol AKSI / `E`).
   - `wall_pee`: hanya kalau Buang Air ≥ 65 **dan** dekat/menghadap tembok atau bangunan → Moral −5, Buang Air −70, Kebersihan −5.
@@ -49,8 +49,14 @@ Satu-satunya pengecualian bentuk bulat: joystick dan tombol AKSI/LARI di HP (kon
 - **Landscape** (acuan 844×390), susunan HUD sama dengan desktop, diperkecil.
 - Portrait saat main → jendela **"Putar HP ke landscape"**; `screen.orientation.lock('landscape')` dicoba setelah fullscreen, gagal dengan tenang.
 - Gerak: **joystick bulat** semi-transparan kiri bawah (muncul di titik jempol), menyetir input WASD yang sudah ada. D-pad lama tetap di DOM tapi disembunyikan.
-- AKSI & LARI bulat kompak di kanan bawah.
-- Target sentuh **≥ 40px**. HUD bawaan **tidak boleh menutupi > 25% layar**. Saat Nokia/popup terbuka, HUD minggir.
+- AKSI & LARI di kanan bawah: **ikon saja** (tangan / tokoh lari), latar semi-transparan, border pixel tipis, tanpa tulisan; `aria-label`/`title` tetap. Di HP bentuknya tetap bulat, target ≥ 44px. Joystick tidak diubah.
+- Target sentuh: dock / opsi Aksi **≥ 36px** di HP, tombol **AKSI** dan **LARI** **≥ 44px** di HP. HUD bawaan **tidak boleh menutupi > 25% layar**. Saat Nokia/popup terbuka, HUD minggir.
+
+### Ukuran & komposisi HUD play
+- Dock kanan bawah seperti **taskbar Win98 asli**: tinggi ±28px di desktop, tombol ±22px, font 11px, ikon 16px, tray rapat (ikon + label satu baris). Di HP landscape tetap diperkecil, target sentuh dock ≥ 36px. **Joystick tidak diubah.**
+- Tombol **AKSI** dan **LARI**: ikon saja, latar semi-transparan, border pixel tipis, tanpa tulisan. Desktop kompak (~28px). HP ≥ 44px. `aria-label`/`title` wajib.
+- Opsi Aksi: **bukan jendela**. Bar ikon slide dari tombol AKSI. Satu tombol AKSI tetap — jangan menambah tombol aksi baru. Tutup: ketuk di luar, Esc, atau setelah memilih. Label pendek + ellipsis, tidak boleh keluar kotak; tag SIMULASI tetap.
+- **Kondisi** digabung ke jendela kiri sebagai tab (**Profil | Kondisi**). Tidak ada jendela Kondisi terpisah di kanan atas, tidak ada menu dobel. Tab rata, teks tidak overflow. Berlaku juga di HP landscape.
 
 ### Urutan masuk
 1. **Intro**: kartu Lafrich (~1.5 dtk) → judul + bar loading (preload aset asli) → "Tekan tombol apa saja / ketuk" → Menu Utama. Ketuk/tombol mempercepat; pemain lama (`njh98:intro-seen`) lebih cepat.
@@ -95,12 +101,12 @@ Ikuti handoff Baymax: `/workspace/mainkan-ui-handoff/MAINKAN-UI-HANDOFF.md` (box
 |---|---|
 | "Namanya Juga Hidup — the Game" | "Mainkan.exe" di layar pemain |
 | Bevel 98, title bar navy, sudut tajam, ikon pixel | Rounded, soft shadow, gradasi glossy, emoji, gaya kartun |
-| Satu pintu per fitur (dock) | Tombol/menu kembar (Nokia dua kali, Peta di luar Nokia) |
-| Menu aksi pop-up saat dekat objek | Panel "Aksi & Tas" permanen |
+| Satu pintu per fitur (dock); Kondisi hanya tab di jendela kiri | Tombol/menu kembar (Nokia dua kali, Peta di luar Nokia, jendela Kondisi terpisah di kanan) |
+| Bar ikon Aksi yang geser dari tombol AKSI saat dekat objek | Panel "Aksi & Tas" permanen, atau jendela/tab opsi Aksi di tengah layar |
 | Debug hanya `?dev=1` | Teks TEST/teleport/koordinat di layar pemain |
 | Fullscreen play, HUD jendela kecil | Dunia dibingkai jendela editor |
 | HP landscape + prompt putar + joystick bulat | D-pad kotak besar, layout portrait yang menutupi layar |
-| Target ≥ 40px, HUD ≤ 25% layar | HUD menutupi dunia |
+| Target dock/opsi ≥ 36px, AKSI/LARI ≥ 44px di HP, HUD ≤ 25% layar | HUD menutupi dunia; tombol AKSI/LARI bertuliskan teks |
 | Intro → Menu Utama; tutorial sekali, bisa dilewati | Tutorial muncul tiap login |
 | Tag SIMULASI / CONTOH / PLACEHOLDER kalau datanya mock | Mock tanpa tag, seolah data asli |
 | Uang asli hanya lewat `runAction` (harga game) | Mock mengubah dompet/status asli |
@@ -158,6 +164,7 @@ Format tiap entri: **Error** · **Kenapa** · **Aturan** · **Cara cek**.
 - **Bangku taman kebesaran & tembus (lintas tim, sisi peta — milik Ellen)**. Error: bangku taman jauh lebih besar dari karakter dan menembus objek/jalan di sekitarnya. Kenapa: aset peta diletakkan tanpa cek skala dan collision terhadap ukuran karakter. Aturan: ini bukan perbaikan UI — dicatat ke Ellen untuk cek skala/collision LFB; UI tidak boleh "menutupi" masalah peta dengan overlay. Cara cek: cek skala/collision LFB Ellen (objek vs tinggi karakter, kotak collision tidak tumpang tindih); dari sisi UI cukup screenshot `*-cue` di bangku untuk dibandingkan.
 - **"Pipis di Tembok" tidak pernah bisa dipilih (mock)**. Error: syarat mock "dekat tembok" hanya terpenuhi dalam 3 tile dari pintu, padahal dalam 4 tile Action sudah jadi "Masuk" pintu → opsi pipis tak terjangkau. Kenapa: jarak mock dan jarak pintu dipilih terpisah. Aturan: syarat aksi kontekstual tidak boleh bertabrakan dengan aksi lain di tombol Action yang sama; mock pakai cincin 4.2–6 tile dari pintu (sepanjang dinding bangunan). Cara cek: `capture4.mjs` langkah `pee` → `peeAt` bukan `none`, screenshot `*-36-ctx-pipis.png`.
 - **Pintu kost tidak terdeteksi** karena site kost di kota ini masih placeholder → pintu kost tetap ditampilkan (CONTOH) supaya Kost.exe bisa dimasuki.
+- **HUD kanan bawah kebesaran, tidak seperti taskbar Win98** (t67u–t71u). Error: dock ikon-di-atas-label ±46–58px dan tombol AKSI/LARI besar bertuliskan teks; opsi Aksi tampil sebagai jendela di tengah; Kondisi jendela terpisah di kanan atas. Aturan: lihat *Ukuran & komposisi HUD play* (28px / 22px / 11px di desktop; ikon-only semi-transparan untuk AKSI/LARI; opsi Aksi = bar geser, bukan jendela; Kondisi = tab kiri). Cara cek: screenshot play HUD desktop 1280×800 + HP landscape di `/workspace/layar/preview/shots5/`; ukur tinggi dock 28px (desktop) dan target AKSI/LARI ≥ 44px (HP); buka bar Aksi dan tab Kondisi; audit `njh98-audit.js` 0 flag.
 
 ## 5. File
 - `njh98.css` — skin Win98, step bar, HUD play, intro, joystick, penanda dunia.

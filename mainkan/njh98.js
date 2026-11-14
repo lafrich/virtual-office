@@ -2,7 +2,7 @@
  * - intro sequence (publisher card → title + preload → "tekan untuk mulai")
  * - wizard step bar + "Cara Main" how-to steps for the existing onboarding flow
  * - fullscreen play HUD over the Semesta iframe, one place per entry point
- * - context menu near objects (re-uses the native life-panel buttons), progress window,
+ * - action options as a slide-out icon bar from the AKSI button (proxies native life-panel buttons), progress window,
  *   Tas window, virtual joystick (drives the existing WASD walk input), landscape prompt
  * - placeholder "keluar tenda" spawn reveal (no animation exists yet)
  * Gameplay goes only through existing hooks: the native panel buttons, SemestaLifePlay.runAction
@@ -43,6 +43,17 @@ const ICON={
  action:px(['................','.kkkkkkkkkkkkkk.','.kllllllllllllk.','.klwwwwwwwwwwlk.','.klwkkkkkkkkwlk.','.klwwwwwwwwwwlk.','.klwkkkkkwwwwlk.','.klwwwwwwwwwwlk.','.kllllllllllllk.','.kkkkkkkkkkkkkk.','........k.......','.......kyk......','......kyyyk.....','.....kyyyyyk....','......kkkkk.....','................'],K),
  needs:px(['................','..kk......kk....','.krrk....krrk...','krrrrk..krrrrk..','krrrrrkkrrrrrk..','krrrrrrrrrrrrk..','.krrrrrrrrrrk...','..krrrrrrrrk....','...krrrrrrk.....','....krrrrk......','.....krrk.......','......kk........','................','kkkkkkkkkkkkkkk.','kGGGGGGGGGkwwwk.','kkkkkkkkkkkkkkk.'],K),
  app:px(['kkkkkkkkkkkkkkkk','knnnnnnnnnnnnnnk','kkkkkkkkkkkkkkkk','kwwwwwwwwwwwwwwk','kwttwwwwwwwwwwwk','kwttwkkkkkkkkwwk','kwwwwwwwwwwwwwwk','kwttwkkkkkkwwwwk','kwttwwwwwwwwwwwk','kwwwwwwwwwwwwwwk','kwwwwwwwwwwwwwwk','kwwwwwwwwwwwwwwk','kwwwwwwwwwwwwwwk','kwwwwwwwwwwwwwwk','kkkkkkkkkkkkkkkk','................'],K)
+,
+ hand:px(['......kkk.......','.....kwwwk......','.....kwwwk......','.....kwwwkkk....','.....kwwwkwwk...','..kk.kwwwkwwk...','.kwwkkwwwwkwwk..','.kwwwkwwwwwwwk..','.kwwwwwwwwwwwk..','..kwwwwwwwwwwk..','..kwwwwwwwwwwk..','...kwwwwwwwwk...','...kwwwwwwwwk...','....kkkkkkkk....','................','................'],K),
+ run:px(['.......kk.......','.......kyk......','.......kkk......','.....kknnkk.....','....k.nnnn.k....','......nnnkkk....','.....k.n.k.k....','....k..n..k.....','...kk..nn.k.....','...k...k.k......','......k...k.....','.....k.....k....','.....k.....k....','....kk.....kk...','................','................'],K),
+ sit:px(['.......kk.......','.......kyk......','.......kkk......','......knn.......','......nnn.......','.....knnnk......','....k.....k.....','.kkkkkkkkkkkkk..','.koooooooooook..','.kkkkkkkkkkkkk..','.k............k.','.k............k.','.kkkkkkkkkkkkkk.','................','................','................'],K),
+ pee:px(['.......kk.......','......kyyk......','......kyyyk.....','.....kyyyyyk....','.....kyyyyyk....','.....kyyyyyk....','......kyyyk.....','......kyyk......','.......kk.......','................','...kkkkkkkkk....','...kwwwwwwwk....','...kwwkkkkwwk...','...kwwwwwwwk....','...kkkkkkkkk....','................'],K),
+ fart:px(['................','.....kk.........','....kwwk..kk....','....kwwk.kwwk...','.....kk.kwwwwk..','...kk...kwwwwk..','..kwwk...kwwk...','..kwwk....kk....','...kk...........','................','.......kk.......','.......kyk......','.......kkk......','......knn.......','......nnn.......','................'],K),
+ eat:px(['................','......kyk.......','.....kyyyk......','......kyk.......','.......k........','..kkkkkkkkkkk...','.kwwwwwwwwwwwk..','.kwwyyyyyyyywk..','.kwwwwwwwwwwwk..','..kwwwwwwwwwk...','...kkkkkkkkk....','................','................','................','................','................'],K),
+ talk:px(['...kkkkkkkkk....','..kwwwwwwwwwk...','.kwwkkwwwwwwwk..','.kwwwwwwwwwwwk..','.kwwkkkkkwwwwk..','.kwwwwwwwwwwwk..','..kwwwwwwwwwk...','...kkkkkwwkk....','........kwwk....','.........kk.....','................','................','................','................','................','................'],K),
+ door:px(['................','..kkkkkkkkkkk...','..kwwwwwwwwwk...','..kwkkkkkkkkwk..','..kwwwwwwwwwk...','..kwwwwwwwwwk...','..kwwwwwwkwwk...','..kwwwwwwkwwk...','..kwwwwwwwwwk...','..kwwwwwwwwwk...','..kwwwwwwwwwk...','..kwwwwwwwwwk...','..kkkkkkkkkkk...','................','................','................'],K),
+ work:px(['................','.........kkk....','........kyyyk...','.......kyyyk....','......kyyyk.....','.....kyyyk......','..kkkyyyk.......','..kyyyyk........','..kkkkk.........','..koook.........','..koook.........','..kkkkk.........','................','................','................','................'],K),
+ sleep:px(['................','......kkkkkk....','...........k....','........kkk.....','.......k........','.......kkkkkk...','................','..kkkk..........','.....k..........','...kk...........','..k.............','..kkkk..........','................','................','................','................'],K)
 };
 const big=svg=>svg.replace('width="20" height="20"','width="32" height="32"');
 const titleIcon=document.querySelector('.titlebar .icon');
@@ -137,12 +148,12 @@ SCREENS.forEach(id=>{const el=$(id);if(el)mo.observe(el,{attributes:true,attribu
 const HOWTO=[
  {t:'Kontrol',c:[
   ['walk','Jalan','<span class="njh-kb"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> atau panah. Tahan <kbd>Shift</kbd> buat lari.</span><span class="njh-touch">Geser joystick di kiri bawah. Tahan <b>LARI</b> buat lari.</span>'],
-  ['action','Aksi','Dekat objek atau orang, tekan <b>AKSI</b><span class="njh-kb"> / <kbd>E</kbd></span>. Muncul menu kecil, pilih aksinya. Di tempat kerja, <b>tahan</b> AKSI sampai bar penuh.']]},
+  ['action','Aksi','Dekat objek atau orang, tekan <b>AKSI</b><span class="njh-kb"> / <kbd>E</kbd></span>. Muncul bar ikon dari tombol AKSI, pilih aksinya. Di tempat kerja, <b>tahan</b> AKSI sampai bar penuh.']]},
  {t:'Fitur',c:[
   ['nokia','Nokia','Dompet, Skill, Kursus, Marketplace, Furnitur, <b>Peta</b>, Profil.'],
   ['bag','Tas','Isi tas: makan buah atau buang barang.'],
   ['status','Status','Tempat tinggal, token listrik, agama, zodiak.'],
-  ['menu','Menu','Jeda, lihat tutorial lagi, atau keluar.']],n:'Semua tombol ini ada di dock kanan bawah. Bar <b>Kondisi</b> di kanan atas.'},
+  ['menu','Menu','Jeda, lihat tutorial lagi, atau keluar.']],n:'Semua tombol ini ada di dock kanan bawah. <b>Kondisi</b> ada di tab jendela kiri (bersama Profil).'},
  {t:'Tujuan pertama',c:[
   ['needs','Bertahan hidup','Jaga Energi, Kebersihan, Kenyang, Moral. Kalau Buang Air penuh, cari WC!'],
   ['app','Kumpulkan uang buat kost','Kerja serabutan, hemat, lalu sewa kamar kost supaya nggak tidur di tenda lagi.']]}
@@ -221,6 +232,18 @@ if(dock){
  app('njhDockMenu','Menu','menu','Menu jeda').addEventListener('click',()=>$('pauseButton')?.click());
  app('njhDockFull','Layar','full','Layar penuh').addEventListener('click',toggleFull);
 }
+(function(){
+ const a=$('gameAction');if(a){a.innerHTML=ICON.hand;a.setAttribute('aria-label','Aksi');if(!a.getAttribute('title'))a.title='Aksi (E)';}
+ const r=$('gameRun');if(r){r.innerHTML=ICON.run;r.setAttribute('aria-label','Lari');if(!r.getAttribute('title'))r.title='Tahan untuk lari (Shift)';}
+})();
+function hudTab(pane){
+ const prof=pane==='njhProfilePane';
+ const a=$('njhProfilePane'),b=$('njhNeedsBody');
+ if(a)a.hidden=!prof;if(b)b.hidden=prof;
+ $('njhTabProfil')?.setAttribute('aria-selected',String(prof));
+ $('njhTabKondisi')?.setAttribute('aria-selected',String(!prof));
+}
+$('njhHudTabs')?.addEventListener('click',e=>{const tab=e.target.closest('[role=tab]');if(tab)hudTab(tab.getAttribute('aria-controls'));});
 // Tas opens its own window (bag grid) instead of switching the native panel into bag mode.
 $('gameBag')?.addEventListener('click',e=>{if(DEV)return;e.stopImmediatePropagation();e.preventDefault();toggleWin('njhBagWin',paintBag);},true);
 
@@ -359,20 +382,103 @@ function ctxInfo(){
 }
 let ctxOpen=false,ctxLabel='';
 function setWorldClass(c,on){try{wdoc()?.documentElement?.classList.toggle(c,on);}catch{}}
+function cleanLabel(s){return String(s||'').replace(/^[^\wÀ-ɏ]+\s*/u,'').replace(/\s+/g,' ').trim();}
+const ACT_SHORT={wall_pee:'Pipis',pee_outside:'Pipis',fart:'Kentut',sit:'Duduk',sit_down:'Duduk',rest:'Duduk',
+ eat:'Makan',eat_item:'Makan',talk:'Bicara',speak:'Bicara',enter:'Masuk',enter_interior:'Masuk',
+ sleep:'Tidur',lie:'Tidur',work:'Kerja',job:'Kerja',discard_item:'Buang'};
+const ACT_IC={wall_pee:'pee',pee_outside:'pee',fart:'fart',sit:'sit',sit_down:'sit',rest:'sit',
+ eat:'eat',eat_item:'eat',talk:'talk',speak:'talk',enter:'door',enter_interior:'door',
+ sleep:'sleep',lie:'sleep',work:'work',job:'work',discard_item:'bag'};
+function shortOf(id,label){if(ACT_SHORT[id])return ACT_SHORT[id];const t=cleanLabel(label||id);const w=t.split(/\s+/)[0]||t;return w.length<=12?w:w.slice(0,11)+'…';}
+function ctxOptions(){
+ const out=[];const seen=new Set();
+ const add=o=>{const id=String(o.id||'');if(!id||seen.has(id))return;seen.add(id);out.push(o);};
+ const acts=wdoc()?.getElementById('slpActions');
+ if(acts){
+  acts.querySelectorAll('button[data-life-action]').forEach(b=>{
+   const id=b.getAttribute('data-life-action');
+   add({id,label:cleanLabel(b.textContent),src:'native',disabled:!!b.disabled,hint:b.title||'',mock:false});
+  });
+  acts.querySelectorAll('select').forEach((s,i)=>add({id:'select-'+i,label:s.getAttribute('aria-label')||'Pilih',src:'select',elId:s.id||'',mock:false}));
+ }
+ try{
+  const L=life();
+  if(typeof L?.nearbyActions==='function')(L.nearbyActions()||[]).forEach(a=>{
+   const id=String(a.id||a.action||'');if(!id)return;
+   add({id,label:cleanLabel(a.label||id),src:'hook',args:a.args,disabled:!!a.disabled,hint:a.hint||'',mock:false});
+  });
+ }catch{}
+ for(const a of bodyActs())add({...a,src:'body',label:cleanLabel(a.label)});
+ return out;
+}
+function placeActBar(){
+ const bar=$('njhActBar'),btn=$('gameAction'),hud=$('njhHud');
+ if(!bar||!btn||!hud||bar.hidden)return;
+ const br=btn.getBoundingClientRect(),hr=hud.getBoundingClientRect();
+ const bw=bar.offsetWidth,bh=bar.offsetHeight;
+ let left=br.left-hr.left-bw-6;
+ let top=br.bottom-hr.top-bh;
+ if(left<8)left=Math.max(8,br.right-hr.left-bw);
+ if(left+bw>hr.width-8)left=Math.max(8,hr.width-bw-8);
+ if(top<8)top=8;
+ if(top+bh>hr.height-8)top=Math.max(8,hr.height-bh-8);
+ bar.style.left=Math.round(left)+'px';
+ bar.style.top=Math.round(top)+'px';
+}
+function paintActBar(list){
+ const bar=$('njhActBar');if(!bar)return;
+ if(!list.length){bar.hidden=true;bar.innerHTML='';return;}
+ const parts=[];
+ for(const a of list){
+  if(a.src==='select'){
+   const src=wdoc()?.getElementById(a.elId)||wdoc()?.querySelector('#slpActions select');
+   if(!src)continue;
+   const opts=[...src.options].map(o=>'<option value="'+esc(o.value)+'"'+(o.selected?' selected':'')+'>'+esc(o.text)+'</option>').join('');
+   parts.push('<select data-njh-act="'+esc(a.id)+'" data-src="select" aria-label="'+esc(a.label)+'">'+opts+'</select>');
+   continue;
+  }
+  const lab=shortOf(a.id,a.label);
+  const ic=ICON[ACT_IC[a.id]||'action']||ICON.action;
+  const tip=a.label+(a.hint?(' — '+a.hint):'')+(a.mock?' (SIMULASI)':'');
+  parts.push('<button type="button" role="menuitem" class="njh-act" data-njh-act="'+esc(a.id)+'" data-src="'+esc(a.src)+'"'
+   +(a.disabled?' disabled':'')+' title="'+esc(tip)+'" aria-label="'+esc(a.label+(a.mock?' (SIMULASI)':''))+'">'
+   +ic+'<span>'+esc(lab)+'</span>'+(a.mock?'<b class="njh-sim">SIMULASI</b>':'')+'</button>');
+ }
+ bar.innerHTML='<div class="njh-actbar-inner">'+parts.join('')+'</div>';
+ bar.hidden=false;
+ placeActBar();
+}
+function pickAct(id,src,selVal){
+ if(src==='body'){
+  let msg='';try{msg=window.NJH98Mock?.runBody?.(id)||'';}catch(err){console.warn(err);}
+  if(msg)toast(msg);
+ }else if(src==='native'){
+  const b=wdoc()?.querySelector('#slpActions button[data-life-action="'+id.replace(/"/g,'')+'"]');
+  if(b){pending={label:cleanLabel(b.textContent),t:performance.now()};b.click();}
+ }else if(src==='hook'){
+  try{life()?.runAction?.(id);}catch{}
+  pending={label:id,t:performance.now()};
+ }else if(src==='select'){
+  const srcEl=wdoc()?.querySelector('#slpActions select');
+  if(srcEl){srcEl.value=selVal;srcEl.dispatchEvent(new Event('change',{bubbles:true}));}
+ }
+ setTimeout(closeCtx,0);
+}
 function openCtx(){
  // enterable door nearby → its (placeholder) interior instead of the generic menu
  if(doorNearObj&&typeof window.NJH98Mock?.enterDoor==='function'){try{window.NJH98Mock.enterDoor(doorNearObj);}catch(err){console.warn(err);}return true;}
  const info=ctxInfo();if(!info||info.work)return false;
- ctxOpen=true;ctxLabel=info.label;setWorldClass('njh-ctx-open',true);decorateWorld(true);paintBody(info.body||[]);
- setTimeout(()=>{try{wdoc()?.querySelector('#slpActions button[data-life-action],#slpActions select')?.focus();}catch{}},0);
+ const opts=ctxOptions();if(!opts.length)return false;
+ ctxOpen=true;ctxLabel=info.label;document.body.classList.add('njh-act-open');
+ paintActBar(opts);
+ setTimeout(()=>{$('njhActBar')?.querySelector('.njh-act:not([disabled]),select')?.focus();},0);
  return true;
 }
-function paintBody(list){
- const box=wdoc()?.getElementById('njhCtxBody');if(!box)return;
- box.hidden=!list.length;
- box.innerHTML=list.map(a=>'<button type="button" data-njh-body="'+esc(a.id)+'"'+(a.disabled?' disabled title="'+esc(a.hint||'')+'"':'')+'><span>'+esc(a.label)+'</span>'+(a.disabled&&a.hint?'<small>'+esc(a.hint)+'</small>':'')+(a.mock?'<span class="njh-sim">SIMULASI</span>':'')+'</button>').join('');
+function closeCtx(){
+ if(!ctxOpen)return;ctxOpen=false;document.body.classList.remove('njh-act-open');
+ const bar=$('njhActBar');if(bar){bar.hidden=true;bar.innerHTML='';}
+ try{frame.focus();}catch{}
 }
-function closeCtx(){if(!ctxOpen)return;ctxOpen=false;setWorldClass('njh-ctx-open',false);try{frame.focus();}catch{}}
 // AKSI button: near a spot with choices it opens the menu; at a job it still forwards the hold-to-work input.
 (function(){
  const a=$('gameAction');if(!a)return;let mine=false;
@@ -419,23 +525,31 @@ let decorated=null;
 function decorateWorld(force){
  const d=wdoc();if(!d)return;
  const outer=d.getElementById('semestaLifePlayPanel');if(!outer)return;
- const h=outer.querySelector('h3');
- if(h&&!DEV&&(force||ctxOpen))h.textContent=ctxLabel||'Aksi';
  if(decorated===outer)return;decorated=outer;
+ const h=outer.querySelector('h3');
  if(DEV){if(h)h.textContent='Aksi & Tas (dev)';return;}
- const body=d.createElement('div');body.className='njh-ctx-body';body.id='njhCtxBody';body.hidden=true;outer.append(body);
- body.addEventListener('click',e=>{const b=e.target.closest('[data-njh-body]');if(!b||b.disabled||!ctxOpen)return;
-  let msg='';try{msg=window.NJH98Mock?.runBody?.(b.dataset.njhBody)||'';}catch(err){console.warn(err);}
-  if(msg)toast(msg);setTimeout(closeCtx,0);});
- const foot=d.createElement('div');foot.className='njh-ctx-foot';
- const cancel=d.createElement('button');cancel.type='button';cancel.id='njhCtxCancel';cancel.textContent='Batal';
- foot.append(cancel);outer.append(foot);
- cancel.addEventListener('click',closeCtx);
- outer.addEventListener('click',e=>{
-  const b=e.target.closest('button[data-life-action]');if(!b||!ctxOpen)return;
-  pending={label:(b.textContent||'').replace(/^[^\wÀ-ɏ]+\s*/u,'').trim(),t:performance.now()};
-  setTimeout(closeCtx,0);
- });
+ // player mode: options live in the parent slide-out bar, not this window
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('#njhActBar [data-njh-act]');
+ if(!b||b.disabled||!ctxOpen)return;
+ if(b.tagName==='SELECT')return;
+ pickAct(b.dataset.njhAct,b.dataset.src);
+});
+document.addEventListener('change',e=>{
+ const s=e.target.closest('#njhActBar select[data-src=select]');
+ if(!s||!ctxOpen)return;
+ pickAct(s.dataset.njhAct,'select',s.value);
+});
+document.addEventListener('pointerdown',e=>{
+ if(!ctxOpen)return;
+ if(e.target.closest('#njhActBar,#gameAction'))return;
+ closeCtx();
+});
+window.addEventListener('resize',()=>{if(ctxOpen)placeActBar();});
+function worldPointer(w){
+ if(w.__njh98Ptr)return;w.__njh98Ptr=true;
+ w.addEventListener('pointerdown',()=>{if(ctxOpen)closeCtx();},true);
 }
 function worldKeys(w){
  if(w.__njh98Keys)return;w.__njh98Keys=true;
@@ -467,6 +581,7 @@ function paintModal(){
  document.body.classList.toggle('njh-modal',!!kind);
  try{window.NJH98Mock?.onModal?.(kind);}catch{}
  if(modalClose){modalClose.hidden=!kind;modalClose.textContent=kind==='phone'?'× Tutup Nokia':'× Tutup';}
+ if(kind)closeCtx();
 }
 
 /* ---------- virtual joystick → existing WASD walk input ---------- */
@@ -688,12 +803,12 @@ function injectWorld(){
   d.documentElement.classList.toggle('njh-devtools',DEV);
   if(!d.getElementById('njh98-world-css')&&d.head){
    const l=d.createElement('link');l.id='njh98-world-css';l.rel='stylesheet';
-   l.href=new URL('./njh98-world.css?v=njh98-6',location.href).href;d.head.appendChild(l);
+   l.href=new URL('./njh98-world.css?v=njh98-7',location.href).href;d.head.appendChild(l);
   }
-  worldKeys(w);worldZoom(w);worldReact(w);
+  worldKeys(w);worldPointer(w);worldZoom(w);worldReact(w);
  }catch{}
 }
-frame.addEventListener('load',()=>{decorated=null;viewSize=16;ctxOpen=false;spawnShown=false;injectWorld();});
+frame.addEventListener('load',()=>{decorated=null;viewSize=16;if(ctxOpen)closeCtx();ctxOpen=false;spawnShown=false;const bar=$('njhActBar');if(bar){bar.hidden=true;bar.innerHTML='';}injectWorld();});
 $('njhClock')?.addEventListener('click',()=>{try{wdoc()?.documentElement?.classList.toggle('njh-show-clock');}catch{}});
 
 /* observe (never alter) the profile Mainkan sends to Semesta, for the avatar + name */
