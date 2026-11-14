@@ -43,10 +43,13 @@ test('mechanics panel exposes a Traffic lights module',()=>{
  assert.match(panel,/cycleSeconds/);
 });
 
-test('mechanics panel exposes HUD Layout scales and reset',()=>{
- assert.match(panel,/HUD LAYOUT/);
- assert.match(panel,/hudLayoutReset/);
- assert.match(panel,/Phone profile/);
+test('Jiwa mechanics uses shared NOKIA/AKSI HUD and resets gameplay modules',()=>{
+ assert.match(panel,/NOKIA HP/);
+ assert.match(panel,/Single contextual Action button/);
+ assert.match(panel,/VLPlayHud\\.mount/);
+ assert.match(panel,/VLPlayHud\\.apply/);
+ assert.match(panel,/resetGameplay/);
+ assert.match(hud,/oneWindowAtATime/);
 });
 test('mechanics panel exposes Spawn & Respawn settings',()=>{
  assert.match(panel,/SPAWN & RESPAWN/);
