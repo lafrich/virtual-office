@@ -21,9 +21,10 @@ function THREE(){
  class Mesh extends Object3D{constructor(g,m){super();this.geometry=g;this.material=m;}}
  class Group extends Object3D{}
  class PlaneGeometry{constructor(){this.type='PlaneGeometry';}dispose(){this.disposed=true;}}
+ class BoxGeometry{constructor(){this.type='BoxGeometry';}dispose(){this.disposed=true;}}
  class MeshBasicMaterial{constructor(opts){Object.assign(this,opts||{});}dispose(){this.disposed=true;}}
  class Texture{constructor(){this.needsUpdate=false;}dispose(){this.disposed=true;}}
- return {Group,Mesh,PlaneGeometry,MeshBasicMaterial,Texture,DoubleSide:2,NearestFilter:1003,SRGBColorSpace:'srgb'};
+ return {Group,Mesh,PlaneGeometry,BoxGeometry,MeshBasicMaterial,Texture,DoubleSide:2,NearestFilter:1003,SRGBColorSpace:'srgb'};
 }
 
 test('official cove scenes: lobby 10x5 doors/exits, rooms 10x8 owner/partner access',()=>{
