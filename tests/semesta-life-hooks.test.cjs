@@ -325,15 +325,23 @@ test('quests persist, pay reward through the economy, and questMarkers follow st
  assert.equal(h.api.quests().find(q=>q.id==='q_parkir').state,'done');
 });
 
-test('enterables includes kost/warteg buildings even without the enterable flag',()=>{
+test('enterables requires an enterable flag or interior template and skips scavenge props',()=>{
  const h=harness({objects:[
-  {id:'rumah-kost-a',name:'Kost Melati',x:10,z:10},
-  {id:'warteg-bu',name:'Warteg Bahari',x:12,z:12},
+  {id:'rumah-kost-a',name:'Kost Melati',x:10,z:10,enterable:true},
+  {id:'warteg-bu',name:'Warteg Bahari',x:12,z:12,njhInteriorTemplate:'njh_warteg_kharisma'},
+  {id:'wc-umum-1',name:'WC Umum',x:4,z:4,enterable:true},
+  {id:'kopi-nama',name:'Warung Kopi',x:5,z:5},
+  {id:'kost-name-only',name:'Dekat Kost',x:6,z:6},
+  {id:'botol-1',name:'Botol bekas',x:3,z:3,tags:['scavenge']},
   {id:'tree-1',name:'Pohon',x:1,z:1}
  ]});
  const doors=h.api.enterables().map(d=>d.id);
  assert.ok(doors.includes('rumah-kost-a'));
  assert.ok(doors.includes('warteg-bu'));
+ assert.ok(doors.includes('wc-umum-1'));
+ assert.ok(!doors.includes('kopi-nama'),'warung kopi without a flag is not an enterable');
+ assert.ok(!doors.includes('kost-name-only'),'a kost-like name alone is not enough');
+ assert.ok(!doors.includes('botol-1'));
  assert.ok(!doors.includes('tree-1'));
 });
 

@@ -195,3 +195,17 @@ Wallet transactions now include `day` (visual day when `runAction` / `advance_ti
 - `tests/semesta-life-hooks.test.cjs`
 - `docs/LOGIC-STATUS.md` — real vs stub vs placeholder-position for every hook, site, and NPC
 - `world-builder/MERGE-PLAN.md` — how `preview/njh-map-draft1` interiors would join main
+
+## 4P kost, lobby, and access (preview)
+
+`SemestaLifePlay.housing()` → `{ownerId, roomId, kind, lobbyTemplate, lobbyDoorId, homeSpawn}`.
+
+`relationship(id?)` → `[{with, type}]` (pacaran for `t_ichsan`/`t_noor`).
+
+`roomAccess(roomId)` → `{canEnter, role: 'owner'|'partner'|'guest'|'none', allowedActs, reason, kind}`. Locked reason: `'Terkunci'`. Partner denied on owner-only furniture: `'Punya pacar'`.
+
+`saveMeta()` includes `{hasCharacter, needsCharacter, ownerId, spawn:{site,roomId}}`. 4P starts go through the character creator first, then `spawnAt('kost', roomId)` into their room. Guests: creator, then hobo start.
+
+`openInteriorById('njh-kos-noor')` opens the shared lobby. Lobby/room doors are used via the single Action button (`enter_room` / `exit_interior`). Interior action ids `open`, `cook`, `wash`, `bathe`, `use_toilet` and tags `open_fridge`/`store_fridge`/`take_fridge`, `open_storage`/`store_home`/`take_home`, `cook_recipe` map onto the existing economy actions.
+
+Interaction scenes: `runAction('scene:<sceneId>')` with planned ids `njh_int_wc`, `njh_int_bed`, `njh_int_tree`, `njh_int_room`, `njh_int_npc_f`, `njh_int_npc_m`. Playing pauses control, plays both actor tracks, resumes, and emits `mainkan:scene-start` / `mainkan:scene-end`. Placeholder Beraksi files are local only (`/workspace/beraksi-int-slots/`).

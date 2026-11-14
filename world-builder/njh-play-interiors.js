@@ -16,6 +16,12 @@ const PIXEL_WORLD=View?.PIXEL_WORLD||Math.SQRT2/64, VERTICAL_COMP=View?.VERTICAL
 const DIR=['sw','se','ne','nw'];
 const TEMPLATES={kost:'njh_kos',warteg:'njh_warteg_kharisma'};
 const FALLBACK={warteg:'njh_warung_makan'};
+const ROOM_SCENES=['njh_kos_cove_lobby','njh_kos_ichsan','njh_kos_noor'];
+const LOBBY_ID='njh_kos_cove_lobby';
+const ACTION_LABELS={sleep:'Tidur',store_fridge:'Simpan Kulkas',take_fridge:'Ambil dari Kulkas',
+ store_home:'Simpan di Kost',take_home:'Ambil dari Kost',cook:'Masak Ikan',cook_recipe:'Masak Resep',
+ wash:'Cuci',home_shower:'Mandi Kost',home_toilet:'WC Kost',bathe:'Mandi Kost',use_toilet:'WC Kost',
+ exit_interior:'Keluar',enter_room:'Masuk'};
 const MEAL_PRICE=12000;
 const ENTER_RADIUS=2.2;
 const ORIGIN={kost:{x:240,z:0},warteg:{x:260,z:0}};
@@ -38,6 +44,28 @@ function baseUrl(){
 function dirFor(rot){return DIR[(Math.round((((Number(rot)||0)%360+360)%360)/90)%4)]||'sw';}
 function num(v,d){const n=Number(v);return Number.isFinite(n)?n:(d??0);}
 function textOf(o){return [o?.id,o?.name,o?.label,o?.asset,o?.type].filter(Boolean).join(' ');}
+function AccessApi(){
+ try{if(typeof require==='function')return require('./semesta-room-access.js');}catch(_e){}
+ return root?.SemestaRoomAccess||null;
+}
+function doorUseWorld(origin,door){
+ if(Array.isArray(door?.usePoint)&&door.usePoint.length>=2)
+  return {x:origin.x+num(door.usePoint[0]),z:origin.z+num(door.usePoint[1])};
+ if(Array.isArray(door?.useTile)&&door.useTile.length>=2)
+  return {x:origin.x+num(door.useTile[0])+0.5,z:origin.z+num(door.useTile[1])+0.5};
+ return {x:origin.x+num(door?.c,0)+0.5,z:origin.z+num(door?.r,0)+1.5};
+}
+function sceneDoors(sc){
+ const all=[...(sc?.doors||[]),...(sc?.exits||[])];
+ const seen=new Set();
+ return all.filter(d=>{
+  if(!d)return false;
+  const id=d.id;if(!id)return true;
+  if(seen.has(id))return false;seen.add(id);return true;
+ });
+}
+function isExitDoor(d){return !!(d&&(d.role==='exit'||d.to==='street'||d.exitTo==='street'));}
+
 function wrapInterior(scene){
  if(!scene)return null;
  return {format:'virtual-life-interiors-v1',
@@ -71,7 +99,7 @@ function create(opts){
    catalog=r.ok?await r.json():{items:{}};
   }
   const items=catalog.items||catalog;
-  const wanted=new Set([...Object.values(TEMPLATES),...Object.values(FALLBACK)]);
+  const wanted=new Set([...Object.values(TEMPLATES),...Object.values(FALLBACK),...ROOM_SCENES]);
   await Promise.all([...wanted].map(async id=>{
    if(scenes[id])return;
    try{const r=await fetch(base+id+'.interior-scene.json',{cache:'no-cache'});
@@ -81,13 +109,22 @@ function create(opts){
   for(const typ of Object.values(items)){
    for(const view of Object.values(typ||{}))if(view?.file)files.add(view.file);
   }
-  await Promise.all([...files].map(file=>new Promise(resolve=>{
+  for(const sc of Object.values(scenes)){
+   for(const d of sceneDoors(sc)){
+    if(d.sprite)files.add(d.sprite);
+    for(const v of Object.values(d.sprites||{}))if(typeof v==='string')files.add(v);
+   }
+  }
+  function loadImg(file){return new Promise(resolve=>{
    if(images.has(file))return resolve();
    const img=new Image();
+   let tried=0;
+   const srcs=[file.startsWith('art/')?base+file:base+'art/'+file, base+file];
    img.onload=()=>{images.set(file,img);resolve();};
-   img.onerror=()=>resolve();
-   img.src=base+'art/'+file;
-  })));
+   img.onerror=()=>{if(tried<srcs.length-1){img.src=srcs[++tried];}else resolve();};
+   img.src=srcs[0];
+  });}
+  await Promise.all([...files].map(loadImg));
   return {catalog,scenes,ready:images.size};
  }
 
@@ -122,7 +159,9 @@ function create(opts){
   buildings={};
   for(const [kind,obj] of [['kost',kost],['warteg',warteg]]){
    if(!obj)continue;
-   const template=scenes[TEMPLATES[kind]]?TEMPLATES[kind]:(FALLBACK[kind]||TEMPLATES[kind]);
+   let template=scenes[TEMPLATES[kind]]?TEMPLATES[kind]:(FALLBACK[kind]||TEMPLATES[kind]);
+   if(kind==='kost'&&scenes[LOBBY_ID]&&obj.id!==PLAY_KOST_ID&&/njh-kos-noor|cove/i.test(textOf(obj)+' '+(obj.id||'')))
+    template=LOBBY_ID;
    const sceneData=scenes[template];
    obj.enterable=true;obj.interactive=true;
    obj.njhInteriorTemplate=template;
@@ -170,11 +209,32 @@ function create(opts){
   return tex;
  }
 
- function buildRoom(kind){
-  const rec=buildings[kind];if(!rec?.scene||!THREE||!scene)return null;
+ function sceneOf(id){
+  if(!id)return null;
+  if(scenes[id])return scenes[id];
+  const A=AccessApi();
+  const resolved=A?.resolveId?.(id);
+  if(resolved&&scenes[resolved])return scenes[resolved];
+  if(id==='kost')return scenes[TEMPLATES.kost]||buildings.kost?.scene||null;
+  if(id==='warteg')return scenes[TEMPLATES.warteg]||scenes[FALLBACK.warteg]||buildings.warteg?.scene||null;
+  return buildings[id]?.scene||null;
+ }
+ function kindOfRoom(id){
+  if(id==='warteg'||id===TEMPLATES.warteg||id===FALLBACK.warteg)return 'warteg';
+  const A=AccessApi();
+  if(id===LOBBY_ID||id==='njh-kos-noor'||A?.isLobby?.(id))return 'lobby';
+  return 'kost';
+ }
+ function pid(){return String(opts.getPlayerId?.()||opts.playerId?.()||'');}
+ function rels(){return opts.getRelationships?.()||AccessApi()?.DEFAULT_RELATIONSHIPS||[];}
+
+ function buildRoom(kind,sceneOverride,roomId){
+  const sc=sceneOverride||sceneOf(roomId||kind)||buildings[kind]?.scene;
+  const themeKind=kindOfRoom(roomId||kind)==='warteg'?'warteg':'kost';
+  if(!sc||!THREE||!scene)return null;
   disposeRoom();
-  const origin=ORIGIN[kind],sc=rec.scene,w=num(sc.width,8),d=num(sc.depth,6);
-  group=new THREE.Group();group.name='njh-play-interior-'+kind;
+  const origin=ORIGIN[themeKind]||ORIGIN.kost,w=num(sc.width,8),d=num(sc.depth,6);
+  group=new THREE.Group();group.name='njh-play-interior-'+(roomId||kind);
   const policy=View?.DRAW_POLICY||{};
   const floorY=policy.floor?.y??0.045;
   // MUST: floor never writes depth — iso sprite bases hang below the foot and
@@ -189,7 +249,7 @@ function create(opts){
   const wallH=View?.WALL_HEIGHT||2.8;
   const far=View?.farWalls?.(opts.cameraDirection)||{back:true,left:true,right:false,front:false};
   const paint=root?.VLWartegInteriorArt;
-  const bake=side=>((sc.theme==='warteg'||kind==='warteg')&&View?.bakeWallTexture)
+  const bake=side=>((sc.theme==='warteg'||themeKind==='warteg'||kind==='warteg')&&View?.bakeWallTexture)
    ?View.bakeWallTexture(side,{width:w,depth:d},paint):null;
   const wallMaterial=(side,fallback)=>{
    const can=bake(side);
@@ -249,16 +309,39 @@ function create(opts){
    group.add(root);
    furniture.push({
     id:item.id,assetId:item.assetId,name:item.name,actionId:item.actionId,
+    tags:item.tags||'',access:item.access||null,ownerId:item.ownerId||null,
     kind:item.assetId,furnitureId:item.assetId,label:item.name||item.assetId,
     x:pos.x,z:pos.z,fw:pos.fw,fd:pos.fd,blocking:item.blocking!==false,
-    c:snapped.c,r:snapped.r,roomId:kind,source:'interior',height
+    c:snapped.c,r:snapped.r,roomId:roomId||kind,source:'interior',height
    });
   }
+  const A=AccessApi();
+  const doorRecs=sceneDoors(sc).map(d=>{
+   const use=doorUseWorld(origin,d);
+   const rec=Object.assign({},d,{wx:use.x,wz:use.z});
+   const spr=A?A.doorSprite(d,pid()):(d.sprite||null);
+   const file=spr||d.sprite;
+   const img=file?images.get(file):null;
+   if(img&&THREE){
+    const size=[img.naturalWidth||img.width||64,img.naturalHeight||img.height||96];
+    const width=size[0]*PIXEL_WORLD,height=size[1]*PIXEL_WORLD*VERTICAL_COMP;
+    const rootG=new THREE.Group();
+    rootG.position.set(origin.x+num(d.c,0)+0.5,0,origin.z+num(d.r,0)+0.5);
+    const mat=new THREE.MeshBasicMaterial({map:makeTexture(img),transparent:true,alphaTest:.05,depthTest:true,depthWrite:true,side:THREE.DoubleSide});
+    const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
+    plane.position.set(0,height*0.3+.04,0);
+    plane.userData.billboard=true;plane.renderOrder=1;plane.rotation.y=View?.isoBillboardYaw?.()||Math.PI/4;
+    rootG.add(plane);billboards.push({root:rootG,plane,item:d,height});
+    group.add(rootG);
+    rec.spriteFile=file;
+   }
+   return rec;
+  });
   // Door mat at entrance
   const ent=sc.entrance||{c:Math.floor(w/2),r:d-1};
   const door={x:origin.x+num(ent.c,4)+0.5,z:origin.z+num(ent.r,d-1)+0.5};
   scene.add(group);
-  return {origin,width:w,depth:d,furniture,door,entrance:ent};
+  return {origin,width:w,depth:d,furniture,door,entrance:ent,doors:doorRecs,sceneId:sc.id||roomId||kind};
  }
 
  function hideOutdoor(hide){
@@ -285,20 +368,72 @@ function create(opts){
  function persistSession(){
   const state=opts.getState?.();
   if(!state)return;
-  if(session)state.interior={id:session.template,kind:session.kind,buildingId:session.buildingId,
-   exit:session.exit,schema:1};
+  if(session)state.interior={id:session.template,kind:session.kind,roomId:session.roomId||session.template,
+   buildingId:session.buildingId,exit:session.exit,schema:1};
   else delete state.interior;
   opts.persist?.();
  }
 
+ function canEnterRoom(roomId){
+  const kind=kindOfRoom(roomId);
+  if(kind==='warteg')return {ok:true};
+  const A=AccessApi();
+  if(!A)return canEnter(kind==='lobby'?'kost':kind);
+  A.setRelationships?.(rels());
+  const acc=A.roomAccess(pid(),roomId,opts.getState?.(),rels());
+  if(acc&&acc.canEnter===false)return {ok:false,reason:acc.reason||'Terkunci',acc};
+  return {ok:true,acc};
+ }
+
+ function enterInterior(roomId,reason){
+  const A=AccessApi();
+  const resolved=A?.resolveId?.(roomId)||roomId;
+  const sc=sceneOf(resolved);
+  if(!sc)return {ok:false,reason:'Interior belum siap'};
+  const gate=canEnterRoom(resolved);if(!gate.ok)return gate;
+  const kind=kindOfRoom(resolved);
+  const pos=opts.getPos?.()||{x:0,z:0};
+  const streetExit=(session&&session.exit)?session.exit:{x:pos.x,z:pos.z};
+  const lobbyReturn=session&&(session.kind==='lobby'||session.roomId===LOBBY_ID)
+   ?{x:session.door.x,z:session.door.z,roomId:session.roomId||LOBBY_ID}
+   :(session&&session.lobbyReturn)||null;
+  const built=buildRoom(kind,sc,resolved);if(!built)return {ok:false,reason:'Gagal membangun interior'};
+  hideOutdoor(true);
+  session={kind,roomId:resolved,template:resolved,
+   buildingId:buildings.kost?.object?.id||'njh-kos-noor',
+   exit:streetExit,lobbyReturn,...built};
+  opts.teleport?.(built.door.x,built.door.z,8,{keepView:true});
+  fitRoomCamera();
+  persistSession();
+  const msg=kind==='lobby'?'🏠 Masuk lobi kost':kind==='warteg'?'🍚 Masuk warteg':'🏠 Masuk kamar';
+  opts.message?.(msg+(reason?' · '+reason:''));
+  opts.onEnter?.(session);
+  return {ok:true,kind,roomId:resolved,session};
+ }
+
+ function openInteriorById(id){
+  const A=AccessApi();
+  const raw=String(id||'');
+  const resolved=A?.resolveId?.(raw)||raw;
+  if(raw==='njh-kos-noor'||resolved===LOBBY_ID||A?.isLobby?.(raw))
+   return enterInterior(LOBBY_ID);
+  if(sceneOf(resolved))return enterInterior(resolved);
+  if(raw==='kost'||raw==='warteg')return enter(raw);
+  const k=kindOfBuilding({id:raw,name:raw})||kindOfRoom(resolved);
+  if(k==='warteg'||k==='kost')return enter(k);
+  return {ok:false,reason:'Interior tidak dikenal'};
+ }
+
  function enter(kind,reason){
+  if(kind==='kost'&&buildings.kost?.template===LOBBY_ID)
+   return enterInterior(LOBBY_ID,reason);
   const rec=buildings[kind];
   if(!rec)return {ok:false,reason:'Interior belum siap'};
   const gate=canEnter(kind);if(!gate.ok)return gate;
   const pos=opts.getPos?.()||{x:0,z:0};
-  const built=buildRoom(kind);if(!built)return {ok:false,reason:'Gagal membangun interior'};
+  const built=buildRoom(kind,rec.scene,rec.template);if(!built)return {ok:false,reason:'Gagal membangun interior'};
   hideOutdoor(true);
-  session={kind,template:rec.template,buildingId:rec.object.id,
+  session={kind,template:rec.template,roomId:rec.template,buildingId:rec.object.id,
    exit:session?.exit||{x:pos.x,z:pos.z},...built};
   const spawn=built.door;
   opts.teleport?.(spawn.x,spawn.z,8,{keepView:true});
@@ -329,7 +464,11 @@ function create(opts){
 
  function exit(){
   if(!session)return {ok:false,reason:'Tidak di dalam interior'};
-  const exitAt=session.exit||buildings[session.kind]?.door||{x:0,z:0};
+  const A=AccessApi();
+  if(session.kind!=='warteg'&&session.roomId&&A?.isRoom?.(session.roomId)&&sceneOf(session.lobbyReturn?.roomId||LOBBY_ID)){
+   return enterInterior(session.lobbyReturn?.roomId||LOBBY_ID,'kembali ke lobi');
+  }
+  const exitAt=session.exit||buildings[session.kind==='lobby'?'kost':session.kind]?.door||{x:0,z:0};
   const kind=session.kind;
   hideOutdoor(false);
   disposeRoom();
@@ -344,9 +483,15 @@ function create(opts){
  function restoreIfNeeded(){
   const state=opts.getState?.();
   const saved=state?.interior;
-  if(!saved?.kind||!buildings[saved.kind])return {ok:false};
-  if(session?.kind===saved.kind)return {ok:true,kind:session.kind,restored:true};
-  if(session)exit();
+  if(!saved?.kind&&!saved?.roomId)return {ok:false};
+  if(saved.roomId&&session?.roomId===saved.roomId)return {ok:true,kind:session.kind,restored:true};
+  if(session?.kind===saved.kind&&!saved.roomId)return {ok:true,kind:session.kind,restored:true};
+  if(session){/* drop without street teleport */hideOutdoor(false);disposeRoom();session=null;}
+  if(saved.roomId&&sceneOf(saved.roomId)){
+   session={exit:saved.exit};
+   return enterInterior(saved.roomId,'lanjut dari save');
+  }
+  if(!buildings[saved.kind])return {ok:false};
   const rec=buildings[saved.kind];
   const gate=canEnter(saved.kind);
   if(!gate.ok){delete state.interior;opts.persist?.();return gate;}
@@ -371,9 +516,34 @@ function create(opts){
   const push=(id,label,price,args,furnitureId,spotLabel)=>{
    out.push({id,action:id,label,price:price??0,furnitureId,spotLabel,args:args||{}});
   };
-  // Exit when near the interior door
-  if(Math.hypot(p.x-session.door.x,p.z-session.door.z)<=1.4)
+  const A=AccessApi();
+  if(A)A.setRelationships?.(rels());
+  const doors=session.doors||[];
+  let offeredDoor=false;
+  for(const d of doors){
+   if(Math.hypot(p.x-d.wx,p.z-d.wz)>1.4)continue;
+   const acc=A?A.doorAccess(pid(),d):{canEnter:d.state!=='locked',label:d.label,reason:d.state==='locked'?'Terkunci':null};
+   const isExit=isExitDoor(d);
+   if(isExit){
+    push('exit_interior',acc.label||'Keluar',0,{doorId:d.id,role:'exit'},d.id,'Pintu');
+   }else{
+    const locked=!acc.canEnter;
+    push('enter_room',locked?'Terkunci':(d.label||'Masuk'),0,
+     {doorId:d.id,roomId:d.interiorTemplate||d.to,locked,reason:acc.reason||(locked?'Terkunci':null)},
+     d.id,d.label||'Pintu');
+   }
+   offeredDoor=true;
+  }
+  if(!offeredDoor&&Math.hypot(p.x-session.door.x,p.z-session.door.z)<=1.4)
    push('exit_interior','Keluar',0,{},undefined,'Pintu');
+  for(const f of session.furniture||[]){
+   if(Math.hypot(p.x-f.x,p.z-f.z)>2.2)continue;
+   const ids=A?.mapActionIds?.(f)||[];
+   for(const id of ids){
+    if(out.some(a=>a.id===id&&a.furnitureId===f.id))continue;
+    push(id,ACTION_LABELS[id]||id,0,{itemId:f.id,access:f.access,ownerId:f.ownerId},f.id,f.label);
+   }
+  }
   if(session.kind==='warteg'){
    const ibu=session.furniture.find(f=>f.assetId==='npc_ibu_warteg'||f.id==='npc_ibu_warteg');
    const through=ibu&&Math.hypot(p.x-ibu.x,p.z-ibu.z)<=2.8?ibu:null;
@@ -451,18 +621,18 @@ function create(opts){
  }
 
  return {
-  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,canEnter,enter,enterNearby,exit,fitRoomCamera,cameraLocked,
+  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,canEnter,canEnterRoom,enter,enterInterior,openInteriorById,enterNearby,exit,fitRoomCamera,cameraLocked,
   restoreIfNeeded,furniture,extraActions,obstacles,constrain,update,candidates,
-  doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,FALLBACK,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
+  doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
   place:(x,z,size)=>{if(!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return {ok:false};opts.teleport?.(Number(x),Number(z),size||12,{keepView:!!session});return {ok:true,x:Number(x),z:Number(z)};},
-  active:()=>session,kind:()=>session?.kind||null,buildings:()=>buildings,
+  active:()=>session,kind:()=>session?.kind||null,roomId:()=>session?.roomId||null,buildings:()=>buildings,
 
   isPlayObject:id=>id===PLAY_KOST_ID||String(id||'').startsWith('__njh_play_')
  };
 }
 
 return Object.freeze({
- PIXEL_WORLD,VERTICAL_COMP,TEMPLATES,FALLBACK,MEAL_PRICE,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
- wrapInterior,tilePos,dirFor,doorWorld,create,baseUrl
+ PIXEL_WORLD,VERTICAL_COMP,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
+ wrapInterior,tilePos,dirFor,doorWorld,doorUseWorld,sceneDoors,create,baseUrl
 });
 });

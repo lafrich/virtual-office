@@ -18,13 +18,14 @@ Preview branch `preview/main-interiors-kost-warteg` only. Not live. Status:
 | `quests()` / `acceptQuest` / `turnInQuest` | stub | Data-driven table + real wallet reward via `quest_reward`; not Jiwa-authored quests |
 | `questMarkers()` | real | Follows those quest states; also world `quest_npc` objects |
 | `jobs()` | real | Jiwa `config.jobs` |
-| `enterInterior(id)` | real | Kost + warteg play interiors; otherwise `false` |
+| `enterInterior(id)` | real | Street door / `openInteriorById('njh-kos-noor')` opens lobby `njh_kos_cove_lobby`; rooms via lobby doors or `spawnAt('kost', roomId)` |
 | `furnitureSpots()` | real | Default 8×6 kost grid from the save; interior items when inside a room |
 | `messages()` | real | Persisted Nokia inbox |
-| `sites()` | real | `{id,label,x,z,placeholder,npc?}` |
-| `enterables()` | real | Flagged interiors + kost/warteg by name |
-| `nearbyActions()` / `runAction()` | real | Every SITE action, including at placeholder positions |
-| `spawnAt` / `clock` / `pause` / save slots | real | Existing hooks |
+| `sites()` | real | `{id,label,x,z,placeholder,npc?,points[]}`; `x,z` is the first match, `points` lists every match (e.g. all scavenge spots) |
+| `enterables()` | real | Requires `enterable` or an interior template; scavenge props are excluded |
+| `housing()` / `relationship()` / `roomAccess()` / `saveMeta()` | real | Client-side 4P kost + pacaran. `housing().roomId` is `njh_kos_ichsan` / `njh_kos_noor`. Partner may use bed/WC; fridge/lemari/stove/kitchen_sink rejected with `Punya pacar`. Locked doors show `Terkunci`. |
+| `nearbyActions()` / `runAction()` | real | SITE actions, lobby/room door enter/exit on the Action button, mapped furniture ids (`open`/`cook`/`wash`/`bathe`/`use_toilet` + tags), and `scene:<id>` stubs |
+| `spawnAt` / `clock` / `pause` / save slots | real | `spawnAt('kost', roomId)` still lands in the room (skips lobby) for Ichsan/Noor |
 | `njh98:open-map` | real | Listener forwards to the parent map window |
 | `wall_pee` | real | See actions |
 | `fart` | real | See actions |
@@ -36,8 +37,8 @@ Preview branch `preview/main-interiors-kost-warteg` only. Not live. Status:
 |---|---|---|---|
 | `loak` | real object | `sell_loak` | real |
 | `scavenge` | real object | `scavenge` | real |
-| `tree` | real object | `catch_fruit` | real |
-| `warung` | real object | `eat` (warteg Rp12.000) | real |
+| `tree` | real object | `catch_fruit` | real; name match is word-bounded (`\btree\b`) so the `streetscape` tag is ignored |
+| `warung` | real object | `eat` (warteg Rp12.000) | real; prefers a building whose name matches `warteg` |
 | `bench` | real object | `rest` | real |
 | `fish` | placeholder-position | `fish` (no water tiles required; `spotId` is enough) | real + placeholder-position |
 | `siomay_batagor` | placeholder-position | `sell_fish` | real + placeholder-position |
@@ -111,3 +112,14 @@ Job session wages are unchanged (Silver Rp1.600, Pak Ogah Rp2.500, Kang Parkir R
 
 - `tests/semesta-life-hooks.test.cjs` — hooks, quests, enterables, `wall_pee`, `fart`, `open-map`
 - `tests/semesta-life-logic.test.cjs` — site list, NPC defs, no `pee_outside` UI, price + stat alignment, fish without water
+- `tests/semesta-room-access.test.cjs` — 4P housing, pacaran, lobby/room access, locked doors, action map
+- `tests/njh-kost-lobby-smoke.test.cjs` — official Cove lobby/rooms, `openInteriorById`, partner/guest, site-name guards
+- `tests/semesta-int-scenes.test.cjs` — 6 Beraksi slot files import + DB version replace + play events
+
+## Kost Cove lobby (Ellen `8e099eb`)
+
+Street door `njh_door_kos_cove_lobby` on building `njh-kos-noor` (use tile −27,71 / point −26.25,71.5) opens interior `njh_kos_cove_lobby`. Inside: `njh_door_home_ichsan` → `njh_kos_ichsan`, `njh_door_home_noor` → `njh_kos_noor`, `njh_door_cove_room_1/2/3` locked (`Terkunci`), `njh_door_kos_cove_lobby_exit` → street. New scene schema: `doors[]` + optional `exits[]` (`role` room|exit, `c/r`, `useTile`/`usePoint`, `state`, `interiorTemplate`, `exitTo`, sprites). Generic clip-test `njh_kos.interior-scene.json` is not overwritten.
+
+## Interaction scenes (stubs)
+
+Planned Beraksi ids `njh_int_wc|bed|tree|room|npc_f|npc_m` are mapped in `semesta-int-scenes.js` and offered as `scene:<id>`. Importable placeholder JSONs live in `/workspace/beraksi-int-slots/` (not Drive). Cloud DB wins after sync; tiny in-code fallback only if a scene is unreachable.

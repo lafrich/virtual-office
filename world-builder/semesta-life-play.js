@@ -24,7 +24,7 @@ const SITES=[
  {id:'premium_job',jobId:'kantor_premium',label:'Kerja Premium / Kantor',icon:'🏢',pattern:/kantor.?premium|premium.?job|office.?job/i,action:'work',offset:[-2,5]},
  {id:'loak',label:'Toko Loak',icon:'♻',pattern:/toko.?loak|babeh|pawnshop/i,action:'sell_loak',offset:[8,5]},
  {id:'scavenge',label:'Titik Mulung',icon:'📦',pattern:/botol|kardus|sampah|trash|barang.?bekas|scavenge/i,action:'scavenge',offset:[-8,-3]},
- {id:'tree',label:'Pohon Buah',icon:'🌳',pattern:/pohon|tree|mangga|jambu/i,action:'catch_fruit',offset:[-4,-8]},
+ {id:'tree',label:'Pohon Buah',icon:'🌳',pattern:/\bpohon\b|\btree\b|mangga|jambu/i,action:'catch_fruit',offset:[-4,-8]},
  {id:'warung',label:'Warteg / Makanan',icon:'🍚',pattern:/warteg|warung|nasi|food.vendor/i,action:'eat',offset:[3,7]},
  {id:'coffee',label:'Warung Kopi',icon:'☕',pattern:/kopi|coffee|kafe|cafe/i,action:'coffee',offset:[6,8]},
  {id:'public_wc',label:'WC Umum',icon:'🚾',pattern:/wc.umum|public.?toilet|toilet.umum/i,action:'public_toilet',offset:[-10,7]},
@@ -54,6 +54,7 @@ const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
 const name=o=>[o.name,o.label,o.asset,o.subtype,o.questId,...(Array.isArray(o.tags)?o.tags:[])].filter(Boolean).join(' ');
+const buildingName=o=>[o.name,o.label,o.type,o.id].filter(Boolean).join(' ');
 let bridge=null,active=false,projectId='',config=RULES?RULES.defaults():null;
 let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',progress=null;
 let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
@@ -88,8 +89,15 @@ function applyStart(s,id,force){
  const st=f.start,base=RULES.stateFrom({},config);
  if(Number.isFinite(Number(st.electricityUnits)))base.powerTokens=Math.max(0,Math.round(Number(st.electricityUnits)));
  for(const k of ['wallet','energy','hygiene','bladder','fullness','moral'])if(Number.isFinite(Number(st[k])))base[k]=Number(st[k]);
- base.housing={room:st.housing?.room===true,fridge:st.housing?.fridge===true};base.homeAccess=base.housing.room;
+ base.housing={room:st.housing?.room===true,fridge:st.housing?.fridge===true,
+  roomId:st.housing?.roomId||null,ownerId:st.housing?.ownerId||null,
+  kind:st.housing?.kind||(st.housing?.room===true?'kost':null)};
+ base.homeAccess=base.housing.room;
  base.furniture=(st.furniture||[]).filter(x=>(RULES.FURNITURE||[]).some(f=>f.id===x));
+ base.needsCharacter=!!(f.profile.needsCharacter&&!s.hasCharacter&&!s.identityChosen);
+ base.hasCharacter=!!(s.hasCharacter||s.identityChosen);
+ if(startProfiles?.relationships)base.relationships=startProfiles.relationships.slice();
+ if(st.tutorial===false)base.tutorial=false;
  const make=list=>(list||[]).map(it=>{const iid='life:'+String(it.type).replace(/[^a-z0-9_]/gi,'')+':'+(++base.itemSequence);
   base.itemMeta[iid]={species:String(it.type),label:String(it.label||it.type).slice(0,60),expiresAt:base.elapsedMinutes+Math.max(1,Number(it.minutes)||1440),inFridge:false};return iid;});
  base.inventory=make(st.inventory).slice(0,8);base.homeStorage=make(st.homeStorage).slice(0,24);
@@ -169,8 +177,11 @@ function hookCtx(){
   worldToScreen:(x,y,z)=>{try{return bridge?.worldToScreen?.(x,y,z)||null;}catch{return null;}},
   doorAnchor:o=>{try{return bridge?.doorAnchor?.(o)||null;}catch{return null;}},
   interiorFurniture:()=>{try{return bridge?.interiorFurniture?.()||[];}catch{return [];}},
-  interiorKind:()=>{try{return bridge?.interiorKind?.()||null;}catch{return null;}},
-  extraActions:()=>{try{return bridge?.extraActions?.()||[];}catch{return [];}},
+  interiorKind:()=>{try{return bridge?.interiorKind?.()||bridge?.playInteriors?.kind?.()||null;}catch{return null;}},
+  interiorRoomId:()=>{try{return bridge?.playInteriors?.roomId?.()||bridge?.playInteriors?.active?.()?.roomId||null;}catch{return null;}},
+  extraActions:()=>{try{return bridge?.extraActions?.()||bridge?.playInteriors?.extraActions?.()||[];}catch{return [];}},
+  hasCharacter:()=>!!(state?.hasCharacter||state?.identityChosen),
+  getRelationships:()=>state?.relationships||startProfiles?.relationships||(root.SemestaRoomAccess?.DEFAULT_RELATIONSHIPS)||[],
   resetCurrent:()=>resetSave(),
   runEconomy:(action,args)=>{if(!RULES||!state)return {ok:false,reason:'Tidak ada state'};
    const r=RULES.run(config,state,action,args||{});if(r.ok)state=r.state;return r;},
@@ -178,10 +189,12 @@ function hookCtx(){
    const raw=String(id||'').replace(/^d:/,'');
    try{
     const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
-    if((raw==='kost'||raw==='warteg')&&I?.enter)return !!(I.enter(raw)?.ok);
+    if(I?.openInteriorById){const r=I.openInteriorById(raw);if(r?.ok)return r;}
+    if(I?.enterInterior){const r=I.enterInterior(raw);if(r?.ok)return r;}
+    if((raw==='kost'||raw==='warteg')&&I?.enter)return I.enter(raw);
     const obj=(getWorld().objects||[]).find(o=>String(o.id)===raw);
-    const kind=I?.kindOf?.(obj);
-    if(kind&&I?.enter)return !!(I.enter(kind)?.ok);
+    const kind=I?.kindOfBuilding?.(obj);
+    if(kind&&I?.enter)return I.enter(kind);
     if(bridge?.openInteriorById)return !!bridge.openInteriorById(raw);
    }catch(_e){}
    return false;
@@ -225,9 +238,20 @@ function buildSites(){
  const maxRange=Math.min(28,Math.max(8,(bounds.maxX-bounds.minX+bounds.maxZ-bounds.minZ)/5));
  // Prototype sites and imaginary placeholder jobs are strictly demo-only.
  sites=publishedCatalog?[]:SITES.map((d,i)=>{
-  const matches=objects.filter(o=>d.pattern.test(name(o)));
+  const blobOf=o=>d.id.startsWith('prayer_')?buildingName(o):name(o);
+  let matches=objects.filter(o=>{
+   const full=name(o)+' '+buildingName(o);
+   if(d.id.startsWith('prayer_')&&/rak.?sandal/i.test(full))return false;
+   if(d.id==='tree')return /\bpohon\b|\btree\b|mangga|jambu/i.test(name(o));
+   return d.pattern.test(blobOf(o));
+  });
+  if(d.id==='warung'){
+   const prefer=matches.filter(o=>/warteg/i.test(name(o)+' '+buildingName(o)));
+   if(prefer.length)matches=prefer;
+  }
   const prayerIndex=d.id==='prayer_islam_b'?1:d.id==='prayer_islam_c'?2:0;
   const found=matches[prayerIndex]||(!d.id.startsWith('prayer_')?matches[0]:null);
+  const points=matches.map(o=>{const q=findLanding(Number(o.x)||0,Number(o.z)||0);return {id:String(o.id||''),x:q.x,z:q.z};});
   let p=found?findLanding(Number(found.x)||0,Number(found.z)||0):null;
   if(!p&&d.id==='fish'){
    const cells=world.map?.terrain?.cells||[];
@@ -238,7 +262,7 @@ function buildSites(){
   if(!p){const x=center.x+d.offset[0]*maxRange/10,z=center.z+d.offset[1]*maxRange/10;
    p=findLanding(x,z);
   }
-  return {...d,sourceId:found?.id||'',placeholder:!found,x:p.x,z:p.z};
+  return {...d,sourceId:found?.id||'',placeholder:!found,x:p.x,z:p.z,points};
  });
  const tent=sites.find(n=>n.id==='tent');
  const last=window.__semestaLastSpawn;
@@ -698,17 +722,52 @@ function afterLifeTransition(previous){
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
+ const ALIAS={bathe:'home_shower',use_toilet:'home_toilet'};
+ if(ALIAS[action])action=ALIAS[action];
+ if(String(action).startsWith('scene:')){
+  try{
+   const Scenes=root.SemestaIntScenes;
+   const id=String(args.sceneId||action.slice(6));
+   if(!Scenes)return {ok:false,reason:'Adegan belum siap'};
+   const r=Scenes.play(id,{
+    pause:()=>getHooks()?.pause?.(),
+    resume:()=>getHooks()?.resume?.(),
+    emit:(type,detail)=>{try{root.dispatchEvent?.(new root.CustomEvent(type,{detail}));}catch(_e){}
+     try{root.parent?.postMessage?.({type,detail},'*');}catch(_e){}}
+   });
+   if(!r.ok)message('⛔ '+(r.reason||'Adegan gagal'));
+   paintPanel();return r;
+  }catch(err){return {ok:false,reason:String(err.message||err)};}
+ }
+ if(action==='enter_room'){
+  try{
+   const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
+   if(args.locked){message('Terkunci');return {ok:false,reason:'Terkunci'};}
+   const r=I?.enterInterior?.(args.roomId)||I?.openInteriorById?.(args.roomId)||{ok:false,reason:'Pintu tidak bisa dibuka'};
+   if(!r.ok)message('⛔ '+(r.reason||'Terkunci'));
+   paintPanel();return r;
+  }catch(err){return {ok:false,reason:String(err.message||err)};}
+ }
  if(action==='exit_interior'||action==='enter_interior'){
   try{
    const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
-   const fn=action==='exit_interior'?(bridge?.exitInterior||I?.exit):(bridge?.enterInterior||I?.enterNearby);
-   const r=fn?.()||{ok:false,reason:'Interior tidak tersedia'};
+   const fn=action==='exit_interior'?(I?.exit||bridge?.exitInterior):(I?.enterNearby||bridge?.enterInterior);
+   const r=(typeof fn==='function'?fn():null)||{ok:false,reason:'Interior tidak tersedia'};
    if(r.ok)message(action==='exit_interior'?'🚪 Keluar ruangan':'Masuk ruangan');
    else message('⛔ '+(r.reason||'Tidak bisa'));
    paintPanel();return r;
   }catch(err){return {ok:false,reason:String(err.message||err)};}
  }
  try{if(getHooks())args=getHooks().argsFor(action,args);}catch{}
+ try{
+  const Access=root.SemestaRoomAccess;
+  const room=bridge?.playInteriors?.roomId?.()||getHooks()?.roomAccess&&null;
+  const roomId=bridge?.playInteriors?.roomId?.();
+  if(Access&&roomId){
+   const deny=Access.rejectAction(playerId(),roomId,action,args);
+   if(deny){message(deny);return {ok:false,reason:deny};}
+  }
+ }catch(_e){}
  const gate=getHooks()?.furnitureAllows?.(action,{});
  if(gate&&gate.ok===false)return {ok:false,reason:gate.reason||'Furnitur tidak ada di dekatmu'};
  if(action==='wall_pee'){
@@ -766,7 +825,7 @@ function runAction(action,args={}){
   const expected='act:'+String(args.activityId||'');
   if(node?.id!==expected||node.placeholder)return {ok:false,reason:'Datangi bangunan aktivitas yang sesuai di Semesta.'};
  }
- if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity'].includes(action)&&!node)
+ if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity','wash','enter_room','exit_interior'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
@@ -1041,13 +1100,16 @@ function hookApi(name,fallback){
 function publicSites(){
  const h=getHooks();
  if(h&&typeof h.sites==='function')return h.sites();
- return (sites||[]).map(s=>({id:s.id,label:s.label,x:s.x,z:s.z,placeholder:!!s.placeholder,npc:!!s.npc}));
+ return (sites||[]).map(s=>({id:s.id,label:s.label,x:s.x,z:s.z,placeholder:!!s.placeholder,npc:!!s.npc,points:s.points||[{id:s.sourceId||s.id,x:s.x,z:s.z}]}));
 }
 const api=Object.freeze({attach,start,stop,active:visible,persist,state:()=>state,sites:publicSites,npcs:()=>lifeNpcs.map(n=>({id:n.id,label:n.label,siteId:n.siteId,role:n.role,behavior:n.behavior,x:n.x,z:n.z,placeholder:!!n.placeholder,lgr:n.lgr||null,emote:n.emote||null})),spawnEntitlement,
  spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
  playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null,
  spawnAt:hookApi('spawnAt',{ok:false,reason:'hooks missing'}),
+ housing:hookApi('housing',null),
+ relationship:hookApi('relationship',[]),
+ roomAccess:hookApi('roomAccess',null),
  nearbyActions:hookApi('nearbyActions',[]),
  pause:hookApi('pause',{ok:false}),resume:hookApi('resume',{ok:false}),
  isPaused:()=>!!getHooks()?.isPaused?.(),

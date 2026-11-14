@@ -2727,7 +2727,7 @@ function setMode(m){
        interiorFurniture:()=>I.furniture(),
        interiorKind:()=>I.kind(),
        extraActions:()=>I.extraActions(),
-       enterInterior:()=>I.enterNearby(),
+       enterInterior:id=>id?(I.enterInterior?.(id)||I.openInteriorById?.(id)||I.enterNearby()):I.enterNearby(),
        exitInterior:()=>I.exit(),
        playInteriors:I,
        doorAnchor:o=>I.doorWorld(o)
@@ -2748,9 +2748,10 @@ function setMode(m){
        syncHud:syncPlayHud,
        tell,
        openInteriorById:id=>{
+        if(I?.openInteriorById){const r=I.openInteriorById(id);if(r?.ok)return true;}
         const obj=documentMap.objects.find(o=>String(o.id)===String(id));
         if(obj&&I?.kindOfBuilding){/* peek */}
-        const kind=obj&&((/kost|kos_/i.test([obj.name,obj.label,obj.id].join(' '))?'kost':/warteg|warung/i.test([obj.name,obj.label,obj.id].join(' '))?'warteg':null));
+        const kind=obj&&((/kost|kos_|cove/i.test([obj.name,obj.label,obj.id].join(' '))?'kost':/warteg|warung/i.test([obj.name,obj.label,obj.id].join(' '))?'warteg':null));
         if(kind){const r=I.enter(kind);if(r?.ok)return true;}
         if(!obj||!interiorPreview?.openFor||
            !(obj.interior?.floors?.length||assetByName.get(obj.asset)?.interior?.floors?.length))return false;
@@ -2779,7 +2780,7 @@ function setMode(m){
        interiorFurniture:()=>I.furniture(),
        interiorKind:()=>I.kind(),
        extraActions:()=>I.extraActions(),
-       enterInterior:()=>I.enterNearby(),
+       enterInterior:id=>id?(I.enterInterior?.(id)||I.openInteriorById?.(id)||I.enterNearby()):I.enterNearby(),
        exitInterior:()=>I.exit(),
        playInteriors:I
       });
@@ -3273,6 +3274,8 @@ if(window.SemestaLifePlay){
   syncHud:syncPlayHud,
   tell,
   openInteriorById:id=>{
+   const I=window.__njhPlayInteriors;
+   if(I?.openInteriorById){const r=I.openInteriorById(id);if(r?.ok)return true;}
    const obj=documentMap.objects.find(o=>String(o.id)===String(id));
    const asset=obj?.type==='sprite'?assetByName.get(obj.asset):null;
    if(!obj||!interiorPreview?.openFor||
@@ -3328,6 +3331,8 @@ function bootNjhPlayInteriors(){
   THREE,scene,
   getWorld:()=>documentMap,
   getState:()=>window.SemestaLifePlay?.state?.()||null,
+  getPlayerId:()=>playerMode?mainkanPlayerId:'',
+  getRelationships:()=>{try{return window.SemestaLifePlay?.state?.()?.relationships||null;}catch{return null;}},
   persist:()=>{try{window.SemestaLifePlay?.persist?.();}catch{}},
   getPos:()=>{const p=walkWorldPos();return {x:Number(p?.x)||0,y:Number(p?.y)||0,z:Number(p?.z)||0};},
   teleport:(x,z,size,opt)=>{

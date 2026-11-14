@@ -1332,6 +1332,472 @@
         "batch": "old-asset-v6b",
         "sourceFolder": "bu_warteg_v6b_sheet"
       }
+    },
+    "lobby_door": {
+      "sw": {
+        "file": "lobby_door_sw.png",
+        "sha256": "fe2c5b3644da72253d4a405196dde2718e894f2345c0e4fb9a541f5dc3340b01",
+        "size": [
+          36,
+          118
+        ],
+        "pivot": [
+          34,
+          117
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "lobby-doors-preview"
+      },
+      "se": {
+        "file": "lobby_door_sw.png",
+        "sha256": "fe2c5b3644da72253d4a405196dde2718e894f2345c0e4fb9a541f5dc3340b01",
+        "size": [
+          36,
+          118
+        ],
+        "pivot": [
+          34,
+          117
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "lobby-doors-preview"
+      },
+      "ne": {
+        "file": "lobby_door_sw.png",
+        "sha256": "fe2c5b3644da72253d4a405196dde2718e894f2345c0e4fb9a541f5dc3340b01",
+        "size": [
+          36,
+          118
+        ],
+        "pivot": [
+          34,
+          117
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "lobby-doors-preview"
+      },
+      "nw": {
+        "file": "lobby_door_sw.png",
+        "sha256": "fe2c5b3644da72253d4a405196dde2718e894f2345c0e4fb9a541f5dc3340b01",
+        "size": [
+          36,
+          118
+        ],
+        "pivot": [
+          34,
+          117
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "lobby-doors-preview"
+      }
+    },
+    "water_tub": {
+      "sw": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "se": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "ne": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "nw": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      }
+    },
+    "sekat_wc": {
+      "sw": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "se": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "ne": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "nw": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      }
+    },
+    "fan": {
+      "sw": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "se": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "ne": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "nw": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "footprint-stub"
+      }
+    },
+    "shoe_rack": {
+      "sw": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "se": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "ne": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "nw": {
+        "file": null,
+        "size": [
+          64,
+          64
+        ],
+        "pivot": [
+          32,
+          52
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      }
+    },
+    "bathtub": {
+      "sw": {
+        "file": null,
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "se": {
+        "file": null,
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "ne": {
+        "file": null,
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "nw": {
+        "file": null,
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      }
+    },
+    "registration_desk": {
+      "sw": {
+        "file": null,
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "se": {
+        "file": null,
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "ne": {
+        "file": null,
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      },
+      "nw": {
+        "file": null,
+        "size": [
+          101,
+          80
+        ],
+        "pivot": [
+          50,
+          64
+        ],
+        "footprint": [
+          2,
+          1
+        ],
+        "batch": "footprint-stub"
+      }
     }
   }
 }

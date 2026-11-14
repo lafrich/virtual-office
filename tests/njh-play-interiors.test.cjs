@@ -121,7 +121,7 @@ test('owner can enter kost, guest cannot; warteg is open; enter/exit and save re
  assert.equal(owned.api.kind(),'kost');
  assert.equal(owned.state.interior.kind,'kost');
  assert.equal(owned.api.active().furniture.length,kos.items.length);
- assert.equal(owned.api.furniture().length,3);
+ assert.equal(owned.api.furniture().length,7); // bed, wardrobe, stove, fridge, bathroom, toilet, sink
  assert.ok(owned.api.furniture().some(f=>f.kind==='bed'));
  assert.ok(owned.api.furniture().some(f=>f.kind==='bathroom'),'shower maps to bathroom for Mandi');
  assert.ok(owned.api.furniture().some(f=>f.kind==='stove'));

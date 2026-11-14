@@ -8,6 +8,16 @@
  if(root)root.SemestaLifeHooks=api;
 })(typeof window!=='undefined'?window:typeof globalThis!=='undefined'?globalThis:null,function(){
 'use strict';
+const Access=(function(){
+ try{if(typeof require==='function')return require('./semesta-room-access.js');}catch(_e){}
+ const g=typeof globalThis!=='undefined'?globalThis:typeof window!=='undefined'?window:null;
+ return g&&g.SemestaRoomAccess||null;
+})();
+const Scenes=(function(){
+ try{if(typeof require==='function')return require('./semesta-int-scenes.js');}catch(_e){}
+ const g=typeof globalThis!=='undefined'?globalThis:typeof window!=='undefined'?window:null;
+ return g&&g.SemestaIntScenes||null;
+})();
 const RANGE=2.5;
 const WALL_PEE=Object.freeze({id:'wall_pee',bladderMin:65,moral:-5,bladder:-70,hygiene:-5,minutes:3});
 const FART=Object.freeze({id:'fart',moralWitness:-3,moralAlone:0,cooldownMinutes:1,range:2});
@@ -20,11 +30,27 @@ const WEEK=['SEN','SEL','RAB','KAM','JUM','SAB','MIN'];
 const FURNITURE_GATES=Object.freeze([
  {id:'stove',kind:'stove',actions:Object.freeze(['cook','cook_recipe']),
   furnitureIds:Object.freeze(['stove']),
-  patterns:/kompor|stove|dapur/i,inRoom:true,label:'Kompor'},
- {id:'bathroom',kind:'bathroom',actions:Object.freeze(['home_shower','shower']),
-  furnitureIds:Object.freeze(['bathroom','kamar_mandi']),
-  patterns:/kamar.?mandi|bathroom|shower|bak.?mandi|pancuran|(?:^|[-_])mandi(?:$|[-_])/i,
+  patterns:/kompor|stove/i,inRoom:true,label:'Kompor'},
+ {id:'fridge',kind:'fridge',actions:Object.freeze(['store_fridge','take_fridge']),
+  furnitureIds:Object.freeze(['fridge','kulkas']),
+  patterns:/kulkas|fridge|lemari.?es/i,inRoom:true,label:'Kulkas'},
+ {id:'wardrobe',kind:'wardrobe',actions:Object.freeze(['store_home','take_home']),
+  furnitureIds:Object.freeze(['wardrobe','lemari']),
+  patterns:/lemari|wardrobe/i,inRoom:true,label:'Lemari'},
+ {id:'kitchen_sink',kind:'kitchen_sink',actions:Object.freeze(['wash']),
+  furnitureIds:Object.freeze(['kitchen_sink']),
+  patterns:/kitchen.?sink|wastafel.?dapur/i,inRoom:true,label:'Wastafel Dapur'},
+ {id:'bathroom',kind:'bathroom',actions:Object.freeze(['home_shower','shower','bathe']),
+  furnitureIds:Object.freeze(['bathroom','kamar_mandi','bathtub','shower']),
+  patterns:/kamar.?mandi|bathroom|shower|bathtub|bak.?mandi|pancuran|(?:^|[-_])mandi(?:$|[-_])/i,
   inRoom:true,label:'Kamar mandi'},
+ {id:'toilet',kind:'toilet',actions:Object.freeze(['home_toilet','use_toilet']),
+  furnitureIds:Object.freeze(['squat_toilet','toilet']),
+  patterns:/toilet|kloset|(?:^|[-_])wc(?:$|[-_])/i,inRoom:true,label:'Toilet',
+  exemptSiteIds:Object.freeze(['kost'])},
+ {id:'sink',kind:'sink',actions:Object.freeze(['wash']),
+  furnitureIds:Object.freeze(['sink']),
+  patterns:/(?:^|[-_])sink(?:$|[-_])|wastafel/i,inRoom:true,label:'Wastafel'},
  {id:'bed',kind:'bed',actions:Object.freeze(['sleep']),
   furnitureIds:Object.freeze(['bed']),
   patterns:/kasur|bed|divan|dipan/i,inRoom:true,label:'Kasur',
@@ -35,7 +61,8 @@ const ACTION_LABELS={
  catch_fruit:'Ambil Buah',eat:'Makan',coffee:'Ngopi',tea:'Beli Es Teh',talk:'Ngobrol',arrest:'Tegur Hansip',wall_pee:'Pipis di Tembok',fart:'Kentut',public_toilet:'WC Umum',public_shower:'Mandi Umum',
  buy_room:'Beli Akses Kost',home_toilet:'WC Kost',home_shower:'Mandi Kost',sleep:'Tidur',
  cook:'Masak Ikan',cook_recipe:'Masak Resep',store_fridge:'Simpan Kulkas',take_fridge:'Ambil dari Kulkas',
- store_home:'Simpan di Kost',take_home:'Ambil dari Kost',rest:'Duduk sebentar',help:'Bantu warga',
+ store_home:'Simpan di Kost',take_home:'Ambil dari Kost',wash:'Cuci',bathe:'Mandi Kost',use_toilet:'WC Kost',
+ enter_room:'Masuk',exit_interior:'Keluar',rest:'Duduk sebentar',help:'Bantu warga',
  charity:'Sedekah',worship:'Ibadah',course:'Kursus Online',world_enter:'Masuk',world_quest:'Quest',
  world_ambient:'Interaksi'
 };
@@ -79,7 +106,8 @@ function furnitureFromInteriorItems(items,origin){
   const z=Number.isFinite(Number(it.z))?Number(it.z):originZ+num(it.r,0);
   const kind=kindOf(it,FURNITURE_GATES);
   return {id:String(it.id||('furn-'+i)),kind,furnitureId:it.assetId||it.furnitureId||it.id||'',
-   label:it.name||it.label||it.assetId||it.id||'Furnitur',x,z,roomId:it.roomId||origin?.id||null,source:'interior'};
+   label:it.name||it.label||it.assetId||it.id||'Furnitur',x,z,roomId:it.roomId||origin?.id||null,source:'interior',
+   access:it.access||null,actionId:it.actionId||null,tags:it.tags||'',ownerId:it.ownerId||null};
  }).filter(f=>f.kind);
 }
 function dayFromElapsed(elapsed){return Math.floor(Math.max(0,num(elapsed,0))/MINUTES)+1;}
@@ -218,6 +246,15 @@ function create(ctx){
  const getWorld=()=>ctx.getWorld?ctx.getWorld()||{objects:[]}:{objects:[]};
  const getPos=()=>{const p=ctx.getPos?ctx.getPos():null;return {x:num(p?.x,0),y:num(p?.y,0),z:num(p?.z,0)};};
  const config=()=>ctx.getConfig?ctx.getConfig():null;
+ const pid=()=>String(ctx.playerId?.()||'');
+ const rels=()=>((typeof ctx.getRelationships==='function'?ctx.getRelationships():null)||Access?.DEFAULT_RELATIONSHIPS||[]);
+ const currentRoomId=()=>{try{return ctx.interiorRoomId?.()||null;}catch(_e){return null;}};
+ function housing(){return Access?Access.housingOf(pid(),getState()):{ownerId:null,roomId:null,kind:null};}
+ function relationship(id){return Access?Access.relationshipsOf(rels(),id==null||id===''?pid():id):[];}
+ function roomAccess(roomId){
+  if(!Access)return {canEnter:false,role:'none',allowedActs:[],reason:'Terkunci',kind:null};
+  return Access.roomAccess(pid(),roomId||currentRoomId(),getState(),rels());
+ }
  function ownedKinds(state){
   const set=new Set();
   for(const id of (state?.furniture||[])){
@@ -358,10 +395,11 @@ function create(ctx){
   const near=nearestSites();
   const list=[];
   const kind=interiorKind();
-  if(kind==='kost'&&state?.housing?.room){
+  const inLobby=!!(Access&&currentRoomId()&&Access.isLobby(currentRoomId()));
+  if(kind==='kost'&&state?.housing?.room&&!inLobby){
    const site=getSites().find(s=>s.id==='kost')||{id:'kost',label:'Kost',x:getPos().x,z:getPos().z};
    list.push(...actionsForSite(site,state));
-  }else if(kind==='warteg'){
+  }else if(kind==='warteg'||kind==='lobby'||inLobby){
    /* Makan is supplied as an extra action near tables / kasir. */
   }else{
    for(const {site} of near)list.push(...actionsForSite(site,state));
@@ -369,6 +407,28 @@ function create(ctx){
   try{
    const extra=(typeof ctx.extraActions==='function'?ctx.extraActions():[])||[];
    for(const a of extra)if(a&&a.id&&!list.some(x=>x.id===a.id&&x.furnitureId===a.furnitureId))list.push(a);
+  }catch(_e){}
+  try{
+   if(Scenes){
+    const nearSite=near[0]?.site;
+    const furn=worldFurniture();
+    const pos=getPos();
+    const close=k=>furn.some(f=>f.kind===k&&Math.hypot((f.x??0)-pos.x,(f.z??0)-pos.z)<=range);
+    let context=null;
+    if(close('toilet')||(kind==='kost'&&close('toilet')))context='wc';
+    else if(close('bed'))context='bed';
+    else if(kind==='kost'||kind==='lobby')context='room';
+    else if(nearSite?.id==='tree')context='tree';
+    const npc=(typeof ctx.getNpcs==='function'?ctx.getNpcs():[])||[];
+    const npcNear=npc.find(n=>Math.hypot(num(n.x,0)-pos.x,num(n.z,0)-pos.z)<=range);
+    const ctxScene={
+     partnered:(relationship()||[]).some(r=>r.type==='pacaran'),
+     context,
+     npcGender:npcNear&&(npcNear.gender||npcNear.sex)||null
+    };
+    for(const a of Scenes.nearbySceneActions(ctxScene))
+     if(a&&!list.some(x=>x.id===a.id))list.push(a);
+   }
   }catch(_e){}
   if(state&&!state.detained&&!(state.restMinutes>0)){
    const wall=nearWall();
@@ -386,6 +446,14 @@ function create(ctx){
   const spot=near[0]?.site?.label||near[0]?.site?.id||'';
   Object.defineProperty(list,'spot',{value:spot,enumerable:false,configurable:true});
   if(list[0]&&!list[0].spotLabel)list[0].spotLabel=spot;
+  if(Access&&currentRoomId()){
+   const acc=roomAccess();
+   if(acc&&(acc.role==='partner'||acc.kind==='lobby'||acc.role==='none')){
+    const next=Access.filterActions(list,acc);
+    Object.defineProperty(next,'spot',{value:spot,enumerable:false,configurable:true});
+    return next;
+   }
+  }
   return list;
  }
  function argsFor(action,args){
@@ -405,12 +473,29 @@ function create(ctx){
   const sites=getSites(),objects=getWorld().objects||[],state=getState();
   if(id){
    const sid=String(id);
+   if(Access){
+    const hit=Access.spawnTarget(pid(),kind,sid)||Access.spawnTarget(sid);
+    if(hit&&hit.roomId){
+     const enter=hit.skipLobby?'room':(Access.isLobby(hit.roomId)?'lobby':'room');
+     return {id:hit.roomId,x:num(hit.x,0),z:num(hit.z,0),kind,source:'room',roomId:hit.roomId,doorId:hit.doorId,enter,skipLobby:!!hit.skipLobby};
+    }
+    if(Access.isLobby(sid)){
+     const L=Access.lobbyOf()||{};
+     const use=L.usePoint||L.tile||[0,0];
+     return {id:L.id,x:num(use[0],0),z:num(use[1],0),kind,source:'lobby',roomId:L.id,enter:'lobby'};
+    }
+   }
    const site=sites.find(s=>String(s.id)===sid||String(s.sourceId)===sid);
    if(site)return {id:site.id,x:num(site.x,0),z:num(site.z,0),kind,source:'site'};
    const obj=objects.find(o=>String(o.id)===sid);
    if(obj)return {id:obj.id,x:num(obj.x,0),z:num(obj.z,0),kind,source:'world'};
   }
   if(kind==='kost'){
+   const roomId=state?.housing?.roomId||null;
+   if(Access&&roomId){
+    const hit=Access.spawnTarget(pid(),'kost',roomId);
+    if(hit&&hit.roomId)return {id:hit.roomId,x:num(hit.x,0),z:num(hit.z,0),kind,source:'room',roomId:hit.roomId,enter:hit.skipLobby?'room':'lobby',skipLobby:!!hit.skipLobby};
+   }
    const pos=state?.housing?.roomPosition;
    if(pos&&Number.isFinite(Number(pos.x)))return {id:pos.id||'kost',x:num(pos.x,0),z:num(pos.z,0),kind,source:'room'};
    const site=sites.find(s=>s.id==='kost');
@@ -435,7 +520,10 @@ function create(ctx){
   }
   let moved=false;
   if(typeof ctx.teleport==='function')moved=!!ctx.teleport(target.x,target.z);
-  const result={ok:true,kind:k,id:target.id,x:target.x,z:target.z,teleported:moved};
+  if((target.enter==='room'||target.enter==='lobby')&&target.roomId&&typeof ctx.enterInterior==='function'){
+   try{ctx.enterInterior(target.roomId);}catch(_e){}
+  }
+  const result={ok:true,kind:k,id:target.id,x:target.x,z:target.z,teleported:moved,roomId:target.roomId||null,enter:target.enter||null};
   emit('mainkan:spawn-done',result);
   return result;
  }
@@ -646,7 +734,8 @@ function create(ctx){
  }
  function listSites(){
   return getSites().map(s=>({id:s.id,label:s.label,x:num(s.x,0),z:num(s.z,0),
-   placeholder:s.placeholder===true,npc:!!(s.npc||s.npcId||s.jobId||s.role==='quest'||s.id==='hansip'||s.id==='loak'||s.id==='help'||s.id==='siomay_batagor'||s.id==='pasar_ikan')}));
+   placeholder:s.placeholder===true,npc:!!(s.npc||s.npcId||s.jobId||s.role==='quest'||s.id==='hansip'||s.id==='loak'||s.id==='help'||s.id==='siomay_batagor'||s.id==='pasar_ikan'),
+   points:Array.isArray(s.points)&&s.points.length?s.points.map(p=>({id:p.id||s.id,x:num(p.x,s.x),z:num(p.z,s.z)})):[{id:s.sourceId||s.id,x:num(s.x,0),z:num(s.z,0)}]}));
  }
  function openMap(){
   try{
@@ -702,11 +791,13 @@ function create(ctx){
    out.push({id,name:o.name||o.label||o.asset||o.id||'Bangunan',x,z});
   };
   const kostPat=/kost|kos_|boarding.?room|cove|kamar.?sewa|__njh_play_kost__/i;
-  const wartegPat=/warteg|warung|nasi|food.vendor/i;
+  const wartegPat=/warteg|warung.?makan|nasi padang|food.vendor/i;
+  const scavengePat=/botol|kardus|sampah|trash|barang.?bekas|scavenge/i;
   const text=o=>[o.id,o.name,o.label,o.asset,o.assetId,o.subtype,o.type,o.njhInteriorTemplate].filter(Boolean).join(' ');
   for(const o of objects){
+   if(scavengePat.test(text(o))&&o.enterable!==true&&!o.njhInteriorTemplate&&!o.interior)continue;
    const hasInterior=!!(o.enterable===true||o.interior?.floors?.length||o.njhInteriorTemplate);
-   const playDoor=kostPat.test(text(o))||wartegPat.test(text(o));
+   const playDoor=(o.enterable===true||o.njhInteriorTemplate||o.interior)&& (kostPat.test(text(o))||wartegPat.test(text(o)));
    if(hasInterior||playDoor)push(o);
   }
   if(typeof ctx.playEnterables==='function'){
@@ -736,12 +827,16 @@ function create(ctx){
  }
  function saveMeta(slot){
   if(slot==null||slot===''){
-   const st=storageOf(ctx);if(!st)return null;
-   try{
-    const raw=JSON.parse(st.getItem(autoKey(ctx))||'null');
-    if(!raw||!raw.state)return null;
-    return Object.assign({slot:'auto',schema:raw.schema||1,cityId:raw.cityId||null},metaFromState(raw.state,clock(),raw.savedAt));
-   }catch(_e){return null;}
+   const st=storageOf(ctx);
+   let raw=null;
+   if(st){try{raw=JSON.parse(st.getItem(autoKey(ctx))||'null');}catch(_e){raw=null;}}
+   const live=getState();
+   const src=(raw&&raw.state)?raw.state:live;
+   if(!src)return null;
+   const has=typeof ctx.hasCharacter==='function'?!!ctx.hasCharacter():!!src.hasCharacter;
+   return Object.assign({slot:'auto',schema:(raw&&raw.schema)||1,cityId:(raw&&raw.cityId)||null},
+    metaFromState(src,clock(),raw&&raw.savedAt),
+    Access?Access.saveFields(pid(),src,{hasCharacter:has}):{});
   }
   const id=slotId(slot);if(!id)return null;
   const rec=readSlotStore(ctx).slots[id];if(!rec)return null;
@@ -789,6 +884,7 @@ function create(ctx){
   sites:listSites,openMap,
   questMarkers,enterables,worldToScreen,playerPosition,
   hasSave,saveMeta,saveSlot,loadSlot,listSlots,resetSave,
+  housing,relationship,roomAccess,
   RANGE:range,FURNITURE_GATES:gates
  };
 }
