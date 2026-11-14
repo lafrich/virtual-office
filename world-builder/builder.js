@@ -1132,6 +1132,10 @@ function movingOverlap(record,candidate,dx,dz,ignore){
  return false;
 }
 function simulationObstacles(){
+ // An interior is a separate playable space (origin x=240+). Outdoor buildings,
+ // traffic and city boundaries must never collide with room furniture/player.
+ const interior=window.__njhPlayInteriors;
+ if(interior?.active?.())return interior.obstacles?.()||[];
  const obstacles=documentMap.objects.filter(o=>!automaticType(o.type)||o.type==='quest_npc');
  for(const [id,agent] of automatedAgents){
   if(agent.kind==='quest_npc'||!agent.root.visible)continue;
@@ -2434,7 +2438,13 @@ canvas.addEventListener('wheel',e=>{
   return !!(o?.interior?.floors?.length||(o?.type==='sprite'&&assetByName.get(o.asset)?.interior?.floors?.length));
  }
  function enterNearbyBuilding(){
-  try{const r=window.__njhPlayInteriors?.enterNearby?.();if(r?.ok)return true;if(r?.reason)tell(r.reason);}catch{}
+  try{
+   const I=window.__njhPlayInteriors;
+   const r=I?.enterNearby?.();
+   if(r?.ok)return true;
+   if(playerMode&&I){lastEnterReason=r?.reason||'no-enterable-door';tell(r?.reason||'Interior belum tersedia');return false;}
+   if(r?.reason)tell(r.reason);
+  }catch{}
   const root=owners.get(walkActorId);
   if(!root||!interiorPreview){lastEnterReason='unavailable';return false;}
   const candidates=documentMap.objects.filter(o=>
@@ -2751,7 +2761,7 @@ function setMode(m){
        interiorFurniture:()=>I.furniture(),
        interiorKind:()=>I.kind(),
        extraActions:()=>I.extraActions(),
-       enterInterior:id=>id?(I.enterInterior?.(id)||I.openInteriorById?.(id)||I.enterNearby()):I.enterNearby(),
+       enterInterior:id=>id?I.openInteriorById?.(id):I.enterNearby(),
        exitInterior:()=>I.exit(),
        playInteriors:I,
        doorAnchor:o=>I.doorWorld(o)
@@ -2772,7 +2782,10 @@ function setMode(m){
        syncHud:syncPlayHud,
        tell,
        openInteriorById:id=>{
-        if(I?.openInteriorById){const r=I.openInteriorById(id);if(r?.ok)return true;}
+        if(I?.openInteriorById){const r=I.openInteriorById(id);if(r?.ok)return true;
+         // Player interiors must remain walkable. Never fall through to the
+         // editor's static preview when an authored door has no scene.
+         if(playerMode){if(r?.reason)tell(r.reason);return false;}}
         const obj=documentMap.objects.find(o=>String(o.id)===String(id));
         if(obj&&I?.kindOfBuilding){/* peek */}
         const kind=obj&&((/kost|kos_|cove/i.test([obj.name,obj.label,obj.id].join(' '))?'kost':/warteg|warung/i.test([obj.name,obj.label,obj.id].join(' '))?'warteg':null));
@@ -2804,7 +2817,7 @@ function setMode(m){
        interiorFurniture:()=>I.furniture(),
        interiorKind:()=>I.kind(),
        extraActions:()=>I.extraActions(),
-       enterInterior:id=>id?(I.enterInterior?.(id)||I.openInteriorById?.(id)||I.enterNearby()):I.enterNearby(),
+       enterInterior:id=>id?I.openInteriorById?.(id):I.enterNearby(),
        exitInterior:()=>I.exit(),
        playInteriors:I
       });
@@ -3372,8 +3385,10 @@ if(njhMapPreview){
    if(!holder||!actor||!physics)return null;
    const live=new Map([...rigs].map(([id,rec])=>[id,rec.root.position]));
    const start={x:holder.root.position.x,z:holder.root.position.z};
+   const inside=!!window.__njhPlayInteriors?.active?.();
+   const indoorMap={unbounded:true,terrain:{default:'floor',cells:[]}};
    const next=physics.move(actor,start,Number(dx)||0,Number(dz)||0,
-    documentMap.objects,documentMap.map,assetByName,style,live);
+    simulationObstacles(),inside?indoorMap:documentMap.map,assetByName,style,live);
    holder.root.position.x=next.x;holder.root.position.z=next.z;
    return {start,next,moved:!!next.moved,blocked:!!next.blocked};
   },
@@ -3409,7 +3424,10 @@ if(window.SemestaLifePlay){
   tell,
   openInteriorById:id=>{
    const I=window.__njhPlayInteriors;
-   if(I?.openInteriorById){const r=I.openInteriorById(id);if(r?.ok)return true;}
+   if(I?.openInteriorById){const r=I.openInteriorById(id);if(r?.ok)return true;
+         // Player interiors must remain walkable. Never fall through to the
+         // editor's static preview when an authored door has no scene.
+         if(playerMode){if(r?.reason)tell(r.reason);return false;}}
    const obj=documentMap.objects.find(o=>String(o.id)===String(id));
    const asset=obj?.type==='sprite'?assetByName.get(obj.asset):null;
    if(!obj||!interiorPreview?.openFor||
@@ -4789,12 +4807,14 @@ function frame(now){
      if(actor){
       const live=new Map([...rigs].map(([id,rec])=>[id,rec.root.position]));
       const start={x:holder.root.position.x,z:holder.root.position.z};
+      const inside=!!window.__njhPlayInteriors?.active?.();
+      const indoorMap={unbounded:true,terrain:{default:'floor',cells:[]}};
       let next=physics.move(actor,start,dx*speed*dt,dz*speed*dt,
-       simulationObstacles(),documentMap.map,assetByName,style,live);
+       simulationObstacles(),inside?indoorMap:documentMap.map,assetByName,style,live);
       const TL=window.VLSemestaTrafficLights;
       const tlSet=trafficLightSettings();
       const tlPhase=tlSet.enabled&&TL?TL.phaseAt(trafficLightTime,tlSet.cycleSeconds):null;
-      if(TL&&tlPhase){
+      if(!inside&&TL&&tlPhase){
        const held=TL.constrainPlayer(start,next,documentMap.map,documentMap.objects,tlPhase);
        if(held.x!==next.x||held.z!==next.z){
         next={x:held.x,z:held.z,moved:held.x!==start.x||held.z!==start.z};
