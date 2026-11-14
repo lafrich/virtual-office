@@ -24,40 +24,43 @@ html.semesta-player-mode.njh98 #worldClockHud *{font-family:var(--w-font)!import
 html.semesta-player-mode.njh98 #worldClockHud button,html.semesta-player-mode.njh98 #worldClockHud select{background:var(--w-face)!important;border:0!important;box-shadow:var(--raised)!important;min-height:28px}
 html.semesta-player-mode.njh98 #worldClockHud .clock-panel{position:static!important;background:var(--w-face)!important;border:0!important;box-shadow:none!important;margin-top:4px}
 
-/* ---- life panel = "Aksi & Tas" window ---- */
-html.semesta-player-mode.njh98 #semestaLifePlayPanel.slp{left:calc(8px + env(safe-area-inset-left,0px))!important;top:var(--hud-top)!important;right:auto!important;bottom:auto!important;
- transform:none!important;width:300px;max-width:calc(100% - 16px)!important;max-height:calc(100% - var(--hud-top) - 72px)!important;
- background:var(--w-face)!important;border:0!important;outline:0!important;padding:3px!important;box-shadow:var(--win)!important;color:#000!important;font:11px/1.3 var(--w-font)!important;
- display:flex;flex-direction:column;overflow:hidden!important}
+/* ---- native life panel ----
+   Player view: no persistent window. It becomes a small context menu (title = spot, actions, Batal)
+   only while html.njh-ctx-open is set by the parent (AKSI / E near a spot).
+   ?dev=1 (html.njh-devtools) keeps the full panel with test tools on the left. */
+html.semesta-player-mode.njh98 #semestaLifePlayPanel.slp{transform:none!important;background:var(--w-face)!important;border:0!important;outline:0!important;padding:3px!important;
+ box-shadow:var(--win)!important;color:#000!important;font:11px/1.3 var(--w-font)!important;flex-direction:column;overflow:hidden!important;right:auto!important;bottom:auto!important}
+html.semesta-player-mode.njh98:not(.njh-devtools) #semestaLifePlayPanel.slp{display:none!important}
+html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) #semestaLifePlayPanel.slp{display:flex!important;left:calc(50% + 34px)!important;top:20%!important;
+ width:236px;max-width:calc(50% - 44px)!important;max-height:calc(80% - 96px)!important}
+html.semesta-player-mode.njh98.njh-devtools #semestaLifePlayPanel.slp{display:flex;left:calc(8px + env(safe-area-inset-left,0px))!important;top:var(--hud-top)!important;
+ width:300px;max-width:calc(100% - 16px)!important;max-height:calc(100% - var(--hud-top) - 72px)!important}
 html.semesta-player-mode.njh98 .slp .slp-head{background:linear-gradient(90deg,var(--w-t0),var(--w-t1))!important;padding:1px 2px 1px 4px!important;min-height:18px;flex:none}
 html.semesta-player-mode.njh98 .slp .slp-head h3{background:none!important;padding:0!important;font:bold 11px var(--w-font)!important;color:#fff!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.semesta-player-mode.njh98 .slp .slp-head button{width:16px!important;height:14px!important;min-height:0!important;padding:0!important;font:bold 9px/1 var(--w-font)!important}
-html.semesta-player-mode.njh98 .slp .slp-content{padding:5px 3px 3px!important;overflow:auto;min-height:0}
-html.semesta-player-mode.njh98 .slp .slp-summary,
-html.semesta-player-mode.njh98 .slp .slp-stats{display:none!important} /* shown by the parent HUD */
+html.semesta-player-mode.njh98 .slp .slp-content{padding:4px 2px 2px!important;overflow:auto;min-height:0}
 html.semesta-player-mode.njh98 .slp button,html.semesta-player-mode.njh98 .slp select{background:var(--w-face)!important;color:#000!important;border:0!important;
  box-shadow:var(--raised)!important;font:11px var(--w-font)!important;padding:4px 8px!important;min-height:28px}
 html.semesta-player-mode.njh98 .slp button:active{box-shadow:var(--pressed)!important}
 html.semesta-player-mode.njh98 .slp select{background:#fff!important;box-shadow:var(--sunken)!important}
 html.semesta-player-mode.njh98 .slp button:disabled{opacity:1!important;color:var(--w-sh)!important;text-shadow:1px 1px var(--w-hl)}
-html.semesta-player-mode.njh98 .slp .slp-actions{gap:3px!important;margin:4px 0!important}
-html.semesta-player-mode.njh98 .slp-goal{background:#fff!important;border:0!important;box-shadow:var(--sunken);padding:4px 6px!important;font-size:11px!important;line-height:1.35!important;margin:0 0 4px!important}
-html.semesta-player-mode.njh98 .slp .slp-spot{color:#000!important;padding:4px 0 2px!important;border-top:1px solid var(--w-sh);box-shadow:inset 0 1px var(--w-hl)}
-html.semesta-player-mode.njh98 .slp-alert{background:var(--w-tip)!important;border:1px solid #000!important}
-html.semesta-player-mode.njh98 .slp #lifePlayMessage{background:var(--w-tip)!important;border:1px solid #000!important}
+html.semesta-player-mode.njh98 .slp .slp-actions{gap:3px!important;margin:3px 0!important}
+html.semesta-player-mode.njh98 .slp-alert{background:var(--w-tip)!important;border:1px solid #000!important;margin:2px 0 4px!important;padding:3px 5px!important}
 html.semesta-player-mode.njh98 .slp small{color:#404040!important}
-html.semesta-player-mode.njh98 .slp details{margin-top:4px;border-top:1px solid var(--w-sh)}
 html.semesta-player-mode.njh98 .slp .slp-work-progress{height:16px!important;background:#fff!important;border:0!important;padding:2px;box-shadow:var(--sunken)}
 html.semesta-player-mode.njh98 .slp .slp-work-progress>span{background:repeating-linear-gradient(90deg,var(--w-sel) 0 8px,transparent 8px 10px)!important}
-html.semesta-player-mode.njh98 .slp .slp-bag{background:#fff;box-shadow:var(--sunken);padding:5px}
-html.semesta-player-mode.njh98.njh-slp-closed #semestaLifePlayPanel{display:none!important}
+html.semesta-player-mode.njh98:not(.njh-devtools) .slp .slp-actions{display:grid!important;grid-template-columns:1fr}
+html.semesta-player-mode.njh98:not(.njh-devtools) .slp .slp-actions button{text-align:left;width:100%;min-height:32px}
+html.semesta-player-mode.njh98:not(.njh-devtools) .slp .slp-actions select{width:100%}
+html.semesta-player-mode.njh98:not(.njh-devtools) .slp :is(.slp-summary,.slp-stats,.slp-goal,.slp-spot,#lifePlayMessage,details,#slpToggle),
+html.semesta-player-mode.njh98:not(.njh-devtools) .slp .slp-actions:has(#slpPhone),
+html.semesta-player-mode.njh98:not(.njh-devtools) .slp #slpActions>small{display:none!important}
+html.semesta-player-mode.njh98 .slp .njh-ctx-foot{display:none;flex:none;justify-content:flex-end;padding:3px 2px 1px;border-top:1px solid var(--w-sh);box-shadow:inset 0 1px var(--w-hl)}
+html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) .slp .njh-ctx-foot{display:flex}
+html.semesta-player-mode.njh98 .slp .njh-ctx-foot button{min-width:72px}
 
-/* ---- D-pad: touch only ---- */
-html.semesta-player-mode.njh98 #walkPad{left:calc(6px + env(safe-area-inset-left,0px))!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;transform:none!important;
- grid-template-columns:repeat(3,46px)!important;grid-template-rows:repeat(3,46px)!important;gap:2px!important;padding:3px;background:var(--w-face);box-shadow:var(--win)}
-html.semesta-player-mode.njh98 #walkPad button{background:var(--w-face)!important;border:0!important;box-shadow:var(--raised)!important;color:#000!important;font:bold 18px/1 var(--w-font)!important;touch-action:none}
-html.semesta-player-mode.njh98 #walkPad button:active{box-shadow:var(--pressed)!important}
-@media (hover:hover) and (pointer:fine){html.semesta-player-mode.njh98 #walkPad.active{display:none!important}}
+/* ---- D-pad: kept in the DOM, hidden; the parent joystick drives the same WASD walk input ---- */
+html.semesta-player-mode.njh98:not(.njh-devtools) #walkPad,html.semesta-player-mode.njh98:not(.njh-devtools) #walkPad.active{display:none!important}
 
 /* ---- Nokia / bag window chrome (VLPlayHud #ptWindow) ---- */
 html.semesta-player-mode.njh98 #ptWindow.vsw9:not([data-kind=phone]){background:var(--w-face)!important;border:0!important;padding:3px!important;box-shadow:var(--win)!important;font:11px var(--w-font)!important;color:#000}
@@ -69,17 +72,15 @@ html.semesta-player-mode.njh98 #ptWindow .pt-slot{background:#fff!important;bord
 /* ---- toasts / tips ---- */
 html.semesta-player-mode.njh98 #toast,html.semesta-player-mode.njh98 #vs-tip:not(:empty){background:var(--w-tip)!important;color:#000!important;border:1px solid #000!important;
  box-shadow:none!important;font:11px var(--w-font)!important;padding:3px 6px!important;text-shadow:none!important}
-html.semesta-player-mode.njh98 #toast{top:auto!important;bottom:calc(120px + env(safe-area-inset-bottom,0px))!important;left:50%!important;transform:translateX(-50%)!important;max-width:min(420px,calc(100% - 24px))}
+html.semesta-player-mode.njh98 #toast{top:auto!important;bottom:calc(150px + env(safe-area-inset-bottom,0px))!important;left:50%!important;transform:translateX(-50%)!important;max-width:min(420px,calc(100% - 24px))}
 
 /* ---- by Lafrich watermark stays visible between the corners ---- */
 html.semesta-player-mode.njh98 #vl-lafrich-mark{left:50%!important;right:auto!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;
  transform:translateX(-50%);opacity:.6!important;color:#fff!important;text-shadow:1px 1px 0 #000!important;z-index:70!important}
 
-@media (max-width:760px){
- html.semesta-player-mode.njh98{--hud-top:136px}
- html.semesta-player-mode.njh98.njh-show-clock #worldClockHud{left:auto!important;right:calc(6px + env(safe-area-inset-right,0px))!important;top:var(--hud-top)!important}
- html.semesta-player-mode.njh98 #semestaLifePlayPanel.slp{left:calc(6px + env(safe-area-inset-left,0px))!important;width:auto;right:calc(6px + env(safe-area-inset-right,0px))!important;
-  max-width:none!important;max-height:min(36%,calc(100% - var(--hud-top) - 380px))!important;min-height:96px}
- html.semesta-player-mode.njh98 #toast{bottom:calc(178px + env(safe-area-inset-bottom,0px))!important}
- html.semesta-player-mode.njh98 #vl-lafrich-mark{bottom:calc(14px + env(safe-area-inset-bottom,0px))!important}
+@media (pointer:coarse) and (max-height:500px){
+ html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) #semestaLifePlayPanel.slp{top:12%!important;max-height:calc(88% - 70px)!important}
+ html.semesta-player-mode.njh98 #toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
 }
+/* one toast only: #toast carries the same tell() text as the play-hud tip */
+html.semesta-player-mode.njh98:not(.njh-devtools) #vs-tip{display:none!important}
