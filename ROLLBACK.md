@@ -1,3 +1,23 @@
+# Rollback — Step 2 (minimarket, cooking, fishing, kost token, NJH98 step 2 UI)
+
+Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged. No storage migration (new save fields are additive; old saves load).
+
+- Previous live `origin/main`: `ceb87da8886897d6fc6413cb2e15d985ebef5c90` (NJH-only map, sw v27, `?v=njh-only-map-1`)
+- Step 2 tip before this notes commit: `dec6996aa9d1fd7124ddbe5a4672066eabfbcacf` (`preview/njh-step2`; sw v28, `?v=njh-step2-2`)
+- Contents: logic + hooks `0a850e2c`; Ellen fishing spot `1a20b3c1` / `f36e173c` (merge `075a3e30`); Ellen minimarket `db5b85c6` + Cove facade `00d0f7a`; merge of `origin/main` ceb87da8; Layar UI `1ff0fa3f` (`shared/genesis-player.js` not included).
+
+Main was fast-forwarded (merges kept). To roll back without force-push, restore the previous tree in one new commit:
+
+```bash
+git fetch origin
+git checkout main && git pull --ff-only origin main
+git checkout ceb87da8886897d6fc6413cb2e15d985ebef5c90 -- .
+git commit -m "rollback: step 2 (restore ceb87da8 tree)"
+# bump sw.js to v29 so phones drop v28, then push --ff-only
+```
+
+---
+
 # Rollback — NJH as the only default playable map
 
 Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged. No storage migration.
