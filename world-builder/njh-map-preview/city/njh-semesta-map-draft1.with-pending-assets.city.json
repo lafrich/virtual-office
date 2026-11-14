@@ -13823,6 +13823,38 @@
           "notes": "Published native pipeline sprite, individually editable"
         },
         {
+          "id": "jakarta-v3-18446",
+          "name": "Warteg (warung makan)",
+          "type": "sprite",
+          "x": -39.5,
+          "z": 39.5,
+          "y": 0,
+          "rotation": 0,
+          "scale": 1,
+          "width": 4.28,
+          "height": 4.32,
+          "asset": "pipeline:id_warteg_sederhana",
+          "collision": true,
+          "replaceable": true,
+          "layer": "structure",
+          "subtype": "id_warteg_sederhana",
+          "tags": [
+            "dense-v3",
+            "jakarta-city",
+            "kampung",
+            "native",
+            "njh-door:njh_door_warung_makan"
+          ],
+          "interactions": [
+            "enter"
+          ],
+          "capacity": 1,
+          "entranceFacing": "sw",
+          "markerKind": "",
+          "blocking": "auto",
+          "notes": "Published native pipeline sprite, individually editable"
+        },
+        {
           "id": "ref-north-row-b",
           "name": "Warung Madura (warung pojok)",
           "type": "sprite",
@@ -13854,38 +13886,6 @@
           "markerKind": "",
           "blocking": "auto",
           "notes": "Reference-inspired editable building placeholder; swap with published game artwork later. | Kebon Sirih visual sprite: Warung Madura"
-        },
-        {
-          "id": "jakarta-v3-18446",
-          "name": "Warteg (warung makan)",
-          "type": "sprite",
-          "x": -39.5,
-          "z": 39.5,
-          "y": 0,
-          "rotation": 0,
-          "scale": 1,
-          "width": 4.28,
-          "height": 4.32,
-          "asset": "pipeline:id_warteg_sederhana",
-          "collision": true,
-          "replaceable": true,
-          "layer": "structure",
-          "subtype": "id_warteg_sederhana",
-          "tags": [
-            "dense-v3",
-            "jakarta-city",
-            "kampung",
-            "native",
-            "njh-door:njh_door_warung_makan"
-          ],
-          "interactions": [
-            "enter"
-          ],
-          "capacity": 1,
-          "entranceFacing": "sw",
-          "markerKind": "",
-          "blocking": "auto",
-          "notes": "Published native pipeline sprite, individually editable"
         },
         {
           "id": "ref-infill-extra-168",
@@ -15827,7 +15827,7 @@
           "rotation": 0,
           "width": 2.84,
           "height": 3.24,
-          "name": "Rak sandal masjid",
+          "name": "Rak sandal",
           "subtype": "id200_budaya_rak_sandal_masjid",
           "collision": false
         },
@@ -16498,7 +16498,6 @@
           "tags": [
             "jakarta-city",
             "dense-v3",
-            "streetscape",
             "native"
           ],
           "interactions": [],
@@ -17448,7 +17447,7 @@
           "rotation": 0,
           "width": 0.55,
           "height": 0.7,
-          "name": "Botol bekas dekat Warung Kopi",
+          "name": "Botol bekas Gang Selatan",
           "subtype": "botol_plastik_hijau",
           "collision": false
         },
@@ -17532,7 +17531,7 @@
           "rotation": 0,
           "width": 0.55,
           "height": 0.7,
-          "name": "Botol bekas dekat Tenda Hobo",
+          "name": "Botol bekas Gang Selatan 2",
           "subtype": "botol_plastik_bening",
           "collision": false
         },
@@ -17644,7 +17643,7 @@
           "rotation": 0,
           "width": 0.625,
           "height": 0.7,
-          "name": "Kardus bekas dekat Kost",
+          "name": "Kardus bekas Gang Timur",
           "subtype": "kardus_lipat",
           "collision": false
         },

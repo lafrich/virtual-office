@@ -20,6 +20,7 @@ DOORS = [
     ('ref-gas-station', 'Rumah Ichsan', 'njh_rumah_biasa'),
     ('jakarta-v3-13634', 'Laundry Kiloan', 'njh_laundry'),
     ('njh-bengkel', 'Bengkel Motor', 'njh_bengkel'),
+    ('ref-west-center-a', 'Warung Kopi Pojok Gang', 'njh_warung_kopi'),
 ]
 PENDING_DOORS = [
     ('njh-tenda-pecel-lele', 'njh_pecel_lele_tenda'),
@@ -28,7 +29,6 @@ PENDING_DOORS = [
     ('jakarta-v3-13541', 'njh_koperasi'),
     ('njh-toko-loak', 'njh_toko_loak'),
     ('ref-north-row-b', 'njh_warung_madura'),
-    ('ref-west-center-a', 'njh_warung_kopi'),
     ('jakarta-v3-13525', 'njh_nasi_sunda'),
 ]
 NEW_ASSETS = [

@@ -50,14 +50,14 @@ Kost, WC/mandi umum, and Warung Kopi were already enterable on draft1. Door ids 
 | `njh-scavenge-botol-nw-1` | Botol bekas Gang Utara | -41.5, 25.5 | `loak-v2/ground/botol_plastik_bening.png` | yes |
 | `njh-scavenge-kardus-nw-1` | Kardus bekas Gang Utara | -37.5, 25.5 | `loak-v2/ground/kardus_lipat.png` | yes |
 | `njh-scavenge-tong-sw-1` | Tong Sampah Gang Selatan | -47.5, 51.5 | `pipeline:tong_sampah` | yes |
-| `njh-scavenge-botol-sw-1` | Botol bekas dekat Warung Kopi | -41.5, 51.5 | `loak-v2/ground/botol_plastik_hijau.png` | yes |
+| `njh-scavenge-botol-sw-1` | Botol bekas Gang Selatan | -41.5, 51.5 | `loak-v2/ground/botol_plastik_hijau.png` | yes |
 | `njh-scavenge-kardus-sw-1` | Kardus bekas Gang Selatan | -36.5, 51.5 | `loak-v2/ground/kardus_lipat.png` | yes |
 | `njh-scavenge-tong-sw-2` | Tong Sampah Gang Selatan 2 | -47.5, 63.5 | `pipeline:tong_sampah` | yes |
-| `njh-scavenge-botol-sw-2` | Botol bekas dekat Tenda Hobo | -45.5, 63.5 | `loak-v2/ground/botol_plastik_bening.png` | yes |
+| `njh-scavenge-botol-sw-2` | Botol bekas Gang Selatan 2 | -45.5, 63.5 | `loak-v2/ground/botol_plastik_bening.png` | yes |
 | `njh-scavenge-kardus-sw-2` | Kardus bekas Gang Selatan 2 | -37.5, 63.5 | `loak-v2/ground/kardus_lipat.png` | yes |
 | `njh-scavenge-tong-se-1` | Tong Sampah Gang Timur | -24.5, 64.5 | `pipeline:tong_sampah` | yes |
 | `njh-scavenge-botol-se-1` | Botol bekas Gang Timur | -18.5, 64.5 | `loak-v2/ground/botol_plastik_hijau.png` | yes |
-| `njh-scavenge-kardus-se-1` | Kardus bekas dekat Kost | -13.5, 64.5 | `loak-v2/ground/kardus_lipat.png` | yes |
+| `njh-scavenge-kardus-se-1` | Kardus bekas Gang Timur | -13.5, 64.5 | `loak-v2/ground/kardus_lipat.png` | yes |
 | `njh-scavenge-botol-pasar-1` | Botol bekas tepi pasar | -13.5, 22.5 | `loak-v2/ground/botol_plastik_bening.png` | yes |
 | `njh-scavenge-kardus-pasar-1` | Kardus bekas tepi plaza | -29.5, 36.5 | `loak-v2/ground/kardus_lipat.png` | yes |
 | `njh-scavenge-tong-kali-1` | Tong Sampah tepi Kali utara | -51.5, 28.5 | `pipeline:tong_sampah` | yes |
@@ -65,11 +65,26 @@ Kost, WC/mandi umum, and Warung Kopi were already enterable on draft1. Door ids 
 
 Botol and kardus use existing Loak v2 ground sprites (`loak-v2/ground/botol_plastik_*.png`, `kardus_lipat.png`). Tong uses `pipeline:tong_sampah`. All new scavenge props have collision off.
 
-## Skipped (not in this pass)
+## Already present (not added in the gameplay-sites pass)
 
-Rumah ibadah extras were already partially present (mushola) but no new gereja/pura/vihara/klenteng were added. Kotak sedekah, relawan, kursus, and kantor premium were skipped as requested. Those sites will still fall back in play.js.
+- **Kotak sedekah / charity** is not a fallback: `/kotak.?amal/` already hits `njh-kotak-amal-anchor` (`PENDING Kotak amal`) at the same coordinates as the real `njh-kotak-amal` sprite.
+- Mushola was already on draft1 (`prayer_islam_a`).
+- Fishing still resolves first to the existing `PENDING Dermaga mancing` anchor at the same coordinates as the real dermaga sprite. That is not a fallback.
+- Warung makan now resolves to **Warteg (warung makan)** (`jakarta-v3-18446`), not Warung Madura. The warteg object was moved earlier in `objects`. The coffee-site fix (no `cafe` tag on Warung Madura) is unchanged.
 
-Fishing still resolves first to the existing `PENDING Dermaga mancing` anchor at the same coordinates as the real dermaga sprite. That is not a fallback.
+## Skipped (still fallback)
+
+No new gereja / pura / vihara / klenteng, relawan, kursus, or kantor premium were added. Those sites still fall back in play.js.
+
+## Warung kopi interior
+
+The r6 scene `njh_warung_kopi.interior-scene.json` is wired on `njh_door_warung_kopi` (copied from `/workspace/njh-interior-templates-r6/scenes/`). Preview only. This layout does **not** yet meet the mandatory Kharisma interior standard (Drive Guides, `NJH-INTERIOR-LAYOUT-STANDARD-KHARISMA.md`); a revision is planned.
+
+## Name-pattern cleanup
+
+- Dropped the `streetscape` tag on `jakarta-v3-22020` (Tong Sampah Jakarta). The substring `tree` inside `streetscape` was making play.js treat the bin as a fruit tree.
+- Renamed `Rak sandal masjid` → `Rak sandal`. The visible name no longer matches a prayer site, but the pipeline asset id `id200_budaya_rak_sandal_masjid` still contains `masjid`, and play.js `name()` includes `asset`/`subtype`. So `prayer_islam_b` still resolves to this rack (`matches[1]`). A full fix needs an asset alias or a play.js change. `prayer_islam_c` still falls back (only two masjid/mushola matches).
+- Scavenge labels use area names only (no Warung Kopi / Kost / Tenda Hobo), so they cannot become false enterables for those sites.
 
 ## QA
 

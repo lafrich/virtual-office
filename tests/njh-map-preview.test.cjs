@@ -95,7 +95,8 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
   njh_door_home_ichsan:'njh_rumah_biasa',
   njh_door_bengkel:'njh_bengkel',
   njh_door_wc_umum:'njh_wc_mandi_umum',
-  njh_door_home_noor:'njh_kos'
+  njh_door_home_noor:'njh_kos',
+  njh_door_warung_kopi:'njh_warung_kopi'
  });
  const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
  assert.deepEqual(pending,{
@@ -105,7 +106,6 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
   njh_door_koperasi:'njh_koperasi',
   njh_door_loak:'njh_toko_loak',
   njh_door_warung_madura:'njh_warung_madura',
-  njh_door_warung_kopi:'njh_warung_kopi',
   njh_door_nasi_sunda:'njh_nasi_sunda'
  });
  for(const row of report.pending){
