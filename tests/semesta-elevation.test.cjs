@@ -49,3 +49,11 @@ test('Existing nonzero height without metadata stays custom; animated traffic st
  e.apply(bus,'level:2',0,[],catalog,style);
  assert.equal(bus.y,0);
 });
+
+test('Walk Test camera tracks the actual world Y without modifying placed asset elevation',()=>{
+ const builder=fs.readFileSync(path.join(__dirname,'../world-builder/builder.js'),'utf8');
+ assert.match(builder,/cameraFocus\.set\(root\.position\.x,root\.position\.y,root\.position\.z\)/);
+ assert.match(builder,/const x=actor\.position\.x,y=actor\.position\.y,z=actor\.position\.z/);
+ assert.match(builder,/cameraFocus\.y\+=\(y-cameraFocus\.y\)\*alpha/);
+ assert.match(builder,/root\.position\.set\(o\.x,o\.y,o\.z\)/);
+});
