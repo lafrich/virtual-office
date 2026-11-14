@@ -26,10 +26,21 @@ function loadPhysics(){
  return {style:window.VLWorldStyle,physics:window.VLWorldPhysics};
 }
 
-test('preview module is inert without njhMap=1',()=>{
+test('NJH map module is enabled by default and inert only with njhMap=0',()=>{
+ const on=loadPreview('');
+ assert.equal(on.api.enabled(),true);
+ assert.equal(on.api.registerCatalog().count,7);
+ const off=loadPreview('?njhMap=0');
+ assert.equal(off.api.enabled(),false);
+ assert.equal(off.api.registerCatalog().count,0);
+});
+
+test('isNjhDocument accepts the official NJH city and rejects Jakarta leftovers',()=>{
  const {api}=loadPreview('');
- assert.equal(api.enabled(),false);
- assert.equal(api.registerCatalog().count,0);
+ const official=JSON.parse(require('fs').readFileSync(require('path').join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
+ assert.equal(api.isNjhDocument(official,official.id),true);
+ assert.equal(api.isNjhDocument({id:'city-mw54pfac-iq6xof',name:'Jakarta City',document:{map:{name:'Jakarta City'},objects:[]}}),false);
+ assert.equal(api.isNjhDocument({map:{name:'NJH · Kampung Kali Kebon Sirih (draft1)'},objects:[]}),true);
 });
 
 test('registers 7 corrected catalog keys when njhMap=1',()=>{

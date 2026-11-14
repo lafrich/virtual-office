@@ -12,9 +12,10 @@ for(const name of ['asset-catalog.js','pipeline-catalog.js','vegetation-catalog.
 }
 const catalog=new Map(win.VLAssetCatalog.map(x=>[x.file,x]));
 const style=win.VLWorldStyle,physics=win.VLWorldPhysics,traffic=win.VLSemestaTraffic;
-const doc=win.VLReferenceCity.create(JSON.parse(read('world.json')),catalog,style,win.VLMapSchema);
-const movers=doc.objects.filter(o=>o.type==='pedestrian'||o.type==='crowd');
-assert.ok(movers.length>=4);
+const wrapped=JSON.parse(read('njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'));
+const doc=wrapped.record.document;
+const movers=doc.objects.filter(o=>o.type==='pedestrian'||o.type==='crowd'||o.type==='vehicle');
+assert.ok(movers.length>=6);
 const blockers=doc.objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&
  (!['vehicle','pedestrian','crowd','quest_npc'].includes(o.type)||o.type==='quest_npc'));
 for(const o of movers){

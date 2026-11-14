@@ -319,7 +319,7 @@ function startWorld(force=false){
  $('worldLabel').textContent='World asli Semesta • perangkat ini';
  const url=new URL('../world-builder/',location.href);
  url.searchParams.set('player','1');
- if(new URLSearchParams(location.search).get('njhMap')==='1')url.searchParams.set('njhMap','1');
+ url.searchParams.set('njhMap','1');
  url.searchParams.set('v',String(++worldCounter));
  frame.src=url.href;
  // Never mark an unfinished world as ready. Offer a non-destructive retry

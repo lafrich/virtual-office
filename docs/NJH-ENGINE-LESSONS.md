@@ -94,3 +94,9 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Aturan:** Ukuran resmi katalog = 1.591×1.888 wu (PX/PY native), `collision: true`, `blocking: yes`, interaksi `sit`. Hapus override ukuran instance kecuali ukurannya memang disengaja. Berlaku di city JSON peta NJH dan `world.json`.
 - **Cek:** `tests/njh-map-preview.test.cjs` ("bangku taman scale and collision match the LFB guide"). Cuplikan: `/workspace/integ-step1-shots/bangku-taman-sit.png`.
 
+## 14. MUST: peta NJH harus menjadi default Mainkan dan Semesta
+
+- **Masalah:** Setelah Step 1 live, peta resmi NJH (`city-njh-semesta-draft1-with-pending`, Kampung Kali Kebon Sirih) hanya terbuka dengan `?njhMap=1`. Tautan landing `./mainkan/` dan Semesta tanpa flag masih memuat leftover Kebon Sirih / Reference City dari `world.json`, plus draft browser atau kota Drive "Jakarta City".
+- **Penyebab:** `mainkan/app.js` `startWorld()` hanya meneruskan `njhMap=1` jika URL luar sudah memilikinya. `builder.js` memuat `world.json`, lalu `VLReferenceCity` dan `VLKebonSirihStyle.upgrade`, lalu localStorage, kecuali flag itu aktif.
+- **Aturan:** Satu-satunya peta yang boleh dimainkan atau dipilih adalah peta NJH resmi. Mainkan selalu memasang `njhMap=1`. Semesta memuat `VLNjhMapPreview.loadCity()` secara default. Jangan fallback ke `world.json`, Reference City, Jakarta City, atau City Sample. Draft / Cloud Projects / Jiwa `?city=` / browser kota Bangun Ruang menolak dokumen non-NJH. `?njhMap=0` hanya untuk tes.
+- **Cek:** buka `/mainkan/` tanpa flag (desktop dan ponsel) — spawn di peta NJH (kost Ichsan untuk akun tes). Buka `/world-builder/` tanpa flag — editor Semesta menampilkan Kampung Kali Kebon Sirih. Tombol Jakarta / Reference / City Sample tidak ada. Suite unit: hanya 9 kegagalan lama yang diizinkan.

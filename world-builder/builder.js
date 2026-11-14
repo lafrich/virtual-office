@@ -7,7 +7,8 @@ const $=id=>document.getElementById(id);
 // mainkan.exe reuses the native Semesta renderer, assets, physics and Jiwa play runtime.
 // Player entry is read-only and cannot enter authoring modes.
 const playerMode=new URLSearchParams(location.search).get('player')==='1';
-const njhMapPreview=new URLSearchParams(location.search).get('njhMap')==='1'||window.VLNjhMapPreview?.enabled?.()===true;
+const njhMapOff=new URLSearchParams(location.search).get('njhMap')==='0';
+const njhMapPreview=!njhMapOff&&window.VLNjhMapPreview?.enabled?.()!==false;
 if(playerMode){
  // Load player-only, immutable Genesis + Emosi sources on demand;
  // Semesta edit mode must not download these heavy atlases.
@@ -303,46 +304,20 @@ const seed={
 };
 let documentMap=clone(seed),defaultSeed=clone(seed),selectedId=null,mode='select',snap=true,undoStack=[],redoStack=[];
 try{
- if(njhMapPreview&&window.VLNjhMapPreview?.loadCity){
+ if(window.VLNjhMapPreview?.loadCity){
   const njhCity=await window.VLNjhMapPreview.loadCity();
   defaultSeed=sanitize(njhCity);documentMap=clone(defaultSeed);
  }else{
-  const r=await fetch('./world.json?v=p3',{cache:'no-store'});
-  if(r.ok){defaultSeed=sanitize(await r.json());documentMap=clone(defaultSeed);}
+  console.warn('NJH map loader unavailable; Street2/world.json fallback is retired');
  }
-}catch(err){console.warn('Using built-in map if world.json is unavailable',err);}
-// Fresh installations start on the editable reference city; existing local
-// editing sessions are restored below without overwriting their work.
-// NJH map preview must not be replaced by Reference City, Kebon Sirih, or
-// a leftover localStorage draft.
-try{
- if(!njhMapPreview&&window.VLReferenceCity){
-  defaultSeed=sanitize(window.VLReferenceCity.create(defaultSeed,assetByName,style,schema));
-  documentMap=clone(defaultSeed);
- }
-}catch(error){console.warn('Could not seed Reference City; original map remains',error);}
-// Upgrade the built-in template immediately, without touching authored city data.
-try{
- const starter=njhMapPreview?null:window.VLKebonSirihStyle?.upgrade(defaultSeed,assetCatalog);
- if(starter?.map){defaultSeed=sanitize(starter.map);documentMap=clone(defaultSeed);}
-}catch(error){console.warn('Kebon Sirih starter upgrade',error);}
-// Existing working drafts keep their coordinates, IDs and custom sprites.
-// Only recognizable proxy objects are migrated; preserve their old draft.
+}catch(err){console.warn('NJH map unavailable',err);}
+// Restore only an NJH working draft, and only in the Semesta editor (not play).
+// Non-NJH localStorage leftovers must not replace the official map.
 try{
  const previousRaw=localStorage.getItem(STORE),saved=JSON.parse(previousRaw||'null');
- if(!njhMapPreview&&saved&&saved.format===seed.format&&Array.isArray(saved.objects)){
-  const upgrade=window.VLKebonSirihStyle?.upgrade(saved,assetCatalog);
-  if(upgrade?.changed&&previousRaw&&!playerMode){
-   try{
-    const backupKey=STORE+'-backup-pre-kebon-sirih';
-    if(!localStorage.getItem(backupKey))localStorage.setItem(backupKey,previousRaw);
-   }catch(error){console.warn('Cannot retain old working draft backup',error);}
-  }
-  documentMap=sanitize(upgrade?.map||saved);
-  if(upgrade?.changed&&!playerMode){
-   try{localStorage.setItem(STORE,JSON.stringify(mapForPersist()));}
-   catch(error){console.warn('Could not auto-save upgraded draft',error);}
-  }
+ if(!playerMode&&saved&&saved.format===seed.format&&Array.isArray(saved.objects)
+    &&(window.VLNjhCityGuard||window.VLNjhMapPreview)?.isNjhDocument?.(saved)){
+  documentMap=sanitize(saved);
  }
 }catch(e){console.warn('World Builder previous draft',e);}
 documentMap.map.unbounded=njhMapPreview?false:true;
@@ -4495,6 +4470,8 @@ window.MembangunCloudAdapter=Object.freeze({
   const record=payload?.record;
   if(payload?.kind!=='city'||record?.format!=='vl-city-draft-1'||
      !Array.isArray(record.document?.objects))throw Error('Incompatible Semesta City Draft');
+  if(!(window.VLNjhCityGuard||window.VLNjhMapPreview)?.isNjhDocument?.(record,record.id))
+   throw Error('Hanya peta NJH (Kampung Kali Kebon Sirih) yang bisa dibuka');
   const errors=schema.validate(record.document,assetByName,style);
   if(errors.length)throw Error('Drive city not valid: '+errors.join('; '));
   let original=null;
@@ -4545,9 +4522,11 @@ $('loadDraft').onclick=async()=>{
  if(!confirm('Open selected City Draft? Current unsaved edits will be replaced. Save first if needed.'))return;
  try{
   const record=await window.VLCityDrafts.load(id);
+  if(!(window.VLNjhCityGuard||window.VLNjhMapPreview)?.isNjhDocument?.(record,record.id))
+   throw Error('Hanya peta NJH (Kampung Kali Kebon Sirih) yang bisa dibuka');
   const errors=schema.validate(record.document,assetByName,style);
   if(errors.length)throw Error(errors.join('; '));
-  const migrated=window.VLKebonSirihStyle?.upgrade(record.document,assetCatalog);
+  const migrated={map:record.document,changed:0};
   if(cameraFollowId)leaveCharacterCamera(false);
   undoPoint();documentMap=sanitize(migrated?.map||record.document);restoreCityClock();
   selectedId=null;activeDraftId=record.id;draftDirty=!!migrated?.changed;
@@ -4580,107 +4559,20 @@ $('draftDialog').addEventListener('click',e=>{
 window.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&!$('draftDialog').hidden)closeDraftDialog();
 });
-function loadReferencePreset(){
- if(!confirm('Load Reference City layout? Current canvas will be replaced. Save your City Draft first if needed.'))return;
- try{
-  const reference=window.VLReferenceCity.create(defaultSeed,assetByName,style,schema);
-  if(cameraFollowId)leaveCharacterCamera(false);
-  undoPoint();documentMap=sanitize(window.VLKebonSirihStyle?.upgrade(reference,assetCatalog).map||reference);restoreCityClock();selectedId=null;
-  activeDraftId=null;draftDirty=true;
-  try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
-  closeMobileSheets();setMode('select');
-  rebuild();rebuildTerrain();resetCamera();saved();
-  tell('Reference City ready · tap Save Draft to keep a named copy');
- }catch(error){tell('Reference City gagal: '+error.message);}
+function refuseLegacyMap(name){
+ tell(name+' sudah tidak dipakai. Hanya peta NJH (Kampung Kali Kebon Sirih) yang bisa dibuka.');
 }
-$('referenceCity').onclick=loadReferencePreset;
-async function loadJakartaCity(){
- if(!window.VLJakartaCity||!window.VLCityDrafts){tell('Jakarta preset belum tersedia');return;}
- if(!confirm('Create Jakarta City as a NEW saved city? Current unsaved canvas will be replaced. Save it first if needed.'))return;
- try{
-  const jakarta=window.VLJakartaCity.create(defaultSeed,assetByName,style,schema);
-  const upgraded=window.VLKebonSirihStyle?.upgrade(jakarta,assetCatalog)?.map||jakarta;
-  const fresh=sanitize(upgraded);
-  fresh.map.name='Jakarta City';
-  const record=await window.VLCityDrafts.save({id:null,name:'Jakarta City',document:clone(fresh)});
-  if(cameraFollowId)leaveCharacterCamera(false);
-  undoPoint();documentMap=fresh;restoreCityClock();selectedId=null;
-  activeDraftId=record.id;draftDirty=false;
-  try{localStorage.setItem(ACTIVE_DRAFT_KEY,activeDraftId);}catch{}
-  closeMobileSheets();setMode('select');
-  rebuild();rebuildTerrain();resetCamera();saved();
-  draftDirty=false;
-  await refreshDraftPicker(activeDraftId);
-  tell('Jakarta City · '+fresh.objects.length+' objects / '+fresh.map.terrain.cells.filter(c=>c.type==='drain').length+' drain tiles / '+fresh.map.terrain.cells.filter(c=>c.type==='river').length+' river tiles · saved');
- }catch(error){console.error('Jakarta City',error);tell('Jakarta City gagal: '+error.message);}
-}
-$('jakartaCity').onclick=loadJakartaCity;
+if($('referenceCity'))$('referenceCity').onclick=()=>refuseLegacyMap('Reference City');
+if($('jakartaCity'))$('jakartaCity').onclick=()=>refuseLegacyMap('Jakarta City');
+if($('newCity'))$('newCity').onclick=()=>refuseLegacyMap('City Sample');
 
-function makeCityExample(){
- const city=clone(defaultSeed);
- city.objects=[];
- city.map.name='Virtual Life · City Sample (editable placeholders)';
- city.map.notes='Independent city-block authoring example. Buildings, parks and road intersections are replaceable layout drafts.';
- const bounds=city.map.worldBounds;
- const cells=new Map();
- const roads=new Set();
- const K=(c,r)=>c+','+r;
- for(let r=Math.ceil(bounds.minZ);r<bounds.maxZ;r++)for(let c=Math.ceil(bounds.minX);c<bounds.maxX;c++){
-  const horizontal=(r>=24&&r<=26)||(r>=44&&r<=46);
-  const vertical=(c>=-13&&c<=-11)||(c>=12&&c<=14)||(c>=29&&c<=31);
-  if(horizontal||vertical)roads.add(K(c,r));
- }
- for(let r=Math.ceil(bounds.minZ);r<bounds.maxZ;r++)for(let c=Math.ceil(bounds.minX);c<bounds.maxX;c++){
-  const key=K(c,r);
-  if(roads.has(key)){cells.set(key,{c,r,type:'road',roadClass:'two_lane'});continue;}
-  if([[1,0],[-1,0],[0,1],[0,-1]].some(([x,z])=>roads.has(K(c+x,r+z))))
-   cells.set(key,{c,r,type:'sidewalk'});
- }
- // Park plaza with a small pond; all separate ground cells.
- for(let r=29;r<41;r++)for(let c=-8;c<9;c++){
-  const k=K(c,r);if(roads.has(k))continue;
-  if((c>=-1&&c<=2)&&(r>=34&&r<=36))cells.set(k,{c,r,type:'water'});
-  else if(c===4||r===32||r===39)cells.set(k,{c,r,type:'plaza'});
-  else cells.delete(k);
- }
- city.map.terrain={default:'grass',cells:[...cells.values()].sort((a,b)=>a.r-b.r||a.c-b.c)};
- const prefabs=[
-  ['building:large',-22,30,'Hospital','hospital'],['building:medium',-21,40,'Office','office'],
-  ['building:large',-22,51,'Factory','factory'],['building:medium',2,22,'Bank','bank'],
-  ['building:medium',21,22,'School','school'],['building:large',21,34,'Office Tower','office'],
-  ['building:medium',21,51,'Warehouse','warehouse'],['building:medium',1,51,'Shopping Row','shop'],
-  ['building:small',-5,51,'Cafe','cafe'],['building:small',35,32,'House','house'],
-  ['sprite:vegetation:pohon_asam_M',-6,31,'Park Tree','tree'],
-  ['sprite:vegetation:pohon_asam_M',7,31,'Park Tree','tree'],
-  ['sprite:vegetation:pohon_asam_M',-6,39,'Park Tree','tree'],
-  ['sprite:vegetation:pohon_asam_M',7,39,'Park Tree','tree'],
-  ['bench',-4,36,'Park Bench','bench'],['bench',6,36,'Park Bench','bench'],
-  ['lamp',-9,34,'Street Light','lamp'],['lamp',10,33,'Street Light','lamp']
- ];
- for(const [tag,x,z,name,subtype] of prefabs){
-  const obj=makeObject(tag,{x,z});if(!obj)continue;
-  obj.name=name;obj.subtype=subtype;obj.tags=['city-sample','replaceable'];
-  obj.replaceable=true;
-  if(!style.reason(obj,city.objects,city.map,assetByName))city.objects.push(obj);
- }
- return sanitize(window.VLKebonSirihStyle?.upgrade(city,assetCatalog).map||city);
-}
-$('newCity').onclick=()=>{
- if(!confirm('Start City Sample? Map draft saat ini akan diganti. Gunakan Save City untuk menyimpan layout lama.'))return;
- if(cameraFollowId)leaveCharacterCamera(false);
- undoPoint();documentMap=makeCityExample();restoreCityClock();selectedId=null;
- activeDraftId=null;draftDirty=true;
- try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
- rebuild();rebuildTerrain();resetCamera();saved();
- tell('City Sample ready · roads, park, water, placeholders');
-};
 $('reset').onclick=()=>{
  if(!confirm('Reset seluruh map draft 3D ke default?'))return;
  if(cameraFollowId)leaveCharacterCamera(false);
  undoPoint();documentMap=clone(defaultSeed);restoreCityClock();selectedId=null;
  activeDraftId=null;draftDirty=true;
  try{localStorage.removeItem(ACTIVE_DRAFT_KEY);}catch{}
- rebuild();rebuildTerrain();resetCamera();saved();tell('Reference City reset (working copy)');
+ rebuild();rebuildTerrain();resetCamera();saved();tell('NJH map reset (working copy)');
 };
 $('export').onclick=()=>{
  const ready=schema.enrich(documentMap,assetByName,style);

@@ -8,7 +8,7 @@ const KEY='virtual-life-city-builder-welcome-v1';
 const steps=[
  {icon:'🗺️',title:'Welcome to Semesta!',
   text:'Selamat datang di Semesta. Rancang kota isometric sendiri, letakkan gedung dan props, lalu simpan sebagai City Draft.',
-  tip:'Mulai dengan Reference City, atau buat map baru tanpa menghapus draft yang sudah disimpan.'},
+  tip:'Peta resmi adalah NJH · Kampung Kali Kebon Sirih. Simpan draft NJH lewat Save City; peta lama sudah tidak dibuka.'},
  {icon:'✋',title:'Geser map dan lihat grid',
   text:'Geser area kosong untuk pan. Gunakan dua jari untuk pinch zoom; di komputer bisa pakai scroll. Tombol # menampilkan atau menyembunyikan grid.',
   tip:'Grid mengikuti map tanpa batas. Gunakan Snap untuk posisi objek lebih rapi.'},

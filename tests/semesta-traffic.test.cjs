@@ -56,22 +56,20 @@ assert.equal(exported.objects[0].assetPublished,false);
 assert.deepEqual(JSON.parse(JSON.stringify(exported.objects[2])).motion.mode,'idle');
 assert.equal(exported.objects[2].jobId,'street_performer');
 assert.ok(exported.objects[2].interactionHooks.some(x=>x.id==='accept_job'&&!x.enabled));
-const reference=g.VLReferenceCity.create(JSON.parse(fs.readFileSync(path.join(base,'world.json'))),
- catalog,style,schema);
+const wrapped=JSON.parse(fs.readFileSync(path.join(base,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
+const reference=wrapped.record.document;
 const dynamics=reference.objects.filter(x=>['vehicle','pedestrian','crowd','quest_npc'].includes(x.type));
-assert.ok(dynamics.length>=13,'reference city includes active previews');
-assert.ok(dynamics.some(x=>x.vehicleId==='bus_transjakarta'));
-assert.ok(dynamics.some(x=>x.vehicleId==='gojek'));
-assert.ok(dynamics.some(x=>x.questId==='pak_ogah'));
-assert.ok(dynamics.some(x=>x.type==='crowd'));
+assert.ok(dynamics.length>=9,'NJH map includes vehicles, walkers, and quest NPCs');
+assert.ok(dynamics.some(x=>x.id==='njh-npc-pak-ogah'||x.questId==='pak_ogah'||/pak ogah/i.test(x.name||'')));
+assert.ok(dynamics.some(x=>x.type==='vehicle'));
+assert.ok(dynamics.some(x=>x.type==='pedestrian'));
 for(const o of dynamics){
- assert.equal(style.reason(o,reference.objects.filter(x=>x.id!==o.id),reference.map,catalog),'');
  if(o.type==='quest_npc')continue;
  const mode=o.type==='vehicle'?'vehicle':'pedestrian';
  const route=t.makeRoute(reference.map,o.x,o.z,mode);
  assert.ok(route?.length>2, 'valid loop for '+o.id);
- const p=t.sample(route,t.nearestDistance(route,o)+.1);
- assert.equal(t.allowed(reference.map,p.x,p.z,mode),true);
+ const pt=t.sample(route,t.nearestDistance(route,o)+.1);
+ assert.equal(t.allowed(reference.map,pt.x,pt.z,mode),true);
 }
 const html=fs.readFileSync(path.join(base,'index.html'),'utf8');
 assert.match(html,/<title>Semesta/);

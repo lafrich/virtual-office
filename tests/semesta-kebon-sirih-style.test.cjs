@@ -87,6 +87,10 @@ test('renderer uses texture with pixel filtering, batches and retains full world
  assert.ok(script.includes("cityStyle?.tile(cell.type,cell,tileIndex)"));
  assert.ok(script.includes('THREE.NearestFilter'));
  assert.ok(script.includes('new THREE.InstancedMesh'));
- assert.ok(script.includes('window.VLKebonSirihStyle?.upgrade(defaultSeed,assetCatalog)'));
+ assert.ok(script.includes('window.VLNjhMapPreview?.loadCity'));
+ assert.ok(!script.includes("fetch('./world.json?v=p3'"));
+ assert.ok(!page.includes('id="jakartaCity"'));
+ assert.ok(!page.includes('id="referenceCity"'));
+ assert.ok(!page.includes('id="newCity"'));
  assert.ok(page.indexOf('kebon-sirih-style.js')<page.indexOf('builder.js?v='));
 });

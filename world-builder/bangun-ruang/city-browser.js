@@ -48,7 +48,13 @@ function mount(api){
  }
  async function refresh(selectCity){
   try{
-   cities=await drafts.list();
+   const listed=await drafts.list();
+   cities=[];
+   for(const d of listed){
+    let rec=d;
+    try{rec=await drafts.load(d.id);}catch{}
+    if((window.VLNjhCityGuard||window.VLNjhMapPreview)?.isNjhDocument?.(rec,d.id))cities.push(d);
+   }
    const picker=$('brCitySelect'),chosen=selectCity||picker.value||target?.cityId||localStorage.getItem(link.ACTIVE_KEY);
    picker.replaceChildren();
    for(const d of cities){
