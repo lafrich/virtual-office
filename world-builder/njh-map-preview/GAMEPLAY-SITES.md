@@ -99,3 +99,17 @@ Preview only, not live, not pushed. Branch taken from frozen `preview/njh-gamepl
 | Minimarket | `minimarket` (not wired in frozen play.js yet) | `njh-minimarket` | NJH Mart (Minimarket) | -26.5, 56.0 | `object:njh_minimarket` | `njh_door_minimarket` | `njh_minimarket` (pending) | exterior placed; interior pending |
 
 Lot: 5×4 grass at tiles c=−29..−25, r=54..57, east of the main N–S road (sidewalk c=−30 left clear). Rotation 0 / sw, door on the +z edge, use tile (−27, 58) / use point (−26.5, 58.5) on the E–W gang sidewalk that meets that main road. About 15 tiles south of Kost Cove (same x) and about 28 tiles from the dock via the main roads. Billboard width/height use the LFB PX/PY lock (6.894 × 8.012), not size/50. Street furniture `njh-atm-15` (pole, to −22.0, 58.5), `njh-atm-16` (Bangku Taman, to −22.5, 55.9, sit tile still free), and `njh-atm-17` (papan, to −21.2, 54.5) was nudged off the lot. In-map close-up: `renders/njh-minimarket-placement-closeup.png`.
+
+## Step 2 — Fishing spot (`preview/njh-step2-map`)
+
+Preview only, not live. Based on `origin/preview/njh-step2` @ `624fd525`. Follows `docs/HOOKS-STEP2.md` §4 (`fishSpots()` / `fishStart(spotId)`).
+
+| Site | spotId (= object id) | Name | Object (x, z) | Asset | Use tile / use point | Water tiles |
+|---|---|---|---|---|---|---|
+| `fishing_spot` | `njh-fishing-spot-kali-selatan` | Tempat Mancing Kali Selatan | -51.5, 68.0 (rot 270, deck c=-52 r=67..68) | `object:njh_dermaga_mancing` (reused) | (-51, 67) / (-50.5, 67.5) | (-53, 67), (-53, 68) |
+
+- Collision: the deck is solid (`collision:true`, `blocking:'yes'`); the Kali tiles stay `river` terrain, which physics already refuses (`reason:'water'`). Every dock instance now gets the 0.8 river-side draw overhang (`applyDermagaOverhang` handled only the first dock before).
+- The use point is 1.12 from the spot centre (inside the fishStart range of 2.5) and sits on the jalan inspeksi at c=-51, which stays walkable from the r=63/64 gang to the r=71 gang. No door or use tile is covered.
+- `fishSpots()` matches it by id (`fishing`), asset (`dermaga`) and name (`Mancing`). Legacy play.js `SITES.fish` still resolves `matches[0]` = `njh-dermaga-mancing-anchor` (the original dock at -51.5, 44), so nothing is hijacked.
+- The Bengkel Motor (-48, 69) is on the camera side, so when the player stands on the use tile it fades out (x-ray). The deck is visible without the player.
+- Renders: `renders/njh-step2-fishing-spot-{closeup,noplayer,map,grid}.png`, plus `renders/njh-step2-fishing-spot-dock-4views-vs-lgr.png`.

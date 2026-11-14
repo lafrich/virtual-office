@@ -231,10 +231,11 @@ function dermagaOverhang(o){
  return {x:0,z:dist};
 }
 function applyDermagaOverhang(document){
- const o=(document?.objects||[]).find(x=>x.id==='njh-dermaga-mancing'||x.asset==='object:njh_dermaga_mancing');
- if(!o)return null;
- o.njhDrawOffset=dermagaOverhang(o);
- return o.njhDrawOffset;
+ // Every dock instance (main dermaga + step-2 fishing spot) overhangs the Kali.
+ const docks=(document?.objects||[]).filter(x=>x.id==='njh-dermaga-mancing'||x.asset==='object:njh_dermaga_mancing');
+ if(!docks.length)return null;
+ for(const o of docks)o.njhDrawOffset=dermagaOverhang(o);
+ return docks[0].njhDrawOffset;
 }
 function hookKebonTiles(){
  if(!enabled())return;

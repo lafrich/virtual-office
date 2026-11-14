@@ -513,3 +513,81 @@ test('places NJH Mart on a free 5x4 main-road lot with a sidewalk use tile',()=>
  assert.ok(dKost<20,'should be a short walk to Kost Cove, got '+dKost);
  assert.ok(dDock<35,'should be a walkable trip to the dock, got '+dDock);
 });
+
+test('step-2 fishing spot on the Kali bank: dock collision, water stays water, reachable use tile',()=>{
+ const {window,api}=loadPreview('?njhMap=1');
+ const {style,physics}=loadPhysics();
+ api.registerCatalog();
+ const pipeWin={VLAssetCatalog:Array.from(window.VLAssetCatalog||[])};
+ const context=vm.createContext({window:pipeWin,globalThis:pipeWin,Object,Math,Number,Array,JSON,Error,Map,Set});
+ vm.runInContext(fs.readFileSync(path.join(root,'pipeline-catalog.js'),'utf8'),context,{filename:'pipeline-catalog.js'});
+ const catalog=new Map(pipeWin.VLAssetCatalog.map(x=>[x.file,x]));
+ const city=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
+ const meta=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/njh-map-meta.json'),'utf8'));
+ const document=city.record.document;
+ const objects=document.objects;
+ const map=Object.assign({},document.map,{unbounded:false,worldBounds:document.map.worldBounds});
+ const cells=new Map(document.map.terrain.cells.map(c=>[c.c+','+c.r,c.type]));
+
+ const site=meta.gameplaySites.fishing_spot;
+ assert.equal(site.siteId,'fishing_spot');
+ assert.equal(site.spotId,'njh-fishing-spot-kali-selatan');
+ assert.equal(site.action,'fish');
+ // HOOKS-STEP2 §4 fishSpots(): id/name/asset match, spot x/z, fishStart range 2.5.
+ assert.equal(site.id,site.spotId);
+ assert.equal(site.source,'world');
+ assert.ok(/dermaga|mancing|fishing|pier/i.test(site.spotId));
+ const row=meta.interactables.find(x=>x.id==='fishing_spot');
+ assert.equal(row.objectId,site.objectId);
+ assert.equal(row.kind,'fish');
+
+ const spot=objects.find(o=>o.id===site.objectId);
+ assert.ok(spot,'fishing spot object exists');
+ assert.equal(spot.asset,'object:njh_dermaga_mancing');
+ assert.equal(spot.rotation,270);
+ assert.equal(spot.collision,true);
+ assert.equal(spot.blocking,'yes');
+ assert.ok(spot.interactions.includes('fish'));
+ assert.ok(/mancing/i.test(spot.name));
+ assert.equal(physics.solid(spot),true);
+ assert.equal(JSON.stringify(style.footprint(spot,catalog)),'[1,2]');
+ const box=physics.area(spot,catalog,style);
+ assert.deepEqual([box.minX,box.maxX,box.minZ,box.maxZ],[-52,-51,67,69]);
+ for(const [c,r] of row.footprintTiles)assert.equal(cells.get(c+','+r),'sidewalk','deck on the bank '+c+','+r);
+ for(const [c,r] of site.waterTiles){
+  assert.equal(cells.get(c+','+r),'river','water tile '+c+','+r);
+  const swim=physics.check({id:'p',type:'avatar',x:0,z:0,scale:1,collision:true},{x:c+0.5,z:r+0.5},objects,map,catalog,style,new Map());
+  assert.equal(swim.ok,false,'water tile must not be walkable');
+ }
+ // The dock itself blocks walking.
+ const onDeck=physics.check({id:'p',type:'avatar',x:0,z:0,scale:1,collision:true},{x:-51.5,z:68},objects,map,catalog,style,new Map());
+ assert.equal(onDeck.ok,false);
+
+ // Use tile: walkable bank / jalan inspeksi, adjacent to the deck, no object.
+ const [uc,ur]=site.useTile;
+ assert.equal(cells.get(uc+','+ur),'sidewalk');
+ assert.equal(uc,box.maxX,'use tile is directly +c of the deck');
+ const stand=physics.check({id:'p',type:'avatar',x:0,z:0,scale:1,collision:true},{x:site.usePoint[0],z:site.usePoint[1]},objects,map,catalog,style,new Map());
+ assert.equal(stand.ok,true,'use point must be standable, got '+stand.reason+' '+stand.id);
+ assert.equal(spot.x,site.x);assert.equal(spot.z,site.z);
+ assert.ok(Math.hypot(site.usePoint[0]-spot.x,site.usePoint[1]-spot.z)<2.5,'use point within fishStart range 2.5');
+
+ // Path: the c=-51 jalan inspeksi stays walkable from the r=63/64 gang to the r=71 gang.
+ for(let z=63.5;z<=71.5;z+=0.5){
+  const p=physics.check({id:'p',type:'avatar',x:0,z:0,scale:1,collision:true},{x:-50.5,z},objects,map,catalog,style,new Map());
+  assert.equal(p.ok,true,'inspection path blocked at -50.5,'+z+' by '+p.reason+' '+p.id);
+ }
+ // No door use tile / use point is covered by the dock.
+ for(const d of meta.doors){
+  const [x,z]=d.usePoint;
+  assert.ok(!(x>=box.minX&&x<=box.maxX&&z>=box.minZ&&z<=box.maxZ),'dock covers door '+d.doorId);
+ }
+ // Every dock instance overhangs toward the river.
+ api.applyDermagaOverhang(document);
+ assert.deepEqual(JSON.parse(JSON.stringify(spot.njhDrawOffset)),{x:-0.8,z:0});
+ assert.deepEqual(JSON.parse(JSON.stringify(objects.find(o=>o.id==='njh-dermaga-mancing').njhDrawOffset)),{x:-0.8,z:0});
+ // Play.js 'fish' still resolves first to the original dock anchor (no site hijack).
+ const fishRe=/sungai|river|danau|kolam|fishing|mancing/i;
+ const first=objects.find(o=>fishRe.test([o.name,o.label,o.asset,o.subtype,o.questId,(o.tags||[]).join(' ')].join(' ')));
+ assert.equal(first.id,'njh-dermaga-mancing-anchor');
+});
