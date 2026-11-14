@@ -138,9 +138,13 @@ function create(opts){
   const objects=world?.objects||opts.getWorld?.()?.objects||[];
   const pat=kind==='kost'?KOST_PATTERN:kind==='minimarket'?MINIMARKET_PATTERN:WARTEG_PATTERN;
   const notMart=o=>kind==='minimarket'||!MINIMARKET_PATTERN.test(textOf(o));
+  // A coffee shop or Madura kiosk must not become the Kharisma warteg
+  // just because its name contains "warung".
+  const notOtherDoor=o=>kind!=='warteg'||!o.njhDoors?.length||
+   ['njh_warung_makan','njh_warteg_kharisma'].includes(o.njhInteriorTemplate);
   const preferred={kost:'njh-kos-noor',warteg:'jakarta-v3-18446',minimarket:'njh-minimarket'}[kind];
   return objects.find(o=>o.id===preferred&&o.type==='sprite')
-   ||objects.find(o=>o.id!==PLAY_KOST_ID&&o.type==='sprite'&&pat.test(textOf(o))&&notMart(o))
+   ||objects.find(o=>o.id!==PLAY_KOST_ID&&o.type==='sprite'&&pat.test(textOf(o))&&notMart(o)&&notOtherDoor(o))
    ||objects.find(o=>o.id===PLAY_KOST_ID&&kind==='kost')
    ||null;
  }
@@ -460,7 +464,9 @@ function create(opts){
   if(obj){
    const choices=obj.njhDoors||[];
    const door=choices.find(d=>d.doorId===raw)||choices[0]||null;
-   const template=door?.template||obj.njhInteriorTemplate;
+   const canonicalWarteg=obj.id===buildings.warteg?.object?.id&&
+    door?.template===FALLBACK.warteg&&!!scenes[TEMPLATES.warteg];
+   const template=canonicalWarteg?TEMPLATES.warteg:(door?.template||obj.njhInteriorTemplate);
    if(!template||door?.pending||!sceneOf(template))
     return {ok:false,reason:'Interior belum tersedia untuk '+(door?.label||obj.name||raw)};
    return enterInterior(template,undefined,{object:obj,door});
