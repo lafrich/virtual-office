@@ -137,7 +137,7 @@ function onScreen(){
   if(store.get('tutorial-done')==='1'&&!DEV){setTimeout(()=>{if(current==='tutorialScreen')$('tutorialDone')?.click();},0);}
   else howto.render('njhHowtoScreen',0);
  }
- if(playing){injectWorld();tick();if(store.get('tutorial-done')!=='1'&&!howtoScreenSeen)firstHowto=true;if(prev==='pauseScreen'&&pendingHowto){pendingHowto=false;openHowtoWin();}}
+ if(playing){injectWorld();tick();scheduleRotateHintDismiss();if(store.get('tutorial-done')!=='1'&&!howtoScreenSeen)firstHowto=true;if(prev==='pauseScreen'&&pendingHowto){pendingHowto=false;openHowtoWin();}}
  else{closeWindows();closeCtx();joyRelease();}
  paintFull();
 }
@@ -188,6 +188,21 @@ $('njhPauseHowto')?.addEventListener('click',()=>{pendingHowto=true;$('resumeGam
 
 /* ---------- login back (re-uses the existing return-to-menu path) ---------- */
 $('njhLoginBack')?.addEventListener('click',()=>$('homeButton')?.click());
+
+/* Orientation is advisory only: users with rotation lock / Fold screens must
+   always be able to play portrait. Auto-dismiss after 6s even without a tap. */
+let rotateHintTimer=null;
+function dismissRotateHint(){
+ clearTimeout(rotateHintTimer);
+ $('njhRotate')?.classList.add('dismissed');
+}
+function scheduleRotateHintDismiss(){
+ if($('njhRotate')?.classList.contains('dismissed'))return;
+ clearTimeout(rotateHintTimer);
+ rotateHintTimer=setTimeout(dismissRotateHint,6000);
+}
+$('njhRotateClose')?.addEventListener('click',dismissRotateHint);
+$('njhRotateContinue')?.addEventListener('click',dismissRotateHint);
 
 /* ---------- fullscreen (optional, user gesture) + landscape lock ---------- */
 const docEl=document.documentElement;

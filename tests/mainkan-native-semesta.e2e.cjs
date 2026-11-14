@@ -200,6 +200,40 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.ok(!errors.some(e=>/SyntaxError|ReferenceError/i.test(e)),errors.slice(0,4).join(' | '));
  fs.mkdirSync('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/mainkan-native-semesta.png',fullPage:true});
+ // Regression: touch+portrait used to show an opaque full-screen
+ // "Putar HP" alertdialog with no bypass; users with rotation lock were stuck.
+ const mobileContext=await browser.newContext({
+  viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true
+ });
+ const mobilePage=await mobileContext.newPage();
+ await mobilePage.goto(base,{waitUntil:'domcontentloaded',timeout:60000});
+ // Force the CSS presentation state without writing player state or requiring a login.
+ await mobilePage.addStyleTag({content:'#gameScreen[hidden]{display:flex!important}'});
+ await mobilePage.evaluate(()=>document.body.classList.add('njh-play'));
+ const hint=await mobilePage.evaluate(()=>{
+  const el=document.getElementById('njhRotate');
+  const r=el.getBoundingClientRect(),hit=document.elementFromPoint(180,520);
+  return {coarse:matchMedia('(pointer:coarse)').matches,
+   portrait:matchMedia('(orientation:portrait)').matches,
+   display:getComputedStyle(el).display,width:r.width,height:r.height,
+   middleBlocked:el.contains(hit),role:el.getAttribute('role'),
+   continueVisible:!!document.getElementById('njhRotateContinue')?.getClientRects().length};
+ });
+ assert.equal(hint.coarse,true,'mobile test must actually emulate a touch pointer');
+ assert.equal(hint.portrait,true,'mobile test must actually emulate portrait');
+ assert.equal(hint.display,'block','optional portrait hint should be visible until dismissed');
+ assert.ok(hint.width<340&&hint.height<300,'portrait hint must never become a full-screen blocker');
+ assert.equal(hint.middleBlocked,false,'world center must remain available to touch');
+ assert.equal(hint.role,'status','rotation hint must no longer be a modal alertdialog');
+ assert.equal(hint.continueVisible,true,'portrait users require a continue control');
+ await mobilePage.locator('#njhRotateContinue').click();
+ assert.equal(await mobilePage.locator('#njhRotate').evaluate(el=>getComputedStyle(el).display),
+  'none','Continue must immediately uncover gameplay');
+ await mobilePage.setViewportSize({width:844,height:390});
+ await mobilePage.setViewportSize({width:390,height:844});
+ assert.equal(await mobilePage.locator('#njhRotate').evaluate(el=>getComputedStyle(el).display),
+  'none','dismissal must survive orientation changes in the same session');
+ await mobileContext.close();
  await browser.close();
  console.log('MAINKAN_NATIVE_SEMESTA_BROWSER_PASS');
 })().catch(e=>{console.error('MAINKAN_NATIVE_SEMESTA_BROWSER_FAIL',e.stack||e);process.exit(1)});
