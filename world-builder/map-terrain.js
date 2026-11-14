@@ -38,6 +38,15 @@ function shape(t,c,r,d){
  const m=mask(t,c,r,d),n=[1,2,4,8].filter(bit=>m&bit).length;
  return n===4?'cross':n===3?'t':n===2?(m===5||m===10?'straight':'corner'):n===1?'end':'isolated';
 }
+// Drain.png is authored along r. Infer the connected axis from terrain neighbors;
+// axis does not depend on how the user manually rotated an unrelated prop.
+function drainAxis(t,c,r,d){
+ const cells=d||dict(t),isDrain=(x,z)=>read(t,x,z,cells)==='drain';
+ const alongC=Number(isDrain(c-1,r))+Number(isDrain(c+1,r));
+ const alongR=Number(isDrain(c,r-1))+Number(isDrain(c,r+1));
+ if(alongC&&alongR)return 'junction';
+ return alongC?'along_c':alongR?'along_r':'isolated';
+}
 function paint(t,c,r,type,size=1,options={}){
  const d=dict(t),b=bounds(options.bounds),n=[1,2,4].includes(size)?size:1;
  const changes=[];
@@ -74,5 +83,5 @@ function exported(t){
  const d=dict(t);
  return t.cells.map(x=>({...x,...(x.type==='road'?{shape:shape(t,x.c,x.r,d)}:{})}));
 }
-g.VLMapTerrain=Object.freeze({types,normalize,seeded,paint,fill,dict,read,shape,exported});
+g.VLMapTerrain=Object.freeze({types,normalize,seeded,paint,fill,dict,read,shape,drainAxis,exported});
 })(window);
