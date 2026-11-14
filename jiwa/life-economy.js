@@ -462,7 +462,8 @@ function doAction(config,previous,action,args={}){
   clock(12);stat('energy',setting.seatRestEnergy);break;
  }
  case 'eat': {
-  if(!spend(2500))return reject('Uang tidak cukup.');
+  const mealPrice=Number.isFinite(Number(args.price))?Math.max(0,Math.round(Number(args.price))):2500;
+  if(!spend(mealPrice))return reject('Uang tidak cukup.');
   clock(10);stat('energy',12);stat('fullness',30);stat('bladder',12);break;
  }
  case 'coffee': {

@@ -169,6 +169,8 @@ function hookCtx(){
   worldToScreen:(x,y,z)=>{try{return bridge?.worldToScreen?.(x,y,z)||null;}catch{return null;}},
   doorAnchor:o=>{try{return bridge?.doorAnchor?.(o)||null;}catch{return null;}},
   interiorFurniture:()=>{try{return bridge?.interiorFurniture?.()||[];}catch{return [];}},
+  interiorKind:()=>{try{return bridge?.interiorKind?.()||null;}catch{return null;}},
+  extraActions:()=>{try{return bridge?.extraActions?.()||[];}catch{return [];}},
   resetCurrent:()=>resetSave()
  };
 }
@@ -487,6 +489,18 @@ function bagMarkup(){
    '<button data-life-action="discard_item">🗑 Buang Barang</button></div>':'<small>Tas kosong. Mulung, mancing, atau panjat pohon untuk mengisi tas.</small>')+
   '</div>';
 }
+function hookActionButtons(){
+ try{
+  const list=getHooks()?.nearbyActions?.()||[];
+  if(!list.length)return {html:'',spot:''};
+  const html=list.map(a=>{
+   const price=Number(a.price)>0?(' Rp'+Number(a.price).toLocaleString('id-ID')):'';
+   return '<button data-life-action="'+esc(a.id)+'" data-args="'+esc(JSON.stringify(a.args||{}))+'">'+esc(a.label||a.id)+price+'</button>';
+  }).join('');
+  const spot=list.spot||list[0]?.spotLabel||'';
+  return {html,spot,list};
+ }catch{return {html:'',spot:''};}
+}
 function paintPanel(){
  if(!outer||!active||!state)return;
  const el=outer.querySelector('#slpContent');if(!el||el.hidden)return;
@@ -494,10 +508,11 @@ function paintPanel(){
  const previousSelect=navSelect||'';
  const options=sites.map(t=>'<option value="'+esc(t.id)+'" '+(t.id===previousSelect?'selected':'')+'>'+esc(t.label)+(t.placeholder?' [PLACEHOLDER]':'')+'</option>').join('');
  const optsButton=(action,label,props={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(props))+'">'+label+'</button>';
+ const hooked=(!state.detained&&state.restMinutes===0&&!bagOpen)?hookActionButtons():{html:'',spot:''};
  const result=state.detained?
   optsButton('fine','💰 Bayar Denda Rp2.000')+optsButton('community_service','🧹 Bersihkan Gorong-gorong'):
   (state.restMinutes>0?optsButton('advance_time','⏩ Lewati 15 menit bed rest',{minutes:15}):
-   bagOpen?bagMarkup():nodeButtons(n));
+   bagOpen?bagMarkup():(hooked.html||nodeButtons(n)));
  const nextGoal=publishedCatalog?
   ('🏙️ JIWA AUTHORING · Hanya NPC, gedung, dan aset yang di-marking dalam World Entities untuk kota ini yang dapat berinteraksi. Tidak ada pekerjaan demo atau placeholder otomatis.'):
   ownsRoom()?('🏠 Hidup mandiri: gunakan WC/kamar, beli furnitur lewat HP, dan kelola token listrik.'):
@@ -508,7 +523,7 @@ function paintPanel(){
   (state.restMinutes>0?'<div class="slp-alert">⚠ PINGSAN · Bed rest '+state.restMinutes+' menit. Tidak bisa bekerja atau berjalan.</div>':'')+
   (state.detained?'<div class="slp-alert">🚨 DITAHAN HANSIP · Pilih denda atau kerja sosial.</div>':'')+
   (state.bladder>=80?'<div class="slp-alert">🚾 Kebelet pipis! Cari WC sebelum terlambat.</div>':'')+
-  '<div class="slp-spot">📍 '+(bagOpen?'TAS / INVENTORI':n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')+'</div>'+
+  '<div class="slp-spot">📍 '+(bagOpen?'TAS / INVENTORI':(hooked.spot?esc(hooked.spot):n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):(bridge?.interiorKind?.()==='kost'?'Kost':bridge?.interiorKind?.()==='warteg'?'Warteg':'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')))+'</div>'+
   '<div class="slp-actions" id="slpActions">'+result+'</div>'+
   (!publishedCatalog&&state.bladder>=65&&!state.detained&&state.restMinutes===0?'<div class="slp-actions">'+optsButton('pee_outside','⚠ Pipis sembarangan (moral turun)')+'</div>':'')+
   '<div class="slp-actions"><button id="slpPhone" type="button">📱 NOKIA · PETA AKTIVITAS</button><button id="slpBag" type="button">'+(bagOpen?'← Kembali':'🎒 Tas')+'</button></div>'+  
@@ -639,6 +654,16 @@ function afterLifeTransition(previous){
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
+ if(action==='exit_interior'||action==='enter_interior'){
+  try{
+   const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
+   const fn=action==='exit_interior'?(bridge?.exitInterior||I?.exit):(bridge?.enterInterior||I?.enterNearby);
+   const r=fn?.()||{ok:false,reason:'Interior tidak tersedia'};
+   if(r.ok)message(action==='exit_interior'?'🚪 Keluar ruangan':'Masuk ruangan');
+   else message('⛔ '+(r.reason||'Tidak bisa'));
+   paintPanel();return r;
+  }catch(err){return {ok:false,reason:String(err.message||err)};}
+ }
  try{if(getHooks())args=getHooks().argsFor(action,args);}catch{}
  const gate=getHooks()?.furnitureAllows?.(action,{});
  if(gate&&gate.ok===false)return {ok:false,reason:gate.reason||'Furnitur tidak ada di dekatmu'};
@@ -702,7 +727,8 @@ function runAction(action,args={}){
   cook:'kost',cook_recipe:'kost',store_fridge:'kost',take_fridge:'kost',store_home:'kost',take_home:'kost',rest:'bench',help:'help',charity:'charity',
   worship:node?.id?.startsWith('prayer_')?node.id:'prayer'
  }[action];
- if(required&&node?.id!==required){
+ const inWarteg=(bridge?.interiorKind?.()||root.VLNjhPlayInteriors?.kind?.())==='warteg';
+ if(required&&node?.id!==required&&!(action==='eat'&&inWarteg)){
   message('Dekati '+(sites.find(s=>s.id===required)?.label||required)+' dahulu.');return {ok:false,reason:'Lokasi aksi tidak sesuai'};
  }
  if(action==='buy_room'){
@@ -729,6 +755,11 @@ function runAction(action,args={}){
 }
 function handleAction(){
  if(!active)return false;
+ try{
+  const inside=bridge?.interiorKind?.();
+  const door=inside?(bridge?.exitInterior?.()):(bridge?.enterInterior?.());
+  if(door?.ok)return true;
+ }catch{}
  const node=nearest();
  if(!node)return false;
  if(node.jobId){
@@ -879,7 +910,7 @@ try{root.addEventListener?.('storage',ev=>{
 function hookApi(name,fallback){
  return function(){const h=getHooks();if(h&&typeof h[name]==='function')return h[name].apply(h,arguments);return fallback;}
 }
-const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
+const api=Object.freeze({attach,start,stop,active:visible,persist,state:()=>state,sites:()=>sites,spawnEntitlement,
  spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
  playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null,

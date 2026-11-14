@@ -1,0 +1,280 @@
+{
+  "id": "njh_warung_makan",
+  "label": "NJH · Warung Makan",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "items": [
+    {
+      "id": "njh-warung-stove-1",
+      "assetId": "stove",
+      "name": "Kompor Dapur",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-warung-noodle_pot-1",
+      "assetId": "noodle_pot",
+      "name": "Panci Kuah",
+      "c": 1,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-warung-kitchen_sink-1",
+      "assetId": "kitchen_sink",
+      "name": "Bak Cuci",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-warung-dish_rack-1",
+      "assetId": "dish_rack",
+      "name": "Rak Piring",
+      "c": 3,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-warung-fridge-1",
+      "assetId": "fridge",
+      "name": "Kulkas",
+      "c": 5,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    },
+    {
+      "id": "njh-warung-coffee_machine-1",
+      "assetId": "coffee_machine",
+      "name": "Mesin Kopi",
+      "c": 6,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "brew",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "drink_coffee"
+      ]
+    },
+    {
+      "id": "njh-warung-water_dispenser-1",
+      "assetId": "water_dispenser",
+      "name": "Dispenser",
+      "c": 7,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "drink",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "drink_coffee"
+      ]
+    },
+    {
+      "id": "njh-warung-wooden_bench-1",
+      "assetId": "wooden_bench",
+      "name": "Bangku 1",
+      "c": 0,
+      "r": 2,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit",
+        "eat",
+        "drink_coffee"
+      ]
+    },
+    {
+      "id": "njh-warung-dining_table-1",
+      "assetId": "dining_table",
+      "name": "Meja Makan 1",
+      "c": 2,
+      "r": 2,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat"
+      ]
+    },
+    {
+      "id": "njh-warung-food_vitrine-1",
+      "assetId": "food_vitrine",
+      "name": "Etalase Lauk",
+      "c": 4,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat"
+      ]
+    },
+    {
+      "id": "njh-warung-cashier-1",
+      "assetId": "cashier",
+      "name": "Kasir / Konter",
+      "c": 6,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell"
+      ]
+    },
+    {
+      "id": "njh-warung-dining_table-2",
+      "assetId": "dining_table",
+      "name": "Meja Makan 2",
+      "c": 5,
+      "r": 3,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat"
+      ]
+    },
+    {
+      "id": "njh-warung-chair-1",
+      "assetId": "chair",
+      "name": "Kursi 2",
+      "c": 7,
+      "r": 4,
+      "rotation": 270,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit",
+        "eat",
+        "drink_coffee"
+      ]
+    }
+  ],
+  "floor": 1,
+  "notes": "r3 facing fix of njh_warung_makan. Bangku rot 90 (front +c) faces meja 1 across a 1-tile gap; kursi rot 270 (front -c) faces meja 2 across a gap. Both use real side-view sprites (I1 seats have no true rot-180 back view, so seats were not placed south of the table facing in). Kasir rot 0 customer front faces the door aisle. Kompor/bak rot 0 into the room. Kopi/dispenser pindah ke dinding belakang (menggantikan rak stok) supaya pasangan makan muat.",
+  "adaptedFrom": "/workspace/njh-interior-templates-r1/scenes/njh_warung_makan.interior-scene.json",
+  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema)."
+}

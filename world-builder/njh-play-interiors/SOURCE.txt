@@ -1,0 +1,5 @@
+Preview only. Ellen's existing interiors, not new layouts.
+Scenes: njh-interior-templates-r3 / njh_kos and njh_warung_makan
+  (identical to njh-map-preview interiors/ for these two rooms).
+Furniture art: njh-interior-preview-art catalog, types used in those scenes only.
+Do not edit the source worktrees.

@@ -163,7 +163,9 @@ function create(ctx){
   }
   return out.filter(f=>f.kind);
  }
+ function interiorKind(){try{return ctx.interiorKind?ctx.interiorKind():null;}catch{return null;}}
  function atHomeSite(site,state){
+  if(interiorKind()==='kost'&&state?.housing?.room)return true;
   return !!(state?.housing?.room&&site&&(site.id==='kost'||site.home===true));
  }
  function siteForAction(action,explicit){
@@ -252,7 +254,19 @@ function create(ctx){
   const state=getState();
   const near=nearestSites();
   const list=[];
-  for(const {site} of near)list.push(...actionsForSite(site,state));
+  const kind=interiorKind();
+  if(kind==='kost'&&state?.housing?.room){
+   const site=getSites().find(s=>s.id==='kost')||{id:'kost',label:'Kost',x:getPos().x,z:getPos().z};
+   list.push(...actionsForSite(site,state));
+  }else if(kind==='warteg'){
+   /* Makan is supplied as an extra action near tables / kasir. */
+  }else{
+   for(const {site} of near)list.push(...actionsForSite(site,state));
+  }
+  try{
+   const extra=(typeof ctx.extraActions==='function'?ctx.extraActions():[])||[];
+   for(const a of extra)if(a&&a.id&&!list.some(x=>x.id===a.id&&x.furnitureId===a.furnitureId))list.push(a);
+  }catch(_e){}
   const spot=near[0]?.site?.label||near[0]?.site?.id||'';
   Object.defineProperty(list,'spot',{value:spot,enumerable:false,configurable:true});
   if(list[0]&&!list[0].spotLabel)list[0].spotLabel=spot;
@@ -371,6 +385,7 @@ function create(ctx){
   return out;
  }
  function enterables(){
+  if(interiorKind())return [];
   const objects=getWorld().objects||[];
   const door=typeof ctx.doorAnchor==='function'?ctx.doorAnchor:null;
   const out=[];
