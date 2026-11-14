@@ -3256,11 +3256,16 @@ window.SemestaPlay=Object.freeze({
     if(maxY>=minY)visibleHeight=maxY-minY+1;
    }
   }catch(_e){}
+  const root=rigs.get(LIFE_TEST_ACTOR_ID)?.root;
+  const p=root?.position;
+  const screen=p?worldToScreen(p.x,1.1,p.z):{visible:false};
+  const clipPlaying=window.VLSpawnHobo?.busy?.()===true;
   return {loaded:!!rig.state?.loaded,failed:!!rig.state?.failed,
    source:rig.mesh?.userData?.characterSource||'',
    emotion:rig.state?.emotion||'neutral',
-   visible:rig.mesh?.visible!==false&&rig.mesh?.parent?.visible!==false,
-   opaquePixels,visibleHeight};
+   visible:rig.mesh?.visible!==false&&root?.visible!==false,
+   clipPlaying,world:p?{x:p.x,y:p.y,z:p.z}:null,
+   screen,opaquePixels,visibleHeight};
  },
  setPlayerEmotion:(name,duration=3)=>playerMode?!!rigs.get(LIFE_TEST_ACTOR_ID)?.rig?.setEmotion?.(name,duration):false,
  // Test-play preview of a pose / facing on the ephemeral player only (never saved).
