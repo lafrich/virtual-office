@@ -357,6 +357,69 @@
         "owner:noor",
         "access:shared_partner"
       ]
+    },
+    {
+      "id": "njh_kos_noor-sekat-privacy-6-1",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC",
+      "c": 6,
+      "r": 1,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh_kos_noor-sekat-privacy-6-2",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC",
+      "c": 6,
+      "r": 2,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh_kos_noor-sekat-privacy-6-3",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC",
+      "c": 6,
+      "r": 3,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh_kos_noor-sekat-privacy-6-4",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC",
+      "c": 6,
+      "r": 4,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh_kos_noor-sekat-privacy-6-5",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC",
+      "c": 6,
+      "r": 5,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh_kos_noor-sekat-privacy-7-5",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC",
+      "c": 7,
+      "r": 5,
+      "rotation": 0,
+      "blocking": true
+    },
+    {
+      "id": "njh_kos_noor-sekat-privacy-9-5",
+      "assetId": "sekat_wc",
+      "name": "Sekat WC",
+      "c": 9,
+      "r": 5,
+      "rotation": 0,
+      "blocking": true
     }
   ],
   "doors": [
@@ -376,10 +439,28 @@
       ],
       "exitTo": "njh_kos_cove_lobby",
       "lobbyDoorId": "njh_door_home_noor"
+    },
+    {
+      "id": "njh_kos_noor-bathroom-curtain",
+      "role": "bathroom",
+      "label": "Tirai Kamar Mandi",
+      "c": 8,
+      "r": 5,
+      "rotation": 0,
+      "useTile": [
+        8,
+        5
+      ],
+      "usePoint": [
+        8.5,
+        5.5
+      ],
+      "privacy": true,
+      "walkable": true
     }
   ],
   "floor": 1,
-  "notes": "Per-owner kost room for the 4-player preview test, rebuilt from Ellen's Cove kamar plan (bed left, bathroom right of sekat; sources: kamar_cove_kosong + old VO p_cove.py / index.html). t519: bathtub + shower instead of bak+gayung; this is an explicit exception — public WC (njh_wc_mandi_umum) stays water_tub. t520: complete interactable kitchenette (stove + kitchen_sink + fridge) and lemari storage, all with free reachable use tiles. Kitchen + kulkas + lemari are owner_only (partner may use kasur and kamar mandi, not the owner's food/storage/cook station). ownerId is 'noor' (player t_noor). Existing catalog TYPEs only. Preview only.",
+  "notes": "Per-owner kost room for the 4-player preview test, rebuilt from Ellen's Cove kamar plan (bed left, bathroom right of sekat; sources: kamar_cove_kosong + old VO p_cove.py / index.html). t519: bathtub + shower instead of bak+gayung; this is an explicit exception — public WC (njh_wc_mandi_umum) stays water_tub. t520: complete interactable kitchenette (stove + kitchen_sink + fridge) and lemari storage, all with free reachable use tiles. Kitchen + kulkas + lemari are owner_only (partner may use kasur and kamar mandi, not the owner's food/storage/cook station). ownerId is 'noor' (player t_noor). Existing catalog TYPEs only. Preview only. · Privacy r6: bathrooms behind c6 and r5 sekat with walkable curtain 8,5.",
   "adaptedFrom": "Ellen kamar_cove_kosong (virtual-office-assets/kamar_cove_kosong) + Cove geometry in vo-mp/ind/p_cove.py and virtual-office/index.html. Previous Baymax njh_kos (preview/main-interiors-kost-warteg) was the earlier base; rooms are now rebuilt on the Cove plan.",
   "adaption": "Cove plan (kasur left, sekat + bathroom right). t519 bathtub+shower, no water_tub. t520 kitchenette stove+kitchen_sink+fridge and wardrobe storage with action tags. doors[] exit back to njh_kos_cove_lobby. owner/access metadata kept for Baymax.",
   "ownerId": "noor",
