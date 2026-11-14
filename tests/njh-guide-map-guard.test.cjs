@@ -84,3 +84,11 @@ test('Pecel Lele and Sate Madura tents keep their sprite-proportional iso billbo
   assert.equal(item.height,+(item.size[1]*PY).toFixed(3));
  }
 });
+
+test('Mainkan Jiwa hooks identify the official NJH-only city, never the authoring working copy',()=>{
+ const builder=read('world-builder/builder.js');
+ assert.match(builder,/const activeGameCityId=\(\)=>playerMode&&njhMapPreview/);
+ assert.match(builder,/\?'city-njh-semesta-draft1-with-pending':\(activeDraftId/);
+ assert.equal((builder.match(/getCityId:activeGameCityId/g)||[]).length,2,
+  'both initial and interior-reattach bridges must preserve the same city id');
+});
