@@ -194,12 +194,12 @@ function hookCtx(){
    const raw=String(id||'').replace(/^d:/,'');
    try{
     const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
-    if(I?.openInteriorById){const r=I.openInteriorById(raw);if(r?.ok)return r;}
-    if(I?.enterInterior){const r=I.enterInterior(raw);if(r?.ok)return r;}
-    if((raw==='kost'||raw==='warteg')&&I?.enter)return I.enter(raw);
-    const obj=(getWorld().objects||[]).find(o=>String(o.id)===raw);
-    const kind=I?.kindOfBuilding?.(obj);
-    if(kind&&I?.enter)return I.enter(kind);
+    if(I?.openInteriorById){
+     // The official door/room resolver is authoritative. A failed or pending
+     // door must NOT fall through to a broad regex that enters Kost Cove.
+     const r=I.openInteriorById(raw);
+     return r&&typeof r==='object'?r:{ok:r===true};
+    }
     if(bridge?.openInteriorById)return !!bridge.openInteriorById(raw);
    }catch(_e){}
    return false;
