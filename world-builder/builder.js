@@ -637,6 +637,7 @@ function rebuildTerrain(force=true){
  clearTerrain();
  const t=documentMap.map.terrain||{default:'grass',cells:[]};
  const tileIndex=new Map(t.cells.map(o=>[o.c+','+o.r,o.type]));
+ const drainCells=terrain.dict(t);
  const byVisualTile=new Map();
  for(const cell of t.cells){
   if(cell.c<b.minX||cell.c>=b.maxX||cell.r<b.minZ||cell.r>=b.maxZ||cell.type===t.default)continue;
@@ -659,7 +660,12 @@ function rebuildTerrain(force=true){
   for(let i=0;i<items.length;i++){
    const cell=items[i],y=kind==='road'?.024:kind==='sidewalk'?.036:['water','river','drain'].includes(kind)?.015:.026;
    tmp.position.set(cell.c+.5,y,cell.r+.5);
-   tmp.rotation.set(-Math.PI/2,0,0);tmp.scale.set(1,1,1);tmp.updateMatrix();
+   tmp.rotation.set(-Math.PI/2,0,0);
+   // Drain.png runs along r. Rotate the plane itself for a connected along-c run.
+   // A junction needs dedicated art; do not fake one by rotating a straight.
+   if(kind==='drain'&&terrain.drainAxis?.(t,cell.c,cell.r,drainCells)==='along_c')
+    tmp.rotateZ(Math.PI/2);
+   tmp.scale.set(1,1,1);tmp.updateMatrix();
    mesh.setMatrixAt(i,tmp.matrix);
    if(['grass','water','river','soil'].includes(kind)){
     const variation=((cell.c*12347+cell.r*2917)>>>0)%9;
