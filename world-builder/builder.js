@@ -3339,6 +3339,18 @@ function bootNjhPlayInteriors(){
   getRoots:()=>[...owners.entries()].map(([id,root])=>({id,root})),
   onAddObject:o=>{if(!Number.isFinite(Number(o.y)))o.y=0;if(!owners.has(o.id))instantiate(o);},
   setGroundVisible:on=>{try{baseGround.visible=!!on;if(typeof gridOverlay!=='undefined'&&gridOverlay)gridOverlay.visible=!!on&&(typeof gridShown==='undefined'||gridShown);}catch{}},
+  setGroundDepthWrite:on=>{
+   try{
+    const write=!!on;
+    if(baseGround?.material){baseGround.material.depthWrite=write;baseGround.material.needsUpdate=true;}
+    if(typeof tileGround!=='undefined'&&tileGround)tileGround.traverse(n=>{
+     const mats=n.material? (Array.isArray(n.material)?n.material:[n.material]):[];
+     for(const m of mats){if(!m)continue;if(n.userData._njhDw==null)n.userData._njhDw=m.depthWrite!==false;
+      m.depthWrite=write&&(n.userData._njhDw!==false);m.needsUpdate=true;}
+    });
+   }catch{}
+  },
+
 
   onEnter:()=>{try{window.SemestaLifePlay?.refresh?.();}catch{}},
   onExit:()=>{try{window.SemestaLifePlay?.refresh?.();}catch{}},

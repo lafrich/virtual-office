@@ -175,10 +175,15 @@ function create(opts){
   disposeRoom();
   const origin=ORIGIN[kind],sc=rec.scene,w=num(sc.width,8),d=num(sc.depth,6);
   group=new THREE.Group();group.name='njh-play-interior-'+kind;
-  const floorMat=new THREE.MeshBasicMaterial({color:sc.theme==='aqua'?0xd0e9f0:0xe8dbc7,side:THREE.DoubleSide});
+  const policy=View?.DRAW_POLICY||{};
+  const floorY=policy.floor?.y??0.045;
+  // MUST: floor never writes depth — iso sprite bases hang below the foot and
+  // a depth-writing floor slices them on a diagonal.
+  const floorMat=new THREE.MeshBasicMaterial({color:sc.theme==='aqua'?0xd0e9f0:0xe8dbc7,side:THREE.DoubleSide,
+   depthTest:policy.floor?.depthTest!==false,depthWrite:false});
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(w,d),floorMat);
-  floor.rotation.x=-Math.PI/2;floor.position.set(origin.x+w/2,0.045,origin.z+d/2);
-  group.add(floor);
+  floor.rotation.x=-Math.PI/2;floor.position.set(origin.x+w/2,floorY,origin.z+d/2);
+  floor.renderOrder=policy.floor?.renderOrder??0;group.add(floor);
   // Only the TWO FAR walls (iso cutaway). The near-side wall used to sit
   // in front of the camera and hide right-wall fixtures (shower, toilet, sink).
   const wallH=View?.WALL_HEIGHT||2.8;
@@ -192,9 +197,9 @@ function create(opts){
     const tex=new THREE.CanvasTexture(can);
     tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
     tex.needsUpdate=true;
-    return new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthTest:true,depthWrite:true});
+    return new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthTest:true,depthWrite:false});
    }
-   return new THREE.MeshBasicMaterial({color:fallback,side:THREE.DoubleSide,depthTest:true,depthWrite:true});
+   return new THREE.MeshBasicMaterial({color:fallback,side:THREE.DoubleSide,depthTest:true,depthWrite:false});
   };
   if(far.back){
    const back=new THREE.Mesh(new THREE.PlaneGeometry(w,wallH),wallMaterial('back',0xd4c8ae));
@@ -223,7 +228,11 @@ function create(opts){
    const dir=dirFor(item.rotation);
    const view=typ[dir]||typ.sw||typ.se||null;
    const foot=view?.footprint||[1,1];
-   const pos=tilePos(origin,item,foot);
+   let fw=num(foot[0],1),fd=num(foot[1],1);
+   if((num(item.rotation,0)%180)===90){const t=fw;fw=fd;fd=t;}
+   const snapped=View?.snapFootprint?.(item.c,item.r,fw,fd,w,d)||{c:num(item.c,0),r:num(item.r,0),fw,fd};
+   const itemSnap=Object.assign({},item,{c:snapped.c,r:snapped.r});
+   const pos=tilePos(origin,itemSnap,[snapped.fw,snapped.fd]);
    const img=view?.file?images.get(view.file):null;
    const size=view?.size||(img?[img.naturalWidth||img.width,img.naturalHeight||img.height]:[64,64]);
    const pivot=view?.pivot||[size[0]/2,size[1]*0.8];
@@ -242,7 +251,7 @@ function create(opts){
     id:item.id,assetId:item.assetId,name:item.name,actionId:item.actionId,
     kind:item.assetId,furnitureId:item.assetId,label:item.name||item.assetId,
     x:pos.x,z:pos.z,fw:pos.fw,fd:pos.fd,blocking:item.blocking!==false,
-    c:item.c,r:item.r,roomId:kind,source:'interior',height
+    c:snapped.c,r:snapped.r,roomId:kind,source:'interior',height
    });
   }
   // Door mat at entrance
@@ -256,7 +265,7 @@ function create(opts){
   if(!hide){
    for(const rec of hidden){if(rec.obj)rec.obj.visible=rec.prev;}
    hidden=[];
-   try{opts.setGroundVisible?.(true);}catch(_e){}
+   try{opts.setGroundVisible?.(true);}catch(_e){}try{opts.setGroundDepthWrite?.(true);}catch(_e){}
    return;
   }
   hidden=[];
@@ -270,7 +279,7 @@ function create(opts){
    hidden.push({obj,prev:obj.visible!==false});
    obj.visible=false;
   }
-  try{opts.setGroundVisible?.(false);}catch(_e){}
+  try{opts.setGroundVisible?.(false);}catch(_e){}try{opts.setGroundDepthWrite?.(false);}catch(_e){}
  }
 
  function persistSession(){
@@ -404,7 +413,19 @@ function create(opts){
    origin:session.origin,width:session.width,depth:session.depth,props,aspect,
    inset:View.playInset(aspect),wallHeight:View.WALL_HEIGHT
   });
-  View.warnIfClipped(fit.clipped,session.kind);
+  const clips=View.inspectPropClips?.({
+   origin:session.origin,width:session.width,depth:session.depth,
+   focus:fit.focus,viewSize:fit.viewSize,aspect,
+   policy:View.DRAW_POLICY,
+   props:(session.furniture||[]).map(f=>{
+    const typ=(catalog?.items||catalog||{})[View.artId?.(f.assetId)||f.assetId]||{};
+    const view=typ.sw||typ.se||{};
+    return {id:f.assetId,assetId:f.assetId,x:f.x,z:f.z,c:f.c,r:f.r,
+     fw:f.fw,fd:f.fd,footprint:[f.fw||1,f.fd||1],
+     size:view.size,pivot:view.pivot,height:f.height};
+   })
+  })||fit.clipped;
+  View.warnIfClipped([...(fit.clipped||[]),...clips],session.kind);
   opts.setView?.(fit.focus,fit.viewSize);
   session.camera=fit;
   return fit;

@@ -216,15 +216,159 @@ function bakeWallTexture(side,geo,paint){
 }
 function warnIfClipped(clipped,tag){
  if(!clipped?.length||typeof console==='undefined')return;
- const names=clipped.map(c=>c.id).join(', ');
- console.warn('[NJH interior] Furniture would be clipped ('+(tag||'view')+'): '+names+
-  '. Use VLSemestaInteriorView.fitInteriorCamera (room bbox + tallest prop).');
+ const names=clipped.map(c=>c.id+(c.reason?(' '+c.reason):'')).join(', ');
+ console.warn('[NJH interior] MUST: no prop may be clipped ('+(tag||'view')+'): '+names+
+  '. Floor/walls/ground must not write depth over sprites; camera must frame every prop; footprints stay inside the room.');
+}
+
+/* MUST: floor, far walls and the unbounded ground never depth-occlude a prop
+ * sprite. Iso billboards are vertical; the PNG's ground diamond hangs below
+ * the foot, so a depth-writing floor cuts them on a diagonal. */
+const FLOOR_Y=0.045, GROUND_Y=0.002, SPRITE_LIFT=0.04;
+const DRAW_POLICY=Object.freeze({
+ floor:{depthWrite:false,depthTest:true,renderOrder:0,y:FLOOR_Y},
+ walls:{depthWrite:false,depthTest:true,renderOrder:0},
+ ground:{depthWrite:false,depthTest:true,y:GROUND_Y},
+ sprites:{depthWrite:true,depthTest:true,renderOrder:1,alphaTest:.05,yaw:Math.PI/4}
+});
+
+function snapFootprint(c,r,fw,fd,width,depth){
+ const w=Math.max(1,num(width,8)),d=Math.max(1,num(depth,6));
+ let tw=Math.max(.01,num(fw,1)),td=Math.max(.01,num(fd,1));
+ if(tw>w)tw=w;if(td>d)td=d;
+ let nc=num(c,0),nr=num(r,0);
+ if(nc<0)nc=0;if(nr<0)nr=0;
+ if(nc+tw>w)nc=w-tw;if(nr+td>d)nr=d-td;
+ return {c:nc,r:nr,fw:tw,fd:td,inside:nc>=-1e-9&&nr>=-1e-9&&nc+tw<=w+1e-9&&nr+td<=d+1e-9};
+}
+function footprintInside(c,r,fw,fd,width,depth){
+ return snapFootprint(c,r,fw,fd,width,depth).inside&&
+  Math.abs(snapFootprint(c,r,fw,fd,width,depth).c-num(c,0))<1e-6&&
+  Math.abs(snapFootprint(c,r,fw,fd,width,depth).r-num(r,0))<1e-6;
+}
+function rotY(x,z,yaw){
+ const c=Math.cos(yaw),s=Math.sin(yaw);
+ return {x:x*c+z*s,z:-x*s+z*c};
+}
+function catalogView(catalog,assetId,rotation){
+ const items=catalog?.items||catalog||{};
+ const typ=items[artId(assetId)]||items[assetId]||{};
+ const dir=['sw','se','ne','nw'][(Math.round((((Number(rotation)||0)%360+360)%360)/90)%4)]||'sw';
+ return typ[dir]||typ.sw||typ.se||null;
+}
+function spriteQuad(opts){
+ opts=opts||{};
+ const size=opts.size||[64,64];
+ const pivot=opts.pivot||[size[0]/2,size[1]*0.8];
+ const width=size[0]*PIXEL_WORLD,height=size[1]*PIXEL_WORLD*VERTICAL_COMP;
+ const py=num(pivot[1],size[1]*0.8)/Math.max(1,size[1]);
+ const px=(size[0]/2-num(pivot[0],size[0]/2))/Math.max(1,size[0])*width;
+ const yaw=num(opts.yaw,DRAW_POLICY.sprites.yaw);
+ const planeY=height*(py-.5)+SPRITE_LIFT;
+ const rootX=num(opts.x,0),rootZ=num(opts.z,0);
+ const corners=[];
+ for(const lx of [-width/2,width/2])for(const ly of [-height/2,height/2]){
+  const r=rotY(lx+px,0,yaw);
+  corners.push({x:rootX+r.x,y:planeY+ly,z:rootZ+r.z});
+ }
+ return {x:rootX,z:rootZ,width,height,px,planeY,yaw,corners,bottomY:planeY-height/2,topY:planeY+height/2};
+}
+function occludersFromPolicy(policy,room){
+ policy=policy||DRAW_POLICY;
+ const origin=room?.origin||{x:0,z:0},w=num(room?.width,8),d=num(room?.depth,6);
+ const list=[];
+ if(policy.floor?.depthWrite)list.push({id:'floor',kind:'floor',y:num(policy.floor.y,FLOOR_Y),
+  x0:origin.x,x1:origin.x+w,z0:origin.z,z1:origin.z+d});
+ if(policy.ground?.depthWrite)list.push({id:'ground',kind:'ground',y:num(policy.ground.y,GROUND_Y)});
+ if(policy.walls?.depthWrite){
+  const far=farWalls(room?.direction);
+  if(far.back)list.push({id:'wall-back',kind:'wall-z',z:origin.z-0.04});
+  if(far.front)list.push({id:'wall-front',kind:'wall-z',z:origin.z+d+0.04});
+  if(far.left)list.push({id:'wall-left',kind:'wall-x',x:origin.x-0.04});
+  if(far.right)list.push({id:'wall-right',kind:'wall-x',x:origin.x+w+0.04});
+ }
+ return list;
+}
+function pointHiddenBy(p,occ,dir){
+ const d=normalizeDir(dir);
+ if(occ.kind==='floor'||occ.kind==='ground'){
+  if(p.y>=occ.y-1e-4)return false;
+  if(occ.x0!=null&&(p.x<occ.x0-0.02||p.x>occ.x1+0.02||p.z<occ.z0-0.02||p.z>occ.z1+0.02))return false;
+  return true;
+ }
+ // Wall hides a point on the far side (away from the camera).
+ if(occ.kind==='wall-z'){
+  const wallIsFar=d.z>=0?occ.z<=(occ._originZ??occ.z):occ.z>=(occ._originZ??occ.z);
+  if(!wallIsFar&&d.z>=0&&p.z<=occ.z)return true;
+  if(!wallIsFar&&d.z<0&&p.z>=occ.z)return true;
+  if(d.z>=0&&p.z<=occ.z)return true;
+  if(d.z<0&&p.z>=occ.z)return true;
+  return false;
+ }
+ if(occ.kind==='wall-x'){
+  if(d.x>=0&&p.x<=occ.x)return true;
+  if(d.x<0&&p.x>=occ.x)return true;
+  return false;
+ }
+ return false;
+}
+function sampleQuad(quad,n){
+ const pts=[],c=quad.corners;
+ if(!c||c.length<4)return pts;
+ // corners pushed in order (-w,-h), (-w,+h), (+w,-h), (+w,+h)
+ const a=c[0],b=c[1],d=c[2],e=c[3];
+ const N=Math.max(3,num(n,7));
+ for(let i=0;i<N;i++)for(let j=0;j<N;j++){
+  const u=i/(N-1),v=j/(N-1);
+  // lerp from bottom-left a to top-left b to bottom-right d to top-right e
+  const x=(1-u)*(1-v)*a.x+(1-u)*v*b.x+u*(1-v)*d.x+u*v*e.x;
+  const y=(1-u)*(1-v)*a.y+(1-u)*v*b.y+u*(1-v)*d.y+u*v*e.y;
+  const z=(1-u)*(1-v)*a.z+(1-u)*v*b.z+u*(1-v)*d.z+u*v*e.z;
+  pts.push({x,y,z,u,v});
+ }
+ return pts;
+}
+function inspectPropClips(opts){
+ opts=opts||{};
+ const policy=opts.policy||DRAW_POLICY;
+ const origin=opts.origin||{x:0,z:0};
+ const width=num(opts.width,8),depth=num(opts.depth,6);
+ const dir=opts.direction,aspect=num(opts.aspect,16/9);
+ const focus=opts.focus,viewSize=opts.viewSize;
+ const occluders=occludersFromPolicy(policy,{origin,width,depth,direction:dir});
+ const out=[];
+ for(const prop of opts.props||[]){
+  const reasons=new Set();
+  if(prop.footprint&&!footprintInside(prop.c,prop.r,prop.fw||prop.footprint[0],prop.fd||prop.footprint[1],width,depth))
+   reasons.add('footprint-outside');
+  const quad=prop.quad||spriteQuad(prop);
+  if(Number.isFinite(viewSize)&&focus){
+   const fr=frustum(viewSize,aspect);
+   const ax=isoAxes(dir);
+   for(const p of quad.corners){
+    if(!inFrustum(project(p,focus,ax),fr)){reasons.add('frustum');break;}
+   }
+  }
+  const samples=sampleQuad(quad,7);
+  for(const p of samples){
+   for(const occ of occluders){
+    if(pointHiddenBy(p,occ,dir)){
+     reasons.add(occ.kind==='ground'?'ground-depth':occ.kind==='floor'?'floor-depth':'wall-depth');
+    }
+   }
+  }
+  if(reasons.size)out.push({id:prop.id||prop.assetId||'prop',reasons:[...reasons],reason:[...reasons].join(',')});
+ }
+ return out;
 }
 
 return Object.freeze({
  PIXEL_WORLD,VERTICAL_COMP,WALL_PX,WALL_HEIGHT,TILE_PX,ISO_DIRECTION,MIN_VIEW,ART_ALIAS,EAT_SPOTS,
+ FLOOR_Y,GROUND_Y,SPRITE_LIFT,DRAW_POLICY,
  spriteSize,isoAxes,project,unprojectGround,farWalls,roomPoints,frustum,inFrustum,
  clippedProps,fitInteriorCamera,playInset,isoBillboardYaw,artId,eatSpot,
- bakeWallTexture,warnIfClipped
+ bakeWallTexture,warnIfClipped,
+ snapFootprint,footprintInside,rotY,catalogView,spriteQuad,occludersFromPolicy,
+ sampleQuad,inspectPropClips,pointHiddenBy
 });
 });

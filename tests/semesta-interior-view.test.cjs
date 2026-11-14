@@ -107,3 +107,119 @@ test('Kharisma layout is the play warteg, Ellen warung remains as fallback',()=>
  assert.equal(e.items.length,13,'generic Ellen layout kept on disk as fallback');
  assert.match(html,/semesta-interior-view.js/);
 });
+
+const ROOT=path.join(__dirname,'..');
+function viewOf(assetId){
+ const typ=(catalog.items||catalog)[V.artId(assetId)]||(catalog.items||catalog)[assetId]||{};
+ return typ.sw||typ.se||{};
+}
+function propsFromScene(scene,origin){
+ const o=origin||{x:0,z:0};
+ const w=scene.width||8,d=scene.depth||6;
+ return (scene.items||[]).map((it,i)=>{
+  const typ=(catalog.items||catalog)[V.artId(it.assetId)]||(catalog.items||catalog)[it.assetId]||{};
+  const view=typ.sw||typ.se||{};
+  let fw=numFoot(it,view)[0],fd=numFoot(it,view)[1];
+  const snap=V.snapFootprint(it.c,it.r,fw,fd,w,d);
+  const x=o.x+snap.c+snap.fw/2,z=o.z+snap.r+snap.fd/2;
+  const size=view.size||estSize(snap.fw,snap.fd);
+  const pivot=view.pivot||[size[0]/2,size[1]*0.8];
+  const h=V.spriteSize(1,size[1]).h;
+  return {id:(it.assetId||'prop')+'@'+snap.c+','+snap.r+'#'+i,assetId:it.assetId,
+   x,z,c:snap.c,r:snap.r,fw:snap.fw,fd:snap.fd,footprint:[snap.fw,snap.fd],
+   size,pivot,h,height:h};
+ });
+}
+function numFoot(it,view){
+ let fw=(view.footprint||[it.fw||it.w||1,it.fd||it.d||1])[0];
+ let fd=(view.footprint||[it.fw||it.w||1,it.fd||it.d||1])[1];
+ if(it.fw)fw=it.fw;if(it.fd)fd=it.fd;
+ if((Number(it.rotation)||0)%180===90){const t=fw;fw=fd;fd=t;}
+ return [fw,fd];
+}
+function estSize(fw,fd){return [Math.round(64*Math.max(1,fw)+5),Math.round(56*Math.max(1,Math.max(fw,fd))+24)];}
+
+function indonesiaScenes(){
+ const vm=require('node:vm');
+ const code=fs.readFileSync(path.join(ROOT,'world-builder/bangun-ruang/indonesia-interior-templates.js'),'utf8');
+ const sandbox={window:{}};
+ vm.runInNewContext(code,sandbox);
+ const pack=sandbox.window.VLIndonesiaInteriorPack;
+ if(!pack)return [];
+ return Object.entries(pack.templates).map(([id,t])=>{
+  const width=(t.min&&t.min[0])||8,depth=(t.min&&t.min[1])||6;
+  const items=(t.items||[]).map((row,i)=>{
+   const assetId=row[0],u=Number(row[1])||0,v=Number(row[2])||0;
+   const typ=pack.types[assetId]||{};
+   return {id:assetId+'-'+i,assetId,c:u*width,r:v*depth,fw:typ.w||1,fd:typ.d||1};
+  });
+  return {file:'indonesia:'+id,source:'indonesia-interior-pack',scene:{id,name:t.label,width,depth,items,theme:t.theme}};
+ });
+}
+function kharismaTemplateScene(){
+ const text=fs.readFileSync(path.join(ROOT,'world-builder/bangun-ruang/warteg-kharisma-template.js'),'utf8');
+ const m=text.match(/const placements=\[([\s\S]*?)\];/);
+ if(!m)return null;
+ const items=[];
+ const re=/\['([^']+)',\s*(\d+)\s*,\s*(\d+)/g;
+ let row;
+ while((row=re.exec(m[1])))items.push({id:row[1]+'@'+row[2]+','+row[3],assetId:row[1],c:+row[2],r:+row[3]});
+ return {file:'bangun-ruang:warteg-kharisma-template',source:'warteg-kharisma-template',
+  scene:{id:'warteg-kharisma-template',name:'Warteg Kharisma Bahari',width:8,depth:6,items}};
+}
+function allRepoInteriorScenes(){
+ const list=scenes(); // play interiors JSON
+ const seen=new Set(list.map(s=>'json:'+s.file));
+ const extra=indonesiaScenes();
+ const k=kharismaTemplateScene();
+ if(k)extra.unshift(k);
+ for(const s of extra){
+  const key=s.file;
+  if(seen.has(key))continue;
+  seen.add(key);list.push(s);
+ }
+ return list;
+}
+
+test('MUST policy: floor and far walls do not write depth over prop sprites',()=>{
+ assert.equal(V.DRAW_POLICY.floor.depthWrite,false);
+ assert.equal(V.DRAW_POLICY.walls.depthWrite,false);
+ assert.equal(V.DRAW_POLICY.ground.depthWrite,false);
+ const src=fs.readFileSync(path.join(ROOT,'world-builder','njh-play-interiors.js'),'utf8');
+ assert.match(src,/depthWrite:false/);
+ assert.match(src,/snapFootprint/);
+ // wall materials explicitly drop depth writes
+ assert.equal((src.match(/depthWrite:false/g)||[]).length>=3,true);
+});
+
+test('a depth-writing floor is the bug: it diagonally clips kost stove, shower and squat toilet',()=>{
+ const kost=scenes().find(s=>s.file.startsWith('njh_kos')).scene;
+ const origin={x:240,z:0};
+ const props=propsFromScene(kost,origin);
+ const bad={...V.DRAW_POLICY,floor:{...V.DRAW_POLICY.floor,depthWrite:true,y:V.FLOOR_Y}};
+ const clipped=V.inspectPropClips({origin,width:8,depth:6,props,policy:bad});
+ const hit=clipped.filter(c=>c.reasons.includes('floor-depth'));
+ assert.ok(hit.some(c=>c.id.startsWith('squat_toilet')),'toilet must be detected as floor-clipped under the old policy');
+ assert.ok(hit.some(c=>c.id.startsWith('shower')||c.id.startsWith('stove')||c.id.startsWith('sink')),
+  'right-wall fixtures must be detected as floor-clipped under the old policy, got '+JSON.stringify(hit.map(c=>c.id)));
+});
+
+test('MUST: official policy leaves every repo interior scene with zero clipped props',()=>{
+ const all=allRepoInteriorScenes();
+ assert.ok(all.length>=60,'expected play interiors + Bangun Ruang / Indonesia templates, got '+all.length);
+ const origin={x:0,z:0};
+ const failures=[];
+ for(const {file,scene} of all){
+  const props=propsFromScene(scene,origin);
+  const fit=V.fitInteriorCamera({
+   origin,width:scene.width||8,depth:scene.depth||6,props,aspect:1280/800,pad:1.22,
+   inset:V.playInset(1280/800)
+  });
+  const clips=V.inspectPropClips({
+   origin,width:scene.width||8,depth:scene.depth||6,props,
+   focus:fit.focus,viewSize:fit.viewSize,aspect:1280/800,policy:V.DRAW_POLICY
+  });
+  if(clips.length)failures.push(file+': '+clips.map(c=>c.id+' ['+c.reason+']').join('; '));
+ }
+ assert.equal(failures.length,0,failures.join('\n'));
+});
