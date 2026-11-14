@@ -215,6 +215,7 @@ if(dock){
  adopt('gamePhone','Nokia','nokia','Nokia: Dompet, Skill, Kursus, Marketplace, Furnitur, Peta, Profil');
  adopt('gameBag','Tas','bag','Isi tas');
  app('njhDockStatus','Status','status','Status pemain').addEventListener('click',()=>toggleWin('njhStatusWin',paintStatus));
+ app('njhDockMap','Peta','map','Peta kota').addEventListener('click',()=>{if(window.NJH98Mock?.openMap)window.NJH98Mock.openMap();else notice('Peta','Peta belum siap.');});
  const sep=document.createElement('i');sep.className='njh-dsep';sep.setAttribute('aria-hidden','true');dock.append(sep);
  app('njhDockMenu','Menu','menu','Menu jeda').addEventListener('click',()=>$('pauseButton')?.click());
  app('njhDockFull','Layar','full','Layar penuh').addEventListener('click',toggleFull);
@@ -282,6 +283,7 @@ function paintProfile(st){
 }
 function paintStatus(){
  const b=$('njhStatusBody');if(!b)return;
+ if(typeof window.NJH98Mock?.statusHTML==='function'){try{b.innerHTML=window.NJH98Mock.statusHTML(lifeState()||{});return;}catch(err){console.warn(err);}}
  const st=lifeState()||{};
  const rows=[['Nama',profile?.name||'Pemain'],['Tempat tinggal',st.housing?.room?'Kamar kost':'Tenda (hobo)'],
   ['Token listrik',(st.powerTokens??0)+' token'],['Furnitur',(st.furniture||[]).join(', ')||'belum ada'],
@@ -336,6 +338,8 @@ function ctxInfo(){
 let ctxOpen=false,ctxLabel='';
 function setWorldClass(c,on){try{wdoc()?.documentElement?.classList.toggle(c,on);}catch{}}
 function openCtx(){
+ // enterable door nearby → its (placeholder) interior instead of the generic menu
+ if(doorNearObj&&typeof window.NJH98Mock?.enterDoor==='function'){try{window.NJH98Mock.enterDoor(doorNearObj);}catch(err){console.warn(err);}return true;}
  const info=ctxInfo();if(!info||info.work)return false;
  ctxOpen=true;ctxLabel=info.label;setWorldClass('njh-ctx-open',true);decorateWorld(true);
  setTimeout(()=>{try{wdoc()?.querySelector('#slpActions button[data-life-action],#slpActions select')?.focus();}catch{}},0);
@@ -428,6 +432,7 @@ function paintModal(){
  let kind='';
  try{const w=wdoc()?.getElementById('ptWindow');if(w&&!w.hidden&&w.offsetParent!==null)kind=w.getAttribute('data-kind')||'window';}catch{}
  document.body.classList.toggle('njh-modal',!!kind);
+ try{window.NJH98Mock?.onModal?.(kind);}catch{}
  if(modalClose){modalClose.hidden=!kind;modalClose.textContent=kind==='phone'?'× Tutup Nokia':'× Tutup';}
 }
 
@@ -524,7 +529,8 @@ function canvasRect(){
 }
 function project(x,y,z,rect,me){
  const S=sp();
- if(typeof S?.worldToScreen==='function'){try{const p=S.worldToScreen(x,y,z);return p&&{x:rect.x+p.x,y:rect.y+p.y};}catch{return null;}}
+ // real hook: canvas pixels from the canvas top-left, {x,y,visible}
+ if(typeof S?.worldToScreen==='function'){try{const p=S.worldToScreen(x,y,z);return p&&p.visible!==false&&Number.isFinite(p.x)?{x:rect.x+p.x,y:rect.y+p.y}:null;}catch{return null;}}
  if(!me)return null;
  const dx=x-me.x,dy=y,dz=z-me.z,k=rect.h/viewSize;
  return {x:rect.x+rect.w/2+(dx*CAM_R[0]+dz*CAM_R[2])*k,y:rect.y+rect.h/2-(dx*CAM_U[0]+dy*CAM_U[1]+dz*CAM_U[2])*k};
@@ -534,18 +540,22 @@ function questList(){
  let dir=[];try{dir=S.worldDirectory?.()||[];}catch{}
  if(typeof S.questMarkers==='function'){
   try{const byId=new Map(dir.map(o=>[String(o.id),o]));
-   return (S.questMarkers()||[]).map(q=>{const o=byId.get(String(q.npcId));return o&&{id:'q:'+o.id,x:o.x,z:o.z,name:o.name,state:q.state==='ready'?'ready':'available',sample:false};}).filter(Boolean);}catch{return [];}
+   return (S.questMarkers()||[]).map(q=>{const o=byId.get(String(q.npcId));return o&&{id:'q:'+o.id,npc:o,x:o.x,z:o.z,name:o.name,state:q.state==='ready'?'ready':'available',sample:false};}).filter(Boolean);}catch{return [];}
  }
- return dir.filter(o=>o.type==='quest_npc').map((o,i)=>({id:'q:'+o.id,x:o.x,z:o.z,name:o.name||'NPC',state:demo&&i===1?'ready':'available',sample:true}));
+ const all=dir.filter(o=>o.type==='quest_npc');
+ if(typeof window.NJH98Mock?.questState==='function')
+  return all.map(o=>{const st=window.NJH98Mock.questState(o);return st&&{id:'q:'+o.id,npc:o,x:o.x,z:o.z,name:o.name||'NPC',state:st,sample:true};}).filter(Boolean);
+ return all.map((o,i)=>({id:'q:'+o.id,npc:o,x:o.x,z:o.z,name:o.name||'NPC',state:demo&&i===1?'ready':'available',sample:true}));
 }
 function doorList(){
  const S=sp();
- if(typeof S?.enterables==='function'){try{return (S.enterables()||[]).map(d=>({id:'d:'+d.id,x:+d.x,z:+d.z,name:d.name||'Bangunan',sample:false}));}catch{return [];}}
+ // real hook first; an empty list (no interiors on this map yet) falls back to the marked sample
+ if(typeof S?.enterables==='function'){try{const v=(S.enterables()||[]).map(d=>({id:'d:'+d.id,x:+d.x,z:+d.z,name:d.name||'Bangunan',sample:false}));if(v.length)return v;}catch{}}
  let dir=[];try{dir=S?.worldDirectory?.()||[];}catch{}
  const real=dir.filter(o=>o.enterable).map(o=>({id:'d:'+o.id,x:o.x,z:o.z,name:o.name||o.label||'Bangunan',sample:false}));
  if(real.length)return real;
  let sites=[];try{sites=life()?.sites?.()||[];}catch{}
- return sites.filter(s=>s&&!s.placeholder&&SAMPLE_DOORS.test(s.id)&&Number.isFinite(s.x)).map(s=>({id:'d:'+s.id,x:s.x,z:s.z,name:s.label,sample:true}));
+ return sites.filter(s=>s&&(!s.placeholder||s.id==='kost')&&SAMPLE_DOORS.test(s.id)&&Number.isFinite(s.x)).map(s=>({id:'d:'+s.id,x:s.x,z:s.z,name:s.label,sample:true}));
 }
 function mark(id,cls,html){
  let el=markPool.get(id);
@@ -553,11 +563,11 @@ function mark(id,cls,html){
  if(el.className!==cls)el.className=cls;if(el._h!==html){el.innerHTML=html;el._h=html;}
  el._live=true;return el;
 }
-let doorNear='';
+let doorNear='',doorNearObj=null;
 function paintMarks(){
  if(!marks)return;
  const show=current==='gameScreen'&&!document.body.classList.contains('njh-modal')&&!ctxOpen;
- marks.hidden=!show;doorNear='';
+ marks.hidden=!show;doorNear='';doorNearObj=null;
  if(!show)return;
  const rect=canvasRect(),me=cameraFocus();
  for(const el of markPool.values())el._live=false;
@@ -565,7 +575,7 @@ function paintMarks(){
   for(const q of questList()){
    const p=project(q.x,2.15,q.z,rect,me);if(!p||p.x<rect.x-20||p.y<rect.y-30||p.x>rect.x+rect.w+20||p.y>rect.y+rect.h+20)continue;
    const el=mark(q.id,'njh-qmark '+q.state+(q.sample?' sample':''),'<b>'+(q.state==='ready'?'?':'!')+'</b>');
-   el.title=q.name+(q.state==='ready'?' · quest siap diserahkan':' · punya quest')+(q.sample?' (status contoh)':'');
+   el._q=q;el.title=q.name+(q.state==='ready'?' · quest siap diserahkan':' · punya quest')+(q.sample?' (status contoh)':'');
    el.style.transform='translate('+Math.round(p.x)+'px,'+Math.round(p.y)+'px)';
   }
   let best=null;
@@ -576,7 +586,7 @@ function paintMarks(){
    if(me){const dist=Math.hypot(d.x-me.px,d.z-me.pz);if(dist<4&&(!best||dist<best.dist))best={...d,dist,p:project(d.x,2.7,d.z,rect,me)||p};}
   }
   if(best){
-   doorNear=best.id;const g=markPool.get(best.id);if(g)g._live=false;
+   doorNear=best.id;doorNearObj=best;const g=markPool.get(best.id);if(g)g._live=false;
    const el=mark('tip','njh-doortip','<b>'+esc(best.name)+'</b> · Masuk ['+(coarse()?'AKSI':'E')+']'+(best.sample?'<span class="njh-soon nologic">CONTOH</span>':''));
    el.style.transform='translate('+Math.round(best.p.x)+'px,'+Math.round(best.p.y)+'px)';
   }
@@ -604,6 +614,7 @@ function tick(){
  if(!$('njhBagWin')?.hidden&&avatarTick%4===0)paintBag();
  if(ctxOpen){const info=ctxInfo();if(!info||info.work||info.label!==ctxLabel)closeCtx();}
  paintNear();paintModal();
+ try{window.NJH98Mock?.tick?.(st);}catch(err){console.warn(err);}
  if(!spawnShown&&!spawnHookSeen&&$('worldLoading')?.hidden&&st)spawnReveal();
 }
 setInterval(tick,500);
@@ -618,7 +629,7 @@ function injectWorld(){
   d.documentElement.classList.toggle('njh-devtools',DEV);
   if(!d.getElementById('njh98-world-css')&&d.head){
    const l=d.createElement('link');l.id='njh98-world-css';l.rel='stylesheet';
-   l.href=new URL('./njh98-world.css?v=njh98-3',location.href).href;d.head.appendChild(l);
+   l.href=new URL('./njh98-world.css?v=njh98-4',location.href).href;d.head.appendChild(l);
   }
   worldKeys(w);worldZoom(w);
  }catch{}
@@ -640,5 +651,8 @@ window.addEventListener('message',e=>{
 /* placeholders are disabled; make sure nothing can activate them */
 document.querySelectorAll('[data-njh-placeholder]').forEach(b=>{b.disabled=true;b.setAttribute('aria-disabled','true');});
 
+window.NJH98=Object.freeze({world,wdoc,life,sp,lifeState,worldText,rp,esc,clamp,notice,toast,closeWindows,toggleWin,closeCtx,
+ openHowto:openHowtoWin,paintStatus,ICON,big,coarse,DEV,store,NEEDS,profile:()=>profile,current:()=>current,
+ playerPos,questList,doorList,doorNear:()=>doorNearObj});
 onScreen();
 })();

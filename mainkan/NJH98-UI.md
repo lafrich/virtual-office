@@ -26,7 +26,7 @@ Lapisan UI ini **presentasi saja**: logic game, Worker, data peta/aset LFB, kara
 Satu-satunya pengecualian bentuk bulat: joystick dan tombol AKSI/LARI di HP (konvensi game mobile).
 
 ### Satu pintu per fitur
-- **Dock kanan bawah adalah satu-satunya tempat** untuk Nokia, Tas, Status, Menu, Layar. **Peta ada di dalam Nokia** (bukan tombol kedua).
+- **Dock kanan bawah adalah satu-satunya tempat** untuk Nokia, Tas, Status, Peta, Menu, Layar. Tombol **Peta** di dock membuka jendela *Peta Kota*. (Catatan untuk Baymax: Nokia masih punya app Peta bawaan → nanti cukup satu; usul: app Nokia memanggil jendela yang sama.)
 - Tidak boleh ada tombol kembar (contoh: Nokia di atas *dan* di bawah). Sebelum menambah tombol, cek apakah fitur itu sudah punya pintu.
 - Kondisi (Energi, Kebersihan, Buang Air, Kenyang, Moral, EXP) hanya di jendela **Kondisi** kanan atas; uang hanya di jendela profil kiri atas.
 
@@ -63,12 +63,12 @@ Satu-satunya pengecualian bentuk bulat: joystick dan tombol AKSI/LARI di HP (kon
 - Bangunan yang bisa dimasuki: **kilau pixel kecil** di pintu + tooltip Win98 saat dekat: `Warteg Bu Sari · Masuk [E]` (HP: `[AKSI]`). Tooltip ini menggantikan hint AKSI biasa (bukan dobel).
 - Data yang belum ada ditandai **CONTOH**. Hook yang dibutuhkan dari Baymax: `SemestaPlay.questMarkers() → [{npcId,state}]`, `SemestaPlay.enterables() → [{id,name,x,z}]`, `SemestaPlay.worldToScreen(x,y,z)` (atau `playerPosition()`). UI otomatis memakai hook kalau ada.
 
-### Fitur tanpa logic
-- Tombol tetap tampil tapi **disabled** dengan tag **SEGERA** (fitur direncanakan) atau **BELUM ADA LOGIC**. Contoh: Lanjutkan, Mulai Baru, Simpan/Muat, Laporan Hari, Pengaturan, Kredit, Rumah Lv.?.
-- Setiap hook baru dipakai lewat *feature detection*: pakai kalau ada, kalau tidak ada tampilkan fallback/SEGERA.
+### Fitur tanpa logic → lapisan SIMULASI
+- Fitur yang direncanakan **bisa diklik** dan berfungsi sebagai placeholder, dengan tag teal **SIMULASI** (dulu: tombol disabled SEGERA). Semuanya di `njh98-mock.js`, terpisah dari `njh98.js`.
+- Aturan: **hook asli dulu** (`window.SemestaLifePlay`, alias `window.SemestaPlay`), kalau tidak ada baru mock. Lihat bagian *Lapisan simulasi* di bawah.
 
 ### Kontrak DOM & hook (handoff Baymax)
-Ikuti handoff Baymax di thread koordinasi Mainkan ↔ Baymax (Virtual Office). Ringkasnya — **jangan diganti nama/dihapus**:
+Ikuti handoff Baymax: `/workspace/mainkan-ui-handoff/MAINKAN-UI-HANDOFF.md` (box bersama; API hook: `world-builder/API.md` di branch `preview/mainkan-hooks-p1`). Ringkasnya — **jangan diganti nama/dihapus**:
 - Layar: `splashScreen`, `welcomeScreen`, `loginScreen`, `characterScreen`, `confirmScreen`, `loadingScreen`, `tutorialScreen`, `gameScreen`, `pauseScreen`, `messageScreen`.
 - Kontrol: `skipSplash`, `welcomeContinue`, `welcomeGuest`, `guestButton`, `email`, `password`, `authSubmit`, `authMessage`, `ccCreate`, `confirmGo`, `tutorialDone`, `tutorialSkip`, `gamePhone`, `gameBag`, `gameAction`, `gameRun`, `pauseButton`, `resumeGame`, `pauseExit`, `semestaFrame`, `worldLoading`, `walkPad`.
 - postMessage: `mainkan:profile-request`, `mainkan:player-profile`, `mainkan:pause`, `mainkan:resume`. Storage key game tidak diubah; key UI baru hanya `njh98:*`.
@@ -94,18 +94,55 @@ Ikuti handoff Baymax di thread koordinasi Mainkan ↔ Baymax (Virtual Office). R
 | HP landscape + prompt putar + joystick bulat | D-pad kotak besar, layout portrait yang menutupi layar |
 | Target ≥ 40px, HUD ≤ 25% layar | HUD menutupi dunia |
 | Intro → Menu Utama; tutorial sekali, bisa dilewati | Tutorial muncul tiap login |
-| Tag SEGERA / BELUM ADA LOGIC / CONTOH | Tombol palsu yang seolah berfungsi |
+| Tag SIMULASI / CONTOH / PLACEHOLDER kalau datanya mock | Mock tanpa tag, seolah data asli |
+| Uang asli hanya lewat `runAction` (harga game) | Mock mengubah dompet/status asli |
 | Pakai id/hook handoff + feature detection | Ganti id, storage key, atau logic game |
 | Preview + screenshot, live atas izin Ichsan, ff-only + bump SW + rollback | Push langsung ke live / force push |
 
-## 3. Kesalahan yang pernah terjadi (sudah diperbaiki)
+## 3. Lapisan simulasi (`njh98-mock.js`)
+
+**Aturan**
+1. `hook(nama)` = `SemestaLifePlay[nama]` atau `SemestaPlay[nama]`. Ada → dipakai, tag SIMULASI hilang. Tidak ada → mock + tag **SIMULASI**.
+2. Nama & bentuk data mock **sama persis** dengan API Baymax (`world-builder/API.md`), jadi mock cuma menambal yang belum ada.
+3. Penyimpanan mock hanya di `localStorage` `njh98:mock:*` (per pemain: `njh98:mock:<nama>@<playerId>`), setelan di `njh98:settings`. Key game tidak disentuh, kecuali *Muat* mock (menulis key life `semesta-life-play-v1:…` lalu reload dunia — sama seperti `loadSlot` asli).
+4. Dompet asli berubah **hanya** lewat `SemestaLifePlay.runAction(aksi,args)` dengan harga game. Belanja/hadiah simulasi pakai **dompet simulasi** (`njh98:mock:wallet`, awal Rp 50.000).
+5. Furnitur dalam ruangan: aksi muncul hanya saat dekat furnitur yang cocok; aksi asli lewat `runAction`, dan `setInteriorFurnitureAdapter(fn)` dipasang selama di dalam Kost.exe (dilepas saat keluar).
+6. `NJH98Mock.mockFired()` = daftar mock yang pernah jalan di sesi ini (untuk cek hook mana yang belum ada).
+
+**Fitur**: Menu Utama (Lanjutkan, Mulai Baru + konfirmasi, Pengaturan: suara/bahasa/ukuran UI, Kredit) · Menu Jeda (Simpan/Muat 3 slot, Laporan Hari, Pengaturan, Lihat Tutorial) · Laporan akhir hari (dari `mainkan:day-end`, kalau tidak ada: perubahan hari yang terlihat) · Status (Kondisi, Skill, Reputasi, progres Tenda → Kost Lv3 → Rumah Lv8) · Nokia + (Pesan, Lowongan, Tips) · Peta Kota · Dialog quest (terima, progres, serahkan) · Interior placeholder `<Toko>.exe` + `Kost.exe`.
+
+**Hook → mock** (yang dipakai kalau hook tidak ada)
+
+| Hook (SemestaLifePlay / SemestaPlay) | Bentuk | Status di Baymax `preview/mainkan-hooks-p1` |
+|---|---|---|
+| `clock()` | `{day, minute, weekday, label, phase, paused, speed, elapsedMinutes}` | ada |
+| event `mainkan:day-end` | `{day, previousDay}` | ada |
+| `hasSave(slot?)` / `saveMeta(slot?)` | boolean / `{slot, savedAt, day, minute, label, weekday, wallet, elapsedMinutes}` | ada |
+| `saveSlot(slot)` / `loadSlot(slot)` | `{ok, slot, meta?, reason?}`, slot `slot1..slot3` | ada |
+| `listSlots()` | `[{slot, savedAt, day, …}]` | ada |
+| `nearbyActions()` | `[{id, label, price, furnitureId?, action, spotLabel, args, hold?}]` | ada |
+| `setInteriorFurnitureAdapter(fn)` | `fn() → [{id, kind, furnitureId, label, x, z, roomId, source:'interior'}]` | ada |
+| `dayReport(day)` | `{day, start, end, income:{label:Rp}, expense:{label:Rp}, status?:{energy, fullness, hygiene, moral, housing}}` | **belum** (sementara dari `transactions[].day`) |
+| `level()` | `number` | **belum** (mock: 1 + EXP/10) |
+| `skills()` / `reputation()` | `[{label, level}]` (1–10) / `[{label, value}]` (0–100) | **belum** |
+| `housingProgress()` | `{current:'tenda'\|'kost'\|'rumah', next, targets:[{label, done, info}]}` | **belum** |
+| `quests()` / `acceptQuest(npcId, questId)` / `turnInQuest(npcId, questId)` | `[{npcId, id, title, goal, text?, target, progress, reward, state:'available'\|'active'\|'ready'\|'done'}]` / `{ok}` | **belum** (`questMarkers()` ada) |
+| `jobs()` | `[{id, label, wage, per, where?}]` | **belum** (mock: `JiwaLifeEconomy.JOBS` + 3 lowongan contoh) |
+| `enterInterior(id)` | `true` kalau interior asli dibuka | **belum** (mock: jendela `<Toko>.exe`) |
+| `furnitureSpots()` | `[{id, label, x, y, w, h, owned, buy?, acts:[{act, label}]}]` (grid kamar 8×6) | **belum** (mock: tata letak contoh 8×6) |
+| inbox Nokia | `[{from, text, t}]` | **belum** |
+
+## 4. Kesalahan yang pernah terjadi (sudah diperbaiki)
 - **Tombol Nokia dobel**: ada di bar atas dan di dock bawah → sekarang hanya di dock.
 - **Panel "Aksi & Tas"** permanen di kiri dengan tab Aksi/Tas → dihapus; jadi menu kontekstual + jendela Tas sendiri.
 - **D-pad portrait menutupi layar** di HP → diganti layout landscape + joystick bulat + prompt putar HP.
 - **Judul "Mainkan.exe"** → diganti "Namanya Juga Hidup — the Game".
+- **Tombol SEGERA mati** bikin fitur terasa rusak → jadi placeholder SIMULASI yang bisa diklik.
+- **Pintu kost tidak terdeteksi** karena site kost di kota ini masih placeholder → pintu kost tetap ditampilkan (CONTOH) supaya Kost.exe bisa dimasuki.
 
-## 4. File
+## 5. File
 - `njh98.css` — skin Win98, step bar, HUD play, intro, joystick, penanda dunia.
 - `njh98.js` — lapisan presentasi (intro, Cara Main, dock, jendela, menu kontekstual, progres, Tas, joystick, spawn placeholder, penanda dunia).
 - `njh98-world.css` — di-inject ke iframe `world-builder/?player=1` (hanya di bawah `html.semesta-player-mode.njh98`).
+- `njh98-mock.js` — lapisan SIMULASI (hook asli dulu, mock `njh98:mock:*`).
 - `index.html` — markup/copy; semua id lama tetap ada.
