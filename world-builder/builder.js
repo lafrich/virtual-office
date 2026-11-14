@@ -548,7 +548,7 @@ function plate(x,z,w,d,y,kind){
 
 const tileGround=new THREE.Group();tileGround.name='Editable terrain';scene.add(tileGround);
 const gridOverlay=new THREE.Group();gridOverlay.name='Grid overlay';scene.add(gridOverlay);
-let gridShown=true;
+let gridShown=!playerMode;
 const cityStyle=window.VLKebonSirihStyle;
 // Material sprites are built from the Virtual Life Asset Pipeline; 3D planes
 // project the tile textures into the editor's fixed 2:1 orthographic world.
@@ -627,7 +627,7 @@ function rebuildGrid(b){
  const lines=new THREE.LineSegments(geo,new THREE.LineBasicMaterial({
   color:0xf8f4da,transparent:true,opacity:.4,depthTest:true,depthWrite:false}));
  lines.frustumCulled=false;lines.renderOrder=4;gridOverlay.add(lines);
- gridOverlay.visible=gridShown;
+ gridOverlay.visible=!playerMode&&gridShown;
 }
 function rebuildTerrain(force=true){
  const v=visibleWorldBounds(),b=chunkWindow(v),key=[b.minX,b.maxX,b.minZ,b.maxZ].join(':');
@@ -1934,11 +1934,11 @@ function updateSelection(){
  $('editInBangunRuang').disabled=!canEditInterior;
  $('quickEditBuilding').hidden=!canEditInterior;
  $('quickEditBuilding').disabled=!canEditInterior;
- if(highlight&&highlight.userData.selected===cur?.id){
+ if(!playerMode&&highlight&&highlight.userData.selected===cur?.id){
    highlight.update();
  }else{
    if(highlight){scene.remove(highlight);highlight.geometry.dispose();highlight.material.dispose();highlight=null;}
-   if(cur&&owners.has(cur.id)){
+   if(!playerMode&&cur&&owners.has(cur.id)){
      highlight=selectionGuide(cur);
      highlight.userData.selected=cur.id;
      highlight.material.depthTest=false;highlight.material.transparent=true;
@@ -1954,7 +1954,7 @@ function select(id,options={}){
  }
  updateSelection();
  if(id&&options.focus)focusPlacedAsset(id,false);
- if(id)tell(owners.get(id)?.userData?.pendingPipelineImage?'Preview sementara: PNG sumber belum dipublikasikan.':'Selected: '+item()?.name+'. Pilih Move lalu drag.');
+ if(id&&!playerMode)tell(owners.get(id)?.userData?.pendingPipelineImage?'Preview sementara: PNG sumber belum dipublikasikan.':'Selected: '+item()?.name+'. Pilih Move lalu drag.');
  renderer.render(scene,camera);
 }
 // Contextual Semesta -> Bangun Ruang editor: a city instance is identified by
@@ -2906,6 +2906,7 @@ $('panMode').onclick=()=>{
 $('paintMode').onclick=()=>setMode('paint');
 $('fillMode').onclick=()=>setMode('fill');
 function toggleGrid(){
+ if(playerMode)return; // Editor grid is never part of Mainkan gameplay.
  gridShown=!gridShown;gridOverlay.visible=gridShown;
  $('gridToggle').classList.toggle('active',gridShown);
  $('gridToggle').setAttribute('aria-pressed',String(gridShown));
@@ -3265,7 +3266,9 @@ window.SemestaPlay=Object.freeze({
    emotion:rig.state?.emotion||'neutral',
    visible:rig.mesh?.visible!==false&&root?.visible!==false,
    clipPlaying,world:p?{x:p.x,y:p.y,z:p.z}:null,
-   screen,opaquePixels,visibleHeight};
+   screen,opaquePixels,visibleHeight,
+   editorOutline:!!(highlight&&highlight.userData.selected===LIFE_TEST_ACTOR_ID),
+   editorGrid:!!gridOverlay.visible};
  },
  setPlayerEmotion:(name,duration=3)=>playerMode?!!rigs.get(LIFE_TEST_ACTOR_ID)?.rig?.setEmotion?.(name,duration):false,
  // Test-play preview of a pose / facing on the ephemeral player only (never saved).
@@ -3376,7 +3379,7 @@ if(njhMapPreview){
    return {x:cameraFocus.x,z:cameraFocus.z,viewSize,follow:!!cameraFollowId};
   },
   setGrid(on){
-   gridShown=!!on;
+   gridShown=!playerMode&&!!on;
    gridOverlay.visible=gridShown;
    try{
     $('gridToggle')?.classList.toggle('active',gridShown);
@@ -3527,7 +3530,7 @@ function bootNjhPlayInteriors(){
   playerObjectId:()=>walkActorId||LIFE_TEST_ACTOR_ID,
   getRoots:()=>[...owners.entries()].map(([id,root])=>({id,root})),
   onAddObject:o=>{if(!Number.isFinite(Number(o.y)))o.y=0;if(!owners.has(o.id))instantiate(o);},
-  setGroundVisible:on=>{try{baseGround.visible=!!on;if(typeof gridOverlay!=='undefined'&&gridOverlay)gridOverlay.visible=!!on&&(typeof gridShown==='undefined'||gridShown);}catch{}},
+  setGroundVisible:on=>{try{baseGround.visible=!!on;if(typeof gridOverlay!=='undefined'&&gridOverlay)gridOverlay.visible=!playerMode&&!!on&&(typeof gridShown==='undefined'||gridShown);}catch{}},
   setGroundDepthWrite:on=>{
    try{
     const write=!!on;
