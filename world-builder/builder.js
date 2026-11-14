@@ -7,6 +7,8 @@ const $=id=>document.getElementById(id);
 // mainkan.exe reuses the native Semesta renderer, assets, physics and Jiwa play runtime.
 // Player entry is read-only and cannot enter authoring modes.
 const playerMode=new URLSearchParams(location.search).get('player')==='1';
+// True only after the Semesta renderer has completed its first frame.
+let playerFirstFrameRendered=false;
 const njhMapOff=new URLSearchParams(location.search).get('njhMap')==='0';
 const njhMapPreview=!njhMapOff&&window.VLNjhMapPreview?.enabled?.()!==false;
 if(playerMode){
@@ -4747,29 +4749,41 @@ if(playerMode){
   // block it while waiting for the async PNG atlases. Keep Mainkan's loading
   // screen until the *first actual CanvasTexture frame* has been painted.
   const loadedAt=performance.now();
-  let done=false,reportedAt=0;
+  // Gameplay can begin after the actual WebGL frame and Jiwa runtime are ready.
+  // The Genesis PNG/LGR layers are downloaded asynchronously; never freeze
+  // the entire game just because a character atlas is slow on a phone.
+  let done=false,reportedAt=0,worldAnnounced=false;
   function reportPlayerReady(){
    if(done)return;
    const rig=rigs.get(LIFE_TEST_ACTOR_ID)?.rig;
-   if(rig?.state?.loaded){
-    done=true;
+   const gameplayActive=window.SemestaLifePlay?.active?.()===true;
+   if(!worldAnnounced&&rig&&gameplayActive&&playerFirstFrameRendered){
+    worldAnnounced=true;
     document.documentElement.dataset.mainkanReady='true';
     if(window.parent!==window)window.parent.postMessage({
      type:'mainkan:semesta-ready',city:documentMap.map?.name||'Semesta',
      profile:mainkanPlayerProfile.base,faceSource:'emosi.exe',
+     characterPending:!rig.state?.loaded,
      count:documentMap.objects.filter(o=>o.id!=='__semesta_life_temporary_player__').length
+    },location.origin);
+   }
+   if(worldAnnounced&&rig?.state?.loaded){
+    done=true;
+    if(window.parent!==window)window.parent.postMessage({
+     type:'mainkan:player-character-ready'
     },location.origin);
     return;
    }
    const status=window.VLGenesisPlayer.imageStatus(mainkanPlayerProfile,
     rig?.state?.emotion||'neutral',rig?.state?.direction||'se');
-   const timedOut=performance.now()-loadedAt>90000;
+   const timedOut=performance.now()-loadedAt>45000;
    if(status.errors.length||timedOut){
     done=true;
     const reason=status.errors.length?'Asset tidak tersedia: '+status.errors.join(', '):
-     'Loading Genesis terlalu lama. Coba Reload.';
+     (worldAnnounced?'Sprite Genesis terlalu lama dimuat. Coba Reload.':'Engine Semesta tidak berhasil memulai gameplay.');
     if(window.parent!==window)window.parent.postMessage({
-     type:'mainkan:semesta-error',message:reason
+     type:worldAnnounced?'mainkan:player-character-error':'mainkan:semesta-error',
+     message:reason
     },location.origin);
     return;
    }
@@ -4962,5 +4976,6 @@ function frame(now){
  try{window.SemestaLifePlay?.tick?.(dt);}catch(err){console.warn('life play tick',err);}
  worldEffects.update(elapsedReal,dayClock.solar());
  renderer.render(scene,camera);
+ if(playerMode)playerFirstFrameRendered=true;
 }
 requestAnimationFrame(frame);
