@@ -1063,6 +1063,7 @@ function create(ctx){
   }
   for(const s of getSites())if(s.id==='fish'){
    const key=Math.round(num(s.x,0)*2)+','+Math.round(num(s.z,0)*2);
+   if(out.some(o=>o.id===String(s.sourceId||'')||Math.hypot(o.x-num(s.x,0),o.z-num(s.z,0))<3))continue;
    if(!seen.has(key)){seen.add(key);out.push({id:String(s.sourceId||'fish'),label:s.label||'Mancing',x:num(s.x,0),z:num(s.z,0),source:'site'});}
   }
   if(!out.length){const p=getPos();out.push({id:'njh-fish-temp',label:'Tempat mancing (sementara)',x:p.x,z:p.z,source:'temporary'});}
