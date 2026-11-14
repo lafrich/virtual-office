@@ -159,6 +159,10 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(readyPlayer.rig.visible,true,'Genesis must become visible after tent intro');
  assert.equal(readyPlayer.rig.clipPlaying,false,'Tent exit must finish before gameplay visibility QA');
  assert.equal(readyPlayer.rig.screen.visible,true,'Genesis world position must project onto the playable viewport');
+ assert.equal(readyPlayer.rig.editorOutline,false,
+  'Mainkan must not draw the yellow Semesta editor BoxHelper around Genesis');
+ assert.equal(readyPlayer.rig.editorGrid,false,
+  'Mainkan must hide the full-screen isometric placement grid');
  fs.mkdirSync('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/mainkan-world-genesis-visible.png',fullPage:true});
  await page.locator('#gamePhone').click();
