@@ -101,6 +101,11 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.ok(genesis.faces>=18);
  assert.equal(genesis.faceSource,'mainkan-emosi-published-v1');
  assert.equal(genesis.rig.source,'genesis','Player geometry must be Genesis pixels');
+ assert.equal(genesis.rig.visible,true,'Genesis mesh must remain visible in the player world');
+ assert.ok(genesis.rig.opaquePixels>350,
+  'Player CanvasTexture must contain an actual opaque LGR character, not just an empty loaded canvas');
+ assert.ok(genesis.rig.visibleHeight>=60,
+  'LGR character must be visibly tall next to NJH scenery');
  assert.notEqual(genesis.actor.profile,'ichsan');
  assert.equal(result.hasNativeHUD,true);
  assert.equal(result.hiddenEditor,true);
