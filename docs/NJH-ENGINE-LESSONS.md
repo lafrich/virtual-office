@@ -120,3 +120,20 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Masalah:** Jendela Step 2 Layar menampilkan label SIMULASI / PLACEHOLDER dan entri AKSI tiruan walau hook asli sudah ada.
 - **Aturan:** `NJH98Step2.live()` (ada `SemestaLifePlay.token` + `inventory`) mematikan semua label SIMULASI / PLACEHOLDER dan entri AKSI tiruan. Klik id Step 2 dari `nearbyActions()` asli membuka jendela Layar, dan jendela memanggil hook asli.
 - **Cek:** smoke `ui.simVisible` kosong dan `simInShop:false` di desktop dan ponsel.
+
+## 18. MUST (STRICT): Tidak boleh ada jendela, tombol, atau tab UI yang terpotong di ukuran layar mana pun
+
+- **Error:** Minimarket.exe live (Step 2) terpotong (Ichsan t802u). Tepi kanan memotong tombol "Beli", tombol "Tutup", dan tab terakhir ("Token"). Di ponsel jendela juga terpotong di bawah, dan daftar barang hanya kelihatan sekitar 3 baris.
+- **Penyebab:** `.w98-body` jendela memakai `display:grid` tanpa kolom eksplisit. Item grid punya `min-width:auto`, jadi deretan tab `nowrap` (10 kategori) memaksa kolom selebar ~530 px. Seluruh isi jadi lebih lebar dari jendela (500 px / layar), lalu dipotong `overflow:auto` badan jendela. Footer sticky ikut bergeser. Audit Layar lama hanya mengecek overflow milik elemen itu sendiri, bukan elemen yang dipotong container induknya.
+- **Aturan (wajib, tanpa pengecualian):**
+  1. Setiap jendela harus muat di viewport di semua ukuran: desktop 1024x576 dan 1280x800, ponsel 844x390 dan 390x844.
+  2. Badan jendela berupa satu kolom yang bisa menyusut (`grid-template-columns:minmax(0,1fr)`, anak `min-width:0`).
+  3. Deretan tab harus wrap (atau scroll horizontal yang disengaja di `.njh-tabs`).
+  4. Baris item memakai grid fleksibel, jadi Qty dan tombol aksi selalu di dalam baris.
+  5. Footer dengan Tutup/OK selalu terlihat tanpa scroll.
+  6. Tidak boleh ada `scrollWidth > clientWidth` pada container berisi tombol kecuali teks ellipsis yang disengaja.
+  7. Jendela baru wajib ditambahkan ke pengecek.
+- **Cek (gate sebelum push):**
+  - `node mainkan/tools/njh98-window-fit.mjs [baseUrl] [--shots dir]` harus exit 0 ("0 cropped element(s)"). Pengecek membuka semua jendela Step 1 + Step 2 di keempat ukuran, lewat Main Tanpa Akun. baseUrl default: `http://localhost:8901/virtual-office/mainkan/index.html`.
+  - `node --test tests/njh98-window-fit.test.cjs` (bagian statis, ikut suite unit).
+  - Catatan: di potret 390x844 game menampilkan "Putar HP" (sengaja landscape), tetapi jendela di belakangnya tetap dicek.

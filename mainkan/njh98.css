@@ -675,3 +675,13 @@ html:not(.njh-devmode) .njh-dev{display:none!important}
  .njh-s2-cols{grid-template-columns:1fr;max-height:46vh;overflow:auto}
  .njh-qty input{min-height:32px}
 }
+/* Hotfix crop (Ichsan t802u/t803u, lesson 18 MUST): windows never crop. Body is one shrinkable column,
+   tab strips wrap, rows keep Qty + Beli inside, footer stays on screen. Gate: mainkan/tools/njh98-window-fit.mjs */
+.njh-win>.w98-body{grid-template-columns:minmax(0,1fr);min-width:0}
+.njh-win>.w98-body>*{min-width:0;max-width:100%}
+.njh-win .njh-tabs{flex-wrap:wrap;row-gap:2px;max-width:100%}
+.njh-win .njh-tabs button{flex:0 1 auto;padding:3px 7px}
+.njh-s2-list{min-width:0;width:100%}
+.njh-s2-row{grid-template-columns:minmax(0,1fr) auto auto;width:100%;box-sizing:border-box}
+@media (max-width:520px){.njh-s2-row{grid-template-columns:minmax(0,1fr) auto}.njh-s2-row .btn{grid-column:2;grid-row:1/3}}
+@media (pointer:coarse) and (max-height:500px) and (min-width:521px){.njh-s2-row{grid-template-rows:auto}.njh-s2-row .njh-qty{grid-column:2;grid-row:1}.njh-s2-row .btn{grid-column:3;grid-row:1}}
