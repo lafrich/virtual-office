@@ -1093,14 +1093,14 @@ function create(ctx){
   if(!spot||(spot.source!=="temporary"&&Math.hypot(spot.x-pos.x,spot.z-pos.z)>range))return {ok:false,reason:'Dekati dermaga / tempat mancing dahulu.'};
   if((st.inventory||[]).length>=set.bagSlots)return {ok:false,reason:'Tas penuh ('+set.bagSlots+' slot).'};
   if(num(st.energy,0)<set.fishEnergy)return {ok:false,reason:'Energi tidak cukup untuk mancing.'};
-  fishSession={id:'fish-'+(++fishSeq),spotId:spot.id,phase:'cast',waits:0,fish:null,progress:0,tension:0.5,miss:0};
+  fishSession={id:'fish-'+(++fishSeq),spotId:spot.id,spotLabel:spot.label,phase:'cast',waits:0,fish:null,progress:0,tension:0.5,miss:0};
   play('fishing_cast');
   return {ok:true,sessionId:fishSession.id,spotId:spot.id,energyCost:set.fishEnergy,phase:'cast'};
  }
  function finishFish(gotAway,reason){
   const ses=fishSession;fishSession=null;
   if(!ses)return {ok:false,done:true,reason:'Sesi mancing tidak ada.'};
-  const r=econ('fish_catch',gotAway?{gotAway:true,spotId:ses.spotId}:{fishId:ses.fish.id,spotId:ses.spotId});
+  const r=econ('fish_catch',gotAway?{gotAway:true,spotId:ses.spotId,spotLabel:ses.spotLabel}:{fishId:ses.fish.id,spotId:ses.spotId,spotLabel:ses.spotLabel});
   const res=r.ok?{ok:true,done:true,sessionId:ses.id,spotId:ses.spotId,gotAway:!!gotAway,
    fishId:gotAway?null:r.fishId,label:gotAway?null:r.label,rarity:gotAway?null:r.rarity,rarityTier:gotAway?null:r.rarityTier,uid:gotAway?null:r.uid}
    :{ok:false,done:true,sessionId:ses.id,gotAway:true,reason:r.reason};

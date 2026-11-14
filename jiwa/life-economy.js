@@ -785,7 +785,7 @@ function doAction(config,previous,action,args={}){
   if(!f)return reject('Ikan tidak dikenal.');
   out.uid=add(f.id,f.label,number(f.spoilMinutes,1,100000,180));out.fishId=f.id;out.label=f.label;
   out.rarity=f.rarity||'umum';out.rarityTier=f.rarityTier||'common';out.gotAway=false;
-  changes.push('hasil mancing di '+String(args.spotId||'dermaga').slice(0,60));
+  changes.push('hasil mancing di '+String(args.spotLabel||args.spotId||'dermaga').slice(0,60));
   break;
  }
  case 'topup_token': {

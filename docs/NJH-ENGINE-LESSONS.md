@@ -100,3 +100,23 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Penyebab:** `mainkan/app.js` `startWorld()` hanya meneruskan `njhMap=1` jika URL luar sudah memilikinya. `builder.js` memuat `world.json`, lalu `VLReferenceCity` dan `VLKebonSirihStyle.upgrade`, lalu localStorage, kecuali flag itu aktif.
 - **Aturan:** Satu-satunya peta yang boleh dimainkan atau dipilih adalah peta NJH resmi. Mainkan selalu memasang `njhMap=1`. Semesta memuat `VLNjhMapPreview.loadCity()` secara default. Jangan fallback ke `world.json`, Reference City, Jakarta City, atau City Sample. Draft / Cloud Projects / Jiwa `?city=` / browser kota Bangun Ruang menolak dokumen non-NJH. `?njhMap=0` hanya untuk tes.
 - **Cek:** buka `/mainkan/` tanpa flag (desktop dan ponsel) — spawn di peta NJH (kost Ichsan untuk akun tes). Buka `/world-builder/` tanpa flag — editor Semesta menampilkan Kampung Kali Kebon Sirih. Tombol Jakarta / Reference / City Sample tidak ada. Suite unit: hanya 9 kegagalan lama yang diizinkan.
+
+## 15. Hitungan objek peta di tes ikut berubah saat Step 2 menambah objek
+
+- **Masalah:** Setelah merge `origin/main` (peta NJH-only) ke Step 2, dua tes gagal: `world-builder-v2` (objek peta 152, bukan 150) dan `njh-map-preview` (9 kunci katalog, bukan 7).
+- **Penyebab:** Step 2 menambah NJH Mart (Ellen `db5b85c`) dan Tempat Mancing Kali Selatan (Ellen `1a20b3c1`), plus Kost Cove di katalog. Tes `main` masih memakai angka sebelum Step 2.
+- **Aturan:** Saat menambah objek atau aset ke peta NJH, perbarui hitungan di kedua tes dalam commit yang sama, dan sebutkan objek barunya di komentar.
+- **Cek:** `node --test tests/*.test.cjs` hanya 9 kegagalan lama.
+
+## 16. Login tes lokal: apiBase harus `http://localhost`, dan Worker lokal perlu origin lokal
+
+- **Masalah:** Smoke 4 ID ke Worker lokal gagal: "Login tes belum terhubung", lalu "Failed to fetch".
+- **Penyebab:** `mainkan/app.js` hanya menerima `https://…` atau `http://localhost:port` (bukan `127.0.0.1`). Worker hanya mengizinkan origin `https://lafrich.github.io`.
+- **Aturan:** Untuk smoke lokal, ganti `config.js` lewat route Playwright ke `http://localhost:<port>`, dan jalankan salinan Worker di `/tmp` dengan `ORIGIN` lokal serta hash sandi acak baru di `.dev.vars` (jangan sentuh Worker produksi atau `.dev.vars` bersama). Sandi tidak pernah dicetak.
+- **Cek:** `/tmp/step2-smoke.mjs` lolos login untuk Ichsan, Noor, Guest1, Guest2.
+
+## 17. UI SIMULASI harus diam saat hook asli ada
+
+- **Masalah:** Jendela Step 2 Layar menampilkan label SIMULASI / PLACEHOLDER dan entri AKSI tiruan walau hook asli sudah ada.
+- **Aturan:** `NJH98Step2.live()` (ada `SemestaLifePlay.token` + `inventory`) mematikan semua label SIMULASI / PLACEHOLDER dan entri AKSI tiruan. Klik id Step 2 dari `nearbyActions()` asli membuka jendela Layar, dan jendela memanggil hook asli.
+- **Cek:** smoke `ui.simVisible` kosong dan `simInShop:false` di desktop dan ponsel.

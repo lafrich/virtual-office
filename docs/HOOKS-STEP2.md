@@ -160,6 +160,31 @@ Entries keep the existing shape `{id, action, label, price, spotLabel, args, fur
 | `fish_start` | `fishing` (args.spotId) | near a fishing spot |
 | `topup_token` | `token` | in own kost when units ≤ 2 |
 
+Locks: in someone else's kost (partner `Punya pacar`, stranger `Terkunci`) and when the token is 0, `open_fridge` /
+`open_storage` / `cook_menu` still come back, with `disabled:true`, `hint` and `reason` (the lock or
+`"Token listrik habis. Isi token dulu (Rp20.000 / 5 unit)."`), and `locked:true` for owner locks.
+Ellen's furniture ids map to kinds: `stove` → `cook_menu`, `fridge` / `kulkas` → `open_fridge`, `wardrobe` / `lemari` → `open_storage`.
+
+## token_listrik (minimarket item)
+
+`token_listrik` (`category:'token'`, price = `settings.tokenPrice`, `tokenUnits` = `settings.tokenUnits`) is in
+`shopList().items`. Buying it adds `qty × tokenUnits` to `powerTokens` instead of a bag item (no bag slot),
+returns `tokenAdded`, and emits `mainkan:token` after `mainkan:shop-receipt`. Kost residents only
+(`"Token listrik hanya untuk penghuni kost."`).
+
+## Fishing spots (Ellen `f36e173c`)
+
+`fishSpots()` returns `njh-dermaga-mancing-anchor` (Dermaga mancing, −51.5,44) and
+`njh-fishing-spot-kali-selatan` (Tempat Mancing Kali Selatan, −51.5,68; use point −50.5,67.5) from the map
+objects (x/z). `fishStart(spotId?)` needs the player within 2.5 of the spot. The legacy `runAction('fish')`
+still resolves to the old dock first.
+
+## UI (Layar `1ff0fa3f`, `mainkan/njh98-step2.js`)
+
+When real hooks exist (`SemestaLifePlay.token` + `inventory`), the UI hides every SIMULASI / PLACEHOLDER tag and
+adds no mock AKSI entries; clicking a step-2 id from the real `nearbyActions()` opens Layar's Win98 window,
+which calls the hooks above.
+
 `runAction(id,args)` for these returns `{ok:true, ui, ...data}` (e.g. the `shopList` / `inventory` result) and
 emits `mainkan:open-ui` `{ui, args}`; it does not change state.
 

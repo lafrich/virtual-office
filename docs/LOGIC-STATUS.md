@@ -6,6 +6,21 @@ Preview branch `preview/main-interiors-kost-warteg` only. Not live. Status:
 - **stub** — the hook or action works with a small data-driven or default implementation, not yet the finished authored content.
 - **placeholder-position** — the action itself works, but the site sits at an offset because `world.json` has no matching object.
 
+## Step 2 (live 2026-11-14, sw v28, `?v=njh-step2-2`)
+
+Contract: `docs/HOOKS-STEP2.md`. UI: Layar `mainkan/njh98-step2.js` (`1ff0fa3f`), real hooks win, no SIMULASI when they exist.
+
+| Feature | Status | Notes |
+|---|---|---|
+| Containers `inventory` / `moveItem` / `eatItem` (bag, kulkas, lemari) | real | kulkas/lemari owner_only; partner/stranger get disabled AKSI rows with the reason; token 0 locks them |
+| Cooking `recipes` / `cook` + `mainkan:cook-done` | real | 38 recipes (Gerak manifest), known + experiment, needs kompor in own kost + token |
+| Minimarket `shopList` / `buy` / `checkoutCart` + `mainkan:shop-receipt` | real | NJH Mart interior (Gerak scene), 54 items + `token_listrik`; prices in `jiwa/njh-cooking-catalog.js`, override via `cooking.prices` |
+| Fishing `fishSpots` / `fishStart` / `fishInput` + `mainkan:fish-result` | real | Ellen's `njh-fishing-spot-kali-selatan` (−51.5,68) + old dock (−51.5,44), range 2.5; legacy `fish` kept |
+| Kost token `token` / `topupToken` + `mainkan:token` | real | Rp20.000 / 5 unit, base drain 1 unit / 240 game min + fridge; minimarket `token_listrik` tops up |
+| Animations (`cook`, `cook_stir`, `hand_over`, `fishing_cast`, `fishing_wait(_sit)`, `use_storage`, `eat*`) | stub | ids wired; fall back through the existing pose chain |
+
+Follow-ups: preview prop sizes at size/50 (dock ~22% short, Cove 6.76×7.04 vs 7.469×8.982) not changed; minimarket paint hook; Bangun Ruang registry for the 8 + 3 minimarket types.
+
 ## Hooks (`SemestaLifePlay` / `SemestaPlay`)
 
 | Item | Status | Notes |
