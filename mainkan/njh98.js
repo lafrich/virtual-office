@@ -16,6 +16,7 @@ const frame=$('semestaFrame');
 if(!frame)return;
 const params=new URLSearchParams(location.search);
 const DEV=params.get('dev')==='1';
+document.documentElement.classList.toggle('njh-devmode',DEV); // Alat Dev menu only with ?dev=1
 const store={get(k){try{return localStorage.getItem('njh98:'+k);}catch{return null;}},set(k,v){try{localStorage.setItem('njh98:'+k,v);}catch{}}};
 const coarse=()=>matchMedia('(pointer:coarse)').matches;
 if(DEV)document.body.classList.add('njh-devtools');
@@ -687,7 +688,7 @@ function injectWorld(){
   d.documentElement.classList.toggle('njh-devtools',DEV);
   if(!d.getElementById('njh98-world-css')&&d.head){
    const l=d.createElement('link');l.id='njh98-world-css';l.rel='stylesheet';
-   l.href=new URL('./njh98-world.css?v=njh98-5',location.href).href;d.head.appendChild(l);
+   l.href=new URL('./njh98-world.css?v=njh98-6',location.href).href;d.head.appendChild(l);
   }
   worldKeys(w);worldZoom(w);worldReact(w);
  }catch{}

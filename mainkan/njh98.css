@@ -585,3 +585,8 @@ body.njh-indoor .njh-joy,body.njh-indoor.njh-play #viewport #gameAction,body.njh
 }
 /* Status: wide enough that Skill / Reputasi labels show in full (no ellipsis) */
 #njhStatusWin{width:min(500px,calc(100% - 16px))}
+/* njh98-6 · Alat Dev only with ?dev=1; no lone "Login" tab; window buttons always reachable */
+html:not(.njh-devmode) .njh-dev{display:none!important}
+#loginScreen .tabs{display:none}
+/* the last button row of a floating window (OK / Tutup / Keluar) sticks to the bottom while the body scrolls */
+.njh-win>.w98-body>.njh-row:last-child{position:sticky;bottom:-3px;z-index:2;margin:0 -4px -3px;padding:4px 4px 3px;background:var(--w-face)}
