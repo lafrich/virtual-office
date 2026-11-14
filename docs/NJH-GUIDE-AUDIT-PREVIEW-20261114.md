@@ -1,6 +1,6 @@
 # NJH guide compliance — preview audit fixes (14 Nov 2026)
 
-**State: PREVIEW / NOT LIVE.** Branch `fix/njh-guide-audit-20261114` from live `a8bd4337`. No production Worker, logins, existing saves, scenes, official LGR/Emosi anchors, or service worker changed. Do not merge/push live until Ichsan gives explicit approval.
+**State: PREVIEW / NOT LIVE.** Branch `fix/njh-guide-audit-20261114` from live `a8bd4337`. No production Worker, logins, existing saves, main-branch scenes, official LGR/Emosi anchors, or production service worker changed. This preview branch DOES modify selected scene JSONs. Do not merge/push live until Ichsan gives explicit approval.
 
 ## Sources of truth
 
@@ -26,21 +26,34 @@
 - In-memory data/function checks passed: 11 tree placements have permitted terrain, fixed-size trunk collider and required visual-scale metadata; all 7 grill rotations are 90; drain neighbor counts are 74/72/1/4; all 11 NJH Mart assets match the source registry.
 - **Node tests and Playwright smoke/browser QA have NOT been run in this session**: the sandbox cannot connect to GitHub to clone the actual repository. Do not call this fully tested or production-ready.
 
+## Additional repairs in the same draft PR (continued 14 Nov 2026)
+
+- Corrected authoring/runtime test mismatch after guide updates. Seven GitHub workflows passed at commit `478360df9`; new subsequent commits must rerun the CI before any ready-for-review change.
+- Browser-proofed `SemestaPlay.playerRigStatus()` with read-only `visible`, `opaquePixels` and `visibleHeight`. The real player texture must exceed 350 opaque pixels and 60 pixels tall. A "loaded" blank sprite now fails CI.
+- NJH MART in native play mode now bakes its declared five wall paint layers (dado/trim/midDisplay/identity/ceiling) rather than a flat background.
+- Deleted invented/fallback map-site pins from the playable site list and prevented an artificial `npc_ibu_warteg` capsule at (0,0). Only actual placed world objects can become source IDs.
+- Added WC privacy geometry in the native interior renderer: the already-registered `sekat_wc` TYPE blocks traversal but is not an interaction, and `doors[]` entries with role `bathroom`/`stall` render as curtains while remaining walkable and never trigger kost-room ownership logic.
+- Enclosed bathrooms in `njh_kos` (both the 10×8 map scene and older 8×6 play scene), `njh_kos_ichsan` and `njh_kos_noor` (preview+play copies). Enclosed three individual public toilet stalls and two bak-air bays in `njh_wc_mandi_umum`, without adding a shower. Enclosed `njh_rumah_biasa` bathroom; fixed bed headboard against wall and dining-seat direction/path.
+- Existing `world-builder/bangun-ruang/njh-interior-preview-art` contained approved four-view PNG art for six previously invisible/placeholder types: `water_tub`, `sekat_wc`, `fan`, `shoe_rack`, `bathtub`, `registration_desk`. The play catalog now points to these 24 existing PNGs, retaining checksums, pivots and footprints. Procedural privacy wall geometry is a **missing-image fallback**, not a replacement for PNG art.
+- Added read-only `njh-wc-privacy.test.cjs`: checks 4-connected walkable privacy entries, physical overlaps, wet-fixture approach tiles and diagonal entrance privacy line-of-sight on eight preview/play scenes. Added `njh-interior-art-catalog.test.cjs` to check all 24 source PNG paths and hashes, plus updated older `njh-play-interiors.test.cjs` for the privacy layout. Tests are in the regular PR CI gate.
+
+**Limitations:** These scene changes are not a full 14/15-scene compliance pass. The CI renderer exercises synthetic and headless Chrome paths, not human inspection from every camera angle. The 65 original layout findings must be independently re-audited with the missing full checker; new mandatory art and 3D visual review still need approval. Drain junction/culvert art and LGR Beraksi poses are not fabricated here.
+
 ## Remaining open before game can be called stable
 
-- **P0:** Genesis player sprite visibility in local game (check serving both repos, LGR DB status and `SemestaPlay.playerRigStatus()`; do not fake a renderer or replace the face source).
-- **P1:** 14/15 interior layout scenes previously failed (65 recorded violations). Enclose WC/bathrooms with authentic partitions + door/curtain, fix facing/pairing/clearance **with real supported fixture types**. Re-run `tools/check_interior_layout.py`. No speculative re-layout was committed.
+- **P0:** Genesis player sprite now has a real opacity/visible-height browser regression gate and passes headless Chrome. **Independent manual live-device visual confirmation is still required**; no official LGR/Emosi master was changed.
+- **P1:** Former 14/15 interior layout failures (65 recorded violations) were only PARTIALLY resolved: seven kost/public-WC scene copies plus `njh_rumah_biasa` have privacy walls/curtains and some facing fixes. More layouts need pairing, wall-backing, density, service-line and full checker QA. The original `tools/check_interior_layout.py` is not bundled in this repo and **has NOT been run**.
 - **P1:** Drain: junction/corners, isolated ends, 9 crossings without gorong; re-run original `check_water_axis.py` with runtime-axis-aware checks.
 - **P1:** Screenshot-check every relocated/scaled tree, avoid obstruction of doors and interaction tiles, and re-run `check_trees.py` on new map.
 - **P1:** Genesis LGR latest joint/outfit animation (v4/preview W4-v5) and six Beraksi scenes `njh_int_wc/bed/tree/room/npc_f/npc_m`. Must use approved DB IDs and preserve head/Emosi/rig pivot; no autogenerated motion art was substituted.
-- **P2:** NJH Mart wall paint/zoning and interior visual QA; drawer/furniture registry integration after art load must be visually verified.
+- **P2:** NJH Mart five declared wall paint layers are rendered and automatically tested. The official 11 furniture variants and six older fixture types now reuse source PNGs. Human visual review of paint/readability/framing remains open.
 - **P2:** NPC dialogue/quests, full housing progression, missing real places, wall_pee visual and four-player online sync, plus Guest1 mobile-specific QA.
 - **P2:** Existing 7 baseline unit failures (last 16:00 checkpoint) remain untriaged.
 
 ## Required gate before merging (run from a local checkout of both sibling repos)
 
 ```bash
-node --test tests/njh-guide-map-guard.test.cjs tests/njh-mart-registry.test.cjs
+node --test tests/njh-guide-map-guard.test.cjs tests/njh-mart-registry.test.cjs tests/njh-mart-paint.test.cjs tests/njh-wc-privacy.test.cjs tests/njh-interior-art-catalog.test.cjs tests/njh-play-interiors.test.cjs
 node --test tests/njh-map-preview.test.cjs tests/njh-step2.test.cjs tests/njh98-window-fit.test.cjs
 node --test tests/*.test.cjs
 node mainkan/tools/njh98-window-fit.mjs http://localhost:8901/virtual-office/mainkan/index.html --shots /tmp/njh-preview-shots
