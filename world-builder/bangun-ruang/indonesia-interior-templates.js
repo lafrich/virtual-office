@@ -5,7 +5,8 @@
  */
 (function(g){
 'use strict';
-if(g.VLIndonesiaInteriorPack?.version===1)return;
+// Upstream may already register v1. This local extension merges only NJH Mart
+// IDs when upstream is present; it must not overwrite canonical templates.
 const action=(label,pose=null)=>({label,pose,description:pose?'Existing rig preview; gameplay integration remains separate':'Interaction slot / gameplay hook; animation not authored'});
 const actions={
  eat:action('Makan'),drink:action('Minum'),pray:action('Salat'),watch:action('Nonton','idle'),
@@ -229,5 +230,12 @@ function pairTemplateChairs(){
  }
 }
 pairTemplateChairs();
-g.VLIndonesiaInteriorPack=Object.freeze({version:1,source:'lafrich/virtual-life-asset-pipeline',tilePixels:[64,32],actions:Object.freeze(actions),types:Object.freeze(types),templates:Object.freeze(templates),count:Object.keys(templates).length});
+const previous=g.VLIndonesiaInteriorPack;
+if(previous?.version===1){
+ const martOnly=Object.fromEntries(Object.entries(types).filter(([id])=>id.startsWith('njh_')));
+ g.VLIndonesiaInteriorPack=Object.freeze({...previous,
+  types:Object.freeze({...previous.types,...martOnly}),njhMartVersion:1});
+ return;
+}
+g.VLIndonesiaInteriorPack=Object.freeze({version:1,source:'lafrich/virtual-life-asset-pipeline',tilePixels:[64,32],actions:Object.freeze(actions),types:Object.freeze(types),templates:Object.freeze(templates),count:Object.keys(templates).length,njhMartVersion:1});
 })(window);
