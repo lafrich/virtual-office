@@ -1493,8 +1493,8 @@ function makeMarker(root,item){
 }
 const owners=new Map(),assetRoots=new THREE.Group();scene.add(assetRoots);
 const MARKER_VIEW_KEY='semesta-logic-marker-visible-v1';
-let markerShown=true;
-try{markerShown=localStorage.getItem(MARKER_VIEW_KEY)!=='false';}catch{}
+let markerShown=!playerMode; // Logic pins are editor-only, never gameplay sprites.
+if(!playerMode)try{markerShown=localStorage.getItem(MARKER_VIEW_KEY)!=='false';}catch{}
 function visibleMarkerCount(){return documentMap.objects.filter(o=>o.type==='marker').length;}
 function syncMarkerButtons(){
  const count=visibleMarkerCount();
@@ -1505,6 +1505,7 @@ function syncMarkerButtons(){
  $('markerVisibilityTool').title='Yellow logic markers '+(markerShown?'visible':'hidden')+' · '+count+' total';
 }
 function setMarkerVisible(show){
+ if(playerMode)return; // Do not let a hidden editor control turn logic pins on in Mainkan.
  markerShown=!!show;
  for(const o of documentMap.objects)if(o.type==='marker'){
   const root=owners.get(o.id);if(root)root.visible=markerShown;
@@ -1677,7 +1678,7 @@ function instantiate(o){
    makeAutomated(root,o);
    if(hideLegacyCharacters&&o.type!=='vehicle'&&!approvedCharacter(o.profile))root.visible=false;
    break;
-  case 'marker':makeMarker(root,o);root.visible=markerShown;break;
+  case 'marker':makeMarker(root,o);root.visible=!playerMode&&markerShown;break;
  }
  assetRoots.add(root);owners.set(o.id,root);
  if(o.type==='sprite'&&playPickedIds.has(String(o.id)))root.visible=mode!=='walk';
@@ -3268,7 +3269,8 @@ window.SemestaPlay=Object.freeze({
    clipPlaying,world:p?{x:p.x,y:p.y,z:p.z}:null,
    screen,opaquePixels,visibleHeight,
    editorOutline:!!(highlight&&highlight.userData.selected===LIFE_TEST_ACTOR_ID),
-   editorGrid:!!gridOverlay.visible};
+   editorGrid:!!gridOverlay.visible,
+   editorMarkersVisible:documentMap.objects.filter(o=>o.type==='marker'&&owners.get(o.id)?.visible!==false).length};
  },
  setPlayerEmotion:(name,duration=3)=>playerMode?!!rigs.get(LIFE_TEST_ACTOR_ID)?.rig?.setEmotion?.(name,duration):false,
  // Test-play preview of a pose / facing on the ephemeral player only (never saved).
