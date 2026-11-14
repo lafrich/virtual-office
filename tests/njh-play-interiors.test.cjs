@@ -171,6 +171,14 @@ test('contextual E never enters a remote building and room movement uses indoor 
  const moved=h.api.moveInside(start,.1,0);
  assert.equal(h.api.freeInside(moved.x,moved.z),true);
  assert.ok(Math.abs(moved.x-start.x)<=.11);
+ const room=h.api.active(),door=room.door;
+ let far=null;
+ for(let c=0;c<room.width&&!far;c++)for(let r=0;r<room.depth&&!far;r++){
+  const pt={x:room.origin.x+c+.5,z:room.origin.z+r+.5};
+  if(h.api.freeInside(pt.x,pt.z)&&Math.hypot(pt.x-door.x,pt.z-door.z)>1.8)far=pt;
+ }
+ assert.ok(far,'interior contains a walkable space away from the entrance');
+ h.pos=far;
  assert.equal(h.api.enterNearby().ok,false,'interior E away from a door must not exit');
 });
 test('authored room assets exist for Ichsan, Noor, Cove and NJH Mart',()=>{
