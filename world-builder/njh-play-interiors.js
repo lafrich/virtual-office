@@ -1,6 +1,8 @@
 /* Playable KOST and WARTEG interiors for Mainkan player mode. PREVIEW only.
- * Uses Ellen's existing njh_kos / njh_warung_makan scenes and furniture art.
- * No new layouts. Does not mutate the authoring draft. Not live.
+ * Kost uses Ellen's njh_kos. Warteg uses the Kharisma Bahari Bangun Ruang
+ * layout (faithful placement + baked wall paint); Ellen's njh_warung_makan
+ * remains on disk as fallback. Camera/walls come from VLSemestaInteriorView.
+ * Does not mutate the authoring draft. Not live.
  */
 (function(root,factory){
  'use strict';
@@ -9,9 +11,11 @@
  if(root)root.VLNjhPlayInteriors=api;
 })(typeof window!=='undefined'?window:typeof globalThis!=='undefined'?globalThis:null,function(root){
 'use strict';
-const PIXEL_WORLD=Math.SQRT2/64, VERTICAL_COMP=2/Math.sqrt(3);
+const View=root?.VLSemestaInteriorView||(typeof require==='function'?require('./semesta-interior-view.js'):null);
+const PIXEL_WORLD=View?.PIXEL_WORLD||Math.SQRT2/64, VERTICAL_COMP=View?.VERTICAL_COMP||2/Math.sqrt(3);
 const DIR=['sw','se','ne','nw'];
-const TEMPLATES={kost:'njh_kos',warteg:'njh_warung_makan'};
+const TEMPLATES={kost:'njh_kos',warteg:'njh_warteg_kharisma'};
+const FALLBACK={warteg:'njh_warung_makan'};
 const MEAL_PRICE=12000;
 const ENTER_RADIUS=2.2;
 const ORIGIN={kost:{x:240,z:0},warteg:{x:260,z:0}};
@@ -67,8 +71,8 @@ function create(opts){
    catalog=r.ok?await r.json():{items:{}};
   }
   const items=catalog.items||catalog;
-  await Promise.all(Object.keys(TEMPLATES).map(async kind=>{
-   const id=TEMPLATES[kind];
+  const wanted=new Set([...Object.values(TEMPLATES),...Object.values(FALLBACK)]);
+  await Promise.all([...wanted].map(async id=>{
    if(scenes[id])return;
    try{const r=await fetch(base+id+'.interior-scene.json',{cache:'no-cache'});
     if(r.ok)scenes[id]=await r.json();}catch(_e){}
@@ -118,7 +122,8 @@ function create(opts){
   buildings={};
   for(const [kind,obj] of [['kost',kost],['warteg',warteg]]){
    if(!obj)continue;
-   const template=TEMPLATES[kind],sceneData=scenes[template];
+   const template=scenes[TEMPLATES[kind]]?TEMPLATES[kind]:(FALLBACK[kind]||TEMPLATES[kind]);
+   const sceneData=scenes[template];
    obj.enterable=true;obj.interactive=true;
    obj.njhInteriorTemplate=template;
    obj.njhUsePoint=doorWorld(obj);
@@ -133,7 +138,7 @@ function create(opts){
  function kindOfBuilding(obj){
   if(!obj)return null;
   if(obj.njhInteriorTemplate===TEMPLATES.kost||obj.id===PLAY_KOST_ID||KOST_PATTERN.test(textOf(obj)))return 'kost';
-  if(obj.njhInteriorTemplate===TEMPLATES.warteg||WARTEG_PATTERN.test(textOf(obj)))return 'warteg';
+  if(obj.njhInteriorTemplate===TEMPLATES.warteg||obj.njhInteriorTemplate===FALLBACK.warteg||WARTEG_PATTERN.test(textOf(obj)))return 'warteg';
   return null;
  }
 
@@ -170,26 +175,51 @@ function create(opts){
   disposeRoom();
   const origin=ORIGIN[kind],sc=rec.scene,w=num(sc.width,8),d=num(sc.depth,6);
   group=new THREE.Group();group.name='njh-play-interior-'+kind;
-  // Floor
   const floorMat=new THREE.MeshBasicMaterial({color:sc.theme==='aqua'?0xd0e9f0:0xe8dbc7,side:THREE.DoubleSide});
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(w,d),floorMat);
   floor.rotation.x=-Math.PI/2;floor.position.set(origin.x+w/2,0.045,origin.z+d/2);
   group.add(floor);
-  // Back (min z) and side walls — open on the entrance / camera side.
-  const wallH=2.8,wallMat=new THREE.MeshBasicMaterial({color:0xc4b49a,side:THREE.DoubleSide});
-  const back=new THREE.Mesh(new THREE.PlaneGeometry(w,wallH),wallMat);
-  back.position.set(origin.x+w/2,wallH/2,origin.z-0.04);
-  group.add(back);
-  const left=new THREE.Mesh(new THREE.PlaneGeometry(d,wallH),wallMat);
-  left.rotation.y=Math.PI/2;left.position.set(origin.x-0.04,wallH/2,origin.z+d/2);
-  group.add(left);
-  const right=new THREE.Mesh(new THREE.PlaneGeometry(d,wallH),wallMat);
-  right.rotation.y=Math.PI/2;right.position.set(origin.x+w+0.04,wallH/2,origin.z+d/2);
-  group.add(right);
+  // Only the TWO FAR walls (iso cutaway). The near-side wall used to sit
+  // in front of the camera and hide right-wall fixtures (shower, toilet, sink).
+  const wallH=View?.WALL_HEIGHT||2.8;
+  const far=View?.farWalls?.(opts.cameraDirection)||{back:true,left:true,right:false,front:false};
+  const paint=root?.VLWartegInteriorArt;
+  const bake=side=>((sc.theme==='warteg'||kind==='warteg')&&View?.bakeWallTexture)
+   ?View.bakeWallTexture(side,{width:w,depth:d},paint):null;
+  const wallMaterial=(side,fallback)=>{
+   const can=bake(side);
+   if(can&&THREE){
+    const tex=new THREE.CanvasTexture(can);
+    tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
+    tex.needsUpdate=true;
+    return new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthTest:true,depthWrite:true});
+   }
+   return new THREE.MeshBasicMaterial({color:fallback,side:THREE.DoubleSide,depthTest:true,depthWrite:true});
+  };
+  if(far.back){
+   const back=new THREE.Mesh(new THREE.PlaneGeometry(w,wallH),wallMaterial('back',0xd4c8ae));
+   back.position.set(origin.x+w/2,wallH/2,origin.z-0.04);
+   back.renderOrder=0;group.add(back);
+  }
+  if(far.left){
+   const left=new THREE.Mesh(new THREE.PlaneGeometry(d,wallH),wallMaterial('left',0xc3ad8d));
+   left.rotation.y=Math.PI/2;left.position.set(origin.x-0.04,wallH/2,origin.z+d/2);
+   left.renderOrder=0;group.add(left);
+  }
+  if(far.right){
+   const right=new THREE.Mesh(new THREE.PlaneGeometry(d,wallH),wallMaterial('left',0xc3ad8d));
+   right.rotation.y=Math.PI/2;right.position.set(origin.x+w+0.04,wallH/2,origin.z+d/2);
+   right.renderOrder=0;group.add(right);
+  }
+  if(far.front){
+   const front=new THREE.Mesh(new THREE.PlaneGeometry(w,wallH),wallMaterial('back',0xc4b49a));
+   front.position.set(origin.x+w/2,wallH/2,origin.z+d+0.04);
+   front.renderOrder=0;group.add(front);
+  }
   const items=catalog?.items||catalog||{};
   const furniture=[];
   for(const item of sc.items||[]){
-   const typ=items[item.assetId]||{};
+   const typ=items[View?.artId?.(item.assetId)||item.assetId]||items[item.assetId]||{};
    const dir=dirFor(item.rotation);
    const view=typ[dir]||typ.sw||typ.se||null;
    const foot=view?.footprint||[1,1];
@@ -204,15 +234,15 @@ function create(opts){
     const mat=new THREE.MeshBasicMaterial({map:makeTexture(img),transparent:true,alphaTest:.05,depthTest:true,depthWrite:true,side:THREE.DoubleSide});
     const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
     plane.position.set(px,height*(py-.5)+.04,0);
-    plane.userData.billboard=true;
-    root.add(plane);billboards.push({root,plane});
+    plane.userData.billboard=true;plane.renderOrder=1;plane.rotation.y=View?.isoBillboardYaw?.()||Math.PI/4;
+    root.add(plane);billboards.push({root,plane,item,height});
    }
    group.add(root);
    furniture.push({
     id:item.id,assetId:item.assetId,name:item.name,actionId:item.actionId,
     kind:item.assetId,furnitureId:item.assetId,label:item.name||item.assetId,
     x:pos.x,z:pos.z,fw:pos.fw,fd:pos.fd,blocking:item.blocking!==false,
-    c:item.c,r:item.r,roomId:kind,source:'interior'
+    c:item.c,r:item.r,roomId:kind,source:'interior',height
    });
   }
   // Door mat at entrance
@@ -262,7 +292,8 @@ function create(opts){
   session={kind,template:rec.template,buildingId:rec.object.id,
    exit:session?.exit||{x:pos.x,z:pos.z},...built};
   const spawn=built.door;
-  opts.teleport?.(spawn.x,spawn.z,8);
+  opts.teleport?.(spawn.x,spawn.z,8,{keepView:true});
+  fitRoomCamera();
   persistSession();
   opts.message?.((kind==='kost'?'🏠 Masuk kost':'🍚 Masuk warteg')+(reason?' · '+reason:''));
   opts.onEnter?.(session);
@@ -295,7 +326,7 @@ function create(opts){
   disposeRoom();
   session=null;
   persistSession();
-  opts.teleport?.(exitAt.x,exitAt.z,16);
+  opts.teleport?.(exitAt.x,exitAt.z,16,{keepView:false});
   opts.message?.('🚪 Keluar '+(NAME[kind]||kind));
   opts.onExit?.(kind);
   return {ok:true,kind,x:exitAt.x,z:exitAt.z};
@@ -335,7 +366,7 @@ function create(opts){
   if(Math.hypot(p.x-session.door.x,p.z-session.door.z)<=1.4)
    push('exit_interior','Keluar',0,{},undefined,'Pintu');
   if(session.kind==='warteg'){
-   const eatSpots=session.furniture.filter(f=>['dining_table','food_vitrine','cashier'].includes(f.assetId)
+   const eatSpots=session.furniture.filter(f=>(View?.eatSpot?.(f.assetId)||['dining_table','food_vitrine','cashier','table','counter'].includes(f.assetId))
     &&Math.hypot(p.x-f.x,p.z-f.z)<=2.2);
    if(eatSpots.length)
     push('eat','Makan Warteg',MEAL_PRICE,{price:MEAL_PRICE,buyerId:'warteg'},eatSpots[0].furnitureId,eatSpots[0].label);
@@ -365,11 +396,26 @@ function create(opts){
   return {x,z,moved};
  }
 
+ function fitRoomCamera(){
+  if(!session||!View?.fitInteriorCamera)return null;
+  const aspect=opts.getViewAspect?.()||16/9;
+  const props=(session.furniture||[]).map(f=>({id:f.assetId,x:f.x,z:f.z,h:f.height||2}));
+  const fit=View.fitInteriorCamera({
+   origin:session.origin,width:session.width,depth:session.depth,props,aspect,
+   inset:View.playInset(aspect),wallHeight:View.WALL_HEIGHT
+  });
+  View.warnIfClipped(fit.clipped,session.kind);
+  opts.setView?.(fit.focus,fit.viewSize);
+  session.camera=fit;
+  return fit;
+ }
+ function cameraLocked(){return !!session;}
+
  function update(camera){
   if(!camera)return;
+  const yaw=View?.isoBillboardYaw?.()||Math.PI/4;
   for(const {root,plane} of billboards){
-   const yaw=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z);
-   plane.rotation.y=yaw-root.rotation.y;
+   plane.rotation.y=yaw-(root.rotation.y||0);
   }
  }
 
@@ -381,10 +427,10 @@ function create(opts){
  }
 
  return {
-  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,canEnter,enter,enterNearby,exit,
+  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,canEnter,enter,enterNearby,exit,fitRoomCamera,cameraLocked,
   restoreIfNeeded,furniture,extraActions,obstacles,constrain,update,candidates,
-  doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
-  place:(x,z,size)=>{if(!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return {ok:false};opts.teleport?.(Number(x),Number(z),size||12);return {ok:true,x:Number(x),z:Number(z)};},
+  doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,FALLBACK,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
+  place:(x,z,size)=>{if(!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return {ok:false};opts.teleport?.(Number(x),Number(z),size||12,{keepView:!!session});return {ok:true,x:Number(x),z:Number(z)};},
   active:()=>session,kind:()=>session?.kind||null,buildings:()=>buildings,
 
   isPlayObject:id=>id===PLAY_KOST_ID||String(id||'').startsWith('__njh_play_')
@@ -392,7 +438,7 @@ function create(opts){
 }
 
 return Object.freeze({
- PIXEL_WORLD,VERTICAL_COMP,TEMPLATES,MEAL_PRICE,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
+ PIXEL_WORLD,VERTICAL_COMP,TEMPLATES,FALLBACK,MEAL_PRICE,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
  wrapInterior,tilePos,dirFor,doorWorld,create,baseUrl
 });
 });

@@ -10,6 +10,7 @@ const DIR=path.join(R,'world-builder/njh-play-interiors');
 const catalog=JSON.parse(fs.readFileSync(path.join(DIR,'catalog.json'),'utf8'));
 const kos=JSON.parse(fs.readFileSync(path.join(DIR,'njh_kos.interior-scene.json'),'utf8'));
 const warteg=JSON.parse(fs.readFileSync(path.join(DIR,'njh_warung_makan.interior-scene.json'),'utf8'));
+const kharisma=JSON.parse(fs.readFileSync(path.join(DIR,'njh_warteg_kharisma.interior-scene.json'),'utf8'));
 
 function THREE(){
  class Vec{constructor(x=0,y=0,z=0){this.x=x;this.y=y;this.z=z;}set(x,y,z){this.x=x;this.y=y;this.z=z;return this;}}
@@ -58,9 +59,10 @@ function kit(opts={}){
   set pos(v){pos=v;},persisted};
 }
 
-test('preview wires Ellen r3 kost and warteg scenes, not new layouts',()=>{
+test('preview wires Ellen kost and Kharisma warteg; Ellen warung remains fallback',()=>{
  assert.equal(Interiors.TEMPLATES.kost,'njh_kos');
- assert.equal(Interiors.TEMPLATES.warteg,'njh_warung_makan');
+ assert.equal(Interiors.TEMPLATES.warteg,'njh_warteg_kharisma');
+ assert.equal(Interiors.FALLBACK.warteg,'njh_warung_makan');
  assert.equal(kos.width,8);assert.equal(kos.depth,6);assert.equal(kos.entrance.c,4);assert.equal(kos.entrance.r,5);
  assert.equal(warteg.width,8);assert.equal(warteg.depth,6);
  assert.deepEqual(kos.items.map(i=>i.assetId),[
@@ -70,6 +72,10 @@ test('preview wires Ellen r3 kost and warteg scenes, not new layouts',()=>{
   'wooden_bench','dining_table','food_vitrine','cashier','dining_table','chair']);
  assert.equal(kos.items.length,9);
  assert.equal(warteg.items.length,13);
+ assert.equal(kharisma.name,'Warteg Kharisma Bahari');
+ assert.equal(kharisma.width,8);assert.equal(kharisma.depth,6);
+ assert.equal(kharisma.entrance.c,3);assert.equal(kharisma.entrance.r,5);
+ assert.equal(kharisma.items.length,14);
  const artDir=path.join(DIR,'art');
  assert.ok(fs.statSync(artDir).isDirectory());
  assert.ok(fs.readdirSync(artDir).filter(f=>f.endsWith('.png')).length>=17);
@@ -218,4 +224,54 @@ test('hooks expose kost furniture actions inside the room and warteg Makan as an
  const meal=list.find(a=>a.id==='eat');
  assert.ok(meal);assert.equal(meal.price,12000);
  assert.equal(list.some(a=>a.id==='sleep'),false);
+});
+
+test('kharisma is used when present; Ellen layout is the fallback if it is missing',()=>{
+ const withK=kit();
+ // kit injects only Ellen; wireWorld must fall back
+ const fallbackTpl=withK.world.objects.find(o=>/warung|warteg/i.test([o.name,o.asset,o.id].join(' ')));
+ // find via api
+ const w=withK.api.findBuilding('warteg',withK.world);
+ assert.ok(w);
+ assert.equal(withK.api.buildings().warteg.template,'njh_warung_makan');
+ withK.pos={x:w.njhUsePoint.x,z:w.njhUsePoint.z};
+ assert.equal(withK.api.enterNearby().ok,true);
+ assert.equal(withK.api.active().template,'njh_warung_makan');
+ withK.api.exit();
+
+ const T=THREE();
+ const scene=new T.Group();
+ const world={objects:[{id:'warteg-front',type:'sprite',asset:'pipeline:warung_madura',name:'Warung Madura',x:31.8,z:25,d:3}]};
+ const roots=new Map();
+ let state=Life.stateFrom({wallet:20000,energy:80,hygiene:75,bladder:20,fullness:50,moral:50,
+  furniture:['bed','chair','stove','wardrobe'],housing:{room:true,fridge:true}},Life.defaults());
+ let pos={x:31.8,y:0,z:27.4};
+ const api=Interiors.create({
+  THREE:T,scene,catalog,scenes:{njh_kos:kos,njh_warteg_kharisma:kharisma,njh_warung_makan:warteg},
+  getWorld:()=>world,getState:()=>state,persist:()=>{},
+  getPos:()=>pos,teleport:(x,z)=>{pos={x,y:0,z};return true;},
+  message:()=>{},playerObjectId:()=>'player',
+  getRoots:()=>[...roots.entries()].map(([id,root])=>({id,root})),
+  onAddObject:o=>{const g=new T.Group();g.name=o.name;g.userData.itemId=o.id;roots.set(o.id,g);scene.add(g);}
+ });
+ for(const o of world.objects){const g=new T.Group();g.name=o.name;g.userData.itemId=o.id;roots.set(o.id,g);scene.add(g);}
+ api.wireWorld(world);
+ assert.equal(api.buildings().warteg.template,'njh_warteg_kharisma');
+ const ww=api.findBuilding('warteg',world);
+ pos={x:ww.njhUsePoint.x,z:ww.njhUsePoint.z};
+ assert.equal(api.enterNearby().ok,true);
+ assert.equal(api.active().furniture.length,kharisma.items.length);
+ const table=api.active().furniture.find(f=>f.assetId==='table'||f.assetId==='counter'||f.assetId==='dining_table');
+ assert.ok(table);
+ pos={x:table.x,z:table.z};
+ const meal=api.extraActions().find(a=>a.id==='eat');
+ assert.ok(meal);assert.equal(meal.price,12000);
+ // far walls only: no plane at origin.x+width (near/right wall)
+ const room=api.active();
+ let right=false;
+ scene.traverse(n=>{
+  if(n.geometry&&n.geometry.type==='PlaneGeometry'&&Math.abs((n.position?.x||0)-(room.origin.x+room.width+0.04))<0.02)right=true;
+ });
+ assert.equal(right,false,'near-side right wall must not be drawn');
+ assert.equal(api.cameraLocked(),true);
 });

@@ -3314,15 +3314,26 @@ function bootNjhPlayInteriors(){
   getState:()=>window.SemestaLifePlay?.state?.()||null,
   persist:()=>{try{window.SemestaLifePlay?.persist?.();}catch{}},
   getPos:()=>{const p=walkWorldPos();return {x:Number(p?.x)||0,y:Number(p?.y)||0,z:Number(p?.z)||0};},
-  teleport:(x,z,size)=>{
+  teleport:(x,z,size,opt)=>{
    if(window.VLSpawnHobo?.busy?.())window.VLSpawnHobo.dispose();
    const holder=rigs.get(walkActorId);
    if(!holder)return false;
    holder.root.position.set(Number(x),holder.root.position.y||0,Number(z));
    holder.rig?.setMoving(0,0,false);
-   focusCameraAt(Number(x),Number(z),size||12);
+   if(!opt?.keepView && !window.__njhPlayInteriors?.cameraLocked?.())
+    focusCameraAt(Number(x),Number(z),size||12);
    return true;
   },
+  setView:(focus,size)=>{
+   cameraFocus.set(Number(focus?.x)||0,Number(focus?.y)||0,Number(focus?.z)||0);
+   if(size)viewSize=Math.max(8,Number(size));
+   fitCamera();
+  },
+  getViewAspect:()=>{
+   const r=canvas.getBoundingClientRect();
+   return Math.max(.3,(r.width||1280)/Math.max(1,r.height||760));
+  },
+  cameraDirection:direction,
   message:tell,
   playerObjectId:()=>walkActorId||LIFE_TEST_ACTOR_ID,
   getRoots:()=>[...owners.entries()].map(([id,root])=>({id,root})),
@@ -4714,7 +4725,7 @@ function frame(now){
  }
  // Follow the live, unsaved Walk Test character position with frame-rate
  // independent easing. Orthographic projection prevents character scale changes.
- if(cameraFollowId){
+ if(cameraFollowId && !window.__njhPlayInteriors?.cameraLocked?.()){
   const actor=owners.get(cameraFollowId);
   if(!actor){leaveCharacterCamera(false);}
   else{

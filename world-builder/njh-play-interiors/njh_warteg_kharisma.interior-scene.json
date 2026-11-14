@@ -1,0 +1,155 @@
+{
+ "format": "virtual-life-interior-v1",
+ "id": "njh_warteg_kharisma",
+ "name": "Warteg Kharisma Bahari",
+ "theme": "warteg",
+ "width": 8,
+ "depth": 6,
+ "entrance": {
+  "c": 3,
+  "r": 5
+ },
+ "notes": "Faithful conversion of VLWartegKharismaTemplate placements (pipeline-v2). Art aliases: shelf→dish_rack, counter→food_vitrine, table→dining_table. Wall paint baked from VLWartegInteriorArt at runtime.",
+ "items": [
+  {
+   "id": "shelf-1",
+   "assetId": "shelf",
+   "name": "Rak Piring",
+   "c": 0,
+   "r": 0,
+   "rotation": 0,
+   "actionId": "browse",
+   "blocking": true
+  },
+  {
+   "id": "shelf-2",
+   "assetId": "shelf",
+   "name": "Rak Bumbu dan Minuman",
+   "c": 2,
+   "r": 0,
+   "rotation": 0,
+   "actionId": "browse",
+   "blocking": true
+  },
+  {
+   "id": "fridge-3",
+   "assetId": "fridge",
+   "name": "Kulkas Minuman",
+   "c": 6,
+   "r": 0,
+   "rotation": 0,
+   "actionId": "open",
+   "blocking": true
+  },
+  {
+   "id": "stove-4",
+   "assetId": "stove",
+   "name": "Kompor Dapur",
+   "c": 7,
+   "r": 0,
+   "rotation": 0,
+   "actionId": "cook",
+   "blocking": true
+  },
+  {
+   "id": "counter-5",
+   "assetId": "counter",
+   "name": "Etalase Lauk",
+   "c": 2,
+   "r": 1,
+   "rotation": 0,
+   "actionId": "buy",
+   "blocking": true
+  },
+  {
+   "id": "counter-6",
+   "assetId": "counter",
+   "name": "Etalase Lauk",
+   "c": 4,
+   "r": 1,
+   "rotation": 0,
+   "actionId": "buy",
+   "blocking": true
+  },
+  {
+   "id": "cashier-7",
+   "assetId": "cashier",
+   "name": "Kasir Warteg",
+   "c": 5,
+   "r": 2,
+   "rotation": 0,
+   "actionId": "sell",
+   "blocking": true
+  },
+  {
+   "id": "kitchen_sink-8",
+   "assetId": "kitchen_sink",
+   "name": "Bak Cuci",
+   "c": 7,
+   "r": 2,
+   "rotation": 0,
+   "actionId": "wash",
+   "blocking": true
+  },
+  {
+   "id": "table-9",
+   "assetId": "table",
+   "name": "Meja Makan",
+   "c": 1,
+   "r": 3,
+   "rotation": 0,
+   "actionId": "browse",
+   "blocking": true
+  },
+  {
+   "id": "table-10",
+   "assetId": "table",
+   "name": "Meja Tambahan",
+   "c": 4,
+   "r": 3,
+   "rotation": 0,
+   "actionId": "browse",
+   "blocking": true
+  },
+  {
+   "id": "chair-11",
+   "assetId": "chair",
+   "name": "Kursi Makan",
+   "c": 1,
+   "r": 4,
+   "rotation": 0,
+   "actionId": "sit",
+   "blocking": true
+  },
+  {
+   "id": "chair-12",
+   "assetId": "chair",
+   "name": "Kursi Makan",
+   "c": 2,
+   "r": 4,
+   "rotation": 0,
+   "actionId": "sit",
+   "blocking": true
+  },
+  {
+   "id": "chair-13",
+   "assetId": "chair",
+   "name": "Bangku Warteg",
+   "c": 5,
+   "r": 4,
+   "rotation": 0,
+   "actionId": "sit",
+   "blocking": true
+  },
+  {
+   "id": "chair-14",
+   "assetId": "chair",
+   "name": "Bangku Samping",
+   "c": 7,
+   "r": 4,
+   "rotation": 0,
+   "actionId": "sit",
+   "blocking": true
+  }
+ ]
+}
