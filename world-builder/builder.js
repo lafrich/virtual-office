@@ -3240,8 +3240,27 @@ window.SemestaPlay=Object.freeze({
  playerActor:()=>playerMode?documentMap.objects.find(o=>o.id===LIFE_TEST_ACTOR_ID)||null:null,
  playerRigStatus:()=>{
   const rig=playerMode?rigs.get(LIFE_TEST_ACTOR_ID)?.rig:null;
-  return rig?{loaded:!!rig.state?.loaded,failed:!!rig.state?.failed,
-   source:rig.mesh?.userData?.characterSource||'',emotion:rig.state?.emotion||'neutral'}:null;
+  if(!rig)return null;
+  // A loaded CanvasTexture is not proof of an actual visible pixel character.
+  // Inspect only the small 64×112 approved Genesis texture, read-only.
+  let opaquePixels=0,visibleHeight=0;
+  try{
+   const cv=rig.mesh?.material?.map?.image;
+   if(cv?.getContext){
+    const d=cv.getContext('2d',{willReadFrequently:true}).getImageData(0,0,cv.width,cv.height).data;
+    let minY=cv.height,maxY=-1;
+    for(let y=0;y<cv.height;y++)for(let x=0;x<cv.width;x++){
+     if(d[(y*cv.width+x)*4+3]<128)continue;
+     opaquePixels++;minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+    }
+    if(maxY>=minY)visibleHeight=maxY-minY+1;
+   }
+  }catch(_e){}
+  return {loaded:!!rig.state?.loaded,failed:!!rig.state?.failed,
+   source:rig.mesh?.userData?.characterSource||'',
+   emotion:rig.state?.emotion||'neutral',
+   visible:rig.mesh?.visible!==false&&rig.mesh?.parent?.visible!==false,
+   opaquePixels,visibleHeight};
  },
  setPlayerEmotion:(name,duration=3)=>playerMode?!!rigs.get(LIFE_TEST_ACTOR_ID)?.rig?.setEmotion?.(name,duration):false,
  // Test-play preview of a pose / facing on the ephemeral player only (never saved).
