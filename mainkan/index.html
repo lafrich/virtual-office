@@ -152,7 +152,7 @@ body.mainkan-playing #viewport{
 </style>
 <link rel="stylesheet" href="./classic-creator.css?v=desktop-paint-preview-20261108">
 <!-- Windows 98 / Y2K skin + fullscreen play HUD (UI only). -->
-<link rel="stylesheet" href="./njh98.css?v=njh-step2-3">
+<link rel="stylesheet" href="./njh98.css?v=njh-step2-4">
 <script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
 <script src="../shared/spawn-respawn.js?v=mainkan-20261108" defer></script>
 <script src="/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108" defer></script>
@@ -165,10 +165,10 @@ body.mainkan-playing #viewport{
 <script src="../shared/hud-layout.js?v=mainkan-hud-20261108" defer></script>
  <script src="./game-hud.js?v=mainkan-hud-edit-20261108" defer></script>
 <script src="./classic-creator.js?v=pakaian-v2" defer></script>
-<script src="./njh98.js?v=njh-step2-3" defer></script>
-<script src="./njh98-mock.js?v=njh-step2-3" defer></script>
-<script src="./njh98-step2-catalog.js?v=njh-step2-3" defer></script>
-<script src="./njh98-step2.js?v=njh-step2-3" defer></script>
+<script src="./njh98.js?v=njh-step2-4" defer></script>
+<script src="./njh98-mock.js?v=njh-step2-4" defer></script>
+<script src="./njh98-step2-catalog.js?v=njh-step2-4" defer></script>
+<script src="./njh98-step2.js?v=njh-step2-4" defer></script>
 </head>
 <body>
 <div id="desktop">
@@ -342,7 +342,7 @@ body.mainkan-playing #viewport{
    <div class="njh-joy" id="njhJoy" aria-hidden="true"><div class="njh-joy-base" id="njhJoyBase"><div class="njh-joy-knob" id="njhJoyKnob"></div></div></div>
    <section class="w98 njh-win" id="njhStatusWin" hidden role="dialog" aria-labelledby="njhStatusTitle"><header class="w98-title"><span id="njhStatusTitle">Status Pemain</span><button type="button" data-close aria-label="Tutup">×</button></header><div class="w98-body" id="njhStatusBody"></div></section>
    <section class="w98 njh-win njh-howwin" id="njhHowtoWin" hidden role="dialog" aria-labelledby="njhHowtoWinTitle"><header class="w98-title"><span id="njhHowtoWinTitle">Cara Main</span><button type="button" data-close aria-label="Tutup">×</button></header><div class="w98-body"><div class="njh-howto" id="njhHowtoWinBody"></div><div class="njh-row"><button class="btn" type="button" data-close id="njhHowtoWinSkip">Lewati</button><span class="spacer" style="flex:1"></span><button class="btn" type="button" data-howto="prev">&lt; Kembali</button><button class="btn primary" type="button" data-howto="next">Lanjut &gt;</button><button class="btn primary" type="button" data-close data-howto-last>Selesai</button></div></div></section>
-   <div class="njh-spawn" id="njhSpawn" hidden aria-live="polite"><div class="njh-spawn-flap l"></div><div class="njh-spawn-flap r"></div><section class="w98 njh-spawn-note"><header class="w98-title"><span id="njhSpawnTitle">Hari baru</span></header><div class="w98-body"><span id="njhSpawnText"></span> <span class="njh-soon nologic njh-spawn-ph" title="Placeholder sampai animasi keluar tenda dari Gerak siap">PLACEHOLDER ANIMASI</span></div></section></div>
+   <div class="njh-spawn" id="njhSpawn" hidden aria-live="polite"><div class="njh-spawn-flap l"></div><div class="njh-spawn-flap r"></div><section class="w98 njh-spawn-note"><header class="w98-title"><span id="njhSpawnTitle">Hari baru</span></header><div class="w98-body"><span id="njhSpawnText"></span></div></section></div>
    <section class="w98 njh-win" id="njhNotice" hidden role="alertdialog" aria-labelledby="njhNoticeTitle"><header class="w98-title"><span id="njhNoticeTitle">Info</span><button type="button" data-close aria-label="Tutup">×</button></header><div class="w98-body"><p id="njhNoticeText"></p><div class="njh-row"><button type="button" class="btn primary" data-close>OK</button></div></div></section>
   </div>
   <div class="njh-rotate" id="njhRotate" role="alertdialog" aria-labelledby="njhRotateTitle"><section class="w98"><header class="w98-title"><span id="njhRotateTitle">Putar HP</span></header><div class="w98-body"><div class="njh-rotate-ico" aria-hidden="true"></div><p><b>Putar HP ke landscape</b> biar layarnya sama kayak versi desktop.</p><small>Kunci rotasi layar dimatikan dulu kalau HP nggak mau muter.</small></div></section></div>

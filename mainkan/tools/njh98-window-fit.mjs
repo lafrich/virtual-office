@@ -41,12 +41,15 @@ const OPENERS = [
   ['s2-shop', `NJH98Step2.openShop()`],
   ['s2-fish', `NJH98Step2.openFish()`],
   ['s2-token', `NJH98Step2.openToken()`],
+  ['pause', `document.getElementById('pauseButton')?.click()`],
+  ['actbar', `document.getElementById('gameAction')?.click()`],
 ];
+
 function measure() {
   const VW = innerWidth, VH = innerHeight, T = 1.5, out = [];
   const name = el => { let s = el.tagName.toLowerCase(); if (el.id) s += '#' + el.id; const c = (typeof el.className === 'string' ? el.className : '').trim().split(/\s+/).filter(Boolean).slice(0, 2); if (c.length) s += '.' + c.join('.'); const t = (el.textContent || el.value || '').replace(/\s+/g, ' ').trim().slice(0, 24); return s + (t ? ' "' + t + '"' : ''); };
   const vis = el => el.checkVisibility ? el.checkVisibility({ visibilityProperty: true }) : el.getClientRects().length > 0;
-  const wins = [...document.querySelectorAll('.njh-win,.njh-hud>.w98,#njhNotice')].filter(w => !w.hidden && vis(w) && w.getBoundingClientRect().width > 1);
+  const wins = [...document.querySelectorAll('.njh-win,.njh-hud>.w98,#njhNotice,#pauseScreen .njh-pause,#njhActBar,#loginScreen,#characterScreen,.njh-rotate .w98')].filter(w => !w.hidden && vis(w) && w.getBoundingClientRect().width > 1);
   for (const w of wins) {
     const wr = w.getBoundingClientRect(), wn = name(w).split(' "')[0];
     if (wr.left < -T || wr.top < -T || wr.right > VW + T || wr.bottom > VH + T) out.push({ win: wn, el: wn, why: `window outside viewport ${Math.round(wr.left)},${Math.round(wr.top)},${Math.round(wr.right)},${Math.round(wr.bottom)} vs ${VW}x${VH}` });
@@ -86,8 +89,25 @@ for (const sz of SIZES) {
   try {
     await p.goto(BASE + (BASE.includes('?') ? '&' : '?') + 'cb=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 60000 });
     for (let i = 0; i < 40; i++) { if (await p.locator('#welcomeGuest').isVisible().catch(() => false)) break; const s = p.locator('#skipSplash'); if (await s.isVisible().catch(() => false)) await s.click().catch(() => {}); await p.waitForTimeout(400); }
+    // login screen (welcomeContinue), then back and use Main Tanpa Akun
+    if (await p.locator('#welcomeContinue').isVisible().catch(() => false)) {
+      await p.locator('#welcomeContinue').click();
+      await p.locator('#loginScreen').waitFor({ state: 'visible', timeout: 15000 });
+      const loginM = await p.evaluate(measure);
+      for (const f of loginM.flags) { failures++; console.log(`FAIL [${sz.tag}] login: ${f.el} — ${f.why}`); }
+      report.push({ size: sz.tag, window: 'login', open: loginM.open, flags: loginM.flags.length });
+      if (SHOTS) await p.screenshot({ path: `${SHOTS}/${sz.tag}-login.png` });
+      const back = p.locator('#njhLoginBack');
+      if (await back.isVisible().catch(() => false)) await back.click();
+      else await p.locator('#welcomeGuest').click().catch(() => {});
+      await p.waitForTimeout(300);
+    }
     await p.locator('#welcomeGuest').click();
     await p.locator('#characterScreen').waitFor({ state: 'visible', timeout: 20000 });
+    const charM = await p.evaluate(measure);
+    for (const f of charM.flags) { failures++; console.log(`FAIL [${sz.tag}] character: ${f.el} — ${f.why}`); }
+    report.push({ size: sz.tag, window: 'character', open: charM.open, flags: charM.flags.length });
+    if (SHOTS) await p.screenshot({ path: `${SHOTS}/${sz.tag}-character.png` });
     await p.locator('#playerName').fill('FitTes'); await p.locator('#ccDay').fill('15'); await p.locator('#ccMonth').fill('01'); await p.locator('#ccYear').fill('1990');
     await p.locator('#ccCreate').click(); await p.locator('#confirmScreen').waitFor({ state: 'visible', timeout: 20000 }); await p.locator('#confirmGo').click();
     for (let i = 0; i < 20; i++) { for (const s of ['#tutorialSkip', '#tutorialDone', '#njhHowtoWinSkip']) { const l = p.locator(s); if (await l.isVisible().catch(() => false)) await l.click().catch(() => {}); } if (await p.locator('#gameScreen').isVisible().catch(() => false)) break; await p.waitForTimeout(400); }
@@ -107,9 +127,11 @@ for (const sz of SIZES) {
       const a = await p.evaluate(() => { try { const r = NJH98Audit.run(); return r.flags.filter(f => /njhCook|njhStore|njhShop2|njhFish|njhTokenWin/.test(f.el)).map(f => f.kind + ' ' + f.el + ' ' + (f.detail || '')); } catch (e) { return ['audit error ' + e]; } });
       for (const f of a) console.log(`audit [${sz.tag}] ${id}: ${f}`);
     }
-    if (SHOTS && /s2-shop|s2-cook|s2-fridge|kost|status|bag/.test(id)) await p.screenshot({ path: `${SHOTS}/${sz.tag}-${id}.png` });
+    if (id === 'pause') await p.evaluate(() => { try { document.getElementById('resumeGame')?.click(); } catch {} });
+    if (SHOTS && /s2-shop|s2-cook|s2-fridge|kost|status|bag|pause|actbar|nokia/.test(id)) await p.screenshot({ path: `${SHOTS}/${sz.tag}-${id}.png` });
   }
   await ctx.close();
+
 }
 await browser.close();
 const notOpened = report.filter(r => r.note);

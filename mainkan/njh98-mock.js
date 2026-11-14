@@ -69,6 +69,7 @@ function win(id,title,html,{layer='auto',cls=''}={}){
  w.querySelector('.w98-title span').innerHTML=title;w.querySelector('.w98-body').innerHTML=html;
  N.closeWindows();N.closeCtx();w.hidden=false;dlgLayer.classList.toggle('on',!inGame);
  setTimeout(()=>(w.querySelector('[data-focus]')||w.querySelector('.btn.primary')||w.querySelector('[data-close]'))?.focus(),0);
+ try{N.fitWin?.(w);}catch{}
  return w;
 }
 const bodyOf=id=>$(id)?.querySelector('.w98-body');
@@ -265,7 +266,7 @@ function paintNokiaPlus(){
   (j.site?'<button class="btn" type="button" data-job-map="'+esc(j.site.id)+'">Tandai di Peta</button>':j.mock?'<button class="btn" type="button" data-job-apply="'+i+'">Lamar</button>':'')+'</li>').join('')+'</ul>';
  if(nokiaTab==='tips')body='<ul class="njh-list tips"><li>Kerja: tahan <b>AKSI</b> di tempat kerja sampai bar penuh.</li><li>Kebersihan rendah? Mandi umum cuma '+rp(price('publicShowerFee'))+'.</li><li>Kumpulin '+rp(price('roomPrice'))+' buat sewa kost biar tidurnya pulih lebih banyak.</li><li>Makanan bisa busuk. Simpan di kulkas kost.</li><li>Token listrik: 5 unit '+rp(price('tokenPrice'))+'. Kalau habis, kulkas / lemari / masak mati.</li><li>Moral di bawah '+setting('arrestMoralThreshold',15)+' bikin hansip curiga.</li></ul>';
  if(nokiaTab==='token')body=(window.NJH98Step2?.tokenHTML?.()||'<p class="micro">Token listrik belum siap.</p>');
- b.innerHTML='<div class="njh-tabs" role="tablist">'+tabs.map(([id,l])=>'<button type="button" role="tab" aria-selected="'+(id===nokiaTab)+'" data-ntab="'+id+'">'+l+'</button>').join('')+'</div><div class="njh-tabpane">'+body+'</div><p class="micro">Aplikasi tambahan Nokia '+SIM+'</p>';
+ const live=!!window.NJH98Step2?.live?.();b.innerHTML='<div class="njh-tabs" role="tablist">'+tabs.map(([id,l])=>'<button type="button" role="tab" aria-selected="'+(id===nokiaTab)+'" data-ntab="'+id+'">'+l+'</button>').join('')+'</div><div class="njh-tabpane">'+body+'</div><p class="micro">Aplikasi tambahan Nokia'+(live?'':' '+SIM)+'</p>';
  try{if(nokiaTab==='token')window.NJH98Step2?.bindTokenBuy?.(b);}catch{}
 }
 document.addEventListener('click',e=>{
@@ -279,7 +280,7 @@ function onModal(kind){
  const w=$('njhNokiaPlus');
  if(kind==='phone'){
   let x=w;if(!x){x=document.createElement('section');x.id='njhNokiaPlus';x.className='w98 njh-nokiaplus';x.innerHTML='<header class="w98-title"><span>Nokia · Aplikasi</span></header><div class="w98-body"></div>';$('njhHud').append(x);}
-  x.hidden=false;paintNokiaPlus();
+  x.hidden=false;paintNokiaPlus();try{N.fitWin?.(x);}catch{}
  }else if(w)w.hidden=true;
 }
 
@@ -599,7 +600,7 @@ new MutationObserver(()=>{if(!$('welcomeScreen')?.hidden)paintContinue();applySe
 
 window.NJH98Mock=Object.freeze({
  // UI-facing mock API (njh98:mock:*). Each one prefers the real hook named in NJH98-UI.md.
- questState,openQuest,statusHTML,enterDoor,openMap,onModal,tick,openReport,openSlots,openSettings,openCredits,
+ questState,openQuest,statusHTML,enterDoor,openKost,openMap,onModal,tick,openReport,openSlots,openSettings,openCredits,
  bodyActions,runBody,
  saveSlot,loadSlot,listSlots:()=>slotApi('listSlots')(),saveMeta:slot=>slotApi('saveMeta')(slot),hasSave:slot=>slotApi('hasSave')(slot),mockFired:()=>[...mockFired].sort(),jobs,skills,reputation,housing,level,furnitureSpots,mockWallet:mwallet,inbox,
  // test helper: close the current day now (screenshots / QA only)

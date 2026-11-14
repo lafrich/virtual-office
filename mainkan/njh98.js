@@ -249,7 +249,31 @@ $('gameBag')?.addEventListener('click',e=>{if(DEV)return;e.stopImmediatePropagat
 
 /* ---------- Win98 windows ---------- */
 function closeWindows(){document.querySelectorAll('.njh-win').forEach(w=>w.hidden=true);}
-function toggleWin(id,paint){const w=$(id);if(!w)return;const open=w.hidden;closeWindows();closeCtx();if(open){paint&&paint();w.hidden=false;w.querySelector('[data-close]')?.focus();}}
+function clearFit(el){if(!el)return;el.style.left='';el.style.top='';el.style.transform='';}
+function fitWin(el){
+ if(!el||el.hidden)return;
+ clearFit(el);
+ const apply=()=>{
+  if(el.hidden)return;
+  const z=Number(getComputedStyle(el).zoom)||Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--njh-ui'))||1;
+  const r=el.getBoundingClientRect();
+  const pad=8,vw=innerWidth,vh=innerHeight;
+  const host=el.closest('#njhHud,#gameScreen,#desktop')||document.body;
+  const hr=host.getBoundingClientRect();
+  const dock=$('njhDock');const d=dock&&!dock.hidden?dock.getBoundingClientRect():null;
+  const minL=Math.max(pad,hr.left+pad),minT=Math.max(pad,hr.top+pad);
+  const maxR=Math.min(vw-pad,hr.right-pad),maxB=Math.min(vh-pad,(d&&d.height>2?d.top-6:hr.bottom-pad),hr.bottom-pad);
+  let left=r.left,top=r.top;
+  if(r.right>maxR)left=maxR-r.width;
+  if(left<minL)left=minL;
+  if(r.bottom>maxB)top=maxB-r.height;
+  if(top<minT)top=minT;
+  if(Math.abs(left-r.left)<1&&Math.abs(top-r.top)<1)return;
+  el.style.left=((left-hr.left)/z)+'px';el.style.top=((top-hr.top)/z)+'px';el.style.transform='none';
+ };
+ requestAnimationFrame(()=>requestAnimationFrame(apply));
+}
+function toggleWin(id,paint){const w=$(id);if(!w)return;const open=w.hidden;closeWindows();closeCtx();if(open){paint&&paint();w.hidden=false;w.querySelector('[data-close]')?.focus();fitWin(w);}}
 document.addEventListener('click',e=>{const c=e.target.closest('.njh-win [data-close]');if(c)c.closest('.njh-win').hidden=true;});
 function notice(title,text){
  const w=$('njhNotice');
@@ -393,6 +417,14 @@ const ACT_IC={wall_pee:'pee',pee_outside:'pee',fart:'fart',sit:'sit',sit_down:'s
  sleep:'sleep',lie:'sleep',work:'work',job:'work',discard_item:'bag',
  cook:'eat',cook_recipe:'eat',cook_menu:'eat',open_fridge:'bag',open_storage:'bag',fish:'work',fish_start:'work',shop:'bag',shop_minimarket:'bag',topup_token:'status'};
 function shortOf(id,label){if(ACT_SHORT[id])return ACT_SHORT[id];const t=cleanLabel(label||id);const w=t.split(/\s+/)[0]||t;return w.length<=12?w:w.slice(0,11)+'…';}
+// Hide leftover step-1 action ids when the step-2 equivalent is already in the bar (UI-only; logic files stay as-is).
+const LEGACY_ACT={cook_menu:['cook','cook_recipe'],open_fridge:['store_fridge','take_fridge'],open_storage:['store_home','take_home'],shop_minimarket:['shop','shop_buy'],fish_start:['fish','fish_catch'],topup_token:['buy_token']};
+function dedupeActs(list){
+ const have=new Set(list.map(a=>String(a.id||'')));
+ const hide=new Set();
+ for(const [neu,olds] of Object.entries(LEGACY_ACT))if(have.has(neu))for(const id of olds)hide.add(id);
+ return list.filter(a=>!hide.has(String(a.id||'')));
+}
 function ctxOptions(){
  const out=[];const seen=new Set();
  const add=o=>{const id=String(o.id||'');if(!id||seen.has(id))return;seen.add(id);out.push(o);};
@@ -412,7 +444,7 @@ function ctxOptions(){
   });
  }catch{}
  for(const a of bodyActs())add({...a,src:'body',label:cleanLabel(a.label)});
- return out;
+ return dedupeActs(out);
 }
 function placeActBar(){
  const bar=$('njhActBar'),btn=$('gameAction'),hud=$('njhHud');
@@ -679,17 +711,20 @@ if(joy){
  for(const t of ['pointerup','pointercancel','lostpointercapture'])joy.addEventListener(t,e=>{if(e.pointerId===joyId)joyRelease();});
 }
 
-/* ---------- spawn reveal (placeholder for Gerak's "keluar tenda" animation) ---------- */
+/* ---------- spawn reveal (flap overlay; greeting only — no PLACEHOLDER/SIMULASI label when real hooks exist) ---------- */
 let spawnShown=false;
+function hooksLive(){try{const L=life();return typeof L?.token==='function'&&typeof L?.inventory==='function';}catch{return false;}}
 function spawnReveal(kind){
  if(spawnShown)return;const st=lifeState();if(!st&&!kind)return;spawnShown=true;
  try{viewSize=sp()?.spawnRespawn?.last?.()?.playExitTent?14:16;}catch{}
  const kost=kind?kind==='kost':!!st.housing?.room;
  const el=$('njhSpawn');if(!el)return;
  let real=false;try{const H=world()?.VLSpawnHobo;real=!kost&&!!(H?.busy?.()||H?.snapshot?.());}catch{}
- el.classList.toggle('kost',kost);el.classList.toggle('real',real);
+ const live=hooksLive()||!!window.NJH98Step2?.live?.();
+ el.classList.toggle('kost',kost);el.classList.toggle('real',real);el.classList.toggle('live',live);
  $('njhSpawnTitle').textContent=kost?'Bangun di kost':'Keluar tenda';
  $('njhSpawnText').textContent=kost?'Pagi! Kamu bangun di kamar kost.':'Pagi! Kamu keluar dari tenda di pinggir jalan.';
+ const ph=el.querySelector('.njh-spawn-ph');if(ph){ph.hidden=live||real;if(live||real)ph.textContent='';}
  el.hidden=false;el.classList.remove('go');void el.offsetWidth;el.classList.add('go');
  setTimeout(()=>{el.hidden=true;el.classList.remove('go');if(firstHowto&&current==='gameScreen'){firstHowto=false;openHowtoWin();}},2600);
 }
@@ -882,7 +917,7 @@ window.addEventListener('message',e=>{
 /* placeholders are disabled; make sure nothing can activate them */
 document.querySelectorAll('[data-njh-placeholder]').forEach(b=>{b.disabled=true;b.setAttribute('aria-disabled','true');});
 
-window.NJH98=Object.freeze({world,wdoc,life,sp,lifeState,worldText,rp,esc,clamp,notice,toast,closeWindows,toggleWin,closeCtx,
+window.NJH98=Object.freeze({world,wdoc,life,sp,lifeState,worldText,rp,esc,clamp,notice,toast,closeWindows,toggleWin,closeCtx,fitWin,
  openHowto:openHowtoWin,paintStatus,ICON,big,coarse,DEV,store,NEEDS,profile:()=>profile,current:()=>current,
  playerPos,questList,doorList,doorNear:()=>doorNearObj});
 onScreen();

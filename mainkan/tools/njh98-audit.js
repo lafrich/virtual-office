@@ -1,10 +1,13 @@
-/* NJH98 UI audit — text overflow + alignment (dev tool, never loaded by the game).
+/* NJH98 UI audit — text overflow + alignment + window/control crop (dev tool, never loaded by the game).
    Usage (Playwright / DevTools console): paste or addScriptTag this file, then
    NJH98Audit.run() → {flags:[{kind,doc,el,text,detail}], counts:{kind:n}, info:[...]}.
    Checks the top document and same-origin iframes (world). Only visible elements.
    kinds: text-outside-box, text-clipped, overflow-x, overflow-y, offscreen,
-          row-height, row-misaligned, label-off-center, icon-misaligned, uneven-gap, legend-overlap.
-   info (not counted): ellipsis (intended truncation, review by eye), h-scroll. */
+          row-height, row-misaligned, label-off-center, icon-misaligned, uneven-gap, legend-overlap,
+          win-cropped, ctrl-cropped.
+   info (not counted): ellipsis (intended truncation, review by eye), h-scroll.
+   Crop rule: every visible window, button, tab and footer must sit fully inside the viewport
+   and must not be clipped by an overflow:hidden/clip ancestor. */
 (function(){
 const TOL=1.5;
 function name(el){let s=el.tagName.toLowerCase();if(el.id)s+='#'+el.id;const c=(typeof el.className==='string'?el.className:'').trim().split(/\s+/).filter(Boolean).slice(0,2);if(c.length)s+='.'+c.join('.');
@@ -75,6 +78,55 @@ function run(opt){
       const g=gaps.filter(v=>v>=-0.5);if(g.length>=2&&Math.max(...g)-Math.min(...g)>2.5&&Math.max(...g)<40)add('uneven-gap',el,'gaps '+g.map(v=>v.toFixed(0)).join('/'));}
     }
    }
+  }
+  // 8. windows, buttons, tabs, footers: fully inside the viewport and not clipped by overflow:hidden
+  const WIN='.njh-win,.window,.njh-profile,.njh-nokiaplus,.njh-actbar,.njh-progress,.njh-spawn-note,.njh-rotate .w98,#pauseScreen .njh-pause';
+  const FOOT=el=>el.matches('.njh-wizard-actions,.njh-row:last-child,.njh-dock,.taskbar,footer,.njh-tabs,[role=tablist],.cc-form-actions,.cc-bottom-form,.cc-win-button,#pauseScreen .btn,.w98-title button,[data-close],.njh-wizard-actions .btn');
+  const CTRL=BTN+',.njh-wizard-actions,.njh-row:last-child,.njh-dock,.taskbar,footer,.njh-tabs,[role=tablist],.cc-form-actions,.cc-bottom-form';
+  const overlayOn=!!(doc.getElementById('pauseScreen')&&!doc.getElementById('pauseScreen').hidden)||!!(doc.querySelector('.njh-rotate')&&doc.defaultView.getComputedStyle(doc.querySelector('.njh-rotate')).display!=='none');
+  const cropSkip=el=>{
+   if(skip(el)||el.closest('canvas,svg,script,style,#njhMarks,.njh-joy,#semestaFrame'))return true;
+   if(overlayOn&&el.closest('#njhHud,#gameScreen,#njhKeys'))return true;
+   // the desktop chrome is the app shell, not a game dialog; skip it during play/pause
+   if(el.matches('#desktop .window, main.window')&&(doc.body.classList.contains('njh-play')||doc.body.classList.contains('njh-paused')))return true;
+   return false;
+  };
+  const clipBy=el=>{
+   const r=el.getBoundingClientRect();
+   for(let a=el.parentElement;a&&a!==doc.documentElement;a=a.parentElement){
+    const ac=win.getComputedStyle(a);
+    const hidX=ac.overflowX==='hidden'||ac.overflowX==='clip';
+    const hidY=ac.overflowY==='hidden'||ac.overflowY==='clip';
+    if(!hidX&&!hidY)continue;
+    const pb=padBox(a,ac);
+    if((hidX&&(r.left<pb.left-TOL||r.right>pb.right+TOL))||(hidY&&(r.top<pb.top-TOL||r.bottom>pb.bottom+TOL)))return a;
+   }
+   return null;
+  };
+  const inScroll=el=>{
+   for(let a=el.parentElement;a&&a!==doc.body;a=a.parentElement){
+    const ac=win.getComputedStyle(a);
+    if(/auto|scroll/.test(ac.overflowX)||/auto|scroll/.test(ac.overflowY))return true;
+   }
+   return false;
+  };
+  const inVp=(r)=>r.left>=-TOL&&r.top>=-TOL&&r.right<=VW+TOL&&r.bottom<=VH+TOL;
+  const seenCrop=new Set();
+  const crop=(kind,el,detail)=>{
+   const k=kind+'|'+dn+'|'+name(el);
+   if(seenCrop.has(k))return;seenCrop.add(k);
+   add(kind,el,detail);
+  };
+  const targets=[];
+  for(const el of doc.body.querySelectorAll(WIN))if(!cropSkip(el)&&vis(el))targets.push(['win-cropped',el]);
+  for(const el of doc.body.querySelectorAll(CTRL))if(!cropSkip(el)&&vis(el))targets.push(['ctrl-cropped',el]);
+  for(const [kind,el] of targets){
+   const r=el.getBoundingClientRect();
+   if(r.width<2||r.height<2)continue;
+   // list items inside a scrollable body may sit below the fold; footers/tabs/dock may not
+   if(kind==='ctrl-cropped'&&inScroll(el)&&!FOOT(el))continue;
+   if(!inVp(r))crop(kind,el,'viewport '+[r.left,r.top,r.right,r.bottom].map(v=>v.toFixed(0)).join('/')+' vp '+VW+'x'+VH);
+   const a=clipBy(el);if(a)crop(kind,el,'clipped by '+name(a)+' '+[r.left,r.top,r.right,r.bottom].map(v=>v.toFixed(0)).join('/'));
   }
  }
  const counts={};for(const f of flags)counts[f.kind]=(counts[f.kind]||0)+1;

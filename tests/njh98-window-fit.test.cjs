@@ -10,7 +10,7 @@ test('window-fit gate: CSS keeps windows shrinkable and the checker covers every
  assert.match(css,/\.njh-win \.njh-tabs\{flex-wrap:wrap/,'tab strips wrap');
  const tool=fs.readFileSync(path.join(R,'mainkan/tools/njh98-window-fit.mjs'),'utf8');
  for(const sz of ['1024, height: 576','1280, height: 800','844, height: 390','390, height: 844'])assert.ok(tool.includes('width: '+sz),sz);
- for(const id of ['openCook','openStorage(\'fridge\')','openStorage(\'storage\')','openShop','openFish','openToken','openMap','openSlots','openSettings','openCredits','openHowto','enterDoor','njhDockStatus','gameBag'])
+ for(const id of ['openCook','openStorage(\'fridge\')','openStorage(\'storage\')','openShop','openFish','openToken','openMap','openSlots','openSettings','openCredits','openHowto','enterDoor','njhDockStatus','gameBag','pauseButton','gameAction','loginScreen','characterScreen'])
   assert.ok(tool.includes(id),'checker opens '+id);
  const win=fs.readFileSync(path.join(R,'mainkan/njh98-step2.js'),'utf8');
  for(const m of win.matchAll(/openWin\('(\w+)'/g))assert.ok(['njhCook','njhFish','njhShop2','njhStore','njhTokenWin'].includes(m[1]),'new step-2 window '+m[1]+' must be added to the checker');

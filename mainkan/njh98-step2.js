@@ -437,6 +437,7 @@ function openWin(id,title,html,cls){
  w.querySelector('.w98-body').innerHTML=html;
  N.closeWindows();N.closeCtx();w.hidden=false;
  setTimeout(()=>(w.querySelector('[data-focus]')||w.querySelector('.btn.primary')||w.querySelector('[data-close]'))?.focus(),0);
+ try{N.fitWin?.(w);}catch{}
  return w;
 }
 function fx(e){const s=e?.statEffectsEat||e||{};const bits=[];if(s.fullness)bits.push('Kenyang '+(s.fullness>0?'+':'')+s.fullness);if(s.energy)bits.push('Energi '+(s.energy>0?'+':'')+s.energy);if(s.moral)bits.push('Moral '+(s.moral>0?'+':'')+s.moral);return bits.join(' · ')||'—';}
