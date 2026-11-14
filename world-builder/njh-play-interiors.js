@@ -588,7 +588,9 @@ function create(opts){
 
  function furniture(){
   if(!session)return [];
-  const items=session.furniture.map(f=>({...f}));
+  // Privacy panels are physical collision, never interactive furniture.
+  // They remain in session.furniture for obstacle/pathfinding checks.
+  const items=session.furniture.filter(f=>f.assetId!=='sekat_wc').map(f=>({...f}));
   try{
    if(root.SemestaLifeHooks?.furnitureFromInteriorItems)
     return root.SemestaLifeHooks.furnitureFromInteriorItems(items);
