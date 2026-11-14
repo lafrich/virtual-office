@@ -40,6 +40,24 @@ test('Mainkan enters playable landscape world before slow Genesis art completes'
  assert.match(html,/layout landscape/);
 });
 
+test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entry',()=>{
+ const interiors=read('world-builder/njh-play-interiors.js');
+ const life=read('world-builder/semesta-life-play.js');
+ const shell=read('mainkan/njh98.js');
+ assert.match(interiors,/function nearestDoor\(\)/);
+ assert.match(interiors,/distance<limit/);
+ assert.match(interiors,/function moveInside\(start,dx,dz\)/);
+ assert.match(semesta,/scheduleNjhHomeSpawn\(\)/);
+ assert.match(semesta,/interior\.moveInside\(start/);
+ assert.match(semesta,/if\(studio&&!playerMode\)/);
+ assert.match(semesta,/collectObject:id=>/);
+ assert.match(life,/const door=I\?\.nearestDoor\?\.\(\)\|\|null/);
+ assert.doesNotMatch(life,/const door=inside\?\(bridge\?\.exitInterior/);
+ assert.doesNotMatch(shell,/NJH98Mock\?\.enterDoor\(doorNearObj\)/);
+ assert.match(shell,/if\(!demo\)return \[\]/);
+ assert.match(html,/interaction-markers-20261115/);
+});
+
 test('login requires real server; browser never stores Mainkan passwords',()=>{
  assert.match(app,/authenticated!==true/);
  assert.match(app,/saved!==true/);
