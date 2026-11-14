@@ -359,7 +359,8 @@ function create(opts){
    const img=view?.file?images.get(view.file):null;
    const size=view?.size||(img?[img.naturalWidth||img.width,img.naturalHeight||img.height]:[64,64]);
    const pivot=view?.pivot||[size[0]/2,size[1]*0.8];
-   const width=size[0]*PIXEL_WORLD,height=size[1]*PIXEL_WORLD*VERTICAL_COMP;
+   const width=size[0]*PIXEL_WORLD;
+   const height=item.assetId==='sekat_wc'?2.2:size[1]*PIXEL_WORLD*VERTICAL_COMP;
    const py=pivot[1]/size[1],px=(size[0]/2-pivot[0])/size[0]*width;
    const root=new THREE.Group();root.position.set(pos.x,0,pos.z);
    if(img&&THREE){
@@ -368,6 +369,17 @@ function create(opts){
     plane.position.set(px,height*(py-.5)+.04,0);
     plane.userData.billboard=true;plane.renderOrder=1;plane.rotation.y=View?.isoBillboardYaw?.()||Math.PI/4;
     root.add(plane);billboards.push({root,plane,item,height});
+   }
+   // An authored sekat_wc must be a REAL solid privacy panel in play,
+   // never the invisible footprint-stub that used to leave toilets exposed.
+   if(item.assetId==='sekat_wc'){
+    const alongC=((Number(item.rotation)||0)%180)===0;
+    const dims=[alongC?.94:.12,alongC?.12:.94];
+    for(const [lo,hi,color] of [[0,.78,0x58a3a2],[.78,2.2,0xe8eee7]]){
+     const wall=new THREE.Mesh(new THREE.BoxGeometry(dims[0],hi-lo,dims[1]),
+      new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide}));
+     wall.position.y=(lo+hi)/2;wall.renderOrder=2;root.add(wall);
+    }
    }
    group.add(root);
    furniture.push({
@@ -382,8 +394,19 @@ function create(opts){
   const doorRecs=sceneDoors(sc).map(d=>{
    const use=doorUseWorld(origin,d);
    const rec=Object.assign({},d,{wx:use.x,wz:use.z});
-   const spr=A?A.doorSprite(d,pid()):(d.sprite||null);
-   const file=spr||d.sprite;
+   const privacy=d.role==='bathroom'||d.role==='stall';
+   // Bathroom curtain/stall is NOT a locked lobby door. It is a walkable
+   // privacy screen on the only opening, with no "Masuk Kamar" action.
+   const spr=privacy?null:(A?A.doorSprite(d,pid()):(d.sprite||null));
+   const file=privacy?null:(spr||d.sprite);
+   if(privacy){
+    const curtain=new THREE.Mesh(new THREE.PlaneGeometry(.94,2.05),
+     new THREE.MeshBasicMaterial({color:0xc4dad6,transparent:true,opacity:.94,
+      depthTest:true,depthWrite:false,side:THREE.DoubleSide}));
+    curtain.rotation.y=(Number(d.rotation)||0)%180===90?Math.PI/2:0;
+    curtain.position.set(origin.x+num(d.c,0)+.5,1.025,origin.z+num(d.r,0)+.5);
+    curtain.renderOrder=3;group.add(curtain);
+   }
    const img=file?images.get(file):null;
    if(img&&THREE){
     const size=[img.naturalWidth||img.width||64,img.naturalHeight||img.height||96];
@@ -584,6 +607,7 @@ function create(opts){
   const doors=session.doors||[];
   let offeredDoor=false;
   for(const d of doors){
+   if(d.role==='bathroom'||d.role==='stall')continue; // curtain has no room-transition action
    if(Math.hypot(p.x-d.wx,p.z-d.wz)>1.4)continue;
    const acc=A?A.doorAccess(pid(),d):{canEnter:d.state!=='locked',label:d.label,reason:d.state==='locked'?'Terkunci':null};
    const isExit=isExitDoor(d);
