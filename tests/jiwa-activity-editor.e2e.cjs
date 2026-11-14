@@ -31,16 +31,17 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
   return match||null;
  });
  assert.ok(target,'Semesta must have an actual object to mark in Entities');
- // Use the Semesta current working-copy ID as a saved draft, so Jiwa reads
- // the same physical object and game play matches the same city ID.
- const cityId='__semesta_working_copy__';
+ // NJH-only guide: a test draft must use the canonical NJH ID. The old
+ // __semesta_working_copy__ draft is filtered out by Jiwa's city picker.
+ // This copy exists only in this disposable CI browser's local storage.
+ const cityId='city-njh-semesta-draft1-with-pending';
  await jiwa.evaluate(async({target,cityId})=>{
-  await window.VLCityDrafts.save({id:cityId,name:'JIWA DIRECTORY E2E',
-   document:{objects:[target],map:{}}});
+  await window.VLCityDrafts.save({id:cityId,name:'NJH · Kampung Kali Kebon Sirih (CI E2E)',
+   document:{objects:[target],map:{name:'NJH · Kampung Kali Kebon Sirih (draft1)'}}});
  },{target,cityId});
  await jiwa.locator('#refresh').click();
  await jiwa.locator('#cityPicker').selectOption(cityId);
- await jiwa.waitForFunction(()=>window.JiwaContextBridge.city()?.id==='__semesta_working_copy__');
+ await jiwa.waitForFunction(()=>window.JiwaContextBridge.city()?.id==='city-njh-semesta-draft1-with-pending');
  // Initially, a placed object is NOT selectable in activities until
  // specifically marked in the Entities tab.
  await jiwa.locator('#activityList .activity-row').first().click();
@@ -121,7 +122,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
     return {worldMatches:world.filter(o=>o.id===id),
      activity:selection,activeRules:rules.filter(r=>r.enabled),
      targetKind:window.JiwaActivities.kindOf(world.find(o=>o.id===id)),
-     available:window.JiwaActivities.eligibleTargets(world,rules,'__semesta_working_copy__').map(x=>x.id),
+     available:window.JiwaActivities.eligibleTargets(world,rules,'city-njh-semesta-draft1-with-pending').map(x=>x.id),
      sites:window.SemestaLifePlay.sites().filter(x=>x.activityId||x.worldRuleId)};
    },target.id);
    throw Error(error.message+' / diagnostic: '+JSON.stringify(diagnostic).slice(0,3000));
