@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#008080">
 <meta name="color-scheme" content="only light">
 <meta name="robots" content="noindex,nofollow">
-<title>Mainkan.exe — Namanya Juga Hidup</title>
+<title>Namanya Juga Hidup — the Game</title>
 <style>
 :root{font-family:Tahoma,"MS Sans Serif",Arial,sans-serif;font-size:13px;color:#161616;background:#008080}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;color:#777}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px dotted #111;outline-offset:2px}
@@ -151,6 +151,8 @@ body.mainkan-playing #viewport{
 @media(prefers-reduced-motion:reduce){.btn{transition:none}}
 </style>
 <link rel="stylesheet" href="./classic-creator.css?v=desktop-paint-preview-20261108">
+<!-- Windows 98 / Y2K skin + fullscreen play HUD (UI only). -->
+<link rel="stylesheet" href="./njh98.css?v=njh98-5">
 <script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
 <script src="../shared/spawn-respawn.js?v=mainkan-20261108" defer></script>
 <script src="/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108" defer></script>
@@ -159,31 +161,34 @@ body.mainkan-playing #viewport{
 <script src="./flow-model.js?v=mainkan-flow-v1" defer></script>
 <script src="./config.js?v=mainkan-20261108" defer></script>
 <script src="./local-character.js?v=test-login-save-2" defer></script>
-<script src="./app.js?v=test-login-save-2" defer></script>
+<script src="./app.js?v=njh98-1" defer></script>
 <script src="../shared/hud-layout.js?v=mainkan-hud-20261108" defer></script>
  <script src="./game-hud.js?v=mainkan-hud-edit-20261108" defer></script>
 <script src="./classic-creator.js?v=pakaian-v2" defer></script>
+<script src="./njh98.js?v=njh98-5" defer></script>
+<script src="./njh98-mock.js?v=njh98-5" defer></script>
 </head>
 <body>
 <div id="desktop">
-<main class="window" aria-label="Mainkan aplikasi pemain">
-<header class="titlebar"><span class="icon" aria-hidden="true">▶</span><span>MAINKAN.EXE — Namanya Juga Hidup</span><div class="controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
-<div class="menubar"><span>Game</span><span>Player</span><a href="./flow-editor.html" id="openFlowEditor" title="Atur flow game secara visual">▤ Flow Editor</a><a href="./ui-editor.html" id="openUIEditor" title="Atur posisi HUD Mainkan desktop dan phone">▤ UI Editor</a><button type="button" class="btn compact" id="importPlayerFlow">Import Flow JSON</button><input type="file" id="importFlowFile" accept=".json,application/json" hidden></div>
+<main class="window" aria-label="Namanya Juga Hidup — the Game">
+<header class="titlebar"><span class="icon" aria-hidden="true">▶</span><span id="njhWindowTitle">Namanya Juga Hidup — the Game</span><div class="controls" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></header>
+<div class="menubar"><span>Game</span><span>Bantuan</span><details class="njh-dev"><summary>Alat Dev ▾</summary><div class="njh-dev-menu"><a href="./flow-editor.html" id="openFlowEditor" title="Atur flow game secara visual">Flow Editor</a><a href="./ui-editor.html" id="openUIEditor" title="Atur posisi HUD desktop dan phone">UI Editor</a><button type="button" class="btn compact" id="importPlayerFlow">Import Flow JSON…</button><small>Untuk pengembang, bukan pemain.</small></div></details><input type="file" id="importFlowFile" accept=".json,application/json" hidden></div>
+<ol class="njh-steps" id="njhSteps" aria-label="Langkah masuk game" hidden><li data-step="welcome"><b>1</b><span>Menu Utama</span></li><li data-step="login"><b>2</b><span>Login</span></li><li data-step="character"><b>3</b><span>Buat Karakter</span></li><li data-step="confirm"><b>4</b><span>Konfirmasi</span></li><li data-step="tutorial"><b>5</b><span>Hari Pertama</span></li><li data-step="play"><b>6</b><span>Main</span></li></ol>
 <section id="splashScreen" class="screen" aria-label="Splash Screen">
-  <div class="split"><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Game dunia virtual Indonesia<br>mainkan.exe / player client</small></div>
-  <div><h1>Memuat dunia...</h1><p class="muted">Memeriksa peta dan aset game. Ini aplikasi untuk pemain, bukan editor.</p><div class="progress" role="progressbar" aria-label="Persiapan game"><div id="progressFill"></div></div><p id="bootText" class="micro" aria-live="polite">Starting mainkan.exe...</p><button id="skipSplash" type="button" class="btn compact">Lewati intro</button></div></div>
+  <div class="split"><div class="hero"><span class="njh-byline">by Lafrich</span><strong>NAMANYA<br>JUGA HIDUP</strong><em class="njh-sub">the Game</em><small>Simulasi hidup sehari-hari di kota Indonesia.</small></div>
+  <div class="njh-boot"><h1>Memuat game…</h1><p class="muted">Memeriksa peta, karakter, dan aset kota.</p><div class="progress" role="progressbar" aria-label="Persiapan game"><div id="progressFill"></div></div><p id="bootText" class="micro" aria-live="polite">Memulai Namanya Juga Hidup…</p><div class="njh-wizard-actions"><span class="spacer"></span><button id="skipSplash" type="button" class="btn">Lewati &gt;&gt;</button></div></div></div>
 </section>
 <section id="loginScreen" class="screen" hidden aria-label="Login tes">
-<div class="split"><div><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Virtual life • Indonesia<br>Player login</small></div><p class="micro">Login tes 4 pemain. Pendaftaran email ditunda dulu.</p></div>
-<div><h1>Selamat datang.</h1><p class="muted">Masuk dengan ID tes (bukan email).</p>
+<div class="split"><div><div class="hero"><span class="njh-byline">by Lafrich</span><strong>NAMANYA<br>JUGA HIDUP</strong><em class="njh-sub">the Game</em><small>Login pemain</small></div><p class="micro">Login tes 4 pemain. Pendaftaran email ditunda dulu.</p></div>
+<div><h1>Login</h1><p class="muted">Masuk dengan ID tes (bukan email). Belum punya akun? Kembali dan pilih <b>Main Tanpa Akun</b>.</p>
 <div class="tabs" role="tablist" aria-label="Pilihan akun"><button type="button" class="tab active" id="loginTab" aria-selected="true">Login</button><button type="button" class="tab" id="registerTab" aria-selected="false" hidden>Daftar</button></div>
-<form id="authForm"><div class="field"><label for="email">ID</label><input id="email" type="text" autocomplete="username" placeholder="ID tes" required></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><div class="actions"><button class="btn primary" id="authSubmit" type="submit">Login</button><button class="btn" id="guestButton" type="button">▶ Mainkan Preview</button></div><p id="authMessage" class="status" aria-live="polite"></p></form>
+<form id="authForm"><fieldset class="njh-group"><legend>Akun pemain</legend><div class="field"><label for="email">ID</label><input id="email" type="text" autocomplete="username" placeholder="ID tes" required></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div></fieldset><p id="authMessage" class="status" aria-live="polite"></p><div class="njh-wizard-actions"><button class="btn" id="njhLoginBack" type="button">&lt; Kembali</button><span class="spacer"></span><button class="btn" id="guestButton" type="button">Main Tanpa Akun</button><button class="btn primary" id="authSubmit" type="submit">Login</button></div></form>
 </div></div>
 </section>
 <section id="welcomeScreen" class="screen" hidden aria-label="Welcome">
-<div class="split"><div class="hero"><strong>NAMANYA<br>JUGA HIDUP.</strong><small>Hidup semaumu di dunia virtual Indonesia.</small></div>
-<div><h1>Selamat datang.</h1><p class="muted" id="welcomeCopy">Bikin karakter, masuk ke kota, cari pekerjaan, dan jalani hidupmu.</p>
-<div class="welcome-actions"><button type="button" class="btn primary" id="welcomeContinue">▶ Mulai</button><button type="button" class="btn" id="welcomeGuest">Mainkan Preview</button></div></div></div></section><section id="characterScreen" class="screen" hidden aria-label="Original Paint Character Creator">
+<div class="split"><div class="hero"><span class="njh-byline">by Lafrich</span><strong>NAMANYA<br>JUGA HIDUP</strong><em class="njh-sub">the Game</em><small>Hidup semaumu di kota virtual Indonesia.</small></div>
+<div><h1>Menu Utama</h1><p class="muted" id="welcomeCopy">Bikin karakter, masuk ke kota, cari pekerjaan, dan jalani hidupmu.</p>
+<div class="njh-menu welcome-actions" role="menu" aria-label="Menu utama"><button type="button" class="btn primary" id="welcomeContinue" role="menuitem"><span>▶ Mulai Main</span><small>Login</small></button><button type="button" class="btn" id="welcomeGuest" role="menuitem"><span>Main Tanpa Akun</span><small>Preview</small></button><i class="njh-sep" aria-hidden="true"></i><button type="button" class="btn" data-njh-placeholder="lanjutkan" title="Placeholder jalan (data simulasi): slot simpanan &amp; lanjutkan"><span>Lanjutkan</span><span class="njh-sim">SIMULASI</span></button><button type="button" class="btn" data-njh-placeholder="mulai-baru" title="Placeholder jalan (data simulasi): hapus simpanan &amp; mulai ulang"><span>Mulai Baru</span><span class="njh-sim">SIMULASI</span></button><button type="button" class="btn" data-njh-placeholder="pengaturan" title="Placeholder jalan (data simulasi): pengaturan game"><span>Pengaturan</span><span class="njh-sim">SIMULASI</span></button><button type="button" class="btn" data-njh-placeholder="kredit" title="Placeholder jalan (data simulasi): layar kredit"><span>Kredit</span><span class="njh-sim">SIMULASI</span></button></div><p class="njh-menu-note">Pemain lama langsung masuk kota setelah login (karakter tersimpan di perangkat ini).</p></div></div></section><section id="characterScreen" class="screen" hidden aria-label="Original Paint Character Creator">
  <div id="classicCreator" class="cc-paint">
    <div class="cc-titlebar">
       <span class="cc-paint-icon" aria-hidden="true">▧</span>
@@ -242,8 +247,8 @@ body.mainkan-playing #viewport{
       </label>
       <div class="cc-form-message"><span id="characterMessage" class="status" aria-live="polite"></span></div>
       <div class="cc-form-actions">
-         <button type="button" id="backToLogin" class="cc-win-button">Back</button>
-         <button type="submit" id="ccCreate" class="cc-win-button cc-default">Create Character</button>
+         <button type="button" id="backToLogin" class="cc-win-button">&lt; Kembali</button>
+         <button type="submit" id="ccCreate" class="cc-win-button cc-default">Lanjut &gt;</button>
       </div>
    </form>
    <div class="cc-statusbar" aria-live="polite">
@@ -274,34 +279,33 @@ body.mainkan-playing #viewport{
  </div>
 </section>
 <section id="confirmScreen" class="screen" hidden aria-label="Confirm Character">
-<h1>Confirm Character</h1><p class="muted">Periksa nama, zodiak, body, dan penampilan sebelum masuk dunia.</p>
-<div id="confirmList"></div><div class="actions" style="margin-top:15px"><button type="button" class="btn" id="confirmBack">← Edit Character</button><button type="button" class="btn primary" id="confirmGo">Create Character ✓</button></div><p id="confirmMessage" class="status"></p>
+<h1>Konfirmasi Karakter</h1><p class="muted">Periksa nama, zodiak, badan, dan penampilan sebelum masuk kota.</p>
+<fieldset class="njh-group"><legend>Data karakter</legend><div id="confirmList"></div></fieldset><p id="confirmMessage" class="status"></p><div class="njh-wizard-actions"><button type="button" class="btn" id="confirmBack">&lt; Ubah Karakter</button><span class="spacer"></span><button type="button" class="btn primary" id="confirmGo">Lanjut &gt;</button></div>
 </section>
 <section id="loadingScreen" class="screen" hidden aria-label="Enter World">
-<h1>Entering World...</h1><p class="muted" id="loadingCopy">Menyiapkan kehidupanmu di Semesta.</p><div class="progress"><div id="enterProgress"></div></div>
+<h1>Masuk ke kota…</h1><p class="muted" id="loadingCopy">Menyiapkan kehidupanmu di Semesta.</p><div class="progress"><div id="enterProgress"></div></div>
 </section>
-<section id="tutorialScreen" class="screen" hidden aria-label="Tutorial">
-<h1>Selamat datang di kota.</h1>
-<div class="guide"><h2>Dasar permainan</h2><p>WASD / Arrow: berjalan. Shift: berlari. Gunakan tombol Action saat dekat objek atau NPC. Buka handphone untuk fitur kota. Cari pekerjaan dan jaga kebutuhan hidupmu.</p></div>
-<div class="actions"><button class="btn primary" type="button" id="tutorialDone">Mulai Hidup →</button><button class="btn" type="button" id="tutorialSkip">Skip Tutorial</button></div>
+<section id="tutorialScreen" class="screen" hidden aria-label="Cara Main">
+<div class="njh-howto" id="njhHowtoScreen"></div>
+<div class="njh-wizard-actions"><button class="btn" type="button" id="tutorialSkip">Lewati</button><span class="spacer"></span><button class="btn" type="button" data-howto="prev">&lt; Kembali</button><button class="btn primary" type="button" data-howto="next">Lanjut &gt;</button><button class="btn primary" type="button" id="tutorialDone">Mulai Main &gt;</button></div>
 </section>
 <section id="pauseScreen" class="screen" hidden aria-label="Pause">
-<h1>Game Paused</h1><p class="muted">World tetap dibuka. Lanjut bermain atau kembali ke Welcome.</p>
-<div class="actions"><button class="btn primary" id="resumeGame">▶ Resume</button><button class="btn" id="pauseExit">Exit to Menu</button></div>
+<div class="njh-pause"><h1>Menu Jeda</h1><p class="muted">Progres hidup tersimpan otomatis di perangkat ini.</p>
+<div class="njh-menu" role="menu" aria-label="Menu jeda"><button class="btn primary" id="resumeGame" role="menuitem"><span>▶ Lanjut Main</span></button><button class="btn" type="button" id="njhPauseHowto" role="menuitem"><span>Lihat Tutorial</span></button><button class="btn" type="button" id="njhPauseReload" role="menuitem"><span>Muat Ulang Kota</span><small>data aman</small></button><i class="njh-sep" aria-hidden="true"></i><button class="btn" type="button" data-njh-placeholder="simpan" title="Placeholder jalan (data simulasi): slot simpan manual"><span>Simpan</span><span class="njh-sim">SIMULASI</span></button><button class="btn" type="button" data-njh-placeholder="muat" title="Placeholder jalan (data simulasi): muat slot"><span>Muat</span><span class="njh-sim">SIMULASI</span></button><button class="btn" type="button" data-njh-placeholder="laporan-hari" title="Placeholder jalan (data simulasi): laporan pemasukan/pengeluaran harian"><span>Laporan Hari</span><span class="njh-sim">SIMULASI</span></button><button class="btn" type="button" data-njh-placeholder="pengaturan" title="Placeholder jalan (data simulasi): pengaturan"><span>Pengaturan</span><span class="njh-sim">SIMULASI</span></button><i class="njh-sep" aria-hidden="true"></i><button class="btn" id="pauseExit"><span>Keluar ke Menu Utama</span></button></div></div>
 </section>
 <section id="messageScreen" class="screen" hidden aria-label="Custom Flow Screen">
-<h1 id="customTitle">Screen</h1><p class="muted" id="customDescription"></p><button type="button" class="btn primary" id="customContinue">Continue →</button>
+<h1 id="customTitle">Screen</h1><p class="muted" id="customDescription"></p><div class="njh-wizard-actions"><span class="spacer"></span><button type="button" class="btn primary" id="customContinue">Lanjut &gt;</button></div>
 </section>
 <section id="gameScreen" class="screen" hidden aria-label="Semesta gameplay">
   <div class="game-top"><div><strong id="cityName">SEMESTA • Original World</strong>
   <div class="micro" id="worldLabel">Menggunakan renderer dan mekanik Semesta asli</div></div>
-  <div class="actions"><button type="button" class="btn compact" id="pauseButton">Ⅱ Pause</button><button type="button" class="btn compact" id="reloadWorld">↻ Reload</button>
+  <div class="actions"><button type="button" class="btn compact" id="pauseButton">Ⅱ Menu</button><button type="button" class="btn compact" id="reloadWorld">↻ Reload</button>
   <button class="btn compact" id="exitGame" type="button">Keluar</button></div></div>
   <div id="viewport">
     <iframe id="semestaFrame" title="Semesta — mode bermain tanpa editor" allow="fullscreen" referrerpolicy="same-origin" tabindex="0"></iframe>
     <div id="worldLoading" role="status" aria-live="polite">
       <div class="world-loader-card">
-       <strong>MAINKAN · MEMUAT SEMESTA</strong>
+       <strong>NAMANYA JUGA HIDUP · MEMUAT KOTA</strong>
        <p id="worldLoadingText">Menyiapkan dunia dan karakter Genesis...</p>
        <div class="progress"><div id="worldProgress"></div></div>
        <small id="worldLoadingDetail">Karakter akan muncul setelah semua sprite siap.</small>
@@ -309,19 +313,41 @@ body.mainkan-playing #viewport{
       </div>
      </div>
   </div>
+  <div class="njh-hud" id="njhHud" hidden aria-label="HUD permainan"><div class="njh-marks" id="njhMarks" aria-hidden="true"></div>
+   <section class="w98 njh-profile" id="njhProfile" aria-label="Profil pemain">
+    <header class="w98-title"><span>Namanya Juga Hidup</span></header>
+    <div class="w98-body"><div class="njh-avatar"><canvas id="njhAvatar" width="64" height="112" aria-hidden="true"></canvas></div>
+     <div class="njh-pinfo"><div class="njh-pname"><span id="njhName">Pemain</span><small id="njhHousing">Tenda</small></div>
+      <button type="button" class="njh-clockbtn" id="njhClock" title="Jam kota (klik untuk detail)"><span id="njhDay">Hari 1</span><b id="njhTime">--:--</b></button>
+      <div class="w98-well njh-wallet" id="njhWallet">Rp —</div></div></div>
+   </section>
+   <section class="w98 njh-needs" id="njhNeeds" aria-label="Kebutuhan"><header class="w98-title"><span>Kondisi</span></header><div class="w98-body" id="njhNeedsBody"></div></section>
+   <section class="w98 njh-keys" id="njhKeys" aria-label="Kontrol keyboard"><div class="w98-body"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> jalan</span><span><kbd>Shift</kbd> lari</span><span><kbd>E</kbd> aksi</span><span>tahan aksi = kerja</span></div></section>
+   <nav class="w98 njh-dock" id="njhDock" aria-label="Aplikasi"></nav>
+   <div class="njh-near" id="njhNear" hidden role="status"></div>
+   <section class="w98 njh-progress" id="njhProgress" hidden role="progressbar" aria-labelledby="njhProgressTitle"><header class="w98-title"><span id="njhProgressTitle">Sedang berjalan…</span></header><div class="w98-body"><div class="njh-bar njh-bar-lg"><i id="njhProgressFill"></i></div><small id="njhProgressText"></small></div></section>
+   <section class="w98 njh-win njh-bagwin" id="njhBagWin" hidden role="dialog" aria-labelledby="njhBagTitle"><header class="w98-title"><span id="njhBagTitle">Tas</span><button type="button" data-close aria-label="Tutup">×</button></header><div class="w98-body"><div class="njh-slots" id="njhBagSlots"></div><div class="njh-bag-info w98-well" id="njhBagInfo">Pilih barang.</div><div class="njh-row"><button type="button" class="btn" id="njhBagEat" disabled>Makan</button><button type="button" class="btn" id="njhBagDrop" disabled>Buang</button><button type="button" class="btn primary" data-close>Tutup</button></div></div></section>
+   <div class="njh-joy" id="njhJoy" aria-hidden="true"><div class="njh-joy-base" id="njhJoyBase"><div class="njh-joy-knob" id="njhJoyKnob"></div></div></div>
+   <section class="w98 njh-win" id="njhStatusWin" hidden role="dialog" aria-labelledby="njhStatusTitle"><header class="w98-title"><span id="njhStatusTitle">Status Pemain</span><button type="button" data-close aria-label="Tutup">×</button></header><div class="w98-body" id="njhStatusBody"></div></section>
+   <section class="w98 njh-win njh-howwin" id="njhHowtoWin" hidden role="dialog" aria-labelledby="njhHowtoWinTitle"><header class="w98-title"><span id="njhHowtoWinTitle">Cara Main</span><button type="button" data-close aria-label="Tutup">×</button></header><div class="w98-body"><div class="njh-howto" id="njhHowtoWinBody"></div><div class="njh-row"><button class="btn" type="button" data-close id="njhHowtoWinSkip">Lewati</button><span class="spacer" style="flex:1"></span><button class="btn" type="button" data-howto="prev">&lt; Kembali</button><button class="btn primary" type="button" data-howto="next">Lanjut &gt;</button><button class="btn primary" type="button" data-close data-howto-last>Selesai</button></div></div></section>
+   <div class="njh-spawn" id="njhSpawn" hidden aria-live="polite"><div class="njh-spawn-flap l"></div><div class="njh-spawn-flap r"></div><section class="w98 njh-spawn-note"><header class="w98-title"><span id="njhSpawnTitle">Hari baru</span></header><div class="w98-body"><span id="njhSpawnText"></span> <span class="njh-soon nologic njh-spawn-ph" title="Placeholder sampai animasi keluar tenda dari Gerak siap">PLACEHOLDER ANIMASI</span></div></section></div>
+   <section class="w98 njh-win" id="njhNotice" hidden role="alertdialog" aria-labelledby="njhNoticeTitle"><header class="w98-title"><span id="njhNoticeTitle">Info</span><button type="button" data-close aria-label="Tutup">×</button></header><div class="w98-body"><p id="njhNoticeText"></p><div class="njh-row"><button type="button" class="btn primary" data-close>OK</button></div></div></section>
+  </div>
+  <div class="njh-rotate" id="njhRotate" role="alertdialog" aria-labelledby="njhRotateTitle"><section class="w98"><header class="w98-title"><span id="njhRotateTitle">Putar HP</span></header><div class="w98-body"><div class="njh-rotate-ico" aria-hidden="true"></div><p><b>Putar HP ke landscape</b> biar layarnya sama kayak versi desktop.</p><small>Kunci rotasi layar dimatikan dulu kalau HP nggak mau muter.</small></div></section></div>
   <div class="game-bottom" id="mainkanGameBar">
  <span class="micro" id="gameWallet" data-hud-item="money">Rp —</span>
  <!-- Life stats and activity controls are the native SemestaLifePlay panel, only in Mainkan player mode. -->
  <div class="actions">
-  <button type="button" class="btn compact" id="gamePhone" data-hud-item="hpButton">▣ HP</button>
-  <button type="button" class="btn compact" id="gameBag" data-hud-item="bagButton">▣ Bag</button>
-  <button type="button" class="btn primary" id="gameAction" data-hud-item="action">ACTION</button>
-  <button type="button" class="btn compact" id="gameRun" data-hud-item="run" aria-label="Hold to run">RUN</button>
+  <button type="button" class="btn compact" id="gamePhone" data-hud-item="hpButton">Nokia</button>
+  <button type="button" class="btn compact" id="gameBag" data-hud-item="bagButton">Tas</button>
+  <button type="button" class="btn primary" id="gameAction" data-hud-item="action">AKSI</button>
+  <button type="button" class="btn compact" id="gameRun" data-hud-item="run" aria-label="Tahan untuk lari">LARI</button>
  </div>
 </div>
 </section>
-<div class="statusbar"><span id="statusText">READY</span><span>mainkan.exe · preview v0.1</span></div>
+<div class="statusbar"><span id="statusText">Siap</span><span>Namanya Juga Hidup · the Game · preview</span></div>
 </main></div>
-<footer class="taskbar"><button class="start" type="button" id="homeButton">▣ Start</button><span class="appname">▶ Mainkan.exe</span><span class="time" id="clock">--:--</span></footer>
+<footer class="taskbar"><button class="start" type="button" id="homeButton" title="Kembali ke Menu Utama">▣ Start</button><span class="appname">Namanya Juga Hidup</span><span class="time" id="clock">--:--</span></footer>
+<div class="njh-mark" aria-hidden="true">by Lafrich</div>
 </body>
 </html>
