@@ -77,16 +77,39 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   return {depth,wallet,rgba:[...before.data]};
  });
  assert.equal(token.depth,3,'Nokia must navigate to Dompet within original handset');
- const trade=await frame.evaluate(()=>{
-  const E=window.VLPhoneEllen;E.press('R');E.press('4');E.press('1');E.press('L');E.press('L');
+ // First purchase attempt must fail safely: new Guest starts on Rp6.000
+ // while Jiwa's official price is Rp20.000. No negative balance or token grant.
+ const rejected=await frame.evaluate(()=>{
+  const E=window.VLPhoneEllen;
+  E.press('R');E.press('4');E.press('1');E.press('L');E.press('L');
   const game=window.SemestaLifePlay,live=E.gameSnapshot();
-  return {wallet:game.state().wallet,nokiaWallet:live.wallet,token:game.state().powerTokens,
-   ledger:live.transactions,stillOpen:window.VLNokiaPlay.isOpen(),depth:E.depth()};
+  return {wallet:game.state().wallet,token:game.state().powerTokens,
+   ledger:live.transactions,depth:E.depth()};
  });
- console.log('REAL_NOKIA_PURCHASE',JSON.stringify(trade));
- assert.equal(trade.wallet,token.wallet-20000,'Nokia must debit the Jiwa price Rp20.000 for five token units');
+ assert.equal(rejected.wallet,token.wallet,'Insufficient funds must not debit wallet');
+ assert.equal(rejected.token,0,'Insufficient funds must not grant token units');
+ assert.ok(!rejected.ledger.some(t=>t.action==='buy_token'&&t.delta<0),
+  'Rejected token purchase cannot create a receipt');
+ // Fund only this disposable CI browser state, not production or Drive.
+ // Retry the same native Nokia purchase using real Jiwa hooks.
+ const trade=await frame.evaluate(()=>{
+  const E=window.VLPhoneEllen,game=window.SemestaLifePlay;
+  E.press('L'); // dismiss rejection message
+  E.press('R'); // back to marketplace
+  game.state().wallet=50000;
+  const startingWallet=game.state().wallet;
+  E.press('1');E.press('L');E.press('L');
+  const live=E.gameSnapshot();
+  return {startingWallet,wallet:game.state().wallet,nokiaWallet:live.wallet,
+   token:game.state().powerTokens,ledger:live.transactions,
+   stillOpen:window.VLNokiaPlay.isOpen(),depth:E.depth()};
+ });
+ console.log('REAL_NOKIA_PURCHASE',JSON.stringify({rejected,trade}));
+ assert.equal(trade.wallet,trade.startingWallet-20000,
+  'Nokia must debit Jiwa Rp20.000 for five token units');
  assert.equal(trade.nokiaWallet,trade.wallet,'Nokia and Jiwa balances must match after buying');
- assert.ok(trade.ledger.some(t=>t.action==='buy_token'&&t.delta===-20000),'Dompet must record the authoritative Rp20.000 token purchase');
+ assert.ok(trade.ledger.some(t=>t.action==='buy_token'&&t.delta===-20000),
+  'Dompet must record the authoritative Rp20.000 token purchase');
  assert.equal(trade.stillOpen,true,'Nokia must remain open after game HUD refresh');
  assert.ok(trade.depth>=3,'Nokia must not reset to standby during purchase');
  const mapResult=await frame.evaluate(()=>{
