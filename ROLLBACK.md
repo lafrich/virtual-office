@@ -5,7 +5,7 @@ Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault fil
 - Previous live `origin/main` (before this step): `53cfe59be06b567a6ad2f51c84ea0e68eb5120b8`
 - Integration branch: `integ/step1` (tip will be the latest commit on this branch; revert newest first, then the merges with `-m 1`)
 - Merge order (do not force-push): ours `preview/main-interiors-kost-warteg` (`0dcc793c`) → Ellen `preview/njh-gameplay-sites` (`8e099eb9`, frozen) → Layar `layar/win98-ui` (`6ffffc8e99a50839a53b9e770319056e4c3c3c65`, `?v=njh98-5`, sw v23) → Layar follow-up `a953045acbedf1096cf8765758df53b22979d0be` (`?v=njh98-6`, sw v24; merge `212c84a6`; committed objects only, uncommitted `shared/genesis-player.js` was not included)
-- Ellen park-bench scale fix `fix/njh-bangku-taman-scale` had **no unique commit** at merge time (still at `8e099eb9`); it was **not** included and should ship as a follow-up.
+- Ellen park-bench scale fix `5c6de782` (`fix/njh-bangku-taman-scale`) **was included** (cherry-pick `0a11dd94`). Catalog + city instance `njh-atm-16` use plane 1.591×1.888, collision true, blocking yes, sit. `world.json` park benches had their 2.19×2.251 size overrides removed so the catalog size applies, and blocking set to yes. Cove facade `4c3dc4d` was **not** included (step 2).
 
 If `origin/main` has been fast-forwarded to this step, revert the merge commits in reverse order (`-m 1` keeps the first parent, which is `origin/main` / the previous merge). Also revert the builder-string fix if it is still on `main`:
 

@@ -3292,8 +3292,6 @@
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "width": 2.19,
-      "height": 2.251,
       "collision": true,
       "interactions": [
         "sit"
@@ -3307,7 +3305,7 @@
       "subtype": "bangku_taman",
       "entranceFacing": "",
       "markerKind": "",
-      "blocking": "auto",
+      "blocking": "yes",
       "notes": ""
     },
     {
@@ -3371,8 +3369,6 @@
       "y": 0,
       "rotation": 0,
       "scale": 1,
-      "width": 2.19,
-      "height": 2.251,
       "collision": true,
       "interactions": [
         "sit"
@@ -3386,7 +3382,7 @@
       "subtype": "bangku_taman",
       "entranceFacing": "",
       "markerKind": "",
-      "blocking": "auto",
+      "blocking": "yes",
       "notes": ""
     },
     {
