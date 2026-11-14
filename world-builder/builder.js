@@ -43,6 +43,12 @@ if(playerMode)window.addEventListener('message',event=>{
  }else if(event.data?.type==='mainkan:player-profile-error'){
   console.warn('Mainkan player profile unavailable:',event.data.message);
   finishMainkanProfile(false);
+ }else if(event.data?.type==='mainkan:pause'){
+  try{dayClock?.setPaused?.(true);updateClockHUD?.(true);}catch{}
+  try{window.SemestaLifePlay?.pause?.();}catch{}
+ }else if(event.data?.type==='mainkan:resume'){
+  try{dayClock?.setPaused?.(false);updateClockHUD?.(true);}catch{}
+  try{window.SemestaLifePlay?.resume?.();}catch{}
  }
 });
 if(playerMode)document.documentElement.classList.add('semesta-player-mode');
@@ -3092,6 +3098,23 @@ function spawnRespawnApi(){
  };
 }
 
+
+function worldToScreen(x,y,z){
+ if(!camera||!canvas)return {x:0,y:0,visible:false};
+ try{
+  const v=new THREE.Vector3(Number(x)||0,Number(y)||0,Number(z)||0);
+  v.project(camera);
+  const w=canvas.clientWidth||canvas.width||0,h=canvas.clientHeight||canvas.height||0;
+  const sx=(v.x+1)/2*w,sy=(-v.y+1)/2*h;
+  const visible=v.z>=-1&&v.z<=1&&sx>=-8&&sy>=-8&&sx<=w+8&&sy<=h+8;
+  return {x:sx,y:sy,visible};
+ }catch{return {x:0,y:0,visible:false};}
+}
+function playerWorldPos(){
+ const p=walkWorldPos();
+ return {x:Number(p?.x)||0,y:Number(p?.y)||0,z:Number(p?.z)||0};
+}
+
 window.SemestaPlay=Object.freeze({
  playerProfile:()=>mainkanPlayerProfile,
  playerActor:()=>playerMode?documentMap.objects.find(o=>o.id===LIFE_TEST_ACTOR_ID)||null:null,
@@ -3136,7 +3159,14 @@ window.SemestaPlay=Object.freeze({
   const step=Math.max(0,Number(dt)||0);
   trafficLightTime+=step;updateAutomated(step);refreshTrafficLights();
   return inspectTrafficLights();
- }
+ },
+ playerPosition:playerWorldPos,
+ worldToScreen,
+ questMarkers:()=>window.SemestaLifePlay?.questMarkers?.()||[],
+ enterables:()=>window.SemestaLifePlay?.enterables?.()||[],
+ spawnAt:(kind,id)=>window.SemestaLifePlay?.spawnAt?.(kind,id),
+ nearbyActions:()=>window.SemestaLifePlay?.nearbyActions?.()||[],
+ clock:()=>window.SemestaLifePlay?.clock?.()||null
 });
 
 if(window.SemestaLifePlay){
@@ -3177,8 +3207,31 @@ if(window.SemestaLifePlay){
    focusCameraAt(Number(x),Number(z),14);
    return true;
   },
-  respawn:(opts)=>spawnRespawnApi().respawn(opts)
+  respawn:(opts)=>spawnRespawnApi().respawn(opts),
+  setClockPaused:on=>{dayClock.setPaused(!!on);try{updateClockHUD(true);}catch{}},
+  getClock:()=>dayClock,
+  worldToScreen,
+  doorAnchor:o=>{
+   try{if(window.VLNjhMapPreview?.doorAnchor)return window.VLNjhMapPreview.doorAnchor(o);}catch{}
+   try{const spec=o?.type==='sprite'?assetByName.get(o.asset):null;
+    if(window.VLWarteg3D?.supported?.(spec))return window.VLWarteg3D.doorPosition(o);}catch{}
+   return o?{x:Number(o.x)||0,z:Number(o.z)||0}:null;
+  },
+  interiorFurniture:()=>{
+   try{if(typeof window.VLNjhMapPreview?.interiorFurniture==='function')
+    return window.VLNjhMapPreview.interiorFurniture()||[];}catch{}
+   return [];
+  }
  });
+}
+if(playerMode){
+ const onLifePause=ev=>{
+  const type=ev?.type||ev?.data?.type;
+  if(type==='mainkan:pause'){try{dayClock.setPaused(true);updateClockHUD(true);}catch{}try{window.SemestaLifePlay?.pause?.();}catch{}}
+  if(type==='mainkan:resume'){try{dayClock.setPaused(false);updateClockHUD(true);}catch{}try{window.SemestaLifePlay?.resume?.();}catch{}}
+ };
+ window.addEventListener('mainkan:pause',onLifePause);
+ window.addEventListener('mainkan:resume',onLifePause);
 }
 $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');};
 $('home').onclick=cameraMapView;
@@ -4494,7 +4547,11 @@ function frame(now){
  requestAnimationFrame(frame);
  const elapsedReal=Math.min(.5,Math.max(0,(now-priorFrame)/1000));
  const dt=Math.min(.05,elapsedReal);priorFrame=now;
+ const prevClockDay=dayClock.get().day;
  dayClock.tick(elapsedReal);
+ if(dayClock.get().day>prevClockDay){
+  try{window.SemestaLifePlay?.onDayEnd?.({day:dayClock.get().day,previousDay:prevClockDay});}catch{}
+ }
  updateClockHUD();
  clockLastSaved+=elapsedReal;
  // Save the running virtual time at low frequency, without dirtying the

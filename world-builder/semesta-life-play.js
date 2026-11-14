@@ -11,6 +11,7 @@
 'use strict';
 const RULES=root&&root.JiwaLifeEconomy;
 const SR=root&&root.VLSpawnRespawn;
+const Hooks=(root&&root.SemestaLifeHooks)||(typeof require==='function'?(()=>{try{return require('./semesta-life-hooks.js');}catch{return null;}})():null);
 const STORAGE='semesta-life-play-v1:';
 const DATA_DB='jiwa-mechanics-v1',DATA_STORE='projects';
 const SITES=[
@@ -57,6 +58,7 @@ let bridge=null,active=false,projectId='',config=RULES?RULES.defaults():null;
 let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',progress=null;
 let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
 let publishedCatalog=false; // Separate unconfigured sandbox demo from Jiwa-authored rules
+let hooks=null;
 let bagOpen=false,justWorkedAt=0,lastFaintCount=0;
 let navSelect=null,workHoldStart=0,workAnimation=0;
 let cachedMapOverview={bounds:{minX:-20,maxX:20,minZ:-20,maxZ:20},terrain:[]};
@@ -151,6 +153,27 @@ async function reloadRules(revision){
   paintPanel();
  }catch{}
 }
+
+function hookCtx(){
+ return {
+  window:root,root,
+  getState:()=>state,setState:next=>{state=next;},
+  loadState:next=>{state=RULES&&next?RULES.stateFrom(next,config):next;paintPanel();notifyHud();},
+  getSites:()=>sites,getWorld:getWorld,getPos:getPos,
+  getConfig:()=>config,getWorldEntities:()=>config?.worldEntities||[],
+  playerId,cityId,dataKey,projectId,
+  storage:typeof localStorage!=='undefined'?localStorage:null,
+  persist,teleport:(x,z)=>{try{return !!(bridge&&bridge.teleport&&bridge.teleport(x,z));}catch{return false;}},
+  setClockPaused:on=>{try{bridge?.setClockPaused?.(!!on);}catch{}},
+  getClock:()=>{try{return bridge?.getClock?.()||null;}catch{return null;}},
+  worldToScreen:(x,y,z)=>{try{return bridge?.worldToScreen?.(x,y,z)||null;}catch{return null;}},
+  doorAnchor:o=>{try{return bridge?.doorAnchor?.(o)||null;}catch{return null;}},
+  interiorFurniture:()=>{try{return bridge?.interiorFurniture?.()||[];}catch{return [];}},
+  resetCurrent:()=>resetSave()
+ };
+}
+function bindHooks(){hooks=Hooks&&Hooks.create?Hooks.create(hookCtx()):null;return hooks;}
+function getHooks(){return hooks||bindHooks();}
 function worldBounds(){
  const world=getWorld(),arr=(world.objects||[]).filter(o=>Number.isFinite(Number(o.x))&&Number.isFinite(Number(o.z)));
  const xs=arr.map(o=>Number(o.x)),zs=arr.map(o=>Number(o.z));
@@ -294,6 +317,7 @@ function onSpawn(decision){
  }
  message((decision.kind==='home'?'🏠 RESPAWN KOST: ':'⛺ HOBO / TENDA: ')+(p.id||'spawn'));
  persist();placeMarkers();paintPanel();
+ try{getHooks()?.onSpawnDecision?.(decision);}catch{}
 }
 function disposeMarkers(){
  if(!markerGroup)return;
@@ -426,11 +450,14 @@ function nodeButtons(n){
  if(id==='coffee')entries=[button('coffee','☕ Ngopi')];
  if(id==='public_wc')entries=[button('public_toilet','🚾 WC Umum',{facilityId:n.sourceId||id})];
  if(id==='public_bath')entries=[button('public_shower','🚿 Mandi Umum',{facilityId:n.sourceId||id})];
+ const furnOk=action=>!getHooks()?.furnitureAllows||getHooks().furnitureAllows(action,{site:n}).ok;
  if(id==='kost')entries=ownsRoom()?
-  [button('home_toilet','🚽 WC Kost'),button('home_shower','🚿 Mandi Kost'),button('sleep','💤 Tidur Kost'),
+  [button('home_toilet','🚽 WC Kost'),
+   ...(furnOk('home_shower')?[button('home_shower','🚿 Mandi Kost')]:[]),
+   ...(furnOk('sleep')?[button('sleep','💤 Tidur Kost')]:[]),
    '<select id="slpItem">'+itemOptions('any')+'</select>',
-   button('cook','🍳 Masak Ikan'),
-   ...(kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
+   ...(furnOk('cook')?[button('cook','🍳 Masak Ikan')]:[]),
+   ...(furnOk('cook_recipe')&&kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
     button('cook_recipe','🍳 Masak Resep')]:[]),button('store_fridge','🧊 Simpan Kulkas'),button('store_home','📦 Simpan di Kost'),
    '<select id="slpHomeItem">'+(state.homeStorage||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
    button('take_home','🎒 Ambil dari Kost'),
@@ -612,6 +639,9 @@ function afterLifeTransition(previous){
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
+ try{if(getHooks())args=getHooks().argsFor(action,args);}catch{}
+ const gate=getHooks()?.furnitureAllows?.(action,{});
+ if(gate&&gate.ok===false)return {ok:false,reason:gate.reason||'Furnitur tidak ada di dekatmu'};
  // Also guard the public runAction API, not only the visible action menu.
  if(publishedCatalog&&['pee_outside','fish','sell_fish','work','scavenge','sell_loak',
   'catch_fruit','eat','coffee','public_toilet','public_shower','buy_room',
@@ -754,6 +784,7 @@ function checkHansip(){
 }
 function tick(dt){
  if(!active||!state)return;
+ if(getHooks()?.isPaused?.())return;
  const seconds=Math.max(0,Math.min(.2,Number(dt)||0));
  actorMoved(seconds);
  timeAccumulator+=seconds;
@@ -824,6 +855,7 @@ function start(){
  if(active&&id===projectId)return true;
  if(active)stop();
  projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;bagOpen=false;
+ bindHooks();
  const gameCatalog=root.JiwaActivities?.readLocal?.(localStorage);
  publishedCatalog=!!gameCatalog?.updatedAt;
  config=RULES.normalize({...defaults(),activities:gameCatalog?.activities||[],
@@ -844,9 +876,30 @@ function attach(bridgeApi){bridge=bridgeApi||null;return api;}
 try{root.addEventListener?.('storage',ev=>{
  if(ev.key==='jiwa-activities-global-v1'&&active)reloadRules(sessionRevision);
 });}catch(_e){}
+function hookApi(name,fallback){
+ return function(){const h=getHooks();if(h&&typeof h[name]==='function')return h[name].apply(h,arguments);return fallback;}
+}
 const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
  spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
- playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null});
+ playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null,
+ spawnAt:hookApi('spawnAt',{ok:false,reason:'hooks missing'}),
+ nearbyActions:hookApi('nearbyActions',[]),
+ pause:hookApi('pause',{ok:false}),resume:hookApi('resume',{ok:false}),
+ isPaused:()=>!!getHooks()?.isPaused?.(),
+ clock:hookApi('clock',null),
+ onDayEnd:hookApi('onDayEnd',null),
+ questMarkers:hookApi('questMarkers',[]),
+ enterables:hookApi('enterables',[]),
+ worldToScreen:hookApi('worldToScreen',{x:0,y:0,visible:false}),
+ playerPosition:hookApi('playerPosition',{x:0,y:0,z:0}),
+ hasSave:hookApi('hasSave',false),
+ saveMeta:hookApi('saveMeta',null),
+ saveSlot:hookApi('saveSlot',{ok:false}),
+ loadSlot:hookApi('loadSlot',{ok:false}),
+ listSlots:hookApi('listSlots',[]),
+ resetSave:(slot)=>{if(slot==null||slot===''){if(!active)return {ok:false,reason:'Play Game belum dimulai'};resetSave();paintPanel();return {ok:true,reset:true};}return getHooks()?.resetSave?.(slot)||{ok:false};},
+ setInteriorFurnitureAdapter:fn=>{if(bridge)bridge.interiorFurniture=typeof fn==='function'?fn:()=>[];bindHooks();}
+});
 return api;
 });

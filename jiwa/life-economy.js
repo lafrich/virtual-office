@@ -100,7 +100,10 @@ function normalize(raw){
 function stateFrom(existing,config){
  const s=copy(existing||{}),c=normalize(config);
  s.inventory=Array.isArray(s.inventory)?s.inventory:[];
- s.transactions=Array.isArray(s.transactions)?s.transactions.slice(-40).filter(t=>t&&Number.isFinite(Number(t.delta))):[];
+ s.transactions=Array.isArray(s.transactions)?s.transactions.slice(-40).filter(t=>t&&Number.isFinite(Number(t.delta))).map(t=>{
+  const day=Number.isFinite(Number(t.day))?Math.max(1,Math.floor(Number(t.day))):Math.floor(Math.max(0,Number(t.minute)||0)/1440)+1;
+  return t.day===day?t:Object.assign({},t,{day});
+ }):[];
  s.homeStorage=Array.isArray(s.homeStorage)?s.homeStorage:[];
  s.itemMeta=s.itemMeta&&typeof s.itemMeta==='object'?s.itemMeta:{};
  s.fridge=Array.isArray(s.fridge)?s.fridge:[];
@@ -586,8 +589,9 @@ function doAction(config,previous,action,args={}){
    action==='buy_furniture'?
    (FURNITURE.find(x=>x.id===String(args.itemId))?.label||'Furnitur'):
    names[action]||action.replace(/_/g,' ');
+  const day=Number.isFinite(Number(args.day))?Math.max(1,Math.floor(Number(args.day))):Math.floor(Math.max(0,s.elapsedMinutes)/1440)+1;
   s.transactions.push({id:'txn:'+s.elapsedMinutes+':'+(s.transactions.length+1),
-   action,label,delta,balance:s.wallet,minute:s.elapsedMinutes});
+   action,label,delta,balance:s.wallet,minute:s.elapsedMinutes,day});
   s.transactions=s.transactions.slice(-40);
  }
  return {ok:true,state:s,changes,action};
