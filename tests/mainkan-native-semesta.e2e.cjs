@@ -24,10 +24,20 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  const before=await page.evaluate(()=>localStorage.getItem('virtual-life-gpt-world-builder-pipeline-v3'));
  await page.locator('#characterForm button[type=submit]').click();
  await page.locator('#confirmGo').click({timeout:15000});
- // Guest/NJH-only flow may skip the one-time tutorial entirely.
- // If it is shown, finish it normally; otherwise require visible gameplay.
- if(await page.locator('#tutorialScreen').isVisible())
-  await page.locator('#tutorialDone').click({timeout:3000}).catch(()=>{});
+ // Tutorial is a three-page wizard: 'Mulai Main' stays hidden until
+ // the last page. Wait for loading to finish, then follow its supported flow.
+ await page.waitForFunction(()=>['tutorialScreen','gameScreen'].some(id=>{
+  const e=document.getElementById(id);return e&&!e.hidden;
+ }),null,{timeout:30000});
+ if(await page.locator('#tutorialScreen').isVisible()){
+  if(await page.locator('#tutorialSkip').isVisible())
+   await page.locator('#tutorialSkip').click({timeout:10000});
+  else{
+   for(let i=0;i<3&&!(await page.locator('#tutorialDone').isVisible());i++)
+    await page.locator('#tutorialScreen [data-howto="next"]').click({timeout:10000});
+   await page.locator('#tutorialDone').click({timeout:10000});
+  }
+ }
  await page.locator('#gameScreen').waitFor({state:'visible',timeout:30000});
  await page.waitForFunction(()=>{
    const el=document.getElementById('semestaFrame');
