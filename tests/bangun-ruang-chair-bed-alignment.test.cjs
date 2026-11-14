@@ -152,8 +152,8 @@ test('Bangun Ruang walks to a bed, lies on its mattress, then sits on a chair',(
 
 test('chair and bed docking are preview-only; saved building data has no preview actor',()=>{
  const html=read('index.html');
- assert.ok(/interior-isometric\\.js\\?v=[^"']+/.test(html));
- assert.ok(/character-scale-preview\\.js\\?v=[^"']+/.test(html));
+ assert.ok(html.includes('interior-isometric.js?v='));
+ assert.ok(html.includes('character-scale-preview.js?v='));
  const start=html.indexOf('function buildAsset()'),end=html.indexOf('function persist(',start);
  assert.ok(start>=0&&end>start);
  assert.ok(!html.slice(start,end).includes('actionAnchor'));
