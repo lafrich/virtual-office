@@ -56,8 +56,13 @@ function defaults(){return {
 };}
 // Step 2 (NJH): minimarket items, recipes and extra fish from jiwa/njh-cooking-catalog.js.
 // Prices may be overridden per item id in config.cooking.prices {itemId:Rp}.
+// Kost electricity token sold at the minimarket. Not a bag item: buying it tops up powerTokens.
+// Price/units follow settings.tokenPrice / tokenUnits (synced in normalize).
+const TOKEN_ITEM=Object.freeze({id:'token_listrik',label:'Token listrik (5 unit)',category:'token',price:20000,unit:'paket',
+ spoilMinutes:null,storeIn:[],source:['supermarket'],species:'token',approximate:false,icon:null,tokenUnits:5});
 function cookingDefaults(){
- return {items:copy(COOKING.items||[]),recipes:copy(COOKING.recipes||[]),fish:copy(COOKING.fish||[]),
+ const items=copy(COOKING.items||[]);if(!items.some(i=>i.id===TOKEN_ITEM.id))items.push(copy(TOKEN_ITEM));
+ return {items,recipes:copy(COOKING.recipes||[]),fish:copy(COOKING.fish||[]),
   shop:copy(COOKING.shop||{}),iconBase:COOKING.iconBase||'',prices:{}};
 }
 function normalizeCooking(src){
@@ -92,6 +97,7 @@ function normalize(raw){
  });
  if(!base.fish.some(f=>f.weight>0))base.fish=copy(FISH);
  base.cooking=normalizeCooking(source.cooking);
+ {const tk=base.cooking.items.find(i=>i.id===TOKEN_ITEM.id);if(tk){tk.price=base.settings.tokenPrice;tk.tokenUnits=base.settings.tokenUnits;tk.label='Token listrik ('+base.settings.tokenUnits+' unit)';}}
  const incomingJobs=new Map((Array.isArray(source.jobs)?source.jobs:[]).filter(j=>j&&j.id).map(j=>[j.id,j]));
  base.jobs=JOBS.map(d=>{
   const next=incomingJobs.get(d.id)||{};
@@ -673,11 +679,16 @@ function doAction(config,previous,action,args={}){
    count+=qty;total+=qty*def.price;
   }
   if(!lines.length)return reject('Keranjang kosong.');
+  const tokenLine=lines.find(l=>l.itemId===TOKEN_ITEM.id);
+  if(tokenLine){if(!s.housing.room)return reject('Token listrik hanya untuk penghuni kost.');count-=tokenLine.qty;}
   if(s.inventory.length+count>setting.bagSlots)return reject('Tas penuh ('+setting.bagSlots+' slot).');
   if(s.wallet<total)return reject('Uang tidak cukup.');
   const walletBefore=s.wallet;spend(total);clock(2);
   const added=[];
-  for(const l of lines){const def=itemDef(c,l.itemId);for(let i=0;i<l.qty;i++)added.push(add(l.itemId,def.label,keepMinutes(def)));}
+  for(const l of lines){
+   if(l.itemId===TOKEN_ITEM.id){const u=l.qty*setting.tokenUnits;s.powerTokens+=u;out.tokenAdded=(out.tokenAdded||0)+u;changes.push('token listrik +'+u);continue;}
+   const def=itemDef(c,l.itemId);for(let i=0;i<l.qty;i++)added.push(add(l.itemId,def.label,keepMinutes(def)));
+  }
   out.receipt={lines,total,walletBefore,walletAfter:s.wallet};out.added=added;
   break;
  }

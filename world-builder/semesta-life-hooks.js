@@ -456,7 +456,8 @@ function create(ctx){
    if(acc&&(acc.role==='partner'||acc.kind==='lobby'||acc.role==='none')){
     const next=Access.filterActions(list,acc);
     // Public step-2 entries (shop, fishing) are not room furniture; keep them.
-    for(const x of list)if((x.id==='shop_minimarket'||x.id==='fish_start')&&!next.some(y=>y.id===x.id))next.push(x);
+    // Locked kost furniture entries stay as disabled rows so the AKSI bar can say why (Punya pacar / Terkunci).
+    for(const x of list)if((x.id==='shop_minimarket'||x.id==='fish_start'||(x.disabled&&x.locked&&/^(open_fridge|open_storage|cook_menu)$/.test(x.id)))&&!next.some(y=>y.id===x.id))next.push(x);
     Object.defineProperty(next,'spot',{value:spot,enumerable:false,configurable:true});
     return next;
    }
@@ -1046,7 +1047,9 @@ function create(ctx){
   const r=econ('shop_buy',{cart});
   if(!r.ok)return {ok:false,reason:r.reason};
   const out={ok:true,receipt:r.receipt,added:r.added||[],pose:'hand_over'};
+  if(r.tokenAdded)out.tokenAdded=r.tokenAdded;
   play('hand_over');emit('mainkan:shop-receipt',out);
+  if(r.tokenAdded){const t=token();emit('mainkan:token',{units:t.units,empty:t.empty,added:r.tokenAdded});}
   return out;
  }
  // ---- fishing (data-driven spots; Ellen's preview/njh-step2-map spot ids plug in) ----
@@ -1178,12 +1181,17 @@ function create(ctx){
   const st=getState();if(!st)return [];
   const out=[],pos=getPos();
   const push=(id,label,ui,args,extra)=>out.push(Object.assign({id,action:id,label,ui,price:0,spotLabel:'',args:args||{}},extra||{}));
-  const ownOk=!ownerGate();
-  if(ownOk&&interiorKind()==='kost'){
-   const fr=nearKind('fridge');if(fr)push('open_fridge','Buka Kulkas','inventory',{container:'fridge'},{furnitureId:fr.furnitureId||fr.id,spotLabel:'Kulkas'});
-   const wd=nearKind('wardrobe');if(wd)push('open_storage','Buka Lemari','inventory',{container:'storage'},{furnitureId:wd.furnitureId||wd.id,spotLabel:'Lemari'});
-   const sv=nearKind('stove');if(sv)push('cook_menu','Masak','cook',{},{furnitureId:sv.furnitureId||sv.id,spotLabel:'Kompor'});
-   if(num(st.powerTokens,0)<=2)push('topup_token','Isi Token Listrik','token',{units:5},{price:cfgN()?.settings?.tokenPrice||20000});
+  // Owner / partner locks and empty token come back as disabled entries with a reason (hint), so the AKSI bar can show why.
+  if(interiorKind()==='kost'){
+   const lock=ownerGate();
+   const empty=num(st.powerTokens,0)<=0;
+   const c=cfgN(),set=c?.settings||{tokenPrice:20000,tokenUnits:5};
+   const tokenMsg='Token listrik habis. Isi token dulu ('+rpMoney(set.tokenPrice).replace('Rp ','Rp')+' / '+set.tokenUnits+' unit).';
+   const gate=(extra,needsPower)=>{const why=lock||(needsPower&&empty?tokenMsg:null);return why?Object.assign({},extra,{disabled:true,hint:why,reason:why,locked:!!lock}):extra;};
+   const fr=nearKind('fridge');if(fr)push('open_fridge','Buka Kulkas','inventory',{container:'fridge'},gate({furnitureId:fr.furnitureId||fr.id,spotLabel:'Kulkas'},true));
+   const wd=nearKind('wardrobe');if(wd)push('open_storage','Buka Lemari','inventory',{container:'storage'},gate({furnitureId:wd.furnitureId||wd.id,spotLabel:'Lemari'},true));
+   const sv=nearKind('stove');if(sv)push('cook_menu','Masak','cook',{},gate({furnitureId:sv.furnitureId||sv.id,spotLabel:'Kompor'},true));
+   if(!lock&&st.housing?.room&&num(st.powerTokens,0)<=2)push('topup_token','Isi Token Listrik','token',{units:5},{price:set.tokenPrice||20000});
   }
   if(inMart()||nearMart())push('shop_minimarket','Belanja NJH Mart','shop',{siteId:'minimarket'},{spotLabel:'NJH Mart'});
   const spot=fishSpots().filter(s=>s.source!=='temporary').map(s=>({s,d:Math.hypot(s.x-pos.x,s.z-pos.z)})).filter(x=>x.d<=range).sort((a,b)=>a.d-b.d)[0];

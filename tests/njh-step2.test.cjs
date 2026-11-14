@@ -30,7 +30,8 @@ function harness(o={}){
 
 test('catalog: 54 minimarket items, 38 recipes, 19 fish; existing prices and fish locked',()=>{
  const c=Life.defaults();
- assert.equal(c.cooking.items.filter(i=>(i.source||[]).includes('supermarket')).length,54);
+ assert.equal(c.cooking.items.filter(i=>(i.source||[]).includes('supermarket')&&i.id!=='token_listrik').length,54);
+ assert.equal(c.cooking.items.find(i=>i.id==='token_listrik').price,20000,'token_listrik item follows tokenPrice');
  assert.equal(c.cooking.recipes.length,38);
  assert.equal(c.cooking.fish.length,19);
  assert.equal(c.settings.tokenPrice,20000);assert.equal(c.settings.tokenUnits,5);
@@ -42,7 +43,7 @@ test('catalog: 54 minimarket items, 38 recipes, 19 fish; existing prices and fis
 
 test('minimarket: shopList, buy all-or-nothing, receipt, hand_over pose, must be near',()=>{
  const t=harness({kind:'minimarket',roomId:'njh_minimarket'});
- const list=t.h.shopList();assert.equal(list.ok,true);assert.equal(list.inside,true);assert.equal(list.items.length,54);
+ const list=t.h.shopList();assert.equal(list.ok,true);assert.equal(list.inside,true);assert.equal(list.items.length,55,'54 Gerak items + token_listrik');
  const telur=list.items.find(i=>i.itemId==='telur');assert.equal(telur.price,2500);
  const r=t.h.buy({cart:[{itemId:'telur',qty:2},{itemId:'minyak',qty:1}]});
  assert.equal(r.ok,true,r.reason);assert.equal(r.receipt.total,2*2500+18000);
@@ -172,4 +173,27 @@ test('NJH Mart interior: every scene asset has catalog art; no-clip guard and Kh
  assert.ok(I.MINIMARKET_PATTERN.test('NJH Mart (Minimarket)'));
  assert.equal(V.inspectChairTables(sc,{catalog:{items:cat}}).ok,true);
  const ent=sc.entrance;assert.ok(!sc.items.some(i=>i.blocking!==false&&i.c===ent.c&&i.r===ent.r-1),'door-front tile free');
+});
+
+test('token_listrik: minimarket item tops up powerTokens (no bag slot), kost residents only, token event',()=>{
+ const t=harness({kind:'minimarket',roomId:'njh_minimarket',state:{powerTokens:0}});
+ const r=t.h.buy({cart:[{itemId:'token_listrik',qty:2},{itemId:'telur',qty:1}]});
+ assert.equal(r.ok,true,r.reason);assert.equal(r.tokenAdded,10);assert.equal(t.state.powerTokens,10);
+ assert.equal(r.receipt.total,40000+2500);assert.equal(t.state.inventory.length,1,'token takes no bag slot');
+ assert.ok(t.events.some(e=>e.type==='mainkan:token'&&e.detail.units===10));
+ const g=harness({kind:'minimarket',roomId:'njh_minimarket',state:{housing:{room:false}}});
+ assert.equal(g.h.buy('token_listrik',1).ok,false);
+ const n=Life.normalize({settings:{tokenPrice:25000}});assert.equal(n.cooking.items.find(i=>i.id==='token_listrik').price,25000);
+});
+
+test('AKSI locks: partner / stranger and empty token give disabled step-2 entries with a reason',()=>{
+ const p=harness({playerId:'t_noor',state:{housing:{room:true,roomId:'njh_kos_noor',ownerId:'t_noor',kind:'kost'}}});
+ const pa=p.h.nearbyActions().filter(a=>['open_fridge','open_storage','cook_menu'].includes(a.id));
+ assert.equal(pa.length,3);for(const a of pa){assert.equal(a.disabled,true);assert.ok(a.hint);}
+ assert.ok(!p.h.nearbyActions().some(a=>a.id==='topup_token'),'no topup in someone else\'s room');
+ const e=harness({state:{powerTokens:0}});
+ const ea=e.h.nearbyActions();
+ for(const id of ['open_fridge','open_storage','cook_menu']){const a=ea.find(x=>x.id===id);assert.ok(a&&a.disabled,id);assert.match(a.hint,/Token listrik habis/);}
+ assert.ok(ea.some(a=>a.id==='topup_token'&&!a.disabled));
+ const ok=harness();assert.ok(ok.h.nearbyActions().filter(a=>a.id==='cook_menu').every(a=>!a.disabled));
 });
