@@ -98,10 +98,20 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  await mainkan.locator('#ccYear').dispatchEvent('input');
  await mainkan.locator('#characterForm button[type=submit]').click();
  await mainkan.locator('#confirmGo').click({timeout:15000});
- // Guest/NJH-only flow may skip the one-time tutorial entirely.
- // If it is shown, finish it normally; otherwise require visible gameplay.
- if(await mainkan.locator('#tutorialScreen').isVisible())
-  await mainkan.locator('#tutorialDone').click({timeout:3000}).catch(()=>{});
+ // Tutorial is a three-page wizard: 'Mulai Main' stays hidden until
+ // the last page. Wait for loading to finish, then follow its supported flow.
+ await mainkan.waitForFunction(()=>['tutorialScreen','gameScreen'].some(id=>{
+  const e=document.getElementById(id);return e&&!e.hidden;
+ }),null,{timeout:30000});
+ if(await mainkan.locator('#tutorialScreen').isVisible()){
+  if(await mainkan.locator('#tutorialSkip').isVisible())
+   await mainkan.locator('#tutorialSkip').click({timeout:10000});
+  else{
+   for(let i=0;i<3&&!(await mainkan.locator('#tutorialDone').isVisible());i++)
+    await mainkan.locator('#tutorialScreen [data-howto="next"]').click({timeout:10000});
+   await mainkan.locator('#tutorialDone').click({timeout:10000});
+  }
+ }
  await mainkan.locator('#gameScreen').waitFor({state:'visible',timeout:30000});
  await mainkan.waitForFunction(()=>{
   const win=document.getElementById('semestaFrame')?.contentWindow;
