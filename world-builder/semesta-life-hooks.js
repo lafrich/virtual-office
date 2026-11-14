@@ -1059,7 +1059,7 @@ function create(ctx){
    if(o.type==='building')continue;
    const pt=Array.isArray(o.fishPoint)?{x:num(o.fishPoint[0]),z:num(o.fishPoint[1])}:Array.isArray(o.actionPoint)?{x:num(o.actionPoint[0]),z:num(o.actionPoint[1])}:{x:num(o.x,0),z:num(o.z,0)};
    const key=Math.round(pt.x*2)+','+Math.round(pt.z*2);if(seen.has(key))continue;seen.add(key);
-   out.push({id:String(o.id),label:o.name||o.label||'Tempat mancing',x:pt.x,z:pt.z,source:'world'});
+   out.push({id:String(o.id),label:String(o.name||o.label||'Tempat mancing').replace(/^PENDING\s+/i,''),x:pt.x,z:pt.z,source:'world'});
   }
   for(const s of getSites())if(s.id==='fish'){
    const key=Math.round(num(s.x,0)*2)+','+Math.round(num(s.z,0)*2);
@@ -1086,7 +1086,7 @@ function create(ctx){
   const spots=fishSpots();
   let spot=spotId?spots.find(s=>s.id===String(spotId)):null;
   if(!spot)spot=spots.map(s=>({s,d:Math.hypot(s.x-pos.x,s.z-pos.z)})).sort((a,b)=>a.d-b.d)[0]?.s||null;
-  if(!spot||(spot.source!=='temporary'&&Math.hypot(spot.x-pos.x,spot.z-pos.z)>Math.max(range,3)))return {ok:false,reason:'Dekati dermaga / tempat mancing dahulu.'};
+  if(!spot||(spot.source!=="temporary"&&Math.hypot(spot.x-pos.x,spot.z-pos.z)>range))return {ok:false,reason:'Dekati dermaga / tempat mancing dahulu.'};
   if((st.inventory||[]).length>=set.bagSlots)return {ok:false,reason:'Tas penuh ('+set.bagSlots+' slot).'};
   if(num(st.energy,0)<set.fishEnergy)return {ok:false,reason:'Energi tidak cukup untuk mancing.'};
   fishSession={id:'fish-'+(++fishSeq),spotId:spot.id,phase:'cast',waits:0,fish:null,progress:0,tension:0.5,miss:0};
@@ -1185,7 +1185,7 @@ function create(ctx){
    if(num(st.powerTokens,0)<=2)push('topup_token','Isi Token Listrik','token',{units:5},{price:cfgN()?.settings?.tokenPrice||20000});
   }
   if(inMart()||nearMart())push('shop_minimarket','Belanja NJH Mart','shop',{siteId:'minimarket'},{spotLabel:'NJH Mart'});
-  const spot=fishSpots().filter(s=>s.source!=='temporary').map(s=>({s,d:Math.hypot(s.x-pos.x,s.z-pos.z)})).filter(x=>x.d<=Math.max(range,3)).sort((a,b)=>a.d-b.d)[0];
+  const spot=fishSpots().filter(s=>s.source!=='temporary').map(s=>({s,d:Math.hypot(s.x-pos.x,s.z-pos.z)})).filter(x=>x.d<=range).sort((a,b)=>a.d-b.d)[0];
   if(spot&&!interiorKind())push('fish_start','Mancing','fishing',{spotId:spot.s.id},{spotLabel:spot.s.label});
   return out;
  }
