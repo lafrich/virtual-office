@@ -182,7 +182,7 @@
       "id": "njh-kopi-wooden_bench-2",
       "assetId": "wooden_bench",
       "name": "Bangku Meja",
-      "c": 5,
+      "c": 6,
       "r": 2,
       "rotation": 90,
       "flipX": false,
@@ -198,6 +198,16 @@
         "eat",
         "drink_coffee"
       ]
+    },
+    {
+      "id": "njh-kopi-dining_table-2",
+      "assetId": "dining_table",
+      "name": "Meja Kopi Depan",
+      "c": 2,
+      "r": 2,
+      "rotation": 0,
+      "actionId": "eat",
+      "blocking": true
     },
     {
       "id": "njh-kopi-dining_table-1",
