@@ -942,7 +942,10 @@ function handleAction(){
    const actions=getHooks()?.nearbyActions?.()||[];
    const talk=actions.find(a=>['talk','world_quest','npc_talk'].includes(a.id));
    if(talk){runAction(talk.id,talk.args||{npcId:best.o.id});return true;}
-   message('Bicara dengan '+(best.o.name||'NPC'));paintPanel();return true;
+   // Jiwa has a native "talk" operation even for NPCs without a quest.
+   const result=runAction('talk',{npcId:best.o.id});
+   if(result?.ok)message('Ngobrol dengan '+(best.o.name||'NPC'));
+   return true;
   }
  }
  if(!node)return false;
