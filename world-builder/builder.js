@@ -2895,7 +2895,7 @@ function enterCharacterCamera(){
  setMode('walk');
  const root=owners.get(actor.id);
  if(root){
-  cameraFocus.set(root.position.x,0,root.position.z);
+  cameraFocus.set(root.position.x,root.position.y,root.position.z);
   viewSize=16;
   fitCamera();
  }
@@ -4920,10 +4920,13 @@ function frame(now){
   if(!actor){leaveCharacterCamera(false);}
   else{
    const alpha=1-Math.exp(-dt*10);
-   const x=actor.position.x,z=actor.position.z;
-   const remaining=Math.hypot(x-cameraFocus.x,z-cameraFocus.z);
+   // Follow world Y as well: raised platforms are above the land plane.
+   // This is only camera focus; no sprite pivot or saved object position changes.
+   const x=actor.position.x,y=actor.position.y,z=actor.position.z;
+   const remaining=Math.hypot(x-cameraFocus.x,y-cameraFocus.y,z-cameraFocus.z);
    if(remaining>0.003){
     cameraFocus.x+=(x-cameraFocus.x)*alpha;
+    cameraFocus.y+=(y-cameraFocus.y)*alpha;
     cameraFocus.z+=(z-cameraFocus.z)*alpha;
     fitCamera();
    }
