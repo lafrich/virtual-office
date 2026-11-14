@@ -71,6 +71,10 @@ const STORE='virtual-life-gpt-world-builder-pipeline-v3';
 const ACTIVE_DRAFT_KEY='virtual-life-active-city-draft';
 let activeDraftId=null,draftDirty=true;
 try{activeDraftId=localStorage.getItem(ACTIVE_DRAFT_KEY)||null;}catch{}
+// NJH is the only playable city. Jiwa-authored targets use its canonical ID;
+// a temporary authoring copy ID must never leak into Mainkan's gameplay hooks.
+const activeGameCityId=()=>playerMode&&njhMapPreview
+ ?'city-njh-semesta-draft1-with-pending':(activeDraftId||'__semesta_working_copy__');
 // Read the published Mahluk Hidup catalog and local Character Storage
 // before loading any saved city, so custom profiles survive import.
 const mahluk=window.VLMahlukHidup;
@@ -2767,7 +2771,7 @@ function setMode(m){
        THREE,
        getWorld:()=>documentMap,
        getScene:()=>scene,
-       getCityId:()=>activeDraftId||'__semesta_working_copy__',
+       getCityId:activeGameCityId,
        getPlayerId:()=>playerMode?mainkanPlayerId:'',
        currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
        playPose:(pose,seconds=4)=>{const r=(rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig;if(!r?.setPose)return false;r.setPose(pose);
@@ -3402,7 +3406,7 @@ if(window.SemestaLifePlay){
   THREE,
   getWorld:()=>documentMap,
   getScene:()=>scene,
-  getCityId:()=>activeDraftId||'__semesta_working_copy__',
+  getCityId:activeGameCityId,
   getPlayerId:()=>playerMode?mainkanPlayerId:'',
   currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
   getFacing:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.direction)||null,
