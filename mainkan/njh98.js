@@ -393,11 +393,11 @@ $('njhBagDrop')?.addEventListener('click',()=>bagAction('discard_item'));
 function bodyActs(){try{return window.NJH98Mock?.bodyActions?.()||[];}catch{return [];}}
 function ctxSpot(){
  // Future hook (Baymax): SemestaLifePlay.nearbyActions() → [{action,label,...}] with a spot label.
- try{const L=life();if(typeof L?.nearbyActions==='function'){const list=L.nearbyActions()||[];const spot=list.spot||list[0]?.spotLabel;
+ try{const L=life();if(typeof L?.nearbyActions==='function'){const list=(L.nearbyActions()||[]).filter(a=>!IDLE_ACT.has(String(a.id||a.action)));const spot=list.spot||list[0]?.spotLabel;
   if(Array.isArray(list)&&list.length&&!wdoc()?.getElementById('slpActions'))return {work:list.some(a=>a.hold),label:spot||'Aksi'};}}catch{}
  const d=wdoc();const acts=d?.getElementById('slpActions');if(!acts)return null;
  const work=!!acts.querySelector('#slpWork');
- const has=!!acts.querySelector('button[data-life-action],select');
+ const has=[...acts.querySelectorAll('button[data-life-action]')].some(b=>!IDLE_ACT.has(b.dataset.lifeAction))||!!acts.querySelector('select');
  if(!work&&!has)return null;
  // title = the spot name from nearbyActions when the hook exists (the native .slp-spot line can be a long hint);
  // only the always-on fart → plain "Aksi"
@@ -416,7 +416,7 @@ function ctxInfo(){
  const spot=ctxSpot();if(spot&&spot.work)return spot;
  const body=bodyActs();
  if(spot)return {...spot,body};
- if(!body.length)return null;
+ if(!body.some(a=>a.contextual))return null;
  // no spot: the menu still opens for the body actions; only a contextual one (wall_pee) counts as "something nearby"
  return {work:false,label:'Aksi',body,bodyOnly:true,contextual:body.some(a=>a.contextual)};
 }
@@ -568,7 +568,7 @@ function pickAct(id,src,selVal){
 }
 function openCtx(){
  // enterable door nearby → its (placeholder) interior instead of the generic menu
- if(doorNearObj&&typeof window.NJH98Mock?.enterDoor==='function'){try{window.NJH98Mock.enterDoor(doorNearObj);}catch(err){console.warn(err);}return true;}
+ if(doorNearObj&&doorNearObj.dist<=1.8){try{return !!life()?.handleAction?.();}catch(err){console.warn(err);}}
  const info=ctxInfo();if(!info||info.work)return false;
  const opts=ctxOptions();if(!opts.length)return false;
  ctxOpen=true;ctxLabel=info.label;document.body.classList.add('njh-act-open');
@@ -664,6 +664,7 @@ function worldKeys(w){
   if(window.NJH98Step2?.busy?.()){e.preventDefault();e.stopImmediatePropagation();return;}
   if(ctxOpen){e.preventDefault();e.stopImmediatePropagation();closeCtx();return;}
   const info=ctxInfo();
+  if(doorNearObj&&doorNearObj.dist<=1.8&&!info){e.preventDefault();e.stopImmediatePropagation();life()?.handleAction?.();return;}
   if(info&&!info.work){e.preventDefault();e.stopImmediatePropagation();openCtx();}
  },true);
 }
@@ -676,7 +677,9 @@ window.addEventListener('keydown',e=>{
  if(k!=='e')return;
  if(window.NJH98Step2?.busy?.()){e.preventDefault();return;}
  if(ctxOpen){e.preventDefault();closeCtx();return;}
- const info=ctxInfo();if(info&&!info.work){e.preventDefault();openCtx();}
+ const info=ctxInfo();
+  if(doorNearObj&&doorNearObj.dist<=1.8&&!info){e.preventDefault();life()?.handleAction?.();return;}
+  if(info&&!info.work){e.preventDefault();openCtx();}
 });
 /* ---------- popups on touch: HUD steps aside ---------- */
 function paintModal(){
@@ -799,6 +802,7 @@ function questList(){
   try{const byId=new Map(sites.concat(dir).map(o=>[String(o.id),o]));
    return (S.questMarkers()||[]).map(q=>{const o=byId.get(String(q.npcId));return o&&{id:'q:'+o.id,npc:o,npcId:String(q.npcId),x:o.x,z:o.z,name:o.name,state:q.state==='ready'?'ready':'available',sample:false};}).filter(Boolean);}catch{return [];}
  }
+ if(!demo)return [];
  const all=dir.filter(o=>o.type==='quest_npc');
  if(typeof window.NJH98Mock?.questState==='function')
   return all.map(o=>{const st=window.NJH98Mock.questState(o);return st&&{id:'q:'+o.id,npc:o,x:o.x,z:o.z,name:o.name||'NPC',state:st,sample:true};}).filter(Boolean);
@@ -806,11 +810,12 @@ function questList(){
 }
 function doorList(){
  const S=sp();
- // real hook first; an empty list (no interiors on this map yet) falls back to the marked sample
- if(typeof S?.enterables==='function'){try{const v=(S.enterables()||[]).map(d=>({id:'d:'+d.id,x:+d.x,z:+d.z,name:d.name||'Bangunan',sample:false}));if(v.length)return v;}catch{}}
+ // Real interior doors only. Never show outside glints while indoors.
+ try{if(world()?.__njhPlayInteriors?.active?.())return [];}catch{}
+ if(typeof S?.enterables==='function'){try{return (S.enterables()||[]).map(d=>({id:'d:'+d.id,x:+d.x,z:+d.z,name:d.name||'Bangunan',sample:false}));}catch{return [];}}
  let dir=[];try{dir=S?.worldDirectory?.()||[];}catch{}
  const real=dir.filter(o=>o.enterable).map(o=>({id:'d:'+o.id,x:o.x,z:o.z,name:o.name||o.label||'Bangunan',sample:false}));
- if(real.length)return real;
+ if(real.length||!demo)return real;
  let sites=[];try{sites=life()?.sites?.()||[];}catch{}
  return sites.filter(s=>s&&(!s.placeholder||s.id==='kost')&&SAMPLE_DOORS.test(s.id)&&Number.isFinite(s.x)).map(s=>({id:'d:'+s.id,x:s.x,z:s.z,name:s.label,sample:true}));
 }
@@ -841,7 +846,7 @@ function paintMarks(){
    const p=project(d.x,0.15,d.z,rect,me);if(!p||p.x<rect.x||p.y<rect.y||p.x>rect.x+rect.w||p.y>rect.y+rect.h)continue;
    const el=mark(d.id,'njh-glint'+(d.sample?' sample':''),'<i></i>');
    el.style.transform='translate('+Math.round(p.x)+'px,'+Math.round(p.y)+'px)';
-   if(me){const dist=Math.hypot(d.x-me.px,d.z-me.pz);if(dist<4&&(!best||dist<best.dist))best={...d,dist,p:project(d.x,2.7,d.z,rect,me)||p};}
+   if(me){const dist=Math.hypot(d.x-me.px,d.z-me.pz);if(dist<=1.8&&(!best||dist<best.dist))best={...d,dist,p:project(d.x,2.7,d.z,rect,me)||p};}
   }
   // interaction cue: visual-only "!" bubble above the PLAYER's head while something is actionable nearby (Action button / E opens the menu)
   let hp=null;
