@@ -1,6 +1,7 @@
 /* Semesta Play Game V1: non-destructive survival sandbox powered by Jiwa's
  * shared life-economy rules. Uses real Semesta world geometry and actor walk mode.
- * Missing interactables render lightweight 3D placeholders, never saved as objects.
+ * Playable sites must resolve to actual placed Semesta objects. Unconfigured
+ * demo-only locations are not emitted as Nokia pins, player action sites or 3D props.
  */
 (function(root,factory){
  'use strict';
