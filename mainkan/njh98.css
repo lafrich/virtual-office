@@ -92,7 +92,7 @@ button,input,select{font-family:var(--w-font)}
 .hero:before{background:
   linear-gradient(180deg,#000040 0%,#000080 46%,#1084d0 100%)!important}
 .hero:after{background:#000020!important;opacity:.9!important;height:34%!important}
-.hero strong{font:900 clamp(26px,4.4vw,42px)/.95 "Arial Black","Franklin Gothic Heavy",Impact,var(--w-font)!important;text-shadow:2px 2px 0 #000!important;letter-spacing:-.01em;text-transform:uppercase}
+.hero strong{font:900 clamp(26px,4.4vw,42px)/1.08 "Arial Black","Franklin Gothic Heavy",Impact,var(--w-font)!important;text-shadow:2px 2px 0 #000!important;letter-spacing:-.01em;text-transform:uppercase}
 .hero em.njh-sub{display:block;font:italic clamp(16px,2.3vw,22px)/1 "Times New Roman",Times,serif;color:#ffff80;margin-top:4px;letter-spacing:.02em}
 .hero small{font:11px/1.45 var(--w-font);margin-top:10px;color:#dfdfdf}
 .njh-byline{position:absolute!important;right:10px;top:8px;font:10px var(--w-mono);color:#c0c0c0;z-index:3}
@@ -139,8 +139,8 @@ button,input,select{font-family:var(--w-font)}
 
 /* statusbar + taskbar */
 .statusbar{border-top:0;padding:2px 0 0;gap:2px;font:11px var(--w-font);color:#000}
-.statusbar>span{flex:1;padding:1px 4px;box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl)}
-.statusbar>span:last-child{flex:0 0 auto}
+.statusbar>span{flex:1;min-width:0;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl)}
+.statusbar>span:last-child{flex:0 1 auto}
 .taskbar{background:var(--w-face)!important;border-top:0!important;box-shadow:inset 0 1px var(--w-lt),inset 0 2px var(--w-hl);min-height:calc(30px + var(--sab));
  padding:3px 3px calc(3px + var(--sab));gap:4px}
 .start{display:flex;align-items:center;gap:4px;font:bold 12px var(--w-font);padding:2px 6px;border:0;background:var(--w-face);min-height:max(22px,var(--tap));
@@ -423,7 +423,14 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 @keyframes njhGlint{0%,62%{opacity:.85;transform:scale(1)}63%,80%{opacity:.35;transform:scale(.6)}81%,100%{opacity:0}}
 .njh-doortip{white-space:nowrap;transform-origin:0 0;padding:2px 5px;background:var(--w-tip);color:#000;border:1px solid #000;font:11px var(--w-font);translate:-50% -100%}
 .njh-doortip .njh-soon{margin-left:4px;font-size:9px}
-@media (prefers-reduced-motion:reduce){.njh-qmark b,.njh-glint i{animation:none}}
+/* interaction cue above the PLAYER: white Win98 speech bubble with a navy "!" — visual only (never clickable), distinct from the yellow NPC quest "!" */
+.njh-pcue{pointer-events:none!important;z-index:4}
+.njh-marks>.njh-doortip{z-index:3}
+.njh-pcue b{position:absolute;left:-8px;top:-14px;width:16px;height:16px;display:grid;place-items:center;background:#fff;color:#000080;
+ font:bold 12px/1 var(--w-mono);border:1px solid #000;box-shadow:1px 1px 0 #000;animation:njhBob 1.2s steps(2) infinite;pointer-events:none}
+.njh-pcue b::before{content:"";position:absolute;left:2px;bottom:-6px;border-style:solid;border-width:5px 5px 0 0;border-color:#000 transparent transparent transparent}
+.njh-pcue b::after{content:"";position:absolute;left:3px;bottom:-3px;border-style:solid;border-width:3px 3px 0 0;border-color:#fff transparent transparent transparent}
+@media (prefers-reduced-motion:reduce){.njh-qmark b,.njh-glint i,.njh-pcue b{animation:none}}
 @media (pointer:coarse) and (max-height:500px){
  .njh-menu{display:grid!important;grid-template-columns:1fr 1fr}
  .njh-menu>.btn.primary,#welcomeGuest,#pauseExit,#njhPauseHowto,#njhPauseReload,.njh-menu>.njh-sep{grid-column:1/-1}
@@ -443,12 +450,14 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 .njh-win.njh-mapwin{width:min(520px,calc(100% - 16px))}
 .njh-win.njh-kostwin{width:min(560px,calc(100% - 16px))}
 .njh-win.njh-shopwin{width:min(420px,calc(100% - 16px))}
-.njh-group{border:1px solid var(--w-sh);box-shadow:1px 1px var(--w-hl),inset 1px 1px var(--w-hl);padding:6px 8px;margin:0;min-width:0}
-.njh-group legend{padding:0 3px}
+.njh-group{border:1px solid var(--w-sh);box-shadow:1px 1px var(--w-hl),inset 1px 1px var(--w-hl);padding:14px 8px 7px;margin:7px 0 0;min-width:0}
+.njh-group legend{padding:0 3px;top:-8px;display:flex;align-items:center;gap:0;height:15px;line-height:15px;white-space:nowrap;max-width:calc(100% - 16px)}
+.njh-group legend .njh-sim{vertical-align:0}
 .njh-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .njh-win tr.tot th,.njh-win tr.tot td{font-weight:bold;border-top:1px solid #000}
 .njh-win td{text-align:right;white-space:nowrap}
 .njh-win .njh-need{grid-template-columns:110px 1fr 34px}
+.njh-win .njh-2col .njh-need{grid-template-columns:minmax(0,1fr) 44px 24px}
 .njh-ladder .njh-arrow{align-self:center;font-style:normal;padding:0 2px}
 .njh-ladder span.done{background:#dfdfdf;color:#000}
 .njh-ladder small{font-size:9px}
@@ -484,8 +493,9 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 .njh-shophead{display:flex;align-items:center;gap:6px;padding:4px 6px;background:#000080;color:#fff;font:bold 13px var(--w-font)}
 .njh-shophead .njh-soon{margin-left:auto}
 .njh-shoprow{display:flex;gap:4px;align-items:center;margin:2px 0;flex-wrap:wrap}
-.njh-shoprow .btn{flex:1;display:flex;justify-content:space-between;gap:8px;min-height:30px;text-align:left}
-.njh-shoprow select{min-height:26px;max-width:180px}
+.njh-shoprow .btn{flex:1;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:30px;text-align:left;min-width:0}
+.njh-shoprow .btn>small,.njh-roomacts .btn>small{flex:none;font-family:var(--w-mono);white-space:nowrap}
+.njh-shoprow select{min-height:30px;max-width:180px;min-width:0}
 /* Kost.exe room */
 .njh-room{--t:40px;position:relative;width:calc(var(--t)*8);height:calc(var(--t)*6);margin:0 auto;display:grid;grid-template-columns:repeat(8,var(--t));grid-auto-rows:var(--t);
  box-shadow:0 0 0 2px #000,inset 0 0 0 1px #000;outline:none}
@@ -495,10 +505,13 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 .njh-room i.t.wall{background:repeating-linear-gradient(90deg,#9c9c9c 0 19px,#8a8a8a 19px 20px);cursor:default}
 .njh-room i.t.door{background:#6b4a2a;box-shadow:inset 0 3px 0 #3b2614}
 .njh-room b.f{position:absolute;left:calc(var(--x)*var(--t) + 2px);top:calc(var(--y)*var(--t) + 2px);width:calc(var(--w)*var(--t) - 4px);height:calc(var(--h)*var(--t) - 4px);
- display:grid;place-items:center;text-align:center;font:10px/1.1 var(--w-font);background:var(--w-face);box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh);pointer-events:none}
+ display:grid;place-items:center;text-align:center;font:10px/1.05 var(--w-font);letter-spacing:-.02em;padding:1px;overflow:hidden;overflow-wrap:break-word;background:var(--w-face);box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh);pointer-events:none}
 .njh-room b.f.missing{background:repeating-linear-gradient(45deg,#dfdfdf 0 4px,#c0c0c0 4px 8px);color:#606060}
 .njh-room .njh-me{position:absolute;left:calc(var(--x)*var(--t) + var(--t)/2 - 7px);top:calc(var(--y)*var(--t) + 4px);width:14px;height:calc(var(--t) - 8px);background:#000080;border:1px solid #000;
  box-shadow:inset 0 6px 0 #ffcc99;pointer-events:none;transition:left .12s steps(2),top .12s steps(2)}
+.njh-roomacts .btn{display:inline-flex;align-items:center;gap:6px}
+/* 1-tile-wide furniture (Kulkas, Lemari, Kamar Mandi): smaller label so whole words fit */
+.njh-room b.f[style*="--w:1;"]{font-size:9px;letter-spacing:-.03em}
 .njh-roomacts{min-height:58px;padding:4px 6px;background:#fff;box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl);display:grid;gap:2px}
 body.njh-indoor .njh-joy,body.njh-indoor.njh-play #viewport #gameAction,body.njh-indoor.njh-play #viewport #gameRun,body.njh-indoor .njh-near,body.njh-indoor .njh-marks{visibility:hidden}
 .njh-credits{text-align:center;display:grid;gap:4px}
@@ -534,3 +547,39 @@ body.njh-indoor .njh-joy,body.njh-indoor.njh-play #viewport #gameAction,body.njh
  .njh-menu>.btn[data-njh-placeholder] .njh-sim{font-size:8px;line-height:12px;padding:0 2px;letter-spacing:0}
 }
 .njh-last{min-width:0}
+/* NPC reaction (mainkan:npc-react) — symbol only, short */
+.njh-emote{pointer-events:none!important}
+.njh-emote b{position:absolute;left:-7px;top:-24px;width:14px;height:14px;display:grid;place-items:center;background:#fff;color:#008000;font:bold 12px/1 var(--w-mono);border:1px solid #000;box-shadow:1px 1px 0 #000;animation:njhBob .6s steps(2) infinite}
+
+/* ---------- njh98-5 · overflow + alignment pass (t28u) ---------- */
+/* spacing scale: 2 / 4 / 6 / 8 / 12 px · one centre line for label, tag and price */
+.njh-menu .btn>span,.njh-menu .btn>small{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.njh-menu .btn>small{flex:none}
+.njh-list li .btn{align-self:start}
+.njh-slotlist li>*{min-width:0}
+.njh-slotlist li>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.njh-need label,.njh-need output{line-height:12px}
+/* onboarding on short screens: the wizard buttons stay visible at the bottom of the scrolled screen */
+.njh-wizard-actions{position:sticky;bottom:0;z-index:2;background:var(--w-face)}
+@media (pointer:coarse) and (max-height:500px){
+ .njh-mark{display:none}
+ .njh-room{--t:34px}
+ .njh-room b.f{font-size:9px}
+ .njh-room b.f[style*="--w:1;"]{font-size:8px}
+ .njh-group{padding:13px 6px 5px}
+ .njh-win .njh-2col .njh-need{grid-template-columns:minmax(0,1fr) 34px 20px}
+ #pauseScreen .njh-pause h1{margin:0 0 2px}
+ #pauseScreen .njh-pause p{margin:0 0 4px}
+ #pauseScreen .njh-menu .btn{min-height:34px}
+ #pauseScreen .njh-menu .njh-sep{margin:2px 0}
+ .njh-wizard-actions{margin-top:6px;padding-top:6px}
+}
+@media (pointer:coarse) and (max-height:400px){
+ #loginScreen .split>div:first-child,#loginScreen .tabs{display:none}
+ #loginScreen .muted{margin:0 0 4px}
+ #authForm .njh-group{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+ #authForm .field{margin:0}
+ #loginScreen .split{grid-template-columns:1fr!important}
+ .screen h1{font-size:15px}
+ #pauseScreen .njh-menu .btn{min-height:32px}
+}

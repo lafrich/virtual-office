@@ -324,7 +324,10 @@ $('njhBagEat')?.addEventListener('click',()=>bagAction('eat_item'));
 $('njhBagDrop')?.addEventListener('click',()=>bagAction('discard_item'));
 
 /* ---------- context menu (native life-panel buttons, shown only near a spot) ---------- */
-function ctxInfo(){
+// body actions (Pipis di Tembok / Kentut): real nearbyActions entries win, otherwise the SIMULASI mock (njh98-mock.js).
+// They live INSIDE the one Action menu — never as their own button.
+function bodyActs(){try{return window.NJH98Mock?.bodyActions?.()||[];}catch{return [];}}
+function ctxSpot(){
  // Future hook (Baymax): SemestaLifePlay.nearbyActions() → [{action,label,...}] with a spot label.
  try{const L=life();if(typeof L?.nearbyActions==='function'){const list=L.nearbyActions()||[];const spot=list.spot||list[0]?.spotLabel;
   if(Array.isArray(list)&&list.length&&!wdoc()?.getElementById('slpActions'))return {work:list.some(a=>a.hold),label:spot||'Aksi'};}}catch{}
@@ -335,15 +338,34 @@ function ctxInfo(){
  const spot=(d.querySelector('#semestaLifePlayPanel .slp-spot')?.textContent||'').replace(/^\s*📍\s*/,'').replace(/\s*\[PLACEHOLDER\]/,'').trim();
  return {work,label:spot||'Aksi'};
 }
+// "something actionable nearby" for the player cue + hint: any action except the always-on fart
+const IDLE_ACT=new Set(['fart']);
+function contextualNear(){
+ try{const L=life();if(typeof L?.nearbyActions==='function'){const list=L.nearbyActions()||[];if(Array.isArray(list))return list.some(a=>!IDLE_ACT.has(String(a.id||a.action)));}}catch{}
+ const ci=ctxInfo();return !!(ci&&(!ci.bodyOnly||ci.contextual));
+}
+function ctxInfo(){
+ const spot=ctxSpot();if(spot&&spot.work)return spot;
+ const body=bodyActs();
+ if(spot)return {...spot,body};
+ if(!body.length)return null;
+ // no spot: the menu still opens for the body actions; only a contextual one (wall_pee) counts as "something nearby"
+ return {work:false,label:'Aksi',body,bodyOnly:true,contextual:body.some(a=>a.contextual)};
+}
 let ctxOpen=false,ctxLabel='';
 function setWorldClass(c,on){try{wdoc()?.documentElement?.classList.toggle(c,on);}catch{}}
 function openCtx(){
  // enterable door nearby → its (placeholder) interior instead of the generic menu
  if(doorNearObj&&typeof window.NJH98Mock?.enterDoor==='function'){try{window.NJH98Mock.enterDoor(doorNearObj);}catch(err){console.warn(err);}return true;}
  const info=ctxInfo();if(!info||info.work)return false;
- ctxOpen=true;ctxLabel=info.label;setWorldClass('njh-ctx-open',true);decorateWorld(true);
+ ctxOpen=true;ctxLabel=info.label;setWorldClass('njh-ctx-open',true);decorateWorld(true);paintBody(info.body||[]);
  setTimeout(()=>{try{wdoc()?.querySelector('#slpActions button[data-life-action],#slpActions select')?.focus();}catch{}},0);
  return true;
+}
+function paintBody(list){
+ const box=wdoc()?.getElementById('njhCtxBody');if(!box)return;
+ box.hidden=!list.length;
+ box.innerHTML=list.map(a=>'<button type="button" data-njh-body="'+esc(a.id)+'"'+(a.disabled?' disabled title="'+esc(a.hint||'')+'"':'')+'><span>'+esc(a.label)+'</span>'+(a.disabled&&a.hint?'<small>'+esc(a.hint)+'</small>':'')+(a.mock?'<span class="njh-sim">SIMULASI</span>':'')+'</button>').join('');
 }
 function closeCtx(){if(!ctxOpen)return;ctxOpen=false;setWorldClass('njh-ctx-open',false);try{frame.focus();}catch{}}
 // AKSI button: near a spot with choices it opens the menu; at a job it still forwards the hold-to-work input.
@@ -380,7 +402,9 @@ function paintProgress(){
 /* ---------- near hint ---------- */
 function paintNear(){
  const n=$('njhNear');if(!n)return;
- const info=(!ctxOpen&&current==='gameScreen'&&!doorNear)?ctxInfo():null;
+ let info=(!ctxOpen&&current==='gameScreen'&&!doorNear)?ctxInfo():null;
+ if(info?.bodyOnly){info=info.contextual?{...info,label:info.body.find(a=>a.contextual)?.label||'Aksi'}:null;}
+ if(info&&!info.work&&!contextualNear())info=null;
  n.hidden=!info;
  if(info)n.textContent=(info.work?'Tahan AKSI: ':'AKSI'+(coarse()?'':' (E)')+': ')+info.label;
 }
@@ -394,6 +418,10 @@ function decorateWorld(force){
  if(h&&!DEV&&(force||ctxOpen))h.textContent=ctxLabel||'Aksi';
  if(decorated===outer)return;decorated=outer;
  if(DEV){if(h)h.textContent='Aksi & Tas (dev)';return;}
+ const body=d.createElement('div');body.className='njh-ctx-body';body.id='njhCtxBody';body.hidden=true;outer.append(body);
+ body.addEventListener('click',e=>{const b=e.target.closest('[data-njh-body]');if(!b||b.disabled||!ctxOpen)return;
+  let msg='';try{msg=window.NJH98Mock?.runBody?.(b.dataset.njhBody)||'';}catch(err){console.warn(err);}
+  if(msg)toast(msg);setTimeout(closeCtx,0);});
  const foot=d.createElement('div');foot.className='njh-ctx-foot';
  const cancel=d.createElement('button');cancel.type='button';cancel.id='njhCtxCancel';cancel.textContent='Batal';
  foot.append(cancel);outer.append(foot);
@@ -563,7 +591,7 @@ function mark(id,cls,html){
  if(el.className!==cls)el.className=cls;if(el._h!==html){el.innerHTML=html;el._h=html;}
  el._live=true;return el;
 }
-let doorNear='',doorNearObj=null;
+let doorNear='',doorNearObj=null,cueT=0,cueOn=false;
 function paintMarks(){
  if(!marks)return;
  const show=current==='gameScreen'&&!document.body.classList.contains('njh-modal')&&!ctxOpen;
@@ -572,11 +600,12 @@ function paintMarks(){
  const rect=canvasRect(),me=cameraFocus();
  for(const el of markPool.values())el._live=false;
  if(rect){
+  const qpts=[];
   for(const q of questList()){
    const p=project(q.x,2.15,q.z,rect,me);if(!p||p.x<rect.x-20||p.y<rect.y-30||p.x>rect.x+rect.w+20||p.y>rect.y+rect.h+20)continue;
    const el=mark(q.id,'njh-qmark '+q.state+(q.sample?' sample':''),'<b>'+(q.state==='ready'?'?':'!')+'</b>');
    el._q=q;el.title=q.name+(q.state==='ready'?' · quest siap diserahkan':' · punya quest')+(q.sample?' (status contoh)':'');
-   el.style.transform='translate('+Math.round(p.x)+'px,'+Math.round(p.y)+'px)';
+   el.style.transform='translate('+Math.round(p.x)+'px,'+Math.round(p.y)+'px)';qpts.push(p);
   }
   let best=null;
   for(const d of doorList()){
@@ -585,16 +614,39 @@ function paintMarks(){
    el.style.transform='translate('+Math.round(p.x)+'px,'+Math.round(p.y)+'px)';
    if(me){const dist=Math.hypot(d.x-me.px,d.z-me.pz);if(dist<4&&(!best||dist<best.dist))best={...d,dist,p:project(d.x,2.7,d.z,rect,me)||p};}
   }
+  // interaction cue: visual-only "!" bubble above the PLAYER's head while something is actionable nearby (Action button / E opens the menu)
+  let hp=null;
+  if(me){const now=performance.now();if(now-cueT>180){cueT=now;cueOn=!!best||contextualNear();}
+   hp=cueOn&&project(me.px,2.2,me.pz,rect,me);
+   if(hp){const el=mark('pcue','njh-pcue','<b>!</b>');el.style.transform='translate('+Math.round(hp.x)+'px,'+Math.round(hp.y)+'px)';}}
+  const nowR=performance.now();reacts=reacts.filter(r=>r.until>nowR);
+  for(const r of reacts){const p=project(r.x,2.15,r.z,rect,me);if(!p)continue;const el=mark(r.id,'njh-emote','<b>~</b>');el.style.transform='translate('+Math.round(p.x)+'px,'+Math.round(p.y)+'px)';}
   if(best){
    doorNear=best.id;doorNearObj=best;const g=markPool.get(best.id);if(g)g._live=false;
    const el=mark('tip','njh-doortip','<b>'+esc(best.name)+'</b> · Masuk ['+(coarse()?'AKSI':'E')+']'+(best.sample?'<span class="njh-soon nologic">CONTOH</span>':''));
-   el.style.transform='translate('+Math.round(best.p.x)+'px,'+Math.round(best.p.y)+'px)';
+   // the door tooltip never covers the player's "!" cue: lift it above the bubble when they would meet
+   // …nor an NPC's quest "!" (marker box spans y-26…y-4): stack the tooltip above whatever it would cover
+   let ty=hp&&Math.abs(best.p.x-hp.x)<180?Math.min(best.p.y,hp.y-20):best.p.y;
+   for(const q of qpts)if(Math.abs(q.x-best.p.x)<180&&ty>q.y-30&&ty-20<q.y-4)ty=q.y-30;
+   el.style.transform='translate('+Math.round(best.p.x)+'px,'+Math.round(ty)+'px)';
   }
  }
  for(const [id,el] of markPool)if(!el._live){el.remove();markPool.delete(id);}
 }
 function markLoop(){paintMarks();requestAnimationFrame(markLoop);}
 requestAnimationFrame(markLoop);
+// Baymax: world dispatches CustomEvent 'mainkan:npc-react' {action, emote} (e.g. after a fart near an NPC).
+// UI shows a small symbol-only bubble over the NPCs within ~2 tiles for 2.5 s. Nothing else happens.
+let reacts=[];
+function worldReact(w){
+ if(w.__njh98React)return;w.__njh98React=true;
+ w.addEventListener('mainkan:npc-react',e=>{try{
+  const me=playerPos();if(!me)return;const t=performance.now()+2500;
+  let pts=[];try{pts=(sp()?.worldDirectory?.()||[]).filter(o=>/npc/i.test(String(o.type||'')));}catch{}
+  try{pts=pts.concat((life()?.sites?.()||[]).filter(o=>o.npc));}catch{}
+  reacts=pts.filter(o=>Number.isFinite(o.x)&&Math.hypot(o.x-me.x,o.z-me.z)<=2.5).map(o=>({id:'r:'+(o.id||o.x+','+o.z),x:o.x,z:o.z,until:t,emote:String(e.detail?.emote||'')}));
+ }catch{}});
+}
 function worldZoom(w){
  if(w.__njh98Zoom)return;w.__njh98Zoom=true;
  // mirror Semesta's wheel zoom (viewSize×1.12 / ×0.89, clamp 8..180) so the fallback projection stays aligned
@@ -629,9 +681,9 @@ function injectWorld(){
   d.documentElement.classList.toggle('njh-devtools',DEV);
   if(!d.getElementById('njh98-world-css')&&d.head){
    const l=d.createElement('link');l.id='njh98-world-css';l.rel='stylesheet';
-   l.href=new URL('./njh98-world.css?v=njh98-4',location.href).href;d.head.appendChild(l);
+   l.href=new URL('./njh98-world.css?v=njh98-5',location.href).href;d.head.appendChild(l);
   }
-  worldKeys(w);worldZoom(w);
+  worldKeys(w);worldZoom(w);worldReact(w);
  }catch{}
 }
 frame.addEventListener('load',()=>{decorated=null;viewSize=16;ctxOpen=false;spawnShown=false;injectWorld();});

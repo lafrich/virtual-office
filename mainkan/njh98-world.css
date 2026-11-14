@@ -58,6 +58,13 @@ html.semesta-player-mode.njh98:not(.njh-devtools) .slp #slpActions>small{display
 html.semesta-player-mode.njh98 .slp .njh-ctx-foot{display:none;flex:none;justify-content:flex-end;padding:3px 2px 1px;border-top:1px solid var(--w-sh);box-shadow:inset 0 1px var(--w-hl)}
 html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) .slp .njh-ctx-foot{display:flex}
 html.semesta-player-mode.njh98 .slp .njh-ctx-foot button{min-width:72px}
+/* body actions (Pipis di Tembok / Kentut) — options inside the same Action menu */
+html.semesta-player-mode.njh98 .slp .njh-ctx-body{display:none;flex:none;gap:3px;padding:3px 2px;border-top:1px solid var(--w-sh);box-shadow:inset 0 1px var(--w-hl)}
+html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) .slp .njh-ctx-body:not([hidden]){display:grid;grid-template-columns:1fr}
+html.semesta-player-mode.njh98 .slp .njh-ctx-body button{display:flex;align-items:center;gap:6px;text-align:left;width:100%;min-height:32px}
+html.semesta-player-mode.njh98 .slp .njh-ctx-body button>span:first-child{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html.semesta-player-mode.njh98 .slp .njh-ctx-body small{flex:none;font-size:10px}
+html.semesta-player-mode.njh98 .slp .njh-sim{flex:none;font:bold 8px/12px var(--w-font);padding:0 3px;background:#008080;color:#fff;letter-spacing:0}
 
 /* ---- D-pad: kept in the DOM, hidden; the parent joystick drives the same WASD walk input ---- */
 html.semesta-player-mode.njh98:not(.njh-devtools) #walkPad,html.semesta-player-mode.njh98:not(.njh-devtools) #walkPad.active{display:none!important}
@@ -79,7 +86,8 @@ html.semesta-player-mode.njh98 #vl-lafrich-mark{left:50%!important;right:auto!im
  transform:translateX(-50%);opacity:.6!important;color:#fff!important;text-shadow:1px 1px 0 #000!important;z-index:70!important}
 
 @media (pointer:coarse) and (max-height:500px){
- html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) #semestaLifePlayPanel.slp{top:12%!important;max-height:calc(88% - 70px)!important}
+ /* never under the Kondisi window (≈190px wide, top-right) */
+ html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) #semestaLifePlayPanel.slp{top:12%!important;max-height:calc(88% - 70px)!important;left:calc(50% + 24px)!important;width:auto!important;max-width:calc(50% - 24px - 198px - env(safe-area-inset-right,0px))!important;min-width:180px}
  html.semesta-player-mode.njh98 #toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
 }
 /* one toast only: #toast carries the same tell() text as the play-hud tip */

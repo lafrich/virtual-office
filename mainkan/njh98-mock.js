@@ -25,6 +25,11 @@ const pk=k=>k+'@'+(pid()||'guest');
 const st=()=>N.lifeState()||{};
 const rules=()=>{try{return N.world()?.JiwaLifeEconomy||null;}catch{return null;}};
 const setting=(k,d)=>{try{return rules()?.defaults?.()?.settings?.[k]??d;}catch{return d;}};
+// fallback prices (Rp) = Baymax jiwa/life-economy.js (preview 2d965ee); the game setting wins when it exists
+const PRICE={streetFoodPrice:2500,wartegMealPrice:12000,coffeePrice:5000,teaPrice:3000,tokenPrice:20000,tokenUnits:5,roomPrice:700000,fridgePrice:2000000,publicShowerFee:500,charity:1000};
+const FURN_PRICE={fridge:2000000,bed:1500000,chair:350000,stove:850000,wardrobe:1000000};
+const price=k=>setting(k,PRICE[k]);
+const furnPrice=id=>(rules()?.FURNITURE||[]).find(x=>x.id===id)?.price??(id==='fridge'?price('fridgePrice'):FURN_PRICE[id]??0);
 const playing=()=>N.current()==='gameScreen';
 
 /* ================= settings (UI only, njh98:settings) ================= */
@@ -110,6 +115,8 @@ function closeDay(d){const days=ls.get(pk('days'),{});if(days[d]){days[d].closed
 const trimDays=d=>{const k=Object.keys(d).map(Number).sort((a,b)=>b-a);k.slice(14).forEach(x=>delete d[x]);return d;};
 const statusSnap=s=>({energy:s.energy,fullness:s.fullness,hygiene:s.hygiene,moral:s.moral,housing:s.housing?.room?'Kost':'Tenda'});
 let dayEndHook=false;
+// Baymax: Nokia's Peta app (world iframe) posts 'njh98:open-map' → the same Peta Kota window as the dock (one map only)
+window.addEventListener('message',e=>{if(e.origin!==location.origin||e.data?.type!=='njh98:open-map')return;try{N.world()?.document?.getElementById('ptWinClose')?.click();}catch{}setTimeout(openMap,80);});
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='mainkan:day-end'){dayEndHook=true;const d=Number(e.data.previousDay)||(Number(e.data.day)||dayNow())-1;closeDay(d);openReport(d,true);}});
 function openReport(day,ended){
  day=day||dayNow();let source='mock';
@@ -156,7 +163,7 @@ const LADDER=[{id:'tenda',label:'Tenda',lv:1},{id:'kost',label:'Kost',lv:3},{id:
 function housing(s){
  const f=hook('housingProgress');if(f){try{const v=f();if(v)return {...v,mock:false};}catch{}}fired('housingProgress');
  const {lv}=level(s);const q=Object.values(ls.get(pk('quests'),{})).filter(x=>x.state==='done').length;
- const cur=s.housing?.room?'kost':'tenda';const room=setting('roomPrice',30000);const furn=s.furniture||[];
+ const cur=s.housing?.room?'kost':'tenda';const room=price('roomPrice');const furn=s.furniture||[];
  const targets=cur==='tenda'?[
    {label:'Level '+3,done:lv>=3,info:'Lv '+lv},
    {label:'Tabungan '+rp(room),done:(s.wallet||0)>=room,info:rp(s.wallet)},
@@ -235,14 +242,17 @@ function openQuest(qm){
 $('njhMarks')?.addEventListener('click',e=>{const m=e.target.closest('.njh-qmark');if(m?._q)openQuest(m._q);});
 
 /* ================= Nokia extras: Pesan / Lowongan / Tips ================= */
-const inbox={list(){return ls.get(pk('inbox'),null)||[{from:'Lafrich',text:'Selamat datang di kota! Cari kerja, hemat, kumpulin buat kost.',t:Date.now()},{from:'Mak Kost',text:'Kamar kost masih ada, '+rp(setting('roomPrice',30000))+' sekali bayar. Kabarin ya.',t:Date.now()}];},
- push(from,text){const l=this.list();l.unshift({from,text,t:Date.now(),unread:true});ls.set(pk('inbox'),l.slice(0,30));}};
+const inbox={real(){const f=hook('messages');if(!f)return null;try{const v=f();return Array.isArray(v)?v:null;}catch{return null;}},
+ list(){const r=this.real();if(r){const extra=ls.get(pk('inbox'),null)||[];return extra.filter(m=>m.sim).concat(r);}fired('messages');return ls.get(pk('inbox'),null)||[{from:'Lafrich',text:'Selamat datang di kota! Cari kerja, hemat, kumpulin buat kost.',t:Date.now()},{from:'Mak Kost',text:'Kamar kost masih ada, '+rp(price('roomPrice'))+' sekali bayar. Kabarin ya.',t:Date.now()}];},
+ // UI-only notes (e.g. a SIMULASI job application) are kept beside the real inbox and tagged
+ push(from,text){const real=!!this.real();const l=real?(ls.get(pk('inbox'),null)||[]).filter(m=>m.sim):this.list();l.unshift({from,text,t:Date.now(),unread:true,sim:real});ls.set(pk('inbox'),l.slice(0,30));}};
 const JOB_NAMES={pak_ogah:'Bantu Lalu Lintas (Pak Ogah)',manusia_silver:'Manusia Silver',kang_parkir:'Jaga Parkir (Kang Parkir)',kantor_premium:'Kerja Kantor Premium'};
-const MOCK_JOBS=[{label:'Jaga Warung',wage:50000,per:'hari',where:'Warung Madura'},{label:'Cuci Piring Warteg',wage:35000,per:'hari',where:'Warteg'},{label:'Kuli Panggul Pasar',wage:80000,per:'hari',where:'Pasar Ikan'}];
+// fallback = the 4 game jobs with Baymax's wages (Rp per sesi); used only when neither jobs() nor JiwaLifeEconomy.JOBS exist
+const MOCK_JOBS=[{id:'manusia_silver',wage:1600,minutes:25},{id:'pak_ogah',wage:2500,minutes:20},{id:'kang_parkir',wage:2100,minutes:18},{id:'kantor_premium',wage:4500,minutes:28,minHygiene:70}].map(j=>({...j,label:JOB_NAMES[j.id],per:'sesi '+j.minutes+' mnt'}));
 function jobs(){
  const f=hook('jobs');if(f){try{const v=f();if(Array.isArray(v))return v.map(j=>({...j,mock:false}));}catch{}}fired('jobs');
  let rj=[];try{rj=(rules()?.JOBS||[]).map(j=>({id:j.id,label:JOB_NAMES[j.id]||j.label,wage:j.wage,per:'sesi '+j.minutes+' mnt',site:(L()?.sites?.()||[]).find(s=>s.jobId===j.id),mock:false,minHygiene:j.minHygiene}));}catch{}
- return rj.concat(MOCK_JOBS.map(j=>({...j,mock:true})));
+ return rj.length?rj:MOCK_JOBS.map(j=>({...j,mock:true}));
 }
 let nokiaTab='pesan';
 function paintNokiaPlus(){
@@ -250,10 +260,10 @@ function paintNokiaPlus(){
  const tabs=[['pesan','Pesan'],['lowongan','Lowongan'],['tips','Tips']];
  let body='';
  if(nokiaTab==='pesan'){const l=inbox.list();body='<ul class="njh-list">'+l.map(m=>'<li><b>'+esc(m.from)+'</b><span>'+esc(m.text)+'</span></li>').join('')+'</ul>';
-  l.forEach(m=>m.unread=false);ls.set(pk('inbox'),l);}
+  if(!inbox.real()){l.forEach(m=>m.unread=false);ls.set(pk('inbox'),l);}}
  if(nokiaTab==='lowongan')body='<ul class="njh-list">'+jobs().map((j,i)=>'<li><b>'+esc(j.label)+(j.mock?' '+SIM:'')+'</b><span>'+rp(j.wage)+' / '+esc(j.per)+(j.minHygiene?' · bersih ≥ '+j.minHygiene:'')+(j.where?' · '+esc(j.where):'')+'</span>'+
   (j.site?'<button class="btn" type="button" data-job-map="'+esc(j.site.id)+'">Tandai di Peta</button>':j.mock?'<button class="btn" type="button" data-job-apply="'+i+'">Lamar</button>':'')+'</li>').join('')+'</ul>';
- if(nokiaTab==='tips')body='<ul class="njh-list tips"><li>Kerja: tahan <b>AKSI</b> di tempat kerja sampai bar penuh.</li><li>Kebersihan rendah? Mandi umum cuma '+rp(setting('publicShowerFee',500))+'.</li><li>Kumpulin '+rp(setting('roomPrice',30000))+' buat sewa kost biar tidurnya pulih lebih banyak.</li><li>Makanan bisa busuk. Simpan di kulkas kost.</li><li>Moral di bawah '+setting('arrestMoralThreshold',15)+' bikin hansip curiga.</li></ul>';
+ if(nokiaTab==='tips')body='<ul class="njh-list tips"><li>Kerja: tahan <b>AKSI</b> di tempat kerja sampai bar penuh.</li><li>Kebersihan rendah? Mandi umum cuma '+rp(price('publicShowerFee'))+'.</li><li>Kumpulin '+rp(price('roomPrice'))+' buat sewa kost biar tidurnya pulih lebih banyak.</li><li>Makanan bisa busuk. Simpan di kulkas kost.</li><li>Moral di bawah '+setting('arrestMoralThreshold',15)+' bikin hansip curiga.</li></ul>';
  b.innerHTML='<div class="njh-tabs" role="tablist">'+tabs.map(([id,l])=>'<button type="button" role="tab" aria-selected="'+(id===nokiaTab)+'" data-ntab="'+id+'">'+l+'</button>').join('')+'</div><div class="njh-tabpane">'+body+'</div><p class="micro">Aplikasi tambahan Nokia '+SIM+'</p>';
 }
 document.addEventListener('click',e=>{
@@ -305,15 +315,15 @@ function paintMap(){
 
 /* ================= interiors (placeholder) ================= */
 const SHOPS={
- warung:{title:'Warteg',real:[{act:'eat',label:'Makan Nasi Rames',price:2500}],mock:[['Es Teh Manis',3000],['Nasi + Ayam Goreng (bungkus)',15000],['Gorengan 2 biji',2000]]},
- coffee:{title:'Warung Kopi',real:[{act:'coffee',label:'Ngopi Kopi Hitam',price:()=>setting('coffeePrice',2000)}],mock:[['Kopi Susu Sachet',5000],['Indomie Rebus + Telur',10000]]},
+ warung:{title:'Warteg',real:[{act:'eat',label:'Makan Warteg',price:()=>price('wartegMealPrice')}],mock:[['Es Teh Manis',3000],['Gorengan 2 biji',2500]]},
+ coffee:{title:'Warung Kopi',real:[{act:'coffee',label:'Kopi',price:()=>price('coffeePrice')},{act:'tea',label:'Es Teh',price:()=>price('teaPrice')}],mock:[['Gorengan 2 biji',2500]]},
  loak:{title:'Toko Loak',real:[{act:'sell_loak',label:'Jual barang dari tas',item:true}],mock:[['Kipas Angin Bekas',45000],['Radio Bekas',30000]]},
  pasar_ikan:{title:'Pasar Ikan',real:[{act:'sell_fish',label:'Jual ikan',item:true,args:{buyerId:'pasar_ikan'}}],mock:[['Ikan Lele 1 kg',28000],['Tahu & Tempe',6000]]},
  siomay_batagor:{title:'Bang Siomay / Batagor',real:[{act:'sell_fish',label:'Jual ikan ke Abang',item:true,args:{buyerId:'siomay_batagor'}}],mock:[['Siomay 1 porsi',12000],['Batagor 1 porsi',12000]]},
  course:{title:'Kursus HP',real:[{act:'course',label:'Ikut Kursus HP (EXP +12)'}],mock:[['Buku Tulis',5000],['Pulpen',3000]]},
  public_wc:{title:'WC Umum',real:[{act:'public_toilet',label:'Pakai WC',args:{facilityId:'public_wc'}}],mock:[['Tisu',2000]]},
- public_bath:{title:'Mandi Umum',real:[{act:'public_shower',label:'Mandi',price:()=>setting('publicShowerFee',500),args:{facilityId:'public_bath'}}],mock:[['Sabun Sachet',1000],['Sampo Sachet',1000]]},
- prayer:{title:'Tempat Ibadah',real:[{act:'worship',label:'Ibadah'}],mock:[['Isi Kotak Amal',2000]]}
+ public_bath:{title:'Mandi Umum',real:[{act:'public_shower',label:'Mandi',price:()=>price('publicShowerFee'),args:{facilityId:'public_bath'}}],mock:[['Sabun Sachet',1000],['Sampo Sachet',1000]]},
+ prayer:{title:'Tempat Ibadah',real:[{act:'worship',label:'Ibadah'}],mock:[['Sedekah',1000]]}
 };
 const shopOf=id=>SHOPS[id]||(/^prayer_/.test(id)?SHOPS.prayer:null);
 function itemSelect(id,list,meta){return '<select id="'+id+'">'+(list.length?list.map(x=>'<option value="'+esc(x)+'">'+esc(meta?.[x]?.label||x)+'</option>').join(''):'<option value="">(kosong)</option>')+'</select>';}
@@ -373,7 +383,7 @@ function indoorOff(){if(indoor){indoor=null;document.body.classList.remove('njh-
 function openKost(d){
  const s=st();
  if(!s.housing?.room){
-  const w=win('njhKost','Kost.exe','<div class="njh-shophead"><b>Kost</b>'+PH+'</div><p>Kamu belum punya kamar. Sewa sekali bayar <b>'+rp(setting('roomPrice',30000))+'</b> (aksi game asli).</p><div class="w98-well micro" id="njhKostMsg">Dompet '+rp(s.wallet)+'</div><div class="njh-row"><button class="btn" data-close type="button">Nanti</button><button class="btn primary" type="button" id="njhKostRent">Sewa Kamar</button></div>',{layer:'hud',cls:'njh-small'});
+  const w=win('njhKost','Kost.exe','<div class="njh-shophead"><b>Kost</b>'+PH+'</div><p>Kamu belum punya kamar. Sewa sekali bayar <b>'+rp(price('roomPrice'))+'</b> (aksi game asli).</p><div class="w98-well micro" id="njhKostMsg">Dompet '+rp(s.wallet)+'</div><div class="njh-row"><button class="btn" data-close type="button">Nanti</button><button class="btn primary" type="button" id="njhKostRent">Sewa Kamar</button></div>',{layer:'hud',cls:'njh-small'});
   w.querySelector('#njhKostRent').onclick=()=>{const r=runReal('buy_room',{});$('njhKostMsg').textContent=resultText(r);if(r.ok)setTimeout(()=>openKost(d),700);};
   return;
  }
@@ -397,7 +407,7 @@ function paintRoom(msg){
  r.innerHTML=html;
  const near=nearSpot(spots);const box=$('njhRoomActs');
  if(!near){box.innerHTML='<span class="micro">Dekati furnitur: '+spots.map(f=>f.label).join(', ')+'.</span>';return;}
- if(!near.owned){const price=(rules()?.FURNITURE||[]).find(x=>x.id===near.id)?.price??setting('fridgePrice',8000);
+ if(!near.owned){const price=furnPrice(near.id);
   box.innerHTML='<b>'+esc(near.label)+'</b> belum punya. <button class="btn" type="button" data-room-buy="'+esc(near.id)+'">Beli '+rp(price)+'</button><div class="micro" id="njhRoomMsg">'+(msg||'')+'</div>';return;}
  let recipes='';try{recipes=[...(N.wdoc()?.querySelectorAll('#slpRecipe option')||[])].map(o=>'<option value="'+esc(o.value)+'">'+esc(o.textContent)+'</option>').join('');}catch{}
  const na=real(L,'nearbyActions');let list=null;if(na){try{list=na()||[];}catch{list=null;}}else fired('nearbyActions');
@@ -521,11 +531,48 @@ document.querySelectorAll('[data-njh-placeholder]').forEach(b=>{
  b.title='Placeholder jalan (data simulasi)';b.addEventListener('click',fn);
 });
 
+
+/* ================= body actions: Pipis di Tembok (wall_pee) + Kentut (fart) =================
+   Options INSIDE the one Action menu (no own button). Same shape as Baymax's plan:
+   wall_pee: only when bladder >= 65 AND near/facing a wall or building → Buang Air -70, Kebersihan -5, Moral -5.
+   fart: always offered, ~60 s play-time cooldown; Moral -3 only if an NPC/other player is within ~2 tiles, 0 alone.
+   Real wins: if SemestaLifePlay.nearbyActions() lists the id, Baymax's panel shows it and the mock hides it.
+   Mock effects are SIMULASI only (njh98:mock:body@<pemain>) and never change the real status. */
+const BODY={peeNeed:65,wallDist:1.6,doorDist:3,npcDist:2,fartCd:60};
+let playSec=0,fartAt=-1e9;
+const WALLISH=/wall|tembok|pagar|fence|building|bangunan|house|rumah|shop|toko|warung|kost|gedung|ruko/i;
+function realIds(){const f=hook('nearbyActions');if(!f)return new Set();try{return new Set((f()||[]).map(a=>String(a.id||a.action)));}catch{return new Set();}}
+function directory(){try{return S()?.worldDirectory?.()||[];}catch{return [];}}
+function nearWall(me){
+ const f=hook('nearWall');if(f){try{return !!f();}catch{}}fired('nearWall');
+ for(const o of directory()){if(!Number.isFinite(o?.x))continue;const k=[o.type,o.kind,o.category,o.id,o.name].join(' ');if(!WALLISH.test(k)||/npc/i.test(String(o.type||'')))continue;
+  if(Math.hypot(o.x-me.x,(o.z||0)-me.z)<=(o.enterable?BODY.doorDist:BODY.wallDist))return true;}
+ try{return N.doorList().some(d=>Math.hypot(d.x-me.x,d.z-me.z)<=BODY.doorDist);}catch{return false;}
+}
+function npcNear(me){return directory().some(o=>Number.isFinite(o?.x)&&/npc|player|orang/i.test(String(o.type||o.kind||''))&&Math.hypot(o.x-me.x,(o.z||0)-me.z)<=BODY.npcDist);}
+function bodyRec(){return ls.get(pk('body'),{bladder:0,hygiene:0,moral:0,at:0});}
+function bladderNow(s){const r=bodyRec();const fresh=Date.now()-(r.at||0)<10*60*1000;return Math.max(0,(Number(s.bladder)||0)+(fresh?r.bladder:0));}
+function bodyActions(){
+ if(!playing())return [];const me=N.playerPos();const s=st();const real=realIds();const out=[];
+ if(!real.has('wall_pee')&&me&&bladderNow(s)>=BODY.peeNeed&&nearWall(me))out.push({id:'wall_pee',label:'Pipis di Tembok',mock:true,contextual:true});
+ if(!real.has('fart')){const left=Math.ceil(BODY.fartCd-(playSec-fartAt));
+  out.push(left>0?{id:'fart',label:'Kentut',mock:true,disabled:true,hint:'tunggu '+left+' dtk'}:{id:'fart',label:'Kentut',mock:true});}
+ if(out.length)fired('bodyActions');return out;
+}
+function runBody(id){
+ const r=bodyRec();const me=N.playerPos();const fresh=Date.now()-(r.at||0)<10*60*1000;if(!fresh){r.bladder=0;r.hygiene=0;r.moral=0;}
+ if(id==='wall_pee'){r.bladder-=70;r.hygiene-=5;r.moral-=5;r.at=Date.now();ls.set(pk('body'),r);
+  return 'Pipis di tembok… lega. Buang Air −70 · Kebersihan −5 · Moral −5 (SIMULASI)';}
+ if(id==='fart'){if(playSec-fartAt<BODY.fartCd)return 'Belum bisa kentut lagi. (SIMULASI)';
+  const seen=!!me&&npcNear(me);fartAt=playSec;if(seen){r.moral-=3;r.at=Date.now();}ls.set(pk('body'),r);
+  return seen?'Prrt… ada yang dengar. Moral −3 (SIMULASI)':'Prrt… aman, nggak ada yang dengar. (SIMULASI)';}
+ return '';
+}
 /* ================= tick (500 ms while playing) ================= */
 let t=0;
 function tick(s){
  if(!s||!Number.isFinite(Number(s.wallet)))return;
- t++;observe(s);
+ t++;observe(s);if(document.getElementById('pauseScreen')?.hidden!==false)playSec+=0.5;
  if(t%4===0)ls.set('last',{id:pid(),guest:!pid(),name:N.profile()?.name||'Pemain',day:dayNow(),wallet:s.wallet,at:Date.now()});
  if(!$('njhStatusWin')?.hidden&&t%2===0)N.paintStatus();
  if(!$('njhNokiaPlus')?.hidden&&nokiaTab!=='pesan'&&t%6===0)paintNokiaPlus();
@@ -539,6 +586,7 @@ new MutationObserver(()=>{if(!$('welcomeScreen')?.hidden)paintContinue();applySe
 window.NJH98Mock=Object.freeze({
  // UI-facing mock API (njh98:mock:*). Each one prefers the real hook named in NJH98-UI.md.
  questState,openQuest,statusHTML,enterDoor,openMap,onModal,tick,openReport,openSlots,openSettings,openCredits,
+ bodyActions,runBody,
  saveSlot,loadSlot,listSlots:()=>slotApi('listSlots')(),saveMeta:slot=>slotApi('saveMeta')(slot),hasSave:slot=>slotApi('hasSave')(slot),mockFired:()=>[...mockFired].sort(),jobs,skills,reputation,housing,level,furnitureSpots,mockWallet:mwallet,inbox,
  // test helper: close the current day now (screenshots / QA only)
  endDay:()=>{const d=dayNow();const days=ls.get(pk('days'),{});if(days[d]){days[d].closed=true;ls.set(pk('days'),days);}openReport(d,true);}

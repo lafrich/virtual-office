@@ -33,6 +33,10 @@ Satu-satunya pengecualian bentuk bulat: joystick dan tombol AKSI/LARI di HP (kon
 ### Aksi kontekstual
 - **Tidak ada panel "Aksi & Tas" permanen.** Aksi muncul sebagai menu pop-up Win98 kecil hanya saat dekat objek/orang (AKSI / `E`), lalu hilang (Batal / `Esc`).
 - Di tempat kerja: tahan AKSI → jendela progres.
+- **Jangan pernah menambah tombol baru untuk aksi.** Semua aksi (termasuk *Pipis di Tembok* `wall_pee` dan *Kentut* `fart`) hanya jadi **opsi di dalam menu Aksi yang sama** (satu tombol AKSI / `E`).
+  - `wall_pee`: hanya kalau Buang Air ≥ 65 **dan** dekat/menghadap tembok atau bangunan → Moral −5, Buang Air −70, Kebersihan −5.
+  - `fart`: selalu ada, cooldown ±60 dtk waktu main; Moral −3 hanya kalau ada NPC/pemain lain ≤ 2 petak, sendirian 0. Karena selalu ada, `fart` **tidak** dihitung "ada yang bisa dilakukan" (tidak memunculkan hint/`!`).
+  - Hook asli (`nearbyActions`/`runAction` Baymax) menang; mock SIMULASI hanya kalau id-nya tidak ada di `nearbyActions()`. Efek mock tidak mengubah status asli.
 - Tas punya jendela sendiri (grid slot) dari dock.
 
 ### Bersih dari teks debug
@@ -61,6 +65,9 @@ Satu-satunya pengecualian bentuk bulat: joystick dan tombol AKSI/LARI di HP (kon
 ### Penanda dunia
 - NPC dengan quest: **`!`** kuning pixel di atas kepala (bob pelan); **`?`** = quest siap diserahkan.
 - Bangunan yang bisa dimasuki: **kilau pixel kecil** di pintu + tooltip Win98 saat dekat: `Warteg Bu Sari · Masuk [E]` (HP: `[AKSI]`). Tooltip ini menggantikan hint AKSI biasa (bukan dobel).
+- **Tanda `!` di atas kepala PEMAIN** (gelembung putih Win98, `!` navy, bob pelan): muncul saat ada yang bisa dilakukan di dekatnya (`nearbyActions()` selain `fart`, atau pintu), ikut posisi pemain (`worldToScreen(playerPosition)`), hilang kalau tidak ada apa-apa. **Hanya simbol visual**: `pointer-events:none`, tidak bisa diklik/ketuk. Interaksi tetap lewat tombol **AKSI** / `E`. Beda dari `!` kuning di atas NPC (quest).
+- Tooltip pintu tidak boleh menutupi `!` pemain atau `!` NPC: tooltip otomatis naik di atasnya.
+- Reaksi NPC (`mainkan:npc-react`, mis. setelah kentut): gelembung simbol `~` kecil 2,5 dtk di atas NPC terdekat (≤ 2 petak). Simbol saja, tanpa teks.
 - Data yang belum ada ditandai **CONTOH**. Hook yang dibutuhkan dari Baymax: `SemestaPlay.questMarkers() → [{npcId,state}]`, `SemestaPlay.enterables() → [{id,name,x,z}]`, `SemestaPlay.worldToScreen(x,y,z)` (atau `playerPosition()`). UI otomatis memakai hook kalau ada.
 
 ### Fitur tanpa logic → lapisan SIMULASI
@@ -76,6 +83,7 @@ Ikuti handoff Baymax: `/workspace/mainkan-ui-handoff/MAINKAN-UI-HANDOFF.md` (box
 
 ### Konten
 - Harga **Rupiah realistis Indonesia** (`Rp 6.000`, format `id-ID`), teks bahasa Indonesia santai.
+- Harga UI/mock **sama persis** dengan logic game (Baymax `jiwa/life-economy.js`); nilai setting game menang, fallback di `njh98-mock.js` (`PRICE`, `FURN_PRICE`, `MOCK_JOBS`): Gorengan 2.500 · Makan Warteg 12.000 · Kopi 5.000 · Es Teh 3.000 · Token listrik (5 unit) 20.000 · Sewa kost 700.000 · Kulkas 2.000.000 · Kasur 1.500.000 · Kursi 350.000 · Kompor 850.000 · Lemari 1.000.000 · Mandi umum 500 · Sedekah 1.000. Upah per sesi: Manusia Silver 1.600 · Pak Ogah 2.500 · Kang Parkir 2.100 · Kerja Premium 4.500.
 
 ### Rilis
 - **Preview dulu** di branch, dengan screenshot **desktop (1366×768) + HP landscape (844×390) + 1 portrait** pakai login test asli (ID test dari Baymax; password tidak pernah dicetak/di-log).
@@ -122,15 +130,18 @@ Ikuti handoff Baymax: `/workspace/mainkan-ui-handoff/MAINKAN-UI-HANDOFF.md` (box
 | `listSlots()` | `[{slot, savedAt, day, …}]` | ada |
 | `nearbyActions()` | `[{id, label, price, furnitureId?, action, spotLabel, args, hold?}]` | ada |
 | `setInteriorFurnitureAdapter(fn)` | `fn() → [{id, kind, furnitureId, label, x, z, roomId, source:'interior'}]` | ada |
-| `dayReport(day)` | `{day, start, end, income:{label:Rp}, expense:{label:Rp}, status?:{energy, fullness, hygiene, moral, housing}}` | **belum** (sementara dari `transactions[].day`) |
-| `level()` | `number` | **belum** (mock: 1 + EXP/10) |
-| `skills()` / `reputation()` | `[{label, level}]` (1–10) / `[{label, value}]` (0–100) | **belum** |
-| `housingProgress()` | `{current:'tenda'\|'kost'\|'rumah', next, targets:[{label, done, info}]}` | **belum** |
-| `quests()` / `acceptQuest(npcId, questId)` / `turnInQuest(npcId, questId)` | `[{npcId, id, title, goal, text?, target, progress, reward, state:'available'\|'active'\|'ready'\|'done'}]` / `{ok}` | **belum** (`questMarkers()` ada) |
-| `jobs()` | `[{id, label, wage, per, where?}]` | **belum** (mock: `JiwaLifeEconomy.JOBS` + 3 lowongan contoh) |
-| `enterInterior(id)` | `true` kalau interior asli dibuka | **belum** (mock: jendela `<Toko>.exe`) |
-| `furnitureSpots()` | `[{id, label, x, y, w, h, owned, buy?, acts:[{act, label}]}]` (grid kamar 8×6) | **belum** (mock: tata letak contoh 8×6) |
-| inbox Nokia | `[{from, text, t}]` | **belum** |
+| `dayReport(day)` | `{day, start, end, income:{label:Rp}, expense:{label:Rp}, status?:{energy, fullness, hygiene, moral, housing}}` | ada di `preview/main-interiors-kost-warteg` 2d965ee |
+| `level()` | `number` | ada di `preview/main-interiors-kost-warteg` 2d965ee |
+| `skills()` / `reputation()` | `[{label, level}]` (1–10) / `[{label, value}]` (0–100) | ada di `preview/main-interiors-kost-warteg` 2d965ee |
+| `housingProgress()` | `{current:'tenda'\|'kost'\|'rumah', next, targets:[{label, done, info}]}` | **stub** di 2d965ee (tenda/kost asli, rumah baru target) |
+| `quests()` / `acceptQuest(npcId, questId)` / `turnInQuest(npcId, questId)` | `[{npcId, id, title, goal, text?, target, progress, reward, state:'available'\|'active'\|'ready'\|'done'}]` / `{ok}` | **stub** di 2d965ee (tabel data; hadiah dompet asli) |
+| `jobs()` | `[{id, label, wage, per, where?}]` | ada di `preview/main-interiors-kost-warteg` 2d965ee |
+| `enterInterior(id)` | `true` kalau interior asli dibuka | ada di `preview/main-interiors-kost-warteg` 2d965ee (kost + warteg) |
+| `furnitureSpots()` | `[{id, label, x, y, w, h, owned, buy?, acts:[{act, label}]}]` (grid kamar 8×6) | ada di `preview/main-interiors-kost-warteg` 2d965ee |
+| `messages()` (inbox Nokia) | `[{from, text, t}]` | ada di `preview/main-interiors-kost-warteg` 2d965ee (catatan UI SIMULASI disimpan terpisah, ditag) |
+| `nearbyActions` → `wall_pee` / `fart` | lihat *Aksi kontekstual* | ada di 2d965ee (mock kalau id tidak ada) |
+| pesan `njh98:open-map` (world → parent) | `{type:'njh98:open-map'}` | ada di 2d965ee → membuka jendela Peta Kota yang sama dengan dock |
+| event `mainkan:npc-react` (di window world) | `{action, emote}` | ada di 2d965ee → gelembung simbol saja |
 
 ## 4. Kesalahan yang pernah terjadi (sudah diperbaiki)
 - **Tombol Nokia dobel**: ada di bar atas dan di dock bawah → sekarang hanya di dock.
@@ -138,6 +149,7 @@ Ikuti handoff Baymax: `/workspace/mainkan-ui-handoff/MAINKAN-UI-HANDOFF.md` (box
 - **D-pad portrait menutupi layar** di HP → diganti layout landscape + joystick bulat + prompt putar HP.
 - **Judul "Mainkan.exe"** → diganti "Namanya Juga Hidup — the Game".
 - **Tombol SEGERA mati** bikin fitur terasa rusak → jadi placeholder SIMULASI yang bisa diklik.
+- **Teks keluar kotak & align jelek** (t28u): legend group box menimpa baris pertama, label furnitur Kost keluar kotak, harga tidak satu garis dengan label, select lebih pendek dari tombol di sebelahnya, watermark menimpa status bar di HP, Menu Jeda/login terpotong di HP kecil → diperbaiki di `njh98-5`. **Aturan: teks tidak boleh keluar dari kotaknya.** Sebelum menunjukkan preview, jalankan audit overflow di **semua viewport** (1366×768, 844×390, 667×375, 1920×1080) sampai **0 flag**, lalu lihat screenshot-nya sendiri (zoom). Audit: `mainkan/tools/njh98-audit.js` (`NJH98Audit.run()` di halaman; cek scrollWidth/Height, teks di luar kotak/terpotong/di luar layar, legend menimpa isi, tinggi & garis tengah tombol satu baris, label & ikon di tengah, jarak antar item). Runner Playwright (semua layar, 4 viewport, before/after): `/workspace/layar/preview/capture4.mjs` (box bersama, `OUT=… node capture4.mjs`).
 - **Pintu kost tidak terdeteksi** karena site kost di kota ini masih placeholder → pintu kost tetap ditampilkan (CONTOH) supaya Kost.exe bisa dimasuki.
 
 ## 5. File
@@ -145,4 +157,5 @@ Ikuti handoff Baymax: `/workspace/mainkan-ui-handoff/MAINKAN-UI-HANDOFF.md` (box
 - `njh98.js` — lapisan presentasi (intro, Cara Main, dock, jendela, menu kontekstual, progres, Tas, joystick, spawn placeholder, penanda dunia).
 - `njh98-world.css` — di-inject ke iframe `world-builder/?player=1` (hanya di bawah `html.semesta-player-mode.njh98`).
 - `njh98-mock.js` — lapisan SIMULASI (hook asli dulu, mock `njh98:mock:*`).
+- `tools/njh98-audit.js` — audit overflow/align (alat dev, tidak dimuat game).
 - `index.html` — markup/copy; semua id lama tetap ada.
