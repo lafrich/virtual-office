@@ -286,6 +286,7 @@ function buildSites(){
    else home.placeholder=false;
   }
  }
+ // PR release gate: published Jiwa activities must match a real placed object.
  // Global Jiwa activity registry: only real, configured buildings become
  // game interactions; unbound drafts remain editable, never fake map pins.
  const catalog=root.JiwaActivities;
