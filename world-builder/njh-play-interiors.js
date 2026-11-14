@@ -120,7 +120,8 @@ function create(opts){
    if(images.has(file))return resolve();
    const img=new Image();
    let tried=0;
-   const srcs=[file.startsWith('art/')?base+file:base+'art/'+file, base+file];
+   const srcs=file.startsWith('../')?[base+file]:
+    [file.startsWith('art/')?base+file:base+'art/'+file,base+file];
    img.onload=()=>{images.set(file,img);resolve();};
    img.onerror=()=>{if(tried<srcs.length-1){img.src=srcs[++tried];}else resolve();};
    img.src=srcs[0];
@@ -360,7 +361,7 @@ function create(opts){
    const size=view?.size||(img?[img.naturalWidth||img.width,img.naturalHeight||img.height]:[64,64]);
    const pivot=view?.pivot||[size[0]/2,size[1]*0.8];
    const width=size[0]*PIXEL_WORLD;
-   const height=item.assetId==='sekat_wc'?2.2:size[1]*PIXEL_WORLD*VERTICAL_COMP;
+   const height=size[1]*PIXEL_WORLD*VERTICAL_COMP;
    const py=pivot[1]/size[1],px=(size[0]/2-pivot[0])/size[0]*width;
    const root=new THREE.Group();root.position.set(pos.x,0,pos.z);
    if(img&&THREE){
@@ -372,7 +373,7 @@ function create(opts){
    }
    // An authored sekat_wc must be a REAL solid privacy panel in play,
    // never the invisible footprint-stub that used to leave toilets exposed.
-   if(item.assetId==='sekat_wc'){
+   if(item.assetId==='sekat_wc'&&!img){
     const alongC=((Number(item.rotation)||0)%180)===0;
     const dims=[alongC?.94:.12,alongC?.12:.94];
     for(const [lo,hi,color] of [[0,.78,0x58a3a2],[.78,2.2,0xe8eee7]]){
