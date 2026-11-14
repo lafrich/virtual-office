@@ -9,6 +9,8 @@ on:
       - "membangun/**"
       - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/njh-guide-map-guard.test.cjs"
+      - "tests/njh-mart-registry.test.cjs"
       - "tests/faceless-v6b-cross-app.test.cjs"
       - "tests/semesta-base-human-gameplay.test.cjs"
       - "tests/semesta-custom-wardrobe-depth.test.cjs"
@@ -46,6 +48,8 @@ on:
       - "membangun/**"
       - "tests/membangun-launcher.test.cjs"
       - "tests/semesta-mahluk-sync.test.cjs"
+      - "tests/njh-guide-map-guard.test.cjs"
+      - "tests/njh-mart-registry.test.cjs"
       - "tests/faceless-v6b-cross-app.test.cjs"
       - "tests/semesta-base-human-gameplay.test.cjs"
       - "tests/semesta-custom-wardrobe-depth.test.cjs"
@@ -163,6 +167,15 @@ jobs:
           node tests/semesta-simple-effects.test.cjs
           node tests/semesta-daynight.test.cjs
           node tests/semesta-sidewalk-and-lighting.test.cjs
+
+      - name: NJH guide compliance — ground, drainage, Mart furniture
+        run: |
+          node --check world-builder/map-terrain.js
+          node --check world-builder/vegetation-catalog.js
+          node --check world-builder/bangun-ruang/indonesia-interior-templates.js
+          node --check world-builder/bangun-ruang/njh-interior-art-preview.js
+          node --check world-builder/njh-map-preview.js
+          node --test tests/njh-guide-map-guard.test.cjs tests/njh-mart-registry.test.cjs
 
       - name: Jiwa Survival V1 Play integration and business rules
         run: |
