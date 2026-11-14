@@ -1,0 +1,380 @@
+{
+ "id": "njh_minimarket",
+ "label": "NJH \u00b7 Minimarket (NJH Mart)",
+ "format": "virtual-life-interior-v1",
+ "version": 2,
+ "width": 8,
+ "depth": 6,
+ "theme": "cream",
+ "tilePixels": [
+  64,
+  32
+ ],
+ "unit": "semesta-ground-tile",
+ "sourceFootprint": [
+  8,
+  6
+ ],
+ "entrance": {
+  "c": 4,
+  "r": 5
+ },
+ "floor": 1,
+ "baseId": "semesta:medium",
+ "notes": "Minimarket 8x6 (Kharisma R1: shop rooms are 8x6). Chillers + drinks + wall rack on the back wall, two gondola rows with a shared aisle r=3, single kasir on the right with staff behind and a staff gap at (5,1), baskets/troli at the door. Main aisle c=4. Tall props only on the far walls (r=0 back, c=0 left); near walls (r=5, c=7) only low props.",
+ "source": "gerak-supermarket-preview",
+ "scope": "PREVIEW, NOT LIVE, not imported into Bangun registry or app code",
+ "paint": {
+  "theme": "cream",
+  "themeNote": "No minimarket paint hook exists at runtime (only warteg). Five layers described here for Baymax.",
+  "layers": [
+   {
+    "layer": "dado",
+    "z": [
+     0,
+     49
+    ],
+    "spec": "white ceramic tile with one teal (#22A094) tile band at z 40-46, back + left walls"
+   },
+   {
+    "layer": "trim",
+    "z": [
+     50,
+     50
+    ],
+    "spec": "orange (#F59E0B) rail, both rear walls"
+   },
+   {
+    "layer": "midDisplay",
+    "z": [
+     56,
+     70
+    ],
+    "spec": "wall price-tag strip over the shelves; cigarette/pulsa rack behind the kasir (c 5-7 on the back wall)"
+   },
+   {
+    "layer": "identity",
+    "z": [
+     69,
+     116
+    ],
+    "spec": "NJH MART wall sign (back wall), category boards SEGAR / SEMBAKO / MINUMAN over their zones, promo posters on the left wall"
+   },
+   {
+    "layer": "ceiling",
+    "z": [
+     108,
+     120
+    ],
+    "spec": "three long LED tube lights across the room + one CCTV dome over the kasir"
+   }
+  ]
+ },
+ "items": [
+  {
+   "id": "njh-minimarket-fridge_drinks-1",
+   "assetId": "fridge_drinks",
+   "name": "Kulkas Minuman 1",
+   "c": 0,
+   "r": 0,
+   "rotation": 0,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse",
+    "open",
+    "buy"
+   ]
+  },
+  {
+   "id": "njh-minimarket-fridge_drinks-2",
+   "assetId": "fridge_drinks",
+   "name": "Kulkas Minuman 2",
+   "c": 1,
+   "r": 0,
+   "rotation": 0,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse",
+    "open",
+    "buy"
+   ]
+  },
+  {
+   "id": "njh-minimarket-njh_chiller_segar-1",
+   "assetId": "njh_chiller_segar",
+   "name": "Chiller Daging, Ikan, Telur, Tahu",
+   "c": 2,
+   "r": 0,
+   "rotation": 0,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse",
+    "open",
+    "buy"
+   ]
+  },
+  {
+   "id": "njh-minimarket-aisle_rack-1",
+   "assetId": "aisle_rack",
+   "name": "Rak Snack & Roti (dinding)",
+   "c": 4,
+   "r": 0,
+   "rotation": 0,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse",
+    "collect"
+   ]
+  },
+  {
+   "id": "njh-minimarket-njh_mesin_kopi-1",
+   "assetId": "njh_mesin_kopi",
+   "name": "Mesin Kopi (staf)",
+   "c": 7,
+   "r": 0,
+   "rotation": 0,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "brew",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "brew"
+   ],
+   "notes": "Countertop machine from the barista_famima kit (recoloured). Staff side."
+  },
+  {
+   "id": "njh-minimarket-njh_counter_kasir-1",
+   "assetId": "njh_counter_kasir",
+   "name": "Kasir NJH Mart",
+   "c": 6,
+   "r": 2,
+   "rotation": 0,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "pay",
+   "pose": "talk",
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "pay",
+    "buy",
+    "sell"
+   ],
+   "notes": "Single checkout. Customer apron +r (6,3)-(7,3); staff behind at (6,1)-(7,1); staff gap via (5,1)."
+  },
+  {
+   "id": "njh-minimarket-njh_rak_sembako-1",
+   "assetId": "njh_rak_sembako",
+   "name": "Rak Sembako",
+   "c": 0,
+   "r": 2,
+   "rotation": 0,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse",
+    "collect"
+   ]
+  },
+  {
+   "id": "njh-minimarket-njh_rak_bumbu_mi-1",
+   "assetId": "njh_rak_bumbu_mi",
+   "name": "Rak Bumbu & Mi",
+   "c": 2,
+   "r": 2,
+   "rotation": 0,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse",
+    "collect"
+   ]
+  },
+  {
+   "id": "njh-minimarket-njh_display_sayur_buah-1",
+   "assetId": "njh_display_sayur_buah",
+   "name": "Display Sayur & Buah",
+   "c": 0,
+   "r": 4,
+   "rotation": 180,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse",
+    "collect"
+   ]
+  },
+  {
+   "id": "njh-minimarket-njh_rak_snack-1",
+   "assetId": "njh_rak_snack",
+   "name": "Rak Snack & Kebutuhan",
+   "c": 2,
+   "r": 4,
+   "rotation": 180,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse",
+    "collect"
+   ]
+  },
+  {
+   "id": "njh-minimarket-njh_papan_promo-1",
+   "assetId": "njh_papan_promo",
+   "name": "Papan Promo",
+   "c": 5,
+   "r": 4,
+   "rotation": 270,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "browse",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "browse"
+   ]
+  },
+  {
+   "id": "njh-minimarket-njh_keranjang_belanja-1",
+   "assetId": "njh_keranjang_belanja",
+   "name": "Keranjang Belanja",
+   "c": 5,
+   "r": 5,
+   "rotation": 270,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "collect",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "collect"
+   ]
+  },
+  {
+   "id": "njh-minimarket-njh_troli-1",
+   "assetId": "njh_troli",
+   "name": "Troli",
+   "c": 6,
+   "r": 5,
+   "rotation": 180,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "collect",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "collect"
+   ]
+  },
+  {
+   "id": "njh-minimarket-trash_bin-1",
+   "assetId": "trash_bin",
+   "name": "Tempat Sampah",
+   "c": 7,
+   "r": 5,
+   "rotation": 180,
+   "flipX": false,
+   "flipY": false,
+   "actionId": "open",
+   "pose": null,
+   "capacity": 1,
+   "blocking": true,
+   "triggerRadius": 1.15,
+   "actionAdjustments": {},
+   "motions": [
+    "open"
+   ]
+  },
+  {
+   "id": "npc_njh_minimarket_kasir",
+   "assetId": "npc_njh_minimarket_kasir",
+   "name": "Kasir NJH Mart",
+   "c": 6,
+   "r": 1,
+   "rotation": 0,
+   "actionId": "pay",
+   "blocking": false,
+   "kind": "npc",
+   "notes": "Reuse barista_famima NPC, uniform recoloured (npc/njh_minimarket_kasir_sheet.png). Stands behind the kasir, faces customers."
+  },
+  {
+   "id": "npc_njh_minimarket_staff",
+   "assetId": "npc_njh_minimarket_staff",
+   "name": "Pramuniaga NJH Mart",
+   "c": 2,
+   "r": 1,
+   "rotation": 0,
+   "actionId": "browse",
+   "blocking": false,
+   "kind": "npc",
+   "notes": "Reuse barista_famima NPC, uniform recoloured (npc/njh_minimarket_staff_sheet.png). Restocks the chiller."
+  }
+ ]
+}

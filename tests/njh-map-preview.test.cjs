@@ -106,7 +106,8 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
   njh_door_rumah_biasa:'njh_rumah_biasa',
   njh_door_bengkel:'njh_bengkel',
   njh_door_wc_umum:'njh_wc_mandi_umum',
-  njh_door_warung_kopi:'njh_warung_kopi'
+  njh_door_warung_kopi:'njh_warung_kopi',
+  njh_door_minimarket:'njh_minimarket'
  });
  const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
  assert.deepEqual(pending,{
@@ -116,8 +117,7 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
   njh_door_koperasi:'njh_koperasi',
   njh_door_loak:'njh_toko_loak',
   njh_door_warung_madura:'njh_warung_madura',
-  njh_door_nasi_sunda:'njh_nasi_sunda',
-  njh_door_minimarket:'njh_minimarket'
+  njh_door_nasi_sunda:'njh_nasi_sunda'
  });
  for(const row of report.pending){
   const obj=document.objects.find(o=>o.id===row.objectId);
@@ -458,15 +458,15 @@ test('places NJH Mart on a free 5x4 main-road lot with a sidewalk use tile',()=>
  assert.equal(door.objectId,'njh-minimarket');
  assert.equal(door.interiorTemplate,'njh_minimarket');
  assert.equal(door.facing,'sw');
- assert.equal(door.interiorPending,true);
+ assert.equal(door.interiorPending,false);
  assert.deepEqual(door.doorPoint,[-26.5,58]);
  assert.deepEqual(door.useTile,[-27,58]);
  assert.deepEqual(door.usePoint,[-26.5,58.5]);
  assert.deepEqual(door.footprintRect,[-29,-24,54,58]);
- assert.ok(!fs.existsSync(path.join(root,'njh-map-preview/interiors/njh_minimarket.interior-scene.json')),
-  'do not vendor the unfinished interior scene');
- assert.ok(api.pendingTemplates.includes('njh_minimarket'));
- assert.ok(!api.readyTemplates.includes('njh_minimarket'));
+ // Step 2: Gerak's shelf-fixed scene is vendored and the door is ready.
+ assert.ok(fs.existsSync(path.join(root,'njh-map-preview/interiors/njh_minimarket.interior-scene.json')));
+ assert.ok(!api.pendingTemplates.includes('njh_minimarket'));
+ assert.ok(api.readyTemplates.includes('njh_minimarket'));
 
  const report=api.wireDoors(document,meta,{});
  assert.equal(report.missingObject.length,0);

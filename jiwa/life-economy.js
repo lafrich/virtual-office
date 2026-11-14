@@ -9,6 +9,11 @@
 'use strict';
 const PREMISES=(typeof module!=='undefined'&&module.exports)?
  require('./interaction-rules.js'):window.JiwaPremises;
+const COOKING=(()=>{
+ try{if(typeof module!=='undefined'&&module.exports)return require('./njh-cooking-catalog.js');}catch(_e){}
+ const g=typeof window!=='undefined'?window:typeof globalThis!=='undefined'?globalThis:null;
+ return (g&&g.JiwaCookingCatalog)||{items:[],recipes:[],fish:[]};
+})();
 const RELIGIONS=['islam','kristen','katolik','hindu','buddha','konghucu','agnostik','ateis','satanis'];
 const ZODIACS=['capricorn','aquarius','pisces','aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius'];
 const BUYERS={siomay_batagor:'Bang Siomay / Batagor',pasar_ikan:'Pasar Ikan'};
@@ -43,9 +48,26 @@ function defaults(){return {
  publicToiletPenalty:5,hoboSleepRecovery:30,homeSleepRecovery:65,
  passiveEnergyMinutes:60,passiveBladderMinutes:20,passiveHygieneMinutes:90,
  passiveFullnessMinutes:35,faintRecoveryEnergy:25,tokenDurationMinutes:60,
+ // Step 2: kost base electricity load, game minutes per token unit (240 = 0.25 unit/hour, perkiraan).
+ tokenBaseDrainMinutes:240,
  realSecondsPerGameMinute:8,seatRestEnergy:3},
- fish:copy(FISH),jobs:copy(JOBS),activities:[],worldEntities:[]
+ fish:copy(FISH),jobs:copy(JOBS),activities:[],worldEntities:[],
+ cooking:cookingDefaults()
 };}
+// Step 2 (NJH): minimarket items, recipes and extra fish from jiwa/njh-cooking-catalog.js.
+// Prices may be overridden per item id in config.cooking.prices {itemId:Rp}.
+function cookingDefaults(){
+ return {items:copy(COOKING.items||[]),recipes:copy(COOKING.recipes||[]),fish:copy(COOKING.fish||[]),
+  shop:copy(COOKING.shop||{}),iconBase:COOKING.iconBase||'',prices:{}};
+}
+function normalizeCooking(src){
+ const base=cookingDefaults(),prices=src&&src.prices&&typeof src.prices==='object'?src.prices:{};
+ for(const it of base.items){
+  if(Object.prototype.hasOwnProperty.call(prices,it.id)){const v=Number(prices[it.id]);if(Number.isFinite(v)&&v>=0)it.price=Math.round(v);}
+ }
+ base.prices=Object.fromEntries(Object.entries(prices).filter(([k,v])=>/^[a-z0-9_]{1,64}$/.test(k)&&Number.isFinite(Number(v))));
+ return base;
+}
 function normalize(raw){
  const base=defaults(),source=raw&&typeof raw==='object'?raw:{},s=source.settings||{};
  const PRICE_KEYS={coffeePrice:1,teaPrice:1,streetFoodPrice:1,wartegMealPrice:1,roomPrice:1,fridgePrice:1,tokenPrice:1,publicShowerFee:1};
@@ -69,6 +91,7 @@ function normalize(raw){
    spoilMinutes:number(p.spoilMinutes,1,100000,d.spoilMinutes),buyers};
  });
  if(!base.fish.some(f=>f.weight>0))base.fish=copy(FISH);
+ base.cooking=normalizeCooking(source.cooking);
  const incomingJobs=new Map((Array.isArray(source.jobs)?source.jobs:[]).filter(j=>j&&j.id).map(j=>[j.id,j]));
  base.jobs=JOBS.map(d=>{
   const next=incomingJobs.get(d.id)||{};
@@ -117,6 +140,7 @@ function stateFrom(existing,config){
  s.itemSequence=number(s.itemSequence,0,1e9,0);
  s.powerTokens=number(s.powerTokens,0,1e9,0);
  s.tokenUseMinutes=number(s.tokenUseMinutes,0,1e9,0);
+ s.tokenBaseMinutes=number(s.tokenBaseMinutes,0,1e9,0);
  s.faintCount=number(s.faintCount,0,1e9,0);
  s.furniture=Array.isArray(s.furniture)?s.furniture:[];
  s.detained=s.detained===true;
@@ -144,13 +168,22 @@ function weighted(config,roll){
  for(const f of fish){remaining-=f.weight;if(remaining<0)return f;}
  return fish[fish.length-1];
 }
+// Legacy FISH (4, used by the instant 'fish' roll) plus catalog fish (Gerak 19; the first 4 identical).
+function allFish(c){
+ const out=(c.fish||[]).slice(),seen=new Set(out.map(f=>f.id));
+ for(const f of (c.cooking?.fish||[]))if(!seen.has(f.id)){seen.add(f.id);out.push(f);}
+ return out;
+}
+function itemDef(c,id){return (c.cooking?.items||[]).find(x=>x.id===id)||null;}
 function activeItem(config,s,id){
  const meta=s.itemMeta[id];
  if(!meta)return {ok:false,reason:'Item tidak ditemukan'};
- const fish=normalize(config).fish.find(f=>f.id===meta.species);
- if(!fish&&meta.species!=='buah')return {ok:false,reason:'Barang tidak termasuk makanan segar'};
+ const c=config&&config.cooking&&Array.isArray(config.fish)?config:normalize(config);
+ const fish=allFish(c).find(f=>f.id===meta.species);
+ const item=fish?null:itemDef(c,meta.species);
+ if(!fish&&!item&&meta.species!=='buah')return {ok:false,reason:'Barang tidak termasuk makanan segar'};
  const limit=meta.expiresAt;
- return {ok:true,fish,meta,spoiled:s.elapsedMinutes>=limit};
+ return {ok:true,fish,item,meta,spoiled:s.elapsedMinutes>=limit};
 }
 function speedFactor(s){
  return s.detained||s.restMinutes>0||s.detentionMinutes>0||s.energy<=0?0:(s.energy>=30?1:.28+.72*s.energy/30);
@@ -158,6 +191,7 @@ function speedFactor(s){
 function doAction(config,previous,action,args={}){
  const c=normalize(config),s=stateFrom(previous,c),setting=c.settings,changes=[];
  const beforeWallet=s.wallet;
+ const out={}; // step-2 extra result fields (receipt, dish, catch...)
  const reject=reason=>({ok:false,reason,state:copy(previous||s),changes:[]});
  const stat=(k,v)=>{s[k]=Math.max(0,Math.min(100,s[k]+v));changes.push(k+' '+(v>=0?'+':'')+v);};
  const clock=m=>{
@@ -171,6 +205,14 @@ function doAction(config,previous,action,args={}){
     s.powerTokens--;s.tokenUseMinutes-=setting.tokenDurationMinutes;
    }
    if(s.powerTokens===0&&powered<m)changes.push('Token listrik habis: kulkas berhenti mendinginkan');
+  }
+  // Step 2: the kost draws a base load on game time (lamp/fan), on top of fridge cooling.
+  if(s.housing.room&&s.powerTokens>0&&setting.tokenBaseDrainMinutes>0){
+   s.tokenBaseMinutes+=m;
+   while(s.tokenBaseMinutes>=setting.tokenBaseDrainMinutes&&s.powerTokens>0){
+    s.powerTokens--;s.tokenBaseMinutes-=setting.tokenBaseDrainMinutes;
+   }
+   if(s.powerTokens===0){s.tokenBaseMinutes=0;changes.push('Token listrik habis: kulkas, lemari dan kompor mati');}
   }
   s.elapsedMinutes+=m;
   s.restMinutes=Math.max(0,s.restMinutes-m);
@@ -197,6 +239,18 @@ function doAction(config,previous,action,args={}){
   const id='life:'+type+':'+(++s.itemSequence);
   s.inventory.push(id);s.itemMeta[id]={species:type,label,expiresAt:s.elapsedMinutes+minutes,inFridge:false};
   changes.push('dapat '+label);return id;};
+ const NEVER=1e8; // non-perishable items (spoilMinutes null)
+ const keepMinutes=def=>def&&Number.isFinite(Number(def.spoilMinutes))&&Number(def.spoilMinutes)>0?Number(def.spoilMinutes):NEVER;
+ const containers={bag:{list:s.inventory,slots:setting.bagSlots,label:'Tas'},
+  fridge:{list:s.fridge,slots:setting.homeStorageSlots,label:'Kulkas'},
+  storage:{list:s.homeStorage,slots:setting.homeStorageSlots,label:'Lemari'}};
+ const powerGate=box=>{
+  if(box==='bag')return null;
+  if(!s.housing.room)return 'Perlu kost dahulu.';
+  if(box==='fridge'&&!s.housing.fridge)return 'Belum punya kulkas.';
+  if(s.powerTokens<=0)return 'Token listrik habis. Isi token dulu (Rp'+setting.tokenPrice.toLocaleString('id-ID')+' / '+setting.tokenUnits+' unit).';
+  return null;
+ };
  if(!['advance_time','rest','respawn'].includes(action)&&(s.restMinutes>0||s.detentionMinutes>0))
   return reject('Masih bed rest / menjalani hukuman. Majukan waktu terlebih dahulu.');
  if(s.detained&&!['fine','community_service','advance_time'].includes(action))return reject('Ditahan hansip: bayar denda atau bersihkan gorong-gorong.');
@@ -432,7 +486,19 @@ function doAction(config,previous,action,args={}){
   const info=activeItem(c,s,id);
   if(!info.ok)return reject(info.reason);
   if(info.spoiled)return reject('Makanan sudah busuk. Buang dari tas.');
-  if(info.meta.species!=='buah')return reject('Ikan mentah harus dimasak dahulu.');
+  if(info.meta.species!=='buah'){
+   if(info.fish)return reject('Ikan mentah harus dimasak dahulu.');
+   const def=info.item,rec=(c.cooking?.recipes||[]).find(r=>r.outputItem===info.meta.species);
+   const eff=def?.category==='dish'||rec?(rec?.statEffectsEat||def?.statEffects):def?.statEffects;
+   if(!eff)return reject('Bahan mentah, masak dulu.');
+   const mult={sempurna:1.5,bagus:1.2}[info.meta.quality]||1;
+   s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];clock(def?.category==='drink'?3:10);
+   const effects={};
+   for(const k of ['fullness','energy','moral','hygiene','bladder'])if(eff[k]){const v=Math.round(eff[k]*(eff[k]>0?mult:1));stat(k,v);effects[k]=v;}
+   out.effects=effects;out.quality=info.meta.quality||null;out.itemId=info.meta.species;out.label=info.meta.label;
+   out.pose=['snack','drink'].includes(def?.category)?'eat_snack':'eat';
+   changes.push('makan '+info.meta.label);break;
+  }
   s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];
   clock(5);stat('energy',8);stat('fullness',20);stat('bladder',5);
   changes.push('makan buah dari tas');break;
@@ -592,6 +658,134 @@ function doAction(config,previous,action,args={}){
   if(s.itemMeta[id])s.itemMeta[id].inFridge=false;
   changes.push('ambil dari kulkas');break;
  }
+
+ /* ===== Step 2 (NJH): minimarket, containers, dishes, fishing catch, token top-up ===== */
+ case 'shop_buy': {
+  const cart=(Array.isArray(args.cart)?args.cart:[{itemId:args.itemId,qty:args.qty}]).slice(0,20);
+  const lines=[];let count=0,total=0;
+  for(const row of cart){
+   const id=String(row&&row.itemId||''),qty=number(row&&row.qty,1,20,1);
+   const def=itemDef(c,id);
+   if(!def||!(def.source||[]).includes('supermarket')||!(def.price>0))return reject('Barang tidak dijual di sini.');
+   const line=lines.find(l=>l.itemId===id);
+   if(line){line.qty+=qty;line.subtotal=line.qty*line.price;}
+   else lines.push({itemId:id,label:def.label,qty,price:def.price,subtotal:qty*def.price});
+   count+=qty;total+=qty*def.price;
+  }
+  if(!lines.length)return reject('Keranjang kosong.');
+  if(s.inventory.length+count>setting.bagSlots)return reject('Tas penuh ('+setting.bagSlots+' slot).');
+  if(s.wallet<total)return reject('Uang tidak cukup.');
+  const walletBefore=s.wallet;spend(total);clock(2);
+  const added=[];
+  for(const l of lines){const def=itemDef(c,l.itemId);for(let i=0;i<l.qty;i++)added.push(add(l.itemId,def.label,keepMinutes(def)));}
+  out.receipt={lines,total,walletBefore,walletAfter:s.wallet};out.added=added;
+  break;
+ }
+ case 'move_item': {
+  const from=String(args.from||''),to=String(args.to||'');
+  if(!containers[from]||!containers[to]||from===to)return reject('Wadah tidak valid.');
+  if(from!=='bag'&&to!=='bag')return reject('Pindahkan lewat Tas dulu.');
+  const gate=powerGate(from)||powerGate(to);if(gate)return reject(gate);
+  const src=containers[from],dst=containers[to];
+  const want=String(args.itemId||''),qty=number(args.qty,1,24,1);
+  let uids=src.list.includes(want)?[want]:src.list.filter(id=>s.itemMeta[id]?.species===want)
+   .sort((a,b)=>(s.itemMeta[a].expiresAt||0)-(s.itemMeta[b].expiresAt||0)).slice(0,qty);
+  if(!uids.length)return reject('Barang tidak ada di '+src.label+'.');
+  if(dst.list.length+uids.length>dst.slots)return reject(dst.label+' penuh.');
+  for(const id of uids){
+   const meta=s.itemMeta[id]||{},def=itemDef(c,meta.species),fish=allFish(c).some(f=>f.id===meta.species);
+   const storeIn=def?.storeIn||(fish||meta.species==='buah'?['bag','fridge']:['bag','storage']);
+   if(to!=='bag'&&!storeIn.includes(to))return reject(to==='fridge'?'Barang kering simpan di lemari.':'Barang basah simpan di kulkas.');
+   if(to==='fridge'&&s.elapsedMinutes>=(meta.expiresAt||0))return reject('Barang sudah busuk, tidak bisa masuk kulkas.');
+  }
+  for(const id of uids){src.list.splice(src.list.indexOf(id),1);dst.list.push(id);if(s.itemMeta[id])s.itemMeta[id].inFridge=to==='fridge';}
+  clock(1);changes.push(uids.length+' barang '+src.label+' → '+dst.label);out.moved=uids;
+  break;
+ }
+ case 'cook_dish': {
+  if(!s.housing.room)return reject('Masak membutuhkan kost.');
+  if(args.stoveOk!==true&&!s.furniture.includes('stove'))return reject('Dekati kompor dahulu.');
+  if(s.powerTokens<1)return reject('Token listrik habis.');
+  const recipes=c.cooking?.recipes||[];
+  const known=new Set([...(Array.isArray(s.knownRecipes)?s.knownRecipes:[]),...recipes.filter(r=>r.unlock?.knownAtStart||r.unlock?.mode==='start').map(r=>r.id)]);
+  const fishIds=new Set(allFish(c).map(f=>f.id));
+  const fits=(need,sp)=>need.id?need.id===sp:(need.category==='fish'?fishIds.has(sp):itemDef(c,sp)?.category===need.category);
+  const needs=r=>(r.ingredients||[]).map(n=>typeof n==='string'?{id:n,qty:1}:{id:n.id,category:n.category,qty:number(n.qty,1,12,1)});
+  // Assign concrete bag items to every need; exact=true means no item may be left over.
+  const assign=(r,pool,exact)=>{
+   const left=pool.slice().sort((a,b)=>(s.itemMeta[a].expiresAt||0)-(s.itemMeta[b].expiresAt||0)),used=[];
+   const ordered=needs(r).sort((a,b)=>(a.id?0:1)-(b.id?0:1)); // exact ids before wildcards
+   for(const n of ordered)for(let k=0;k<n.qty;k++){
+    const i=left.findIndex(id=>fits(n,s.itemMeta[id]?.species));
+    if(i<0)return null;used.push(left.splice(i,1)[0]);
+   }
+   if(exact&&left.length)return null;
+   return used;
+  };
+  const bag=s.inventory.filter(id=>s.itemMeta[id]);
+  let recipe=null,used=null;
+  if(args.recipeId){
+   recipe=recipes.find(r=>r.id===String(args.recipeId));
+   if(!recipe)return reject('Resep tidak ada.');
+   if(!known.has(recipe.id))return reject('Resep belum dikenal. Coba eksperimen bahan.');
+   used=assign(recipe,bag,false);
+   if(!used)return reject('Bahan kurang di Tas.');
+  }else{
+   const picked=(Array.isArray(args.ingredients)?args.ingredients:[]).map(String);
+   if(!picked.length)return reject('Pilih bahan dari Tas.');
+   const pool=[];
+   for(const p of picked){
+    const id=bag.includes(p)&&!pool.includes(p)?p:bag.find(x=>s.itemMeta[x].species===p&&!pool.includes(x));
+    if(!id)return reject('Bahan tidak ada di Tas.');pool.push(id);
+   }
+   for(const r of recipes){const u=assign(r,pool,true);if(u){recipe=r;used=u;break;}}
+   if(!recipe){out.failed=true;return Object.assign(reject('Kombinasi bahan belum jadi masakan.'),{failed:true});}
+  }
+  if(used.some(id=>s.elapsedMinutes>=(s.itemMeta[id].expiresAt||0)))return reject('Ada bahan yang sudah busuk.');
+  const costE=-Math.min(0,number(recipe.statEffectsCook?.energy,-100,100,0));
+  if(s.energy<costE)return reject('Energi tidak cukup untuk masak.');
+  const fresh=used.every(id=>{const m=s.itemMeta[id],def=itemDef(c,m.species),f=allFish(c).find(x=>x.id===m.species);
+   const life=Number(def?.spoilMinutes||f?.spoilMinutes||0);if(!life)return true;return (m.expiresAt-s.elapsedMinutes)/life>=0.5;});
+  const minExp=number(recipe.minExp,0,100,0);
+  const quality=s.experience>=minExp+30&&fresh?'sempurna':s.experience>=minExp+10?'bagus':'biasa';
+  const learned=!known.has(recipe.id);
+  if(s.inventory.length-used.length>=setting.bagSlots)return reject('Tas penuh.');
+  for(const id of used){s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];}
+  clock(number(recipe.durationMinutes,1,600,20));s.powerTokens=Math.max(0,s.powerTokens-1);
+  for(const [k,v] of Object.entries(recipe.statEffectsCook||{}))if(['energy','fullness','hygiene','bladder','moral','experience'].includes(k)&&v)stat(k,number(v,-100,100,0));
+  const outDef=itemDef(c,recipe.outputItem);
+  const label=recipe.outputLabel||outDef?.label||recipe.outputItem;
+  const uid=add(recipe.outputItem,label,keepMinutes(outDef)||NEVER);
+  s.itemMeta[uid].quality=quality;s.itemMeta[uid].recipeId=recipe.id;
+  if(learned){s.knownRecipes=[...(Array.isArray(s.knownRecipes)?s.knownRecipes:[]),recipe.id];changes.push('resep baru: '+label);}
+  out.recipeId=recipe.id;out.consumed=used;out.minutes=number(recipe.durationMinutes,1,600,20);out.tokenUsed=1;
+  out.result={uid,itemId:recipe.outputItem,label,quality,statEffectsEat:copy(recipe.statEffectsEat||{})};
+  out.learnedRecipe=learned?{id:recipe.id,label}:null;
+  out.pose=recipe.actionAsset||'cook';
+  break;
+ }
+ case 'fish_catch': {
+  if(s.energy<setting.fishEnergy)return reject('Energi tidak cukup untuk mancing.');
+  const gotAway=args.gotAway===true;
+  if(!gotAway&&s.inventory.length>=setting.bagSlots)return reject('Tas penuh ('+setting.bagSlots+' slot).');
+  clock(setting.fishMinutes);stat('energy',-setting.fishEnergy);
+  if(gotAway){changes.push('ikan kabur');out.gotAway=true;break;}
+  const f=allFish(c).find(x=>x.id===String(args.fishId||''));
+  if(!f)return reject('Ikan tidak dikenal.');
+  out.uid=add(f.id,f.label,number(f.spoilMinutes,1,100000,180));out.fishId=f.id;out.label=f.label;
+  out.rarity=f.rarity||'umum';out.rarityTier=f.rarityTier||'common';out.gotAway=false;
+  changes.push('hasil mancing di '+String(args.spotId||'dermaga').slice(0,60));
+  break;
+ }
+ case 'topup_token': {
+  if(!s.housing.room)return reject('Perlu kost dahulu.');
+  const packs=Math.max(1,Math.ceil(number(args.units,1,1000,setting.tokenUnits)/setting.tokenUnits));
+  const price=packs*setting.tokenPrice;
+  if(!spend(price))return reject('Uang tidak cukup.');
+  s.powerTokens+=packs*setting.tokenUnits;
+  out.packs=packs;out.paid=price;out.added=packs*setting.tokenUnits;
+  changes.push('token listrik +'+out.added);break;
+ }
  case 'fine':{
   if(!s.detained)return reject('Belum ditahan hansip.');
   if(!spend(2000))return reject('Uang tidak cukup untuk denda.');
@@ -635,7 +829,7 @@ function doAction(config,previous,action,args={}){
    action,label,delta,balance:s.wallet,minute:s.elapsedMinutes,day});
   s.transactions=s.transactions.slice(-40);
  }
- return {ok:true,state:s,changes,action};
+ return Object.assign({ok:true,state:s,changes,action},out);
 }
-return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,FURNITURE,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,run:doAction});
+return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,FURNITURE,COOKING,allFish,itemDef,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,run:doAction});
 });

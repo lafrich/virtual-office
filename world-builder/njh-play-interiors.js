@@ -14,7 +14,7 @@
 const View=root?.VLSemestaInteriorView||(typeof require==='function'?require('./semesta-interior-view.js'):null);
 const PIXEL_WORLD=View?.PIXEL_WORLD||Math.SQRT2/64, VERTICAL_COMP=View?.VERTICAL_COMP||2/Math.sqrt(3);
 const DIR=['sw','se','ne','nw'];
-const TEMPLATES={kost:'njh_kos',warteg:'njh_warteg_kharisma'};
+const TEMPLATES={kost:'njh_kos',warteg:'njh_warteg_kharisma',minimarket:'njh_minimarket'};
 const FALLBACK={warteg:'njh_warung_makan'};
 const ROOM_SCENES=['njh_kos_cove_lobby','njh_kos_ichsan','njh_kos_noor'];
 const LOBBY_ID='njh_kos_cove_lobby';
@@ -24,11 +24,12 @@ const ACTION_LABELS={sleep:'Tidur',store_fridge:'Simpan Kulkas',take_fridge:'Amb
  exit_interior:'Keluar',enter_room:'Masuk'};
 const MEAL_PRICE=12000;
 const ENTER_RADIUS=2.2;
-const ORIGIN={kost:{x:240,z:0},warteg:{x:260,z:0}};
+const ORIGIN={kost:{x:240,z:0},warteg:{x:260,z:0},minimarket:{x:280,z:0}};
 const KOST_PATTERN=/kost|kos_|boarding.?room|cove|kamar.?sewa/i;
 const WARTEG_PATTERN=/warteg|warung|nasi|food.vendor/i;
+const MINIMARKET_PATTERN=/minimarket|njh.?mart|swalayan/i;
 const PLAY_KOST_ID='__njh_play_kost__';
-const NAME={kost:'Kost',warteg:'Warteg'};
+const NAME={kost:'Kost',warteg:'Warteg',minimarket:'NJH Mart'};
 
 function baseUrl(){
  try{
@@ -130,8 +131,9 @@ function create(opts){
 
  function findBuilding(kind,world){
   const objects=world?.objects||opts.getWorld?.()?.objects||[];
-  const pat=kind==='kost'?KOST_PATTERN:WARTEG_PATTERN;
-  return objects.find(o=>o.id!==PLAY_KOST_ID&&o.type==='sprite'&&pat.test(textOf(o)))
+  const pat=kind==='kost'?KOST_PATTERN:kind==='minimarket'?MINIMARKET_PATTERN:WARTEG_PATTERN;
+  const notMart=o=>kind==='minimarket'||!MINIMARKET_PATTERN.test(textOf(o));
+  return objects.find(o=>o.id!==PLAY_KOST_ID&&o.type==='sprite'&&pat.test(textOf(o))&&notMart(o))
    ||objects.find(o=>o.id===PLAY_KOST_ID&&kind==='kost')
    ||null;
  }
@@ -156,8 +158,9 @@ function create(opts){
   if(!world)return buildings;
   const kost=ensureKost(world);
   const warteg=findBuilding('warteg',world);
+  const minimarket=findBuilding('minimarket',world);
   buildings={};
-  for(const [kind,obj] of [['kost',kost],['warteg',warteg]]){
+  for(const [kind,obj] of [['kost',kost],['warteg',warteg],['minimarket',minimarket]]){
    if(!obj)continue;
    let template=scenes[TEMPLATES[kind]]?TEMPLATES[kind]:(FALLBACK[kind]||TEMPLATES[kind]);
    if(kind==='kost'&&scenes[LOBBY_ID]&&obj.id!==PLAY_KOST_ID&&/njh-kos-noor|cove/i.test(textOf(obj)+' '+(obj.id||'')))
@@ -176,13 +179,14 @@ function create(opts){
 
  function kindOfBuilding(obj){
   if(!obj)return null;
+  if(obj.njhInteriorTemplate===TEMPLATES.minimarket||MINIMARKET_PATTERN.test(textOf(obj)))return 'minimarket';
   if(obj.njhInteriorTemplate===TEMPLATES.kost||obj.id===PLAY_KOST_ID||KOST_PATTERN.test(textOf(obj)))return 'kost';
   if(obj.njhInteriorTemplate===TEMPLATES.warteg||obj.njhInteriorTemplate===FALLBACK.warteg||WARTEG_PATTERN.test(textOf(obj)))return 'warteg';
   return null;
  }
 
  function canEnter(kind){
-  if(kind==='warteg')return {ok:true};
+  if(kind==='warteg'||kind==='minimarket')return {ok:true};
   if(kind!=='kost')return {ok:false,reason:'Bukan pintu kost atau warteg'};
   const state=opts.getState?.();
   if(state?.housing?.room)return {ok:true};
@@ -217,10 +221,12 @@ function create(opts){
   if(resolved&&scenes[resolved])return scenes[resolved];
   if(id==='kost')return scenes[TEMPLATES.kost]||buildings.kost?.scene||null;
   if(id==='warteg')return scenes[TEMPLATES.warteg]||scenes[FALLBACK.warteg]||buildings.warteg?.scene||null;
+  if(id==='minimarket')return scenes[TEMPLATES.minimarket]||buildings.minimarket?.scene||null;
   return buildings[id]?.scene||null;
  }
  function kindOfRoom(id){
   if(id==='warteg'||id===TEMPLATES.warteg||id===FALLBACK.warteg)return 'warteg';
+  if(id==='minimarket'||id===TEMPLATES.minimarket)return 'minimarket';
   const A=AccessApi();
   if(id===LOBBY_ID||id==='njh-kos-noor'||A?.isLobby?.(id))return 'lobby';
   return 'kost';
@@ -230,7 +236,8 @@ function create(opts){
 
  function buildRoom(kind,sceneOverride,roomId){
   const sc=sceneOverride||sceneOf(roomId||kind)||buildings[kind]?.scene;
-  const themeKind=kindOfRoom(roomId||kind)==='warteg'?'warteg':'kost';
+  const roomKind=kindOfRoom(roomId||kind);
+  const themeKind=roomKind==='warteg'||roomKind==='minimarket'?roomKind:'kost';
   if(!sc||!THREE||!scene)return null;
   disposeRoom();
   const origin=ORIGIN[themeKind]||ORIGIN.kost,w=num(sc.width,8),d=num(sc.depth,6);
@@ -239,7 +246,7 @@ function create(opts){
   const floorY=policy.floor?.y??0.045;
   // MUST: floor never writes depth — iso sprite bases hang below the foot and
   // a depth-writing floor slices them on a diagonal.
-  const floorMat=new THREE.MeshBasicMaterial({color:sc.theme==='aqua'?0xd0e9f0:0xe8dbc7,side:THREE.DoubleSide,
+  const floorMat=new THREE.MeshBasicMaterial({color:sc.theme==='aqua'?0xd0e9f0:themeKind==='minimarket'?0xeef0ec:0xe8dbc7,side:THREE.DoubleSide,
    depthTest:policy.floor?.depthTest!==false,depthWrite:false});
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(w,d),floorMat);
   floor.rotation.x=-Math.PI/2;floor.position.set(origin.x+w/2,floorY,origin.z+d/2);
@@ -251,7 +258,10 @@ function create(opts){
   const paint=root?.VLWartegInteriorArt;
   const bake=side=>((sc.theme==='warteg'||themeKind==='warteg'||kind==='warteg')&&View?.bakeWallTexture)
    ?View.bakeWallTexture(side,{width:w,depth:d},paint):null;
+  // Minimarket paint (scene.paint): white tile dado + teal band; flat preview colours until a baked hook exists.
+  const MART_WALL={back:0xf3f5f2,left:0xe2ece8};
   const wallMaterial=(side,fallback)=>{
+   if(themeKind==='minimarket')fallback=MART_WALL[side]||fallback;
    const can=bake(side);
    if(can&&THREE){
     const tex=new THREE.CanvasTexture(can);
@@ -418,9 +428,9 @@ function create(opts){
   if(raw==='njh-kos-noor'||resolved===LOBBY_ID||A?.isLobby?.(raw))
    return enterInterior(LOBBY_ID);
   if(sceneOf(resolved))return enterInterior(resolved);
-  if(raw==='kost'||raw==='warteg')return enter(raw);
+  if(raw==='kost'||raw==='warteg'||raw==='minimarket')return enter(raw);
   const k=kindOfBuilding({id:raw,name:raw})||kindOfRoom(resolved);
-  if(k==='warteg'||k==='kost')return enter(k);
+  if(k==='warteg'||k==='kost'||k==='minimarket')return enter(k);
   return {ok:false,reason:'Interior tidak dikenal'};
  }
 
@@ -439,7 +449,7 @@ function create(opts){
   opts.teleport?.(spawn.x,spawn.z,8,{keepView:true});
   fitRoomCamera();
   persistSession();
-  opts.message?.((kind==='kost'?'🏠 Masuk kost':'🍚 Masuk warteg')+(reason?' · '+reason:''));
+  opts.message?.((kind==='kost'?'🏠 Masuk kost':kind==='minimarket'?'🛒 Masuk NJH Mart':'🍚 Masuk warteg')+(reason?' · '+reason:''));
   opts.onEnter?.(session);
   return {ok:true,kind,session};
  }
@@ -623,7 +633,7 @@ function create(opts){
  return {
   loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,canEnter,canEnterRoom,enter,enterInterior,openInteriorById,enterNearby,exit,fitRoomCamera,cameraLocked,
   restoreIfNeeded,furniture,extraActions,obstacles,constrain,update,candidates,
-  doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
+  doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,MINIMARKET_PATTERN,
   place:(x,z,size)=>{if(!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return {ok:false};opts.teleport?.(Number(x),Number(z),size||12,{keepView:!!session});return {ok:true,x:Number(x),z:Number(z)};},
   active:()=>session,kind:()=>session?.kind||null,roomId:()=>session?.roomId||null,buildings:()=>buildings,
 
@@ -632,7 +642,7 @@ function create(opts){
 }
 
 return Object.freeze({
- PIXEL_WORLD,VERTICAL_COMP,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,
+ PIXEL_WORLD,VERTICAL_COMP,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,MINIMARKET_PATTERN,
  wrapInterior,tilePos,dirFor,doorWorld,doorUseWorld,sceneDoors,create,baseUrl
 });
 });

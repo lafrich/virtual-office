@@ -25,6 +25,7 @@ const SITES=[
  {id:'loak',label:'Toko Loak',icon:'♻',pattern:/toko.?loak|babeh|pawnshop/i,action:'sell_loak',offset:[8,5]},
  {id:'scavenge',label:'Titik Mulung',icon:'📦',pattern:/botol|kardus|sampah|trash|barang.?bekas|scavenge/i,action:'scavenge',offset:[-8,-3]},
  {id:'tree',label:'Pohon Buah',icon:'🌳',pattern:/\bpohon\b|\btree\b|mangga|jambu/i,action:'catch_fruit',offset:[-4,-8]},
+ {id:'minimarket',label:'NJH Mart (Minimarket)',icon:'🛒',pattern:/minimarket|njh.?mart|swalayan|supermarket/i,action:'shop',offset:[4,-6]},
  {id:'warung',label:'Warteg / Makanan',icon:'🍚',pattern:/warteg|warung|nasi|food.vendor/i,action:'eat',offset:[3,7]},
  {id:'coffee',label:'Warung Kopi',icon:'☕',pattern:/kopi|coffee|kafe|cafe/i,action:'coffee',offset:[6,8]},
  {id:'public_wc',label:'WC Umum',icon:'🚾',pattern:/wc.umum|public.?toilet|toilet.umum/i,action:'public_toilet',offset:[-10,7]},
@@ -49,7 +50,7 @@ const PLACEHOLDER_COLORS={job_silver:0xa2a9b5,job_pak_ogah:0xa49b5c,job_kang_par
  loak:0x839758,scavenge:0x9d9c84,tree:0x519a64,warung:0xd5aa53,coffee:0x856649,
  public_wc:0x77aec0,public_bath:0x77aec0,kost:0xb18cd3,tent:0x9a9d77,prayer:0x81c69f,prayer_islam_a:0x81c69f,prayer_islam_b:0x81c69f,prayer_islam_c:0x81c69f,
  prayer_kristen:0x81c69f,prayer_katolik:0x81c69f,prayer_hindu:0x81c69f,prayer_buddha:0x81c69f,
- prayer_konghucu:0x81c69f,course:0x709ac4};
+ prayer_konghucu:0x81c69f,course:0x709ac4,minimarket:0x2aa198};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
@@ -183,6 +184,9 @@ function hookCtx(){
   hasCharacter:()=>!!(state?.hasCharacter||state?.identityChosen),
   getRelationships:()=>state?.relationships||startProfiles?.relationships||(root.SemestaRoomAccess?.DEFAULT_RELATIONSHIPS)||[],
   resetCurrent:()=>resetSave(),
+  playPose:(pose,secs)=>{try{bridge?.playPose?.(pose,secs||4);}catch{}},
+  currentPose:()=>{try{return bridge?.currentPose?.()||null;}catch{return null;}},
+  afterEconomy:(action,r)=>{persist();if(r?.changes?.length)message('✅ '+r.changes.join(' · '));notifyHud();paintPanel();},
   runEconomy:(action,args)=>{if(!RULES||!state)return {ok:false,reason:'Tidak ada state'};
    const r=RULES.run(config,state,action,args||{});if(r.ok)state=r.state;return r;},
   enterInterior:id=>{
@@ -679,7 +683,8 @@ function actionUp(ev){workUp(ev);}
 const ACTION_POSE={cook:'cook',eat:'eat',eat_item:'eat',coffee:'drink_coffee',fish:'fishing_cast',scavenge:'mulung_pick',
  public_toilet:'wc_squat',home_toilet:'wc_squat',public_shower:'mandi',home_shower:'mandi',wall_pee:'pee_wall',fart:'idle',talk:'talk',
  worship:'pray_generic',charity:'give_sedekah',help:'hand_over',sell_fish:'hand_over',sell_loak:'hand_over',
- store_fridge:'use_storage',take_fridge:'use_storage',store_home:'use_storage',take_home:'use_storage',catch_fruit:'pick_up'};
+ store_fridge:'use_storage',take_fridge:'use_storage',store_home:'use_storage',take_home:'use_storage',catch_fruit:'pick_up',
+ move_item:'use_storage',shop_buy:'hand_over',buy_token:'hand_over',topup_token:'hand_over',fish_catch:'pick_up'};
 const JOB_POSE={manusia_silver:'silver_pose',pak_ogah:'ogah_flag',kang_parkir:'parkir_whistle'};
 function actionPose(action,args){
  if(action==='work')return JOB_POSE[args.jobId]||'talk';
@@ -758,6 +763,11 @@ function runAction(action,args={}){
    paintPanel();return r;
   }catch(err){return {ok:false,reason:String(err.message||err)};}
  }
+ // Step 2 UI entries (docs/HOOKS-STEP2.md): open a window, never change state here.
+ try{const ui=getHooks()?.openUi?.(action,args);if(ui){paintPanel();return ui;}}catch{}
+ if(['store_home','take_home','store_fridge','take_fridge'].includes(action)&&state?.housing?.room&&(state.powerTokens||0)<=0){
+  const why='Token listrik habis. Isi token dulu (Rp20.000 / 5 unit).';message('⛔ '+why);return {ok:false,reason:why};}
+ if(action==='buy_token'||action==='topup_token'){const r=getHooks()?.topupToken?.(args.units||5)||{ok:false,reason:'hooks missing'};if(!r.ok)message('⛔ '+r.reason);return r;}
  try{if(getHooks())args=getHooks().argsFor(action,args);}catch{}
  try{
   const Access=root.SemestaRoomAccess;
@@ -935,6 +945,7 @@ function tick(dt){
   const result=RULES.run(config,state,'advance_time',{minutes});
   if(result.ok){
    const prior=state;state=result.state;persist();afterLifeTransition(prior);
+   try{const t=getHooks()?.tokenWatch?.();if(t&&t.empty&&(prior?.powerTokens||0)>0)message('⚡ Token listrik habis: kulkas, lemari dan kompor mati. Isi token Rp20.000 / 5 unit.');}catch{}
    if(result.changes.some(x=>x.startsWith('BED REST SELESAI')))
     message('✅ Bed rest selesai. Energi pulih; sekarang bisa beraktivitas lagi.');
   }
@@ -1107,6 +1118,20 @@ const api=Object.freeze({attach,start,stop,active:visible,persist,state:()=>stat
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
  playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null,
  spawnAt:hookApi('spawnAt',{ok:false,reason:'hooks missing'}),
+ // Step 2 (docs/HOOKS-STEP2.md)
+ inventory:hookApi('inventory',{ok:false,reason:'hooks missing',items:[],locked:true}),
+ moveItem:hookApi('moveItem',{ok:false,reason:'hooks missing'}),
+ eatItem:hookApi('eatItem',{ok:false,reason:'hooks missing'}),
+ recipes:hookApi('recipes',[]),
+ cook:hookApi('cook',{ok:false,reason:'hooks missing'}),
+ shopList:hookApi('shopList',{ok:false,reason:'hooks missing',items:[]}),
+ buy:hookApi('buy',{ok:false,reason:'hooks missing'}),
+ checkoutCart:hookApi('checkoutCart',{ok:false,reason:'hooks missing'}),
+ fishSpots:hookApi('fishSpots',[]),
+ fishStart:hookApi('fishStart',{ok:false,reason:'hooks missing'}),
+ fishInput:hookApi('fishInput',{ok:false,reason:'hooks missing'}),
+ token:hookApi('token',null),
+ topupToken:hookApi('topupToken',{ok:false,reason:'hooks missing'}),
  housing:hookApi('housing',null),
  relationship:hookApi('relationship',[]),
  roomAccess:hookApi('roomAccess',null),

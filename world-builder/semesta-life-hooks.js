@@ -443,6 +443,11 @@ function create(ctx){
      price:0,spotLabel:w.length?'Dekat orang':'',args:{witnessed:w.length>0,nearby:w.length}});
    }
   }
+  try{
+   const extra2=step2Actions();
+   if(extra2.some(a=>a.id==='fish_start')){for(let i=list.length-1;i>=0;i--)if(list[i].id==='fish')list.splice(i,1);}
+   for(const a of extra2)if(!list.some(x=>x.id===a.id))list.push(a);
+  }catch(_e){}
   const spot=near[0]?.site?.label||near[0]?.site?.id||'';
   Object.defineProperty(list,'spot',{value:spot,enumerable:false,configurable:true});
   if(list[0]&&!list[0].spotLabel)list[0].spotLabel=spot;
@@ -450,6 +455,8 @@ function create(ctx){
    const acc=roomAccess();
    if(acc&&(acc.role==='partner'||acc.kind==='lobby'||acc.role==='none')){
     const next=Access.filterActions(list,acc);
+    // Public step-2 entries (shop, fishing) are not room furniture; keep them.
+    for(const x of list)if((x.id==='shop_minimarket'||x.id==='fish_start')&&!next.some(y=>y.id===x.id))next.push(x);
     Object.defineProperty(next,'spot',{value:spot,enumerable:false,configurable:true});
     return next;
    }
@@ -876,6 +883,322 @@ function create(ctx){
   if(typeof ctx.resetCurrent==='function')ctx.resetCurrent();
   return {ok:true,reset:true};
  }
+
+ /* ===================== Step 2 (NJH): containers, cook, minimarket, fishing, token =====================
+  * Contract: docs/HOOKS-STEP2.md. Pure state changes go through Jiwa rules (ctx.runEconomy);
+  * these hooks only add location / ownership checks, events and animation ids. */
+ const ECON=()=>{try{return (typeof require==='function'?require('../jiwa/life-economy.js'):null);}catch(_e){return null;}};
+ const rules=()=>(typeof globalThis!=='undefined'&&globalThis.JiwaLifeEconomy)||(ctx.root&&ctx.root.JiwaLifeEconomy)||ECON();
+ const cfgN=()=>{const R=rules();return R?R.normalize(config()):null;};
+ const rnd=()=>{try{return typeof ctx.random==='function'?ctx.random():Math.random();}catch(_e){return Math.random();}};
+ const play=pose=>{try{if(pose&&typeof ctx.playPose==='function')ctx.playPose(pose);}catch(_e){}};
+ const seated=()=>{try{return /sit|duduk|lesehan/i.test(String(ctx.currentPose?.()||''));}catch(_e){return false;}};
+ function econ(action,args){
+  if(typeof ctx.runEconomy!=='function')return {ok:false,reason:'Play Game belum dimulai'};
+  const r=ctx.runEconomy(action,args||{});
+  try{if(r&&r.ok&&typeof ctx.afterEconomy==='function')ctx.afterEconomy(action,r);}catch(_e){}
+  return r||{ok:false,reason:'Gagal'};
+ }
+ const strip=r=>{const o=Object.assign({},r);delete o.state;return o;};
+ const BOXES={bag:'Tas',fridge:'Kulkas',storage:'Lemari'};
+ const listOf=(st,box)=>box==='bag'?st.inventory||[]:box==='fridge'?st.fridge||[]:st.homeStorage||[];
+ function itemRow(st,c,uid){
+  const meta=st.itemMeta?.[uid]||{species:'?',label:'?'};
+  const R=rules();
+  const def=R&&c?R.itemDef(c,meta.species):null;
+  const fish=R&&c?R.allFish(c).find(f=>f.id===meta.species):null;
+  const rec=(c?.cooking?.recipes||[]).find(r=>r.outputItem===meta.species);
+  const never=num(meta.expiresAt,0)>=5e7;
+  const left=never?null:Math.max(0,Math.round(num(meta.expiresAt,0)-num(st.elapsedMinutes,0)));
+  const edible=meta.species==='buah'||(!fish&&!!(def?.category==='dish'||rec||def?.statEffects));
+  return {uid,itemId:meta.species,label:meta.label||def?.label||fish?.label||meta.species,
+   category:fish?'fish':(def?.category||(meta.species==='buah'?'fresh':'other')),
+   icon:fish?.icon||def?.icon||null,quality:meta.quality||null,
+   storeIn:def?.storeIn||(fish||meta.species==='buah'?['bag','fridge']:['bag','storage']),
+   minutesLeft:left,spoiled:left===0,inFridge:!!meta.inFridge,edible,
+   sellPrice:def?.sellPrice??null};
+ }
+ // Ownership of the kost furniture (fridge/lemari/kompor): owner_only, like roomAccess.
+ function ownerGate(){
+  const st=getState();
+  if(!st?.housing?.room)return 'Perlu kost dahulu.';
+  if(Access&&currentRoomId()){
+   const acc=roomAccess();
+   if(acc&&acc.role==='partner')return 'Punya pacar';
+   if(acc&&acc.role!=='owner')return 'Terkunci';
+  }
+  return null;
+ }
+ function boxGate(box,st){
+  if(box==='bag')return null;
+  const own=ownerGate();if(own)return own;
+  if(box==='fridge'&&!st.housing?.fridge)return 'Belum punya kulkas.';
+  if(num(st.powerTokens,0)<=0){
+   const c=cfgN();const set=c?.settings||{tokenPrice:20000,tokenUnits:5};
+   return 'Token listrik habis. Isi token dulu ('+rpMoney(set.tokenPrice).replace('Rp ','Rp')+' / '+set.tokenUnits+' unit).';
+  }
+  return null;
+ }
+ function inventory(container){
+  const box=BOXES[container]?container:'bag';
+  const st=getState();if(!st)return {ok:false,container:box,reason:'Play Game belum dimulai',items:[],locked:true};
+  const c=cfgN(),set=c?.settings||{bagSlots:8,homeStorageSlots:24};
+  const slots=box==='bag'?set.bagSlots:set.homeStorageSlots;
+  const gate=boxGate(box,st);
+  const items=gate?[]:listOf(st,box).map(uid=>itemRow(st,c,uid));
+  const used=listOf(st,box).length;
+  return Object.assign({ok:!gate,container:box,label:BOXES[box],slots,used,free:Math.max(0,slots-used),items,locked:!!gate},gate?{reason:gate}:{});
+ }
+ function nearKind(kind){
+  const pos=getPos();
+  return worldFurniture().find(f=>f.kind===kind&&Math.hypot(num(f.x,0)-pos.x,num(f.z,0)-pos.z)<=range)||null;
+ }
+ function moveItem(from,to,itemId,qty){
+  if(from&&typeof from==='object'){({from,to,itemId,qty}=from);}
+  const st=getState();if(!st)return {ok:false,reason:'Play Game belum dimulai'};
+  for(const b of [from,to]){if(!BOXES[b])return {ok:false,reason:'Wadah tidak valid.'};const g=boxGate(b,st);if(g)return {ok:false,reason:g,locked:true};}
+  const other=from==='bag'?to:from;
+  const kind=other==='fridge'?'fridge':'wardrobe';
+  if(other!=='bag'&&!nearKind(kind)&&!(st.furniture||[]).includes(kind==='wardrobe'?'wardrobe':'fridge')&&interiorKind()!=='kost')
+   return {ok:false,reason:'Dekati '+(other==='fridge'?'Kulkas':'Lemari')+' dahulu.'};
+  const r=econ('move_item',{from,to,itemId:String(itemId||''),qty:num(qty,1)});
+  if(r.ok)play('use_storage');
+  return r.ok?{ok:true,from,to,moved:r.moved||[],pose:'use_storage'}:{ok:false,reason:r.reason};
+ }
+ function eatItem(uid){
+  const r=econ('eat_item',{itemId:String(uid||'')});
+  if(!r.ok)return {ok:false,reason:r.reason};
+  const pose=r.pose==='eat_snack'?'eat_snack':seated()?'eat_sit':'eat';
+  play(pose);
+  return {ok:true,itemId:r.itemId||null,label:r.label||null,quality:r.quality||null,effects:r.effects||{},pose};
+ }
+ function knownSet(st,c){
+  return new Set([...(st.knownRecipes||[]),...(c?.cooking?.recipes||[]).filter(r=>r.unlock?.knownAtStart||r.unlock?.mode==='start').map(r=>r.id)]);
+ }
+ function recipes(){
+  const st=getState()||{},c=cfgN();if(!c)return [];
+  const known=knownSet(st,c);
+  const R=rules(),fishIds=new Set(R?R.allFish(c).map(f=>f.id):[]);
+  const bag=(st.inventory||[]).map(u=>st.itemMeta?.[u]?.species).filter(Boolean);
+  return (c.cooking.recipes||[]).map(r=>{
+   const k=known.has(r.id);
+   const pool=bag.slice(),missing=[];
+   const ings=(r.ingredients||[]).map(n=>{
+    n=typeof n==='string'?{id:n,qty:1}:n;
+    const fits=sp=>n.id?sp===n.id:(n.category==='fish'?fishIds.has(sp):R?.itemDef(c,sp)?.category===n.category);
+    let have=0;for(let i=0;i<num(n.qty,1);i++){const j=pool.findIndex(fits);if(j>=0){pool.splice(j,1);have++;}}
+    if(have<num(n.qty,1))missing.push(n.id||n.category);
+    return {id:n.id,category:n.category,qty:num(n.qty,1),label:n.id?(R?.itemDef(c,n.id)?.label||n.id):(n.category==='fish'?'Ikan apa saja':n.category),have};
+   });
+   return {id:r.id,label:k?(r.outputLabel||r.label):'???',known:k,
+    ingredients:k?ings:[],outputItem:r.outputItem,outputLabel:k?r.outputLabel:'???',
+    durationMinutes:r.durationMinutes,statEffectsEat:k?(r.statEffectsEat||{}):{},minExp:num(r.minExp,0),
+    unlock:{mode:r.unlock?.mode||'experiment'},actionAsset:r.actionAsset||'cook',
+    canCook:k&&!missing.length,missing:k?missing:[]};
+  });
+ }
+ function stoveHere(){
+  const st=getState();
+  if(nearKind('stove'))return true;
+  return !!(st?.furniture||[]).includes('stove')&&interiorKind()==='kost';
+ }
+ function cook(input){
+  const st=getState();if(!st)return {ok:false,reason:'Play Game belum dimulai'};
+  const own=ownerGate();if(own)return {ok:false,reason:own};
+  if(!stoveHere())return {ok:false,reason:'Dekati kompor dahulu.'};
+  if(num(st.powerTokens,0)<1)return {ok:false,reason:'Token listrik habis.'};
+  let args={stoveOk:true};
+  if(typeof input==='string')args.recipeId=input;
+  else if(Array.isArray(input))args.ingredients=input;
+  else if(input&&input.recipeId)args.recipeId=String(input.recipeId);
+  else if(input&&Array.isArray(input.ingredients))args.ingredients=input.ingredients;
+  const r=econ('cook_dish',args);
+  if(!r.ok)return Object.assign({ok:false,reason:r.reason},r.failed?{failed:true}:{});
+  const out={ok:true,recipeId:r.recipeId,result:r.result,learnedRecipe:r.learnedRecipe||null,
+   consumed:r.consumed||[],minutes:r.minutes,tokenUsed:r.tokenUsed,pose:r.pose||'cook'};
+  play(out.pose);emit('mainkan:cook-done',out);tokenWatch();
+  return out;
+ }
+ // ---- minimarket ----
+ function inMart(){
+  const k=interiorKind();if(k==='minimarket')return true;
+  const rid=currentRoomId();return rid==='njh_minimarket';
+ }
+ function nearMart(){
+  if(inMart())return true;
+  const pos=getPos();
+  return getSites().some(s=>s.id==='minimarket'&&Math.hypot(num(s.x,0)-pos.x,num(s.z,0)-pos.z)<=Math.max(range,4));
+ }
+ function shopList(siteId){
+  const c=cfgN();const st=getState()||{};
+  if(!c)return {ok:false,reason:'Katalog belum siap',items:[]};
+  const set=c.settings;
+  const shelfOf=cat=>({staple:'Sembako',dry:'Sembako',spice:'Bumbu & Mi',vegetable:'Sayur & Buah',fresh:'Chiller',protein:'Chiller',fish:'Chiller',dairy:'Chiller',drink:'Minuman',snack:'Snack'}[cat]||'Lainnya');
+  const items=(c.cooking.items||[]).filter(i=>(i.source||[]).includes('supermarket')&&i.price>0).map(i=>({
+   itemId:i.id,label:i.label,category:i.category,price:i.price,unit:i.unit||'',icon:i.icon||null,
+   approximate:!!i.approximate,storeIn:i.storeIn||['bag'],shelf:shelfOf(i.category)}));
+  return {ok:true,siteId:siteId||'minimarket',label:c.cooking.shop?.minimarket?.label||'NJH Mart',
+   inside:inMart(),near:nearMart(),wallet:num(st.wallet,0),bagFree:Math.max(0,set.bagSlots-(st.inventory||[]).length),items};
+ }
+ function buy(itemId,qty){
+  if(!nearMart())return {ok:false,reason:'Masuk ke NJH Mart dahulu.'};
+  const cart=itemId&&typeof itemId==='object'?(Array.isArray(itemId)?itemId:itemId.cart||[{itemId:itemId.itemId,qty:itemId.qty}]):[{itemId,qty:num(qty,1)}];
+  const r=econ('shop_buy',{cart});
+  if(!r.ok)return {ok:false,reason:r.reason};
+  const out={ok:true,receipt:r.receipt,added:r.added||[],pose:'hand_over'};
+  play('hand_over');emit('mainkan:shop-receipt',out);
+  return out;
+ }
+ // ---- fishing (data-driven spots; Ellen's preview/njh-step2-map spot ids plug in) ----
+ const FISH_RE=/dermaga|mancing|fishing|pier|pemancingan/i;
+ function fishSpots(){
+  const out=[],seen=new Set();
+  for(const o of (getWorld().objects||[])){
+   const blob=[o.id,o.name,o.label,o.asset,o.subtype,...(Array.isArray(o.tags)?o.tags:[]),...(Array.isArray(o.interactions)?o.interactions:[])].filter(Boolean).join(' ');
+   if(!(FISH_RE.test(blob)||(Array.isArray(o.interactions)&&o.interactions.includes('fish'))))continue;
+   if(o.type==='building')continue;
+   const pt=Array.isArray(o.fishPoint)?{x:num(o.fishPoint[0]),z:num(o.fishPoint[1])}:Array.isArray(o.actionPoint)?{x:num(o.actionPoint[0]),z:num(o.actionPoint[1])}:{x:num(o.x,0),z:num(o.z,0)};
+   const key=Math.round(pt.x*2)+','+Math.round(pt.z*2);if(seen.has(key))continue;seen.add(key);
+   out.push({id:String(o.id),label:o.name||o.label||'Tempat mancing',x:pt.x,z:pt.z,source:'world'});
+  }
+  for(const s of getSites())if(s.id==='fish'){
+   const key=Math.round(num(s.x,0)*2)+','+Math.round(num(s.z,0)*2);
+   if(!seen.has(key)){seen.add(key);out.push({id:String(s.sourceId||'fish'),label:s.label||'Mancing',x:num(s.x,0),z:num(s.z,0),source:'site'});}
+  }
+  if(!out.length){const p=getPos();out.push({id:'njh-fish-temp',label:'Tempat mancing (sementara)',x:p.x,z:p.z,source:'temporary'});}
+  return out;
+ }
+ let fishSession=null,fishSeq=0;
+ const TIER_BOOST={common:0,uncommon:1,rare:2,epic:3,legendary:4};
+ function rollFish(power){
+  const R=rules(),c=cfgN();const list=(R&&c?R.allFish(c):[]).filter(f=>num(f.weight,0)>0);
+  if(!list.length)return null;
+  const p=clamp(num(power,0.5),0,1);
+  const w=list.map(f=>num(f.weight,0)*(1+p*0.6*(TIER_BOOST[f.rarityTier]||0)));
+  let t=rnd()*w.reduce((a,b)=>a+b,0);
+  for(let i=0;i<list.length;i++){t-=w[i];if(t<0)return list[i];}
+  return list[list.length-1];
+ }
+ function fishStart(spotId){
+  const st=getState();if(!st)return {ok:false,reason:'Play Game belum dimulai'};
+  const c=cfgN(),set=c?.settings||{fishEnergy:8,bagSlots:8};
+  const pos=getPos();
+  const spots=fishSpots();
+  let spot=spotId?spots.find(s=>s.id===String(spotId)):null;
+  if(!spot)spot=spots.map(s=>({s,d:Math.hypot(s.x-pos.x,s.z-pos.z)})).sort((a,b)=>a.d-b.d)[0]?.s||null;
+  if(!spot||(spot.source!=='temporary'&&Math.hypot(spot.x-pos.x,spot.z-pos.z)>Math.max(range,3)))return {ok:false,reason:'Dekati dermaga / tempat mancing dahulu.'};
+  if((st.inventory||[]).length>=set.bagSlots)return {ok:false,reason:'Tas penuh ('+set.bagSlots+' slot).'};
+  if(num(st.energy,0)<set.fishEnergy)return {ok:false,reason:'Energi tidak cukup untuk mancing.'};
+  fishSession={id:'fish-'+(++fishSeq),spotId:spot.id,phase:'cast',waits:0,fish:null,progress:0,tension:0.5,miss:0};
+  play('fishing_cast');
+  return {ok:true,sessionId:fishSession.id,spotId:spot.id,energyCost:set.fishEnergy,phase:'cast'};
+ }
+ function finishFish(gotAway,reason){
+  const ses=fishSession;fishSession=null;
+  if(!ses)return {ok:false,done:true,reason:'Sesi mancing tidak ada.'};
+  const r=econ('fish_catch',gotAway?{gotAway:true,spotId:ses.spotId}:{fishId:ses.fish.id,spotId:ses.spotId});
+  const res=r.ok?{ok:true,done:true,sessionId:ses.id,spotId:ses.spotId,gotAway:!!gotAway,
+   fishId:gotAway?null:r.fishId,label:gotAway?null:r.label,rarity:gotAway?null:r.rarity,rarityTier:gotAway?null:r.rarityTier,uid:gotAway?null:r.uid}
+   :{ok:false,done:true,sessionId:ses.id,gotAway:true,reason:r.reason};
+  if(gotAway&&reason)res.reason=reason;
+  play(res.ok&&!gotAway?'pick_up':'idle');
+  emit('mainkan:fish-result',res);tokenWatch();
+  return res;
+ }
+ function fishInput(action,value){
+  let sid=null;
+  if(action&&typeof action==='object'){sid=action.sessionId||null;value=action.value;action=action.phase||action.action;}
+  if(!fishSession)return {ok:false,reason:'Mulai mancing dulu (fishStart).'};
+  if(sid&&sid!==fishSession.id)return {ok:false,reason:'Sesi mancing sudah berganti.'};
+  const s=fishSession,v=clamp(num(value,0.5),0,1),a=String(action||'');
+  if(a==='cancel')return finishFish(true,'Batal');
+  if(a==='cast'){
+   if(s.phase!=='cast')return {ok:false,phase:s.phase,reason:'Sudah dilempar.'};
+   s.fish=rollFish(v);s.phase='wait';s.power=v;
+   if(!s.fish)return finishFish(true,'Tidak ada ikan.');
+   const pose=seated()?'fishing_wait_sit':'fishing_wait';play(pose);
+   return {ok:true,sessionId:s.id,phase:'wait',pose};
+  }
+  if(a==='wait'){
+   if(s.phase==='strike')return {ok:true,sessionId:s.id,phase:'strike',bite:true,strikeWindowMs:900};
+   if(s.phase!=='wait')return {ok:false,phase:s.phase,reason:'Belum dilempar.'};
+   s.waits++;
+   const bite=rnd()<Math.min(0.95,0.2+0.15*s.waits);
+   if(bite)s.phase='strike';
+   return {ok:true,sessionId:s.id,phase:s.phase,bite,strikeWindowMs:900};
+  }
+  if(a==='strike'){
+   if(s.phase==='wait')return finishFish(true,'Terlalu cepat, ikan kabur.');
+   if(s.phase!=='strike')return {ok:false,phase:s.phase,reason:'Belum ada sambaran.'};
+   const need=0.3+0.1*num(s.fish.catchDifficulty,1);
+   if(v<need)return finishFish(true,'Telat menyentak, ikan kabur.');
+   s.phase='reel';s.tension=0.5;
+   return {ok:true,sessionId:s.id,phase:'reel',hooked:true,tension:s.tension,band:[0.25,0.8]};
+  }
+  if(a==='reel'){
+   if(s.phase!=='reel')return {ok:false,phase:s.phase,reason:'Belum kena kail.'};
+   s.tension=v;
+   if(v>0.95)return finishFish(true,'Senar putus.');
+   const inBand=v>=0.25&&v<=0.8;
+   if(inBand)s.progress+=0.4/(1+(num(s.fish.catchDifficulty,1)-1)*0.25);
+   else{s.progress=Math.max(0,s.progress-0.1);s.miss++;}
+   if(s.miss>=3)return finishFish(true,'Ikan lepas.');
+   if(s.progress>=1)return finishFish(false);
+   return {ok:true,sessionId:s.id,phase:'reel',progress:Math.min(1,+s.progress.toFixed(3)),tension:v,band:[0.25,0.8]};
+  }
+  return {ok:false,phase:s.phase,reason:'Aksi mancing tidak dikenal.'};
+ }
+ // ---- electricity token ----
+ let lastTokenEmpty=null;
+ function token(){
+  const st=getState()||{},c=cfgN(),set=c?.settings||{tokenPrice:20000,tokenUnits:5,tokenDurationMinutes:60,tokenBaseDrainMinutes:240};
+  const units=num(st.powerTokens,0);
+  const cooling=!!(st.housing?.fridge&&(st.fridge||[]).length&&units>0);
+  const base=set.tokenBaseDrainMinutes>0&&st.housing?.room?60/set.tokenBaseDrainMinutes:0;
+  const drain=+(base+(cooling?60/set.tokenDurationMinutes:0)).toFixed(3);
+  const minutesLeft=drain>0?Math.round(units/drain*60):null;
+  return {ok:true,units,drainPerHour:drain,empty:units===0,minutesLeft,price:set.tokenPrice,unitsPerPack:set.tokenUnits,
+   fridgeCooling:cooling,hasRoom:!!st.housing?.room};
+ }
+ function tokenWatch(){
+  const t=token();
+  if(lastTokenEmpty!==null&&t.empty&&!lastTokenEmpty)emit('mainkan:token',{units:t.units,empty:true});
+  lastTokenEmpty=t.empty;return t;
+ }
+ function topupToken(units){
+  const r=econ('topup_token',{units:num(units,5)});
+  if(!r.ok)return {ok:false,reason:r.reason};
+  const t=token();lastTokenEmpty=t.empty;
+  const out={ok:true,units:t.units,added:r.added,packs:r.packs,paid:r.paid};
+  emit('mainkan:token',{units:t.units,empty:t.empty});
+  return out;
+ }
+ function step2Actions(){
+  const st=getState();if(!st)return [];
+  const out=[],pos=getPos();
+  const push=(id,label,ui,args,extra)=>out.push(Object.assign({id,action:id,label,ui,price:0,spotLabel:'',args:args||{}},extra||{}));
+  const ownOk=!ownerGate();
+  if(ownOk&&interiorKind()==='kost'){
+   const fr=nearKind('fridge');if(fr)push('open_fridge','Buka Kulkas','inventory',{container:'fridge'},{furnitureId:fr.furnitureId||fr.id,spotLabel:'Kulkas'});
+   const wd=nearKind('wardrobe');if(wd)push('open_storage','Buka Lemari','inventory',{container:'storage'},{furnitureId:wd.furnitureId||wd.id,spotLabel:'Lemari'});
+   const sv=nearKind('stove');if(sv)push('cook_menu','Masak','cook',{},{furnitureId:sv.furnitureId||sv.id,spotLabel:'Kompor'});
+   if(num(st.powerTokens,0)<=2)push('topup_token','Isi Token Listrik','token',{units:5},{price:cfgN()?.settings?.tokenPrice||20000});
+  }
+  if(inMart()||nearMart())push('shop_minimarket','Belanja NJH Mart','shop',{siteId:'minimarket'},{spotLabel:'NJH Mart'});
+  const spot=fishSpots().filter(s=>s.source!=='temporary').map(s=>({s,d:Math.hypot(s.x-pos.x,s.z-pos.z)})).filter(x=>x.d<=Math.max(range,3)).sort((a,b)=>a.d-b.d)[0];
+  if(spot&&!interiorKind())push('fish_start','Mancing','fishing',{spotId:spot.s.id},{spotLabel:spot.s.label});
+  return out;
+ }
+ function openUi(id,args){
+  const a=args||{};
+  const map={open_fridge:()=>inventory('fridge'),open_storage:()=>inventory('storage'),cook_menu:()=>({ok:true,recipes:recipes(),bag:inventory('bag')}),
+   shop_minimarket:()=>shopList('minimarket'),fish_start:()=>({ok:true,spots:fishSpots(),spotId:a.spotId||null}),topup_token:()=>token()};
+  if(!map[id])return null;
+  const ui={open_fridge:'inventory',open_storage:'inventory',cook_menu:'cook',shop_minimarket:'shop',fish_start:'fishing',topup_token:'token'}[id];
+  const data=map[id]();
+  emit('mainkan:open-ui',{ui,args:a});
+  return Object.assign({ui},data,{ok:true});
+ }
  return {
   spawnAt,onSpawnDecision,nearbyActions,furnitureAllows,argsFor,
   pause,resume,isPaused,clock,onDayEnd,
@@ -885,6 +1208,8 @@ function create(ctx){
   questMarkers,enterables,worldToScreen,playerPosition,
   hasSave,saveMeta,saveSlot,loadSlot,listSlots,resetSave,
   housing,relationship,roomAccess,
+  inventory,moveItem,eatItem,recipes,cook,shopList,buy,checkoutCart:buy,fishSpots,fishStart,fishInput,token,topupToken,
+  step2Actions,openUi,tokenWatch,STEP2_UI:['open_fridge','open_storage','cook_menu','shop_minimarket','fish_start','topup_token'],
   RANGE:range,FURNITURE_GATES:gates
  };
 }

@@ -715,8 +715,8 @@
       ],
       "baymaxDoorId": null,
       "baymaxInteractionId": null,
-      "interiorPending": true,
-      "interiorNote": "Scene still being fixed by Gerak; enter falls back to a toast until then. Link by template id only."
+      "interiorPending": false,
+      "interiorNote": "Gerak shelf-fixed scene vendored in step 2 (interiors/ and njh-play-interiors/)."
     }
   ],
   "interactables": [
