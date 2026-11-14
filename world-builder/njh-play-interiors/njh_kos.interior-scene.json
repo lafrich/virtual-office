@@ -95,9 +95,9 @@
       "id": "njh-kos-fridge-1",
       "assetId": "fridge",
       "name": "Kulkas",
-      "c": 5,
-      "r": 0,
-      "rotation": 0,
+      "c": 0,
+      "r": 4,
+      "rotation": 90,
       "flipX": false,
       "flipY": false,
       "actionId": "open",
@@ -164,9 +164,9 @@
       "id": "njh-kos-sink-1",
       "assetId": "sink",
       "name": "Wastafel",
-      "c": 6,
+      "c": 7,
       "r": 2,
-      "rotation": 0,
+      "rotation": 180,
       "flipX": false,
       "flipY": false,
       "actionId": "wash",
@@ -217,10 +217,75 @@
       "motions": [
         "eat"
       ]
+    },
+    {
+      "id": "njh-kos-sekat-privacy-5-0",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 5,
+      "r": 0,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh-kos-sekat-privacy-5-1",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 5,
+      "r": 1,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh-kos-sekat-privacy-5-2",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 5,
+      "r": 2,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh-kos-sekat-privacy-5-3",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 5,
+      "r": 3,
+      "rotation": 90,
+      "blocking": true
+    },
+    {
+      "id": "njh-kos-sekat-privacy-7-3",
+      "assetId": "sekat_wc",
+      "name": "Sekat Kamar Mandi",
+      "c": 7,
+      "r": 3,
+      "rotation": 0,
+      "blocking": true
     }
   ],
   "floor": 1,
-  "notes": "r3 facing fix of njh_kos. Chair rot 90 (visual front +c) with a 1-tile gap, dining table at (2,3) so the seat visibly faces the table. Back-wall stove/shower/WC stay rot 0 (fronts into the room, WC stays SW). I1 chair has no true back view; rot 180 was not used.",
+  "notes": "r3 facing fix of njh_kos. Chair rot 90 (visual front +c) with a 1-tile gap, dining table at (2,3) so the seat visibly faces the table. Back-wall stove/shower/WC stay rot 0 (fronts into the room, WC stays SW). I1 chair has no true back view; rot 180 was not used. · WC r6 privacy: right-side enclosed bath x6–7, opaque sekat c5 plus curtained entrance at 6,3; sink backed to r3 wall; fridge moved to left wall.",
   "adaptedFrom": "/workspace/njh-interior-templates-r1/scenes/njh_kos.interior-scene.json",
-  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema)."
+  "adaption": "Upgrade of bangun-interior-templates-r1 furniture-only draft for NJH concept-v2 mechanics + t394 interaction-side clearance. Partitions/sidecars from the draft are not used (unsupported by Bangun schema).",
+  "doors": [
+    {
+      "id": "njh-kos-bathroom-curtain",
+      "role": "bathroom",
+      "label": "Tirai Kamar Mandi",
+      "c": 6,
+      "r": 3,
+      "rotation": 0,
+      "useTile": [
+        6,
+        3
+      ],
+      "usePoint": [
+        6.5,
+        3.5
+      ],
+      "privacy": true,
+      "walkable": true
+    }
+  ]
 }
