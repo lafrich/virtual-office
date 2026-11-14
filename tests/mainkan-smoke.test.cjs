@@ -26,6 +26,20 @@ test('mainkan onboarding and native Semesta iframe exist',()=>{
  assert.doesNotMatch(app,/world\.json/);
  assert.doesNotMatch(app,/drawTerrain|drawObject|function blocked\(/);
 });
+test('Mainkan enters playable landscape world before slow Genesis art completes',()=>{
+ const htmlWorld=read('world-builder/index.html');
+ assert.match(semesta,/playerFirstFrameRendered=true/);
+ assert.match(semesta,/gameplayActive&&playerFirstFrameRendered/);
+ assert.match(semesta,/characterPending:!rig\.state\?\.loaded/);
+ assert.match(semesta,/mainkan:player-character-ready/);
+ assert.match(app,/e\.data\.characterPending/);
+ assert.match(app,/mainkan:player-character-error/);
+ assert.match(app,/\},18000\)/);
+ assert.match(htmlWorld,/mainkan-startup-20261115/);
+ assert.match(html,/landscape-startup-unblock-20261115/);
+ assert.match(html,/game menggunakan tampilan landscape/);
+});
+
 test('login requires real server; browser never stores Mainkan passwords',()=>{
  assert.match(app,/authenticated!==true/);
  assert.match(app,/saved!==true/);
