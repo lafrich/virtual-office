@@ -154,11 +154,16 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  assert.equal(linked.ambientOnMap,false,'ambient actions do not become quest pins');
  // The same real object has a Money activity and an Immoral ambient action.
  // Both actions must appear at one physical location and be selectable.
- await play.locator('#slpContent details summary').first().click();
- await play.locator('#slpDestination').selectOption('act:bank_teller');
- await play.locator('#slpTravel').click();
- const siblings=await play.locator('#slpActions [data-life-action]').evaluateAll(buttons=>
-  buttons.map(button=>button.dataset.lifeAction));
+ // Player mode deliberately hides the native Semesta test panel.
+ // Move through the published play-only runtime API; do not force a hidden
+ // editor/debug control visible and do not bypass proximity gating.
+ const siblings=await play.evaluate(()=>{
+  const target=window.SemestaLifePlay.sites().find(s=>s.id==='act:bank_teller');
+  const T=window.VLNjhMapPreviewRuntime;
+  if(!target||!T?.teleport?.(target.x,target.z))
+   throw Error('Cannot travel to the authored activity in NJH-only player world');
+  return window.SemestaLifePlay.nearbyActions().map(a=>a.id);
+ });
  assert.ok(siblings.includes('configured_activity'),siblings.join(','));
  assert.ok(siblings.includes('world_ambient'),siblings.join(','));
  const ambientResult=await play.evaluate(()=>window.SemestaLifePlay.runAction('world_ambient',{ruleId:'wall_pee'}));
