@@ -612,14 +612,17 @@ function create(opts){
   const candidates=[2.2,1.95,1.7].map(distance=>({
    x:d.x+dx/span*distance,z:d.z+dz/span*distance
   }));
-  candidates.push(mid,{x:d.x+dx/span*.9,z:d.z+dz/span*.9},{x:d.x,z:d.z});
+  candidates.push(mid);
   for(let r=1;r<=Math.max(session.width,session.depth);r+=1){
    for(let c=0;c<session.width;c++)for(let z=0;z<session.depth;z++){
     if(Math.abs(c+.5-(d.x-o.x))+Math.abs(z+.5-(d.z-o.z))<=r)
      candidates.push({x:o.x+c+.5,z:o.z+z+.5});
    }
   }
-  return candidates.find(v=>freeInside(v.x,v.z))||{x:o.x+.5,z:o.z+.5};
+  const far=candidates.find(v=>freeInside(v.x,v.z)&&Math.hypot(v.x-d.x,v.z-d.z)>1.55);
+  if(far)return far;
+  const close={x:d.x+dx/span*.9,z:d.z+dz/span*.9};
+  return [close,{x:d.x,z:d.z},...candidates].find(v=>freeInside(v.x,v.z))||{x:o.x+.5,z:o.z+.5};
  }
  function moveInside(start,dx,dz){
   if(!session)return null;
