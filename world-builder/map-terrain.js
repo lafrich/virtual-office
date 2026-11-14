@@ -38,12 +38,38 @@ function shape(t,c,r,d){
  const m=mask(t,c,r,d),n=[1,2,4,8].filter(bit=>m&bit).length;
  return n===4?'cross':n===3?'t':n===2?(m===5||m===10?'straight':'corner'):n===1?'end':'isolated';
 }
-// Drain.png is authored along r. Infer the connected axis from terrain neighbors;
-// axis does not depend on how the user manually rotated an unrelated prop.
+// The authored drain surface stops at roads. Water continues below the
+// asphalt through a real road-only culvert segment, never by painting a drain
+// over a drivable road or inventing an unapproved corner sprite.
+const MAX_CULVERT_ROAD_TILES=6;
+function roadUnderpass(t,c,r,dc,dr,d){
+ const cells=d||dict(t),roadTiles=[];
+ let x=c+dc,z=r+dr;
+ while(roadTiles.length<MAX_CULVERT_ROAD_TILES&&read(t,x,z,cells)==='road'){
+  roadTiles.push({c:x,r:z});x+=dc;z+=dr;
+ }
+ return roadTiles.length>0&&read(t,x,z,cells)==='drain'?
+  {from:{c,r},to:{c:x,r:z},axis:dc?'c':'r',roadTiles}:null;
+}
+function culverts(t,d){
+ const cells=d||dict(t),out=[];
+ for(const tile of t.cells||[]){
+  if(tile.type!=='drain')continue;
+  // Scan only east and south so a single crossing is not counted twice.
+  for(const [dc,dr] of [[1,0],[0,1]]){
+   const part=roadUnderpass(t,tile.c,tile.r,dc,dr,cells);
+   if(part)out.push(part);
+  }
+ }
+ return out;
+}
+// Drain.png is authored along r. Infer the connected axis from both surface
+// drains and underground road spans. Existing terrain and collision stay intact.
 function drainAxis(t,c,r,d){
  const cells=d||dict(t),isDrain=(x,z)=>read(t,x,z,cells)==='drain';
- const alongC=Number(isDrain(c-1,r))+Number(isDrain(c+1,r));
- const alongR=Number(isDrain(c,r-1))+Number(isDrain(c,r+1));
+ const connected=(dc,dr)=>isDrain(c+dc,r+dr)||!!roadUnderpass(t,c,r,dc,dr,cells);
+ const alongC=Number(connected(-1,0))+Number(connected(1,0));
+ const alongR=Number(connected(0,-1))+Number(connected(0,1));
  if(alongC&&alongR)return 'junction';
  return alongC?'along_c':alongR?'along_r':'isolated';
 }
@@ -83,5 +109,5 @@ function exported(t){
  const d=dict(t);
  return t.cells.map(x=>({...x,...(x.type==='road'?{shape:shape(t,x.c,x.r,d)}:{})}));
 }
-g.VLMapTerrain=Object.freeze({types,normalize,seeded,paint,fill,dict,read,shape,drainAxis,exported});
+g.VLMapTerrain=Object.freeze({types,normalize,seeded,paint,fill,dict,read,shape,roadUnderpass,culverts,drainAxis,exported});
 })(window);
