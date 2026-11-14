@@ -46,8 +46,8 @@ test('mechanics panel exposes a Traffic lights module',()=>{
 test('Jiwa mechanics uses shared NOKIA/AKSI HUD and resets gameplay modules',()=>{
  assert.match(panel,/NOKIA HP/);
  assert.match(panel,/Single contextual Action button/);
- assert.match(panel,/VLPlayHud\\.mount/);
- assert.match(panel,/VLPlayHud\\.apply/);
+ assert.match(panel,/VLPlayHud[.]mount/);
+ assert.match(panel,/VLPlayHud[.]apply/);
  assert.match(panel,/resetGameplay/);
  assert.match(hud,/oneWindowAtATime/);
 });
