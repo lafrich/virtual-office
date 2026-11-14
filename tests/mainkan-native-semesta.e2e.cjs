@@ -163,6 +163,8 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
   'Mainkan must not draw the yellow Semesta editor BoxHelper around Genesis');
  assert.equal(readyPlayer.rig.editorGrid,false,
   'Mainkan must hide the full-screen isometric placement grid');
+ assert.equal(readyPlayer.rig.editorMarkersVisible,0,
+  'Mainkan must not render authored yellow logic-marker pins or floating exclamation points');
  fs.mkdirSync('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/mainkan-world-genesis-visible.png',fullPage:true});
  await page.locator('#gamePhone').click();
