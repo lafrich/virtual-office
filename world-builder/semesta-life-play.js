@@ -268,7 +268,7 @@ function buildSites(){
    p=findLanding(x,z);
   }
   return {...d,sourceId:found?.id||'',placeholder:!found,x:p.x,z:p.z,points};
- });
+ }).filter(s=>!s.placeholder); // Never offer imaginary locations as working pins/actions.
  const tent=sites.find(n=>n.id==='tent');
  const last=window.__semestaLastSpawn;
  if(tent&&last?.kind==='hobo'&&last?.point){tent.x=last.point.x;tent.z=last.point.z;tent.placeholder=false;}
@@ -321,11 +321,15 @@ function buildSites(){
  }
  rebuildNokiaMapOverview();
  placeLifeNpcs();
- const warung=sites.find(n=>n.id==='warung');
- if(!sites.some(n=>n.id==='npc_ibu_warteg')){
-  sites.push({id:'npc_ibu_warteg',label:'Ibu Warteg',icon:'👩‍🍳',action:'eat',
-   x:warung?warung.x:0,z:warung?warung.z:0,sourceId:warung?warung.sourceId:'',
-   placeholder:true,npc:true,oldAsset:true,interior:'warteg',behavior:'idle'});
+ // An unarted Ibu Warteg capsule at (0,0) is not a playable character.
+ // Only make this NPC actionable when an actual authored world NPC exists.
+ const ibu=objects.find(o=>/ibu.?warteg/i.test(name(o))&&
+  ['npc','quest_npc','avatar','life_npc'].includes(o.type));
+ if(ibu&&!sites.some(n=>n.id==='npc_ibu_warteg')){
+  const p=findLanding(Number(ibu.x)||0,Number(ibu.z)||0);
+  sites.push({id:'npc_ibu_warteg',label:'Ibu Warteg',icon:'👩‍🍳',
+   action:'talk',x:p.x,z:p.z,sourceId:String(ibu.id||''),placeholder:false,
+   npc:true,interior:'warteg',behavior:'idle'});
  }
 }
 function rebuildNokiaMapOverview(){
