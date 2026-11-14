@@ -17153,6 +17153,37 @@
           "d": 2
         },
         {
+          "id": "njh-fishing-spot-kali-selatan",
+          "type": "sprite",
+          "asset": "object:njh_dermaga_mancing",
+          "name": "Tempat Mancing Kali Selatan",
+          "x": -51.5,
+          "z": 68.0,
+          "y": 0,
+          "rotation": 270,
+          "scale": 1,
+          "collision": true,
+          "blocking": "yes",
+          "layer": "prop",
+          "subtype": "njh_dermaga_mancing",
+          "tags": [
+            "njh-draft1",
+            "njh-preview-asset",
+            "njh-step2",
+            "fishing_spot",
+            "site:fishing_spot"
+          ],
+          "interactions": [
+            "fish"
+          ],
+          "capacity": 1,
+          "entranceFacing": "",
+          "markerKind": "",
+          "notes": "Step 2 fishing spot (preview/njh-step2-map). Reuses object:njh_dermaga_mancing at rot 270, deck over the Kali bank c=-52 r=67..68, overhang toward the river (-c). Water tiles (-53,67),(-53,68) stay object-free and non-walkable (river terrain). Use tile (-51,67), use point (-50.5,67.5) on the jalan inspeksi; c=-51 stays a walkable path. spotId = object id.",
+          "w": 1,
+          "d": 2
+        },
+        {
           "id": "njh-lapak-silver",
           "type": "sprite",
           "asset": "object:njh_lapak_silver",

@@ -903,6 +903,51 @@
       "facing": "nw (rot 270: deck front toward the river, -c)"
     },
     {
+      "id": "fishing_spot",
+      "objectId": "njh-fishing-spot-kali-selatan",
+      "spotId": "njh-fishing-spot-kali-selatan",
+      "kind": "fish",
+      "action": "fish",
+      "side": "front",
+      "usePoint": [
+        -50.5,
+        67.5
+      ],
+      "useTile": [
+        -51,
+        67
+      ],
+      "asset": "object:njh_dermaga_mancing",
+      "footprintTiles": [
+        [
+          -52,
+          67
+        ],
+        [
+          -52,
+          68
+        ]
+      ],
+      "waterSideTiles": [
+        [
+          -53,
+          67
+        ],
+        [
+          -53,
+          68
+        ]
+      ],
+      "facing": "nw (rot 270: deck front toward the river, -c)",
+      "baymaxInteractionId": null,
+      "baymaxAnchorId": null,
+      "note": "Step 2 fishing spot (preview/njh-step2-map). HOOKS-STEP2 §4: fishStart('njh-fishing-spot-kali-selatan'); range 2.5 from (x,z). Legacy play.js SITES 'fish' still resolves matches[0] = njh-dermaga-mancing-anchor.",
+      "label": "Tempat Mancing Kali Selatan",
+      "x": -51.5,
+      "z": 68.0,
+      "source": "world"
+    },
+    {
       "id": "njh_lapak_silver",
       "objectId": "njh-lapak-silver",
       "kind": "silver_pose",
@@ -1901,6 +1946,38 @@
     "studio:br-lapak-sate-madura": "studio:br-lapak-sate-madura"
   },
   "gameplaySites": {
+    "fishing_spot": {
+      "siteId": "fishing_spot",
+      "id": "njh-fishing-spot-kali-selatan",
+      "spotId": "njh-fishing-spot-kali-selatan",
+      "label": "Tempat Mancing Kali Selatan",
+      "x": -51.5,
+      "z": 68.0,
+      "source": "world",
+      "objectId": "njh-fishing-spot-kali-selatan",
+      "action": "fish",
+      "rangeOk": 2.5,
+      "useTile": [
+        -51,
+        67
+      ],
+      "usePoint": [
+        -50.5,
+        67.5
+      ],
+      "waterTiles": [
+        [
+          -53,
+          67
+        ],
+        [
+          -53,
+          68
+        ]
+      ],
+      "zone": "zone_kali",
+      "note": "Added on preview/njh-step2-map (Ellen). Matches HOOKS-STEP2 §4 fishSpots(): world object id contains 'fishing', asset contains 'dermaga', name contains 'Mancing'; spot x/z = object centre; use point is 1.12 from it (fishStart range 2.5). fishStart('njh-fishing-spot-kali-selatan'). The existing dock njh-dermaga-mancing / anchor njh-dermaga-mancing-anchor (-51.5,44) is unchanged."
+    },
     "branch": "preview/njh-gameplay-sites",
     "basedOn": "preview/njh-map-draft1 @ ffc76e6",
     "note": "Function-first Semesta Life Play sites. Rumah ibadah extras skipped. No push, no deploy.",
