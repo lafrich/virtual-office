@@ -446,6 +446,11 @@ function create(opts){
   const raw=String(id||'').replace(/^d:/,'');
   const resolved=A?.resolveId?.(raw)||raw;
   if(!raw)return {ok:false,reason:'Pintu tidak dikenal'};
+  // Keep the old, explicit Cove building ID readable for 4P and saved games.
+  // Do this BEFORE reading a fresh getWorld() snapshot that might not have
+  // wireWorld() metadata; never apply it to unrelated building names.
+  if(raw==='njh-kos-noor'||resolved===LOBBY_ID||A?.isLobby?.(raw))
+   return enterInterior(LOBBY_ID);
   // Lobby doors are different from street doors. Respect per-player access.
   if(session){
    const indoorDoor=(session.doors||[]).find(d=>d.id===raw);
@@ -471,8 +476,6 @@ function create(opts){
     return {ok:false,reason:'Interior belum tersedia untuk '+(door?.label||obj.name||raw)};
    return enterInterior(template,undefined,{object:obj,door});
   }
-  if(raw==='njh-kos-noor'||resolved===LOBBY_ID||A?.isLobby?.(raw))
-   return enterInterior(LOBBY_ID);
   if(raw==='kost'||raw==='warteg'||raw==='minimarket')return enter(raw);
   if(sceneOf(resolved))return enterInterior(resolved);
   return {ok:false,reason:'Interior tidak dikenal: '+raw};
