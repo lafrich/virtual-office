@@ -175,8 +175,14 @@ async function save(){
 }
 async function listCities(){
  try{
-  const savedCities=await window.VLCityDrafts.list();
-  state.cities=[{id:GLOBAL_CITY,name:'GLOBAL FOUNDATION',objectCount:0},...savedCities];
+  const savedCities=(await window.VLCityDrafts.list());
+  const njhOnly=[];
+  for(const row of savedCities){
+   let rec=row;
+   try{rec=await window.VLCityDrafts.load(row.id);}catch{}
+   if((window.VLNjhCityGuard||window.VLNjhMapPreview)?.isNjhDocument?.(rec,row.id))njhOnly.push(row);
+  }
+  state.cities=[{id:GLOBAL_CITY,name:'GLOBAL FOUNDATION',objectCount:0},...njhOnly];
   const picker=$('cityPicker'),previous=picker.value;
   picker.replaceChildren();
   if(!savedCities.length)notice('No city draft yet · edit the Global Foundation, or save a city in Semesta.');
@@ -191,6 +197,8 @@ async function loadCity(id){
  if(!id)return emptyCity('Select a Semesta city first.');
  try{
   const record=id===GLOBAL_CITY?{id:GLOBAL_CITY,name:'GLOBAL FOUNDATION',document:{objects:[],map:{}}}:await window.VLCityDrafts.load(id);
+  if(id!==GLOBAL_CITY&&(window.VLNjhCityGuard||window.VLNjhMapPreview)?.isNjhDocument?.(record,id)!==true)
+   return emptyCity('Hanya peta NJH (Kampung Kali Kebon Sirih) yang bisa dibuka');
   if(!Array.isArray(record.document?.objects))throw Error('Invalid city document');
   state.record=record;state.entities=collectEntities(record);
   const raw=await readProject(id);

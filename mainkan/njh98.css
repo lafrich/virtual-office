@@ -606,15 +606,18 @@ html:not(.njh-devmode) .njh-dev{display:none!important}
 /* the last button row of a floating window (OK / Tutup / Keluar) sticks to the bottom while the body scrolls */
 .njh-win>.w98-body>.njh-row:last-child{position:sticky;bottom:-3px;z-index:2;margin:0 -4px -3px;padding:4px 4px 3px;background:var(--w-face)}
 /* ---------- njh98-7 · compact tray, Sims action bar, Kondisi tab, icon-only AKSI/LARI ---------- */
-/* slide-out action options (not a window) */
-.njh-actbar{position:absolute;z-index:6;pointer-events:auto;max-width:min(420px,calc(100% - 16px - var(--sal) - var(--sar)))}
+/* ---------- njh98-8 · action bar slides UP from AKSI (vertical column, never covers LARI/dock/joystick) ---------- */
+/* slide-up action options (not a window): column stacked above AKSI, right edges aligned */
+.njh-actbar{position:absolute;z-index:6;pointer-events:auto;max-width:min(200px,calc(100% - 16px - var(--sal) - var(--sar)))}
 .njh-actbar[hidden]{display:none!important}
-.njh-actbar-inner{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:stretch;gap:2px;padding:3px;
+.njh-actbar-inner{display:flex;flex-direction:column-reverse;flex-wrap:nowrap;justify-content:flex-start;align-items:stretch;gap:2px;padding:3px;
  background:rgba(192,192,192,.94);
  box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-lt),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-hl);
  animation:njhActSlide .16s steps(4)}
-@keyframes njhActSlide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes njhActSlide{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.njh-actbar-inner{animation:none}}
+.njh-actbar--cols2 .njh-actbar-inner{display:grid;grid-template-columns:auto auto;justify-items:stretch;align-items:stretch}
+.njh-actbar--scroll .njh-actbar-inner{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .njh-act{position:relative;width:56px;min-width:0;min-height:44px;padding:3px 2px 2px;border:0;cursor:pointer;
  display:grid;grid-template-rows:16px auto;place-items:center;gap:1px;box-sizing:border-box;
  font:11px/1.1 var(--w-font);color:#000;background:var(--w-face);

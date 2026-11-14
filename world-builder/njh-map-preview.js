@@ -1,8 +1,7 @@
-/* NJH Semesta map draft1 PREVIEW only. Activated by ?njhMap=1.
- * Registers 8 catalog assets, loads Ellen's district map, wires door
- * use-tiles to the NJH interiors (including the Cove kost lobby), and clamps actors to worldBounds.
- * Live Semesta / Mainkan behavior is unchanged when the flag is off.
- * Not pushed, not deployed.
+/* Official Step-1 NJH Semesta map (Kampung Kali Kebon Sirih).
+ * Default on in Mainkan and Semesta. Pass ?njhMap=0 only to disable in tests.
+ * Registers catalog assets, loads the district map, wires door use-tiles to
+ * NJH interiors (including the Cove kost lobby and NJH Mart minimarket), and clamps actors to worldBounds.
  */
 (function(g){
 'use strict';
@@ -43,8 +42,19 @@ function enabled(){
  try{
   if(g.VL_NJH_MAP_PREVIEW===true)return true;
   if(g.VL_NJH_MAP_PREVIEW===false)return false;
-  return new URLSearchParams(g.location?.search||'').get('njhMap')==='1';
- }catch(e){return false;}
+  return new URLSearchParams(g.location?.search||'').get('njhMap')!=='0';
+ }catch(e){return true;}
+}
+const NJH_CITY_IDS=['city-njh-semesta-draft1-with-pending','njh-semesta-map-draft1'];
+function isNjhDocument(input,id){
+ const rec=(input&&input.record)||input||{};
+ const doc=(rec&&rec.document)||(input&&Array.isArray(input.objects)?input:null)||{};
+ const cid=String(id||(input&&input.id)||rec.id||'');
+ if(NJH_CITY_IDS.includes(cid))return true;
+ const name=String((doc.map&&doc.map.name)||rec.name||'');
+ if(name.includes('Kampung Kali Kebon Sirih'))return true;
+ const objs=doc.objects||[];
+ return objs.some(o=>o&&(o.id==='njh-kos-noor'||String(o.id||'').startsWith('njh-spawn-')));
 }
 
 const PROP_DEFS=[
@@ -482,7 +492,7 @@ function imageUrl(id,dir='sw'){
 
 if(enabled()){hookKebonTiles();}
  g.VLNjhMapPreview=Object.freeze({
- enabled,baseUrl,registerCatalog,registerInto,registerSekatType,
+ enabled,isNjhDocument,baseUrl,registerCatalog,registerInto,registerSekatType,
  loadCity,loadMeta,keyMap:KEY_MAP,specs:()=>SPECS,
  doorCandidates,nearestEnterable,doorAnchor,enterRadius:ENTER_RADIUS,
  worldBoundsOf,applyBounds,spawnPool,homeFor,resolveSpawn,imageUrl,

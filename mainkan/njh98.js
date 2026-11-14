@@ -2,7 +2,7 @@
  * - intro sequence (publisher card → title + preload → "tekan untuk mulai")
  * - wizard step bar + "Cara Main" how-to steps for the existing onboarding flow
  * - fullscreen play HUD over the Semesta iframe, one place per entry point
- * - action options as a slide-out icon bar from the AKSI button (proxies native life-panel buttons), progress window,
+ * - action options as a vertical icon bar that slides UP from the AKSI button (proxies native life-panel buttons), progress window,
  *   Tas window, virtual joystick (drives the existing WASD walk input), landscape prompt
  * - placeholder "keluar tenda" spawn reveal (no animation exists yet)
  * Gameplay goes only through existing hooks: the native panel buttons, SemestaLifePlay.runAction
@@ -148,7 +148,7 @@ SCREENS.forEach(id=>{const el=$(id);if(el)mo.observe(el,{attributes:true,attribu
 const HOWTO=[
  {t:'Kontrol',c:[
   ['walk','Jalan','<span class="njh-kb"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> atau panah. Tahan <kbd>Shift</kbd> buat lari.</span><span class="njh-touch">Geser joystick di kiri bawah. Tahan <b>LARI</b> buat lari.</span>'],
-  ['action','Aksi','Dekat objek atau orang, tekan <b>AKSI</b><span class="njh-kb"> / <kbd>E</kbd></span>. Muncul bar ikon dari tombol AKSI, pilih aksinya. Di tempat kerja, <b>tahan</b> AKSI sampai bar penuh.']]},
+  ['action','Aksi','Dekat objek atau orang, tekan <b>AKSI</b><span class="njh-kb"> / <kbd>E</kbd></span>. Muncul bar ikon ke atas dari tombol AKSI, pilih aksinya. Di tempat kerja, <b>tahan</b> AKSI sampai bar penuh.']]},
  {t:'Fitur',c:[
   ['nokia','Nokia','Dompet, Skill, Kursus, Marketplace, Furnitur, <b>Peta</b>, Profil.'],
   ['bag','Tas','Isi tas: makan buah atau buang barang.'],
@@ -414,14 +414,64 @@ function ctxOptions(){
 function placeActBar(){
  const bar=$('njhActBar'),btn=$('gameAction'),hud=$('njhHud');
  if(!bar||!btn||!hud||bar.hidden)return;
+ const inner=bar.querySelector('.njh-actbar-inner');
+ const items=inner?[...inner.children]:[];
+ const visRect=el=>{
+  if(!el||el.hidden)return null;
+  const cs=getComputedStyle(el);
+  if(cs.display==='none'||cs.visibility==='hidden')return null;
+  const r=el.getBoundingClientRect();
+  return(r.width>=2&&r.height>=2)?r:null;
+ };
+ const hit=(a,b,p=2)=>a.left<b.right+p&&a.right>b.left-p&&a.top<b.bottom+p&&a.bottom>b.top+p;
+ const runR=visRect($('gameRun')),dockR=visRect($('njhDock')),joyR=visRect($('njhJoyBase'));
  const br=btn.getBoundingClientRect(),hr=hud.getBoundingClientRect();
- const bw=bar.offsetWidth,bh=bar.offsetHeight;
- let left=br.left-hr.left-bw-6;
- let top=br.bottom-hr.top-bh;
- if(left<8)left=Math.max(8,br.right-hr.left-bw);
- if(left+bw>hr.width-8)left=Math.max(8,hr.width-bw-8);
- if(top<8)top=8;
- if(top+bh>hr.height-8)top=Math.max(8,hr.height-bh-8);
+ const GAP=6,PAD=8;
+ const floor=Math.min(br.top,runR?runR.top:1e9,dockR?dockR.top:1e9)-GAP;
+ const avail=Math.max(40,floor-(hr.top+PAD));
+ const applyCols=cols=>{
+  bar.classList.toggle('njh-actbar--cols2',cols===2);
+  if(cols===2&&items.length){
+   const rows=Math.ceil(items.length/2);
+   items.forEach((el,i)=>{
+    const inRight=i<rows;
+    el.style.gridColumn=inRight?'2':'1';
+    el.style.gridRow=String(rows-(inRight?i:i-rows));
+   });
+  }else items.forEach(el=>{el.style.gridColumn='';el.style.gridRow='';});
+ };
+ const applyScroll=(on,h)=>{
+  bar.classList.toggle('njh-actbar--scroll',!!on);
+  if(inner)inner.style.maxHeight=on?Math.floor(h)+'px':'';
+ };
+ applyCols(1);applyScroll(false);
+ let bw=bar.offsetWidth,bh=bar.offsetHeight;
+ if(bh>avail&&items.length>=3){
+  applyCols(2);
+  bw=bar.offsetWidth;bh=bar.offsetHeight;
+  const trialLeft=br.right-hr.left-bw;
+  const trial={left:trialLeft+hr.left,right:trialLeft+hr.left+bw,top:floor-Math.min(bh,avail),bottom:floor};
+  if(joyR&&hit(trial,joyR,4)){applyCols(1);bw=bar.offsetWidth;bh=bar.offsetHeight;}
+ }
+ if(bh>avail)applyScroll(true,avail);
+ bw=bar.offsetWidth;bh=bar.offsetHeight;
+ let left=br.right-hr.left-bw;
+ let top=(floor-hr.top)-bh;
+ if(top<PAD)top=PAD;
+ if(left<PAD)left=PAD;
+ if(left+bw>hr.width-PAD)left=Math.max(PAD,hr.width-bw-PAD);
+ const box=()=>({left:left+hr.left,right:left+hr.left+bw,top:top+hr.top,bottom:top+hr.top+bh});
+ for(const r of [runR,dockR,joyR]){
+  if(!r||!hit(box(),r,2))continue;
+  const newTop=r.top-hr.top-bh-GAP;
+  if(newTop>=PAD){top=newTop;continue;}
+  const cap=r.top-(hr.top+PAD)-GAP;
+  if(cap>=40){applyScroll(true,cap);bh=bar.offsetHeight;top=(r.top-hr.top)-bh-GAP;if(top<PAD)top=PAD;}
+ }
+ if(joyR&&hit(box(),joyR,2)){
+  left=Math.max(left,joyR.right-hr.left+GAP);
+  if(left+bw>hr.width-PAD)left=Math.max(PAD,hr.width-bw-PAD);
+ }
  bar.style.left=Math.round(left)+'px';
  bar.style.top=Math.round(top)+'px';
 }
@@ -803,7 +853,7 @@ function injectWorld(){
   d.documentElement.classList.toggle('njh-devtools',DEV);
   if(!d.getElementById('njh98-world-css')&&d.head){
    const l=d.createElement('link');l.id='njh98-world-css';l.rel='stylesheet';
-   l.href=new URL('./njh98-world.css?v=njh98-7',location.href).href;d.head.appendChild(l);
+   l.href=new URL('./njh98-world.css?v=njh98-8',location.href).href;d.head.appendChild(l);
   }
   worldKeys(w);worldPointer(w);worldZoom(w);worldReact(w);
  }catch{}

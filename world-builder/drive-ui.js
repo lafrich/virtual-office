@@ -275,6 +275,8 @@ async function loadSelected(){
  try{
   const payload=await D.load(file);
   if(payload.app!==app)throw Error("File belongs to another app");
+  if(payload.kind==="city"&&(window.VLNjhCityGuard||window.VLNjhMapPreview)?.isNjhDocument?.(payload.record||payload,payload.record?.id||payload.id)!==true)
+   throw Error("Hanya peta NJH (Kampung Kali Kebon Sirih) yang bisa dibuka");
   await adapter().importRemote(payload);
   close();info("✓ DRIVE FILE LOADED · "+payload.id);
  }catch(error){info("OPEN FROM DRIVE FAILED: "+error.message,true)}

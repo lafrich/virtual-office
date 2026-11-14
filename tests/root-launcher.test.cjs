@@ -9,7 +9,7 @@ test('root index is the NJH landing and no longer routes through the archive or 
  assert.match(html,/Namanya Juga Hidup/);
  assert.match(html,/>NJH</);
  assert.doesNotMatch(html,/location\.replace\('\.\/membangun\/'/);
- assert.match(html,/href="\.\/mainkan\/"/);
+ assert.match(html,/href="\.\/mainkan\/\?njhMap=1"/);
  assert.match(html,/href="\.\/world-builder\/"/);
  assert.match(html,/href="\.\/world-builder\/bangun-ruang\/"/);
  assert.match(html,/href="\.\/jiwa\/"/);

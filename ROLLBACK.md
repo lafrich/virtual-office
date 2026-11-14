@@ -1,10 +1,33 @@
+# Rollback — NJH as the only default playable map
+
+Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged. No storage migration.
+
+- Previous live `origin/main`: `28dcca42b6739fd36c12b78e6dd2aa566e1e0adf` (docs: Step 1a status, rollback, and CHECKPOINT STEP 1)
+- Feature commit: `e935083362657a7a4d5f80706725b662a42be64c` (`preview/njh-only-map`; `?v=njh-only-map-1`, sw v27)
+
+Plain `/mainkan/` and `/world-builder/` load the official NJH map (`city-njh-semesta-draft1-with-pending`). Reverting restores the previous default (`world.json` / leftover drafts) and the `?njhMap=1` opt-in.
+
+If `origin/main` has been fast-forwarded to this step, revert the rollback-notes commit on top of `e9350833` first (docs only), then the feature:
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit e935083362657a7a4d5f80706725b662a42be64c
+# then bump sw.js if a rollback build must drop v27, and push --ff-only
+```
+
+If a docs-only rollback-notes commit sits on top of `e9350833`, revert that commit first, then `e9350833`.
+
+---
+
 # Rollback — Step 1 (Kost Cove lobby, NJH map, Win98 UI)
 
 Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged. No storage migration.
 
 - Previous live `origin/main` (before this step): `53cfe59be06b567a6ad2f51c84ea0e68eb5120b8`
 - Integration branch: `integ/step1` (tip will be the latest commit on this branch; revert newest first, then the merges with `-m 1`)
-- Merge order (do not force-push): ours `preview/main-interiors-kost-warteg` (`0dcc793c`) → Ellen `preview/njh-gameplay-sites` (`8e099eb9`, frozen) → Layar `layar/win98-ui` (`6ffffc8e99a50839a53b9e770319056e4c3c3c65`, `?v=njh98-5`, sw v23) → Layar follow-up `a953045acbedf1096cf8765758df53b22979d0be` (`?v=njh98-6`, sw v24; merge `212c84a6`) → Layar HUD `27a820b2a8792c4bc2de945856d71dd410708925` (`?v=njh98-7`, sw v25; merge `31e74f50`; committed objects only, uncommitted `shared/genesis-player.js` was not included)
+- Merge order (do not force-push): ours `preview/main-interiors-kost-warteg` (`0dcc793c`) → Ellen `preview/njh-gameplay-sites` (`8e099eb9`, frozen) → Layar `layar/win98-ui` (`6ffffc8e99a50839a53b9e770319056e4c3c3c65`, `?v=njh98-5`, sw v23) → Layar follow-up `a953045acbedf1096cf8765758df53b22979d0be` (`?v=njh98-6`, sw v24; merge `212c84a6`) → Layar HUD `27a820b2a8792c4bc2de945856d71dd410708925` (`?v=njh98-7`, sw v25; merge `31e74f50`; committed objects only, uncommitted `shared/genesis-player.js` was not included) → Layar follow-up 1a `51cd10f5276f1e96a5cccbda901b5fac533f63b4` (`?v=njh98-8`, sw v26; merge `9c1b2d91`; Action bar slides upward from AKSI and does not cover buttons; committed objects only, uncommitted `shared/genesis-player.js` was not included)
 - Ellen park-bench scale fix `5c6de782` (`fix/njh-bangku-taman-scale`) **was included** (cherry-pick `0a11dd94`). Catalog + city instance `njh-atm-16` use plane 1.591×1.888, collision true, blocking yes, sit. `world.json` park benches had their 2.19×2.251 size overrides removed so the catalog size applies, and blocking set to yes. Cove facade `4c3dc4d` was **not** included (step 2).
 
 If `origin/main` has been fast-forwarded to this step, revert the merge commits in reverse order (`-m 1` keeps the first parent, which is `origin/main` / the previous merge). Also revert the builder-string fix if it is still on `main`:
@@ -13,16 +36,17 @@ If `origin/main` has been fast-forwarded to this step, revert the merge commits 
 git fetch origin
 git checkout main
 git pull --ff-only origin main
+git revert --no-edit -m 1 9c1b2d91   # Layar win98-ui 51cd10f (?v=njh98-8, sw v26) follow-up 1a
 git revert --no-edit -m 1 31e74f50   # Layar win98-ui 27a820b (?v=njh98-7, sw v25)
 git revert --no-edit -m 1 212c84a6   # Layar win98-ui a953045 (?v=njh98-6, sw v24)
 git revert --no-edit 2c81b154        # builder.js playerMode / openFor(nearest.o) restore
 git revert --no-edit -m 1 9e222a90   # Layar win98-ui 6ffffc8 (?v=njh98-5, sw v23)
 git revert --no-edit -m 1 9dc66aeb   # Ellen map 8e099eb
 git revert --no-edit -m 1 85f28c3d   # ours 0dcc793
-# then bump sw.js if a rollback build must drop v25, and push --ff-only
+# then bump sw.js if a rollback build must drop v26, and push --ff-only
 ```
 
-Layar-only rollback (the UI commits on top of `726fde70`) is: revert `27a820b2` first, then `a953045a`, `6ffffc8e`, `dfd8cae7`, and `8eb65938`. `27a820b2` is the final step-1 HUD (28px taskbar, Action icon bar, Kondisi tab, translucent icon-only AKSI/LARI; `?v=njh98-7`, sw v25) and **must** be reverted with the rest. `a953045a` added Alat Dev only with `?dev=1`, no lone Login tab, sticky window OK row on phone, and reachable Pipis di Tembok. The earlier Win98 commits (`dd3396a2`, `2b92b91d`, `726fde70`) came in with the 6ffffc8 merge.
+Layar-only rollback (the UI commits on top of `726fde70`) is: revert `51cd10f5` first, then `27a820b2`, `a953045a`, `6ffffc8e`, `dfd8cae7`, and `8eb65938`. `51cd10f5` is follow-up 1a (Action bar slides upward from AKSI, never covers LARI/dock/joystick; `?v=njh98-8`, sw v26) and **must** be reverted with the rest. `27a820b2` is the Step 1 HUD (28px taskbar, Action icon bar, Kondisi tab, translucent icon-only AKSI/LARI; `?v=njh98-7`, sw v25) and **must** also be reverted with the rest. `a953045a` added Alat Dev only with `?dev=1`, no lone Login tab, sticky window OK row on phone, and reachable Pipis di Tembok. The earlier Win98 commits (`dd3396a2`, `2b92b91d`, `726fde70`) came in with the 6ffffc8 merge.
 
 ---
 
