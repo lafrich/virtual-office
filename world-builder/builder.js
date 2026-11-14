@@ -43,6 +43,12 @@ if(playerMode)window.addEventListener('message',event=>{
  }else if(event.data?.type==='mainkan:player-profile-error'){
   console.warn('Mainkan player profile unavailable:',event.data.message);
   finishMainkanProfile(false);
+ }else if(event.data?.type==='mainkan:pause'){
+  try{dayClock?.setPaused?.(true);updateClockHUD?.(true);}catch{}
+  try{window.SemestaLifePlay?.pause?.();}catch{}
+ }else if(event.data?.type==='mainkan:resume'){
+  try{dayClock?.setPaused?.(false);updateClockHUD?.(true);}catch{}
+  try{window.SemestaLifePlay?.resume?.();}catch{}
  }
 });
 if(playerMode)document.documentElement.classList.add('semesta-player-mode');
@@ -1145,6 +1151,7 @@ function simulationObstacles(){
    collision:true,blocking:'auto'
   });
  }
+ try{const extra=window.__njhPlayInteriors?.obstacles?.()||[];if(extra.length)obstacles.push(...extra);}catch{}
  return obstacles;
 }
 // When another car fills the start of the same straight road,
@@ -2421,6 +2428,7 @@ canvas.addEventListener('wheel',e=>{
 // Walking near a Warteg doorway (rather than crossing solid wall collision)
  // opens the editor's authored interior preview; no multiplayer teleport.
  function enterNearbyBuilding(){
+  try{const r=window.__njhPlayInteriors?.enterNearby?.();if(r?.ok)return true;if(r?.reason)tell(r.reason);}catch{}
   const root=owners.get(walkActorId);
   if(!root||!interiorPreview)return false;
   const candidates=documentMap.objects.filter(o=>
@@ -2523,6 +2531,7 @@ function mapForPersist(){
  const copy=JSON.parse(JSON.stringify(documentMap));
  if(Array.isArray(copy.objects)){
   copy.objects=copy.objects.filter(o=>o.id!=='__semesta_life_temporary_player__');
+ copy.objects=copy.objects.filter(o=>o.playOnly!==true&&o.id!=='__njh_play_kost__'&&!String(o.id||'').startsWith('__njh_play_'));
   for(const o of copy.objects){delete o._pickedPreview;delete o._playHidden;}
  }
  return copy;
@@ -2709,6 +2718,76 @@ function setMode(m){
     ((usable(item())?item():documentMap.objects.find(usable))||makeTemporaryLifePlayer());
    walkActorId=first.id;select(first.id);
    if(playerMode)window.SemestaLifePlay?.start?.();
+   if(playerMode){
+    try{
+     const I=window.__njhPlayInteriors;
+     if(I&&window.SemestaLifePlay){
+      // Live bridge methods used by SemestaLifeHooks / runAction.
+      const br={
+       interiorFurniture:()=>I.furniture(),
+       interiorKind:()=>I.kind(),
+       extraActions:()=>I.extraActions(),
+       enterInterior:id=>id?(I.enterInterior?.(id)||I.openInteriorById?.(id)||I.enterNearby()):I.enterNearby(),
+       exitInterior:()=>I.exit(),
+       playInteriors:I,
+       doorAnchor:o=>I.doorWorld(o)
+      };
+      // attach() stores bridge; re-call with merged methods if possible.
+      window.SemestaLifePlay.attach({
+       THREE,
+       getWorld:()=>documentMap,
+       getScene:()=>scene,
+       getCityId:()=>activeDraftId||'__semesta_working_copy__',
+       getPlayerId:()=>playerMode?mainkanPlayerId:'',
+       currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
+       playPose:(pose,seconds=4)=>{const r=(rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig;if(!r?.setPose)return false;r.setPose(pose);
+        clearTimeout(r._lifePoseTimer);r._lifePoseTimer=setTimeout(()=>{if(r.state?.pose===pose)r.setPose(null);},Math.max(1,seconds)*1000);return true;},
+       getPosition:walkWorldPos,
+       getRoot:()=>rigs.get(walkActorId)?.root||null,
+       mountTo:()=>$('canvas-wrap'),
+       syncHud:syncPlayHud,
+       tell,
+       openInteriorById:id=>{
+        if(I?.openInteriorById){const r=I.openInteriorById(id);if(r?.ok)return true;}
+        const obj=documentMap.objects.find(o=>String(o.id)===String(id));
+        if(obj&&I?.kindOfBuilding){/* peek */}
+        const kind=obj&&((/kost|kos_|cove/i.test([obj.name,obj.label,obj.id].join(' '))?'kost':/warteg|warung/i.test([obj.name,obj.label,obj.id].join(' '))?'warteg':null));
+        if(kind){const r=I.enter(kind);if(r?.ok)return true;}
+        if(!obj||!interiorPreview?.openFor||
+           !(obj.interior?.floors?.length||assetByName.get(obj.asset)?.interior?.floors?.length))return false;
+        interiorPreview.openFor({...obj,enterable:true});return true;
+       },
+       canStand:(x,z)=>{
+        const world=spawnWorldAdapter();
+        const tile=world.tileAt(x,z);
+        if(I?.kind())return true;
+        return !['road','water','river','drain'].includes(tile)&&!world.blocked(x,z);
+       },
+       teleport:(x,z)=>{
+        if(window.VLSpawnHobo?.busy?.())window.VLSpawnHobo.dispose();
+        const holder=rigs.get(walkActorId);
+        if(!holder||!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return false;
+        holder.root.position.set(Number(x),holder.root.position.y||0,Number(z));
+        holder.rig?.setMoving(0,0,false);
+        focusCameraAt(Number(x),Number(z),14);
+        return true;
+       },
+       respawn:(opts)=>spawnRespawnApi().respawn(opts),
+       setClockPaused:on=>{dayClock.setPaused(!!on);try{updateClockHUD(true);}catch{}},
+       getClock:()=>dayClock,
+       worldToScreen,
+       doorAnchor:o=>I.doorWorld(o),
+       interiorFurniture:()=>I.furniture(),
+       interiorKind:()=>I.kind(),
+       extraActions:()=>I.extraActions(),
+       enterInterior:id=>id?(I.enterInterior?.(id)||I.openInteriorById?.(id)||I.enterNearby()):I.enterNearby(),
+       exitInterior:()=>I.exit(),
+       playInteriors:I
+      });
+      I.restoreIfNeeded();
+     }
+    }catch(err){console.warn('njh play interiors start',err);}
+   }
    if(!cameraFollowId){
     mapCameraBeforeFollow={focus:cameraFocus.clone(),size:viewSize};
     cameraFollowId=first.id;lifeAutoCamera=true;
@@ -3092,6 +3171,23 @@ function spawnRespawnApi(){
  };
 }
 
+
+function worldToScreen(x,y,z){
+ if(!camera||!canvas)return {x:0,y:0,visible:false};
+ try{
+  const v=new THREE.Vector3(Number(x)||0,Number(y)||0,Number(z)||0);
+  v.project(camera);
+  const w=canvas.clientWidth||canvas.width||0,h=canvas.clientHeight||canvas.height||0;
+  const sx=(v.x+1)/2*w,sy=(-v.y+1)/2*h;
+  const visible=v.z>=-1&&v.z<=1&&sx>=-8&&sy>=-8&&sx<=w+8&&sy<=h+8;
+  return {x:sx,y:sy,visible};
+ }catch{return {x:0,y:0,visible:false};}
+}
+function playerWorldPos(){
+ const p=walkWorldPos();
+ return {x:Number(p?.x)||0,y:Number(p?.y)||0,z:Number(p?.z)||0};
+}
+
 window.SemestaPlay=Object.freeze({
  playerProfile:()=>mainkanPlayerProfile,
  playerActor:()=>playerMode?documentMap.objects.find(o=>o.id===LIFE_TEST_ACTOR_ID)||null:null,
@@ -3136,7 +3232,29 @@ window.SemestaPlay=Object.freeze({
   const step=Math.max(0,Number(dt)||0);
   trafficLightTime+=step;updateAutomated(step);refreshTrafficLights();
   return inspectTrafficLights();
- }
+ },
+ playerPosition:playerWorldPos,
+ worldToScreen,
+ questMarkers:()=>window.SemestaLifePlay?.questMarkers?.()||[],
+ enterables:()=>window.SemestaLifePlay?.enterables?.()||[],
+ spawnAt:(kind,id)=>window.SemestaLifePlay?.spawnAt?.(kind,id),
+ nearbyActions:()=>window.SemestaLifePlay?.nearbyActions?.()||[],
+ clock:()=>window.SemestaLifePlay?.clock?.()||null,
+ dayReport:(day)=>window.SemestaLifePlay?.dayReport?.(day)||null,
+ level:()=>window.SemestaLifePlay?.level?.()??1,
+ skills:()=>window.SemestaLifePlay?.skills?.()||[],
+ reputation:()=>window.SemestaLifePlay?.reputation?.()||[],
+ housingProgress:()=>window.SemestaLifePlay?.housingProgress?.()||null,
+ quests:()=>window.SemestaLifePlay?.quests?.()||[],
+ acceptQuest:(n,q)=>window.SemestaLifePlay?.acceptQuest?.(n,q),
+ turnInQuest:(n,q)=>window.SemestaLifePlay?.turnInQuest?.(n,q),
+ jobs:()=>window.SemestaLifePlay?.jobs?.()||[],
+ enterInterior:(id)=>!!window.SemestaLifePlay?.enterInterior?.(id),
+ furnitureSpots:()=>window.SemestaLifePlay?.furnitureSpots?.()||[],
+ messages:()=>window.SemestaLifePlay?.messages?.()||[],
+ sites:()=>window.SemestaLifePlay?.sites?.()||[],
+ npcs:()=>window.SemestaLifePlay?.npcs?.()||[],
+ openMap:()=>window.SemestaLifePlay?.openMap?.()
 });
 
 if(window.SemestaLifePlay){
@@ -3147,6 +3265,7 @@ if(window.SemestaLifePlay){
   getCityId:()=>activeDraftId||'__semesta_working_copy__',
   getPlayerId:()=>playerMode?mainkanPlayerId:'',
   currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
+  getFacing:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.direction)||null,
   playPose:(pose,seconds=4)=>{const r=(rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig;if(!r?.setPose)return false;r.setPose(pose);
    clearTimeout(r._lifePoseTimer);r._lifePoseTimer=setTimeout(()=>{if(r.state?.pose===pose)r.setPose(null);},Math.max(1,seconds)*1000);return true;},
   getPosition:walkWorldPos,
@@ -3155,6 +3274,8 @@ if(window.SemestaLifePlay){
   syncHud:syncPlayHud,
   tell,
   openInteriorById:id=>{
+   const I=window.__njhPlayInteriors;
+   if(I?.openInteriorById){const r=I.openInteriorById(id);if(r?.ok)return true;}
    const obj=documentMap.objects.find(o=>String(o.id)===String(id));
    const asset=obj?.type==='sprite'?assetByName.get(obj.asset):null;
    if(!obj||!interiorPreview?.openFor||
@@ -3177,9 +3298,101 @@ if(window.SemestaLifePlay){
    focusCameraAt(Number(x),Number(z),14);
    return true;
   },
-  respawn:(opts)=>spawnRespawnApi().respawn(opts)
+  respawn:(opts)=>spawnRespawnApi().respawn(opts),
+  setClockPaused:on=>{dayClock.setPaused(!!on);try{updateClockHUD(true);}catch{}},
+  getClock:()=>dayClock,
+  worldToScreen,
+  doorAnchor:o=>{
+   try{if(window.VLNjhMapPreview?.doorAnchor)return window.VLNjhMapPreview.doorAnchor(o);}catch{}
+   try{const spec=o?.type==='sprite'?assetByName.get(o.asset):null;
+    if(window.VLWarteg3D?.supported?.(spec))return window.VLWarteg3D.doorPosition(o);}catch{}
+   return o?{x:Number(o.x)||0,z:Number(o.z)||0}:null;
+  },
+  interiorFurniture:()=>{
+   try{if(typeof window.VLNjhMapPreview?.interiorFurniture==='function')
+    return window.VLNjhMapPreview.interiorFurniture()||[];}catch{}
+   return [];
+  }
  });
 }
+if(playerMode){
+ const onLifePause=ev=>{
+  const type=ev?.type||ev?.data?.type;
+  if(type==='mainkan:pause'){try{dayClock.setPaused(true);updateClockHUD(true);}catch{}try{window.SemestaLifePlay?.pause?.();}catch{}}
+  if(type==='mainkan:resume'){try{dayClock.setPaused(false);updateClockHUD(true);}catch{}try{window.SemestaLifePlay?.resume?.();}catch{}}
+ };
+ window.addEventListener('mainkan:pause',onLifePause);
+ window.addEventListener('mainkan:resume',onLifePause);
+}
+
+function bootNjhPlayInteriors(){
+ if(!playerMode||!window.VLNjhPlayInteriors||window.__njhPlayInteriors)return;
+ const api=window.VLNjhPlayInteriors.create({
+  THREE,scene,
+  getWorld:()=>documentMap,
+  getState:()=>window.SemestaLifePlay?.state?.()||null,
+  getPlayerId:()=>playerMode?mainkanPlayerId:'',
+  getRelationships:()=>{try{return window.SemestaLifePlay?.state?.()?.relationships||null;}catch{return null;}},
+  persist:()=>{try{window.SemestaLifePlay?.persist?.();}catch{}},
+  getPos:()=>{const p=walkWorldPos();return {x:Number(p?.x)||0,y:Number(p?.y)||0,z:Number(p?.z)||0};},
+  teleport:(x,z,size,opt)=>{
+   if(window.VLSpawnHobo?.busy?.())window.VLSpawnHobo.dispose();
+   const holder=rigs.get(walkActorId);
+   if(!holder)return false;
+   holder.root.position.set(Number(x),holder.root.position.y||0,Number(z));
+   holder.rig?.setMoving(0,0,false);
+   if(!opt?.keepView && !window.__njhPlayInteriors?.cameraLocked?.())
+    focusCameraAt(Number(x),Number(z),size||12);
+   return true;
+  },
+  setView:(focus,size)=>{
+   cameraFocus.set(Number(focus?.x)||0,Number(focus?.y)||0,Number(focus?.z)||0);
+   if(size)viewSize=Math.max(8,Number(size));
+   fitCamera();
+  },
+  getViewAspect:()=>{
+   const r=canvas.getBoundingClientRect();
+   return Math.max(.3,(r.width||1280)/Math.max(1,r.height||760));
+  },
+  cameraDirection:direction,
+  message:tell,
+  playerObjectId:()=>walkActorId||LIFE_TEST_ACTOR_ID,
+  getRoots:()=>[...owners.entries()].map(([id,root])=>({id,root})),
+  onAddObject:o=>{if(!Number.isFinite(Number(o.y)))o.y=0;if(!owners.has(o.id))instantiate(o);},
+  setGroundVisible:on=>{try{baseGround.visible=!!on;if(typeof gridOverlay!=='undefined'&&gridOverlay)gridOverlay.visible=!!on&&(typeof gridShown==='undefined'||gridShown);}catch{}},
+  setGroundDepthWrite:on=>{
+   try{
+    const write=!!on;
+    if(baseGround?.material){baseGround.material.depthWrite=write;baseGround.material.needsUpdate=true;}
+    if(typeof tileGround!=='undefined'&&tileGround)tileGround.traverse(n=>{
+     const mats=n.material? (Array.isArray(n.material)?n.material:[n.material]):[];
+     for(const m of mats){if(!m)continue;if(n.userData._njhDw==null)n.userData._njhDw=m.depthWrite!==false;
+      m.depthWrite=write&&(n.userData._njhDw!==false);m.needsUpdate=true;}
+    });
+   }catch{}
+  },
+
+
+  onEnter:()=>{try{window.SemestaLifePlay?.refresh?.();}catch{}},
+  onExit:()=>{try{window.SemestaLifePlay?.refresh?.();}catch{}},
+ });
+ window.__njhPlayInteriors=api;
+ const life=window.SemestaLifePlay;
+ if(life?.attach){
+  // extend the already-attached bridge with interior hooks
+ }
+ try{
+  const hook=life&&life.attach;
+ }catch{}
+ api.loadAssets().then(()=>{
+  api.wireWorld(documentMap);
+  const kost=api.findBuilding('kost',documentMap);
+  if(kost){if(!Number.isFinite(Number(kost.y)))kost.y=0;if(!owners.has(kost.id))instantiate(kost);}
+  if(window.SemestaLifePlay?.active?.())api.restoreIfNeeded();
+ }).catch(err=>console.warn('njh play interiors',err));
+}
+
+if(playerMode)bootNjhPlayInteriors();
 $('addType').onchange=e=>{add(e.target.value);e.target.value='';setMode('move');};
 $('home').onclick=cameraMapView;
 $('rotateL').onclick=()=>{if(item()&&!actorType(item().type)&&item().type!=='vehicle')edit(o=>{o.rotation=(o.rotation-90+360)%360;});};
@@ -4494,7 +4707,11 @@ function frame(now){
  requestAnimationFrame(frame);
  const elapsedReal=Math.min(.5,Math.max(0,(now-priorFrame)/1000));
  const dt=Math.min(.05,elapsedReal);priorFrame=now;
+ const prevClockDay=dayClock.get().day;
  dayClock.tick(elapsedReal);
+ if(dayClock.get().day>prevClockDay){
+  try{window.SemestaLifePlay?.onDayEnd?.({day:dayClock.get().day,previousDay:prevClockDay});}catch{}
+ }
  updateClockHUD();
  clockLastSaved+=elapsedReal;
  // Save the running virtual time at low frequency, without dirtying the
@@ -4532,6 +4749,7 @@ function frame(now){
         next={x:held.x,z:held.z,moved:held.x!==start.x||held.z!==start.z};
        }
       }
+      try{const held=window.__njhPlayInteriors?.constrain?.(start,next);if(held)next=held;}catch{}
       holder.root.position.x=next.x;
       holder.root.position.z=next.z;
       holder.rig.setMoving(next.x-start.x,next.z-start.z,next.moved);
@@ -4540,7 +4758,7 @@ function frame(now){
  }
  // Follow the live, unsaved Walk Test character position with frame-rate
  // independent easing. Orthographic projection prevents character scale changes.
- if(cameraFollowId){
+ if(cameraFollowId && !window.__njhPlayInteriors?.cameraLocked?.()){
   const actor=owners.get(cameraFollowId);
   if(!actor){leaveCharacterCamera(false);}
   else{
@@ -4648,6 +4866,7 @@ function frame(now){
    const yaw=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z);
    plane.rotation.y=yaw-root.rotation.y;
  }
+ try{window.__njhPlayInteriors?.update?.(camera);}catch{}
  updateLargeOcclusion(dt);
  try{window.VLSpawnHobo&&window.VLSpawnHobo.tick(dt,camera);}catch{}
  try{window.SemestaLifePlay?.tick?.(dt);}catch(err){console.warn('life play tick',err);}

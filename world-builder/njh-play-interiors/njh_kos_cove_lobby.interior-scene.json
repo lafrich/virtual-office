@@ -1,0 +1,261 @@
+{
+  "id": "njh_kos_cove_lobby",
+  "label": "NJH · Lobi Kost Cove",
+  "format": "virtual-life-interior-v1",
+  "version": 3,
+  "width": 10,
+  "depth": 5,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    10,
+    5
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 4
+  },
+  "items": [
+    {
+      "id": "njh_kos_cove_lobby-registration_desk",
+      "assetId": "registration_desk",
+      "name": "Meja pengurus kost",
+      "c": 8,
+      "r": 3,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "access": "public",
+      "tags": [
+        "access:public",
+        "lobby"
+      ]
+    },
+    {
+      "id": "njh_kos_cove_lobby-shoe_rack",
+      "assetId": "shoe_rack",
+      "name": "Rak Sepatu",
+      "c": 0,
+      "r": 4,
+      "rotation": 180,
+      "flipX": false,
+      "flipY": false,
+      "actionId": null,
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "access": "public",
+      "tags": [
+        "access:public",
+        "lobby"
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "id": "njh_door_kos_cove_lobby_exit",
+      "role": "exit",
+      "label": "Keluar ke jalan",
+      "c": 4,
+      "r": 4,
+      "useTile": [
+        4,
+        4
+      ],
+      "usePoint": [
+        4.5,
+        4.5
+      ],
+      "exitTo": "street",
+      "streetDoorId": "njh_door_kos_cove_lobby"
+    },
+    {
+      "id": "njh_door_cove_room_1",
+      "role": "room",
+      "label": "Kamar 1",
+      "c": 1,
+      "r": 0,
+      "useTile": [
+        1,
+        1
+      ],
+      "usePoint": [
+        1.5,
+        1.5
+      ],
+      "rotation": 0,
+      "facing": "sw",
+      "state": "locked",
+      "interiorTemplate": null,
+      "sprite": "lobby-doors/pintu_lobi_terkunci_sw.png",
+      "sprites": {
+        "owned_self": "lobby-doors/pintu_lobi_milik_sw.png",
+        "owned_other": "lobby-doors/pintu_lobi_milik_orang_lain_sw.png",
+        "owned_other_glow": "lobby-doors/pintu_lobi_milik_orang_lain_sw__glow.png",
+        "locked": "lobby-doors/pintu_lobi_terkunci_sw.png",
+        "available": "lobby-doors/pintu_lobi_tersedia_sw.png"
+      }
+    },
+    {
+      "id": "njh_door_cove_room_2",
+      "role": "room",
+      "label": "Kamar 2",
+      "c": 3,
+      "r": 0,
+      "useTile": [
+        3,
+        1
+      ],
+      "usePoint": [
+        3.5,
+        1.5
+      ],
+      "rotation": 0,
+      "facing": "sw",
+      "state": "locked",
+      "interiorTemplate": null,
+      "sprite": "lobby-doors/pintu_lobi_terkunci_sw.png",
+      "sprites": {
+        "owned_self": "lobby-doors/pintu_lobi_milik_sw.png",
+        "owned_other": "lobby-doors/pintu_lobi_milik_orang_lain_sw.png",
+        "owned_other_glow": "lobby-doors/pintu_lobi_milik_orang_lain_sw__glow.png",
+        "locked": "lobby-doors/pintu_lobi_terkunci_sw.png",
+        "available": "lobby-doors/pintu_lobi_tersedia_sw.png"
+      }
+    },
+    {
+      "id": "njh_door_cove_room_3",
+      "role": "room",
+      "label": "Kamar 3",
+      "c": 5,
+      "r": 0,
+      "useTile": [
+        5,
+        1
+      ],
+      "usePoint": [
+        5.5,
+        1.5
+      ],
+      "rotation": 0,
+      "facing": "sw",
+      "state": "locked",
+      "interiorTemplate": null,
+      "sprite": "lobby-doors/pintu_lobi_terkunci_sw.png",
+      "sprites": {
+        "owned_self": "lobby-doors/pintu_lobi_milik_sw.png",
+        "owned_other": "lobby-doors/pintu_lobi_milik_orang_lain_sw.png",
+        "owned_other_glow": "lobby-doors/pintu_lobi_milik_orang_lain_sw__glow.png",
+        "locked": "lobby-doors/pintu_lobi_terkunci_sw.png",
+        "available": "lobby-doors/pintu_lobi_tersedia_sw.png"
+      }
+    },
+    {
+      "id": "njh_door_home_ichsan",
+      "role": "room",
+      "label": "Kost Ichsan",
+      "c": 7,
+      "r": 0,
+      "useTile": [
+        7,
+        1
+      ],
+      "usePoint": [
+        7.5,
+        1.5
+      ],
+      "rotation": 0,
+      "facing": "sw",
+      "state": "owned",
+      "interiorTemplate": "njh_kos_ichsan",
+      "sprite": "lobby-doors/pintu_lobi_milik_sw.png",
+      "sprites": {
+        "owned_self": "lobby-doors/pintu_lobi_milik_sw.png",
+        "owned_other": "lobby-doors/pintu_lobi_milik_orang_lain_sw.png",
+        "owned_other_glow": "lobby-doors/pintu_lobi_milik_orang_lain_sw__glow.png",
+        "locked": "lobby-doors/pintu_lobi_terkunci_sw.png",
+        "available": "lobby-doors/pintu_lobi_tersedia_sw.png"
+      },
+      "ownerId": "ichsan",
+      "owner": "t_ichsan",
+      "partnerOwnerId": "noor",
+      "partnerOwner": "t_noor",
+      "access": "shared_partner",
+      "tags": [
+        "owner:ichsan",
+        "access:shared_partner"
+      ]
+    },
+    {
+      "id": "njh_door_home_noor",
+      "role": "room",
+      "label": "Kost Noor",
+      "c": 9,
+      "r": 0,
+      "useTile": [
+        9,
+        1
+      ],
+      "usePoint": [
+        9.5,
+        1.5
+      ],
+      "rotation": 0,
+      "facing": "sw",
+      "state": "owned",
+      "interiorTemplate": "njh_kos_noor",
+      "sprite": "lobby-doors/pintu_lobi_milik_sw.png",
+      "sprites": {
+        "owned_self": "lobby-doors/pintu_lobi_milik_sw.png",
+        "owned_other": "lobby-doors/pintu_lobi_milik_orang_lain_sw.png",
+        "owned_other_glow": "lobby-doors/pintu_lobi_milik_orang_lain_sw__glow.png",
+        "locked": "lobby-doors/pintu_lobi_terkunci_sw.png",
+        "available": "lobby-doors/pintu_lobi_tersedia_sw.png"
+      },
+      "ownerId": "noor",
+      "owner": "t_noor",
+      "partnerOwnerId": "ichsan",
+      "partnerOwner": "t_ichsan",
+      "access": "shared_partner",
+      "tags": [
+        "owner:noor",
+        "access:shared_partner"
+      ]
+    }
+  ],
+  "exits": [
+    {
+      "id": "njh_door_kos_cove_lobby_exit",
+      "role": "exit",
+      "label": "Keluar ke jalan",
+      "c": 4,
+      "r": 4,
+      "useTile": [
+        4,
+        4
+      ],
+      "usePoint": [
+        4.5,
+        4.5
+      ],
+      "exitTo": "street",
+      "streetDoorId": "njh_door_kos_cove_lobby"
+    }
+  ],
+  "floor": 1,
+  "notes": "Cove kost lobby (preview). Street enter lands here first (njh_door_kos_cove_lobby). Five orange lobby doors along the back wall, matching old VO Cove: rooms 1–3 locked, room 4 Ichsan (njh_door_home_ichsan → njh_kos_ichsan), room 5 Noor (njh_door_home_noor → njh_kos_noor). virtual-life-interior-v1 has no nested-door furniture TYPE, so room and street exits are listed in doors[] (exits[] is the role=exit subset). Sprites are Ellen's pintu_lobi_* from kamar_cove_kosong, copied to interiors/lobby-doors/; they are not catalog TYPEs — Baymax should draw doors[].sprite / doors[].sprites by viewer state (milik / milik_orang_lain / terkunci / tersedia). Preview only.",
+  "adaptedFrom": "Ellen kamar_cove_kosong lobby door sprites + Cove lobby geometry in vo-mp/ind/p_cove.py and virtual-office/index.html (r0=24.6, five doors at c -20.5/-18.85/-17.2/-15.55/-13.9, owners index 3 Ichsan / 4 Noor).",
+  "schemaNoteForBaymax": "New field: doors[] on an interior scene. Each entry has id, role (room|exit), label, c, r, useTile, usePoint, and for room doors: state, interiorTemplate, ownerId/owner/partnerOwner, access, sprite/sprites. exits[] is the subset with role=exit (street or parent interior). Open room interiors by door id or interiorTemplate; do not open a bedroom from the street door. Street door id is njh_door_kos_cove_lobby."
+}

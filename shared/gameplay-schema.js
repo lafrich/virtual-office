@@ -30,7 +30,7 @@
    hud:{style:'gta_minimal',oneWindowAtATime:true,windowClose:'x_only',noExtraTopHUD:true,noMinimapOnHUD:true},
    modules:{
     phone:{enabled:true,kind:'nokia',apps:{map:true,jobs:false,courses:true,bank:true,messages:false,notifications:false}},
-    action:{enabled:true,singleContextButton:true,defaultIdle:'fart'},
+    action:{enabled:true,singleContextButton:true,defaultIdle:'fart',wallPeeFacingRequired:true},
     bag:{enabled:true,separateFromPhone:true,slots:8},
     movement:{enabled:true,controllerOnly:true,walkSpeed:1.4,runSpeed:2.2},
     energy:{enabled:false,todo:true,zeroCanMove:true,lowEnergySlowFactor:0.35,crossingCost:0},
@@ -66,6 +66,7 @@
   base.modules.action.enabled=action.enabled!==false;
   base.modules.action.singleContextButton=action.singleContextButton!==false;
   base.modules.action.defaultIdle=typeof action.defaultIdle==='string'?String(action.defaultIdle).slice(0,40):'fart';
+  base.modules.action.wallPeeFacingRequired=action.wallPeeFacingRequired!==false;
   const bag=src.bag&&typeof src.bag==='object'?src.bag:{};
   base.modules.bag.enabled=bag.enabled!==false;
   base.modules.bag.separateFromPhone=true;

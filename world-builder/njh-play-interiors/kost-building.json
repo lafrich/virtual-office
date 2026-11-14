@@ -1,0 +1,210 @@
+{
+  "format": "njh-kost-building-v1",
+  "version": 2,
+  "building": {
+    "id": "njh-kos-noor",
+    "aliases": [
+      "njh_kos",
+      "njh-kos-noor",
+      "njh_kos_noor"
+    ],
+    "name": "Kost Cove (Ichsan & Noor)",
+    "asset": "pipeline:id200_bangunan_rumah_kos_dua_lantai",
+    "streetDoorId": "njh_door_kos_cove_lobby",
+    "streetDoorUseTile": [
+      -27,
+      71
+    ],
+    "streetDoorUsePoint": [
+      -26.25,
+      71.5
+    ],
+    "enterRadius": 1.25,
+    "lobbyTemplate": "njh_kos_cove_lobby",
+    "openInteriorById": "njh_kos_cove_lobby"
+  },
+  "lobby": {
+    "id": "njh_kos_cove_lobby",
+    "aliases": [
+      "njh_kos_lobby",
+      "njh-kos-noor",
+      "njh_kos_cove_lobby"
+    ],
+    "streetDoorId": "njh_door_kos_cove_lobby",
+    "exitDoorId": "njh_door_kos_cove_lobby_exit",
+    "openTo": [
+      "owner",
+      "partner",
+      "guest"
+    ],
+    "kind": "lobby"
+  },
+  "homes": [
+    {
+      "ownerId": "t_ichsan",
+      "roomId": "njh_kos_ichsan",
+      "doorId": "njh_door_home_ichsan",
+      "lobbyDoorId": "njh_door_kos_cove_lobby",
+      "lobbyTemplate": "njh_kos_cove_lobby",
+      "kind": "kost",
+      "homeSpawn": [
+        -26.25,
+        71.5
+      ],
+      "aliases": [
+        "njh_kos"
+      ]
+    },
+    {
+      "ownerId": "t_noor",
+      "roomId": "njh_kos_noor",
+      "doorId": "njh_door_home_noor",
+      "lobbyDoorId": "njh_door_kos_cove_lobby",
+      "lobbyTemplate": "njh_kos_cove_lobby",
+      "kind": "kost",
+      "homeSpawn": [
+        -26.25,
+        71.5
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "id": "njh_door_kos_cove_lobby",
+      "buildingId": "njh-kos-noor",
+      "interior": "njh_kos_cove_lobby",
+      "useTile": [
+        -27,
+        71
+      ],
+      "usePoint": [
+        -26.25,
+        71.5
+      ],
+      "role": "lobby"
+    },
+    {
+      "id": "njh_door_kos_cove_lobby_exit",
+      "from": "njh_kos_cove_lobby",
+      "to": "street",
+      "streetDoorId": "njh_door_kos_cove_lobby",
+      "role": "exit"
+    },
+    {
+      "id": "njh_door_home_ichsan",
+      "from": "njh_kos_cove_lobby",
+      "to": "njh_kos_ichsan",
+      "ownerId": "t_ichsan",
+      "role": "room",
+      "state": "owned"
+    },
+    {
+      "id": "njh_door_home_noor",
+      "from": "njh_kos_cove_lobby",
+      "to": "njh_kos_noor",
+      "ownerId": "t_noor",
+      "role": "room",
+      "state": "owned"
+    },
+    {
+      "id": "njh_door_cove_room_1",
+      "from": "njh_kos_cove_lobby",
+      "role": "room",
+      "state": "locked",
+      "label": "Kamar 1"
+    },
+    {
+      "id": "njh_door_cove_room_2",
+      "from": "njh_kos_cove_lobby",
+      "role": "room",
+      "state": "locked",
+      "label": "Kamar 2"
+    },
+    {
+      "id": "njh_door_cove_room_3",
+      "from": "njh_kos_cove_lobby",
+      "role": "room",
+      "state": "locked",
+      "label": "Kamar 3"
+    }
+  ],
+  "access": {
+    "owner_only": [
+      "kulkas",
+      "lemari",
+      "stove",
+      "kitchen_sink",
+      "fridge",
+      "wardrobe"
+    ],
+    "shared_partner": [
+      "bed",
+      "bathtub",
+      "shower",
+      "squat_toilet",
+      "sink",
+      "sekat_wc",
+      "fan",
+      "shoe_rack"
+    ],
+    "public": [
+      "registration_desk",
+      "shoe_rack"
+    ]
+  },
+  "actionMap": {
+    "sleep": [
+      "sleep"
+    ],
+    "open_fridge": [
+      "store_fridge",
+      "take_fridge"
+    ],
+    "store_fridge": [
+      "store_fridge"
+    ],
+    "take_fridge": [
+      "take_fridge"
+    ],
+    "open_storage": [
+      "store_home",
+      "take_home"
+    ],
+    "store_home": [
+      "store_home"
+    ],
+    "take_home": [
+      "take_home"
+    ],
+    "cook": [
+      "cook"
+    ],
+    "cook_recipe": [
+      "cook_recipe"
+    ],
+    "wash": [
+      "wash"
+    ],
+    "bathe": [
+      "home_shower"
+    ],
+    "home_shower": [
+      "home_shower"
+    ],
+    "use_toilet": [
+      "home_toilet"
+    ],
+    "home_toilet": [
+      "home_toilet"
+    ],
+    "open": []
+  },
+  "aliases": {
+    "njh_kos": "njh_kos_noor",
+    "njh-kos-noor": "njh_kos_cove_lobby",
+    "njh_kos_lobby": "njh_kos_cove_lobby",
+    "njh_door_kost_lobby": "njh_door_kos_cove_lobby",
+    "ichsan": "t_ichsan",
+    "noor": "t_noor"
+  }
+}

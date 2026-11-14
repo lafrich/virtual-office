@@ -42,3 +42,24 @@ test("Confirm falls back to a per-player local character when the Worker has no 
  assert.strictEqual(win.MainkanLocalCharacter.load("t_ichsan").base,"genesis_male_nude");
  assert.strictEqual(win.MainkanLocalCharacter.load("t_noor"),null);
 });
+
+test('4P Ichsan/Noor starts: no appearance, needsCharacter, own room, Rp10jt, pacaran',()=>{
+ for(const id of ['t_ichsan','t_noor']){
+  const p=d.profiles[id];
+  assert.equal(p.needsCharacter,true);
+  assert.equal(p.appearance,undefined);
+  assert.ok(!p.character);
+  const s=d.starts[p.start];
+  assert.equal(s.wallet,10000000);
+  assert.equal(s.tutorial,false);
+  assert.equal(s.tent,false);
+  assert.equal(s.housing.room,true);
+  assert.equal(s.housing.roomId,id==='t_ichsan'?'njh_kos_ichsan':'njh_kos_noor');
+  assert.equal(s.housing.ownerId,id);
+  assert.ok(!s.furniture.includes('stove'),'4P rooms have stove in the scene, not the start seed');
+ }
+ assert.deepStrictEqual(d.relationships,[{a:'t_ichsan',b:'t_noor',type:'pacaran'}]);
+ const src=fs.readFileSync(path.join(R,'world-builder/semesta-life-play.js'),'utf8');
+ assert.match(src,/needsCharacter/);
+ assert.match(src,/roomId/);
+});

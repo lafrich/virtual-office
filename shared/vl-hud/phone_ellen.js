@@ -326,10 +326,10 @@ function Market(){
    }))})
   });
   return List({title:'Marketplace',num:'4-',items:[
-   lines('Token Listrik',cfg.tokenPrice??1000,
+   lines('Token Listrik',cfg.tokenPrice??20000,
     ['+'+(cfg.tokenUnits??5)+' unit token','Untuk listrik kost'],
     'buy_token',{},'Token listrik bertambah'),
-   ...(g.fridgeOwned?[]:[lines('Kulkas',cfg.fridgePrice??8000,
+   ...(g.fridgeOwned?[]:[lines('Kulkas',cfg.fridgePrice??2000000,
     ['Simpan ikan / buah','Perlu token listrik'],
     'buy_fridge',{},'Kulkas tersedia di kost')])
   ]});

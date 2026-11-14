@@ -11,6 +11,7 @@
 'use strict';
 const RULES=root&&root.JiwaLifeEconomy;
 const SR=root&&root.VLSpawnRespawn;
+const Hooks=(root&&root.SemestaLifeHooks)||(typeof require==='function'?(()=>{try{return require('./semesta-life-hooks.js');}catch{return null;}})():null);
 const STORAGE='semesta-life-play-v1:';
 const DATA_DB='jiwa-mechanics-v1',DATA_STORE='projects';
 const SITES=[
@@ -23,7 +24,7 @@ const SITES=[
  {id:'premium_job',jobId:'kantor_premium',label:'Kerja Premium / Kantor',icon:'🏢',pattern:/kantor.?premium|premium.?job|office.?job/i,action:'work',offset:[-2,5]},
  {id:'loak',label:'Toko Loak',icon:'♻',pattern:/toko.?loak|babeh|pawnshop/i,action:'sell_loak',offset:[8,5]},
  {id:'scavenge',label:'Titik Mulung',icon:'📦',pattern:/botol|kardus|sampah|trash|barang.?bekas|scavenge/i,action:'scavenge',offset:[-8,-3]},
- {id:'tree',label:'Pohon Buah',icon:'🌳',pattern:/pohon|tree|mangga|jambu/i,action:'catch_fruit',offset:[-4,-8]},
+ {id:'tree',label:'Pohon Buah',icon:'🌳',pattern:/\bpohon\b|\btree\b|mangga|jambu/i,action:'catch_fruit',offset:[-4,-8]},
  {id:'warung',label:'Warteg / Makanan',icon:'🍚',pattern:/warteg|warung|nasi|food.vendor/i,action:'eat',offset:[3,7]},
  {id:'coffee',label:'Warung Kopi',icon:'☕',pattern:/kopi|coffee|kafe|cafe/i,action:'coffee',offset:[6,8]},
  {id:'public_wc',label:'WC Umum',icon:'🚾',pattern:/wc.umum|public.?toilet|toilet.umum/i,action:'public_toilet',offset:[-10,7]},
@@ -53,10 +54,12 @@ const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
 const name=o=>[o.name,o.label,o.asset,o.subtype,o.questId,...(Array.isArray(o.tags)?o.tags:[])].filter(Boolean).join(' ');
+const buildingName=o=>[o.name,o.label,o.type,o.id].filter(Boolean).join(' ');
 let bridge=null,active=false,projectId='',config=RULES?RULES.defaults():null;
 let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',progress=null;
 let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
 let publishedCatalog=false; // Separate unconfigured sandbox demo from Jiwa-authored rules
+let hooks=null;
 let bagOpen=false,justWorkedAt=0,lastFaintCount=0;
 let navSelect=null,workHoldStart=0,workAnimation=0;
 let cachedMapOverview={bounds:{minX:-20,maxX:20,minZ:-20,maxZ:20},terrain:[]};
@@ -86,8 +89,15 @@ function applyStart(s,id,force){
  const st=f.start,base=RULES.stateFrom({},config);
  if(Number.isFinite(Number(st.electricityUnits)))base.powerTokens=Math.max(0,Math.round(Number(st.electricityUnits)));
  for(const k of ['wallet','energy','hygiene','bladder','fullness','moral'])if(Number.isFinite(Number(st[k])))base[k]=Number(st[k]);
- base.housing={room:st.housing?.room===true,fridge:st.housing?.fridge===true};base.homeAccess=base.housing.room;
+ base.housing={room:st.housing?.room===true,fridge:st.housing?.fridge===true,
+  roomId:st.housing?.roomId||null,ownerId:st.housing?.ownerId||null,
+  kind:st.housing?.kind||(st.housing?.room===true?'kost':null)};
+ base.homeAccess=base.housing.room;
  base.furniture=(st.furniture||[]).filter(x=>(RULES.FURNITURE||[]).some(f=>f.id===x));
+ base.needsCharacter=!!(f.profile.needsCharacter&&!s.hasCharacter&&!s.identityChosen);
+ base.hasCharacter=!!(s.hasCharacter||s.identityChosen);
+ if(startProfiles?.relationships)base.relationships=startProfiles.relationships.slice();
+ if(st.tutorial===false)base.tutorial=false;
  const make=list=>(list||[]).map(it=>{const iid='life:'+String(it.type).replace(/[^a-z0-9_]/gi,'')+':'+(++base.itemSequence);
   base.itemMeta[iid]={species:String(it.type),label:String(it.label||it.type).slice(0,60),expiresAt:base.elapsedMinutes+Math.max(1,Number(it.minutes)||1440),inFridge:false};return iid;});
  base.inventory=make(st.inventory).slice(0,8);base.homeStorage=make(st.homeStorage).slice(0,24);
@@ -151,6 +161,60 @@ async function reloadRules(revision){
   paintPanel();
  }catch{}
 }
+
+function hookCtx(){
+ return {
+  window:root,root,
+  getState:()=>state,setState:next=>{state=next;},
+  loadState:next=>{state=RULES&&next?RULES.stateFrom(next,config):next;paintPanel();notifyHud();},
+  getSites:()=>sites,getWorld:getWorld,getPos:getPos,
+  getConfig:()=>config,getWorldEntities:()=>config?.worldEntities||[],
+  playerId,cityId,dataKey,projectId,
+  storage:typeof localStorage!=='undefined'?localStorage:null,
+  persist,teleport:(x,z)=>{try{return !!(bridge&&bridge.teleport&&bridge.teleport(x,z));}catch{return false;}},
+  setClockPaused:on=>{try{bridge?.setClockPaused?.(!!on);}catch{}},
+  getClock:()=>{try{return bridge?.getClock?.()||null;}catch{return null;}},
+  worldToScreen:(x,y,z)=>{try{return bridge?.worldToScreen?.(x,y,z)||null;}catch{return null;}},
+  doorAnchor:o=>{try{return bridge?.doorAnchor?.(o)||null;}catch{return null;}},
+  interiorFurniture:()=>{try{return bridge?.interiorFurniture?.()||[];}catch{return [];}},
+  interiorKind:()=>{try{return bridge?.interiorKind?.()||bridge?.playInteriors?.kind?.()||null;}catch{return null;}},
+  interiorRoomId:()=>{try{return bridge?.playInteriors?.roomId?.()||bridge?.playInteriors?.active?.()?.roomId||null;}catch{return null;}},
+  extraActions:()=>{try{return bridge?.extraActions?.()||bridge?.playInteriors?.extraActions?.()||[];}catch{return [];}},
+  hasCharacter:()=>!!(state?.hasCharacter||state?.identityChosen),
+  getRelationships:()=>state?.relationships||startProfiles?.relationships||(root.SemestaRoomAccess?.DEFAULT_RELATIONSHIPS)||[],
+  resetCurrent:()=>resetSave(),
+  runEconomy:(action,args)=>{if(!RULES||!state)return {ok:false,reason:'Tidak ada state'};
+   const r=RULES.run(config,state,action,args||{});if(r.ok)state=r.state;return r;},
+  enterInterior:id=>{
+   const raw=String(id||'').replace(/^d:/,'');
+   try{
+    const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
+    if(I?.openInteriorById){const r=I.openInteriorById(raw);if(r?.ok)return r;}
+    if(I?.enterInterior){const r=I.enterInterior(raw);if(r?.ok)return r;}
+    if((raw==='kost'||raw==='warteg')&&I?.enter)return I.enter(raw);
+    const obj=(getWorld().objects||[]).find(o=>String(o.id)===raw);
+    const kind=I?.kindOfBuilding?.(obj);
+    if(kind&&I?.enter)return I.enter(kind);
+    if(bridge?.openInteriorById)return !!bridge.openInteriorById(raw);
+   }catch(_e){}
+   return false;
+  },
+  playEnterables:()=>{
+   try{
+    const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
+    const out=[];
+    if(I?.buildings){for(const k of Object.keys(I.buildings)){const b=I.buildings[k];if(b?.object)out.push(b.object);}}
+    return out;
+   }catch(_e){return [];}
+  },
+  interiorItems:()=>{try{return bridge?.playInteriors?.session?.items||root.VLNjhPlayInteriors?.session?.items||[];}catch{return [];}},
+  getFacing:()=>{try{return bridge?.getFacing?.()||null;}catch{return null;}},
+  getNpcs:()=>lifeNpcs||[],
+  getGameplay:()=>{try{return bridge?.getGameplay?.()||root.JiwaGameplay?.current?.()||null;}catch{return null;}}
+ };
+}
+function bindHooks(){hooks=Hooks&&Hooks.create?Hooks.create(hookCtx()):null;return hooks;}
+function getHooks(){return hooks||bindHooks();}
 function worldBounds(){
  const world=getWorld(),arr=(world.objects||[]).filter(o=>Number.isFinite(Number(o.x))&&Number.isFinite(Number(o.z)));
  const xs=arr.map(o=>Number(o.x)),zs=arr.map(o=>Number(o.z));
@@ -174,9 +238,20 @@ function buildSites(){
  const maxRange=Math.min(28,Math.max(8,(bounds.maxX-bounds.minX+bounds.maxZ-bounds.minZ)/5));
  // Prototype sites and imaginary placeholder jobs are strictly demo-only.
  sites=publishedCatalog?[]:SITES.map((d,i)=>{
-  const matches=objects.filter(o=>d.pattern.test(name(o)));
+  const blobOf=o=>d.id.startsWith('prayer_')?buildingName(o):name(o);
+  let matches=objects.filter(o=>{
+   const full=name(o)+' '+buildingName(o);
+   if(d.id.startsWith('prayer_')&&/rak.?sandal/i.test(full))return false;
+   if(d.id==='tree')return /\bpohon\b|\btree\b|mangga|jambu/i.test(name(o));
+   return d.pattern.test(blobOf(o));
+  });
+  if(d.id==='warung'){
+   const prefer=matches.filter(o=>/warteg/i.test(name(o)+' '+buildingName(o)));
+   if(prefer.length)matches=prefer;
+  }
   const prayerIndex=d.id==='prayer_islam_b'?1:d.id==='prayer_islam_c'?2:0;
   const found=matches[prayerIndex]||(!d.id.startsWith('prayer_')?matches[0]:null);
+  const points=matches.map(o=>{const q=findLanding(Number(o.x)||0,Number(o.z)||0);return {id:String(o.id||''),x:q.x,z:q.z};});
   let p=found?findLanding(Number(found.x)||0,Number(found.z)||0):null;
   if(!p&&d.id==='fish'){
    const cells=world.map?.terrain?.cells||[];
@@ -187,13 +262,24 @@ function buildSites(){
   if(!p){const x=center.x+d.offset[0]*maxRange/10,z=center.z+d.offset[1]*maxRange/10;
    p=findLanding(x,z);
   }
-  return {...d,sourceId:found?.id||'',placeholder:!found,x:p.x,z:p.z};
+  return {...d,sourceId:found?.id||'',placeholder:!found,x:p.x,z:p.z,points};
  });
  const tent=sites.find(n=>n.id==='tent');
  const last=window.__semestaLastSpawn;
  if(tent&&last?.kind==='hobo'&&last?.point){tent.x=last.point.x;tent.z=last.point.z;tent.placeholder=false;}
  const home=sites.find(n=>n.id==='kost');
- if(home&&state?.housing?.roomPosition){home.x=state.housing.roomPosition.x;home.z=state.housing.roomPosition.z;home.placeholder=!!state.housing.roomPosition.placeholder;}
+ if(home){
+  const realKost=home.sourceId||(getWorld().objects||[]).find(o=>/kost|kos_|boarding.?room|cove|kamar.?sewa|__njh_play_kost__/i.test(name(o)+' '+(o.id||'')));
+  if(realKost&&!home.sourceId){
+   const obj=typeof realKost==='object'?realKost:null;
+   if(obj){const pos=findLanding(Number(obj.x)||home.x,Number(obj.z)||home.z);home.x=pos.x;home.z=pos.z;home.sourceId=String(obj.id||'');}
+   home.placeholder=false;
+  }
+  if(state?.housing?.roomPosition){
+   if(!realKost){home.x=state.housing.roomPosition.x;home.z=state.housing.roomPosition.z;home.placeholder=!!state.housing.roomPosition.placeholder;}
+   else home.placeholder=false;
+  }
+ }
  // Global Jiwa activity registry: only real, configured buildings become
  // game interactions; unbound drafts remain editable, never fake map pins.
  const catalog=root.JiwaActivities;
@@ -229,6 +315,13 @@ function buildSites(){
   }
  }
  rebuildNokiaMapOverview();
+ placeLifeNpcs();
+ const warung=sites.find(n=>n.id==='warung');
+ if(!sites.some(n=>n.id==='npc_ibu_warteg')){
+  sites.push({id:'npc_ibu_warteg',label:'Ibu Warteg',icon:'👩‍🍳',action:'eat',
+   x:warung?warung.x:0,z:warung?warung.z:0,sourceId:warung?warung.sourceId:'',
+   placeholder:true,npc:true,oldAsset:true,interior:'warteg',behavior:'idle'});
+ }
 }
 function rebuildNokiaMapOverview(){
  const doc=getWorld(),cells=doc.map?.terrain?.cells||[];
@@ -294,6 +387,7 @@ function onSpawn(decision){
  }
  message((decision.kind==='home'?'🏠 RESPAWN KOST: ':'⛺ HOBO / TENDA: ')+(p.id||'spawn'));
  persist();placeMarkers();paintPanel();
+ try{getHooks()?.onSpawnDecision?.(decision);}catch{}
 }
 function disposeMarkers(){
  if(!markerGroup)return;
@@ -426,11 +520,14 @@ function nodeButtons(n){
  if(id==='coffee')entries=[button('coffee','☕ Ngopi')];
  if(id==='public_wc')entries=[button('public_toilet','🚾 WC Umum',{facilityId:n.sourceId||id})];
  if(id==='public_bath')entries=[button('public_shower','🚿 Mandi Umum',{facilityId:n.sourceId||id})];
+ const furnOk=action=>!getHooks()?.furnitureAllows||getHooks().furnitureAllows(action,{site:n}).ok;
  if(id==='kost')entries=ownsRoom()?
-  [button('home_toilet','🚽 WC Kost'),button('home_shower','🚿 Mandi Kost'),button('sleep','💤 Tidur Kost'),
+  [button('home_toilet','🚽 WC Kost'),
+   ...(furnOk('home_shower')?[button('home_shower','🚿 Mandi Kost')]:[]),
+   ...(furnOk('sleep')?[button('sleep','💤 Tidur Kost')]:[]),
    '<select id="slpItem">'+itemOptions('any')+'</select>',
-   button('cook','🍳 Masak Ikan'),
-   ...(kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
+   ...(furnOk('cook')?[button('cook','🍳 Masak Ikan')]:[]),
+   ...(furnOk('cook_recipe')&&kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
     button('cook_recipe','🍳 Masak Resep')]:[]),button('store_fridge','🧊 Simpan Kulkas'),button('store_home','📦 Simpan di Kost'),
    '<select id="slpHomeItem">'+(state.homeStorage||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
    button('take_home','🎒 Ambil dari Kost'),
@@ -460,6 +557,18 @@ function bagMarkup(){
    '<button data-life-action="discard_item">🗑 Buang Barang</button></div>':'<small>Tas kosong. Mulung, mancing, atau panjat pohon untuk mengisi tas.</small>')+
   '</div>';
 }
+function hookActionButtons(){
+ try{
+  const list=getHooks()?.nearbyActions?.()||[];
+  if(!list.length)return {html:'',spot:''};
+  const html=list.map(a=>{
+   const price=Number(a.price)>0?(' Rp'+Number(a.price).toLocaleString('id-ID')):'';
+   return '<button data-life-action="'+esc(a.id)+'" data-args="'+esc(JSON.stringify(a.args||{}))+'">'+esc(a.label||a.id)+price+'</button>';
+  }).join('');
+  const spot=list.spot||list[0]?.spotLabel||'';
+  return {html,spot,list};
+ }catch{return {html:'',spot:''};}
+}
 function paintPanel(){
  if(!outer||!active||!state)return;
  const el=outer.querySelector('#slpContent');if(!el||el.hidden)return;
@@ -467,10 +576,11 @@ function paintPanel(){
  const previousSelect=navSelect||'';
  const options=sites.map(t=>'<option value="'+esc(t.id)+'" '+(t.id===previousSelect?'selected':'')+'>'+esc(t.label)+(t.placeholder?' [PLACEHOLDER]':'')+'</option>').join('');
  const optsButton=(action,label,props={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(props))+'">'+label+'</button>';
+ const hooked=(!state.detained&&state.restMinutes===0&&!bagOpen)?hookActionButtons():{html:'',spot:''};
  const result=state.detained?
   optsButton('fine','💰 Bayar Denda Rp2.000')+optsButton('community_service','🧹 Bersihkan Gorong-gorong'):
   (state.restMinutes>0?optsButton('advance_time','⏩ Lewati 15 menit bed rest',{minutes:15}):
-   bagOpen?bagMarkup():nodeButtons(n));
+   bagOpen?bagMarkup():(hooked.html||nodeButtons(n)));
  const nextGoal=publishedCatalog?
   ('🏙️ JIWA AUTHORING · Hanya NPC, gedung, dan aset yang di-marking dalam World Entities untuk kota ini yang dapat berinteraksi. Tidak ada pekerjaan demo atau placeholder otomatis.'):
   ownsRoom()?('🏠 Hidup mandiri: gunakan WC/kamar, beli furnitur lewat HP, dan kelola token listrik.'):
@@ -481,9 +591,9 @@ function paintPanel(){
   (state.restMinutes>0?'<div class="slp-alert">⚠ PINGSAN · Bed rest '+state.restMinutes+' menit. Tidak bisa bekerja atau berjalan.</div>':'')+
   (state.detained?'<div class="slp-alert">🚨 DITAHAN HANSIP · Pilih denda atau kerja sosial.</div>':'')+
   (state.bladder>=80?'<div class="slp-alert">🚾 Kebelet pipis! Cari WC sebelum terlambat.</div>':'')+
-  '<div class="slp-spot">📍 '+(bagOpen?'TAS / INVENTORI':n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')+'</div>'+
+  '<div class="slp-spot">📍 '+(bagOpen?'TAS / INVENTORI':(hooked.spot?esc(hooked.spot):n?esc(n.label)+(n.placeholder?' [PLACEHOLDER]':''):(bridge?.interiorKind?.()==='kost'?'Kost':bridge?.interiorKind?.()==='warteg'?'Warteg':'Jelajahi kota untuk menemukan pekerjaan dan kebutuhan')))+'</div>'+
   '<div class="slp-actions" id="slpActions">'+result+'</div>'+
-  (!publishedCatalog&&state.bladder>=65&&!state.detained&&state.restMinutes===0?'<div class="slp-actions">'+optsButton('pee_outside','⚠ Pipis sembarangan (moral turun)')+'</div>':'')+
+  ''+
   '<div class="slp-actions"><button id="slpPhone" type="button">📱 NOKIA · PETA AKTIVITAS</button><button id="slpBag" type="button">'+(bagOpen?'← Kembali':'🎒 Tas')+'</button></div>'+  
   '<details><summary>🧪 ALAT TES (bukan aksi gameplay)</summary><p><small>Untuk mengecek skenario tanpa memodifikasi kota asli.</small></p>'+
   '<div class="slp-goto"><select id="slpDestination">'+options+'</select><button id="slpTravel" type="button">TELEPORT TEST</button></div>'+
@@ -567,7 +677,7 @@ function actionUp(ev){workUp(ev);}
 // Successful life actions play their LGR motion on the player (Bergerak DB id,
 // built-in or stand-in via LGRGame; never blocks when a motion is missing).
 const ACTION_POSE={cook:'cook',eat:'eat',eat_item:'eat',coffee:'drink_coffee',fish:'fishing_cast',scavenge:'mulung_pick',
- public_toilet:'wc_squat',home_toilet:'wc_squat',public_shower:'mandi',home_shower:'mandi',pee_outside:'pee_stand',
+ public_toilet:'wc_squat',home_toilet:'wc_squat',public_shower:'mandi',home_shower:'mandi',wall_pee:'pee_wall',fart:'idle',talk:'talk',
  worship:'pray_generic',charity:'give_sedekah',help:'hand_over',sell_fish:'hand_over',sell_loak:'hand_over',
  store_fridge:'use_storage',take_fridge:'use_storage',store_home:'use_storage',take_home:'use_storage',catch_fruit:'pick_up'};
 const JOB_POSE={manusia_silver:'silver_pose',pak_ogah:'ogah_flag',kang_parkir:'parkir_whistle'};
@@ -612,6 +722,58 @@ function afterLifeTransition(previous){
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
+ const ALIAS={bathe:'home_shower',use_toilet:'home_toilet'};
+ if(ALIAS[action])action=ALIAS[action];
+ if(String(action).startsWith('scene:')){
+  try{
+   const Scenes=root.SemestaIntScenes;
+   const id=String(args.sceneId||action.slice(6));
+   if(!Scenes)return {ok:false,reason:'Adegan belum siap'};
+   const r=Scenes.play(id,{
+    pause:()=>getHooks()?.pause?.(),
+    resume:()=>getHooks()?.resume?.(),
+    emit:(type,detail)=>{try{root.dispatchEvent?.(new root.CustomEvent(type,{detail}));}catch(_e){}
+     try{root.parent?.postMessage?.({type,detail},'*');}catch(_e){}}
+   });
+   if(!r.ok)message('⛔ '+(r.reason||'Adegan gagal'));
+   paintPanel();return r;
+  }catch(err){return {ok:false,reason:String(err.message||err)};}
+ }
+ if(action==='enter_room'){
+  try{
+   const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
+   if(args.locked){message('Terkunci');return {ok:false,reason:'Terkunci'};}
+   const r=I?.enterInterior?.(args.roomId)||I?.openInteriorById?.(args.roomId)||{ok:false,reason:'Pintu tidak bisa dibuka'};
+   if(!r.ok)message('⛔ '+(r.reason||'Terkunci'));
+   paintPanel();return r;
+  }catch(err){return {ok:false,reason:String(err.message||err)};}
+ }
+ if(action==='exit_interior'||action==='enter_interior'){
+  try{
+   const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
+   const fn=action==='exit_interior'?(I?.exit||bridge?.exitInterior):(I?.enterNearby||bridge?.enterInterior);
+   const r=(typeof fn==='function'?fn():null)||{ok:false,reason:'Interior tidak tersedia'};
+   if(r.ok)message(action==='exit_interior'?'🚪 Keluar ruangan':'Masuk ruangan');
+   else message('⛔ '+(r.reason||'Tidak bisa'));
+   paintPanel();return r;
+  }catch(err){return {ok:false,reason:String(err.message||err)};}
+ }
+ try{if(getHooks())args=getHooks().argsFor(action,args);}catch{}
+ try{
+  const Access=root.SemestaRoomAccess;
+  const room=bridge?.playInteriors?.roomId?.()||getHooks()?.roomAccess&&null;
+  const roomId=bridge?.playInteriors?.roomId?.();
+  if(Access&&roomId){
+   const deny=Access.rejectAction(playerId(),roomId,action,args);
+   if(deny){message(deny);return {ok:false,reason:deny};}
+  }
+ }catch(_e){}
+ const gate=getHooks()?.furnitureAllows?.(action,{});
+ if(gate&&gate.ok===false)return {ok:false,reason:gate.reason||'Furnitur tidak ada di dekatmu'};
+ if(action==='wall_pee'){
+  const allow=getHooks()?.nearbyActions?.()?.find(a=>a.id==='wall_pee');
+  if(!allow)return {ok:false,reason:'Dekati dan hadap tembok atau bangunan (kandung kemih ≥ 65).'};
+ }
  // Also guard the public runAction API, not only the visible action menu.
  if(publishedCatalog&&['pee_outside','fish','sell_fish','work','scavenge','sell_loak',
   'catch_fruit','eat','coffee','public_toilet','public_shower','buy_room',
@@ -663,7 +825,7 @@ function runAction(action,args={}){
   const expected='act:'+String(args.activityId||'');
   if(node?.id!==expected||node.placeholder)return {ok:false,reason:'Datangi bangunan aktivitas yang sesuai di Semesta.'};
  }
- if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','eat_item','discard_item','set_identity'].includes(action)&&!node)
+ if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity','wash','enter_room','exit_interior'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
@@ -672,7 +834,8 @@ function runAction(action,args={}){
   cook:'kost',cook_recipe:'kost',store_fridge:'kost',take_fridge:'kost',store_home:'kost',take_home:'kost',rest:'bench',help:'help',charity:'charity',
   worship:node?.id?.startsWith('prayer_')?node.id:'prayer'
  }[action];
- if(required&&node?.id!==required){
+ const inWarteg=(bridge?.interiorKind?.()||root.VLNjhPlayInteriors?.kind?.())==='warteg';
+ if(required&&node?.id!==required&&!(action==='eat'&&inWarteg)){
   message('Dekati '+(sites.find(s=>s.id===required)?.label||required)+' dahulu.');return {ok:false,reason:'Lokasi aksi tidak sesuai'};
  }
  if(action==='buy_room'){
@@ -693,12 +856,18 @@ function runAction(action,args={}){
   else message('✅ '+result.changes.join(' · '));
  }else message('⛔ '+result.reason);
  if(result.ok){const pose=actionPose(action,args);if(pose&&action!=='sleep')try{bridge?.playPose?.(pose,4);}catch{}}
+ if(result.ok&&action==='fart'&&(args.witnessed||args.nearNpc||args.nearby>0))reactNpcsToFart();
  if(result.ok)afterLifeTransition(prior);
  else{notifyHud();paintPanel();}
  return result;
 }
 function handleAction(){
  if(!active)return false;
+ try{
+  const inside=bridge?.interiorKind?.();
+  const door=inside?(bridge?.exitInterior?.()):(bridge?.enterInterior?.());
+  if(door?.ok)return true;
+ }catch{}
  const node=nearest();
  if(!node)return false;
  if(node.jobId){
@@ -754,7 +923,9 @@ function checkHansip(){
 }
 function tick(dt){
  if(!active||!state)return;
+ if(getHooks()?.isPaused?.())return;
  const seconds=Math.max(0,Math.min(.2,Number(dt)||0));
+ tickLifeNpcs(seconds);
  actorMoved(seconds);
  timeAccumulator+=seconds;
  const period=Math.max(1,config.settings.realSecondsPerGameMinute||8);
@@ -824,6 +995,7 @@ function start(){
  if(active&&id===projectId)return true;
  if(active)stop();
  projectId=id;active=true;sessionRevision++;timeAccumulator=0;frameAccumulator=0;bagOpen=false;
+ bindHooks();
  const gameCatalog=root.JiwaActivities?.readLocal?.(localStorage);
  publishedCatalog=!!gameCatalog?.updatedAt;
  config=RULES.normalize({...defaults(),activities:gameCatalog?.activities||[],
@@ -837,16 +1009,136 @@ function start(){
 function stop(){
  if(!active)return;
  persist();detachNokia();active=false;cancelAnimationFrame(workAnimation);progress=null;
- disposeMarkers();if(outer)outer.hidden=true;
+ disposeMarkers();disposeNpcGroup();lifeNpcs=[];if(outer)outer.hidden=true;
  actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;bagOpen=false;
 }
 function attach(bridgeApi){bridge=bridgeApi||null;return api;}
 try{root.addEventListener?.('storage',ev=>{
  if(ev.key==='jiwa-activities-global-v1'&&active)reloadRules(sessionRevision);
 });}catch(_e){}
-const api=Object.freeze({attach,start,stop,active:visible,state:()=>state,sites:()=>sites,spawnEntitlement,
+const LIFE_NPC_DEFS=[
+ {id:'npc_silver',siteId:'job_silver',label:'Mas Silver',role:'work',behavior:'work',questId:'q_silver',lgr:'manusia_silver'},
+ {id:'npc_ogah',siteId:'job_pak_ogah',label:'Pak Ogah',role:'work',behavior:'work',questId:'q_ogah',lgr:'pak_ogah'},
+ {id:'npc_parkir',siteId:'job_kang_parkir',label:'Kang Parkir',role:'work',behavior:'work',questId:'q_parkir',lgr:'kang_parkir'},
+ {id:'npc_premium',siteId:'premium_job',label:'HRD Kantor',role:'work',behavior:'idle',lgr:null},
+ {id:'npc_siomay',siteId:'siomay_batagor',label:'Bang Siomay',role:'buyer',behavior:'idle',lgr:null},
+ {id:'npc_pasar',siteId:'pasar_ikan',label:'Ibu Pasar Ikan',role:'buyer',behavior:'idle',lgr:null},
+ {id:'npc_loak',siteId:'loak',label:'Babeh Loak',role:'buyer',behavior:'idle',questId:'q_loak',lgr:null},
+ {id:'npc_hansip',siteId:'hansip',label:'Pak Hansip',role:'hansip',behavior:'patrol',lgr:'hansip'},
+ {id:'npc_help',siteId:'help',label:'Warga',role:'quest',behavior:'idle',questId:'q_warga',lgr:null}
+];
+let lifeNpcs=[],npcGroup=null,npcReactUntil=0;
+function lgrAvailable(id){
+ if(!id)return false;
+ try{
+  const vault=root.VLVirtualLifeVault||root.VLAssetLibrary;
+  if(vault&&typeof vault.has==='function'&&vault.has(id))return true;
+  if(vault?.ids?.includes?.(id))return true;
+ }catch(_e){}
+ return false;
+}
+function disposeNpcGroup(){
+ if(!npcGroup)return;
+ npcGroup.parent?.remove(npcGroup);
+ npcGroup.traverse(n=>{if(n.geometry)n.geometry.dispose();if(n.material){const m=Array.isArray(n.material)?n.material:[n.material];for(const x of m){x.map?.dispose();x.dispose();}}});
+ npcGroup=null;
+}
+function placeLifeNpcs(){
+ lifeNpcs=[];disposeNpcGroup();
+ const THREE=bridge?.THREE||root.THREE;
+ const scene=getScene();
+ if(THREE&&scene){npcGroup=new THREE.Group();npcGroup.name='__njh_life_npcs__';scene.add(npcGroup);}
+ for(const def of LIFE_NPC_DEFS){
+  const site=sites.find(s=>s.id===def.siteId);
+  if(!site)continue;
+  const placeholder=!!site.placeholder||!lgrAvailable(def.lgr);
+  const npc={id:def.id,label:def.label,siteId:def.siteId,role:def.role,behavior:def.behavior,
+   questId:def.questId||null,x:site.x+0.7,z:site.z+0.7,placeholder,lgr:lgrAvailable(def.lgr)?def.lgr:null,
+   emote:null,type:'life_npc',npc:true,homeX:site.x+0.7,homeZ:site.z+0.7,patrolT:Math.random()*Math.PI*2};
+  site.npc=true;site.npcId=npc.id;
+  lifeNpcs.push(npc);
+  if(!npcGroup||!THREE)continue;
+  const color=PLACEHOLDER_COLORS[def.siteId]||0x88aacc;
+  const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:placeholder?0.85:1});
+  const geom=(THREE.CapsuleGeometry?new THREE.CapsuleGeometry(0.18,0.7,4,8):new THREE.CylinderGeometry(0.18,0.18,1.1,8));
+  const mesh=new THREE.Mesh(geom,mat);
+  mesh.position.set(npc.x,0.55,npc.z);mesh.userData.npcId=npc.id;
+  const label=makeLabel(THREE,npc.label+(placeholder?' · PH':''));
+  label.position.set(0,0.85,0);mesh.add(label);
+  npcGroup.add(mesh);npc.mesh=mesh;
+ }
+}
+function tickLifeNpcs(dt){
+ if(!lifeNpcs.length)return;
+ const now=(typeof performance!=='undefined'?performance.now():Date.now());
+ for(const n of lifeNpcs){
+  if(n.emote&&npcReactUntil&&now>npcReactUntil){n.emote=null;}
+  if(n.behavior!=='patrol')continue;
+  n.patrolT=(n.patrolT||0)+((dt||0.016)*0.6);
+  n.x=n.homeX+Math.cos(n.patrolT)*1.4;
+  n.z=n.homeZ+Math.sin(n.patrolT)*1.4;
+  if(n.mesh)n.mesh.position.set(n.x,0.55,n.z);
+ }
+}
+function reactNpcsToFart(){
+ const p=getPos();
+ npcReactUntil=(typeof performance!=='undefined'?performance.now():Date.now())+2500;
+ for(const n of lifeNpcs){
+  if(Math.hypot(n.x-p.x,n.z-p.z)>2)continue;
+  n.emote='jijik';
+  try{bridge?.setNpcEmotion?.(n.id,'disgust',2.5);}catch(_e){}
+ }
+ try{
+  const w=root;
+  const Ev=w?.CustomEvent||(typeof CustomEvent!=='undefined'?CustomEvent:null);
+  if(w?.dispatchEvent&&Ev)w.dispatchEvent(new Ev('mainkan:npc-react',{detail:{action:'fart',emote:'jijik'}}));
+ }catch(_e){}
+}
+function hookApi(name,fallback){
+ return function(){const h=getHooks();if(h&&typeof h[name]==='function')return h[name].apply(h,arguments);return fallback;}
+}
+function publicSites(){
+ const h=getHooks();
+ if(h&&typeof h.sites==='function')return h.sites();
+ return (sites||[]).map(s=>({id:s.id,label:s.label,x:s.x,z:s.z,placeholder:!!s.placeholder,npc:!!s.npc,points:s.points||[{id:s.sourceId||s.id,x:s.x,z:s.z}]}));
+}
+const api=Object.freeze({attach,start,stop,active:visible,persist,state:()=>state,sites:publicSites,npcs:()=>lifeNpcs.map(n=>({id:n.id,label:n.label,siteId:n.siteId,role:n.role,behavior:n.behavior,x:n.x,z:n.z,placeholder:!!n.placeholder,lgr:n.lgr||null,emote:n.emote||null})),spawnEntitlement,
  spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
- playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null});
+ playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null,
+ spawnAt:hookApi('spawnAt',{ok:false,reason:'hooks missing'}),
+ housing:hookApi('housing',null),
+ relationship:hookApi('relationship',[]),
+ roomAccess:hookApi('roomAccess',null),
+ nearbyActions:hookApi('nearbyActions',[]),
+ pause:hookApi('pause',{ok:false}),resume:hookApi('resume',{ok:false}),
+ isPaused:()=>!!getHooks()?.isPaused?.(),
+ clock:hookApi('clock',null),
+ onDayEnd:hookApi('onDayEnd',null),
+ dayReport:hookApi('dayReport',null),
+ level:hookApi('level',1),
+ skills:hookApi('skills',[]),
+ reputation:hookApi('reputation',[]),
+ housingProgress:hookApi('housingProgress',null),
+ quests:hookApi('quests',[]),
+ acceptQuest:(npcId,questId)=>getHooks()?.acceptQuest?.(npcId,questId)||{ok:false},
+ turnInQuest:(npcId,questId)=>getHooks()?.turnInQuest?.(npcId,questId)||{ok:false},
+ jobs:hookApi('jobs',[]),
+ enterInterior:(id)=>!!getHooks()?.enterInterior?.(id),
+ furnitureSpots:hookApi('furnitureSpots',[]),
+ messages:hookApi('messages',[]),
+ openMap:hookApi('openMap',{ok:false}),
+ questMarkers:hookApi('questMarkers',[]),
+ enterables:hookApi('enterables',[]),
+ worldToScreen:hookApi('worldToScreen',{x:0,y:0,visible:false}),
+ playerPosition:hookApi('playerPosition',{x:0,y:0,z:0}),
+ hasSave:hookApi('hasSave',false),
+ saveMeta:hookApi('saveMeta',null),
+ saveSlot:hookApi('saveSlot',{ok:false}),
+ loadSlot:hookApi('loadSlot',{ok:false}),
+ listSlots:hookApi('listSlots',[]),
+ resetSave:(slot)=>{if(slot==null||slot===''){if(!active)return {ok:false,reason:'Play Game belum dimulai'};resetSave();paintPanel();return {ok:true,reset:true};}return getHooks()?.resetSave?.(slot)||{ok:false};},
+ setInteriorFurnitureAdapter:fn=>{if(bridge)bridge.interiorFurniture=typeof fn==='function'?fn:()=>[];bindHooks();}
+});
 return api;
 });

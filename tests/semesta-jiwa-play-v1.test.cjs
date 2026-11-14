@@ -52,14 +52,14 @@ test('Core flow: hobo edge spawn -> work and forage -> save -> buy room -> priva
  assert.ok(forage.ok);assert.equal(forage.state.inventory.length,1);
  const sold=E.run(conf,forage.state,'sell_loak',{itemId:forage.state.inventory[0]});
  assert.ok(sold.ok);assert.equal(sold.state.wallet,9500);
- const wealthy={...sold.state,wallet:45000};
+ const wealthy={...sold.state,wallet:1_000_000};
  const home=E.run(conf,wealthy,'buy_room',{roomSpawn:{id:'kost_unit',x:12,z:15,placeholder:true}});
  assert.ok(home.ok);assert.equal(home.state.homeAccess,true);
  assert.equal(E.run(conf,home.state,'buy_room').ok,false);
  const spawn=E.run(conf,home.state,'respawn',{roll:0});
  assert.ok(spawn.ok);assert.equal(spawn.state.spawn,'home');assert.equal(spawn.state.spawnPosition.id,'kost_unit');
  const bath=E.run(conf,spawn.state,'home_shower');
- assert.ok(bath.ok);assert.equal(bath.state.wallet,15000);assert.equal(bath.state.hygiene,100);
+ assert.ok(bath.ok);assert.equal(bath.state.wallet,300000);assert.equal(bath.state.hygiene,100);
  const wc=E.run(conf,bath.state,'home_toilet');assert.ok(wc.ok);assert.equal(wc.state.bladder,0);
 });
 test('Fishing chances and buyer rules are executable, inventory proof prevents double-sale',()=>{
@@ -119,7 +119,7 @@ test('Kost provides item storage; hobo cannot use it and room inventory survives
  const cfg=c(),initial=fresh();
  const loot=E.run(cfg,initial,'scavenge');assert.ok(loot.ok);
  const id=loot.state.inventory[0];assert.equal(E.run(cfg,loot.state,'store_home',{itemId:id}).ok,false);
- const owned=E.run(cfg,{...loot.state,wallet:50000},'buy_room',{roomSpawn:{id:'kost',x:2,z:3}});
+ const owned=E.run(cfg,{...loot.state,wallet:1_000_000},'buy_room',{roomSpawn:{id:'kost',x:2,z:3}});
  assert.ok(owned.ok);
  const stored=E.run(cfg,owned.state,'store_home',{itemId:id});
  assert.ok(stored.ok);assert.equal(stored.state.homeStorage.length,1);assert.equal(stored.state.inventory.length,0);
@@ -127,7 +127,7 @@ test('Kost provides item storage; hobo cannot use it and room inventory survives
  assert.ok(taken.ok);assert.equal(taken.state.inventory[0],id);
 });
 test('Fruit can be eaten, goes bad in the bag, can be refrigerated with electric tokens',()=>{
- const cfg=c(),s={...fresh(),wallet:90000};
+ const cfg=c(),s={...fresh(),wallet:3_000_000};
  const picked=E.run(cfg,s,'catch_fruit');
  assert.ok(picked.ok);const id=picked.state.inventory[0];
  const edible=E.run(cfg,picked.state,'eat_item',{itemId:id});assert.ok(edible.ok);

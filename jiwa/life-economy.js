@@ -21,10 +21,10 @@ const FISH=[
  {id:'mujair',label:'Ikan Mujair',weight:8,spoilMinutes:180,buyers:{siomay_batagor:1400,pasar_ikan:2000}}
 ];
 const FURNITURE=[
- {id:'bed',label:'Kasur',price:6000},
- {id:'chair',label:'Kursi',price:1500},
- {id:'stove',label:'Kompor',price:4500},
- {id:'wardrobe',label:'Lemari',price:3500}
+ {id:'bed',label:'Kasur',price:1500000},
+ {id:'chair',label:'Kursi',price:350000},
+ {id:'stove',label:'Kompor',price:850000},
+ {id:'wardrobe',label:'Lemari',price:1000000}
 ];
 const JOBS=[
  {id:'manusia_silver',label:'Manusia Silver',wage:1600,energyCost:12,hygieneCost:8,minutes:25,exp:7,minHygiene:0},
@@ -35,8 +35,9 @@ const JOBS=[
 function defaults(){return {
  version:1,identity:{religion:'islam',zodiac:'capricorn'},
  gates:{friendsV2:false,socialV2:false,satanicEvilRouteV2:false},
- settings:{bagSlots:8,homeStorageSlots:24,fishEnergy:8,fishMinutes:12,coffeePrice:2000,roomPrice:30000,
- fridgePrice:8000,tokenPrice:1000,tokenUnits:5,fridgeCoolingMultiplier:2,
+ settings:{bagSlots:8,homeStorageSlots:24,fishEnergy:8,fishMinutes:12,
+ coffeePrice:5000,teaPrice:3000,streetFoodPrice:2500,wartegMealPrice:12000,
+ roomPrice:700000,fridgePrice:2000000,tokenPrice:20000,tokenUnits:5,fridgeCoolingMultiplier:2,
  faintRestMinutes:30,arrestMoralThreshold:15,
  publicShowerFee:500,publicShowerRecovery:35,homeShowerRecovery:70,
  publicToiletPenalty:5,hoboSleepRecovery:30,homeSleepRecovery:65,
@@ -47,9 +48,11 @@ function defaults(){return {
 };}
 function normalize(raw){
  const base=defaults(),source=raw&&typeof raw==='object'?raw:{},s=source.settings||{};
+ const PRICE_KEYS={coffeePrice:1,teaPrice:1,streetFoodPrice:1,wartegMealPrice:1,roomPrice:1,fridgePrice:1,tokenPrice:1,publicShowerFee:1};
  for(const key of Object.keys(base.settings)){
    if(key==='bagSlots'||key==='homeStorageSlots')continue;
-   base.settings[key]=number(s[key],key==='arrestMoralThreshold'?0:1,100000,base.settings[key]);
+   const cap=PRICE_KEYS[key]?1e9:100000;
+   base.settings[key]=number(s[key],key==='arrestMoralThreshold'?0:1,cap,base.settings[key]);
  }
  base.settings.arrestMoralThreshold=number(s.arrestMoralThreshold,0,50,15);
  const identity=source.identity||{};
@@ -100,7 +103,10 @@ function normalize(raw){
 function stateFrom(existing,config){
  const s=copy(existing||{}),c=normalize(config);
  s.inventory=Array.isArray(s.inventory)?s.inventory:[];
- s.transactions=Array.isArray(s.transactions)?s.transactions.slice(-40).filter(t=>t&&Number.isFinite(Number(t.delta))):[];
+ s.transactions=Array.isArray(s.transactions)?s.transactions.slice(-40).filter(t=>t&&Number.isFinite(Number(t.delta))).map(t=>{
+  const day=Number.isFinite(Number(t.day))?Math.max(1,Math.floor(Number(t.day))):Math.floor(Math.max(0,Number(t.minute)||0)/1440)+1;
+  return t.day===day?t:Object.assign({},t,{day});
+ }):[];
  s.homeStorage=Array.isArray(s.homeStorage)?s.homeStorage:[];
  s.itemMeta=s.itemMeta&&typeof s.itemMeta==='object'?s.itemMeta:{};
  s.fridge=Array.isArray(s.fridge)?s.fridge:[];
@@ -122,6 +128,11 @@ function stateFrom(existing,config){
  for(const [k,def] of Object.entries({wallet:6000,energy:80,hygiene:75,bladder:20,fullness:70,moral:50,experience:0})){
   s[k]=number(s[k],0,k==='wallet'?1e9:100,def);
  }
+ s.actionCounts=s.actionCounts&&typeof s.actionCounts==='object'?s.actionCounts:{};
+ s.quests=s.quests&&typeof s.quests==='object'?s.quests:{};
+ s.messages=Array.isArray(s.messages)?s.messages.slice(0,40):[];
+ s.dayReports=s.dayReports&&typeof s.dayReports==='object'?s.dayReports:{};
+ s.lastFartAt=Number.isFinite(Number(s.lastFartAt))?Number(s.lastFartAt):-999;
  s.identity=s.identityChosen===true?{...c.identity,...(s.identity&&typeof s.identity==='object'?s.identity:{})}:copy(c.identity);
  if(!RELIGIONS.includes(s.identity.religion)||s.identity.religion==='satanis')s.identity.religion=c.identity.religion;
  if(!ZODIACS.includes(s.identity.zodiac))s.identity.zodiac=c.identity.zodiac;
@@ -459,12 +470,19 @@ function doAction(config,previous,action,args={}){
   clock(12);stat('energy',setting.seatRestEnergy);break;
  }
  case 'eat': {
-  if(!spend(2500))return reject('Uang tidak cukup.');
+  const warteg=args.place==='warteg'||args.buyerId==='warteg'||args.warteg===true;
+  const fallback=warteg?setting.wartegMealPrice:setting.streetFoodPrice;
+  const mealPrice=Number.isFinite(Number(args.price))?Math.max(0,Math.round(Number(args.price))):fallback;
+  if(!spend(mealPrice))return reject('Uang tidak cukup.');
   clock(10);stat('energy',12);stat('fullness',30);stat('bladder',12);break;
  }
  case 'coffee': {
   if(!spend(setting.coffeePrice))return reject('Uang tidak cukup.');
   clock(5);stat('energy',20);stat('bladder',25);break;
+ }
+ case 'tea': {
+  if(!spend(setting.teaPrice))return reject('Uang tidak cukup.');
+  clock(5);stat('energy',8);stat('fullness',8);stat('bladder',18);break;
  }
  case 'sleep':{
   if(s.restMinutes>0)return reject('Sedang bed rest akibat pingsan. Lanjutkan waktu istirahat.');
@@ -490,7 +508,25 @@ function doAction(config,previous,action,args={}){
    if(!home)stat('hygiene',-setting.publicToiletPenalty);
    changes.push(home?'WC kost pribadi':'WC umum');break;
  }
- case 'pee_outside':clock(3);stat('bladder',-100);stat('hygiene',-20);stat('moral',-10);changes.push('pipis sembarangan berisiko ketahuan');break;
+ case 'wall_pee':{
+  // Aligned to jiwa/interaction-rules.js wall_pee: moral -5, bladder -70, hygiene -5, 3 menit.
+  clock(3);stat('bladder',-70);stat('hygiene',-5);stat('moral',-5);
+  changes.push('pipis di tembok (moral -5)');break;
+ }
+ case 'pee_outside':
+  return reject('Pipis sembarangan dihapus. Dekati tembok untuk pipis (wall_pee).');
+ case 'fart':{
+  const wait=1; // 1 menit game (~60 detik waktu game)
+  if(s.elapsedMinutes-s.lastFartAt<wait)return reject('Tunggu sebentar sebelum kentut lagi.');
+  const witnessed=args.witnessed===true||args.nearNpc===true||Number(args.nearby)>0;
+  s.lastFartAt=s.elapsedMinutes;
+  if(witnessed){stat('moral',-3);changes.push('kentut di dekat orang (moral -3)');}
+  else changes.push('kentut (tidak ada yang dengar)');
+  break;
+ }
+ case 'talk':{
+  clock(2);changes.push('ngobrol');break;
+ }
  case 'work': {
   const jobId=String(args.jobId||'');
   const job=jobId?c.jobs.find(j=>j.id===jobId):null;
@@ -565,6 +601,10 @@ function doAction(config,previous,action,args={}){
   if(!s.detained)return reject('Belum ditahan hansip.');
   clock(45);s.detained=false;s.arrestGraceMinutes=60;stat('energy',-15);stat('moral',10);changes.push('kerja sosial membersihkan gorong-gorong; bebas');break;
  }
+ case 'quest_reward': {
+  const amount=Math.max(0,Math.round(Number(args.amount||args.reward||0)));
+  s.wallet+=amount;changes.push('hadiah quest +Rp'+amount);break;
+ }
  default:return reject('Aksi belum didukung: '+String(action));
  }
  if(s.bladder>=100&&action!=='toilet'&&action!=='public_toilet'&&action!=='home_toilet'){
@@ -576,18 +616,23 @@ function doAction(config,previous,action,args={}){
   changes.push('PINGSAN · bed rest '+s.restMinutes+'m');
  }
  const delta=s.wallet-beforeWallet;
+ s.actionCounts=s.actionCounts&&typeof s.actionCounts==='object'?s.actionCounts:{};
+ s.actionCounts[action]=(s.actionCounts[action]||0)+1;
+ if(action==='work'&&delta>0)s.actionCounts.workEarn=(s.actionCounts.workEarn||0)+delta;
  if(delta!==0){
   const names={world_interaction:(c.worldEntities.find(v=>v.id===args.ruleId)?.label||'Interaksi Objek'),configured_activity:(c.activities.find(a=>a.id===args.activityId)?.label||'Aktivitas Jiwa'),sell_fish:'Jual ikan',sell_loak:'Jual barang bekas',buy_room:'Akses kost',
    buy_furniture:'Beli furnitur',buy_fridge:'Beli kulkas',buy_token:'Token listrik',
    work:'Upah kerja',public_shower:'Mandi umum',shower:'Mandi',eat:'Makan warung',
-   coffee:'Beli kopi',charity:'Sedekah',fine:'Denda hansip',luck_find:'Rezeki / nasib'};
+   coffee:'Beli kopi',tea:'Beli es teh',wall_pee:'Pipis di tembok',fart:'Kentut',talk:'Ngobrol',charity:'Sedekah',fine:'Denda hansip',luck_find:'Rezeki / nasib',
+   quest_reward:'Hadiah quest'};
   const label=action==='work'&&args.jobId?
    (c.jobs.find(j=>j.id===args.jobId)?.label||'Upah kerja'):
    action==='buy_furniture'?
    (FURNITURE.find(x=>x.id===String(args.itemId))?.label||'Furnitur'):
    names[action]||action.replace(/_/g,' ');
+  const day=Number.isFinite(Number(args.day))?Math.max(1,Math.floor(Number(args.day))):Math.floor(Math.max(0,s.elapsedMinutes)/1440)+1;
   s.transactions.push({id:'txn:'+s.elapsedMinutes+':'+(s.transactions.length+1),
-   action,label,delta,balance:s.wallet,minute:s.elapsedMinutes});
+   action,label,delta,balance:s.wallet,minute:s.elapsedMinutes,day});
   s.transactions=s.transactions.slice(-40);
  }
  return {ok:true,state:s,changes,action};

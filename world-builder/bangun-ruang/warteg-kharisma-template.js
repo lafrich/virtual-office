@@ -206,10 +206,10 @@ const placements=[
  ['kitchen_sink',7,2,'Bak Cuci','wash'],
  ['table',1,3,'Meja Makan','browse'],
  ['table',4,3,'Meja Tambahan','browse'],
- ['chair',1,4,'Kursi Makan','sit'],
- ['chair',2,4,'Kursi Makan','sit'],
- ['chair',5,4,'Bangku Warteg','sit'],
- ['chair',7,4,'Bangku Samping','sit']
+ ['chair',1,4,'Kursi Makan','sit',180],
+ ['chair',2,4,'Kursi Makan','sit',270],
+ ['chair',5,4,'Bangku Warteg','sit',270],
+ ['chair',4,4,'Bangku Samping','sit',180]
 ];
 function create(model){
  if(!model?.create||!model?.add)throw Error('Interior model not ready');
@@ -223,11 +223,11 @@ function create(model){
  const scene=model.create(config,'warung');scene.theme='warteg';
  scene.notes='Warteg Bahari · modular layout · detailed warteg visual preset from Virtual Life Asset Pipeline v2';
  scene.entrance={c:3,r:5};
- for(const [assetId,c,r,name,actionId] of placements){
+ for(const [assetId,c,r,name,actionId,rotation] of placements){
   const item=model.add(scene,assetId,c,r);
   if(!item)throw Error('Warteg furniture overlap: '+name+' at '+c+','+r);
   item.id='warteg-'+assetId+'-'+scene.items.length;
-  item.name=name;model.action(scene,item.id,actionId);
+  item.name=name;item.rotation=rotation||0;model.action(scene,item.id,actionId);
  }
  const views={};for(const dir of DIRS)views[dir]=sprite(dir);
  const id='br-warteg-kharisma-'+Date.now().toString(36);
