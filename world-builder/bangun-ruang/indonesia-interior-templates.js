@@ -22,6 +22,7 @@ function prop(label,category,glyph,w,d,actions,visualAs='',material=''){
 const types={
  floor_mattress:prop('Kasur Lantai','Rumah','🛏',2,2,'sleep,rest','floor_mattress'),
  dining_table:prop('Meja Makan','Rumah','▤',2,1,'eat,browse','table'),
+ chair:prop('Kursi Makan','Rumah','▦',1,1,'sit','chair'),
  wooden_bench:prop('Bangku Panjang','Rumah','▭',2,1,'sit','wooden_bench'),
  tv:prop('TV Tabung / Layar','Rumah','▣',2,1,'watch,switch_on','tv'),
  fan:prop('Kipas Angin','Rumah','✳',1,1,'switch_on','fan'),
@@ -130,7 +131,7 @@ const rows=[
  ['Jasa','Rental Arcade','blue','arcade,arcade,arcade,checkout,waiting_bench'],
  ['Jasa','Gym Kecil','blue','treadmill,treadmill,gym_mat,gym_mat,locker,water_dispenser'],
  ['Jasa','Gudang Paket Online','cream','aisle_rack,aisle_rack,locker,workbench,checkout,trash_bin'],
- ['Jasa','Kamar Hotel Melati','warm','bed,wardrobe,tv,chair,shower,wc'],
+ ['Jasa','Kamar Hotel Melati','warm','bed,wardrobe,tv,study_desk,chair,shower,wc'],
  ['Jasa','Studio Desain Freelance','blue','desk,computer,office_chair,bookshelf,sofa,coffee_machine']
 ];
 const anchors=[
@@ -143,5 +144,77 @@ for(const [category,label,theme,recipe] of rows){
  const items=assets.map((assetId,i)=>[assetId,...anchors[i%anchors.length]]);
  templates[key]={label:category+' · '+label,category,theme,min:category==='Rumah'?[5,4]:[8,6],items,source:'indonesia-interior-pack-v1'};
 }
+function pairTemplateChairs(){
+ const CHAIR=new Set(['chair']);
+ const TABLE=new Set(['table','dining_table','counter','food_vitrine','cashier','desk','study_desk','workbench','registration_desk','checkout','laundry_counter']);
+ const VECS=[{id:'sw',dc:-1,dr:1,rot:0},{id:'se',dc:1,dr:1,rot:90},{id:'ne',dc:1,dr:-1,rot:180},{id:'nw',dc:-1,dr:-1,rot:270}];
+ const tiles=(c,r,fw,fd)=>{const out=[];for(let cc=Math.floor(c);cc<Math.ceil(c+fw-1e-9);cc++)for(let rr=Math.floor(r);rr<Math.ceil(r+fd-1e-9);rr++)out.push(cc+','+rr);return out;};
+ for(const t of Object.values(templates)){
+  const W=(t.min&&t.min[0])||8,D=(t.min&&t.min[1])||6;
+  const entC=Math.floor(W/2),entR=D-1,reserved=new Set([entC+','+entR,entC+','+Math.max(0,entR-1)]);
+  const items=t.items.map((row,i)=>{
+   const typ=types[row[0]]||{};
+   let fw=typ.w||1,fd=typ.d||1;
+   let c=Math.round((Number(row[1])||0)*W),r=Math.round((Number(row[2])||0)*D);
+   if(c<0)c=0;if(r<0)r=0;if(c+fw>W)c=Math.max(0,W-fw);if(r+fd>D)r=Math.max(0,D-fd);
+   return {assetId:row[0],c,r,fw,fd,rot:Number(row[3])||0,i};
+  });
+  const occupied=new Set();
+  for(const it of items){if(CHAIR.has(it.assetId))continue;for(const k of tiles(it.c,it.r,it.fw,it.fd))occupied.add(k);}
+  const tableTiles=[];
+  for(const it of items){
+   if(!TABLE.has(it.assetId))continue;
+   const ts=tiles(it.c,it.r,it.fw,it.fd);
+   const cx=it.c+it.fw/2,cz=it.r+it.fd/2;
+   for(const k of ts)tableTiles.push({k,it,cx,cz,c:+k.split(',')[0],r:+k.split(',')[1]});
+  }
+  const seats=[];
+  const seenSeat=new Set();
+  for(const tt of tableTiles){
+   for(const [dc,dr] of [[0,1],[0,-1],[1,0],[-1,0]]){
+    const c=tt.c+dc,r=tt.r+dr,k=c+','+r;
+    if(c<0||r<0||c>=W||r>=D||occupied.has(k)||reserved.has(k)||seenSeat.has(k))continue;
+    seenSeat.add(k);
+    seats.push({c,r,cx:c+0.5,cz:r+0.5,table:tt});
+   }
+  }
+  const used=new Set();
+  for(const ch of items.filter(it=>CHAIR.has(it.assetId))){
+   const self=new Set(tiles(ch.c,ch.r,ch.fw,ch.fd));
+   let paired=null;
+   for(const tt of tableTiles){
+    const [cc,rr]=tt.k.split(',').map(Number);
+    for(const k of self){
+     const [c,r]=k.split(',').map(Number);
+     if(Math.abs(c-cc)+Math.abs(r-rr)===1){paired=tt;break;}
+    }
+    if(paired)break;
+   }
+   if(!paired){
+    let best=null,bestD=1e9;
+    for(const s of seats){
+     if(used.has(s.c+','+s.r))continue;
+     const dist=Math.hypot(s.c-ch.c,s.r-ch.r);
+     if(dist<bestD){bestD=dist;best=s;}
+    }
+    if(best){
+     ch.c=best.c;ch.r=best.r;paired=best.table;used.add(best.c+','+best.r);
+    }
+   }else{
+    for(const k of self)used.add(k);
+   }
+   if(!paired)continue;
+   const vx=paired.cx-(ch.c+ch.fw/2),vz=paired.cz-(ch.r+ch.fd/2);
+   let best=VECS[0],dot=-1e9;
+   for(const v of VECS){
+    const d=v.dc*vx+v.dr*vz;
+    if(d>dot){dot=d;best=v;}
+   }
+   ch.rot=best.rot;
+  }
+  t.items=items.map(it=>[it.assetId,it.c/W,it.r/D,it.rot]);
+ }
+}
+pairTemplateChairs();
 g.VLIndonesiaInteriorPack=Object.freeze({version:1,source:'lafrich/virtual-life-asset-pipeline',tilePixels:[64,32],actions:Object.freeze(actions),types:Object.freeze(types),templates:Object.freeze(templates),count:Object.keys(templates).length});
 })(window);

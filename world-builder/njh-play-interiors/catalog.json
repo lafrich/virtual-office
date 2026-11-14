@@ -1258,6 +1258,80 @@
         "batch": "I3",
         "sourceFolder": "out_i3"
       }
+    },
+    "npc_ibu_warteg": {
+      "se": {
+        "file": "npc_ibu_warteg_se.png",
+        "sha256": "016347dca0b8747ab1aee0d8ecf48f6f8edbe0fa2cd22bd5f8c67ff162475b7b",
+        "size": [
+          64,
+          112
+        ],
+        "pivot": [
+          32,
+          102
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "old-asset-v6b",
+        "sourceFolder": "bu_warteg_v6b_sheet"
+      },
+      "sw": {
+        "file": "npc_ibu_warteg_sw.png",
+        "sha256": "c7f8be94ac006bc8662059801df67bc03661dcd2e50b8498b2cc9e9daa2aa852",
+        "size": [
+          64,
+          112
+        ],
+        "pivot": [
+          32,
+          102
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "old-asset-v6b",
+        "sourceFolder": "bu_warteg_v6b_sheet"
+      },
+      "ne": {
+        "file": "npc_ibu_warteg_ne.png",
+        "sha256": "a6122e26b8a2bd09495413b8fd9a5cca70141a4cb90c7a221aa9271dba442c3d",
+        "size": [
+          64,
+          112
+        ],
+        "pivot": [
+          32,
+          102
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "old-asset-v6b",
+        "sourceFolder": "bu_warteg_v6b_sheet"
+      },
+      "nw": {
+        "file": "npc_ibu_warteg_nw.png",
+        "sha256": "08a06a759e1021c9d09c003392620db7e5735a9647ebd5c4ddc93fcb1bbe81ef",
+        "size": [
+          64,
+          112
+        ],
+        "pivot": [
+          32,
+          102
+        ],
+        "footprint": [
+          1,
+          1
+        ],
+        "batch": "old-asset-v6b",
+        "sourceFolder": "bu_warteg_v6b_sheet"
+      }
     }
   }
 }

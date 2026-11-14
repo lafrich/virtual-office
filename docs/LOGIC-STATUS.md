@@ -83,6 +83,7 @@ Preview branch `preview/main-interiors-kost-warteg` only. Not live. Status:
 | `npc_loak` | `loak` | buyer + quest `q_loak` | idle | placeholder | stub / placeholder |
 | `npc_hansip` | `hansip` | hansip | patrol + talk | LGR `hansip` if present, else placeholder | stub / placeholder |
 | `npc_help` | `help` | quest `q_warga` | idle + give quest | placeholder | stub / placeholder |
+| `npc_ibu_warteg` | `warung` / inside warteg | penjual, offers `eat` (Makan Warteg) | idle, stands behind etalase/cashier facing customers | old Virtual Life v6b `bu_warteg` sheet (placeholder art) | old-asset placeholder |
 
 Behaviours are placeholder: idle, a short patrol loop, talk, give quest, stand-at-work. They use official LGR characters when the vault has them; otherwise a colored capsule + label.
 

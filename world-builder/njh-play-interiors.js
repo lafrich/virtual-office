@@ -375,10 +375,13 @@ function create(opts){
   if(Math.hypot(p.x-session.door.x,p.z-session.door.z)<=1.4)
    push('exit_interior','Keluar',0,{},undefined,'Pintu');
   if(session.kind==='warteg'){
+   const ibu=session.furniture.find(f=>f.assetId==='npc_ibu_warteg'||f.id==='npc_ibu_warteg');
+   const through=ibu&&Math.hypot(p.x-ibu.x,p.z-ibu.z)<=2.8?ibu:null;
    const eatSpots=session.furniture.filter(f=>(View?.eatSpot?.(f.assetId)||['dining_table','food_vitrine','cashier','table','counter'].includes(f.assetId))
     &&Math.hypot(p.x-f.x,p.z-f.z)<=2.2);
-   if(eatSpots.length)
-    push('eat','Makan Warteg',MEAL_PRICE,{price:MEAL_PRICE,buyerId:'warteg'},eatSpots[0].furnitureId,eatSpots[0].label);
+   const spot=through||eatSpots[0];
+   if(spot)
+    push('eat','Makan Warteg',MEAL_PRICE,{price:MEAL_PRICE,buyerId:'warteg',place:'warteg'},spot.furnitureId||spot.assetId,spot.label||'Ibu Warteg');
   }
   if(session.kind==='kost'){
    const toilet=session.furniture.find(f=>f.assetId==='squat_toilet'&&Math.hypot(p.x-f.x,p.z-f.z)<=2.2);

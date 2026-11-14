@@ -292,6 +292,12 @@ function buildSites(){
  }
  rebuildNokiaMapOverview();
  placeLifeNpcs();
+ const warung=sites.find(n=>n.id==='warung');
+ if(!sites.some(n=>n.id==='npc_ibu_warteg')){
+  sites.push({id:'npc_ibu_warteg',label:'Ibu Warteg',icon:'👩‍🍳',action:'eat',
+   x:warung?warung.x:0,z:warung?warung.z:0,sourceId:warung?warung.sourceId:'',
+   placeholder:true,npc:true,oldAsset:true,interior:'warteg',behavior:'idle'});
+ }
 }
 function rebuildNokiaMapOverview(){
  const doc=getWorld(),cells=doc.map?.terrain?.cells||[];

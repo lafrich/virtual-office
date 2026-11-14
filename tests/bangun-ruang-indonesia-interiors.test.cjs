@@ -21,9 +21,9 @@ const canvas=()=>({
   set:(target,key,value)=>{target[key]=value;return true;}
  })
 });
-test('66 context-specific Indonesian rooms and 43 additional reusable furniture definitions',()=>{
+test('66 context-specific Indonesian rooms and 44 additional reusable furniture definitions',()=>{
  assert.equal(pack.count,66);
- assert.equal(Object.keys(pack.types).length,43);
+ assert.equal(Object.keys(pack.types).length,44);
  assert.equal(Object.keys(model.types).length,61);
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('minimarket')));
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('mushola')));
@@ -51,7 +51,7 @@ test('all prescribed placements fit 8x6, are reachable, have action metadata, an
   }
   assert.ok(!occupied.has(scene.entrance.c+','+scene.entrance.r),key+' door');
  }
- assert.equal(props,383);
+ assert.equal(props,384);
 });
 test('smaller footprint gracefully omits furniture without corrupting existing locations',()=>{
  for(const key of Object.keys(pack.templates)){

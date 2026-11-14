@@ -183,7 +183,7 @@
       "id": "njh-kos-chair-1",
       "assetId": "chair",
       "name": "Kursi Makan",
-      "c": 0,
+      "c": 1,
       "r": 3,
       "rotation": 90,
       "flipX": false,

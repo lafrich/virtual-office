@@ -39,13 +39,15 @@ test('life sites() shape and NPC defs cover every requested placeholder site',()
  for(const id of need)assert.match(play,new RegExp("id:'"+id+"'"));
  const real=['loak','scavenge','tree','warung','bench'];
  for(const id of real)assert.match(play,new RegExp("id:'"+id+"'"));
- const npcIds=['npc_silver','npc_ogah','npc_parkir','npc_premium','npc_siomay','npc_pasar','npc_loak','npc_hansip','npc_help'];
+ const npcIds=['npc_silver','npc_ogah','npc_parkir','npc_premium','npc_siomay','npc_pasar','npc_loak','npc_hansip','npc_help','npc_ibu_warteg'];
  for(const id of npcIds)assert.match(play,new RegExp("id:'"+id+"'"));
  assert.match(play,/behavior:'patrol'/);
  assert.match(play,/behavior:'work'/);
  assert.match(play,/behavior:'idle'/);
  assert.match(play,/function publicSites\(\)/);
  assert.match(docs,/placeholder-position/);
+ assert.match(docs,/npc_ibu_warteg/);
+ assert.match(docs,/old-asset placeholder/);
 });
 
 test('authoritative prices and wall_pee/fart economy deltas',()=>{

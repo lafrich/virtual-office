@@ -362,6 +362,222 @@ function inspectPropClips(opts){
  return out;
 }
 
+
+const CHAIR_IDS=new Set(['chair']);
+const TABLE_IDS=new Set(['table','dining_table','counter','food_vitrine','cashier','desk','study_desk','workbench','registration_desk','checkout','laundry_counter']);
+const FACE_VECS=[
+ {dir:'sw',dc:-1,dr:1,rotation:0},
+ {dir:'se',dc:1,dr:1,rotation:90},
+ {dir:'ne',dc:1,dr:-1,rotation:180},
+ {dir:'nw',dc:-1,dr:-1,rotation:270}
+];
+const DEFAULT_FOOT={
+ chair:[1,1],table:[2,1],dining_table:[2,1],counter:[2,1],food_vitrine:[2,1],
+ cashier:[2,1],desk:[2,1],study_desk:[2,1],workbench:[2,1],registration_desk:[2,1],
+ checkout:[2,1],laundry_counter:[2,1]
+};
+function isChair(id){return CHAIR_IDS.has(id)||CHAIR_IDS.has(artId(id));}
+function isTable(id){return TABLE_IDS.has(id)||TABLE_IDS.has(artId(id));}
+function itemFootprint(item,catalog,types){
+ const id=item.assetId||item.id||'';
+ const typ=(catalog&&((catalog.items||catalog)[artId(id)]||(catalog.items||catalog)[id]))||(types&&(types[id]||types[artId(id)]))||{};
+ const view=typ.sw||typ.se||typ;
+ let fw=num(item.fw,num(item.w,num((view.footprint||DEFAULT_FOOT[artId(id)]||DEFAULT_FOOT[id]||[1,1])[0],1)));
+ let fd=num(item.fd,num(item.d,num((view.footprint||DEFAULT_FOOT[artId(id)]||DEFAULT_FOOT[id]||[1,1])[1],1)));
+ if((num(item.rotation,0)%180)===90){const t=fw;fw=fd;fd=t;}
+ return [Math.max(.01,fw),Math.max(.01,fd)];
+}
+function coveredTiles(c,r,fw,fd){
+ const out=[];
+ for(let cc=Math.floor(c);cc<Math.ceil(c+fw-1e-9);cc++)
+  for(let rr=Math.floor(r);rr<Math.ceil(r+fd-1e-9);rr++)out.push({c:cc,r:rr,key:cc+','+rr});
+ return out;
+}
+function faceToward(fromC,fromR,toC,toR){
+ const vx=toC-fromC,vz=toR-fromR;
+ let best=FACE_VECS[0],dot=-1e9;
+ for(const v of FACE_VECS){
+  const d=v.dc*vx+v.dr*vz;
+  if(d>dot+1e-9){dot=d;best=v;}
+ }
+ return best;
+}
+function sceneSize(scene){return {width:num(scene.width,num(scene.w,8)),depth:num(scene.depth,num(scene.d,6))};}
+function entranceOf(scene){
+ const {width,depth}=sceneSize(scene);
+ const e=scene.entrance||{};
+ return {c:Math.floor(num(e.c,width/2)),r:Math.floor(num(e.r,depth-1))};
+}
+function reservedPathTiles(scene){
+  const {width,depth}=sceneSize(scene);
+  const e=entranceOf(scene);
+  const set=new Set([e.c+','+e.r]);
+  const inwardR=e.r>=depth/2?e.r-1:e.r+1;
+  if(inwardR>=0&&inwardR<depth)set.add(e.c+','+inwardR);
+  return set;
+}
+function inspectChairTables(scene,opts){
+ opts=opts||{};
+ const catalog=opts.catalog||null,types=opts.types||null;
+ const {width,depth}=sceneSize(scene);
+ const items=scene.items||[];
+ const issues=[];
+ const tables=[];
+ for(const it of items){
+  if(!isTable(it.assetId))continue;
+  const [fw,fd]=itemFootprint(it,catalog,types);
+  const tiles=coveredTiles(num(it.c,0),num(it.r,0),fw,fd);
+  tables.push({item:it,fw,fd,tiles,cx:num(it.c,0)+fw/2,cz:num(it.r,0)+fd/2});
+ }
+ const reserved=reservedPathTiles(scene);
+ const occupied=new Set();
+ for(const it of items){
+  if(it.blocking===false||it.kind==='npc'||isChair(it.assetId))continue;
+  const [fw,fd]=itemFootprint(it,catalog,types);
+  for(const t of coveredTiles(num(it.c,0),num(it.r,0),fw,fd))occupied.add(t.key);
+ }
+ for(const it of items){
+  if(!isChair(it.assetId))continue;
+  const [fw,fd]=itemFootprint(it,catalog,types);
+  const tiles=coveredTiles(num(it.c,0),num(it.r,0),fw,fd);
+  const cx=num(it.c,0)+fw/2,cz=num(it.r,0)+fd/2;
+  const id=it.id||(it.assetId+'@'+it.c+','+it.r);
+  let paired=null,minEdge=1e9;
+  for(const tb of tables){
+   for(const a of tiles)for(const b of tb.tiles){
+    const edge=Math.abs(a.c-b.c)+Math.abs(a.r-b.r);
+    if(edge===1&&edge<minEdge){minEdge=edge;paired=tb;}
+   }
+  }
+  if(!paired){
+   issues.push({id,reason:'orphan',c:it.c,r:it.r,rotation:it.rotation,assetId:it.assetId});
+   continue;
+  }
+  const face=faceToward(cx,cz,paired.cx,paired.cz);
+  const rot=((num(it.rotation,0)%360)+360)%360;
+  const matches=FACE_VECS.filter(v=>{
+   const vx=paired.cx-cx,vz=paired.cz-cz;
+   return Math.abs((v.dc*vx+v.dr*vz)-(face.dc*(paired.cx-cx)+face.dr*(paired.cz-cz)))<1e-9;
+  }).map(v=>((v.rotation%360)+360)%360);
+  if(!matches.includes(rot)&&rot!==face.rotation){
+   issues.push({id,reason:'wrong-facing',c:it.c,r:it.r,rotation:it.rotation,expected:face.rotation,assetId:it.assetId,dir:face.dir});
+  }
+  for(const t of tiles){
+   if(reserved.has(t.key))
+    issues.push({id,reason:'blocked-path',c:it.c,r:it.r,rotation:it.rotation,assetId:it.assetId,tile:t.key});
+  }
+ }
+ // Path: chairs must not sit on the door aisle, and must not cut off every
+ // approach to a table. Other furniture already on a guessed entrance is not
+ // a chair-layout failure. Standing next to a seated chair counts as reaching
+ // that table.
+ const chairs=items.filter(it=>isChair(it.assetId));
+ if(tables.length&&chairs.length){
+  const chairTiles=new Set();
+  for(const it of chairs){
+   const [fw,fd]=itemFootprint(it,catalog,types);
+   for(const t of coveredTiles(num(it.c,0),num(it.r,0),fw,fd))chairTiles.add(t.key);
+  }
+  const blocked=new Set([...occupied,...chairTiles]);
+  const e=entranceOf(scene);
+  const inBounds=(c,r)=>c>=0&&r>=0&&c<width&&r<depth;
+  const walkable=(c,r)=>inBounds(c,r)&&!blocked.has(c+','+r);
+  // Only flag the door tile when a chair is what occupies it.
+  if(chairTiles.has(e.c+','+e.r))
+   issues.push({id:'entrance',reason:'blocked-path',c:e.c,r:e.r});
+  else if(walkable(e.c,e.r)){
+   const q=[e.c+','+e.r],seen=new Set([e.c+','+e.r]);
+   while(q.length){
+    const [c,r]=q.shift().split(',').map(Number);
+    for(const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1]]){
+     const nc=c+dc,nr=r+dr,k=nc+','+nr;
+     if(!walkable(nc,nr)||seen.has(k))continue;
+     seen.add(k);q.push(k);
+    }
+   }
+   const approach=new Set();
+   for(const tb of tables){
+    for(const t of tb.tiles){
+     for(const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const k=(t.c+dc)+','+(t.r+dr);
+      if(inBounds(t.c+dc,t.r+dr))approach.add(k);
+     }
+    }
+   }
+   for(const key of chairTiles){
+    const [c,r]=key.split(',').map(Number);
+    for(const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1]]){
+     const k=(c+dc)+','+(r+dr);
+     if(inBounds(c+dc,r+dr))approach.add(k);
+    }
+   }
+   const reachable=[...approach].some(k=>seen.has(k));
+   if(!reachable)issues.push({id:'path',reason:'blocked-path',c:e.c,r:e.r,detail:'no walkable path from entrance to a table'});
+  }
+ }
+ return {ok:issues.length===0,issues};
+}
+function pairChairs(scene,opts){
+ opts=opts||{};
+ const catalog=opts.catalog||null,types=opts.types||null;
+ const {width,depth}=sceneSize(scene);
+ const next={...scene,items:(scene.items||[]).map(it=>({...it}))};
+ const items=next.items;
+ const reserved=reservedPathTiles(next);
+ const occupied=new Set();
+ const tables=[];
+ for(const it of items){
+  const [fw,fd]=itemFootprint(it,catalog,types);
+  if(isTable(it.assetId)){
+   const tiles=coveredTiles(num(it.c,0),num(it.r,0),fw,fd);
+   tables.push({item:it,fw,fd,tiles,cx:num(it.c,0)+fw/2,cz:num(it.r,0)+fd/2});
+  }
+  if(isChair(it.assetId)||it.kind==='npc'||it.blocking===false)continue;
+  for(const t of coveredTiles(num(it.c,0),num(it.r,0),fw,fd))occupied.add(t.key);
+ }
+ const seats=[];
+ const seenSeat=new Set();
+ for(const tb of tables){
+  for(const t of tb.tiles){
+   for(const [dc,dr] of [[0,1],[0,-1],[1,0],[-1,0]]){
+    const c=t.c+dc,r=t.r+dr,k=c+','+r;
+    if(c<0||r<0||c>=width||r>=depth||occupied.has(k)||reserved.has(k)||seenSeat.has(k))continue;
+    seenSeat.add(k);
+    seats.push({c,r,cx:c+0.5,cz:r+0.5,table:tb});
+   }
+  }
+ }
+ const used=new Set();
+ for(const ch of items.filter(it=>isChair(it.assetId))){
+  const [fw,fd]=itemFootprint(ch,catalog,types);
+  const tiles=coveredTiles(num(ch.c,0),num(ch.r,0),fw,fd);
+  let paired=null;
+  for(const tb of tables){
+   for(const a of tiles)for(const b of tb.tiles){
+    if(Math.abs(a.c-b.c)+Math.abs(a.r-b.r)===1){paired=tb;break;}
+   }
+   if(paired)break;
+  }
+  if(!paired){
+   let best=null,bestD=1e9;
+   for(const s of seats){
+    if(used.has(s.c+','+s.r))continue;
+    const dist=Math.hypot(s.c-num(ch.c,0),s.r-num(ch.r,0));
+    if(dist<bestD){bestD=dist;best=s;}
+   }
+   if(best){
+    ch.c=best.c;ch.r=best.r;paired=best.table;used.add(best.c+','+best.r);
+   }
+  }else{
+   for(const t of tiles)used.add(t.key);
+  }
+  if(!paired)continue;
+  const face=faceToward(num(ch.c,0)+fw/2,num(ch.r,0)+fd/2,paired.cx,paired.cz);
+  ch.rotation=face.rotation;
+ }
+ return next;
+}
+
 return Object.freeze({
  PIXEL_WORLD,VERTICAL_COMP,WALL_PX,WALL_HEIGHT,TILE_PX,ISO_DIRECTION,MIN_VIEW,ART_ALIAS,EAT_SPOTS,
  FLOOR_Y,GROUND_Y,SPRITE_LIFT,DRAW_POLICY,
@@ -369,6 +585,7 @@ return Object.freeze({
  clippedProps,fitInteriorCamera,playInset,isoBillboardYaw,artId,eatSpot,
  bakeWallTexture,warnIfClipped,
  snapFootprint,footprintInside,rotY,catalogView,spriteQuad,occludersFromPolicy,
- sampleQuad,inspectPropClips,pointHiddenBy
+ sampleQuad,inspectPropClips,pointHiddenBy,
+ CHAIR_IDS,TABLE_IDS,itemFootprint,coveredTiles,faceToward,inspectChairTables,pairChairs
 });
 });

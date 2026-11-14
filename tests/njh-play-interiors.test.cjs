@@ -42,7 +42,7 @@ function kit(opts={}){
  let pos=opts.pos||{x:31.8,y:0,z:27.4};
  const persisted=[];
  const api=Interiors.create({
-  THREE:T,scene,catalog,scenes:{njh_kos:kos,njh_warung_makan:warteg},
+  THREE:T,scene,catalog,scenes:opts.scenes||{njh_kos:kos,njh_warung_makan:warteg},
   getWorld:()=>world,getState:()=>state,persist:()=>persisted.push(JSON.parse(JSON.stringify(state.interior||null))),
   getPos:()=>pos,teleport:(x,z)=>{pos={x,y:0,z};return true;},
   message:()=>{},playerObjectId:()=>'player',
@@ -75,10 +75,13 @@ test('preview wires Ellen kost and Kharisma warteg; Ellen warung remains fallbac
  assert.equal(kharisma.name,'Warteg Kharisma Bahari');
  assert.equal(kharisma.width,8);assert.equal(kharisma.depth,6);
  assert.equal(kharisma.entrance.c,3);assert.equal(kharisma.entrance.r,5);
- assert.equal(kharisma.items.length,14);
+ assert.equal(kharisma.items.length,15);
+ assert.ok(kharisma.items.some(i=>i.assetId==='npc_ibu_warteg'));
+ assert.ok(Object.keys(catalog.items).includes('npc_ibu_warteg'));
  const artDir=path.join(DIR,'art');
  assert.ok(fs.statSync(artDir).isDirectory());
- assert.ok(fs.readdirSync(artDir).filter(f=>f.endsWith('.png')).length>=17);
+ assert.ok(fs.readdirSync(artDir).filter(f=>f.endsWith('.png')).length>=21);
+ assert.ok(['sw','se','ne','nw'].every(d=>fs.existsSync(path.join(artDir,'npc_ibu_warteg_'+d+'.png'))));
  assert.ok(Object.keys(catalog.items).includes('bed'));
  assert.ok(Object.keys(catalog.items).includes('food_vitrine'));
 });
@@ -274,4 +277,28 @@ test('kharisma is used when present; Ellen layout is the fallback if it is missi
  });
  assert.equal(right,false,'near-side right wall must not be drawn');
  assert.equal(api.cameraLocked(),true);
+});
+
+
+test('Ibu Warteg stands behind the etalase and offers Makan Warteg via nearby/extraActions',()=>{
+ const ibu=kharisma.items.find(i=>i.assetId==='npc_ibu_warteg');
+ assert.ok(ibu);
+ assert.equal(ibu.c,4);assert.equal(ibu.r,0);
+ assert.equal(ibu.rotation,0,'faces customers (sw, toward the door)');
+ const h=kit({room:true,scenes:{njh_kos:kos,njh_warteg_kharisma:kharisma,njh_warung_makan:warteg}});
+ const wartegB=h.api.findBuilding('warteg',h.world);
+ assert.ok(wartegB);
+ h.pos={x:wartegB.njhUsePoint.x,z:wartegB.njhUsePoint.z};
+ const inn=h.api.enterNearby();
+ assert.equal(inn.ok,true,inn.reason||'enter warteg');
+ const furn=h.api.active().furniture;
+ const placed=furn.find(f=>f.assetId==='npc_ibu_warteg');
+ assert.ok(placed,'ibu must be in the built room');
+ h.pos={x:placed.x,z:placed.z};
+ const acts=h.api.extraActions();
+ const eat=acts.find(a=>a.id==='eat');
+ assert.ok(eat,'Makan Warteg must be offered next to Ibu Warteg, got '+JSON.stringify(acts));
+ assert.match(eat.label,/Makan Warteg/);
+ assert.equal(eat.furnitureId,'npc_ibu_warteg');
+ assert.match(String(eat.spotLabel||''),/Ibu Warteg/i);
 });

@@ -100,10 +100,10 @@ test('Kharisma layout is the play warteg, Ellen warung remains as fallback',()=>
  assert.equal(k.name,'Warteg Kharisma Bahari');
  assert.equal(k.width,8);assert.equal(k.depth,6);
  assert.equal(k.entrance.c,3);assert.equal(k.entrance.r,5);
- assert.equal(k.items.length,14);
+ assert.equal(k.items.length,15);
  assert.deepEqual(k.items.map(i=>i.assetId),[
   'shelf','shelf','fridge','stove','counter','counter','cashier','kitchen_sink',
-  'table','table','chair','chair','chair','chair']);
+  'table','table','chair','chair','chair','chair','npc_ibu_warteg']);
  assert.equal(e.items.length,13,'generic Ellen layout kept on disk as fallback');
  assert.match(html,/semesta-interior-view.js/);
 });
@@ -149,11 +149,11 @@ function indonesiaScenes(){
  return Object.entries(pack.templates).map(([id,t])=>{
   const width=(t.min&&t.min[0])||8,depth=(t.min&&t.min[1])||6;
   const items=(t.items||[]).map((row,i)=>{
-   const assetId=row[0],u=Number(row[1])||0,v=Number(row[2])||0;
+   const assetId=row[0],u=Number(row[1])||0,v=Number(row[2])||0,rot=Number(row[3])||0;
    const typ=pack.types[assetId]||{};
-   return {id:assetId+'-'+i,assetId,c:u*width,r:v*depth,fw:typ.w||1,fd:typ.d||1};
+   return {id:assetId+'-'+i,assetId,c:u*width,r:v*depth,fw:typ.w||1,fd:typ.d||1,rotation:rot};
   });
-  return {file:'indonesia:'+id,source:'indonesia-interior-pack',scene:{id,name:t.label,width,depth,items,theme:t.theme}};
+  return {file:'indonesia:'+id,source:'indonesia-interior-pack',scene:{id,name:t.label,width,depth,items,theme:t.theme,entrance:{c:Math.floor(width/2),r:depth-1}}};
  });
 }
 function kharismaTemplateScene(){
@@ -161,11 +161,11 @@ function kharismaTemplateScene(){
  const m=text.match(/const placements=\[([\s\S]*?)\];/);
  if(!m)return null;
  const items=[];
- const re=/\['([^']+)',\s*(\d+)\s*,\s*(\d+)/g;
+ const re=/\['([^']+)',\s*(\d+)\s*,\s*(\d+)(?:,\s*'[^']*'(?:,\s*'[^']*'(?:,\s*(\d+))?)?)?/g;
  let row;
- while((row=re.exec(m[1])))items.push({id:row[1]+'@'+row[2]+','+row[3],assetId:row[1],c:+row[2],r:+row[3]});
+ while((row=re.exec(m[1])))items.push({id:row[1]+'@'+row[2]+','+row[3],assetId:row[1],c:+row[2],r:+row[3],rotation:+(row[4]||0)});
  return {file:'bangun-ruang:warteg-kharisma-template',source:'warteg-kharisma-template',
-  scene:{id:'warteg-kharisma-template',name:'Warteg Kharisma Bahari',width:8,depth:6,items}};
+  scene:{id:'warteg-kharisma-template',name:'Warteg Kharisma Bahari',width:8,depth:6,entrance:{c:3,r:5},items}};
 }
 function allRepoInteriorScenes(){
  const list=scenes(); // play interiors JSON
@@ -222,4 +222,56 @@ test('MUST: official policy leaves every repo interior scene with zero clipped p
   if(clips.length)failures.push(file+': '+clips.map(c=>c.id+' ['+c.reason+']').join('; '));
  }
  assert.equal(failures.length,0,failures.join('\n'));
+});
+
+
+test('MUST: official inspectChairTables flags the old warteg orphan and door-facing chairs',()=>{
+ const broken={width:8,depth:6,entrance:{c:3,r:5},items:[
+  {id:'t1',assetId:'table',c:1,r:3,rotation:0},
+  {id:'t2',assetId:'table',c:4,r:3,rotation:0},
+  {id:'c1',assetId:'chair',c:1,r:4,rotation:0},
+  {id:'c2',assetId:'chair',c:2,r:4,rotation:0},
+  {id:'c3',assetId:'chair',c:5,r:4,rotation:0},
+  {id:'c4',assetId:'chair',c:7,r:4,rotation:0}
+ ]};
+ const hit=V.inspectChairTables(broken,{catalog});
+ assert.equal(hit.ok,false);
+ assert.ok(hit.issues.some(i=>i.reason==='orphan'&&(i.id==='c4'||i.c===7)),'orphan at (7,4) must be detected: '+JSON.stringify(hit.issues));
+ assert.ok(hit.issues.some(i=>i.reason==='wrong-facing'),'door-facing chairs must be detected: '+JSON.stringify(hit.issues));
+});
+
+test('MUST: every repo interior scene has chairs adjacent to a table, facing it, with a clear path',()=>{
+ const all=allRepoInteriorScenes();
+ assert.ok(all.length>=60,'expected play interiors + Bangun Ruang / Indonesia templates, got '+all.length);
+ const failures=[];
+ for(const {file,scene} of all){
+  const hit=V.inspectChairTables(scene,{catalog});
+  if(!hit.ok)failures.push(file+': '+hit.issues.map(i=>(i.id||'?')+' ['+i.reason+'] @'+i.c+','+i.r+' rot='+i.rotation+(i.expected!=null?' expected='+i.expected:'')).join('; '));
+ }
+ assert.equal(failures.length,0,failures.join('\n'));
+});
+
+test('Kharisma and kost authored chairs are already paired (pairChairs is a no-op on them)',()=>{
+ const kharisma=JSON.parse(fs.readFileSync(path.join(DIR,'njh_warteg_kharisma.interior-scene.json'),'utf8'));
+ const kost=JSON.parse(fs.readFileSync(path.join(DIR,'njh_kos.interior-scene.json'),'utf8'));
+ for(const [name,scene] of [['warteg',kharisma],['kost',kost]]){
+  const before=scene.items.filter(i=>i.assetId==='chair').map(i=>({id:i.id,c:i.c,r:i.r,rotation:i.rotation}));
+  const after=V.pairChairs(scene,{catalog});
+  const got=after.items.filter(i=>i.assetId==='chair').map(i=>({id:i.id,c:i.c,r:i.r,rotation:i.rotation}));
+  assert.deepEqual(got,before,name+' chairs moved by pairChairs: '+JSON.stringify({before,got}));
+  assert.equal(V.inspectChairTables(scene,{catalog}).ok,true,name+' inspect failed: '+JSON.stringify(V.inspectChairTables(scene,{catalog}).issues));
+ }
+ const chairs=kharisma.items.filter(i=>i.assetId==='chair');
+ assert.ok(chairs.every(c=>!(c.c===7&&c.r===4)),'orphan must have been moved off (7,4)');
+ assert.ok(chairs.every(c=>c.c!==3),'warteg door column 3 must stay clear');
+ const tables=kharisma.items.filter(i=>i.assetId==='table'||i.assetId==='counter'||i.assetId==='cashier');
+ assert.deepEqual(tables.map(t=>({id:t.assetId,c:t.c,r:t.r})),[
+  {id:'counter',c:2,r:1},{id:'counter',c:4,r:1},{id:'cashier',c:5,r:2},
+  {id:'table',c:1,r:3},{id:'table',c:4,r:3}
+ ],'Kharisma tables/counters must not move');
+ const ibu=kharisma.items.find(i=>i.id==='npc_ibu_warteg'||i.assetId==='npc_ibu_warteg');
+ assert.ok(ibu,'npc_ibu_warteg must stand in the warteg scene');
+ assert.equal(ibu.c,4);assert.equal(ibu.r,0);assert.equal(ibu.rotation,0);
+ const kostChair=kost.items.find(i=>i.assetId==='chair');
+ assert.equal(kostChair.c,1);assert.equal(kostChair.r,3);assert.equal(kostChair.rotation,90);
 });
