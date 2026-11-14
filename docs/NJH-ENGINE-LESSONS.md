@@ -72,3 +72,25 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Penyebab:** rotasi kursi memakai arah default `sw` (rot 0), yang menghadap ke pintu/kamera (r membesar). Penempatan tidak dicek terhadap jejak meja/etalase. Kursi yatim (`Bangku Samping` di kolom 7) tidak punya meja tetangga. Di kost, kursi di `(0,3)` dan `dining_table` 2×1 di `(2,3)` menyisakan petak `(1,3)` kosong.
 - **Aturan (MUST):** setiap kursi (`chair`) harus menempel (sisi 4-arah, bukan diagonal) pada petak meja/etalase/kasir/meja kerja (`table`, `dining_table`, `counter`, `food_vitrine`, `cashier`, `desk`, `study_desk`, `workbench`, `registration_desk`, `checkout`, `laundry_counter`). Rotasi kursi menghadap permukaan itu (`DIR=['sw','se','ne','nw']` = rot 0/90/180/270; vektor hadap `sw(-c,+r)`, `se(+c,+r)`, `ne(+c,-r)`, `nw(-c,-r)`). Tidak boleh ada kursi yatim. Jalur dari pintu (petak entrance dan satu petak ke dalam, plus jalan ke meja) tidak boleh terhalang kursi. Meja dan etalase Kharisma tidak dipindah — hanya kursi yang digeser/diputar. Berlaku merata di semua interior play dan templat Bangun Ruang / Indonesia pack.
 - **Cek:** `inspectChairTables` + tes di `tests/semesta-interior-view.test.cjs` jalan di SETIAP scene interior di repo (play interiors + templat Bangun Ruang / Indonesia pack / Kharisma). Gagal jika ada kursi yatim, hadap salah, atau jalur pintu terhalang. Tata letak lama warteg (empat kursi rot 0, satu yatim di `(7,4)`) harus terdeteksi rusak. Cuplikan sebelum/sesudah warteg: `/workspace/main-interiors-shots/warteg-chairs-before-after.png`.
+
+## 11. String tes `builder.js` hilang setelah merge auto
+
+- **Masalah:** Setelah merge peta Ellen ke `integ/step1`, dua tes unit baru gagal: `mainkan-smoke` mencari `if(playerMode)return; // Preview`, dan `bangun-ruang-warteg-3d` mencari `interiorPreview.openFor(nearest.o)`.
+- **Penyebab:** Auto-merge menggabungkan penjaga simpan jadi `if(playerMode||njhMapPreview)return` dan mengganti `openFor(nearest.o)` menjadi `openFor(openObj)` (objek pintu peta Ellen). Perilaku benar, tetapi string yang diuji tes hilang.
+- **Aturan:** Jaga string yang diuji tetap utuh. Kunci `njhMapPreview` ditaruh di baris sendiri. Panggil `openFor(nearest.o)` jika pintu tidak membungkus bangunan, selain itu `openFor(openObj)`. Jangan "memperbaiki" tes dengan melemahkan regex.
+- **Cek:** `tests/mainkan-smoke.test.cjs`, `tests/bangun-ruang-warteg-3d.test.cjs`. Suite integ hanya boleh gagal di 9 tes lama yang sudah diizinkan.
+
+## 12. `genesis-source.js` 404 di server vo-only
+
+- **Masalah:** Mainkan meminta `/virtual-life-asset-pipeline/genesis-source.js` (juga `emosi-source.js` dan jembatan Semesta). Server statis yang hanya merilis pohon `virtual-office` mengembalikan 404, pratinjau karakter dan peta tidak lengkap.
+- **Penyebab:** Path itu merujuk repo Pages saudara, bukan `shared/genesis-source.js` di dalam vo. File yang sama ada di `virtual-life-asset-pipeline/site/`.
+- **Aturan:** Untuk smoke/dev lokal, sajikan root yang punya kedua pohon (`/virtual-office/...` dan `/virtual-life-asset-pipeline/...` → `site/`). Jangan menganggap 404 genesis di server vo-only sebagai bug di file vo. Live Pages sudah memisahkan kedua repo.
+- **Cek:** buka `/virtual-life-asset-pipeline/genesis-source.js` di layout dev; Mainkan harus mencapai "2/2 layer sprite siap".
+
+## 13. Ukuran instance bangku menimpa katalog
+
+- **Masalah:** Bangku Taman (`pipeline:bangku_taman`, mis. `njh-atm-16`) terlihat kebesaran dan memotong lingkungan. Di `world.json`, instance masih 2.19×2.251.
+- **Penyebab:** `width`/`height` per instance menimpa ukuran katalog. `blocking: auto` atau `collision: false` di instance juga menimpa katalog.
+- **Aturan:** Ukuran resmi katalog = 1.591×1.888 wu (PX/PY native), `collision: true`, `blocking: yes`, interaksi `sit`. Hapus override ukuran instance kecuali ukurannya memang disengaja. Berlaku di city JSON peta NJH dan `world.json`.
+- **Cek:** `tests/njh-map-preview.test.cjs` ("bangku taman scale and collision match the LFB guide"). Cuplikan: `/workspace/integ-step1-shots/bangku-taman-sit.png`.
+
