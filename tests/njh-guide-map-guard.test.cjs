@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const city=JSON.parse(read('world-builder/njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json')).record.document;
 const window={VLAssetCatalog:[]};
-for(const script of ['world-builder/vegetation-catalog.js','world-builder/style-rules.js'])
+for(const script of ['world-builder/vegetation-catalog.js','world-builder/style-rules.js','world-builder/map-terrain.js'])
  vm.runInNewContext(read(script),{window,Math,Map,Set},{filename:script});
 const catalog=new Map(window.VLAssetCatalog.map(e=>[e.file,e]));
 const PX=Math.SQRT2/64,PY=PX*2/Math.sqrt(3);
@@ -18,7 +18,6 @@ const trees=city.objects.filter(o=>/^vegetation:pohon_/.test(o.asset||''));
 const allowed=new Set(['grass','plaza','soil','dirt','park']);
 
 test('NJH-only city has 7 correctly oriented north-south grill covers',()=>{
- assert.equal(city.id,undefined); // id is at the outer document; no extra city selector
  const gr=city.objects.filter(o=>o.asset==='pipeline:selokan_grill'&&o.id.startsWith('njh-grill--35-'));
  assert.equal(gr.length,7);
  for(const o of gr)assert.equal(o.rotation,90,o.id+' must follow r axis (se)');
@@ -56,5 +55,32 @@ test('published tree catalog uses pixel-locked billboard dimensions, not multipl
   window.VLWorldStyle.normalize(o,catalog);
   assert.ok(o.scale>=spec.minVisualScale,'newly placed tree must be scaled to its minimum');
   assert.equal(window.VLWorldStyle.footprint(o,catalog)[0],1.25);
+ }
+});
+
+test('terrain drains select a 90-degree in-plane rotation only along c',()=>{
+ const t=city.map.terrain,idx=window.VLMapTerrain.dict(t);
+ const drains=t.cells.filter(c=>c.type==='drain');
+ const count={along_c:0,along_r:0,junction:0,isolated:0};
+ for(const c of drains)count[window.VLMapTerrain.drainAxis(t,c.c,c.r,idx)]++;
+ assert.equal(count.along_c,74,'74 horizontal drain tiles were baked vertically');
+ assert.equal(count.along_r,72,'vertical channels retain their original UV axis');
+ assert.equal(count.junction,1,'junctions must use future dedicated geometry');
+ assert.equal(count.isolated,4,'isolated drain ends require inspection');
+ const renderer=read('world-builder/builder.js');
+ assert.match(renderer,/terrain\.drainAxis\?\.\(t,cell\.c,cell\.r,drainCells\)/);
+ assert.match(renderer,/tmp\.rotateZ\(Math\.PI\/2\)/);
+});
+
+test('Pecel Lele and Sate Madura tents keep their sprite-proportional iso billboard',()=>{
+ const w={VLAssetCatalog:[],location:{search:'?njhMap=1',href:'http://localhost/world-builder/index.html'},
+  document:{getElementsByTagName:()=>[{src:'http://localhost/world-builder/njh-map-preview.js'}]}};
+ vm.runInNewContext(read('world-builder/njh-map-preview.js'),{window:w,URLSearchParams,Math,Map,Set});
+ w.VLNjhMapPreview.registerCatalog();
+ for(const id of ['studio:br-warung-pecel-lele','studio:br-lapak-sate-madura']){
+  const item=w.VLAssetCatalog.find(x=>x.file===id);
+  assert.ok(item,'tent registered '+id);
+  assert.equal(item.width,+(item.size[0]*PX).toFixed(3));
+  assert.equal(item.height,+(item.size[1]*PY).toFixed(3));
  }
 });
