@@ -4874,7 +4874,7 @@ function frame(now){
       const start={x:holder.root.position.x,z:holder.root.position.z};
       const interior=window.__njhPlayInteriors;
       // Off-map interior coordinates must not go through street collision.
-      const next=interior?.active?.()?interior.moveInside(start,dx*speed*dt,dz*speed*dt):
+      let next=interior?.active?.()?interior.moveInside(start,dx*speed*dt,dz*speed*dt):
        physics.move(actor,start,dx*speed*dt,dz*speed*dt,
         simulationObstacles(),documentMap.map,assetByName,style,live);
       const TL=window.VLSemestaTrafficLights;
