@@ -102,6 +102,7 @@ function applyStart(s,id,force){
  const make=list=>(list||[]).map(it=>{const iid='life:'+String(it.type).replace(/[^a-z0-9_]/gi,'')+':'+(++base.itemSequence);
   base.itemMeta[iid]={species:String(it.type),label:String(it.label||it.type).slice(0,60),expiresAt:base.elapsedMinutes+Math.max(1,Number(it.minutes)||1440),inFridge:false};return iid;});
  base.inventory=make(st.inventory).slice(0,8);base.homeStorage=make(st.homeStorage).slice(0,24);
+ base.fridge=make(st.fridge).slice(0,24);base.fridge.forEach(iid=>{base.itemMeta[iid].inFridge=true});
  base.identity=s.identity||base.identity;base.identityChosen=s.identityChosen;
  base.testSeed={id,version:f.profile.version,appliedAt:new Date().toISOString()};
  Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,RULES.stateFrom(base,config));s.testSeed=base.testSeed;

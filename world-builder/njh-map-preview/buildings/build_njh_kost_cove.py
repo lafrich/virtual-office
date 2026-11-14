@@ -539,7 +539,7 @@ def main():
         "function": "kost",
         "sizeClass": "medium",
         "footprint": [FW, FD],
-        "height": 7.04,
+        "height": 8.981,
         "levelCount": 2,
         "placement": "ground",
         "collision": True,
@@ -548,7 +548,7 @@ def main():
         "variants": variants,
         "size": variants["sw"]["size"],
         "pivot": variants["sw"]["pivot"],
-        "width": 6.76,
+        "width": 7.469,
         "enterable": True,
         "interactions": ["enter"],
         "adaptedFrom": (

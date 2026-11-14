@@ -1,9 +1,9 @@
 {
  "format": "mainkan-test-start-v1",
- "note": "Start profiles for Mainkan test-login IDs (data only, no passwords, no pre-made character/appearance). Applied once per player per version on first Play Mode load after the character creator; bump version or RESET to re-apply. t_ichsan / t_noor spawn into their own kost (njh_kos_ichsan / njh_kos_noor) with no tent and no tutorial. IDs not listed (t_guest1, t_guest2, guests) go through the creator, then a normal hobo start.",
+ "note": "Start profiles for Mainkan test-login IDs (data only, no passwords, no pre-made character/appearance). Applied once per player per version on first Play Mode load after the character creator; bump version or RESET to re-apply. t_ichsan / t_noor spawn into their own kost (njh_kos_ichsan / njh_kos_noor) with no tent and no tutorial. IDs not listed (t_guest1, t_guest2, guests) go through the creator, then a normal hobo start. v4 (2026-11-14): Ichsan/Noor start with 3 bag items (telur, minyak, kopi; 5 of 8 slots free); nasi, lele, susu go to the kulkas (fridge), gula to the lemari.",
  "profiles": {
   "t_ichsan": {
-   "version": 3,
+   "version": 4,
    "label": "Ichsan · tes kaya + kost sendiri",
    "start": "rich_housed_ichsan",
    "needsCharacter": true,
@@ -13,7 +13,7 @@
    }
   },
   "t_noor": {
-   "version": 3,
+   "version": 4,
    "label": "Noor · tes kaya + kost sendiri",
    "start": "rich_housed_noor",
    "needsCharacter": true,
@@ -139,11 +139,6 @@
    ],
    "inventory": [
     {
-     "type": "nasi",
-     "label": "Nasi",
-     "minutes": 4320
-    },
-    {
      "type": "telur",
      "label": "Telur",
      "minutes": 4320
@@ -154,23 +149,8 @@
      "minutes": 43200
     },
     {
-     "type": "lele",
-     "label": "Ikan Lele",
-     "minutes": 180
-    },
-    {
      "type": "kopi",
      "label": "Kopi bubuk",
-     "minutes": 43200
-    },
-    {
-     "type": "susu",
-     "label": "Susu",
-     "minutes": 4320
-    },
-    {
-     "type": "gula",
-     "label": "Gula",
      "minutes": 43200
     }
    ],
@@ -214,6 +194,11 @@
      "type": "gula",
      "label": "Gula",
      "minutes": 43200
+    },
+    {
+     "type": "gula",
+     "label": "Gula",
+     "minutes": 43200
     }
    ],
    "tutorial": false,
@@ -224,7 +209,24 @@
     "roomId": "njh_kos_ichsan",
     "ownerId": "t_ichsan",
     "kind": "kost"
-   }
+   },
+   "fridge": [
+    {
+     "type": "nasi",
+     "label": "Nasi",
+     "minutes": 4320
+    },
+    {
+     "type": "lele",
+     "label": "Ikan Lele",
+     "minutes": 180
+    },
+    {
+     "type": "susu",
+     "label": "Susu",
+     "minutes": 4320
+    }
+   ]
   },
   "rich_housed_noor": {
    "wallet": 10000000,
@@ -241,11 +243,6 @@
    ],
    "inventory": [
     {
-     "type": "nasi",
-     "label": "Nasi",
-     "minutes": 4320
-    },
-    {
      "type": "telur",
      "label": "Telur",
      "minutes": 4320
@@ -256,23 +253,8 @@
      "minutes": 43200
     },
     {
-     "type": "lele",
-     "label": "Ikan Lele",
-     "minutes": 180
-    },
-    {
      "type": "kopi",
      "label": "Kopi bubuk",
-     "minutes": 43200
-    },
-    {
-     "type": "susu",
-     "label": "Susu",
-     "minutes": 4320
-    },
-    {
-     "type": "gula",
-     "label": "Gula",
      "minutes": 43200
     }
    ],
@@ -316,6 +298,11 @@
      "type": "gula",
      "label": "Gula",
      "minutes": 43200
+    },
+    {
+     "type": "gula",
+     "label": "Gula",
+     "minutes": 43200
     }
    ],
    "tutorial": false,
@@ -326,7 +313,24 @@
     "roomId": "njh_kos_noor",
     "ownerId": "t_noor",
     "kind": "kost"
-   }
+   },
+   "fridge": [
+    {
+     "type": "nasi",
+     "label": "Nasi",
+     "minutes": 4320
+    },
+    {
+     "type": "lele",
+     "label": "Ikan Lele",
+     "minutes": 180
+    },
+    {
+     "type": "susu",
+     "label": "Susu",
+     "minutes": 4320
+    }
+   ]
   }
  },
  "relationships": [

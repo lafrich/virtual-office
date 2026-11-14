@@ -1,3 +1,21 @@
+# Rollback — props/Cove iso scale + test-ID bags (njh-125)
+
+Written 2026-11-14 (Asia/Jakarta). Client data, sprite metadata and docs only. No Worker, storage or save-format change. `shared/genesis-player.js` is not included.
+
+- Previous live `origin/main`: `58d7eecac83cb34dd26f929624c4409cf65159ec` (Step 2a + docs, sw v30, `?v=njh-step2-4`)
+- This commit: see `git log -1 --grep "njh-125"` (sw v31, world-builder `?v=njh-125-1`)
+- What changes: NJH preview props + Kost Cove `width/height` move from `size/50` to the iso lock `size*PX/PY` (render was already pixel-identical, because the billboard loop rescales to natural size). Ichsan/Noor test-start profile v4 now has 3/8 in the bag, plus a fridge and home storage.
+- Gates before push: unit suite (same 7 failures as 58d7eeca), `AUDIT=1` window-fit local (88 checks, 0 cropped), 4-ID desktop + phone smoke on a local worker (bag 3/8, buy 2, fish at both docks, enter the Cove lobby), secret scan clean
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git revert --no-edit <njh-125 commit sha>
+# bump sw.js to v32 so phones drop v31, then push --ff-only
+# Profiles: reverting returns t_ichsan/t_noor to version 3. applyStart runs per version, so already-applied v4 saves keep 3/8 until reset.
+```
+
+---
+
 # Rollback — Step 2a UI polish (Layar `layar/step2a`)
 
 Written 2026-11-14 (Asia/Jakarta). UI + check tool only (leftover wake toast, legacy AKSI dedupe, no-crop windows); no logic, Worker or storage change. `shared/genesis-player.js` not included.

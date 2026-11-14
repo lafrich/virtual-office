@@ -82,7 +82,7 @@ const TENT_DEFS=[
 ];
 const BUILDING_DEFS=[
  {id:'njh_kost_cove',label:'Kost Cove',folder:'njh_kost_cove',
-  footprint:[5.5,4.6],sizeClass:'medium',levelCount:2,placement:'ground',
+  footprint:[5.5,4.6],sizeClass:'medium',levelCount:2,placement:'ground',isoScale:true,
   interactions:['enter'],
   variants:{
    sw:{size:[338,352],pivot:[159,272]},
@@ -123,7 +123,8 @@ function propSpec(def){
   source:'njh-preview',published:true,collision:def.collision,
   rotateFootprint:!!def.rotateFootprint,
   footprint:def.footprint.slice(),size:sw.size.slice(),pivot:sw.pivot.slice(),
-  width:sw.size[0]/50,height:sw.size[1]/50,
+  // iso lock (size*PX/PY), not size/50 (fixed 2026-11-14, lesson 19)
+  width:isoWidth(sw.size[0]),height:isoHeight(sw.size[1]),
   blocking:def.collision?'yes':'no',
   interactions:def.interactions.slice(),
   variants:Object.freeze(variants)
@@ -165,7 +166,7 @@ function buildingSpec(def){
   id:def.id,file:'object:'+def.id,label:def.label,group:'kampung',
   source:'njh-preview',published:true,collision:true,
   footprint:def.footprint.slice(),size:sw.size.slice(),pivot:sw.pivot.slice(),
-  // Cove keeps its live-approved size/50 scale (step 1); new buildings use the iso lock.
+  // Every NJH building uses the iso lock (Cove moved off size/50 on 2026-11-14, lesson 19).
   width:def.isoScale?isoWidth(sw.size[0]):sw.size[0]/50,height:def.isoScale?isoHeight(sw.size[1]):sw.size[1]/50,
   sizeClass:def.sizeClass,authoredH:def.authoredH,levelCount:def.levelCount,
   placement:def.placement,category:'bangunan',assetKind:def.assetKind||'kost',function:def.function||null,

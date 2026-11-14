@@ -602,3 +602,25 @@ test('step-2 fishing spot on the Kali bank: dock collision, water stays water, r
  const first=objects.find(o=>fishRe.test([o.name,o.label,o.asset,o.subtype,o.questId,(o.tags||[]).join(' ')].join(' ')));
  assert.equal(first.id,'njh-dermaga-mancing-anchor');
 });
+
+test('preview props and the Kost Cove use the iso lock size*PX/PY, never size/50 (lesson 19)',()=>{
+ const {window}=loadPreview('?njhMap=1');window.VLNjhMapPreview.registerCatalog();
+ const PX=Math.SQRT2/64,PY=Math.SQRT2/64*2/Math.sqrt(3),r=v=>+v.toFixed(3);
+ for(const id of ['njh_dermaga_mancing','njh_lapak_silver','njh_tiang_ogah','njh_kotak_amal','njh_penanda_doa','njh_kost_cove']){
+  const s=window.VLAssetCatalog.find(x=>x.id===id);assert.ok(s,id);
+  assert.equal(s.width,r(s.size[0]*PX),id+' width');assert.equal(s.height,r(s.size[1]*PY),id+' height');
+  assert.notEqual(s.width,s.size[0]/50,id+' must not be size/50');
+ }
+ const cove=window.VLAssetCatalog.find(x=>x.id==='njh_kost_cove');
+ assert.equal(cove.width,7.469);assert.equal(cove.height,8.981); // 352*PY = 8.9814 (brief said ~8.982)
+ const dock=window.VLAssetCatalog.find(x=>x.id==='njh_dermaga_mancing');
+ assert.ok(dock.width/(101/50)>1.09&&dock.height/(72/50)>1.25);
+ // A per-object width/height in the city doc overrides the spec (builder: item.width||spec.width),
+ // so a baked size/50 there silently undoes the iso lock.
+ const city=JSON.parse(require('fs').readFileSync(require('path').join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
+ for(const o of city.record.document.objects.filter(o=>/^object:njh_(kost_cove|dermaga_mancing|lapak_silver|tiang_ogah|kotak_amal|penanda_doa)$/.test(o.asset||''))){
+  const s=window.VLAssetCatalog.find(x=>'object:'+x.id===o.asset);
+  if(o.width!=null)assert.equal(o.width,s.width,o.id+' doc width');
+  if(o.height!=null)assert.equal(o.height,s.height,o.id+' doc height');
+ }
+});
