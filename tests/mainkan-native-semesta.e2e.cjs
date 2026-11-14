@@ -121,16 +121,22 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.equal(respawn.before,'genesis_male_nude');
  assert.equal(respawn.after,'genesis_male_nude');
  assert.equal(respawn.happyAvailable,true,'Emosi happy context must be selectable');
- const actionBridge=await page.evaluate(()=>{
-  const source=document.getElementById('semestaFrame').contentWindow.document.getElementById('ptActionBtn');
-  window.__mainkanActionEvents=[];
-  ['pointerdown','pointerup','click'].forEach(type=>source.addEventListener(type,()=>window.__mainkanActionEvents.push(type)));
-  return !!source;
+ // NJH98 uses a single context-sensitive AKSI button. Clicking it opens
+ // the sliding icon bar, not an immediate click on the retired ptActionBtn.
+ const actionBefore=await page.evaluate(()=>{
+  const w=document.getElementById('semestaFrame').contentWindow;
+  return w.SemestaLifePlay.nearbyActions().some(x=>x.id==='fart');
  });
- assert.equal(actionBridge,true);
+ assert.equal(actionBefore,true,'Fart remains an always-offered context action');
  await page.locator('#gameAction').click();
- const events=await page.evaluate(()=>window.__mainkanActionEvents);
- assert.ok(events.includes('pointerdown')&&events.includes('pointerup')&&events.includes('click'),'Mainkan must bridge Action to native Jiwa input');
+ const bar=page.locator('#njhActBar');
+ await bar.waitFor({state:'visible',timeout:10000});
+ const options=await page.locator('#njhActBar [data-njh-act]').count();
+ assert.ok(options>=1,'Single AKSI must expose contextual entries');
+ const fart=page.locator('#njhActBar [data-njh-act="fart"]');
+ assert.ok(await fart.isVisible(),'Fart must be offered inside the same AKSI bar');
+ await fart.click();
+ await bar.waitFor({state:'hidden',timeout:8000});
  await page.locator('#gamePhone').click();
  const phone=await page.evaluate(()=>document.getElementById('semestaFrame').contentWindow.VLNokiaPlay?.isOpen?.()||false);
  assert.equal(phone,true,'Mainkan Phone button must open native Semesta Nokia');
