@@ -954,12 +954,14 @@ function makeSprite(root,item){
  // depth test causes grass to erase the front wall and entrance.
  const studio=studioSprites?.isStudio(spec)===true;
  for(const part of [{file:item.asset,off:0},...(spec.front?[{file:spec.front,off:.025}]:[])]){
-  // Editor-only studio composite can cover a player even in front of it.
-  const flags=studio&&!playerMode?studioSprites.spriteMaterial():
+  // Keep native studio sprites in their authored composite path across
+  // editor and gameplay. A depth-tested opaque plane clips the lower facade
+  // against the ground; Y grounding and actor occlusion need separate rules.
+  const flags=studio?studioSprites.spriteMaterial():
    {transparent:false,depthTest:true,depthWrite:true,alphaTest:.5};
   const mat=new THREE.MeshBasicMaterial({map:pixelTexture(part.file,view),...flags,side:THREE.DoubleSide});
   const plane=new THREE.Mesh(new THREE.PlaneGeometry(width,height),mat);
-  if(studio&&!playerMode){
+  if(studio){
    // Render after terrain and ordinary opaque meshes. Custom studio buildings
    // are 2D isometric compositing layers, not full 3D opaque volumes.
    plane.renderOrder=2;
