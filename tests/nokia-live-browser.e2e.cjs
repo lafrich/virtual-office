@@ -74,9 +74,9 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
    ledger:live.transactions,stillOpen:window.VLNokiaPlay.isOpen(),depth:E.depth()};
  });
  console.log('REAL_NOKIA_PURCHASE',JSON.stringify(trade));
- assert.equal(trade.wallet,token.wallet-1000,'Original Nokia marketplace must debit Jiwa wallet');
+ assert.equal(trade.wallet,token.wallet-20000,'Nokia must debit the Jiwa price Rp20.000 for five token units');
  assert.equal(trade.nokiaWallet,trade.wallet,'Nokia and Jiwa balances must match after buying');
- assert.ok(trade.ledger.some(t=>t.action==='buy_token'&&t.delta===-1000),'Dompet must reflect real transaction');
+ assert.ok(trade.ledger.some(t=>t.action==='buy_token'&&t.delta===-20000),'Dompet must record the authoritative Rp20.000 token purchase');
  assert.equal(trade.stillOpen,true,'Nokia must remain open after game HUD refresh');
  assert.ok(trade.depth>=3,'Nokia must not reset to standby during purchase');
  const mapResult=await frame.evaluate(()=>{
