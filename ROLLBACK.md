@@ -1,3 +1,26 @@
+# Rollback — NJH as the only default playable map
+
+Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged. No storage migration.
+
+- Previous live `origin/main`: `28dcca42b6739fd36c12b78e6dd2aa566e1e0adf` (docs: Step 1a status, rollback, and CHECKPOINT STEP 1)
+- Feature commit: `e935083362657a7a4d5f80706725b662a42be64c` (`preview/njh-only-map`; `?v=njh-only-map-1`, sw v27)
+
+Plain `/mainkan/` and `/world-builder/` load the official NJH map (`city-njh-semesta-draft1-with-pending`). Reverting restores the previous default (`world.json` / leftover drafts) and the `?njhMap=1` opt-in.
+
+If `origin/main` has been fast-forwarded to this step, revert the rollback-notes commit on top of `e9350833` first (docs only), then the feature:
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git revert --no-edit e935083362657a7a4d5f80706725b662a42be64c
+# then bump sw.js if a rollback build must drop v27, and push --ff-only
+```
+
+If a docs-only rollback-notes commit sits on top of `e9350833`, revert that commit first, then `e9350833`.
+
+---
+
 # Rollback — Step 1 (Kost Cove lobby, NJH map, Win98 UI)
 
 Written 2026-11-14 (Asia/Jakarta). Worker, passwords, auth secrets and vault files unchanged. No storage migration.
