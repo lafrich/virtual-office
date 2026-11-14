@@ -32,16 +32,17 @@ test('preview module is inert without njhMap=1',()=>{
  assert.equal(api.registerCatalog().count,0);
 });
 
-test('registers 7 corrected catalog keys when njhMap=1',()=>{
+test('registers 8 corrected catalog keys when njhMap=1',()=>{
  const {window,api}=loadPreview('?njhMap=1');
  assert.equal(api.enabled(),true);
  const result=api.registerCatalog();
- assert.equal(result.count,7);
+ assert.equal(result.count,8);
  const files=window.VLAssetCatalog.map(x=>x.file);
  for(const key of [
   'object:njh_dermaga_mancing','object:njh_lapak_silver','object:njh_tiang_ogah',
   'object:njh_kotak_amal','object:njh_penanda_doa',
-  'studio:br-warung-pecel-lele','studio:br-lapak-sate-madura'
+  'studio:br-warung-pecel-lele','studio:br-lapak-sate-madura',
+  'object:njh_minimarket'
  ])assert.ok(files.includes(key),key);
  const guessed=Object.keys(api.keyMap);
  assert.deepEqual(guessed.sort(),[
@@ -106,7 +107,8 @@ test('wires ready interiors and pre-wires pending r6 doors with use tiles',()=>{
   njh_door_koperasi:'njh_koperasi',
   njh_door_loak:'njh_toko_loak',
   njh_door_warung_madura:'njh_warung_madura',
-  njh_door_nasi_sunda:'njh_nasi_sunda'
+  njh_door_nasi_sunda:'njh_nasi_sunda',
+  njh_door_minimarket:'njh_minimarket'
  });
  for(const row of report.pending){
   const obj=document.objects.find(o=>o.id===row.objectId);
@@ -272,4 +274,147 @@ test('dermaga 270 rotation swaps the 2x1 footprint; dock edge stays clear of obj
  assert.equal(JSON.stringify(placed.njhDrawOffset),JSON.stringify({x:-0.8,z:0}));
  // Footprint / collision stay on the bank. The draw offset is visual only.
  assert.equal(JSON.stringify(style.footprint(placed,catalog)),'[1,2]');
+});
+
+test('places NJH Mart on a free 5x4 main-road lot with a sidewalk use tile',()=>{
+ const {window,api}=loadPreview('?njhMap=1');
+ const {style,physics}=loadPhysics();
+ const city=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
+ const meta=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/njh-map-meta.json'),'utf8'));
+ const document=city.record.document;
+ api.registerCatalog();
+ const pipeWin={VLAssetCatalog:Array.from(window.VLAssetCatalog||[])};
+ const context=vm.createContext({window:pipeWin,globalThis:pipeWin,Object,Math,Number,Array,JSON,Error,Map,Set});
+ vm.runInContext(fs.readFileSync(path.join(root,'pipeline-catalog.js'),'utf8'),context,{filename:'pipeline-catalog.js'});
+ const catalog=new Map(pipeWin.VLAssetCatalog.map(x=>[x.file,x]));
+ const PX=Math.SQRT2/64;
+ const PY=PX*2/Math.sqrt(3);
+
+ const spec=catalog.get('object:njh_minimarket');
+ assert.ok(spec,'catalog has object:njh_minimarket');
+ assert.equal(spec.source,'njh-preview');
+ assert.equal(spec.njhPreview,true);
+ assert.equal(spec.sizeClass,'medium');
+ assert.equal(spec.authoredH,6.2);
+ assert.equal(spec.levelCount,1);
+ assert.equal(spec.placement,'ground');
+ assert.equal(spec.collision,true);
+ assert.equal(spec.blocking,'yes');
+ assert.equal(JSON.stringify(spec.footprint),'[5,4]');
+ assert.equal(JSON.stringify(spec.size),'[312,314]');
+ assert.equal(JSON.stringify(spec.pivot),'[171,300]');
+ assert.equal(spec.width,+(312*PX).toFixed(3));
+ assert.equal(spec.height,+(314*PY).toFixed(3));
+ assert.equal(spec.width,6.894);
+ assert.equal(spec.height,8.012);
+ assert.ok(spec.variants.sw.url.includes('buildings/njh_minimarket/njh_minimarket_sw.png'));
+ assert.ok(spec.variants.se.url.includes('njh_minimarket_se.png'));
+ assert.ok(spec.variants.ne.url.includes('njh_minimarket_ne.png'));
+ assert.ok(spec.variants.nw.url.includes('njh_minimarket_nw.png'));
+ assert.equal(JSON.stringify(spec.variants.se.pivot),'[139,300]');
+ assert.equal(JSON.stringify(spec.variants.nw.pivot),'[139,300]');
+ // Billboard must use the LFB PX/PY lock, never size/50 (logged past mistake).
+ assert.notEqual(spec.width,+(312/50).toFixed(3));
+
+ const shop=document.objects.find(o=>o.id==='njh-minimarket');
+ assert.ok(shop);
+ assert.equal(shop.name,'NJH Mart (Minimarket)');
+ assert.equal(shop.asset,'object:njh_minimarket');
+ assert.equal(shop.subtype,'minimarket');
+ assert.equal(shop.x,-26.5);
+ assert.equal(shop.z,56);
+ assert.equal(shop.rotation,0);
+ assert.equal(shop.width,6.894);
+ assert.equal(shop.height,8.012);
+ assert.equal(shop.w,5);
+ assert.equal(shop.d,4);
+ assert.equal(shop.h,6.2);
+ assert.equal(shop.collision,true);
+ assert.equal(shop.blocking,'yes');
+ assert.ok(shop.tags.includes('minimarket'));
+ assert.ok(shop.tags.includes('shop'));
+ assert.ok(shop.tags.includes('njh-door:njh_door_minimarket'));
+ assert.ok(!shop.tags.includes('supermarket'),'supermarket tag would be a later site-name hazard');
+ const blob=[shop.name,shop.label,shop.asset,shop.subtype,(shop.tags||[]).join(' ')].join(' ').toLowerCase();
+ assert.equal(/warung|warteg|nasi|kopi|cafe|loak|kost|cove|masjid|sampah|trash|pohon|tree|mancing|pasar.?ikan|fish.?market/.test(blob),false);
+
+ const fp=style.footprint(shop,catalog);
+ assert.equal(JSON.stringify(fp),'[5,4]');
+ const area=physics.area(shop,catalog,style);
+ assert.equal(area.minX,-29);
+ assert.equal(area.maxX,-24);
+ assert.equal(area.minZ,54);
+ assert.equal(area.maxZ,58);
+ assert.equal(physics.solid(shop),true);
+
+ const cells=new Map(document.map.terrain.cells.map(c=>[c.c+','+c.r,c.type]));
+ const typ=(c,r)=>cells.get(c+','+r)||document.map.terrain.default||'grass';
+ for(const c of [-29,-28,-27,-26,-25]){
+  for(const r of [54,55,56,57]){
+   assert.equal(typ(c,r),'grass','lot tile '+c+','+r);
+  }
+ }
+ assert.equal(typ(-27,58),'sidewalk','use tile must be sidewalk');
+ assert.equal(typ(-30,58),'sidewalk','N–S main-road sidewalk stays clear');
+ for(const r of [54,55,56,57])assert.equal(typ(-30,r),'sidewalk');
+
+ const door=meta.doors.find(d=>d.doorId==='njh_door_minimarket');
+ assert.ok(door);
+ assert.equal(door.objectId,'njh-minimarket');
+ assert.equal(door.interiorTemplate,'njh_minimarket');
+ assert.equal(door.facing,'sw');
+ assert.equal(door.interiorPending,true);
+ assert.deepEqual(door.doorPoint,[-26.5,58]);
+ assert.deepEqual(door.useTile,[-27,58]);
+ assert.deepEqual(door.usePoint,[-26.5,58.5]);
+ assert.deepEqual(door.footprintRect,[-29,-24,54,58]);
+ assert.ok(!fs.existsSync(path.join(root,'njh-map-preview/interiors/njh_minimarket.interior-scene.json')),
+  'do not vendor the unfinished interior scene');
+ assert.ok(api.pendingTemplates.includes('njh_minimarket'));
+ assert.ok(!api.readyTemplates.includes('njh_minimarket'));
+
+ const report=api.wireDoors(document,meta,{});
+ assert.equal(report.missingObject.length,0);
+ const pending=report.pending.find(r=>r.doorId==='njh_door_minimarket');
+ assert.ok(pending);
+ assert.equal(pending.template,'njh_minimarket');
+ assert.equal(shop.enterable,true);
+ assert.equal(shop.njhInteriorPending,true);
+ assert.equal(shop.interior,null);
+ assert.equal(shop.njhInteriorTemplate,'njh_minimarket');
+ assert.deepEqual([shop.njhUsePoint.x,shop.njhUsePoint.z],[-26.5,58.5]);
+
+ const solids=document.objects.filter(o=>physics.solid(o)&&
+  !['marker','avatar','npc','pedestrian','crowd','quest_npc'].includes(o.type));
+ for(const other of solids){
+  if(other.id==='njh-minimarket')continue;
+  assert.equal(physics.intersect(area,physics.area(other,catalog,style)),false,'overlap with '+other.id);
+ }
+ const sitter={id:'minimarket-use',type:'avatar',x:-26.5,z:58.5,scale:1,collision:true};
+ const useCheck=physics.check(sitter,{x:-26.5,z:58.5},document.objects,document.map,catalog,style,new Map());
+ assert.equal(useCheck.ok,true,'player can stand on the door use tile, got '+useCheck.reason+' '+useCheck.id);
+ const pathWalker={id:'ns-sidewalk',type:'avatar',x:-29.5,z:56,scale:1,collision:true};
+ const pathCheck=physics.check(pathWalker,{x:-29.5,z:56},document.objects,document.map,catalog,style,new Map());
+ assert.equal(pathCheck.ok,true,'N–S sidewalk path stays clear, got '+pathCheck.reason+' '+pathCheck.id);
+
+ const bench=document.objects.find(o=>o.id==='njh-atm-16');
+ assert.equal(bench.x,-22.5);
+ assert.equal(bench.z,55.9);
+ const sit={id:'bench-sit',type:'avatar',x:-22.5,z:56.9,scale:1,collision:true};
+ assert.equal(typ(-23,56),'grass');
+ const sitCheck=physics.check(sit,{x:-22.5,z:56.9},document.objects,document.map,catalog,style,new Map());
+ assert.equal(sitCheck.ok,true,'nudged bench still has a free sit tile, got '+sitCheck.reason+' '+sitCheck.id);
+ const pole=document.objects.find(o=>o.id==='njh-atm-15');
+ assert.equal(pole.x,-22);
+ assert.equal(pole.z,58.5);
+ const papan=document.objects.find(o=>o.id==='njh-atm-17');
+ assert.equal(papan.x,-21.2);
+ assert.equal(papan.z,54.5);
+
+ const kost=document.objects.find(o=>o.id==='njh-kos-noor');
+ const dock=document.objects.find(o=>o.id==='njh-dermaga-mancing');
+ const dKost=Math.hypot(shop.x-kost.x,shop.z-kost.z);
+ const dDock=Math.hypot(shop.x-dock.x,shop.z-dock.z);
+ assert.ok(dKost<20,'should be a short walk to Kost Cove, got '+dKost);
+ assert.ok(dDock<35,'should be a walkable trip to the dock, got '+dDock);
 });

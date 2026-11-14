@@ -254,6 +254,12 @@
       "members": [
         "njh_door_kos_cove_lobby"
       ]
+    },
+    {
+      "id": "njh_loc_minimarket",
+      "members": [
+        "njh_door_minimarket"
+      ]
     }
   ],
   "doors": [
@@ -680,6 +686,37 @@
       "baymaxInteractionId": null,
       "interiorPending": true,
       "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
+    },
+    {
+      "doorId": "njh_door_minimarket",
+      "objectId": "njh-minimarket",
+      "role": "minimarket",
+      "interiorTemplate": "njh_minimarket",
+      "owner": null,
+      "label": "NJH Mart (Minimarket)",
+      "facing": "sw",
+      "doorPoint": [
+        -26.5,
+        58.0
+      ],
+      "useTile": [
+        -27,
+        58
+      ],
+      "usePoint": [
+        -26.5,
+        58.5
+      ],
+      "footprintRect": [
+        -29.0,
+        -24.0,
+        54.0,
+        58.0
+      ],
+      "baymaxDoorId": null,
+      "baymaxInteractionId": null,
+      "interiorPending": true,
+      "interiorNote": "Scene still being fixed by Gerak; enter falls back to a toast until then. Link by template id only."
     }
   ],
   "interactables": [
@@ -1866,6 +1903,14 @@
   "gameplaySites": {
     "branch": "preview/njh-gameplay-sites",
     "basedOn": "preview/njh-map-draft1 @ ffc76e6",
-    "note": "Function-first Semesta Life Play sites. Rumah ibadah extras skipped. No push, no deploy."
+    "note": "Function-first Semesta Life Play sites. Rumah ibadah extras skipped. No push, no deploy.",
+    "minimarket": {
+      "siteId": "minimarket",
+      "objectId": "njh-minimarket",
+      "doorId": "njh_door_minimarket",
+      "interiorTemplate": "njh_minimarket",
+      "interiorPending": true,
+      "note": "Added on preview/njh-step2-minimarket. Frozen play.js has no minimarket matcher yet; documented so it can be matched later. Do not edit play.js here."
+    }
   }
 }

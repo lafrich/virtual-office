@@ -89,3 +89,13 @@ The r6 scene `njh_warung_kopi.interior-scene.json` is wired on `njh_door_warung_
 ## QA
 
 Every required site resolves by play.js name pattern. No new object sits on a road, water tile, or door use tile. Each new object has at least one free sidewalk/plaza neighbor for interaction. Overview: `renders/njh-gameplay-sites-overview.png`.
+
+## Step 2 — Minimarket (`preview/njh-step2-minimarket`)
+
+Preview only, not live, not pushed. Branch taken from frozen `preview/njh-gameplay-sites` at `8e099eb`. Gerak's NJH Mart is registered and placed; the interior scene is **not** vendored (Gerak is still fixing it). Site id is `minimarket` (Layar NJH-SPEC-MASAK; replaces `supermarket`). Frozen `semesta-life-play.js` has no minimarket matcher yet — do not edit play.js on this branch. Name / subtype / tags are `NJH Mart (Minimarket)` / `minimarket` / `minimarket, shop` so they do not hijack existing play.js site patterns.
+
+| Site | play.js id | Object id | Name | Position (x, z) | Asset | Door id | Interior | Placeholder? |
+|---|---|---|---|---|---|---|---|---|
+| Minimarket | `minimarket` (not wired in frozen play.js yet) | `njh-minimarket` | NJH Mart (Minimarket) | -26.5, 56.0 | `object:njh_minimarket` | `njh_door_minimarket` | `njh_minimarket` (pending) | exterior placed; interior pending |
+
+Lot: 5×4 grass at tiles c=−29..−25, r=54..57, east of the main N–S road (sidewalk c=−30 left clear). Rotation 0 / sw, door on the +z edge, use tile (−27, 58) / use point (−26.5, 58.5) on the E–W gang sidewalk that meets that main road. About 15 tiles south of Kost Cove (same x) and about 28 tiles from the dock via the main roads. Billboard width/height use the LFB PX/PY lock (6.894 × 8.012), not size/50. Street furniture `njh-atm-15` (pole, to −22.0, 58.5), `njh-atm-16` (Bangku Taman, to −22.5, 55.9, sit tile still free), and `njh-atm-17` (papan, to −21.2, 54.5) was nudged off the lot. In-map close-up: `renders/njh-minimarket-placement-closeup.png`.
