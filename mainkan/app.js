@@ -326,10 +326,12 @@ function startWorld(force=false){
  // if native art or WebGL stalls on a slower connection.
  setTimeout(()=>{
   if(!worldReady&&stage==='gameScreen'&&frame.getAttribute('src')===url.href){
-   $('worldLoadingDetail').textContent='Masih menunggu Semesta / LGR-1. Coba muat ulang tanpa menghapus data.';
+   $('worldLoadingText').textContent='Engine Semesta belum merespons. Koneksi atau modul mungkin gagal dimuat.';
+   $('worldLoadingDetail').textContent='Tekan Coba Muat Ulang Dunia. Data karakter dan kota tidak dihapus.';
+   $('statusText').textContent='SEMESTA • STARTUP TIMEOUT';
    $('retryWorld').hidden=false;
   }
- },35000);
+ },18000);
 }
 window.addEventListener('message',e=>{
  if(e.origin!==location.origin||!e.data)return;
@@ -357,17 +359,24 @@ window.addEventListener('message',e=>{
   const loaded=Number(e.data.loaded)||0,total=Math.max(1,Number(e.data.total)||1);
   $('worldProgress').style.width=Math.round(100*loaded/total)+'%';
   $('worldLoadingText').textContent='Menyiapkan Genesis + Emosi.exe...';
-  $('worldLoadingDetail').textContent=loaded+'/'+total+' layer sprite siap. Karakter ditampilkan setelah lengkap.';
+  $('worldLoadingDetail').textContent=loaded+'/'+total+' layer sprite siap.';
+  if(worldReady)$('statusText').textContent='SEMESTA • GAME RUNNING · GENESIS '+loaded+'/'+total;
  }else if(e.data.type==='mainkan:semesta-ready'){
   worldReady=true;
   $('worldProgress').style.width='100%';
   $('worldLoading').hidden=true;
   $('retryWorld').hidden=true;
   $('cityName').textContent=e.data.city||'SEMESTA • Native World';
-  $('worldLabel').textContent='Semesta WebGL · '+Number(e.data.count||0)+' objek · '+(guest?'Guest':'Player');
-  $('statusText').textContent='SEMESTA • PLAYER READY';
+  $('worldLabel').textContent='Semesta WebGL · '+Number(e.data.count||0)+' objek · '+(guest?'Guest':'Player')+(e.data.characterPending?' · Genesis dimuat':'');
+  $('statusText').textContent=e.data.characterPending?'SEMESTA • GAME RUNNING · GENESIS LOADING':'SEMESTA • PLAYER READY';
   if(pauseRequested)frame.contentWindow?.postMessage({type:'mainkan:pause'},location.origin);
   else try{frame.focus();}catch{}
+ }else if(e.data.type==='mainkan:player-character-ready'){
+  $('worldLabel').textContent=$('worldLabel').textContent.replace(' · Genesis dimuat',' · Genesis siap');
+  $('statusText').textContent='SEMESTA • PLAYER READY';
+ }else if(e.data.type==='mainkan:player-character-error'){
+  $('worldLabel').textContent='Genesis belum tersedia · tekan Reload Dunia';
+  $('statusText').textContent='GENESIS ERROR • '+String(e.data.message||'Gagal memuat sprite').slice(0,130);
  }else if(e.data.type==='mainkan:semesta-error'){
   $('worldLoading').hidden=false;
   $('worldLoadingText').textContent=e.data.message||'Semesta tidak bisa dimuat. Coba Reload.';
