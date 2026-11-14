@@ -1,0 +1,26 @@
+name: NJH Door and Layer Regression (Preview)
+on:
+  pull_request:
+    paths:
+      - 'world-builder/njh-play-interiors.js'
+      - 'world-builder/semesta-life-play.js'
+      - 'world-builder/studio-sprite-grounding.js'
+      - 'world-builder/builder.js'
+      - 'tests/njh-play-interiors.test.cjs'
+      - 'tests/njh-kost-lobby-smoke.test.cjs'
+      - 'tests/bangun-ruang-grounding.test.cjs'
+      - '.github/workflows/njh-interior-regression.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test Mainkan interior navigation, door routing, and billboard sorting
+        run: node --test tests/njh-play-interiors.test.cjs tests/njh-kost-lobby-smoke.test.cjs tests/bangun-ruang-grounding.test.cjs
