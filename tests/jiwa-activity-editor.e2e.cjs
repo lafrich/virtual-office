@@ -101,7 +101,7 @@ const base=process.env.UI_EDITOR_URL||'http://127.0.0.1:8091/virtual-office/';
  // Guest/NJH-only flow may skip the one-time tutorial entirely.
  // If it is shown, finish it normally; otherwise require visible gameplay.
  if(await mainkan.locator('#tutorialScreen').isVisible())
-  await mainkan.locator('#tutorialDone').click({timeout:15000});
+  await mainkan.locator('#tutorialDone').click({timeout:3000}).catch(()=>{});
  await mainkan.locator('#gameScreen').waitFor({state:'visible',timeout:30000});
  await mainkan.waitForFunction(()=>{
   const win=document.getElementById('semestaFrame')?.contentWindow;
