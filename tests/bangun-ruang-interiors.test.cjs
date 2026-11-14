@@ -13,7 +13,7 @@ test('Mahluk Hidup canonical pose bindings for interior furniture',()=>{
  for(const [type,action,pose] of [
   ['wc','use_toilet','toilet'],['wc','pee','toilet'],['wc','poop','toilet'],
   ['bed','sleep','sleep'],['chair','sit','sit'],['desk','work','work'],
-  ['shower','bathe','bathe'],['bathtub','bathe','bathe']]){
+  ['shower','bathe','bathe'],['bathtub','bathtub_bathe','bathtub_bathe']]){
   assert.ok(m.types[type].actions.includes(action));
   assert.equal(m.actions[action].pose,pose);
  }
@@ -80,7 +80,7 @@ test('fractional Semesta footprint survives bridge; decorative buildings are not
  const i=g.VLAssetCatalog.find(x=>x.id===asset.id),d=g.VLAssetCatalog.find(x=>x.id===decor.id);
  assert.equal(i.footprint.join(','),'3,3.2');assert.equal(i.enterable,true);
  assert.equal(i.actionSlots.length,scene.items.length);
- assert.equal(d.enterable,false);assert.equal(d.entranceFacing,'');assert.equal(d.interactions.length,0);
+ assert.equal(d.enterable,false);assert.equal(d.entranceFacing,'sw','facing remains visual metadata even when not enterable');assert.equal(d.interactions.length,0);
 });
 test('map JSON preserves interior, entrance and action hooks',()=>{
  const m=interiorModel(),scene=m.preset({w:3,d:3},'bedroom'),g={};
