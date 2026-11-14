@@ -538,7 +538,8 @@ document.querySelectorAll('[data-njh-placeholder]').forEach(b=>{
    fart: always offered, ~60 s play-time cooldown; Moral -3 only if an NPC/other player is within ~2 tiles, 0 alone.
    Real wins: if SemestaLifePlay.nearbyActions() lists the id, Baymax's panel shows it and the mock hides it.
    Mock effects are SIMULASI only (njh98:mock:body@<pemain>) and never change the real status. */
-const BODY={peeNeed:65,wallDist:1.6,doorDist:3,npcDist:2,fartCd:60};
+// wall ring beside a door: past the 4-tile door range (so Action isn't 'Masuk') and within 6 = along that building's wall
+const BODY={peeNeed:65,wallDist:1.6,doorMin:4.2,doorDist:6,npcDist:2,fartCd:60};
 let playSec=0,fartAt=-1e9;
 const WALLISH=/wall|tembok|pagar|fence|building|bangunan|house|rumah|shop|toko|warung|kost|gedung|ruko/i;
 // once the real list has shown a body action, the game owns them for this session (a missing fart = its cooldown, not "no logic")
@@ -549,7 +550,7 @@ function nearWall(me){
  const f=hook('nearWall');if(f){try{return !!f();}catch{}}fired('nearWall');
  for(const o of directory()){if(!Number.isFinite(o?.x))continue;const k=[o.type,o.kind,o.category,o.id,o.name].join(' ');if(!WALLISH.test(k)||/npc/i.test(String(o.type||'')))continue;
   if(Math.hypot(o.x-me.x,(o.z||0)-me.z)<=(o.enterable?BODY.doorDist:BODY.wallDist))return true;}
- try{return N.doorList().some(d=>Math.hypot(d.x-me.x,d.z-me.z)<=BODY.doorDist);}catch{return false;}
+ try{return N.doorList().some(d=>{const r=Math.hypot(d.x-me.x,d.z-me.z);return r>=BODY.doorMin&&r<=BODY.doorDist;});}catch{return false;}
 }
 function npcNear(me){return directory().some(o=>Number.isFinite(o?.x)&&/npc|player|orang/i.test(String(o.type||o.kind||''))&&Math.hypot(o.x-me.x,(o.z||0)-me.z)<=BODY.npcDist);}
 function bodyRec(){return ls.get(pk('body'),{bladder:0,hygiene:0,moral:0,at:0});}
