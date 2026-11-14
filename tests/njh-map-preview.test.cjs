@@ -29,7 +29,7 @@ function loadPhysics(){
 test('NJH map module is enabled by default and inert only with njhMap=0',()=>{
  const on=loadPreview('');
  assert.equal(on.api.enabled(),true);
- assert.equal(on.api.registerCatalog().count,7);
+ assert.equal(on.api.registerCatalog().count,9);
  const off=loadPreview('?njhMap=0');
  assert.equal(off.api.enabled(),false);
  assert.equal(off.api.registerCatalog().count,0);

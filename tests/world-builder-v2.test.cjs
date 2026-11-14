@@ -17,7 +17,7 @@ const data=wrapped.record.document;
 assert.equal(wrapped.id,'city-njh-semesta-draft1-with-pending');
 assert.ok(String(data.map.name).includes('Kampung Kali Kebon Sirih'));
 assert.equal(new Set(data.objects.map(x=>x.id)).size,data.objects.length);
-assert.equal(data.objects.length,150);
+assert.equal(data.objects.length,152); // +NJH Mart minimarket, +Tempat Mancing Kali Selatan (step 2)
 assert.ok(catalog.size>=80);
 assert.ok(catalog.has('street2/loak/props/tong_sampah_besi_se.png'));
 assert.ok(catalog.has('vegetation:pohon_asam_M'));
