@@ -605,10 +605,14 @@ function create(opts){
  function spawnInside(){
   if(!session)return null;
   const d=session.door,o=session.origin;
-  const candidates=[
-   {x:d.x,z:d.z-.55}, {x:d.x,z:d.z-.9}, {x:d.x,z:d.z},
-   {x:o.x+session.width/2,z:o.z+session.depth/2}
-  ];
+  const mid={x:o.x+session.width/2,z:o.z+session.depth/2};
+  // Spawn beyond the exit-door action radius, otherwise the first E press
+  // kicks a freshly spawned player straight back into the Cove lobby.
+  const dx=mid.x-d.x,dz=mid.z-d.z,span=Math.max(.01,Math.hypot(dx,dz));
+  const candidates=[2.2,1.95,1.7].map(distance=>({
+   x:d.x+dx/span*distance,z:d.z+dz/span*distance
+  }));
+  candidates.push(mid,{x:d.x+dx/span*.9,z:d.z+dz/span*.9},{x:d.x,z:d.z});
   for(let r=1;r<=Math.max(session.width,session.depth);r+=1){
    for(let c=0;c<session.width;c++)for(let z=0;z<session.depth;z++){
     if(Math.abs(c+.5-(d.x-o.x))+Math.abs(z+.5-(d.z-o.z))<=r)
