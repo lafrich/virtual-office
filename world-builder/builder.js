@@ -2768,6 +2768,15 @@ function setMode(m){
        enterInterior:id=>id?I.openInteriorById(id):I.enterNearby(),
        exitInterior:()=>I.enterNearby(),
        spawnAtOwnRoom:()=>scheduleNjhHomeSpawn(),
+       collectObject:id=>{
+        // Only an economy-approved pickup is hidden; no authoring geometry
+        // or city draft is deleted. Its session inventory remains in Jiwa.
+        const object=documentMap.objects.find(o=>String(o.id)===String(id));
+        if(!object||object.type!=='sprite')return false;
+        playPickedIds.add(String(id));persistPlayPicked();
+        const shown=owners.get(String(id));if(shown)shown.visible=false;
+        return true;
+       },
        playInteriors:I,
        doorAnchor:o=>I.doorWorld(o)
       };
@@ -2822,6 +2831,15 @@ function setMode(m){
        enterInterior:id=>id?I.openInteriorById(id):I.enterNearby(),
        exitInterior:()=>I.enterNearby(),
        spawnAtOwnRoom:()=>scheduleNjhHomeSpawn(),
+       collectObject:id=>{
+        // Only an economy-approved pickup is hidden; no authoring geometry
+        // or city draft is deleted. Its session inventory remains in Jiwa.
+        const object=documentMap.objects.find(o=>String(o.id)===String(id));
+        if(!object||object.type!=='sprite')return false;
+        playPickedIds.add(String(id));persistPlayPicked();
+        const shown=owners.get(String(id));if(shown)shown.visible=false;
+        return true;
+       },
        playInteriors:I
       });
       // Room restored only after its scene files and profile are ready.
