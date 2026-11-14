@@ -258,11 +258,64 @@ function create(opts){
   const paint=root?.VLWartegInteriorArt;
   const bake=side=>((sc.theme==='warteg'||themeKind==='warteg'||kind==='warteg')&&View?.bakeWallTexture)
    ?View.bakeWallTexture(side,{width:w,depth:d},paint):null;
-  // Minimarket paint (scene.paint): white tile dado + teal band; flat preview colours until a baked hook exists.
+  // NJH MART mandatory five-layer wall paint (Kharisma layout standard).
+  // The source is the scene's published paint declaration, not a new asset.
+  // Pixel geometry is baked to a nearest-filtered CanvasTexture once per room.
   const MART_WALL={back:0xf3f5f2,left:0xe2ece8};
+  function bakeMartWall(side){
+   const declared=new Set((sc.paint?.layers||[]).map(x=>x.layer));
+   if(!['dado','trim','midDisplay','identity','ceiling'].every(x=>declared.has(x)))return null;
+   const unit=64,ww=side==='back'?w:d;
+   const c=document.createElement('canvas');c.width=Math.max(64,Math.round(ww*unit));c.height=128;
+   const ctx=c.getContext('2d',{alpha:false});ctx.imageSmoothingEnabled=false;
+   const W=c.width,H=c.height,fromFloor=z=>H-z;
+   ctx.fillStyle=side==='back'?'#F3F5F2':'#E2ECE8';ctx.fillRect(0,0,W,H);
+   // DADO — glazed white tiles, with a teal belt across both far walls.
+   ctx.fillStyle='#F6FAF7';ctx.fillRect(0,fromFloor(49),W,49);
+   ctx.fillStyle='#CDDAD8';
+   for(let x=0;x<W;x+=16)ctx.fillRect(x,fromFloor(49),1,49);
+   for(let y=fromFloor(49);y<H;y+=12)ctx.fillRect(0,y,W,1);
+   ctx.fillStyle='#22A094';ctx.fillRect(0,fromFloor(46),W,6);
+   // TRIM — continuous orange identity rail at z=50.
+   ctx.fillStyle='#F59E0B';ctx.fillRect(0,fromFloor(52),W,3);
+   ctx.fillStyle='#B77811';ctx.fillRect(0,fromFloor(49),W,1);
+   // MID DISPLAY — shelf-top shelf tickets, not floating pseudo-products.
+   ctx.fillStyle='#CBD9D5';ctx.fillRect(0,fromFloor(70),W,2);
+   for(let x=8;x+25<W;x+=48){
+    ctx.fillStyle='#FEF9DE';ctx.fillRect(x,fromFloor(64),26,8);
+    ctx.fillStyle='#164F50';ctx.fillRect(x+3,fromFloor(61),12,2);
+   }
+   // IDENTITY — an anchored NJH MART sign and category bands.
+   if(side==='back'){
+    const sw=Math.min(W-18,235),sx=Math.round((W-sw)/2);
+    ctx.fillStyle='#0D635F';ctx.fillRect(sx,fromFloor(109),sw,35);
+    ctx.fillStyle='#EAF5EC';ctx.fillRect(sx+4,fromFloor(106),sw-8,27);
+    ctx.fillStyle='#123F42';ctx.font='bold 21px monospace';ctx.textAlign='center';
+    ctx.fillText('NJH MART',Math.round(W/2),fromFloor(85));
+    ctx.textAlign='left';
+   }else{
+    ctx.fillStyle='#0D635F';ctx.fillRect(8,fromFloor(106),W-16,26);
+    ctx.fillStyle='#F1FCF8';ctx.font='bold 12px monospace';ctx.textAlign='center';
+    ctx.fillText('SEGAR   SEMBAKO   MINUMAN',Math.round(W/2),fromFloor(90));
+    ctx.textAlign='left';
+   }
+   // CEILING — three LED strips in the height band z=108–120.
+   for(const u of [0.18,0.5,0.82]){
+    const cx=Math.round(u*W),lx=Math.max(4,Math.min(W-42,cx-18));
+    ctx.fillStyle='#718C90';ctx.fillRect(lx,fromFloor(120),37,7);
+    ctx.fillStyle='#FAFFF6';ctx.fillRect(lx+3,fromFloor(118),31,3);
+   }
+   if(side==='back'){
+    // CCTV dome above the cashier end, still part of paint/art dressing.
+    const x=Math.round(W*.84);ctx.fillStyle='#345054';
+    ctx.fillRect(x-6,fromFloor(115),12,5);
+    ctx.fillStyle='#232E36';ctx.fillRect(x-4,fromFloor(110),8,4);
+   }
+   return c;
+  }
   const wallMaterial=(side,fallback)=>{
    if(themeKind==='minimarket')fallback=MART_WALL[side]||fallback;
-   const can=bake(side);
+   const can=themeKind==='minimarket'?bakeMartWall(side):bake(side);
    if(can&&THREE){
     const tex=new THREE.CanvasTexture(can);
     tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
