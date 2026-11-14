@@ -39,5 +39,5 @@ test('Building Studio references shared Semesta specs and edits pixels without g
  assert.ok(studio.includes('../semesta-building-spec.js'));
  assert.ok(studio.includes("spec.footprint[0],d:spec.footprint[1]"));
  assert.ok(studio.includes("pixelCanvas.toDataURL('image/png')"));
- assert.ok(studio.includes('studio:')===false);
+ assert.ok(studio.includes("importSourceAsset='studio:'+asset.id"),'existing Studio assets keep their original stable identity');
 });
