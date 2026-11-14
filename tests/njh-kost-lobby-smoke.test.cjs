@@ -86,7 +86,7 @@ test('openInteriorById(njh-kos-noor) opens the lobby; spawn skips lobby into the
  const mineAct=api.extraActions().find(a=>a.args&&a.args.doorId==='njh_door_home_ichsan');
  assert.ok(mineAct);
  assert.equal(mineAct.args.locked,false);
- const inn=api.enterInterior('njh_kos_ichsan');
+ const inn=api.openInteriorById('njh_door_home_ichsan'); // user-visible lobby door, not a debug direct room jump
  assert.equal(inn.ok,true);
  assert.equal(api.roomId(),'njh_kos_ichsan');
  const back=api.exit();
