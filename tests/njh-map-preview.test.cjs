@@ -273,3 +273,89 @@ test('dermaga 270 rotation swaps the 2x1 footprint; dock edge stays clear of obj
  // Footprint / collision stay on the bank. The draw offset is visual only.
  assert.equal(JSON.stringify(style.footprint(placed,catalog)),'[1,2]');
 });
+
+test('bangku taman scale and collision match the LFB guide',()=>{
+ const window={VLAssetCatalog:[]};
+ const context=vm.createContext({window,globalThis:window,Object,Math,Number,Array,JSON,Error,Map,Set});
+ vm.runInContext(fs.readFileSync(path.join(root,'pipeline-catalog.js'),'utf8'),context,{filename:'pipeline-catalog.js'});
+ const {style,physics}=loadPhysics();
+ const catalog=new Map(window.VLAssetCatalog.map(x=>[x.file,x]));
+ const spec=catalog.get('pipeline:bangku_taman');
+ assert.ok(spec,'bangku_taman must be in the pipeline catalog');
+ assert.equal(JSON.stringify(spec.footprint),'[2,1]');
+ assert.equal(spec.collision,true);
+ const PX=Math.SQRT2/64,PY=PX*2/Math.sqrt(3);
+ assert.equal(spec.width,Math.round(spec.size[0]*PX*1000)/1000);
+ assert.equal(spec.height,Math.round(spec.size[1]*PY*1000)/1000);
+ // Billboard height stays below a 1-storey wall (2.27 wu) and near character scale.
+ assert.ok(spec.height>1.2&&spec.height<2.1,'height '+spec.height);
+ assert.notEqual(spec.width,2.19);
+ assert.notEqual(spec.height,2.251);
+
+ const city=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
+ const objects=city.record.document.objects;
+ const benches=objects.filter(o=>{
+  const blob=[o.id,o.asset,o.name,o.subtype].map(v=>String(v||'').toLowerCase()).join(' ');
+  return o.asset==='pipeline:bangku_taman'||/bangku[_\s-]?taman|park.?bench|kursi[_\s-]?taman/.test(blob);
+ });
+ assert.ok(benches.length>=1,'expected at least one park bench instance');
+ const ids=benches.map(o=>o.id);
+ assert.ok(ids.includes('njh-atm-16'));
+
+ const cells=new Map(city.record.document.map.terrain.cells.map(c=>[c.c+','+c.r,c.type]));
+ const defaultTerrain=city.record.document.map.terrain.default||'grass';
+ const blockedSurface=new Set(['road','water','river','drain']);
+ const solids=objects.filter(o=>o.collision!==false&&o.blocking!=='no'&&
+  !['marker','avatar','npc','pedestrian','crowd','quest_npc'].includes(o.type));
+
+ for(const bench of benches){
+  assert.equal(bench.asset,'pipeline:bangku_taman');
+  assert.equal(bench.scale,1);
+  assert.equal(bench.width,spec.width);
+  assert.equal(bench.height,spec.height);
+  assert.equal(bench.collision,true);
+  assert.notEqual(bench.blocking,'no');
+  assert.ok((bench.interactions||[]).includes('sit'));
+  assert.equal(JSON.stringify(style.footprint(bench,catalog)),'[2,1]');
+  assert.equal(physics.solid(bench),true);
+
+  const [fw,fd]=style.footprint(bench,catalog);
+  const rot=((Number(bench.rotation)||0)%360+360)%360;
+  // Front / sit side is local +r, rotation 0 = sw.
+  const use={x:bench.x,z:bench.z+fd/2+0.5};
+  if(rot===90){use.x=bench.x+fw/2+0.5;use.z=bench.z;}
+  else if(rot===180){use.x=bench.x;use.z=bench.z-fd/2-0.5;}
+  else if(rot===270){use.x=bench.x-fw/2-0.5;use.z=bench.z;}
+  const useC=Math.floor(use.x),useR=Math.floor(use.z);
+  const useType=cells.get(useC+','+useR)||defaultTerrain;
+  assert.ok(!blockedSurface.has(useType),'sit tile '+useC+','+useR+' is '+useType);
+
+  // Bench itself must not sit on road/water, and must not overlap another solid.
+  const box=physics.area(bench,catalog,style);
+  const footprintCells=[];
+  for(let c=Math.floor(box.minX);c<Math.ceil(box.maxX);c++)
+   for(let r=Math.floor(box.minZ);r<Math.ceil(box.maxZ);r++)
+    footprintCells.push([c,r]);
+  for(const [c,r] of footprintCells){
+   const type=cells.get(c+','+r)||defaultTerrain;
+   assert.ok(!blockedSurface.has(type),'bench '+bench.id+' covers '+type+' at '+c+','+r);
+  }
+  const sitter={id:'sitter-'+bench.id,type:'avatar',x:use.x,z:use.z,scale:1,collision:true};
+  const sitBox=physics.area(sitter,catalog,style);
+  for(const other of solids){
+   if(other.id===bench.id)continue;
+   const hit=physics.intersect(box,physics.area(other,catalog,style));
+   assert.equal(hit,false,'bench '+bench.id+' overlaps '+other.id);
+   assert.equal(physics.intersect(sitBox,physics.area(other,catalog,style)),false,
+    'sit tile of '+bench.id+' overlaps '+other.id);
+  }
+
+  // A player walking through the bench centre must be blocked; the sit tile stays free.
+  const player={id:'player',type:'avatar',x:bench.x,z:bench.z-fd/2-0.7,rotation:0,scale:1,collision:true};
+  const through=physics.move(player,{x:player.x,z:player.z},0,fd+1.2,objects,city.record.document.map,catalog,style,new Map());
+  assert.equal(through.blocked,true,'player must not clip through '+bench.id);
+  assert.ok(through.z<bench.z,'walk should stop before the bench centre');
+  const sitCheck=physics.check(sitter,{x:use.x,z:use.z},objects,city.record.document.map,catalog,style,new Map());
+  assert.equal(sitCheck.ok,true,'sit tile in front of '+bench.id+' must stay free, got '+sitCheck.reason+' '+sitCheck.id);
+ }
+});

@@ -15764,21 +15764,23 @@
           "tags": [
             "njh-draft1"
           ],
-          "interactions": [],
+          "interactions": [
+            "sit"
+          ],
           "capacity": 1,
           "entranceFacing": "",
           "markerKind": "",
-          "blocking": "no",
+          "blocking": "yes",
           "notes": "",
           "asset": "pipeline:bangku_taman",
           "x": -24.5,
           "z": 55.9,
           "rotation": 0,
-          "width": 2.19,
-          "height": 2.251,
+          "width": 1.591,
+          "height": 1.888,
           "name": "Bangku Taman",
           "subtype": "bangku_taman",
-          "collision": false
+          "collision": true
         },
         {
           "id": "njh-atm-17",
