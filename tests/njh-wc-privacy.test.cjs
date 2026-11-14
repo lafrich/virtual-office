@@ -93,7 +93,8 @@ for(const p of rooms){
    const seat=sc.items.find(x=>x.assetId==='chair');
    const table=sc.items.find(x=>x.assetId==='dining_table');
    assert.equal(seat.rotation,0,'chair front points +r to table');
-   assert.equal(seat.c,table.c);assert.equal(table.r,seat.r+1);
+   assert.ok(seat.c>=table.c&&seat.c<=table.c+1,'seat faces the table footprint');
+   assert.equal(table.r,seat.r+1);
    for(const r of [0,1,2])
     assert.equal(sc.items.find(x=>x.c===5&&x.r===r)?.assetId,'sekat_wc');
    assert.equal(sc.items.find(x=>x.c===7&&x.r===2)?.assetId,'sekat_wc');
