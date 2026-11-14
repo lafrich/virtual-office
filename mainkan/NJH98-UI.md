@@ -80,6 +80,17 @@ Satu-satunya pengecualian bentuk bulat: joystick dan tombol AKSI/LARI di HP (kon
 - Fitur yang direncanakan **bisa diklik** dan berfungsi sebagai placeholder, dengan tag teal **SIMULASI** (dulu: tombol disabled SEGERA). Semuanya di `njh98-mock.js`, terpisah dari `njh98.js`.
 - Aturan: **hook asli dulu** (`window.SemestaLifePlay`, alias `window.SemestaPlay`), kalau tidak ada baru mock. Lihat bagian *Lapisan simulasi* di bawah.
 
+
+### Step 2 — masak, kulkas/storage, minimarket, mancing, token (placeholder)
+Ichsan (t75u, "Place holder dulu aja"): step 2 jalan sebagai **SIMULASI** dulu, function-first, tanpa polesan. Semua lewat **satu tombol AKSI** (bar geser ke atas). Tidak ada tombol aksi baru di dock.
+- **Masak**: dekat kompor → opsi Masak → jendela daftar resep (bahan punya vs kurang, durasi, efek) → Masak. Butuh kompor + bahan di Tas + token > 0.
+- **Kulkas / lemari**: dekat furnitur → opsi Kulkas / Lemari → grid kiri (kontainer) + Tas kanan, tombol Pindah.
+- **Minimarket**: dekat / masuk toko → opsi Belanja → kategori, harga Rupiah sama dengan katalog/logic, qty, beli masuk Tas.
+- **Mancing**: dekat dermaga → opsi Mancing → bar timing, tekan AKSI saat jarum di zona hijau, hasil masuk Tas (bisa dimasak).
+- **Token listrik kost**: meter di tab **Profil** (dan Kost.exe / Nokia tab Token). Isi 5 unit Rp20.000 dari Nokia atau Minimarket. Drain SIMULASI (bisa dikonfigurasi): 1 unit per hari game selama kulkas nyala, plus 1 unit per sesi masak. Kalau 0, opsi storage / kulkas / masak **disabled** dengan pesan "Token listrik habis. Isi token dulu."
+- Hook Baymax (kontrak `docs/HOOKS-STEP2.md` @ `624fd525`, salinan `STEP2-HOOKS.md`): `inventory`/`moveItem`/`eatItem`, `recipes`/`cook` + `mainkan:cook-done`, `shopList`/`buy`/`checkoutCart` + `mainkan:shop-receipt`, `fishSpots`/`fishStart`/`fishInput` + `mainkan:fish-result`, `token`/`topupToken` + `mainkan:token`. Opsi AKSI: `cook_menu`, `open_fridge`, `open_storage`, `shop_minimarket`, `fish_start`, `topup_token`. Katalog id: kit Gerak (95 item, 19 ikan, 38 resep). Animasi existing hanya disebut sebagai placeholder.
+- Audit overflow 0 flag. Screenshot alur: `/workspace/layar/preview/step2/` (desktop + HP landscape).
+
 ### Kontrak DOM & hook (handoff Baymax)
 Ikuti handoff Baymax: `/workspace/mainkan-ui-handoff/MAINKAN-UI-HANDOFF.md` (box bersama; API hook: `world-builder/API.md` di branch `preview/mainkan-hooks-p1`). Ringkasnya — **jangan diganti nama/dihapus**:
 - Layar: `splashScreen`, `welcomeScreen`, `loginScreen`, `characterScreen`, `confirmScreen`, `loadingScreen`, `tutorialScreen`, `gameScreen`, `pauseScreen`, `messageScreen`.
@@ -172,5 +183,7 @@ Format tiap entri: **Error** · **Kenapa** · **Aturan** · **Cara cek**.
 - `njh98.js` — lapisan presentasi (intro, Cara Main, dock, jendela, menu kontekstual, progres, Tas, joystick, spawn placeholder, penanda dunia).
 - `njh98-world.css` — di-inject ke iframe `world-builder/?player=1` (hanya di bawah `html.semesta-player-mode.njh98`).
 - `njh98-mock.js` — lapisan SIMULASI (hook asli dulu, mock `njh98:mock:*`).
+- `njh98-step2.js` / `njh98-step2-catalog.js` — UI step 2 placeholder (masak, kulkas, minimarket, mancing, token) + katalog ramping Gerak.
+- `STEP2-HOOKS.md` — tanda tangan hook yang harus diisi Baymax (salinan juga di `/workspace/layar/docs/STEP2-HOOKS.md`).
 - `tools/njh98-audit.js` — audit overflow/align (alat dev, tidak dimuat game).
-- `index.html` — markup/copy; semua id lama tetap ada.
+- `index.html` — markup/copy; semua id lama tetap ada. Versi aset `?v=njh98-9`, service worker v27.

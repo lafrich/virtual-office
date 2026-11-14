@@ -304,10 +304,11 @@ function paintProfile(st){
  $('njhWallet').textContent=rp(st.wallet);
  $('njhHousing').textContent=st.housing?.room?'Kost':'Tenda';
  if(profile?.name)$('njhName').textContent=profile.name;
+ try{window.NJH98Step2?.paintToken?.();}catch{}
 }
 function paintStatus(){
  const b=$('njhStatusBody');if(!b)return;
- if(typeof window.NJH98Mock?.statusHTML==='function'){try{b.innerHTML=window.NJH98Mock.statusHTML(lifeState()||{});return;}catch(err){console.warn(err);}}
+ if(typeof window.NJH98Mock?.statusHTML==='function'){try{b.innerHTML=window.NJH98Mock.statusHTML(lifeState()||{});window.NJH98Step2?.bindTokenBuy?.(b);return;}catch(err){console.warn(err);}}
  const st=lifeState()||{};
  const rows=[['Nama',profile?.name||'Pemain'],['Tempat tinggal',st.housing?.room?'Kamar kost':'Tenda (hobo)'],
   ['Token listrik',(st.powerTokens??0)+' token'],['Furnitur',(st.furniture||[]).join(', ')||'belum ada'],
@@ -385,10 +386,12 @@ function setWorldClass(c,on){try{wdoc()?.documentElement?.classList.toggle(c,on)
 function cleanLabel(s){return String(s||'').replace(/^[^\wÀ-ɏ]+\s*/u,'').replace(/\s+/g,' ').trim();}
 const ACT_SHORT={wall_pee:'Pipis',pee_outside:'Pipis',fart:'Kentut',sit:'Duduk',sit_down:'Duduk',rest:'Duduk',
  eat:'Makan',eat_item:'Makan',talk:'Bicara',speak:'Bicara',enter:'Masuk',enter_interior:'Masuk',
- sleep:'Tidur',lie:'Tidur',work:'Kerja',job:'Kerja',discard_item:'Buang'};
+ sleep:'Tidur',lie:'Tidur',work:'Kerja',job:'Kerja',discard_item:'Buang',
+ cook:'Masak',cook_recipe:'Masak',cook_menu:'Masak',open_fridge:'Kulkas',open_storage:'Lemari',fish:'Mancing',fish_start:'Mancing',shop:'Belanja',shop_minimarket:'Belanja',topup_token:'Token'};
 const ACT_IC={wall_pee:'pee',pee_outside:'pee',fart:'fart',sit:'sit',sit_down:'sit',rest:'sit',
  eat:'eat',eat_item:'eat',talk:'talk',speak:'talk',enter:'door',enter_interior:'door',
- sleep:'sleep',lie:'sleep',work:'work',job:'work',discard_item:'bag'};
+ sleep:'sleep',lie:'sleep',work:'work',job:'work',discard_item:'bag',
+ cook:'eat',cook_recipe:'eat',cook_menu:'eat',open_fridge:'bag',open_storage:'bag',fish:'work',fish_start:'work',shop:'bag',shop_minimarket:'bag',topup_token:'status'};
 function shortOf(id,label){if(ACT_SHORT[id])return ACT_SHORT[id];const t=cleanLabel(label||id);const w=t.split(/\s+/)[0]||t;return w.length<=12?w:w.slice(0,11)+'…';}
 function ctxOptions(){
  const out=[];const seen=new Set();
@@ -533,7 +536,7 @@ function closeCtx(){
 (function(){
  const a=$('gameAction');if(!a)return;let mine=false;
  const stop=e=>{e.stopImmediatePropagation();e.preventDefault();};
- a.addEventListener('pointerdown',e=>{if(DEV)return;const info=ctxInfo();mine=!!info&&!info.work;if(mine){stop(e);ctxOpen?closeCtx():openCtx();}},true);
+ a.addEventListener('pointerdown',e=>{if(DEV)return;if(window.NJH98Step2?.busy?.()){stop(e);return;}const info=ctxInfo();mine=!!info&&!info.work;if(mine){stop(e);ctxOpen?closeCtx():openCtx();}},true);
  for(const t of ['pointerup','pointercancel','lostpointercapture'])a.addEventListener(t,e=>{if(mine)stop(e);},true);
  a.addEventListener('click',e=>{if(DEV)return;if(mine){mine=false;stop(e);return;}const info=ctxInfo();if(info&&!info.work&&e.detail===0){stop(e);ctxOpen?closeCtx():openCtx();}},true);
 })();
@@ -609,6 +612,7 @@ function worldKeys(w){
   const k=String(e.key).toLowerCase();
   if(k==='escape'&&ctxOpen){e.preventDefault();closeCtx();return;}
   if(k!=='e'||e.repeat)return;
+  if(window.NJH98Step2?.busy?.()){e.preventDefault();e.stopImmediatePropagation();return;}
   if(ctxOpen){e.preventDefault();e.stopImmediatePropagation();closeCtx();return;}
   const info=ctxInfo();
   if(info&&!info.work){e.preventDefault();e.stopImmediatePropagation();openCtx();}
@@ -621,6 +625,7 @@ window.addEventListener('keydown',e=>{
  const k=String(e.key).toLowerCase();
  if(k==='escape'&&ctxOpen){e.preventDefault();closeCtx();return;}
  if(k!=='e')return;
+ if(window.NJH98Step2?.busy?.()){e.preventDefault();return;}
  if(ctxOpen){e.preventDefault();closeCtx();return;}
  const info=ctxInfo();if(info&&!info.work){e.preventDefault();openCtx();}
 });

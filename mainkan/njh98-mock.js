@@ -185,7 +185,7 @@ function statusHTML(s){
   '<fieldset class="njh-group"><legend>Progres tempat tinggal'+(h.mock?' '+SIM:'')+'</legend><div class="njh-ladder">'+
    LADDER.map((x,i)=>'<span class="'+(i===idx?'on':i<idx?'done':'')+'">'+x.label+' <small>Lv'+x.lv+'</small></span>').join('<i class="njh-arrow">→</i>')+'</div>'+
    (h.targets?.length?'<p class="micro">Target ke <b>'+esc(LADDER.find(x=>x.id===h.next)?.label||h.next)+'</b>:</p><ul class="njh-check">'+h.targets.map(t=>'<li class="'+(t.done?'ok':'')+'"><i>'+(t.done?'✓':'')+'</i>'+esc(t.label)+'<small>'+esc(t.info||'')+'</small></li>').join('')+'</ul>':'')+
-  '</fieldset><div class="njh-row"><button type="button" class="btn primary" data-close>OK</button></div>';
+  '</fieldset>'+(window.NJH98Step2?.tokenHTML?.()||'')+'<div class="njh-row"><button type="button" class="btn primary" data-close>OK</button></div>';
 }
 
 /* ================= quests ================= */
@@ -257,14 +257,16 @@ function jobs(){
 let nokiaTab='pesan';
 function paintNokiaPlus(){
  const b=bodyOf('njhNokiaPlus');if(!b)return;
- const tabs=[['pesan','Pesan'],['lowongan','Lowongan'],['tips','Tips']];
+ const tabs=[['pesan','Pesan'],['lowongan','Lowongan'],['tips','Tips'],['token','Token']];
  let body='';
  if(nokiaTab==='pesan'){const l=inbox.list();body='<ul class="njh-list">'+l.map(m=>'<li><b>'+esc(m.from)+'</b><span>'+esc(m.text)+'</span></li>').join('')+'</ul>';
   if(!inbox.real()){l.forEach(m=>m.unread=false);ls.set(pk('inbox'),l);}}
  if(nokiaTab==='lowongan')body='<ul class="njh-list">'+jobs().map((j,i)=>'<li><b>'+esc(j.label)+(j.mock?' '+SIM:'')+'</b><span>'+rp(j.wage)+' / '+esc(j.per)+(j.minHygiene?' · bersih ≥ '+j.minHygiene:'')+(j.where?' · '+esc(j.where):'')+'</span>'+
   (j.site?'<button class="btn" type="button" data-job-map="'+esc(j.site.id)+'">Tandai di Peta</button>':j.mock?'<button class="btn" type="button" data-job-apply="'+i+'">Lamar</button>':'')+'</li>').join('')+'</ul>';
- if(nokiaTab==='tips')body='<ul class="njh-list tips"><li>Kerja: tahan <b>AKSI</b> di tempat kerja sampai bar penuh.</li><li>Kebersihan rendah? Mandi umum cuma '+rp(price('publicShowerFee'))+'.</li><li>Kumpulin '+rp(price('roomPrice'))+' buat sewa kost biar tidurnya pulih lebih banyak.</li><li>Makanan bisa busuk. Simpan di kulkas kost.</li><li>Moral di bawah '+setting('arrestMoralThreshold',15)+' bikin hansip curiga.</li></ul>';
+ if(nokiaTab==='tips')body='<ul class="njh-list tips"><li>Kerja: tahan <b>AKSI</b> di tempat kerja sampai bar penuh.</li><li>Kebersihan rendah? Mandi umum cuma '+rp(price('publicShowerFee'))+'.</li><li>Kumpulin '+rp(price('roomPrice'))+' buat sewa kost biar tidurnya pulih lebih banyak.</li><li>Makanan bisa busuk. Simpan di kulkas kost.</li><li>Token listrik: 5 unit '+rp(price('tokenPrice'))+'. Kalau habis, kulkas / lemari / masak mati.</li><li>Moral di bawah '+setting('arrestMoralThreshold',15)+' bikin hansip curiga.</li></ul>';
+ if(nokiaTab==='token')body=(window.NJH98Step2?.tokenHTML?.()||'<p class="micro">Token listrik belum siap.</p>');
  b.innerHTML='<div class="njh-tabs" role="tablist">'+tabs.map(([id,l])=>'<button type="button" role="tab" aria-selected="'+(id===nokiaTab)+'" data-ntab="'+id+'">'+l+'</button>').join('')+'</div><div class="njh-tabpane">'+body+'</div><p class="micro">Aplikasi tambahan Nokia '+SIM+'</p>';
+ try{if(nokiaTab==='token')window.NJH98Step2?.bindTokenBuy?.(b);}catch{}
 }
 document.addEventListener('click',e=>{
  const t=e.target.closest('[data-ntab]');if(t){nokiaTab=t.dataset.ntab;paintNokiaPlus();return;}
@@ -335,6 +337,7 @@ const resultText=r=>r.ok?'✓ '+((r.changes||[]).join(' · ')||'OK'):'✗ '+(r.r
 function enterDoor(d){
  const id=String(d.id||'').replace(/^d:/,'');
  if(id==='kost')return openKost(d);
+ if(window.NJH98Step2?.isShopDoor?.(id)||window.NJH98Step2?.isShopDoor?.(d.name)||window.NJH98Step2?.isShopDoor?.(d.interiorId)){window.NJH98Step2.openShop();return;}
  const enter=hook('enterInterior');if(enter&&!d.sample){try{if(enter(id))return;}catch{}}
  fired('enterInterior');
  const shop=shopOf(id)||{title:d.name,real:[],mock:[['Lihat-lihat',0]]};
@@ -388,8 +391,9 @@ function openKost(d){
   return;
  }
  indoor={x:ROOM.door.x,y:ROOM.door.y};document.body.classList.add('njh-indoor');setAdapter(true);
- win('njhKost','Kost.exe · Kamar','<div class="njh-shophead"><b>Kamar Kost</b>'+PH+'</div><div class="njh-room" id="njhRoom" tabindex="0" aria-label="Kamar kost"></div><div class="njh-roomacts" id="njhRoomActs"></div>'+
-  '<p class="micro">Posisi furnitur contoh. Jalan: '+(N.coarse()?'ketuk lantai':'panah / WASD atau klik lantai')+'. Aksi muncul kalau dekat furnitur.</p><div class="njh-row"><button class="btn" type="button" data-close id="njhKostExit">Keluar</button></div>',{layer:'hud',cls:'njh-kostwin'});
+ const tok=window.NJH98Step2?.token?.();
+ win('njhKost','Kost.exe · Kamar','<div class="njh-shophead"><b>Kamar Kost</b>'+PH+'<span class="njh-token-kost" id="njhTokenKost">Token '+(tok?tok.units:'—')+'</span></div><div class="njh-room" id="njhRoom" tabindex="0" aria-label="Kamar kost"></div><div class="njh-roomacts" id="njhRoomActs"></div>'+
+  '<p class="micro">Posisi furnitur contoh. Jalan: '+(N.coarse()?'ketuk lantai':'panah / WASD atau klik lantai')+'. Kompor / kulkas / lemari lewat tombol AKSI. Token: isi dari Nokia atau Minimarket.</p><div class="njh-row"><button class="btn" type="button" data-close id="njhKostExit">Keluar</button></div>',{layer:'hud',cls:'njh-kostwin'});
  $('njhKostExit').addEventListener('click',indoorOff);
  $('njhKost').querySelector('.w98-title [data-close]').addEventListener('click',indoorOff);
  paintRoom();setTimeout(()=>$('njhRoom')?.focus(),0);
@@ -409,6 +413,11 @@ function paintRoom(msg){
  if(!near){box.innerHTML='<span class="micro">Dekati furnitur: '+spots.map(f=>f.label).join(', ')+'.</span>';return;}
  if(!near.owned){const price=furnPrice(near.id);
   box.innerHTML='<b>'+esc(near.label)+'</b> belum punya. <button class="btn" type="button" data-room-buy="'+esc(near.id)+'">Beli '+rp(price)+'</button><div class="micro" id="njhRoomMsg">'+(msg||'')+'</div>';return;}
+ if(near.id==='stove'||near.id==='fridge'||near.id==='wardrobe'){
+  const off=window.NJH98Step2?.token?.().units<=0;
+  const name={stove:'Masak',fridge:'Kulkas',wardrobe:'Lemari'}[near.id];
+  box.innerHTML='<b>'+esc(near.label)+'</b>: tekan <b>AKSI</b> untuk '+name+(off?' <span class="micro">Token listrik habis. Isi token dulu.</span>':'')+' '+SIM+'<div class="micro" id="njhRoomMsg">'+(msg||'')+'</div>';
+  return;}
  let recipes='';try{recipes=[...(N.wdoc()?.querySelectorAll('#slpRecipe option')||[])].map(o=>'<option value="'+esc(o.value)+'">'+esc(o.textContent)+'</option>').join('');}catch{}
  const na=real(L,'nearbyActions');let list=null;if(na){try{list=na()||[];}catch{list=null;}}else fired('nearbyActions');
  const entry=a=>list?list.find(x=>x.id===a.act||x.action===a.act):null;
@@ -560,9 +569,11 @@ function bodyActions(){
  if(!real.has('wall_pee')&&me&&bladderNow(s)>=BODY.peeNeed&&nearWall(me))out.push({id:'wall_pee',label:'Pipis di Tembok',mock:true,contextual:true});
  if(!real.has('fart')){const left=Math.ceil(BODY.fartCd-(playSec-fartAt));
   out.push(left>0?{id:'fart',label:'Kentut',mock:true,disabled:true,hint:'tunggu '+left+' dtk'}:{id:'fart',label:'Kentut',mock:true});}
- if(out.length)fired('bodyActions');return out;
+ const extra=window.NJH98Step2?.actions?.()||[];
+ if(out.length||extra.length)fired('bodyActions');return out.concat(extra);
 }
 function runBody(id){
+ const step=window.NJH98Step2?.run?.(id);if(step!=null)return step;
  const r=bodyRec();const me=N.playerPos();const fresh=Date.now()-(r.at||0)<10*60*1000;if(!fresh){r.bladder=0;r.hygiene=0;r.moral=0;}
  if(id==='wall_pee'){r.bladder-=70;r.hygiene-=5;r.moral-=5;r.at=Date.now();ls.set(pk('body'),r);
   return 'Pipis di tembok… lega. Buang Air −70 · Kebersihan −5 · Moral −5 (SIMULASI)';}
@@ -575,7 +586,7 @@ function runBody(id){
 let t=0;
 function tick(s){
  if(!s||!Number.isFinite(Number(s.wallet)))return;
- t++;observe(s);if(document.getElementById('pauseScreen')?.hidden!==false)playSec+=0.5;
+ t++;observe(s);if(document.getElementById('pauseScreen')?.hidden!==false)playSec+=0.5;try{window.NJH98Step2?.tick?.();}catch{}
  if(t%4===0)ls.set('last',{id:pid(),guest:!pid(),name:N.profile()?.name||'Pemain',day:dayNow(),wallet:s.wallet,at:Date.now()});
  if(!$('njhStatusWin')?.hidden&&t%2===0)N.paintStatus();
  if(!$('njhNokiaPlus')?.hidden&&nokiaTab!=='pesan'&&t%6===0)paintNokiaPlus();
