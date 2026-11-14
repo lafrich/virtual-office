@@ -13,7 +13,8 @@ const rooms=[
  'njh-play-interiors/njh_kos_ichsan',
  'njh-map-preview/interiors/njh_kos_noor',
  'njh-play-interiors/njh_kos_noor',
- 'njh-map-preview/interiors/njh_wc_mandi_umum'
+ 'njh-map-preview/interiors/njh_wc_mandi_umum',
+ 'njh-map-preview/interiors/njh_rumah_biasa'
 ];
 const key=(c,r)=>c+','+r;
 const cells=(item)=>{
@@ -68,6 +69,18 @@ for(const p of rooms){
    }
    for(const c of [1,3,5])for(const r of [0,1])
     assert.equal(sc.items.find(x=>x.c===c&&x.r===r)?.assetId,'sekat_wc','separate WC stall');
+  }else if(sc.id==='njh_rumah_biasa'){
+   assert.equal(curtains.length,1);
+   assert.deepEqual([curtains[0].c,curtains[0].r],[6,2]);
+   const bed=sc.items.find(x=>x.assetId==='bed');
+   assert.equal(bed.rotation,90,'west-facing bed headboard backs the west wall');
+   const seat=sc.items.find(x=>x.assetId==='chair');
+   const table=sc.items.find(x=>x.assetId==='dining_table');
+   assert.equal(seat.rotation,0,'chair front points +r to table');
+   assert.equal(seat.c,table.c);assert.equal(table.r,seat.r+1);
+   for(const r of [0,1,2])
+    assert.equal(sc.items.find(x=>x.c===5&&x.r===r)?.assetId,'sekat_wc');
+   assert.equal(sc.items.find(x=>x.c===7&&x.r===2)?.assetId,'sekat_wc');
   }else{
    assert.equal(curtains.filter(d=>d.role==='bathroom').length,1);
    const compact=sc.width===8,edge=compact?5:6,front=compact?3:5;
