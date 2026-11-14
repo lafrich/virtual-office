@@ -7,7 +7,7 @@ on:
     paths:
       - "world-builder/**"
       - "membangun/**"
-      - "tests/membangun-launcher.test.cjs"
+      - "tests/**"
       - "tests/semesta-mahluk-sync.test.cjs"
       - "tests/njh-guide-map-guard.test.cjs"
       - "tests/njh-mart-registry.test.cjs"
@@ -50,7 +50,7 @@ on:
     paths:
       - "world-builder/**"
       - "membangun/**"
-      - "tests/membangun-launcher.test.cjs"
+      - "tests/**"
       - "tests/semesta-mahluk-sync.test.cjs"
       - "tests/njh-guide-map-guard.test.cjs"
       - "tests/njh-mart-registry.test.cjs"
@@ -185,6 +185,7 @@ jobs:
           node --check world-builder/njh-map-preview.js
           node --test tests/njh-guide-map-guard.test.cjs tests/njh-mart-registry.test.cjs tests/njh-mart-paint.test.cjs tests/njh-wc-privacy.test.cjs tests/njh-interior-art-catalog.test.cjs tests/njh-play-interiors.test.cjs
 
+      # All edited tests must retrigger this gate, not just the handpicked smoke suite.
       # Legacy unit tests were not all in the seven green browser workflows.
       # Report the entire baseline before considering release. This is
       # diagnostic, non-deploying, and will be promoted to a hard gate after triage.
