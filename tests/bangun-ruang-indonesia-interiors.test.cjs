@@ -21,10 +21,10 @@ const canvas=()=>({
   set:(target,key,value)=>{target[key]=value;return true;}
  })
 });
-test('66 context-specific Indonesian rooms and 44 additional reusable furniture definitions',()=>{
+test('66 Indonesian room recipes and 11 registered NJH MART additions',()=>{
  assert.equal(pack.count,66);
- assert.equal(Object.keys(pack.types).length,44);
- assert.equal(Object.keys(model.types).length,61);
+ assert.equal(Object.keys(pack.types).length,55);
+ assert.equal(Object.keys(model.types).length,72);
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('minimarket')));
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('mushola')));
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('puskesmas')));
