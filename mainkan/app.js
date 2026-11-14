@@ -11,7 +11,7 @@ const base=String(window.MAINKAN_CONFIG?.apiBase||'').replace(/\/$/,'');
 const apiReady=/^https:\/\//i.test(base)||/^http:\/\/localhost(?::\d+)?$/i.test(base);
 const allowed=['genesis_male_nude','genesis_female_nude'];
 const frame=$('semestaFrame');
-const unavailable='Login tes belum terhubung. Gunakan Mainkan Preview.';
+const unavailable='Login tes belum terhubung. Gunakan Main Tanpa Akun.';
 const previewMode=new URLSearchParams(location.search).get('flowPreview')==='1';
 let graph=F.preset('default'),currentNode=null,stage='splashScreen',loginMode='login';
 let testPlayerId='';
@@ -27,7 +27,7 @@ function screen(name){
  stage=name;
  document.body.classList.toggle('mainkan-playing',name==='gameScreen'||name==='pauseScreen');
  screens.forEach(id=>{$(id).hidden=id!==name;});
- $('statusText').textContent=name==='gameScreen'?'SEMESTA / NATIVE PLAY':name==='characterScreen'?'CHARACTER CREATOR':name==='pauseScreen'?'GAME MENU':name.toUpperCase();
+ $('statusText').textContent=({splashScreen:'Memuat…',welcomeScreen:'Menu Utama',loginScreen:'Login',characterScreen:'Buat Karakter',confirmScreen:'Konfirmasi Karakter',loadingScreen:'Masuk ke kota…',tutorialScreen:'Hari Pertama',gameScreen:'Main',pauseScreen:'Menu Jeda',messageScreen:'Info'})[name]||name;
 }
 function find(id){return F.get(graph,id);}
 function nextFrom(n,branch){
@@ -68,7 +68,7 @@ function showNode(id){
     function part(){
      if(ticket!==sequence)return;
      index++;$('progressFill').style.width=(100*index/repeats)+'%';
-     $('bootText').textContent=(n.description||'Mainkan.exe startup')+' ('+index+'/'+repeats+')';
+     $('bootText').textContent=(n.description||'Memulai Namanya Juga Hidup')+' ('+index+'/'+repeats+')';
      if(index<repeats)setTimeout(part,duration);
      else setTimeout(()=>{if(ticket===sequence)showNode(nextFrom(n));},duration);
     }

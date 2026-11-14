@@ -1,0 +1,315 @@
+/* Namanya Juga Hidup — the Game · Windows 98 / Y2K skin (UI only).
+   Loaded after the inline Mainkan styles. Restyles chrome, adds the wizard
+   step bar and the fullscreen play HUD. No game logic, ids, storage keys or
+   postMessage contracts are changed here. */
+:root{
+ --w-face:#c0c0c0;--w-hl:#fff;--w-lt:#dfdfdf;--w-sh:#808080;--w-dk:#0a0a0a;
+ --w-t0:#000080;--w-t1:#1084d0;--w-ti0:#808080;--w-ti1:#b5b5b5;
+ --w-desk:#008080;--w-sel:#000080;--w-tip:#ffffe1;--w-bad:#800000;
+ --w-font:"MS Sans Serif","Microsoft Sans Serif","Pixelated MS Sans Serif",Tahoma,Geneva,Verdana,"DejaVu Sans",sans-serif;
+ --w-mono:"Fixedsys","Lucida Console","Courier New",monospace;
+ --sat:env(safe-area-inset-top,0px);--sar:env(safe-area-inset-right,0px);
+ --sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);
+ --tap:28px;
+ font-family:var(--w-font);font-size:12px;color:#000;background:var(--w-desk);
+}
+@media (pointer:coarse){:root{--tap:40px}}
+html,body{-webkit-font-smoothing:none;font-smooth:never;text-rendering:optimizeSpeed}
+button,input,select{font-family:var(--w-font)}
+*{border-radius:0!important}
+
+/* ---------- desktop + window ---------- */
+#desktop{background:var(--w-desk)!important;background-image:none!important;padding:12px 12px calc(44px + var(--sab))}
+.window{background:var(--w-face)!important;border:1px solid!important;border-color:var(--w-lt) var(--w-dk) var(--w-dk) var(--w-lt)!important;
+ box-shadow:inset 1px 1px 0 var(--w-hl),inset -1px -1px 0 var(--w-sh)!important;padding:3px;width:min(100%,960px)}
+.titlebar{min-height:22px;padding:2px 3px 2px 4px;gap:5px;background:linear-gradient(90deg,var(--w-t0),var(--w-t1))!important;
+ font-weight:bold;font-size:12px;letter-spacing:0;color:#fff}
+.titlebar .icon{background:none;border:0;padding:0;width:16px;height:16px;display:grid;place-items:center}
+.titlebar .icon svg{display:block}
+.titlebar .controls{gap:0}.titlebar .controls span,.titlebar .controls button{width:16px;height:14px;font:bold 10px/1 var(--w-font);color:#000;
+ background:var(--w-face);border:0;padding:0;display:grid;place-items:center;
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)}
+.titlebar .controls span:last-child,.titlebar .controls button:last-child{margin-left:2px}
+.menubar{background:var(--w-face)!important;border-bottom:0;padding:1px 4px;min-height:22px;gap:0;flex-wrap:nowrap;align-items:center}
+.menubar>span{padding:2px 7px}
+.menubar>span:hover{background:var(--w-sel);color:#fff}
+.njh-dev{margin-left:auto;position:relative}
+.njh-dev>summary{list-style:none;cursor:pointer;padding:2px 7px;color:#000}
+.njh-dev>summary::-webkit-details-marker{display:none}
+.njh-dev[open]>summary{background:var(--w-sel);color:#fff}
+.njh-dev .njh-dev-menu{position:absolute;right:0;top:100%;z-index:30;display:grid;min-width:170px;padding:2px;background:var(--w-face);
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-lt),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-hl)}
+.njh-dev .njh-dev-menu a,.njh-dev .njh-dev-menu button{all:unset;display:block;padding:4px 18px;color:#000;cursor:pointer;font:12px var(--w-font)}
+.njh-dev .njh-dev-menu a:hover,.njh-dev .njh-dev-menu button:hover,.njh-dev .njh-dev-menu a:focus,.njh-dev .njh-dev-menu button:focus{background:var(--w-sel);color:#fff}
+.njh-dev .njh-dev-menu small{display:block;padding:3px 6px;color:var(--w-sh);border-top:1px solid var(--w-sh);box-shadow:0 1px var(--w-hl) inset;margin-top:2px}
+.screen:not(#gameScreen){background:var(--w-face)!important;padding:clamp(10px,2.2vw,20px)}
+.screen h1{font:bold clamp(18px,2.6vw,24px)/1.15 var(--w-font);letter-spacing:0;color:#000;margin:2px 0 8px}
+.screen h2{font:bold 12px var(--w-font);margin:0 0 6px}
+.muted{color:#000;line-height:1.45}.micro{font-size:11px;color:#404040}
+.hr{border-top:1px solid var(--w-sh);border-bottom:1px solid var(--w-hl);height:0;margin:12px 0}
+
+/* ---------- controls ---------- */
+.btn,.cc-win-button{background:var(--w-face)!important;color:#000;border:0!important;padding:4px 14px;min-height:var(--tap);min-width:75px;
+ font:12px var(--w-font);box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)!important;transition:none}
+.btn:active:not(:disabled),.btn.is-on{box-shadow:inset 1px 1px var(--w-dk),inset -1px -1px var(--w-hl),inset 2px 2px var(--w-sh),inset -2px -2px var(--w-lt)!important;padding:5px 13px 3px 15px}
+.btn.primary{background:var(--w-face)!important;font-weight:bold;color:#000;
+ box-shadow:0 0 0 1px var(--w-dk),inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)!important}
+.btn.primary:hover:not(:disabled){background:var(--w-face)!important}
+.btn.compact{min-height:max(24px,var(--tap));padding:2px 10px}
+.btn:disabled,.btn[aria-disabled=true]{opacity:1;color:var(--w-sh)!important;text-shadow:1px 1px 0 var(--w-hl);cursor:not-allowed}
+.btn:focus-visible{outline:1px dotted #000!important;outline-offset:-5px}
+.field label{font:12px var(--w-font);font-weight:normal}
+.field input,.field select{border:0!important;padding:5px 6px;min-height:var(--tap);background:#fff;
+ box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh),inset -2px -2px var(--w-lt),inset 2px 2px var(--w-dk)}
+.tabs{gap:0;margin-bottom:0;padding-left:2px}
+.tab{background:var(--w-face);border:0;padding:4px 12px;min-height:var(--tap);box-shadow:inset 1px 1px var(--w-hl),inset -1px 0 var(--w-dk),inset -2px 0 var(--w-sh)}
+.tab.active{font-weight:normal;position:relative;top:1px}
+.status{color:#000}.status.error{color:var(--w-bad)}
+.progress{height:20px;background:#fff;border:0;padding:2px;box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh)}
+.progress div{background:repeating-linear-gradient(90deg,var(--w-sel) 0 9px,transparent 9px 11px)!important;transition:width .25s steps(8)}
+.njh-soon{display:inline-block;margin-left:6px;padding:0 4px;font:bold 9px/14px var(--w-font);letter-spacing:.04em;color:#000;background:var(--w-tip);
+ border:1px solid #000;text-shadow:none;vertical-align:1px}
+.njh-soon.nologic{background:#fff}
+
+/* ---------- wizard step bar ---------- */
+.njh-steps{display:flex;gap:2px;margin:0;padding:3px 4px;list-style:none;background:var(--w-face);border-top:1px solid var(--w-sh);
+ box-shadow:inset 0 1px var(--w-hl);overflow-x:auto;scrollbar-width:none}
+.njh-steps::-webkit-scrollbar{display:none}
+.njh-steps li{flex:1 1 0;min-width:max-content;display:flex;align-items:center;gap:5px;padding:2px 8px;font-size:11px;color:var(--w-sh);text-shadow:1px 1px var(--w-hl);
+ box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl)}
+.njh-steps li b{display:inline-grid;place-items:center;width:15px;height:15px;font-size:10px;background:var(--w-face);color:inherit;
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl)}
+.njh-steps li.done{color:#000;text-shadow:none}
+.njh-steps li.done b{background:#000;color:#fff;box-shadow:none}
+.njh-steps li.now{background:var(--w-sel);color:#fff;text-shadow:none;font-weight:bold;box-shadow:none}
+.njh-steps li.now b{color:#000}
+.njh-steps li.skip{text-decoration:line-through}
+.njh-steps[hidden]{display:none!important}
+
+/* ---------- title art (splash / menu / login) ---------- */
+.hero{background:#000080!important;border:0!important;padding:18px 20px;min-height:220px;justify-content:flex-end;color:#fff;
+ box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl),inset 2px 2px var(--w-dk),inset -2px -2px var(--w-lt)}
+.hero:before{background:
+  linear-gradient(180deg,#000040 0%,#000080 46%,#1084d0 100%)!important}
+.hero:after{background:#000020!important;opacity:.9!important;height:34%!important}
+.hero strong{font:900 clamp(26px,4.4vw,42px)/.95 "Arial Black","Franklin Gothic Heavy",Impact,var(--w-font)!important;text-shadow:2px 2px 0 #000!important;letter-spacing:-.01em;text-transform:uppercase}
+.hero em.njh-sub{display:block;font:italic clamp(16px,2.3vw,22px)/1 "Times New Roman",Times,serif;color:#ffff80;margin-top:4px;letter-spacing:.02em}
+.hero small{font:11px/1.45 var(--w-font);margin-top:10px;color:#dfdfdf}
+.njh-byline{position:absolute!important;right:10px;top:8px;font:10px var(--w-mono);color:#c0c0c0;z-index:3}
+.split{gap:18px}
+
+/* splash as a boot dialog */
+#splashScreen .njh-boot{display:grid;gap:10px;align-content:center}
+#splashScreen h1{font-size:16px}
+
+/* menu utama */
+.njh-menu{display:grid;gap:6px;max-width:300px}
+.njh-menu .btn{width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;min-height:max(30px,var(--tap))}
+.njh-menu .njh-sep{height:0;border-top:1px solid var(--w-sh);border-bottom:1px solid var(--w-hl);margin:4px 0}
+.njh-menu-note{font-size:11px;color:#404040;margin:8px 0 0;max-width:320px;line-height:1.4}
+
+/* group box (Win98 fieldset) */
+.njh-group{border:0;margin:10px 0;padding:12px 10px 10px;position:relative;
+ box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl),inset 2px 2px var(--w-hl),inset -2px -2px var(--w-sh)}
+.njh-group>legend{padding:0 4px;font-size:12px;position:absolute;top:-7px;left:8px;background:var(--w-face)}
+.njh-wizard-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--w-sh);box-shadow:inset 0 1px var(--w-hl)}
+.njh-wizard-actions .spacer{flex:1}
+
+#confirmList,#charSummary,.guide,#previewNotice,.inline-msg{background:#fff!important;border:0!important;
+ box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh),inset -2px -2px var(--w-lt),inset 2px 2px var(--w-dk)}
+#confirmList{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2px 16px;padding:8px 10px}
+
+/* tutorial "Hari Pertama" */
+.njh-tut{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:6px 0}
+.njh-tut .card{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:start;padding:8px;background:#fff;
+ box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh)}
+.njh-tut .card svg{width:32px;height:32px}
+.njh-tut .card>div>b:first-child{display:block;margin-bottom:2px}
+.njh-tut kbd{display:inline-block;min-width:18px;padding:0 4px;font:11px/16px var(--w-font);text-align:center;background:var(--w-face);
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl);margin:0 1px}
+.njh-goal{display:flex;gap:8px;align-items:flex-start;padding:8px;background:var(--w-tip);border:1px solid #000}
+
+/* pause = Win98 dialog */
+#pauseScreen .njh-pause{max-width:360px;margin:0 auto}
+#pauseScreen .njh-menu{max-width:none}
+#pauseScreen .btn{min-width:0}
+
+/* loading */
+#loadingScreen .progress{max-width:none}
+
+/* statusbar + taskbar */
+.statusbar{border-top:0;padding:2px 0 0;gap:2px;font:11px var(--w-font);color:#000}
+.statusbar>span{flex:1;padding:1px 4px;box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl)}
+.statusbar>span:last-child{flex:0 0 auto}
+.taskbar{background:var(--w-face)!important;border-top:0!important;box-shadow:inset 0 1px var(--w-lt),inset 0 2px var(--w-hl);min-height:calc(30px + var(--sab));
+ padding:3px 3px calc(3px + var(--sab));gap:4px}
+.start{display:flex;align-items:center;gap:4px;font:bold 12px var(--w-font);padding:2px 6px;border:0;background:var(--w-face);min-height:max(22px,var(--tap));
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)}
+.taskbar .appname{border:0;background:var(--w-face) repeating-conic-gradient(var(--w-hl) 0 25%,var(--w-face) 0 50%) 0 0/2px 2px;padding:3px 8px;min-width:170px;font-weight:bold;
+ box-shadow:inset 1px 1px var(--w-dk),inset -1px -1px var(--w-hl),inset 2px 2px var(--w-sh)}
+.taskbar .time{border:0;padding:3px 10px;box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl)}
+.njh-mark{position:fixed;right:max(10px,var(--sar));bottom:calc(36px + var(--sab));z-index:11;pointer-events:none;user-select:none;
+ font:10px/1 var(--w-mono);color:#fff;opacity:.7}
+
+/* creator fits the window, keep Paint look */
+#characterScreen{padding:4px!important}
+.cc-win-button{min-width:88px}
+
+@media (max-width:650px){
+ #desktop{padding:0 0 calc(34px + var(--sab))}
+ .window{width:100%;max-height:calc(100dvh - 34px - var(--sab))!important;height:calc(100dvh - 34px - var(--sab));border:0!important;box-shadow:none!important;padding:0}
+ .titlebar{font-size:11px}
+ .hero{min-height:130px;padding:12px}
+ .njh-steps li{padding:2px 5px}
+ .njh-steps li span{display:none}
+ .njh-steps li.now span{display:inline}
+ .njh-tut{grid-template-columns:1fr}
+ .njh-menu{max-width:none}
+ .taskbar .appname{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .njh-mark{bottom:calc(40px + var(--sab))}
+}
+
+/* =====================================================================
+   PLAY MODE · fullscreen world + Win98 HUD windows
+   ===================================================================== */
+body.njh-play #desktop{padding:0!important;height:100dvh;display:block}
+body.njh-play .window,body.mainkan-playing.njh-play .window{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+ max-height:none!important;padding:0!important;border:0!important;box-shadow:none!important;background:#000!important}
+body.njh-play .titlebar,body.njh-play .menubar,body.njh-play .njh-steps,body.njh-play .statusbar,body.njh-play .taskbar,
+body.njh-play .game-top,body.njh-play .njh-mark{display:none!important}
+body.njh-play #gameScreen{height:100%!important;width:100%!important}
+body.njh-play #viewport{flex:1 1 0!important;min-height:0!important;height:100%}
+/* paused: dialog centered over the dimmed desktop, still no outer chrome */
+body.njh-paused #desktop{padding:0!important;background:#004040!important}
+body.njh-paused .window{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%);width:min(380px,calc(100vw - 24px))!important;
+ height:auto!important;max-height:calc(100dvh - 24px)!important;padding:3px!important}
+body.njh-paused .menubar,body.njh-paused .njh-steps,body.njh-paused .taskbar,body.njh-paused .statusbar{display:none!important}
+
+.njh-hud{position:absolute;inset:0;z-index:3;pointer-events:none;font:11px/1.25 var(--w-font);color:#000}
+.njh-hud[hidden]{display:none!important}
+.w98{position:absolute;pointer-events:auto;background:var(--w-face);padding:3px;
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-lt),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-hl)}
+.w98-title{display:flex;align-items:center;gap:4px;min-height:18px;padding:1px 2px 1px 4px;color:#fff;font-weight:bold;font-size:11px;
+ background:linear-gradient(90deg,var(--w-t0),var(--w-t1));white-space:nowrap;overflow:hidden}
+.w98-title>span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis}
+.w98-title button{width:16px;height:14px;padding:0;border:0;font:bold 9px/1 var(--w-font);color:#000;background:var(--w-face);display:grid;place-items:center;flex:none;
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)}
+.w98-title button:active{box-shadow:inset 1px 1px var(--w-dk),inset -1px -1px var(--w-hl)}
+.w98-title.inactive{background:linear-gradient(90deg,var(--w-ti0),var(--w-ti1));color:var(--w-face)}
+.w98-body{padding:5px 4px 3px}
+.w98-well{background:#fff;padding:2px 4px;box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh),inset -2px -2px var(--w-lt),inset 2px 2px var(--w-dk)}
+
+/* profile (top-left) */
+.njh-profile{left:calc(8px + var(--sal));top:calc(8px + var(--sat));width:270px}
+.njh-profile .w98-body{display:grid;grid-template-columns:44px 1fr;gap:6px;align-items:center}
+.njh-avatar{width:44px;height:64px;background:#008080;display:grid;place-items:end center;overflow:hidden;
+ box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh),inset 2px 2px var(--w-dk)}
+.njh-avatar canvas{width:36px;height:63px;image-rendering:pixelated;display:block}
+.njh-pinfo{display:grid;gap:3px;min-width:0}
+.njh-pname{display:flex;justify-content:space-between;gap:6px;font-weight:bold;font-size:12px;white-space:nowrap}
+.njh-pname small{font-weight:normal;font-size:11px;color:#000}
+.njh-clockbtn{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:6px;padding:2px 4px;font:11px var(--w-font);color:#000;
+ box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl)}
+.njh-clockbtn:focus-visible{outline:1px dotted #000}
+.njh-clockbtn b{font-family:var(--w-mono);font-weight:normal}
+.njh-wallet{font:bold 13px/18px var(--w-mono);text-align:right;color:#000}
+
+/* needs (top-right) */
+.njh-needs{right:calc(8px + var(--sar));top:calc(8px + var(--sat));width:236px}
+.njh-needs .w98-body{display:grid;gap:3px}
+.njh-need{display:grid;grid-template-columns:70px 1fr 26px;gap:5px;align-items:center}
+.njh-need label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.njh-need output{text-align:right;font-family:var(--w-mono)}
+.njh-bar{height:12px;background:#fff;padding:2px;box-shadow:inset -1px -1px var(--w-hl),inset 1px 1px var(--w-sh)}
+.njh-bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--w-sel) 0 6px,transparent 6px 8px);transition:width .3s steps(6)}
+.njh-need.warn .njh-bar i{background:repeating-linear-gradient(90deg,var(--w-bad) 0 6px,transparent 6px 8px)}
+.njh-need.warn label{color:var(--w-bad);font-weight:bold}
+
+/* key hints (bottom-left, desktop) */
+.njh-keys{left:calc(8px + var(--sal));bottom:calc(8px + var(--sab));max-width:420px}
+.njh-keys .w98-body{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.njh-keys kbd{display:inline-block;min-width:18px;padding:0 4px;font:10px/15px var(--w-font);text-align:center;background:var(--w-face);margin-right:2px;
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl)}
+
+/* dock (bottom-right) */
+.njh-dock{right:calc(8px + var(--sar));bottom:calc(8px + var(--sab));display:flex;gap:2px;padding:3px}
+.njh-dock .njh-app,#njhDock #gamePhone,#njhDock #gameBag{position:static!important;transform:none!important;left:auto!important;top:auto!important;
+ display:grid!important;grid-template-rows:20px auto;place-items:center;gap:1px;width:58px;min-width:0!important;min-height:46px;padding:3px 2px!important;
+ font:11px/1.1 var(--w-font)!important;color:#000;background:var(--w-face)!important;border:0!important;cursor:pointer;
+ box-shadow:inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)!important}
+.njh-dock .njh-app:active,#njhDock #gamePhone:active,#njhDock #gameBag:active,.njh-dock .njh-app.is-on{
+ box-shadow:inset 1px 1px var(--w-dk),inset -1px -1px var(--w-hl),inset 2px 2px var(--w-sh),inset -2px -2px var(--w-lt)!important}
+.njh-dock svg{width:20px;height:20px;display:block}
+.njh-dock .njh-dsep{width:0;margin:2px 3px;border-left:1px solid var(--w-sh);border-right:1px solid var(--w-hl)}
+
+/* Action / Run (existing Mainkan buttons, fixed Win98 placement) */
+body.njh-play #viewport #mainkanGameBar [data-hud-item]{transform:none!important}
+body.njh-play #viewport #gameWallet{display:none!important}
+body.njh-play #viewport #gameAction,body.njh-play #viewport #gameRun{left:auto!important;top:auto!important;bottom:calc(72px + var(--sab));
+ min-height:40px;font:bold 12px var(--w-font)!important;color:#000;background:var(--w-face)!important;border:0!important;padding:4px 12px!important;
+ box-shadow:0 0 0 1px var(--w-dk),inset -1px -1px var(--w-dk),inset 1px 1px var(--w-hl),inset -2px -2px var(--w-sh),inset 2px 2px var(--w-lt)!important}
+body.njh-play #viewport #gameAction{right:calc(8px + var(--sar));min-width:104px}
+body.njh-play #viewport #gameRun{right:calc(124px + var(--sar));min-width:76px;font-weight:normal!important}
+body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
+ box-shadow:0 0 0 1px var(--w-dk),inset 1px 1px var(--w-dk),inset -1px -1px var(--w-hl),inset 2px 2px var(--w-sh)!important}
+#gameAction small,#gameRun small{display:block;font:10px var(--w-font);font-weight:normal}
+
+/* floating Win98 windows (Status, placeholders, toasts) */
+.njh-win{left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100% - 16px));max-height:calc(100% - 24px);display:flex;flex-direction:column;z-index:5}
+.njh-win[hidden]{display:none!important}
+.njh-win .w98-body{overflow:auto;display:grid;gap:8px}
+.njh-win table{width:100%;border-collapse:collapse;background:#fff}
+.njh-win td,.njh-win th{padding:2px 6px;text-align:left;border-bottom:1px solid var(--w-lt);font-weight:normal}
+.njh-win th{color:#404040;width:44%}
+.njh-ladder{display:flex;gap:2px;align-items:stretch}
+.njh-ladder span{flex:1;padding:4px;text-align:center;background:#fff;box-shadow:inset 1px 1px var(--w-sh),inset -1px -1px var(--w-hl);color:var(--w-sh)}
+.njh-ladder span.on{background:var(--w-sel);color:#fff;box-shadow:none}
+.njh-row{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+
+/* touch / phone layout */
+@media (pointer:coarse){
+ .w98-title button{width:28px;height:24px;font-size:12px}
+ .njh-keys{display:none!important}
+}
+@media (max-width:760px){
+ .njh-profile{right:calc(6px + var(--sar));left:calc(6px + var(--sal));top:calc(6px + var(--sat));width:auto}
+ .njh-profile .w98-title{display:none}
+ .njh-profile .w98-body{grid-template-columns:34px 1fr auto;padding:3px}
+ .njh-avatar{width:34px;height:48px}.njh-avatar canvas{width:27px;height:47px}
+ .njh-pinfo{grid-template-columns:1fr auto;gap:2px 6px}
+ .njh-pname{grid-column:1/3}
+ .njh-wallet{font-size:12px}
+ .njh-ptools{display:flex;flex-direction:column;gap:2px}
+ .njh-needs{left:calc(6px + var(--sal));right:calc(6px + var(--sar));top:calc(68px + var(--sat));width:auto}
+ .njh-needs .w98-title{display:none}
+ .njh-needs .w98-body{grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 6px;padding:3px}
+ .njh-need{grid-template-columns:1fr 22px;gap:0 3px}
+ .njh-need label{grid-column:1/3;font-size:10px}
+ .njh-need .njh-bar{height:10px}
+ .njh-dock{flex-direction:column;bottom:calc(84px + var(--sab));right:calc(6px + var(--sar))}
+ .njh-dock .njh-dsep{width:auto;height:0;margin:2px 3px;border-left:0;border-right:0;border-top:1px solid var(--w-sh);border-bottom:1px solid var(--w-hl)}
+ .njh-dock .njh-app,#njhDock #gamePhone,#njhDock #gameBag{width:48px;min-height:44px;font-size:9px!important;grid-template-rows:18px auto}
+ body.njh-play #viewport #gameAction{bottom:calc(10px + var(--sab));right:calc(6px + var(--sar));min-width:0;width:66px;height:66px;padding:2px!important}
+ body.njh-play #viewport #gameRun{bottom:calc(10px + var(--sab));right:calc(80px + var(--sar));min-width:0;width:54px;height:54px;padding:2px!important}
+}
+@media (max-width:760px) and (max-height:520px){ /* phone landscape */
+ .njh-needs{left:auto;width:300px;top:calc(6px + var(--sat))}
+ .njh-profile{right:auto;width:300px}
+ .njh-dock{flex-direction:row;bottom:calc(84px + var(--sab))}
+}
+@media (prefers-reduced-motion:reduce){.njh-bar i,.progress div{transition:none}}
+.njh-tut .card>i{width:32px;height:32px;display:block}
+@media (pointer:coarse){.njh-kb{display:none!important}}
+@media not (pointer:coarse){.njh-touch{display:none!important}}
+.njh-touch,.njh-kb{display:inline}
+
+/* popup (Nokia / bag) open: on phones the HUD steps aside, one clear close button */
+.njh-modal-close{position:absolute;pointer-events:auto;right:calc(6px + var(--sar));top:calc(6px + var(--sat));z-index:7;font-weight:bold}
+.njh-modal-close[hidden]{display:none!important}
+@media (min-width:761px){.njh-modal-close{display:none!important}}
+@media (max-width:760px){
+ body.njh-modal .njh-profile,body.njh-modal .njh-needs,body.njh-modal .njh-dock,
+ body.njh-modal.njh-play #viewport #gameAction,body.njh-modal.njh-play #viewport #gameRun{visibility:hidden}
+ .njh-mark{bottom:calc(9px + var(--sab));right:64px;color:#000;opacity:.55;z-index:13}
+ .taskbar .appname{padding-right:70px}
+}
