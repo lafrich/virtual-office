@@ -49,7 +49,7 @@
      '" value="'+j[k]+'"'+(authored?' disabled title="Edit di MONEY dan ENTITIES"':'')+'></td>').join('')+
    '</tr>').join('')+'</tbody></table></div></div>'+
    '<div class="card"><h3>PARAMETER CORE SURVIVAL</h3><div class="context-grid">'+
-   Object.entries({fishEnergy:'Energi / mancing',fishMinutes:'Durasi mancing (menit)',coffeePrice:'Harga kopi (Rp)',roomPrice:'Beli akses kost sekali (Rp)',
+   Object.entries({fishEnergy:'Energi / mancing',fishMinutes:'Durasi mancing (menit)',coffeePrice:'Harga kopi (Rp)',teaPrice:'Harga es teh (Rp)',streetFoodPrice:'Harga jajanan kaki lima (Rp)',wartegMealPrice:'Harga makan warteg (Rp)',roomPrice:'Beli akses kost sekali (Rp)',
     fridgePrice:'Harga kulkas (Rp)',tokenPrice:'Token listrik (Rp)',tokenUnits:'Unit listrik / token',
     fridgeCoolingMultiplier:'Efektivitas pendinginan kulkas (x)',tokenDurationMinutes:'Durasi 1 unit token (menit)',
     faintRestMinutes:'Bed rest pingsan (menit)',faintRecoveryEnergy:'Energi setelah bed rest',arrestMoralThreshold:'Ambang moral hansip',

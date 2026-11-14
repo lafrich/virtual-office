@@ -22,7 +22,7 @@
         "notifications": false
       }
     },
-    "action": { "enabled": true, "singleContextButton": true, "defaultIdle": "fart" },
+    "action": { "enabled": true, "singleContextButton": true, "defaultIdle": "fart", "wallPeeFacingRequired": true },
     "bag": { "enabled": true, "separateFromPhone": true, "slots": 8 },
     "movement": { "enabled": true, "controllerOnly": true, "walkSpeed": 1.4, "runSpeed": 2.2 },
     "energy": { "enabled": false, "todo": true, "zeroCanMove": true, "lowEnergySlowFactor": 0.35, "crossingCost": 0 },

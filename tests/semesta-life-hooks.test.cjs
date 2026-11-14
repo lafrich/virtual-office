@@ -48,7 +48,12 @@ function harness(opts={}){
   worldToScreen:(x,y,z)=>({x:100+x,y:50-y,visible:z<10}),
   interiorFurniture:opts.interiorFurniture||(()=>[]),
   resetCurrent:()=>{state=Life.stateFrom({wallet:6000},Life.defaults());},
-  onEvent:(type,payload)=>events.push({type,payload})
+  onEvent:(type,payload)=>events.push({type,payload}),
+  getFacing:()=>opts.facing||pos.facing||null,
+  getNpcs:()=>opts.npcs||[],
+  getGameplay:()=>opts.gameplay||{modules:{action:{wallPeeFacingRequired:opts.wallPeeFacingRequired!==false}}},
+  enterInterior:id=>opts.enterInterior?opts.enterInterior(id):false,
+  runEconomy:(action,args)=>{const r=Life.run(Life.defaults(),state,action,args||{});if(r.ok)state=r.state;return r;}
  };
  if(opts.persistNow)ctx.persist();
  const api=Hooks.create(ctx);
@@ -73,7 +78,7 @@ test('spawnAt teleports to kost/tent and emits mainkan:spawn-done',()=>{
 test('nearbyActions lists nearby sites and is runAction-id shaped',()=>{
  const h=harness({pos:{x:8,y:0,z:0}});
  const list=h.api.nearbyActions();
- assert.ok(list.some(a=>a.id==='eat'&&a.label==='Makan'&&a.price===2500));
+ assert.ok(list.some(a=>a.id==='eat'&&a.label==='Makan Warteg'&&a.price===12000));
  assert.equal(list.spot,'Warteg');
  assert.ok(list.every(a=>'id' in a&&'label' in a&&'price' in a));
 });
@@ -138,7 +143,7 @@ test('questMarkers, enterables, worldToScreen, playerPosition',()=>{
    {id:'tree-1',name:'Pohon',x:1,z:1}
   ]
  });
- assert.deepEqual(h.api.questMarkers(),[{npcId:'bu-sari',state:'ready'}]);
+ assert.ok(h.api.questMarkers().some(m=>m.npcId==='bu-sari'&&m.state==='ready'));
  const doors=h.api.enterables();
  assert.equal(doors.length,1);
  assert.equal(doors[0].id,'warteg-1');
@@ -254,7 +259,9 @@ test('life-play public API lists every hook when the factory is loaded',()=>{
  vm.runInNewContext(fs.readFileSync(path.join(R,'world-builder/semesta-life-play.js'),'utf8'),{window,module:{exports:{}},require});
  const api=window.SemestaLifePlay;
  for(const name of ['spawnAt','nearbyActions','pause','resume','clock','questMarkers','enterables',
-  'worldToScreen','hasSave','saveMeta','saveSlot','loadSlot','listSlots','resetSave','onDayEnd','playerPosition','runAction'])
+  'worldToScreen','hasSave','saveMeta','saveSlot','loadSlot','listSlots','resetSave','onDayEnd','playerPosition','runAction',
+  'dayReport','level','skills','reputation','housingProgress','quests','acceptQuest','turnInQuest','jobs',
+  'enterInterior','furnitureSpots','messages','sites','openMap'])
   assert.equal(typeof api[name],'function',name);
  api.attach({
   getWorld:()=>({objects:[]}),getPosition:()=>({x:0,z:0}),getCityId:()=>'city-test',
@@ -265,4 +272,134 @@ test('life-play public API lists every hook when the factory is loaded',()=>{
  assert.deepEqual(api.enterables(),[]);
  assert.equal(api.isPaused(),false);
  api.pause();assert.equal(api.isPaused(),true);api.resume();
+});
+
+
+test('life hooks: dayReport, level, skills, reputation, housing, jobs, messages, furnitureSpots, sites',()=>{
+ const h=harness({pos:{x:8,y:0,z:0}});
+ h.state.wallet=2_000_000;h.state.experience=25;h.state.actionCounts={work:6,workEarn:12000,eat:2};
+ const eat=Life.run(Life.defaults(),h.state,'eat',{place:'warteg'});
+ assert.ok(eat.ok);h.state=eat.state;
+ const report=h.api.dayReport(1);
+ assert.equal(report.day,1);
+ assert.equal(report.expense['Makan warung'],12000);
+ assert.equal(typeof report.start,'number');assert.equal(typeof report.end,'number');
+ assert.ok(report.status&&'energy' in report.status);
+ assert.equal(h.api.level(),3);
+ const skills=h.api.skills();
+ assert.ok(skills.every(s=>s.label&&s.level>=1&&s.level<=10));
+ const rep=h.api.reputation();
+ assert.ok(rep.every(s=>s.label&&s.value>=0&&s.value<=100));
+ const house=h.api.housingProgress();
+ assert.equal(house.current,'tenda');assert.equal(house.next,'kost');
+ assert.ok(house.targets.some(t=>t.label.startsWith('Level')));
+ const jobs=h.api.jobs();
+ assert.ok(jobs.some(j=>j.id==='pak_ogah'&&j.wage&&j.per));
+ const inbox=h.api.messages();
+ assert.ok(inbox.length>=2);
+ assert.ok(inbox.every(m=>'from' in m&&'text' in m&&'t' in m));
+ const spots=h.api.furnitureSpots();
+ assert.ok(spots.length>=7);
+ assert.ok(spots.every(f=>'id' in f&&'label' in f&&'x' in f&&'y' in f&&'owned' in f&&Array.isArray(f.acts)));
+ const sites=h.api.sites();
+ assert.ok(sites.some(s=>s.id==='warung'&&s.placeholder===false));
+ assert.ok(sites.every(s=>'id' in s&&'label' in s&&'x' in s&&'z' in s&&'placeholder' in s));
+});
+
+test('quests persist, pay reward through the economy, and questMarkers follow state',()=>{
+ const h=harness({sites:[{id:'job_kang_parkir',jobId:'kang_parkir',label:'Kang Parkir',x:0,z:0}]});
+ const list=h.api.quests();
+ assert.ok(list.some(q=>q.id==='q_parkir'&&q.state==='available'));
+ const acc=h.api.acceptQuest('job_kang_parkir','q_parkir');
+ assert.equal(acc.ok,true);assert.equal(acc.state,'active');
+ assert.ok(h.api.messages().some(m=>/Biar Rapi/.test(m.text)));
+ assert.ok(!h.api.questMarkers().some(m=>m.npcId==='job_kang_parkir'));
+ h.state.hygiene=90;
+ const ready=h.api.quests().find(q=>q.id==='q_parkir');
+ assert.equal(ready.state,'ready');
+ assert.ok(h.api.questMarkers().some(m=>m.npcId==='job_kang_parkir'&&m.state==='ready'));
+ const before=h.state.wallet;
+ const done=h.api.turnInQuest('job_kang_parkir','q_parkir');
+ assert.equal(done.ok,true);assert.equal(done.reward,4000);
+ assert.equal(h.state.wallet,before+4000);
+ assert.equal(h.api.quests().find(q=>q.id==='q_parkir').state,'done');
+});
+
+test('enterables includes kost/warteg buildings even without the enterable flag',()=>{
+ const h=harness({objects:[
+  {id:'rumah-kost-a',name:'Kost Melati',x:10,z:10},
+  {id:'warteg-bu',name:'Warteg Bahari',x:12,z:12},
+  {id:'tree-1',name:'Pohon',x:1,z:1}
+ ]});
+ const doors=h.api.enterables().map(d=>d.id);
+ assert.ok(doors.includes('rumah-kost-a'));
+ assert.ok(doors.includes('warteg-bu'));
+ assert.ok(!doors.includes('tree-1'));
+});
+
+test('enterInterior returns true only when a real interior opened',()=>{
+ const opened=[];
+ const h=harness({enterInterior:id=>{opened.push(id);return id==='kost';}});
+ assert.equal(h.api.enterInterior('kost'),true);
+ assert.equal(h.api.enterInterior('d:kost'),true);
+ assert.equal(h.api.enterInterior('toko-gaib'),false);
+ assert.deepEqual(opened,['kost','kost','toko-gaib']);
+});
+
+test('wall_pee is offered only near a facing wall when bladder >= 65; stats match the Jiwa rule',()=>{
+ const wall={id:'tembok-1',name:'Tembok Kampung',type:'building',x:1.2,z:1.2};
+ const far=harness({pos:{x:0,y:0,z:0},facing:'se',objects:[wall]});
+ far.state.bladder=40;
+ assert.ok(!far.api.nearbyActions().some(a=>a.id==='wall_pee'),'low bladder hides the action');
+ far.state.bladder=70;
+ far.pos={x:20,y:0,z:20};
+ assert.ok(!far.api.nearbyActions().some(a=>a.id==='wall_pee'),'far from wall hides the action');
+ const back=harness({pos:{x:0,y:0,z:0},facing:'nw',objects:[wall],wallPeeFacingRequired:true});
+ back.state.bladder=70;
+ assert.ok(!back.api.nearbyActions().some(a=>a.id==='wall_pee'),'facing away hides the action');
+ const ready=harness({pos:{x:0,y:0,z:0},facing:'se',objects:[wall],wallPeeFacingRequired:true});
+ ready.state.bladder=70;ready.state.moral=50;ready.state.hygiene=80;
+ const act=ready.api.nearbyActions().find(a=>a.id==='wall_pee');
+ assert.ok(act);assert.equal(act.action,'wall_pee');
+ const r=Life.run(Life.defaults(),ready.state,'wall_pee',act.args);
+ assert.ok(r.ok);
+ assert.equal(r.state.moral,45);
+ assert.equal(r.state.bladder,0);
+ assert.equal(r.state.hygiene,75);
+ assert.equal(Life.WALL_PEE?null:undefined,undefined);
+ const reject=Life.run(Life.defaults(),ready.state,'pee_outside',{});
+ assert.equal(reject.ok,false);
+});
+
+test('fart is always on cooldown; moral drops only next to an NPC, who then reacts',()=>{
+ const alone=harness({pos:{x:0,y:0,z:0}});
+ alone.state.moral=50;alone.state.elapsedMinutes=10;alone.state.lastFartAt=-999;
+ const fart=alone.api.nearbyActions().find(a=>a.id==='fart');
+ assert.ok(fart);assert.equal(fart.args.witnessed,false);
+ const quiet=Life.run(Life.defaults(),alone.state,'fart',fart.args);
+ assert.ok(quiet.ok);
+ assert.equal(quiet.state.moral,50,'alone: no moral hit');
+ const soon=Life.run(Life.defaults(),quiet.state,'fart',{witnessed:false});
+ assert.equal(soon.ok,false,'cooldown 1 game minute');
+ const npc=harness({pos:{x:0,y:0,z:0},npcs:[{id:'npc_ogah',type:'life_npc',npc:true,x:1,z:1}]});
+ npc.state.moral=50;npc.state.elapsedMinutes=10;
+ const near=npc.api.nearbyActions().find(a=>a.id==='fart');
+ assert.ok(near);assert.equal(near.args.witnessed,true);
+ const loud=Life.run(Life.defaults(),npc.state,'fart',near.args);
+ assert.ok(loud.ok);
+ assert.equal(loud.state.moral,47);
+});
+
+test('open-map listener posts njh98:open-map to the parent',()=>{
+ const posts=[];
+ const {Hooks:H,Life:L}= {Hooks,Life};
+ const ctx={
+  window:{parent:{postMessage:(msg,origin)=>posts.push({msg,origin})},location:{origin:'http://local'},
+   addEventListener(){},__njhOpenMapBound:false},
+  getState:()=>L.stateFrom({},L.defaults()),getSites:()=>[],getWorld:()=>({objects:[]}),
+  getPos:()=>({x:0,y:0,z:0}),getConfig:()=>L.defaults()
+ };
+ const api=Hooks.create(ctx);
+ assert.equal(api.openMap().ok,true);
+ assert.equal(posts[0].msg.type,'njh98:open-map');
 });

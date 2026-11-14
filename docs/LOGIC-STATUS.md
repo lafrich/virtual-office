@@ -1,0 +1,112 @@
+# Life-play logic status (preview)
+
+Preview branch `preview/main-interiors-kost-warteg` only. Not live. Status:
+
+- **real** — implemented end-to-end against Jiwa / the Semesta save / a real map object.
+- **stub** — the hook or action works with a small data-driven or default implementation, not yet the finished authored content.
+- **placeholder-position** — the action itself works, but the site sits at an offset because `world.json` has no matching object.
+
+## Hooks (`SemestaLifePlay` / `SemestaPlay`)
+
+| Item | Status | Notes |
+|---|---|---|
+| `dayReport(day)` | real | From `transactions[].day` + persisted day-end snapshot |
+| `level()` | real | From `experience` |
+| `skills()` | real | From persisted `actionCounts` |
+| `reputation()` | real | From `actionCounts` + completed quests |
+| `housingProgress()` | stub | `tenda`/`kost` are real; `rumah` is a target list only (no buy-house action yet) |
+| `quests()` / `acceptQuest` / `turnInQuest` | stub | Data-driven table + real wallet reward via `quest_reward`; not Jiwa-authored quests |
+| `questMarkers()` | real | Follows those quest states; also world `quest_npc` objects |
+| `jobs()` | real | Jiwa `config.jobs` |
+| `enterInterior(id)` | real | Kost + warteg play interiors; otherwise `false` |
+| `furnitureSpots()` | real | Default 8×6 kost grid from the save; interior items when inside a room |
+| `messages()` | real | Persisted Nokia inbox |
+| `sites()` | real | `{id,label,x,z,placeholder,npc?}` |
+| `enterables()` | real | Flagged interiors + kost/warteg by name |
+| `nearbyActions()` / `runAction()` | real | Every SITE action, including at placeholder positions |
+| `spawnAt` / `clock` / `pause` / save slots | real | Existing hooks |
+| `njh98:open-map` | real | Listener forwards to the parent map window |
+| `wall_pee` | real | See actions |
+| `fart` | real | See actions |
+| `tea` | real | Es teh, Rp3.000, at the coffee site |
+
+## Site actions
+
+| Site id | Map | Action | Status |
+|---|---|---|---|
+| `loak` | real object | `sell_loak` | real |
+| `scavenge` | real object | `scavenge` | real |
+| `tree` | real object | `catch_fruit` | real |
+| `warung` | real object | `eat` (warteg Rp12.000) | real |
+| `bench` | real object | `rest` | real |
+| `fish` | placeholder-position | `fish` (no water tiles required; `spotId` is enough) | real + placeholder-position |
+| `siomay_batagor` | placeholder-position | `sell_fish` | real + placeholder-position |
+| `pasar_ikan` | placeholder-position | `sell_fish` | real + placeholder-position |
+| `job_silver` | placeholder-position | `work` | real + placeholder-position |
+| `job_pak_ogah` | placeholder-position | `work` | real + placeholder-position |
+| `job_kang_parkir` | placeholder-position | `work` | real + placeholder-position |
+| `premium_job` | placeholder-position | `work` | real + placeholder-position |
+| `coffee` | placeholder-position | `coffee`, `tea` | real + placeholder-position |
+| `public_wc` | placeholder-position | `public_toilet` | real + placeholder-position |
+| `public_bath` | placeholder-position | `public_shower` | real + placeholder-position |
+| `kost` | placeholder-position unless a real kost / `__njh_play_kost__` is on the map | `buy_room` / in-room actions | real; position may be placeholder |
+| `tent` | placeholder-position until hobo spawn | `sleep` | real + placeholder-position |
+| `prayer_islam_a/b/c` | placeholder-position | `worship` | real + placeholder-position |
+| `prayer_kristen` | placeholder-position | `worship` | real + placeholder-position |
+| `prayer_katolik` | placeholder-position | `worship` | real + placeholder-position |
+| `prayer_hindu` | placeholder-position | `worship` | real + placeholder-position |
+| `prayer_buddha` | placeholder-position | `worship` | real + placeholder-position |
+| `prayer_konghucu` | placeholder-position | `worship` | real + placeholder-position |
+| `hansip` | placeholder-position | `talk`, `arrest` | real + placeholder-position |
+| `help` | placeholder-position | `help` | real + placeholder-position |
+| `charity` | placeholder-position | `charity` | real + placeholder-position |
+| `course` | placeholder-position | `course` | real + placeholder-position |
+
+## Context actions (single Action button)
+
+| Action id | Status | Stats / rules |
+|---|---|---|
+| `wall_pee` | real | Offered only if bladder ≥ 65 and near a wall/building. Honours `wallPeeFacingRequired` (default true). **moral −5, bladder −70, hygiene −5**, 3 minutes — the single set from `jiwa/interaction-rules.js` `wall_pee`, also used in life-economy, activity-catalog, and foundation/gameplay config. The generic `pee_outside` / “Pipis sembarangan” button is removed. |
+| `fart` | real | Always in `nearbyActions` after a **1 game-minute** cooldown (≈ 60s game time). **moral −3** when an NPC or other player is within 2 tiles, **0** when alone. A nearby NPC plays a placeholder “jijik” emote (`mainkan:npc-react`). |
+| `talk` | stub | Simple conversation at hansip / NPC sites. |
+
+## NPCs (ephemeral, never saved to the city draft)
+
+| NPC id | Site | Role | Behaviour | Art | Status |
+|---|---|---|---|---|---|
+| `npc_silver` | `job_silver` | work + quest `q_silver` | work | LGR `manusia_silver` if present, else placeholder capsule | stub / placeholder |
+| `npc_ogah` | `job_pak_ogah` | work + quest `q_ogah` | work | LGR `pak_ogah` if present, else placeholder | stub / placeholder |
+| `npc_parkir` | `job_kang_parkir` | work + quest `q_parkir` | work | LGR `kang_parkir` if present, else placeholder | stub / placeholder |
+| `npc_premium` | `premium_job` | work | idle | placeholder | stub / placeholder |
+| `npc_siomay` | `siomay_batagor` | buyer | idle | placeholder | stub / placeholder |
+| `npc_pasar` | `pasar_ikan` | buyer | idle | placeholder | stub / placeholder |
+| `npc_loak` | `loak` | buyer + quest `q_loak` | idle | placeholder | stub / placeholder |
+| `npc_hansip` | `hansip` | hansip | patrol + talk | LGR `hansip` if present, else placeholder | stub / placeholder |
+| `npc_help` | `help` | quest `q_warga` | idle + give quest | placeholder | stub / placeholder |
+
+Behaviours are placeholder: idle, a short patrol loop, talk, give quest, stand-at-work. They use official LGR characters when the vault has them; otherwise a colored capsule + label.
+
+## Prices (authoritative, `jiwa/life-economy.js`)
+
+| Id | Label | Rp |
+|---|---|---|
+| `streetFoodPrice` / `eat` | Jajanan kaki lima / gorengan | 2.500 |
+| `wartegMealPrice` | Makan Warteg | 12.000 |
+| `coffeePrice` | Kopi | 5.000 |
+| `teaPrice` | Es Teh | 3.000 |
+| `tokenPrice` | Token listrik (5 unit) | 20.000 |
+| `roomPrice` | Sewa kost (sekali bayar) | 700.000 |
+| `fridgePrice` | Kulkas | 2.000.000 |
+| `bed` | Kasur | 1.500.000 |
+| `chair` | Kursi | 350.000 |
+| `stove` | Kompor | 850.000 |
+| `wardrobe` | Lemari | 1.000.000 |
+| `publicShowerFee` | Mandi umum | 500 |
+| `charity` | Sedekah | 1.000 |
+
+Job session wages are unchanged (Silver Rp1.600, Pak Ogah Rp2.500, Kang Parkir Rp2.100, Premium Rp4.500). They are small next to a Rp700.000 kost and were left as-is on purpose.
+
+## Tests
+
+- `tests/semesta-life-hooks.test.cjs` — hooks, quests, enterables, `wall_pee`, `fart`, `open-map`
+- `tests/semesta-life-logic.test.cjs` — site list, NPC defs, no `pee_outside` UI, price + stat alignment, fish without water

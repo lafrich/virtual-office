@@ -35,7 +35,7 @@ test('bag capacity, fishing energy, spoilage and fridge electric token gates',()
  const caught=E.run(c,base(),'fish',{spotId:'river',roll:0.1});
  const stale=E.run(c,caught.state,'advance_time',{minutes:181});
  assert.equal(E.run(c,stale.state,'sell_fish',{itemId:stale.state.inventory[0],buyerId:'siomay_batagor'}).ok,false);
- const owner=base();owner.housing={room:true,fridge:true};
+ const owner=base();owner.housing={room:true,fridge:true};owner.wallet=50000;
  const one=E.run(c,owner,'fish',{spotId:'river',roll:.1});
  assert.equal(E.run(c,one.state,'store_fridge',{itemId:one.state.inventory[0]}).ok,false);
  const powered=E.run(c,one.state,'buy_token');
@@ -52,7 +52,7 @@ test('V2 routes locked; atheist worship denied while good deeds still increase m
  assert.notEqual(E.normalize(blocked).identity.religion,'satanis');
 });
 test('one-time room purchase, sleeping tradeoff and coffee bladder consequence',()=>{
- const s=base();s.wallet=40000;const c=E.defaults();
+ const s=base();s.wallet=1_000_000;const c=E.defaults();
  const room=E.run(c,s,'buy_room');assert.equal(room.ok,true);
  assert.equal(E.run(c,room.state,'buy_room').ok,false);
  const coffee=E.run(c,room.state,'coffee');assert.ok(coffee.state.bladder>room.state.bladder);
@@ -88,13 +88,13 @@ test('before kost: public shower, toilet, and lower-quality camp sleep; home fac
  assert.equal(rest.state.hygiene,25);
 });
 test('one-time kost unlock gives private WC, better shower and owned-room respawn',()=>{
- const c=E.defaults(),s=base();s.wallet=50000;s.hygiene=10;s.bladder=90;s.energy=10;
+ const c=E.defaults(),s=base();s.wallet=1_000_000;s.hygiene=10;s.bladder=90;s.energy=10;
  const room=E.run(c,s,'buy_room',{roomSpawn:{id:'kost_a',x:8,z:16}});
  assert.equal(room.ok,true);assert.equal(room.state.homeAccess,true);
  assert.equal(E.run(c,room.state,'buy_room').ok,false);
  const bathing=E.run(c,room.state,'home_shower');
  assert.equal(bathing.ok,true);
- assert.equal(bathing.state.hygiene,80);assert.equal(bathing.state.wallet,20000);
+ assert.equal(bathing.state.hygiene,80);assert.equal(bathing.state.wallet,300000);
  const wc=E.run(c,bathing.state,'home_toilet');
  assert.equal(wc.state.bladder,0);assert.equal(wc.state.hygiene,80);
  const rested=E.run(c,wc.state,'sleep');

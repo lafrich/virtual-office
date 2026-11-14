@@ -70,7 +70,7 @@ test('Buying can acquire permanent room/furniture, and illicit choices can trigg
  const furniture=A.activity({...src.find(a=>a.id==='beli_furnitur'),enabled:true});
  const theft=A.activity({...src.find(a=>a.id==='mencuri'),enabled:true});
  const cfg={...E.defaults(),activities:[room,furniture,theft]};
- const initial={wallet:50000,energy:80,experience:50};
+ const initial={wallet:3_000_000,energy:80,experience:50};
  const bought=E.run(cfg,initial,'configured_activity',{activityId:room.id,roomSpawn:{id:'kost-1',x:4,z:7}});
  assert.equal(bought.ok,true,bought.reason);
  assert.equal(bought.state.housing.room,true);

@@ -2,7 +2,7 @@
 
 Preview branch `preview/mainkan-hooks-p1` only. Nothing here is live. Going live needs Ichsan's own OK.
 
-Canonical namespace: `window.SemestaLifePlay`. The same read hooks are also aliased on `window.SemestaPlay` so Layar's feature detection (`questMarkers`, `enterables`, `worldToScreen`, `playerPosition`, `spawnAt`, `nearbyActions`, `clock`) swaps off its fallback automatically. `nearbyActions` / `runAction` stay on `SemestaLifePlay`, which is what `mainkan/njh98.js` already calls.
+Canonical namespace: `window.SemestaLifePlay`. The same read hooks are also aliased on `window.SemestaPlay` so Layar's feature detection (`questMarkers`, `enterables`, `worldToScreen`, `playerPosition`, `spawnAt`, `nearbyActions`, `clock`, plus `dayReport`, `level`, `skills`, `reputation`, `housingProgress`, `quests`, `jobs`, `enterInterior`, `furnitureSpots`, `messages`, `sites`) swaps off its fallback automatically. `nearbyActions` / `runAction` stay on `SemestaLifePlay`, which is what `mainkan/njh98.js` already calls.
 
 Events are `window` CustomEvents (detail payload) and, when the world is inside the Mainkan iframe, same-origin `postMessage`s to the parent. Incoming pause/resume are accepted as both parent `postMessage` and iframe CustomEvents.
 
@@ -60,7 +60,69 @@ SemestaLifePlay.setInteriorFurnitureAdapter(() =>
 
 ### `enterables()` → `[{id, name, x, z}]`
 
-Buildings with `enterable` or an interior (`interior.floors` or `njhInteriorTemplate`). `x,z` prefer a door anchor when the bridge provides one.
+Buildings with `enterable` or an interior (`interior.floors` or `njhInteriorTemplate`), plus play-map kost / warteg buildings matched by name even when the `enterable` flag is missing. `x,z` prefer a door anchor when the bridge provides one.
+
+
+### `dayReport(day)` → `{day, start, end, income:{label:Rp}, expense:{label:Rp}, status?}`
+
+Built from `transactions[].day` plus a day-end status snapshot (`energy`, `fullness`, `hygiene`, `moral`, `housing` = Kost/Tenda) persisted on `state.dayReports`.
+
+### `level()` → `number`
+
+`1 + floor(experience / 10)` from the real Jiwa save.
+
+### `skills()` → `[{label, level}]`
+
+Levels 1–10 from persisted `state.actionCounts` (kerja, masak, mulung & mancing, sosial).
+
+### `reputation()` → `[{label, value}]`
+
+0–100 from the same counts plus completed quests (Warga kampung, Pedagang, Kang parkir & Pak Ogah).
+
+### `housingProgress()` → `{current:'tenda'|'kost'|'rumah', next, targets:[{label,done,info}]}`
+
+`current` follows `state.housing.room`. Targets use the real room price and owned furniture.
+
+### `quests()` → `[{npcId,id,title,goal,text?,target,progress,reward,state}]`
+
+`state` is `available` | `active` | `ready` | `done`. `acceptQuest(npcId, questId)` and `turnInQuest(npcId, questId)` persist that state; a ready turn-in pays `reward` through `quest_reward` in the economy. `questMarkers()` hides `active`/`done` and shows `available`/`ready`.
+
+### `jobs()` → `[{id,label,wage,per,where?}]`
+
+From Jiwa `config.jobs`, with `per: 'sesi N mnt'` and `where` from the matching life site.
+
+### `enterInterior(id)` → `boolean`
+
+`true` only when a real play interior opened (kost / warteg, including `d:kost`). Not a mock shop window.
+
+### `furnitureSpots()` → `[{id,label,x,y,w,h,owned,buy?,acts:[{act,label}]}]`
+
+8×6 kost grid (or current interior items when inside). Owned flags come from the save.
+
+### `messages()` → `[{from,text,t}]`
+
+Nokia inbox, persisted on `state.messages` (welcome, quest updates, day report, rent).
+
+### `sites()` → `[{id,label,x,z,placeholder:boolean,npc?:boolean}]`
+
+Every life site, including offset placeholders when the main map has no matching object. `npc: true` when a job/buyer/hansip/quest NPC stands there.
+
+### `wall_pee` / `fart` (nearbyActions + runAction)
+
+The generic **Pipis sembarangan** (`pee_outside`) button is gone. Pee is a context action `wall_pee`, offered only when `bladder >= 65` and the player is near a wall or building. If `wallPeeFacingRequired` (default `true`, from foundation / gameplay.json) the player must also face that wall. Stats are the single Jiwa `wall_pee` rule, used everywhere:
+
+| Action | When | Stats |
+|---|---|---|
+| `wall_pee` | bladder ≥ 65, near (and usually facing) a wall/building | moral −5, bladder −70, hygiene −5, 3 menit |
+| `fart` | always, cooldown 1 game minute (≈ 60s game time) | moral −3 if an NPC or other player is within 2 tiles, else 0. A nearby NPC plays a placeholder “jijik” emote (`mainkan:npc-react`). |
+
+Both go through the single Action button / `nearbyActions()` / `runAction`. `pee_outside` is rejected by the economy.
+
+### `njh98:open-map`
+
+Nokia's Peta (or the dock) should dispatch a `njh98:open-map` CustomEvent on the world iframe, or `postMessage({type:'njh98:open-map'})` to it. The world listens and forwards the same message to its parent so the parent can open the same map window as the dock (`NJH98Mock.openMap()`). `SemestaLifePlay.openMap()` does that forward.
+
+Prices live in `jiwa/life-economy.js` settings + `FURNITURE` (warteg Rp12.000, kopi Rp5.000, es teh Rp3.000, jajanan Rp2.500, token Rp20.000, kost Rp700.000, kulkas Rp2.000.000, kasur Rp1.500.000, …). See `docs/LOGIC-STATUS.md`.
 
 ### `worldToScreen(x, y, z)` → `{x, y, visible}`
 
@@ -131,4 +193,5 @@ Wallet transactions now include `day` (visual day when `runAction` / `advance_ti
 - `world-builder/builder.js` — pause messages, camera projection, day-end, `SemestaPlay` aliases
 - `jiwa/life-economy.js` — `transactions[].day`
 - `tests/semesta-life-hooks.test.cjs`
+- `docs/LOGIC-STATUS.md` — real vs stub vs placeholder-position for every hook, site, and NPC
 - `world-builder/MERGE-PLAN.md` — how `preview/njh-map-draft1` interiors would join main

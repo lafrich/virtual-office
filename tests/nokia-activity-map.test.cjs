@@ -76,7 +76,7 @@ test('Semesta HP button invokes the actual Nokia renderer instead of a second ph
 test('Nokia wallet, Dompet ledger and course share exactly the Jiwa game state',()=>{
  const E=require('../jiwa/life-economy.js');
  const config=E.defaults();
- let player=E.stateFrom({wallet:50000},config);
+ let player=E.stateFrom({wallet:2_000_000},config);
  const room=E.run(config,player,'buy_room',{roomSpawn:{id:'kost',x:7,z:11}});
  assert.ok(room.ok);player=room.state;
  const Nokia=handset();
@@ -100,13 +100,13 @@ test('Nokia wallet, Dompet ledger and course share exactly the Jiwa game state',
  Nokia.press('OK');Nokia.press('1'); // Menu -> Dompet
  const before=Nokia.draw();
  assert.ok(before);
- assert.equal(player.wallet,20000);
+ assert.equal(player.wallet,1_300_000);
  Nokia.press('R');Nokia.press('4'); // Marketplace
  Nokia.press('1');Nokia.press('L');Nokia.press('L'); // Token -> buy -> confirm
- assert.equal(player.wallet,19000);
+ assert.equal(player.wallet,1_280_000);
  assert.equal(player.powerTokens,5);
  assert.equal(player.transactions.length,2);
- assert.deepEqual(player.transactions.map(t=>t.delta),[-30000,-1000]);
+ assert.deepEqual(player.transactions.map(t=>t.delta),[-700000,-20000]);
  Nokia.press('R');Nokia.press('R');Nokia.press('R');Nokia.press('1'); // Dompet
  const after=Nokia.draw();
  assert.ok(after);
@@ -115,15 +115,15 @@ test('Nokia wallet, Dompet ledger and course share exactly the Jiwa game state',
  assert.ok(different>0,'Dompet LCD must visibly update after real Jiwa transaction');
  Nokia.press('R');Nokia.press('3');Nokia.press('1');Nokia.press('L'); // course
  assert.equal(player.experience,12);
- assert.equal(player.wallet,19000,'a course with no fee cannot change the money balance');
+ assert.equal(player.wallet,1_280_000,'a course with no fee cannot change the money balance');
 });
 test('Nokia cannot invent a balance from unowned purchases, and Jiwa owns product prices',()=>{
  const E=require('../jiwa/life-economy.js'),cfg=E.defaults();
  cfg.settings.tokenPrice=1750;
- let player=E.stateFrom({wallet:50000},cfg);
+ let player=E.stateFrom({wallet:2_000_000},cfg);
  const failed=E.run(cfg,player,'buy_token');
  assert.equal(failed.ok,false);
- assert.equal(failed.state.wallet,50000);
+ assert.equal(failed.state.wallet,2_000_000);
  assert.equal(failed.state.transactions.length,0);
  const bought=E.run(cfg,player,'buy_room',{roomSpawn:{id:'kost',x:2,z:2}});
  player=bought.state;

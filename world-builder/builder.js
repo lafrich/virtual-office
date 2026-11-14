@@ -3238,7 +3238,22 @@ window.SemestaPlay=Object.freeze({
  enterables:()=>window.SemestaLifePlay?.enterables?.()||[],
  spawnAt:(kind,id)=>window.SemestaLifePlay?.spawnAt?.(kind,id),
  nearbyActions:()=>window.SemestaLifePlay?.nearbyActions?.()||[],
- clock:()=>window.SemestaLifePlay?.clock?.()||null
+ clock:()=>window.SemestaLifePlay?.clock?.()||null,
+ dayReport:(day)=>window.SemestaLifePlay?.dayReport?.(day)||null,
+ level:()=>window.SemestaLifePlay?.level?.()??1,
+ skills:()=>window.SemestaLifePlay?.skills?.()||[],
+ reputation:()=>window.SemestaLifePlay?.reputation?.()||[],
+ housingProgress:()=>window.SemestaLifePlay?.housingProgress?.()||null,
+ quests:()=>window.SemestaLifePlay?.quests?.()||[],
+ acceptQuest:(n,q)=>window.SemestaLifePlay?.acceptQuest?.(n,q),
+ turnInQuest:(n,q)=>window.SemestaLifePlay?.turnInQuest?.(n,q),
+ jobs:()=>window.SemestaLifePlay?.jobs?.()||[],
+ enterInterior:(id)=>!!window.SemestaLifePlay?.enterInterior?.(id),
+ furnitureSpots:()=>window.SemestaLifePlay?.furnitureSpots?.()||[],
+ messages:()=>window.SemestaLifePlay?.messages?.()||[],
+ sites:()=>window.SemestaLifePlay?.sites?.()||[],
+ npcs:()=>window.SemestaLifePlay?.npcs?.()||[],
+ openMap:()=>window.SemestaLifePlay?.openMap?.()
 });
 
 if(window.SemestaLifePlay){
@@ -3249,6 +3264,7 @@ if(window.SemestaLifePlay){
   getCityId:()=>activeDraftId||'__semesta_working_copy__',
   getPlayerId:()=>playerMode?mainkanPlayerId:'',
   currentPose:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.pose)||null,
+  getFacing:()=>((rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig?.state?.direction)||null,
   playPose:(pose,seconds=4)=>{const r=(rigs.get(LIFE_TEST_ACTOR_ID)||rigs.get(walkActorId))?.rig;if(!r?.setPose)return false;r.setPose(pose);
    clearTimeout(r._lifePoseTimer);r._lifePoseTimer=setTimeout(()=>{if(r.state?.pose===pose)r.setPose(null);},Math.max(1,seconds)*1000);return true;},
   getPosition:walkWorldPos,
