@@ -14640,15 +14640,15 @@
           "entranceFacing": "sw",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "Lobby-first Cove kost (preview). Street door njh_door_kos_cove_lobby → njh_kos_cove_lobby. Room doors njh_door_home_ichsan / njh_door_home_noor live inside the lobby, not on the street. Exterior art stays pipeline:id200_bangunan_rumah_kos_dua_lantai — the original Cove facade was procedural (5 numbered windows + glass door) and there is no LFB/pipeline sprite named cove.",
-          "asset": "pipeline:id200_bangunan_rumah_kos_dua_lantai",
+          "notes": "Lobby-first Cove kost (preview). Street door njh_door_kos_cove_lobby → njh_kos_cove_lobby. Room doors njh_door_home_ichsan / njh_door_home_noor live inside the lobby, not on the street. Exterior is a simple LFB Cove facade (object:njh_kost_cove): two-storey, five numbered windows, glass door at the street use tile (-27, 71). Footprint and collision match the previous id200_bangunan_rumah_kos_dua_lantai lot ([5.5, 4.6]).",
+          "asset": "object:njh_kost_cove",
           "x": -26.25,
           "z": 68.7,
           "rotation": 0,
           "width": 6.76,
           "height": 7.04,
           "name": "Kost Cove (Ichsan & Noor)",
-          "subtype": "id200_bangunan_rumah_kos_dua_lantai",
+          "subtype": "njh_kost_cove",
           "collision": true
         },
         {

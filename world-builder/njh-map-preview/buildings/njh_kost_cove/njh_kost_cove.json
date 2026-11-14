@@ -1,0 +1,85 @@
+{
+  "format": "virtual-life-building-asset-v1",
+  "id": "njh_kost_cove",
+  "file": "object:njh_kost_cove",
+  "label": "Kost Cove",
+  "group": "kampung",
+  "source": "njh-preview",
+  "published": true,
+  "note": "Simple LFB two-storey Cove kost (preview). Based on the old procedural Cove facade (vo-mp/ind/p_cove.py, virtual-office/index.html): grey-white walls, five numbered windows, glass door, COVE KOST sign, thin canopy. Footprint and collision match pipeline:id200_bangunan_rumah_kos_dua_lantai so the lot and street use tile (-27, 71) stay valid. Glass door is centred on the south facade (c=2.75) at that use tile. Windows 4–5 glow for Ichsan and Noor; 1–3 stay dark/locked. sw/se/ne/nw. Preview only.",
+  "category": "bangunan",
+  "assetKind": "rumah",
+  "objectCategory": "building",
+  "function": "kost",
+  "sizeClass": "medium",
+  "footprint": [
+    5.5,
+    4.6
+  ],
+  "height": 7.04,
+  "levelCount": 2,
+  "placement": "ground",
+  "collision": true,
+  "rotation": 0,
+  "rotation0": "sw",
+  "variants": {
+    "sw": {
+      "file": "njh_kost_cove_sw.png",
+      "size": [
+        338,
+        352
+      ],
+      "pivot": [
+        159,
+        272
+      ]
+    },
+    "se": {
+      "file": "njh_kost_cove_se.png",
+      "size": [
+        338,
+        350
+      ],
+      "pivot": [
+        160,
+        270
+      ]
+    },
+    "ne": {
+      "file": "njh_kost_cove_ne.png",
+      "size": [
+        338,
+        352
+      ],
+      "pivot": [
+        159,
+        272
+      ]
+    },
+    "nw": {
+      "file": "njh_kost_cove_nw.png",
+      "size": [
+        338,
+        350
+      ],
+      "pivot": [
+        160,
+        270
+      ]
+    }
+  },
+  "size": [
+    338,
+    352
+  ],
+  "pivot": [
+    159,
+    272
+  ],
+  "width": 6.76,
+  "enterable": true,
+  "interactions": [
+    "enter"
+  ],
+  "adaptedFrom": "Cove exterior in virtual-office/index.html (~KOST 'Cove' block) and lobby door count in p_cove.py. Lot metrics from indonesia_200_catalog.json id200_bangunan_rumah_kos_dua_lantai (footprint [5.5, 4.6], sw 338×352 pivot [159, 272], se 338×350 pivot [160, 270])."
+}

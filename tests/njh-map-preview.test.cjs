@@ -36,13 +36,21 @@ test('registers 7 corrected catalog keys when njhMap=1',()=>{
  const {window,api}=loadPreview('?njhMap=1');
  assert.equal(api.enabled(),true);
  const result=api.registerCatalog();
- assert.equal(result.count,7);
+ assert.equal(result.count,8);
  const files=window.VLAssetCatalog.map(x=>x.file);
  for(const key of [
   'object:njh_dermaga_mancing','object:njh_lapak_silver','object:njh_tiang_ogah',
-  'object:njh_kotak_amal','object:njh_penanda_doa',
+  'object:njh_kotak_amal','object:njh_penanda_doa','object:njh_kost_cove',
   'studio:br-warung-pecel-lele','studio:br-lapak-sate-madura'
  ])assert.ok(files.includes(key),key);
+ const cove=window.VLAssetCatalog.find(x=>x.id==='njh_kost_cove');
+ assert.equal(JSON.stringify(cove.footprint),'[5.5,4.6]');
+ assert.equal(cove.collision,true);
+ assert.equal(cove.sizeClass,'medium');
+ assert.equal(cove.levelCount,2);
+ assert.equal(cove.placement,'ground');
+ assert.equal(JSON.stringify(cove.variants.sw.pivot),'[159,272]');
+ assert.equal(JSON.stringify(cove.variants.se.pivot),'[160,270]');
  const guessed=Object.keys(api.keyMap);
  assert.deepEqual(guessed.sort(),[
   'object:obj-njh-dermaga-mancing','object:obj-njh-kotak-amal',
@@ -64,6 +72,7 @@ test('city file uses real keys and is bounded; 6 interiors exist',()=>{
  assert.ok(assets.includes('object:njh_dermaga_mancing'));
  assert.ok(!assets.includes('object:obj-njh-dermaga-mancing'));
  assert.ok(assets.includes('studio:br-warung-pecel-lele'));
+ assert.ok(assets.includes('object:njh_kost_cove'));
  assert.equal(doc.map.unbounded,false);
  assert.deepEqual(doc.map.worldBounds,{minX:-57,maxX:-5,minZ:14,maxZ:77});
  const scenes=['njh_kos','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel'];
