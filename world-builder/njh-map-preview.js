@@ -1,5 +1,5 @@
 /* NJH Semesta map draft1 PREVIEW only. Activated by ?njhMap=1.
- * Registers 7 catalog assets, loads Ellen's district map, wires door
+ * Registers 8 catalog assets, loads Ellen's district map, wires door
  * use-tiles to the NJH interiors (including the Cove kost lobby), and clamps actors to worldBounds.
  * Live Semesta / Mainkan behavior is unchanged when the flag is off.
  * Not pushed, not deployed.
@@ -8,7 +8,7 @@
 'use strict';
 const DIR=['sw','se','ne','nw'];
 const NJH_READY=['njh_kos','njh_kos_noor','njh_kos_ichsan','njh_kos_cove_lobby','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi'];
-const NJH_PENDING=['njh_pecel_lele_tenda','njh_sate_madura_tenda','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda'];
+const NJH_PENDING=['njh_pecel_lele_tenda','njh_sate_madura_tenda','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_minimarket'];
 const NJH_TEMPLATES=[...NJH_READY,...NJH_PENDING];
 const TEMPLATE_ALIASES=Object.freeze({
  'bangun-ruang kit in br-warung-pecel-lele.json':'njh_pecel_lele_tenda',
@@ -79,8 +79,24 @@ const BUILDING_DEFS=[
    se:{size:[338,350],pivot:[160,270]},
    ne:{size:[338,352],pivot:[159,272]},
    nw:{size:[338,350],pivot:[160,270]}
+  }},
+ {id:'njh_minimarket',label:'NJH Mart (Minimarket)',folder:'njh_minimarket',
+  footprint:[5,4],sizeClass:'medium',authoredH:6.2,levelCount:1,placement:'ground',
+  interactions:['enter'],function:'minimarket',assetKind:'toko',isoScale:true,
+  door:{id:'njh_door_minimarket',tileLocal:[2.5,4.0],faces:'sw'},
+  interiorTemplate:'njh_minimarket',
+  variants:{
+   sw:{size:[312,314],pivot:[171,300],doorAnchor:{x:92,y:260}},
+   se:{size:[312,314],pivot:[139,300],doorAnchor:{x:220,y:260}},
+   ne:{size:[312,314],pivot:[171,300],doorAnchor:{x:220,y:196}},
+   nw:{size:[312,314],pivot:[139,300],doorAnchor:{x:92,y:196}}
   }}
 ];
+
+// LFB billboard world units (same lock as the official LGR character).
+// Do not use size/50 — that is a logged past mistake in the scale guide.
+function isoWidth(px){ return +(px*Math.SQRT2/64).toFixed(3); }
+function isoHeight(px){ return +(px*Math.SQRT2/64*2/Math.sqrt(3)).toFixed(3); }
 
 function propSpec(def){
  const variants={};
@@ -129,15 +145,22 @@ function buildingSpec(def){
  for(const d of DIR){
   const v=(def.variants&&def.variants[d])||def.variants.sw;
   const file='buildings/'+def.folder+'/'+def.id+'_'+d+'.png';
-  variants[d]={file,size:v.size.slice(),pivot:v.pivot.slice(),url:baseUrl()+file};
+  variants[d]={
+   file,size:v.size.slice(),pivot:v.pivot.slice(),url:baseUrl()+file,
+   doorAnchor:v.doorAnchor?{...v.doorAnchor}:undefined
+  };
  }
  const sw=variants.sw;
  return Object.freeze({
   id:def.id,file:'object:'+def.id,label:def.label,group:'kampung',
   source:'njh-preview',published:true,collision:true,
   footprint:def.footprint.slice(),size:sw.size.slice(),pivot:sw.pivot.slice(),
-  width:sw.size[0]/50,height:sw.size[1]/50,
-  sizeClass:def.sizeClass,levelCount:def.levelCount,placement:def.placement,
+  // Cove keeps its live-approved size/50 scale (step 1); new buildings use the iso lock.
+  width:def.isoScale?isoWidth(sw.size[0]):sw.size[0]/50,height:def.isoScale?isoHeight(sw.size[1]):sw.size[1]/50,
+  sizeClass:def.sizeClass,authoredH:def.authoredH,levelCount:def.levelCount,
+  placement:def.placement,category:'bangunan',assetKind:def.assetKind||'kost',function:def.function||null,
+  door:def.door?{...def.door,tileLocal:def.door.tileLocal.slice()}:undefined,
+  interiorTemplate:def.interiorTemplate||null,
   enterable:true,interactive:true,
   interactions:(def.interactions||['enter']).slice(),blocking:'yes',
   variants:Object.freeze(variants),
