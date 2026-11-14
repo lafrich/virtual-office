@@ -626,7 +626,9 @@ function create(opts){
  function obstacles(){
   if(!session)return [];
   return session.furniture.filter(f=>f.blocking).map(f=>({
-   id:f.id,type:'sprite',collision:true,blocking:'auto',name:f.label,
+   // Physics reads explicit w/d only for virtual_asset, not for a sprite
+   // without an asset catalog entry. This keeps chair/bed footprints exact.
+   id:f.id,type:'virtual_asset',assetCategory:'prop',collision:true,blocking:'auto',name:f.label,
    x:f.x,z:f.z,w:f.fw,d:f.fd
   }));
  }
