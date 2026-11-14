@@ -36,7 +36,7 @@ html.semesta-player-mode.njh98.njh-ctx-open:not(.njh-devtools) #semestaLifePlayP
 html.semesta-player-mode.njh98.njh-devtools #semestaLifePlayPanel.slp{display:flex;left:calc(8px + env(safe-area-inset-left,0px))!important;top:var(--hud-top)!important;
  width:300px;max-width:calc(100% - 16px)!important;max-height:calc(100% - var(--hud-top) - 72px)!important}
 html.semesta-player-mode.njh98 .slp .slp-head{background:linear-gradient(90deg,var(--w-t0),var(--w-t1))!important;padding:1px 2px 1px 4px!important;min-height:18px;flex:none}
-html.semesta-player-mode.njh98 .slp .slp-head h3{background:none!important;padding:0!important;font:bold 11px var(--w-font)!important;color:#fff!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.semesta-player-mode.njh98 .slp .slp-head h3{min-width:0;flex:1 1 auto;background:none!important;padding:0!important;font:bold 11px var(--w-font)!important;color:#fff!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.semesta-player-mode.njh98 .slp .slp-head button{width:16px!important;height:14px!important;min-height:0!important;padding:0!important;font:bold 9px/1 var(--w-font)!important}
 html.semesta-player-mode.njh98 .slp .slp-content{padding:4px 2px 2px!important;overflow:auto;min-height:0}
 html.semesta-player-mode.njh98 .slp button,html.semesta-player-mode.njh98 .slp select{background:var(--w-face)!important;color:#000!important;border:0!important;

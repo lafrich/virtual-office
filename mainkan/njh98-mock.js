@@ -216,7 +216,7 @@ function openQuest(qm){
  const o=qm.npc||{};const me=N.playerPos();
  if(me&&Math.hypot((o.x||0)-me.x,(o.z||0)-me.z)>6){N.toast('Dekati '+(o.name||'NPC')+' dulu.');return;}
  // real quest data for this NPC wins: quests() → [{npcId,id,title,goal,target,progress,reward,state:'available'|'active'|'ready'|'done'}]
- let hq=null;const hookQ=hook('quests');if(hookQ){try{hq=(hookQ()||[]).find(x=>String(x.npcId)===String(o.id))||null;}catch{}}
+ let hq=null;const hookQ=hook('quests');if(hookQ){try{const ids=new Set([String(o.id),String(qm.npcId||'')]);hq=(hookQ()||[]).find(x=>ids.has(String(x.npcId)))||null;}catch{}}
  if(!hq)fired('quests');
  const q=hq?{...questFor(o),...hq,text:hq.text||questFor(o).text,kind:'count'}:questFor(o);const all=ls.get(pk('quests'),{});const s=st();
  const rec=hq?(hq.state==='available'?null:{state:hq.state}):all[o.id];
@@ -231,11 +231,11 @@ function openQuest(qm){
  else html+='<button class="btn" type="button" data-close>Tutup</button><button class="btn primary" type="button" id="njhQTurnIn"'+(ready?'':' disabled')+'>? Serahkan</button>';
  const w=win('njhQuest','Quest · '+esc(o.name||'NPC'),html+'</div>',{layer:'hud',cls:'njh-questwin'});
  w.querySelector('#njhQAccept')?.addEventListener('click',()=>{
-  const acc=hook('acceptQuest');if(acc&&hq){try{acc(o.id,q.id);}catch{}openQuest(qm);return;}
+  const acc=hook('acceptQuest');if(acc&&hq){try{acc(hq.npcId??o.id,q.id);}catch{}openQuest(qm);return;}
   const c=ls.get(pk('counts'),{});all[o.id]={qid:q.id,state:'active',base:{workEarn:c.workEarn||0,[q.act||'x']:c[q.act]||0,exp:Number(s.experience)||0},at:Date.now()};ls.set(pk('quests'),all);
   inbox.push(o.name||'NPC','Quest “'+q.title+'” diterima: '+q.goal+'.');openQuest(qm);});
  w.querySelector('#njhQTurnIn')?.addEventListener('click',()=>{
-  const ti=hook('turnInQuest');if(ti&&hq){try{ti(o.id,q.id);}catch{}openQuest(qm);return;}
+  const ti=hook('turnInQuest');if(ti&&hq){try{ti(hq.npcId??o.id,q.id);}catch{}openQuest(qm);return;}
   all[o.id]={...rec,state:'done',doneAt:Date.now()};ls.set(pk('quests'),all);mwallet.add(q.reward);
   inbox.push(o.name||'NPC','Makasih! Hadiah '+rp(q.reward)+' masuk dompet simulasi.');N.toast('Quest selesai · +'+rp(q.reward)+' (SIMULASI)');openQuest(qm);});
 }
@@ -541,7 +541,9 @@ document.querySelectorAll('[data-njh-placeholder]').forEach(b=>{
 const BODY={peeNeed:65,wallDist:1.6,doorDist:3,npcDist:2,fartCd:60};
 let playSec=0,fartAt=-1e9;
 const WALLISH=/wall|tembok|pagar|fence|building|bangunan|house|rumah|shop|toko|warung|kost|gedung|ruko/i;
-function realIds(){const f=hook('nearbyActions');if(!f)return new Set();try{return new Set((f()||[]).map(a=>String(a.id||a.action)));}catch{return new Set();}}
+// once the real list has shown a body action, the game owns them for this session (a missing fart = its cooldown, not "no logic")
+let realBody=false;
+function realIds(){const f=hook('nearbyActions');if(!f)return new Set();try{const ids=new Set((f()||[]).map(a=>String(a.id||a.action)));if(ids.has('fart')||ids.has('wall_pee'))realBody=true;if(realBody){ids.add('fart');ids.add('wall_pee');}return ids;}catch{return new Set();}}
 function directory(){try{return S()?.worldDirectory?.()||[];}catch{return [];}}
 function nearWall(me){
  const f=hook('nearWall');if(f){try{return !!f();}catch{}}fired('nearWall');
@@ -553,7 +555,7 @@ function npcNear(me){return directory().some(o=>Number.isFinite(o?.x)&&/npc|play
 function bodyRec(){return ls.get(pk('body'),{bladder:0,hygiene:0,moral:0,at:0});}
 function bladderNow(s){const r=bodyRec();const fresh=Date.now()-(r.at||0)<10*60*1000;return Math.max(0,(Number(s.bladder)||0)+(fresh?r.bladder:0));}
 function bodyActions(){
- if(!playing())return [];const me=N.playerPos();const s=st();const real=realIds();const out=[];
+ if(!playing()||$('worldLoading')?.hidden===false||!L())return [];const me=N.playerPos();const s=st();const real=realIds();const out=[];
  if(!real.has('wall_pee')&&me&&bladderNow(s)>=BODY.peeNeed&&nearWall(me))out.push({id:'wall_pee',label:'Pipis di Tembok',mock:true,contextual:true});
  if(!real.has('fart')){const left=Math.ceil(BODY.fartCd-(playSec-fartAt));
   out.push(left>0?{id:'fart',label:'Kentut',mock:true,disabled:true,hint:'tunggu '+left+' dtk'}:{id:'fart',label:'Kentut',mock:true});}

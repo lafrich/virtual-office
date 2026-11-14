@@ -335,8 +335,12 @@ function ctxSpot(){
  const work=!!acts.querySelector('#slpWork');
  const has=!!acts.querySelector('button[data-life-action],select');
  if(!work&&!has)return null;
+ // title = the spot name from nearbyActions when the hook exists (the native .slp-spot line can be a long hint);
+ // only the always-on fart → plain "Aksi"
+ try{const L=life();if(typeof L?.nearbyActions==='function'){const list=(L.nearbyActions()||[]).filter(a=>!IDLE_ACT.has(String(a.id||a.action)));
+  return {work,label:String(list.spot||list[0]?.spotLabel||'Aksi')};}}catch{}
  const spot=(d.querySelector('#semestaLifePlayPanel .slp-spot')?.textContent||'').replace(/^\s*📍\s*/,'').replace(/\s*\[PLACEHOLDER\]/,'').trim();
- return {work,label:spot||'Aksi'};
+ return {work,label:spot&&spot.length<=32?spot:'Aksi'};
 }
 // "something actionable nearby" for the player cue + hint: any action except the always-on fart
 const IDLE_ACT=new Set(['fart']);
@@ -567,8 +571,10 @@ function questList(){
  const S=sp();if(!S)return [];
  let dir=[];try{dir=S.worldDirectory?.()||[];}catch{}
  if(typeof S.questMarkers==='function'){
-  try{const byId=new Map(dir.map(o=>[String(o.id),o]));
-   return (S.questMarkers()||[]).map(q=>{const o=byId.get(String(q.npcId));return o&&{id:'q:'+o.id,npc:o,x:o.x,z:o.z,name:o.name,state:q.state==='ready'?'ready':'available',sample:false};}).filter(Boolean);}catch{return [];}
+  // npcId can be a world object id or a life site id (job_pak_ogah, loak, help…) → look in both
+  let sites=[];try{sites=(life()?.sites?.()||[]).map(x=>({...x,name:x.label||x.name}));}catch{}
+  try{const byId=new Map(sites.concat(dir).map(o=>[String(o.id),o]));
+   return (S.questMarkers()||[]).map(q=>{const o=byId.get(String(q.npcId));return o&&{id:'q:'+o.id,npc:o,npcId:String(q.npcId),x:o.x,z:o.z,name:o.name,state:q.state==='ready'?'ready':'available',sample:false};}).filter(Boolean);}catch{return [];}
  }
  const all=dir.filter(o=>o.type==='quest_npc');
  if(typeof window.NJH98Mock?.questState==='function')
