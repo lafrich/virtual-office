@@ -25,5 +25,6 @@ test('missing-art fallback must not mask authored partitions with unrelated boxe
  const source=fs.readFileSync(path.join(root,'world-builder/njh-play-interiors.js'),'utf8');
  assert.match(source,/if\(item.assetId==='sekat_wc'&&!img\)/);
  assert.match(source,/file.startsWith\('\.\.\/'\)\?\[base\+file\]/);
- assert.match(source,/const width=size\[0\]\*PIXEL_WORLD,height=size\[1\]\*PIXEL_WORLD\*VERTICAL_COMP/);
+ assert.match(source,/const width=size\[0\]\*PIXEL_WORLD/);
+ assert.match(source,/const height=size\[1\]\*PIXEL_WORLD\*VERTICAL_COMP/);
 });
