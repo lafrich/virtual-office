@@ -57,12 +57,18 @@ test('openInteriorById(njh-kos-noor) opens the lobby; spawn skips lobby into the
  assert.equal(A.isLobby('njh-kos-noor'),true);
  const T=THREE(),scene=new T.Group();
  let pos={x:-26.25,z:71.5};
+ const streetRoot={visible:true},alreadyHidden={visible:false};
+ const roots=[{id:'njh-kos-noor',root:streetRoot},{id:'unrelated-offline-object',root:alreadyHidden}];
+ let groundVisible=true,groundDepthWrite=true;
  const api=Interiors.create({
   THREE:T,scene,catalog:JSON.parse(fs.readFileSync(path.join(DIR,'catalog.json'),'utf8')),
   scenes:{njh_kos:kos,njh_kos_cove_lobby:lobby,njh_kos_ichsan:ichsan,njh_kos_noor:noor},
   getWorld:()=>({objects:[{id:'njh-kos-noor',type:'sprite',name:'Kost Cove (Ichsan & Noor)',x:-27,z:71,enterable:true}]}),
   getState:()=>({housing:{room:true,roomId:'njh_kos_ichsan',ownerId:'t_ichsan'}}),
   getPos:()=>pos,teleport:(x,z)=>{pos={x,y:0,z};return true;},
+  getRoots:()=>roots,
+  setGroundVisible:on=>{groundVisible=on;},
+  setGroundDepthWrite:on=>{groundDepthWrite=on;},
   getPlayerId:()=>'t_ichsan',playerId:()=>'t_ichsan',
   message:()=>{},persist:()=>{}
  });
@@ -71,6 +77,10 @@ test('openInteriorById(njh-kos-noor) opens the lobby; spawn skips lobby into the
  assert.equal(lobbyIn.ok,true);
  assert.equal(lobbyIn.kind,'lobby');
  assert.equal(api.roomId(),'njh_kos_cove_lobby');
+ assert.equal(streetRoot.visible,false,'outdoor facade hidden upon first entry');
+ assert.equal(alreadyHidden.visible,false,'a pre-hidden outdoor object remains hidden');
+ assert.equal(groundVisible,false);
+ assert.equal(groundDepthWrite,false);
  const acts=api.extraActions();
  const locked=acts.find(a=>a.args&&a.args.doorId==='njh_door_cove_room_1');
  // may be far from doors depending on spawn; move to room 1 use tile c=1
@@ -93,6 +103,16 @@ test('openInteriorById(njh-kos-noor) opens the lobby; spawn skips lobby into the
  const back=api.exit();
  assert.equal(back.ok,true);
  assert.equal(api.roomId(),'njh_kos_cove_lobby');
+ assert.equal(streetRoot.visible,false,'room-to-lobby must keep outdoor facade hidden');
+ assert.equal(groundVisible,false);
+ assert.equal(groundDepthWrite,false);
+ const outside=api.exit();
+ assert.equal(outside.ok,true);
+ assert.equal(api.roomId(),null);
+ assert.equal(streetRoot.visible,true,'exiting lobby must restore originally visible outdoor facade');
+ assert.equal(alreadyHidden.visible,false,'exiting lobby must preserve originally hidden object');
+ assert.equal(groundVisible,true);
+ assert.equal(groundDepthWrite,true);
  // partner can enter Noor's room
  pos={x:-26.25,z:71.5};
  const asNoor=Interiors.create({
