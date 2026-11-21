@@ -11,7 +11,7 @@
   'use strict';
 
   const REASON_LOCKED = 'Terkunci';
-  const REASON_PARTNER = 'Punya pacar';
+  const REASON_PARTNER = 'Hanya pemilik';
 
   const OWNER_ONLY = ['fridge', 'kulkas', 'wardrobe', 'lemari', 'stove', 'kitchen_sink'];
   const SHARED_PARTNER = ['bed', 'bathtub', 'shower', 'water_tub', 'squat_toilet', 'sink', 'sekat_wc', 'fan', 'shoe_rack'];
@@ -299,7 +299,9 @@
         return ['sleep', 'store_fridge', 'take_fridge', 'store_home', 'take_home', 'cook', 'cook_recipe', 'wash', 'home_shower', 'home_toilet', 'buy_furniture', 'bathe', 'use_toilet', 'open'];
       }
       if (role === 'partner') {
-        return ['sleep', 'home_toilet', 'use_toilet', 'home_shower', 'bathe', 'wash'];
+        return ['sleep', 'home_toilet', 'use_toilet', 'home_shower', 'bathe', 'wash',
+          'open_fridge', 'open_storage', 'cook', 'cook_recipe', 'cook_menu',
+          'store_fridge', 'take_fridge', 'store_home', 'take_home', 'open', 'eat'];
       }
       return [];
     }
@@ -376,8 +378,11 @@
       return (actions || []).filter((a) => {
         const id = typeof a === 'string' ? a : (a && a.id);
         if (!id) return false;
-        if (id === 'buy_furniture' || id === 'store_fridge' || id === 'take_fridge' || id === 'store_home' || id === 'take_home' || id === 'cook' || id === 'cook_recipe') {
+        if (id === 'buy_furniture') {
           return acc.role === 'owner';
+        }
+        if (id === 'store_fridge' || id === 'take_fridge' || id === 'store_home' || id === 'take_home' || id === 'cook' || id === 'cook_recipe' || id === 'open_fridge' || id === 'open_storage' || id === 'cook_menu') {
+          return acc.role === 'owner' || acc.role === 'partner';
         }
         /* item-level access: kitchen wash is owner_only even though wash is shared */
         const item = itemsById && (a.item || a.prop || itemsById[a.itemId || a.propId]);
@@ -397,7 +402,7 @@
       if (item && accessOfItem(item) === 'owner_only' && acc.role === 'partner') return REASON_PARTNER;
       if (acc.role === 'partner') {
         const allow = new Set(acc.allowedActs || []);
-        const ownerActs = new Set(['store_fridge', 'take_fridge', 'store_home', 'take_home', 'cook', 'cook_recipe', 'buy_furniture', 'open']);
+        const ownerActs = new Set(['buy_furniture']);
         if (ownerActs.has(actionId) || (item && accessOfItem(item) === 'owner_only')) return REASON_PARTNER;
         if (allow.has(actionId)) return null;
         return REASON_PARTNER;

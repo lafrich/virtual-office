@@ -136,7 +136,7 @@ Live player world position.
 
 Unified snapshot. Day, minute, weekday, label, phase and speed come from the visual Semesta 24-hour clock when it is attached; `elapsedMinutes` is the Jiwa life clock. Both share the pause flag. If the visual clock is not attached, day/minute are derived from `elapsedMinutes` starting at 07:00 on day 1.
 
-The two clocks still advance at their existing rates (visual: 1 real second = 1 game minute at 1×; life: `settings.realSecondsPerGameMinute`, default 8). Unifying the rates is out of scope.
+One clock (NJH balancing slice-1.0): when `shared/njh-balancing.js` is loaded, both the visual day/night clock (`SemestaDayNight.SECONDS_PER_MINUTE`) and the life tick (`settings.realSecondsPerGameMinute`) read `clock.realSecondsPerGameMinute` from `content/balancing.json` (0.5 s per game minute, 1 day = 12 real minutes). Without the table both fall back to the old rates (visual 1 s/min, life 8 s/min).
 
 ### Save slots
 
@@ -202,7 +202,7 @@ Wallet transactions now include `day` (visual day when `runAction` / `advance_ti
 
 `relationship(id?)` → `[{with, type}]` (pacaran for `t_ichsan`/`t_noor`).
 
-`roomAccess(roomId)` → `{canEnter, role: 'owner'|'partner'|'guest'|'none', allowedActs, reason, kind}`. Locked reason: `'Terkunci'`. Partner denied on owner-only furniture: `'Punya pacar'`.
+`roomAccess(roomId)` → `{canEnter, role: 'owner'|'partner'|'guest'|'none', allowedActs, reason, kind}`. Locked reason: `'Terkunci'`. Partner denied on owner-only furniture: `'Hanya pemilik'`.
 
 `saveMeta()` includes `{hasCharacter, needsCharacter, ownerId, spawn:{site,roomId}}`. 4P starts go through the character creator first, then `spawnAt('kost', roomId)` into their room. Guests: creator, then hobo start.
 

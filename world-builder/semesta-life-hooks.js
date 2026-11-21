@@ -31,7 +31,7 @@ const FURNITURE_GATES=Object.freeze([
  {id:'stove',kind:'stove',actions:Object.freeze(['cook','cook_recipe']),
   furnitureIds:Object.freeze(['stove']),
   patterns:/kompor|stove/i,inRoom:true,label:'Kompor'},
- {id:'fridge',kind:'fridge',actions:Object.freeze(['store_fridge','take_fridge']),
+ {id:'fridge',kind:'fridge',actions:Object.freeze(['open_fridge']),
   furnitureIds:Object.freeze(['fridge','kulkas']),
   patterns:/kulkas|fridge|lemari.?es/i,inRoom:true,label:'Kulkas'},
  {id:'wardrobe',kind:'wardrobe',actions:Object.freeze(['store_home','take_home']),
@@ -59,10 +59,10 @@ const FURNITURE_GATES=Object.freeze([
 const ACTION_LABELS={
  fish:'Mancing',sell_fish:'Jual Ikan',work:'Kerja',scavenge:'Mulung',sell_loak:'Jual Barang',
  catch_fruit:'Ambil Buah',eat:'Makan',coffee:'Ngopi',tea:'Beli Es Teh',talk:'Ngobrol',arrest:'Tegur Hansip',wall_pee:'Pipis di Tembok',fart:'Kentut',public_toilet:'WC Umum',public_shower:'Mandi Umum',
- buy_room:'Beli Akses Kost',home_toilet:'WC Kost',home_shower:'Mandi Kost',sleep:'Tidur',
+ buy_room:'Bayar kos (sekali bayar, permanen)',home_toilet:'WC Kost',home_shower:'Mandi Kost',sleep:'Tidur',sleep_until_morning:'Tidur sampai pagi',wake:'Bangun',
  cook:'Masak Ikan',cook_recipe:'Masak Resep',store_fridge:'Simpan Kulkas',take_fridge:'Ambil dari Kulkas',
  store_home:'Simpan di Kost',take_home:'Ambil dari Kost',wash:'Cuci',bathe:'Mandi Kost',use_toilet:'WC Kost',
- enter_room:'Masuk',exit_interior:'Keluar',rest:'Duduk sebentar',help:'Bantu warga',
+ enter_room:'Masuk',enter_closed:'Belum buka',exit_interior:'Keluar',rest:'Duduk sebentar',help:'Bantu warga',
  charity:'Sedekah',worship:'Ibadah',course:'Kursus Online',world_enter:'Masuk',world_quest:'Quest',
  world_ambient:'Interaksi'
 };
@@ -128,6 +128,7 @@ function actionPrice(action,config,args){
  if(action==='coffee')return num(s.coffeePrice,5000);
  if(action==='tea')return num(s.teaPrice,3000);
  if(action==='public_shower')return num(s.publicShowerFee,500);
+ if(action==='public_toilet')return num(s.publicToiletPrice,0);
  if(action==='charity')return 1000;
  if(action==='buy_room')return num(s.roomPrice,700000);
  if(action==='buy_fridge')return num(s.fridgePrice,2000000);
@@ -160,7 +161,7 @@ function seedMessages(state,config){
  const room=num(config?.settings?.roomPrice,700000);
  state.messages=[
   {from:'Lafrich',text:'Selamat datang di kota! Cari kerja, hemat, kumpulin buat kost.',t:1},
-  {from:'Mak Kost',text:'Kamar kost masih ada, '+rpMoney(room)+' sekali bayar. Kabarin ya.',t:1}
+  {from:'Mak Kost',text:'Kamar kost masih ada, Bayar kos (sekali bayar, permanen) '+rpMoney(room)+'. Kabarin ya.',t:1}
  ];
 }
 function pushMessage(state,from,text){
@@ -171,28 +172,42 @@ function pushMessage(state,from,text){
  state.messages=state.messages.slice(0,40);
  return row;
 }
-function questDef(id,npcId){
- if(id){const q=QUEST_TABLE.find(x=>x.id===id);if(q)return q;}
- if(npcId){const q=QUEST_TABLE.find(x=>x.npcId===String(npcId));if(q)return q;}
- return QUEST_TABLE[QUEST_TABLE.length-1];
+// Quest tables: the legacy QUEST_TABLE, or the slice chain from content/balancing.json
+// (ctx.questTable, rows with chain:true). In a chain only the first unfinished quest is open.
+function questDef(id,npcId,table,state){
+ const T=Array.isArray(table)&&table.length?table:QUEST_TABLE;
+ if(id){const q=T.find(x=>x.id===id);if(q)return q;}
+ if(npcId){
+  const mine=T.filter(x=>x.npcId===String(npcId));
+  const open=mine.find(x=>((state?.quests||{})[x.id]||{}).state!=='done');
+  if(open||mine[0])return open||mine[0];
+ }
+ return T[T.length-1];
 }
+function questActs(q){return Array.isArray(q.act)?q.act:q.act?[q.act]:[];}
 function questProgress(q,rec,state){
  const c=state?.actionCounts||{};const b=rec?.base||{};
- if(q.kind==='earn')return num(c.workEarn,0)-num(b.workEarn,0);
- if(q.kind==='count')return num(c[q.act],0)-num(b[q.act],0);
+ if(q.kind==='earn')return q.scope==='total'?num(c.workEarn,0):num(c.workEarn,0)-num(b.workEarn,0);
+ if(q.kind==='count')return questActs(q).reduce((sum,a)=>sum+num(c[a],0)-num(b[a],0),0);
  if(q.kind==='stat')return num(state?.[q.stat],0);
  if(q.kind==='inv')return (state?.inventory||[]).length;
  if(q.kind==='exp')return num(state?.experience,0)-num(b.exp,0);
  return 0;
 }
-function questRow(q,state){
- const rec=(state?.quests||{})[q.id]||(state?.quests||{})[q.npcId]||null;
+function questRow(q,state,table){
+ const rec=(state?.quests||{})[q.id]||(q.chain?null:(state?.quests||{})[q.npcId])||null;
  let st='available';
  const progress=questProgress(q,rec,state);
  if(rec?.state==='done')st='done';
  else if(rec?.state==='active'||rec?.state==='ready')st=progress>=q.target?'ready':'active';
+ else if(q.chain&&Array.isArray(table)){
+  const i=table.indexOf(q);
+  if(i>0&&table.slice(0,i).some(p=>((state?.quests||{})[p.id]||{}).state!=='done'))st='locked';
+ }
  return {npcId:q.npcId,id:q.id,title:q.title,goal:q.goal,text:q.text,target:q.target,
-  progress:Math.max(0,progress),reward:q.reward,state:st};
+  progress:Math.max(0,progress),reward:q.reward,state:st,win:q.win===true||undefined,
+  // Data hint (content/balancing.json quests[].hint): shown while money is below the threshold (no softlock).
+  hint:q.hint&&(st==='active'||st==='available')&&Number.isFinite(Number(q.hint.walletBelow))&&num(state?.wallet,0)<Number(q.hint.walletBelow)?String(q.hint.text||''):undefined};
 }
 function defaultEmit(ctx,type,detail){
  const payload=Object.assign({type},detail||{});
@@ -336,28 +351,28 @@ function create(ctx){
   else if(id==='loak')push('sell_loak','Jual Barang');
   else if(id==='scavenge')push('scavenge','Mulung');
   else if(id==='tree')push('catch_fruit','Ambil Buah');
-  else if(id==='warung')push('eat','Makan Warteg',{place:'warteg',price:actionPrice('eat',config(),{place:'warteg'})});
-  else if(id==='coffee'){push('coffee','Ngopi');push('tea','Beli Es Teh');}
+  else if(id==='warung'){
+   push('eat','Makan Warteg',{place:'warteg',price:actionPrice('eat',config(),{place:'warteg'})});
+   if(ctx.coffeeAtWarteg)push('coffee','Ngopi',{place:'warteg'},{confirm:true,ui:'confirm'});
+  }
+  else if(id==='coffee'){push('coffee','Ngopi',{},{confirm:true,ui:'confirm'});push('tea','Beli Es Teh',{},{confirm:true,ui:'confirm'});}
   else if(id==='public_wc')push('public_toilet','WC Umum',{facilityId:site.sourceId||id});
   else if(id==='public_bath')push('public_shower','Mandi Umum',{facilityId:site.sourceId||id});
   else if(id==='kost'){
    if(state?.housing?.room){
     push('home_toilet','WC Kost');
     push('home_shower','Mandi Kost');
-    push('sleep','Tidur Kost');
+    if(ctx.sleeping&&ctx.sleeping())push('wake','Bangun');
+    else{push('sleep','Tidur Kost');if(ctx.timedSleep)push('sleep_until_morning','Tidur sampai pagi');}
     push('cook','Masak Ikan');
     push('cook_recipe','Masak Resep');
-    push('store_fridge','Simpan Kulkas');
-    push('store_home','Simpan di Kost');
-    push('take_home','Ambil dari Kost');
-    push('take_fridge','Ambil dari Kulkas');
-   }else push('buy_room','Beli Akses Kost');
+   }else push('buy_room','Bayar kos (sekali bayar, permanen)');
   }
-  else if(id==='tent')push('sleep','Tidur Tenda');
-  else if(site.religion)push('worship','Ibadah '+site.religion,{placeReligion:site.religion});
+  else if(id==='tent'){if(ctx.sleeping&&ctx.sleeping())push('wake','Bangun');else{push('sleep','Tidur Tenda');if(ctx.timedSleep)push('sleep_until_morning','Tidur sampai pagi');}}
+  else if(site.religion)push('worship','Ibadah '+site.religion,{placeReligion:site.religion},{confirm:true,ui:'confirm'});
   else if(id==='course')push('course','Kursus Online');
   else if(id==='help')push('help','Bantu warga');
-  else if(id==='charity')push('charity','Sedekah Rp1.000');
+  else if(id==='charity')push('charity','Sedekah Rp1.000',{},{confirm:true,ui:'confirm'});
   else if(id==='bench')push('rest','Duduk sebentar',{seatId:site.sourceId||'bangku_preview'});
   else if(id==='hansip'){push('talk','Ngobrol dengan Hansip');push('arrest','Lapor / Tegur',{witnessed:true});}
   else if(site.npc||site.role==='quest'||site.giveQuest)push('talk',site.label||'Ngobrol');
@@ -402,7 +417,14 @@ function create(ctx){
   }else if(kind==='warteg'||kind==='lobby'||inLobby){
    /* Makan is supplied as an extra action near tables / kasir. */
   }else{
-   for(const {site} of near)list.push(...actionsForSite(site,state));
+   const focus=near[0];
+   const same=s=>{
+    if(!focus)return false;
+    if(s.sourceId&&s.sourceId===focus.site.sourceId)return true;
+    if(s.id===focus.site.id&&Math.hypot(num(s.x,0)-num(focus.site.x,0),num(s.z,0)-num(focus.site.z,0))<=0.4)return true;
+    return Math.hypot(num(s.x,0)-num(focus.site.x,0),num(s.z,0)-num(focus.site.z,0))<=0.35;
+   };
+   for(const {site} of near)if(same(site))list.push(...actionsForSite(site,state));
   }
   try{
    const extra=(typeof ctx.extraActions==='function'?ctx.extraActions():[])||[];
@@ -456,7 +478,7 @@ function create(ctx){
    if(acc&&(acc.role==='partner'||acc.kind==='lobby'||acc.role==='none')){
     const next=Access.filterActions(list,acc);
     // Public step-2 entries (shop, fishing) are not room furniture; keep them.
-    // Locked kost furniture entries stay as disabled rows so the AKSI bar can say why (Punya pacar / Terkunci).
+    // Locked kost furniture entries stay as disabled rows so the AKSI bar can say why (Hanya pemilik / Terkunci).
     for(const x of list)if((x.id==='shop_minimarket'||x.id==='fish_start'||(x.disabled&&x.locked&&/^(open_fridge|open_storage|cook_menu)$/.test(x.id)))&&!next.some(y=>y.id===x.id))next.push(x);
     Object.defineProperty(next,'spot',{value:spot,enumerable:false,configurable:true});
     return next;
@@ -637,7 +659,7 @@ function create(ctx){
   const targets=cur==='tenda'?[
    {label:'Level 3',done:lv>=3,info:'Lv '+lv},
    {label:'Tabungan '+rpMoney(room),done:num(state.wallet,0)>=room,info:rpMoney(state.wallet)},
-   {label:'Sewa kamar di Kost',done:!!state.housing?.room,info:'datangi Kost'}
+   {label:'Bayar kos (sekali bayar, permanen)',done:!!state.housing?.room,info:'datangi Kost'}
   ]:[
    {label:'Level 8',done:lv>=8,info:'Lv '+lv},
    {label:'Tabungan Rp150.000.000',done:num(state.wallet,0)>=150000000,info:rpMoney(state.wallet)},
@@ -654,13 +676,17 @@ function create(ctx){
     where:site?site.label:undefined,siteId:site?.id};
   });
  }
+ function questTable(){return Array.isArray(ctx.questTable)&&ctx.questTable.length?ctx.questTable:QUEST_TABLE;}
  function quests(){
   seedMessages(getState(),config());
-  return QUEST_TABLE.map(q=>questRow(q,getState()));
+  const T=questTable();
+  return T.map(q=>questRow(q,getState(),T));
  }
  function acceptQuest(npcId,questId){
   const state=getState();if(!state)return {ok:false,reason:'Tidak ada state'};
-  const q=questDef(questId,npcId);
+  const T=questTable();
+  const q=questDef(questId,npcId,T,state);
+  if(questRow(q,state,T).state==='locked')return {ok:false,reason:'Selesaikan quest sebelumnya dulu.'};
   state.quests=state.quests&&typeof state.quests==='object'?state.quests:{};
   const cur=state.quests[q.id];
   if(cur?.state==='done')return {ok:false,reason:'Quest sudah selesai'};
@@ -669,15 +695,16 @@ function create(ctx){
    workEarn:num(state.actionCounts?.workEarn,0),eat:num(state.actionCounts?.eat,0),
    exp:num(state.experience,0)
   }};
-  if(q.act)state.quests[q.id].base[q.act]=num(state.actionCounts?.[q.act],0);
+  for(const a of questActs(q))state.quests[q.id].base[a]=num(state.actionCounts?.[a],0);
   pushMessage(state,q.npcId||'NPC','Quest “'+q.title+'” diterima: '+q.goal+'.');
   if(typeof ctx.persist==='function')ctx.persist();
   return {ok:true,id:q.id,state:'active'};
  }
  function turnInQuest(npcId,questId){
   const state=getState();if(!state)return {ok:false,reason:'Tidak ada state'};
-  const q=questDef(questId,npcId);
-  const row=questRow(q,state);
+  const T=questTable();
+  const q=questDef(questId,npcId,T,state);
+  const row=questRow(q,state,T);
   if(row.state==='done')return {ok:false,reason:'Quest sudah selesai'};
   if(row.state!=='ready')return {ok:false,reason:'Syarat quest belum terpenuhi'};
   if(typeof ctx.runEconomy==='function'){
@@ -712,9 +739,9 @@ function create(ctx){
     const owned=id==='shower'||id==='sink'||id==='squat_toilet'||id==='toilet'||!!(state.furniture||[]).includes(id)||(id==='fridge'&&state.housing?.fridge);
     const acts=[];
     const kind=kindOf(it,gates)||id;
-    if(kind==='bed'||id==='bed')acts.push({act:'sleep',label:'Tidur'});
+    if(kind==='bed'||id==='bed'){acts.push({act:'sleep',label:'Tidur'});if(ctx.timedSleep)acts.push({act:'sleep_until_morning',label:'Tidur sampai pagi'});}
     if(kind==='stove'||id==='stove')acts.push({act:'cook',label:'Masak Ikan'},{act:'cook_recipe',label:'Masak Resep'});
-    if(id==='fridge'||kind==='fridge')acts.push({act:'store_fridge',label:'Simpan ke Kulkas'},{act:'take_fridge',label:'Ambil dari Kulkas'});
+    if(id==='fridge'||kind==='fridge')acts.push({act:'open_fridge',label:'Buka Kulkas'});
     if(kind==='bathroom'||/shower|mandi/.test(id))acts.push({act:'home_shower',label:'Mandi'});
     if(/toilet|wc/.test(id))acts.push({act:'home_toilet',label:'Buang Air'});
     if(id==='wardrobe'||kind==='wardrobe')acts.push({act:'store_home',label:'Simpan Barang'},{act:'take_home',label:'Ambil Barang'});
@@ -725,7 +752,7 @@ function create(ctx){
   return [
    {id:'bed',label:'Kasur',x:0,y:1,w:2,h:2,owned:has('bed'),acts:[{act:'sleep',label:'Tidur'}]},
    {id:'stove',label:'Kompor',x:6,y:1,w:2,h:1,owned:has('stove'),acts:[{act:'cook',label:'Masak Ikan'},{act:'cook_recipe',label:'Masak Resep'}]},
-   {id:'fridge',label:'Kulkas',x:5,y:1,w:1,h:1,owned:!!state.housing?.fridge,buy:'fridge',acts:[{act:'store_fridge',label:'Simpan ke Kulkas'},{act:'take_fridge',label:'Ambil dari Kulkas'}]},
+   {id:'fridge',label:'Kulkas',x:5,y:1,w:1,h:1,owned:!!state.housing?.fridge,buy:'fridge',acts:[{act:'open_fridge',label:'Buka Kulkas'}]},
    {id:'bath',label:'Kamar Mandi',x:7,y:3,w:1,h:2,owned:true,acts:[{act:'home_shower',label:'Mandi'}]},
    {id:'wc',label:'WC',x:6,y:4,w:1,h:1,owned:true,acts:[{act:'home_toilet',label:'Buang Air'}]},
    {id:'wardrobe',label:'Lemari',x:0,y:4,w:1,h:1,owned:has('wardrobe'),acts:[{act:'store_home',label:'Simpan Barang'},{act:'take_home',label:'Ambil Barang'}]},
@@ -771,13 +798,13 @@ function create(ctx){
   const out=[],seen=new Set();
   const push=(npcId,state)=>{
    const id=String(npcId||'');if(!id||seen.has(id))return;seen.add(id);
-   if(state==='done'||state==='active')return;
+   if(state==='done'||state==='active'||state==='locked')return;
    out.push({npcId:id,state:state==='ready'?'ready':'available'});
   };
   const sites=getSites();
   const known=id=>sites.some(s=>s.id===id||s.npcId===id||s.sourceId===id)||objects.some(o=>o.id===id||o.questId===id);
   for(const rec of quests()){
-   if(rec.state==='done'||rec.state==='active')continue;
+   if(rec.state==='done'||rec.state==='active'||rec.state==='locked')continue;
    if(known(rec.npcId))push(rec.npcId,rec.state);
   }
   for(const o of objects){
@@ -801,7 +828,10 @@ function create(ctx){
    const id=String(o.id||'');if(!id||seen.has(id))return;seen.add(id);
    let x=num(o.x,0),z=num(o.z,0);
    if(door){try{const p=door(o);if(p&&Number.isFinite(Number(p.x))){x=Number(p.x);z=Number(p.z);}}catch(_e){}}
-   out.push({id,name:o.name||o.label||o.asset||o.id||'Bangunan',x,z});
+   const ready=!!(o.interior&&o.njhInteriorPending!==true)||(Array.isArray(o.njhDoors)&&o.njhDoors.some(d=>d&&d.interior&&!d.pending));
+   const closed=!!(o.closed||o.njhInteriorPending||o.pending||(o.enterable===true&&!ready));
+   out.push({id,name:o.name||o.label||o.asset||o.id||'Bangunan',x,z,
+    closed,label:closed?'Belum buka':(o.name||o.label||'Bangunan'),reason:closed?'Belum buka':null});
   };
   const kostPat=/kost|kos_|boarding.?room|cove|kamar.?sewa|__njh_play_kost__/i;
   const wartegPat=/warteg|warung.?makan|nasi padang|food.vendor/i;
@@ -809,9 +839,10 @@ function create(ctx){
   const text=o=>[o.id,o.name,o.label,o.asset,o.assetId,o.subtype,o.type,o.njhInteriorTemplate].filter(Boolean).join(' ');
   for(const o of objects){
    if(scavengePat.test(text(o))&&o.enterable!==true&&!o.njhInteriorTemplate&&!o.interior)continue;
-   const hasInterior=!!(o.enterable===true||o.interior?.floors?.length||o.njhInteriorTemplate);
+   const wantsEnter=o.enterable===true||o.njhInteriorTemplate||!!o.interior?.floors?.length||
+    (Array.isArray(o.interactions)&&o.interactions.includes('enter'));
    const playDoor=(o.enterable===true||o.njhInteriorTemplate||o.interior)&& (kostPat.test(text(o))||wartegPat.test(text(o)));
-   if(hasInterior||playDoor)push(o);
+   if(wantsEnter||playDoor)push(o);
   }
   if(typeof ctx.playEnterables==='function'){
    try{for(const o of ctx.playEnterables()||[])if(o)push(o);}catch(_e){}
@@ -930,7 +961,7 @@ function create(ctx){
   if(!st?.housing?.room)return 'Perlu kost dahulu.';
   if(Access&&currentRoomId()){
    const acc=roomAccess();
-   if(acc&&acc.role==='partner')return 'Punya pacar';
+   if(acc&&(acc.role==='owner'||acc.role==='partner'))return null;
    if(acc&&acc.role!=='owner')return 'Terkunci';
   }
   return null;
@@ -985,10 +1016,11 @@ function create(ctx){
   const st=getState()||{},c=cfgN();if(!c)return [];
   const known=knownSet(st,c);
   const R=rules(),fishIds=new Set(R?R.allFish(c).map(f=>f.id):[]);
-  const bag=(st.inventory||[]).map(u=>st.itemMeta?.[u]?.species).filter(Boolean);
+  const speciesOf=list=>(list||[]).map(u=>st.itemMeta?.[u]?.species).filter(Boolean);
+  const bag=speciesOf(st.inventory),fridge=speciesOf(st.fridge),storage=speciesOf(st.homeStorage);
   return (c.cooking.recipes||[]).map(r=>{
    const k=known.has(r.id);
-   const pool=bag.slice(),missing=[];
+   const pool=bag.concat(fridge,storage),missing=[];
    const ings=(r.ingredients||[]).map(n=>{
     n=typeof n==='string'?{id:n,qty:1}:n;
     const fits=sp=>n.id?sp===n.id:(n.category==='fish'?fishIds.has(sp):R?.itemDef(c,sp)?.category===n.category);
@@ -1098,14 +1130,17 @@ function create(ctx){
   if(!spot||(spot.source!=="temporary"&&Math.hypot(spot.x-pos.x,spot.z-pos.z)>range))return {ok:false,reason:'Dekati dermaga / tempat mancing dahulu.'};
   if((st.inventory||[]).length>=set.bagSlots)return {ok:false,reason:'Tas penuh ('+set.bagSlots+' slot).'};
   if(num(st.energy,0)<set.fishEnergy)return {ok:false,reason:'Energi tidak cukup untuk mancing.'};
-  fishSession={id:'fish-'+(++fishSeq),spotId:spot.id,spotLabel:spot.label,phase:'cast',waits:0,fish:null,progress:0,tension:0.5,miss:0};
+  fishSession={id:'fish-'+(++fishSeq),spotId:spot.id,spotLabel:spot.label,phase:'cast',waits:0,fish:null,progress:0,tension:0.5,miss:0,startElapsed:num(st.elapsedMinutes,0)};
   play('fishing_cast');
   return {ok:true,sessionId:fishSession.id,spotId:spot.id,energyCost:set.fishEnergy,phase:'cast'};
  }
  function finishFish(gotAway,reason){
   const ses=fishSession;fishSession=null;
   if(!ses)return {ok:false,done:true,reason:'Sesi mancing tidak ada.'};
-  const r=econ('fish_catch',gotAway?{gotAway:true,spotId:ses.spotId,spotLabel:ses.spotLabel}:{fishId:ses.fish.id,spotId:ses.spotId,spotLabel:ses.spotLabel});
+  // One time source: the live clock kept running during the minigame; only the rest of fishMinutes is still owed.
+  const fishMinutes=num(cfgN()?.settings?.fishMinutes,12);
+  const minutes=Math.max(0,fishMinutes-Math.max(0,num(getState()?.elapsedMinutes,0)-num(ses.startElapsed,0)));
+  const r=econ('fish_catch',gotAway?{gotAway:true,spotId:ses.spotId,spotLabel:ses.spotLabel,minutes}:{fishId:ses.fish.id,spotId:ses.spotId,spotLabel:ses.spotLabel,minutes});
   const res=r.ok?{ok:true,done:true,sessionId:ses.id,spotId:ses.spotId,gotAway:!!gotAway,
    fishId:gotAway?null:r.fishId,label:gotAway?null:r.label,rarity:gotAway?null:r.rarity,rarityTier:gotAway?null:r.rarityTier,uid:gotAway?null:r.uid}
    :{ok:false,done:true,sessionId:ses.id,gotAway:true,reason:r.reason};
@@ -1196,7 +1231,7 @@ function create(ctx){
    const fr=nearKind('fridge');if(fr)push('open_fridge','Buka Kulkas','inventory',{container:'fridge'},gate({furnitureId:fr.furnitureId||fr.id,spotLabel:'Kulkas'},true));
    const wd=nearKind('wardrobe');if(wd)push('open_storage','Buka Lemari','inventory',{container:'storage'},gate({furnitureId:wd.furnitureId||wd.id,spotLabel:'Lemari'},true));
    const sv=nearKind('stove');if(sv)push('cook_menu','Masak','cook',{},gate({furnitureId:sv.furnitureId||sv.id,spotLabel:'Kompor'},true));
-   if(!lock&&st.housing?.room&&num(st.powerTokens,0)<=2)push('topup_token','Isi Token Listrik','token',{units:5},{price:set.tokenPrice||20000});
+   if(!lock&&roomAccess()?.role==='owner'&&st.housing?.room&&num(st.powerTokens,0)<=2)push('topup_token','Isi Token Listrik','token',{units:5},{price:set.tokenPrice||20000});
   }
   if(inMart()||nearMart())push('shop_minimarket','Belanja NJH Mart','shop',{siteId:'minimarket'},{spotLabel:'NJH Mart'});
   const spot=fishSpots().filter(s=>s.source!=='temporary').map(s=>({s,d:Math.hypot(s.x-pos.x,s.z-pos.z)})).filter(x=>x.d<=range).sort((a,b)=>a.d-b.d)[0];
@@ -1213,6 +1248,39 @@ function create(ctx){
   emit('mainkan:open-ui',{ui,args:a});
   return Object.assign({ui},data,{ok:true});
  }
+ function sellableFish(buyerId){
+  const st=getState();if(!st)return {ok:false,reason:'Play Game belum dimulai',items:[],buyers:[]};
+  const c=cfgN(),R=rules();
+  const buyers=[{id:'siomay_batagor',label:'Bang Siomay / Batagor'},{id:'pasar_ikan',label:'Pasar Ikan'}];
+  const wanted=buyerId?String(buyerId):'';
+  const rows=[];
+  for(const uid of (st.inventory||[])){
+   const meta=st.itemMeta?.[uid];if(!meta)continue;
+   const fish=(c?.fishing?.fish||c?.fish||[]).find(f=>f.id===meta.species)||null;
+   const def=R&&typeof R.itemDef==='function'?R.itemDef(c,meta.species):null;
+   const isFish=!!fish||def?.category==='fish'||/lele|nila|mujair|sapu_sapu/.test(meta.species||'');
+   if(!isFish)continue;
+   const prices=fish?.buyers||{};
+   const price=wanted?prices[wanted]:(prices.siomay_batagor??prices.pasar_ikan??null);
+   rows.push({uid,itemId:meta.species,label:meta.label||fish?.label||meta.species,qty:1,
+    price:price==null?null:Number(price),prices,container:'bag',spoiled:!!meta.spoiled});
+  }
+  return {ok:true,buyerId:wanted||null,buyers,items:rows};
+ }
+ function sell(itemId,qty,buyerId){
+  const st=getState();if(!st)return {ok:false,reason:'Play Game belum dimulai'};
+  let id=itemId,n=Math.max(1,Math.round(Number(qty)||1)),buyer=String(buyerId||'siomay_batagor');
+  if(itemId&&typeof itemId==='object'){id=itemId.itemId||itemId.uid||itemId.id;n=Math.max(1,Math.round(Number(itemId.qty??qty)||1));buyer=String(itemId.buyerId||buyerId||'siomay_batagor');}
+  const sold=[];
+  const matches=(st.inventory||[]).filter(uid=>uid===id||st.itemMeta?.[uid]?.species===id);
+  if(!matches.length)return {ok:false,reason:'Ikan tidak ada di tas.'};
+  for(const uid of matches.slice(0,n)){
+   const r=econ('sell_fish',{itemId:uid,buyerId:buyer});
+   if(!r.ok)return Object.assign({ok:false,reason:r.reason,sold},r);
+   sold.push({uid,itemId:id,price:r.delta||r.price||null});
+  }
+  return {ok:true,sold,qty:sold.length,buyerId:buyer,wallet:st.wallet};
+ }
  return {
   spawnAt,onSpawnDecision,nearbyActions,furnitureAllows,argsFor,
   pause,resume,isPaused,clock,onDayEnd,
@@ -1222,7 +1290,7 @@ function create(ctx){
   questMarkers,enterables,worldToScreen,playerPosition,
   hasSave,saveMeta,saveSlot,loadSlot,listSlots,resetSave,
   housing,relationship,roomAccess,
-  inventory,moveItem,eatItem,recipes,cook,shopList,buy,checkoutCart:buy,fishSpots,fishStart,fishInput,token,topupToken,
+  inventory,moveItem,eatItem,recipes,cook,shopList,buy,checkoutCart:buy,fishSpots,fishStart,fishInput,sellableFish,sell,token,topupToken,
   step2Actions,openUi,tokenWatch,STEP2_UI:['open_fridge','open_storage','cook_menu','shop_minimarket','fish_start','topup_token'],
   RANGE:range,FURNITURE_GATES:gates
  };

@@ -26,7 +26,7 @@
     "bag": { "enabled": true, "separateFromPhone": true, "slots": 8 },
     "movement": { "enabled": true, "controllerOnly": true, "walkSpeed": 1.4, "runSpeed": 2.2 },
     "energy": { "enabled": false, "todo": true, "zeroCanMove": true, "lowEnergySlowFactor": 0.35, "crossingCost": 0 },
-    "jobs": { "enabled": true, "dailyWageCap": 6000, "viaProfessionNpcOnly": true },
+    "jobs": { "enabled": true, "dailyWageCap": 150000, "viaProfessionNpcOnly": true },
     "courses": { "enabled": true, "dailyXpCap": 150 },
     "traffic": { "enabled": false, "todo": true, "densityCycle": "shared_deterministic", "busyRatio": 0.6, "quietRatio": 0.3 },
     "loak": { "enabled": false, "todo": true, "sellPercent": 5 },

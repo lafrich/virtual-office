@@ -1,0 +1,386 @@
+{
+  "id": "njh_pecel_lele_tenda",
+  "label": "NJH · Pecel Lele (Tenda)",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "floor": 1,
+  "baseId": "semesta:medium",
+  "notes": "Tenda Pecel Lele interior 8x6. Seller side r=0-1: penggorengan + ember cuci on one row, bakul nasi, box bahan, cooler es teh. Service line r=2: staff gap c=0, gerobak (c1-2) + etalase lauk (c3-4), meja bayar (c5-6, faces the door), gap c=7. Two dining groups r=3-5: meja 1 with kursi left/right (rot 90/270); meja 2 with the blue plastic bench north (rot 0, faces +r) and the red plastic bench south (rot 180, true back view, faces -r). Every seat faces its table; no dead pockets. Plastic benches are r6 review TYPES (art exists, not registered yet).",
+  "source": "njh-interiors-kharisma-r7 (revision of njh-interior-templates-r6)",
+  "scope": "PREVIEW, NOT LIVE. Baymax integrates; live needs Ichsan's own OK.",
+  "paint": {
+    "theme": "warm",
+    "themeNote": "Runtime only bakes paint for warteg (VLWartegInteriorArt) and NJH MART (bakeMartWall). These five layers + palette are the declaration for Baymax's hook; preview renders in r7/renders show the intent.",
+    "layers": [
+      {
+        "layer": "dado",
+        "z": [
+          0,
+          49
+        ],
+        "spec": "blue terpal skirt along the tent walls",
+        "palette": [
+          "#123E74",
+          "#1B5AA6",
+          "#2E7BD1",
+          "#6FA8E8",
+          "#B8D6F6"
+        ]
+      },
+      {
+        "layer": "trim",
+        "z": [
+          50,
+          50
+        ],
+        "spec": "red tali / rope edge",
+        "palette": [
+          "#6E1414",
+          "#A11F1F",
+          "#D33B3B",
+          "#EE7A7A",
+          "#FFD0D0"
+        ]
+      },
+      {
+        "layer": "midDisplay",
+        "z": [
+          56,
+          70
+        ],
+        "spec": "menu strip PECEL LELE - AYAM - BEBEK - TAHU TEMPE with prices; hanging kerupuk bags",
+        "palette": [
+          "#1B5AA6",
+          "#D33B3B",
+          "#F2C230",
+          "#FFFFFF",
+          "#2A2A2A"
+        ]
+      },
+      {
+        "layer": "identity",
+        "z": [
+          69,
+          116
+        ],
+        "spec": "white spanduk 'PECEL LELE LAMONGAN' with painted lele + ayam",
+        "palette": [
+          "#FFFFFF",
+          "#F4F1E6",
+          "#D33B3B",
+          "#1B5AA6",
+          "#2E7D32"
+        ]
+      },
+      {
+        "layer": "ceiling",
+        "z": [
+          108,
+          120
+        ],
+        "spec": "terpal ridge pole and two hanging bohlam",
+        "palette": [
+          "#2A2A2A",
+          "#555555",
+          "#FFD27A",
+          "#FFF0C0",
+          "#FFFFFF"
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "njh-pecel-stove-1",
+      "assetId": "stove",
+      "name": "Penggorengan Lele",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-pecel-kitchen_sink-1",
+      "assetId": "kitchen_sink",
+      "name": "Ember Cuci Piring",
+      "c": 1,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-pecel-rice_cooker-1",
+      "assetId": "rice_cooker",
+      "name": "Bakul Nasi",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook",
+        "open"
+      ]
+    },
+    {
+      "id": "njh-pecel-market_crate-1",
+      "assetId": "market_crate",
+      "name": "Box Lele & Ayam",
+      "c": 3,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse",
+        "collect"
+      ]
+    },
+    {
+      "id": "njh-pecel-drink_cooler-1",
+      "assetId": "drink_cooler",
+      "name": "Cooler Es Teh",
+      "c": 5,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "drink",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "drink",
+        "buy"
+      ]
+    },
+    {
+      "id": "njh-pecel-food_cart-1",
+      "assetId": "food_cart",
+      "name": "Gerobak Pecel Lele",
+      "c": 1,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell",
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-pecel-food_vitrine-1",
+      "assetId": "food_vitrine",
+      "name": "Etalase Lele, Ayam, Tahu Tempe",
+      "c": 3,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-pecel-cashier-1",
+      "assetId": "cashier",
+      "name": "Meja Bayar",
+      "c": 5,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell"
+      ]
+    },
+    {
+      "id": "njh-pecel-chair-1",
+      "assetId": "chair",
+      "name": "Kursi Kiri Meja 1",
+      "c": 0,
+      "r": 4,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-pecel-dining_table-1",
+      "assetId": "dining_table",
+      "name": "Meja 1",
+      "c": 1,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-pecel-chair-2",
+      "assetId": "chair",
+      "name": "Kursi Kanan Meja 1",
+      "c": 3,
+      "r": 4,
+      "rotation": 270,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-pecel-plastic_bench_blue-1",
+      "assetId": "plastic_bench_blue",
+      "name": "Bangku Biru (utara Meja 2)",
+      "c": 6,
+      "r": 3,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-pecel-dining_table-2",
+      "assetId": "dining_table",
+      "name": "Meja 2",
+      "c": 6,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-pecel-plastic_bench_red-1",
+      "assetId": "plastic_bench_red",
+      "name": "Bangku Merah (selatan Meja 2)",
+      "c": 6,
+      "r": 5,
+      "rotation": 180,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    }
+  ]
+}

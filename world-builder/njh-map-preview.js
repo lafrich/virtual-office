@@ -6,14 +6,53 @@
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'];
-const NJH_READY=['njh_kos','njh_kos_noor','njh_kos_ichsan','njh_kos_cove_lobby','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi','njh_minimarket'];
-const NJH_PENDING=['njh_pecel_lele_tenda','njh_sate_madura_tenda','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda'];
+const NJH_READY=['njh_kos','njh_kos_noor','njh_kos_ichsan','njh_kos_cove_lobby','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi','njh_minimarket','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_pecel_lele_tenda','njh_sate_madura_tenda'];
+const NJH_PENDING=[];
 const NJH_TEMPLATES=[...NJH_READY,...NJH_PENDING];
 const TEMPLATE_ALIASES=Object.freeze({
  'bangun-ruang kit in br-warung-pecel-lele.json':'njh_pecel_lele_tenda',
  'bangun-ruang kit in br-lapak-sate-madura.json':'njh_sate_madura_tenda',
  'njh_kos':'njh_kos_noor'
 });
+const BELUM_BUKA='Belum buka';
+function hasReadyInterior(entry){
+ if(!entry)return false;
+ if(entry.interior&&entry.njhInteriorPending!==true)return true;
+ return Array.isArray(entry.njhDoors)&&entry.njhDoors.some(d=>d&&d.interior&&!d.pending);
+}
+function isClosedDoor(entry){
+ if(!entry)return false;
+ if(entry.pending===true||entry.njhInteriorPending===true)return true;
+ if(Array.isArray(entry.njhDoors)&&entry.njhDoors.length)
+  return entry.njhDoors.every(d=>d.pending||!d.interior);
+ const wantsEnter=entry.enterable===true||entry.njhInteriorTemplate||
+  (Array.isArray(entry.interactions)&&entry.interactions.includes('enter'));
+ if(wantsEnter&&!hasReadyInterior(entry))return true;
+ return false;
+}
+function usePointOf(entry,obj){
+ const p=entry?.use||entry?.usePoint||obj?.njhUsePoint||null;
+ if(!p)return {x:Number(obj?.x)||0,z:Number(obj?.z)||0};
+ if(Array.isArray(p))return {x:Number(p[0])||0,z:Number(p[1])||0};
+ return {x:Number(p.x)||0,z:Number(p.z)||0};
+}
+function closedDoorsNear(objects,x,z,radius){
+ const r=Number(radius)||1.25,out=[];
+ for(const o of objects||[]){
+  if(!o||!isClosedDoor(o))continue;
+  const pending=(o.njhDoors||[]).filter(d=>d.pending||!d.interior);
+  const pts=pending.length?pending.map(d=>({door:d,pt:usePointOf(d,o)})):[{door:null,pt:usePointOf(null,o)}];
+  for(const row of pts){
+   const dist=Math.hypot(Number(x)-row.pt.x,Number(z)-row.pt.z);
+   if(dist<=r)out.push({object:o,door:row.door,doorId:(row.door&&row.door.doorId)||o.njhDoorId,
+    label:o.name||o.label||'Bangunan',x:row.pt.x,z:row.pt.z,distance:dist,reason:BELUM_BUKA});
+  }
+ }
+ return out.sort((a,b)=>a.distance-b.distance);
+}
+function sliceLockedTemplates(){
+ try{const B=g.NJHBalancing;return B&&B.ok&&B.ok()?B.lockedTemplates():[];}catch(_e){return [];}
+}
 function resolveTemplate(raw){
  const id=TEMPLATE_ALIASES[raw]||raw||null;
  return NJH_TEMPLATES.includes(id)?id:null;
@@ -23,7 +62,7 @@ const KEY_MAP=Object.freeze({
  'object:obj-njh-lapak-silver':'object:njh_lapak_silver',
  'object:obj-njh-tiang-ogah':'object:njh_tiang_ogah',
  'object:obj-njh-kotak-amal':'object:njh_kotak_amal',
- 'object:obj-njh-penanda-doa':'object:njh_penanda_doa',
+ 'object:obj-njh-penanda-doa':'pipeline:id_mainkan_prayer_mat',
  'studio:br-warung-pecel-lele':'studio:br-warung-pecel-lele',
  'studio:br-lapak-sate-madura':'studio:br-lapak-sate-madura'
 });
@@ -45,6 +84,8 @@ function enabled(){
   return new URLSearchParams(g.location?.search||'').get('njhMap')!=='0';
  }catch(e){return true;}
 }
+const VEHICLE_ID_ALIASES=Object.freeze({'njh-vehicle-angkot':'sedan'});
+function resolveVehicleId(id){return VEHICLE_ID_ALIASES[id]||id;}
 const NJH_CITY_IDS=['city-njh-semesta-draft1-with-pending','njh-semesta-map-draft1'];
 function isNjhDocument(input,id){
  const rec=(input&&input.record)||input||{};
@@ -70,9 +111,6 @@ const PROP_DEFS=[
  {id:'njh_kotak_amal',label:'Kotak amal',group:'prop',
   footprint:[1,1],collision:true,rotateFootprint:false,
   canvas:[69,72],pivot:[34,62],interactions:['give_sedekah']},
- {id:'njh_penanda_doa',label:'Penanda tempat tenang',group:'prop',
-  footprint:[1,1],collision:false,rotateFootprint:false,
-  canvas:[69,56],pivot:[34,46],interactions:['pray_generic']}
 ];
 const TENT_DEFS=[
  {id:'br-warung-pecel-lele',label:'Warung Pecel Lele',folder:'pecel',
@@ -252,6 +290,9 @@ function hookKebonTiles(){
  if(!api||api.__njhMapPreviewHooked)return;
  const tiles=api.TILES||{};
  const origTile=api.tile?.bind(api);
+ // Do not hook the 8-frame Kali ripple sheet as a tile texture — a 512×32
+ // strip rendered as a repeating terrain tile becomes black/teal boxes.
+ // Drain/selokan cell data is not edited here.
  function tileUrl(name){
   const file=tiles[name];
   if(!file)return null;
@@ -311,13 +352,15 @@ async function loadMeta(){
 async function loadInteriors(){
  if(interiorCache)return interiorCache;
  const out={};
- await Promise.all(NJH_TEMPLATES.map(async id=>{
+ // Never request scenes for slice-locked doors (no 404s; "Belum buka" needs no JSON).
+ const locked=new Set(sliceLockedTemplates());
+ await Promise.all(NJH_READY.filter(id=>!locked.has(id)).map(async id=>{
   try{
    const url=baseUrl()+'interiors/'+id+'.interior-scene.json';
    const r=await fetch(url,{cache:'no-store'});
    if(!r.ok)return;
    out[id]=await r.json();
-  }catch(e){/* r6 scenes are optional until Ellen drops them in */}
+  }catch(e){/* only READY templates are fetched; locked doors must never 404 */}
  }));
  interiorCache=out;
  return out;
@@ -348,7 +391,9 @@ function wireDoors(document,meta,interiors){
    report.noInterior.push({doorId:door.doorId,label:door.label,template:door.interiorTemplate||null});
    continue;
   }
-  const scene=scenes[template];
+  // Slice lock (content/balancing.json doors.sliceLocked): door stays "Belum buka" and never loads its interior.
+  const sliceLocked=sliceLockedTemplates().includes(template);
+  const scene=sliceLocked?null:scenes[template];
   const usePoint=Array.isArray(door.usePoint)?{x:door.usePoint[0],z:door.usePoint[1]}:null;
   const doorPoint=Array.isArray(door.doorPoint)?{x:door.doorPoint[0],z:door.doorPoint[1]}:null;
   if(!Array.isArray(obj.njhDoors))obj.njhDoors=[];
@@ -392,6 +437,7 @@ async function loadCity(){
   loadInteriors()
  ]);
  const document=unwrapCity(raw);
+ (document.objects||[]).forEach(o=>{if(o&&VEHICLE_ID_ALIASES[o.id])o.id=VEHICLE_ID_ALIASES[o.id];});
  document.map=document.map||{};
  document.map.unbounded=false;
  if(!document.map.worldBounds&&meta.bounds){
@@ -496,6 +542,7 @@ if(enabled()){hookKebonTiles();}
  doorCandidates,nearestEnterable,doorAnchor,enterRadius:ENTER_RADIUS,
  worldBoundsOf,applyBounds,spawnPool,homeFor,resolveSpawn,imageUrl,
  wireDoors,resolveTemplate,readyTemplates:NJH_READY,pendingTemplates:NJH_PENDING,
+ BELUM_BUKA,isClosedDoor,closedDoorsNear,sliceLockedTemplates,VEHICLE_ID_ALIASES,resolveVehicleId,
  visualTerrainType,previewTile,dermagaOverhang,applyDermagaOverhang,dermagaOverhangTiles:DERMAGA_OVERHANG,
  report:()=>cityCache?cityCache.doorReport:null,
  status(){

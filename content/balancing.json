@@ -1,0 +1,1245 @@
+{
+ "name": "NJH balancing slice \"Hari Pertama Hobo → Punya Kos\"",
+ "version": "slice-1.0",
+ "date": "2026-11-22",
+ "sources": {
+  "kode": "virtual-office main 0484b22a (22 Nov 2026 04:05 WIB)",
+  "konsep": "Dokumen Konsep NJH v2.1 (/workspace/game-concept-v2/Namanya_Juga_Hidup_Konsep_v2.1.md)",
+  "baru": "keputusan slice 2026-11-22 (Ichsan: upah harian Rp150.000; lead: target 45–60 menit, kos Rp750.000)"
+ },
+ "params": [
+  {
+   "key": "clock.realSecondsPerGameMinute",
+   "value": 0.5,
+   "unit": "detik nyata / menit game",
+   "source": "baru",
+   "code_value": "visual 1 · life 8",
+   "code_ref": "world-builder/semesta-daynight.js (1 dtk=1 mnt) + jiwa/life-economy.js:53 realSecondsPerGameMinute 8",
+   "note": "SATU jam untuk dunia + kebutuhan. 1 hari game = 12 menit nyata; 1 jam game = 30 detik. Konsep 04.A (24 mnt/hari) diganti untuk slice."
+  },
+  {
+   "key": "clock.gameMinutesPerDay",
+   "value": 1440,
+   "unit": "menit",
+   "source": "kode",
+   "code_value": 1440,
+   "code_ref": "world-builder/semesta-daynight.js",
+   "note": ""
+  },
+  {
+   "key": "clock.newGameStartTime",
+   "value": "06:30",
+   "unit": "jam game",
+   "source": "konsep",
+   "code_value": "jam map (guest tes mulai Hari 3 14:13)",
+   "code_ref": "builder.js:333 makeClock(documentMap.map.environmentClock)",
+   "note": "Jam per save pemain, bukan jam map. Guest baru = Hari 1 06:30."
+  },
+  {
+   "key": "clock.dayStartTime",
+   "value": "06:00",
+   "unit": "jam game",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": "Batas reset kuota upah harian."
+  },
+  {
+   "key": "start.wallet",
+   "value": 15000,
+   "unit": "Rp",
+   "source": "baru",
+   "code_value": 6000,
+   "code_ref": "jiwa/life-economy.js:158",
+   "note": "Cukup 1× warteg + WC; Rp6.000 tidak cukup untuk makan + WC dengan harga v2.1."
+  },
+  {
+   "key": "start.energy",
+   "value": 80,
+   "unit": "0-100",
+   "source": "kode",
+   "code_value": 80,
+   "code_ref": "jiwa/life-economy.js:158",
+   "note": ""
+  },
+  {
+   "key": "start.fullness",
+   "value": 50,
+   "unit": "0-100",
+   "source": "baru",
+   "code_value": 70,
+   "code_ref": "jiwa/life-economy.js:158",
+   "note": "Lapar sedikit supaya quest 1 (makan) terasa wajar."
+  },
+  {
+   "key": "start.hygiene",
+   "value": 50,
+   "unit": "0-100",
+   "source": "baru",
+   "code_value": 75,
+   "code_ref": "jiwa/life-economy.js:158",
+   "note": "Hobo: kebersihan belum ideal (konsep §17)."
+  },
+  {
+   "key": "start.bladder",
+   "value": 40,
+   "unit": "0-100",
+   "source": "baru",
+   "code_value": 20,
+   "code_ref": "jiwa/life-economy.js:158",
+   "note": "Mengarahkan ke quest 2 (WC umum)."
+  },
+  {
+   "key": "start.moral",
+   "value": 50,
+   "unit": "0-100",
+   "source": "kode",
+   "code_value": 50,
+   "code_ref": "jiwa/life-economy.js:158",
+   "note": ""
+  },
+  {
+   "key": "start.bagSlots",
+   "value": 8,
+   "unit": "slot",
+   "source": "kode",
+   "code_value": 8,
+   "code_ref": "jiwa/life-economy.js:45 bagSlots",
+   "note": ""
+  },
+  {
+   "key": "kos.price",
+   "value": 750000,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 700000,
+   "code_ref": "jiwa/life-economy.js:47 roomPrice",
+   "note": "Versi: Konsep v2.1 §07.A/§10. Sekali bayar, permanen, tanpa sewa bulanan."
+  },
+  {
+   "source": "keputusan",
+   "code_value": false,
+   "code_ref": "jiwa/life-economy.js cook (perlu furnitur stove Rp850.000)",
+   "note": "Keputusan New Bot 22 Nov 2026: kamar kos Guest sudah termasuk kompor supaya masak bisa dicoba (§15-D4).",
+   "key": "kos.guestRoomIncludesStove",
+   "value": true,
+   "unit": "bool"
+  },
+  {
+   "key": "jobs.dailyWageCap",
+   "value": 150000,
+   "unit": "Rp / hari game",
+   "source": "baru",
+   "code_value": 6000,
+   "code_ref": "jiwa/foundation-engine.js:38 (clamp max 100000 di :46, gameplay-schema.js:88); life-economy.js tidak memakai cap",
+   "note": "Keputusan Ichsan 2026-11-22. Berlaku per pekerjaan (lihat dailyWageCapScope), reset 06:00. Clamp 100000 harus dinaikkan."
+  },
+  {
+   "key": "jobs.dailyWageCapScope",
+   "value": "per_job",
+   "unit": "global | per_job",
+   "source": "baru",
+   "code_value": "global (foundation-engine)",
+   "code_ref": "jiwa/foundation-engine.js:156",
+   "note": "Rp150.000 = upah 1 hari kerja PER pekerjaan (1 shift 8 jam). Dengan cap global, pemain normal butuh ±74 menit (sim) → di luar target. KEPUTUSAN ICHSAN."
+  },
+  {
+   "key": "jobs.shiftGameHoursForCap",
+   "value": 8,
+   "unit": "jam game",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": "Semua 3 kerja = Rp312,5/menit game → 8 jam kerja = Rp150.000."
+  },
+  {
+   "key": "jobs.kang_parkir.minutes",
+   "value": 16,
+   "unit": "menit game / sesi (8 dtk tahan)",
+   "source": "baru",
+   "code_value": 18,
+   "code_ref": "jiwa/life-economy.js:37",
+   "note": "Sesi = 2 motor."
+  },
+  {
+   "key": "jobs.kang_parkir.wage",
+   "value": 5000,
+   "unit": "Rp / sesi",
+   "source": "baru",
+   "code_value": 2100,
+   "code_ref": "jiwa/life-economy.js:37",
+   "note": "Rp2.500/motor (konsep Rp2.000/motor)."
+  },
+  {
+   "key": "jobs.kang_parkir.energyCost",
+   "value": 2,
+   "unit": "energi / sesi",
+   "source": "baru",
+   "code_value": 8,
+   "code_ref": "jiwa/life-economy.js:37",
+   "note": ""
+  },
+  {
+   "key": "jobs.kang_parkir.hygieneCost",
+   "value": 1,
+   "unit": "kebersihan / sesi",
+   "source": "baru",
+   "code_value": 3,
+   "code_ref": "jiwa/life-economy.js:37",
+   "note": ""
+  },
+  {
+   "key": "jobs.kang_parkir.exp",
+   "value": 6,
+   "unit": "EXP / sesi",
+   "source": "kode",
+   "code_value": 6,
+   "code_ref": "jiwa/life-economy.js:37",
+   "note": ""
+  },
+  {
+   "key": "jobs.pak_ogah.minutes",
+   "value": 24,
+   "unit": "menit game / sesi (12 dtk tahan)",
+   "source": "baru",
+   "code_value": 20,
+   "code_ref": "jiwa/life-economy.js:36",
+   "note": ""
+  },
+  {
+   "key": "jobs.pak_ogah.wage",
+   "value": 7500,
+   "unit": "Rp / sesi",
+   "source": "baru",
+   "code_value": 2500,
+   "code_ref": "jiwa/life-economy.js:36",
+   "note": ""
+  },
+  {
+   "key": "jobs.pak_ogah.energyCost",
+   "value": 3,
+   "unit": "energi / sesi",
+   "source": "baru",
+   "code_value": 10,
+   "code_ref": "jiwa/life-economy.js:36",
+   "note": ""
+  },
+  {
+   "key": "jobs.pak_ogah.hygieneCost",
+   "value": 1,
+   "unit": "kebersihan / sesi",
+   "source": "baru",
+   "code_value": 4,
+   "code_ref": "jiwa/life-economy.js:36",
+   "note": ""
+  },
+  {
+   "key": "jobs.pak_ogah.exp",
+   "value": 7,
+   "unit": "EXP / sesi",
+   "source": "kode",
+   "code_value": 7,
+   "code_ref": "jiwa/life-economy.js:36",
+   "note": ""
+  },
+  {
+   "key": "jobs.manusia_silver.minutes",
+   "value": 40,
+   "unit": "menit game / sesi (20 dtk tahan)",
+   "source": "baru",
+   "code_value": 25,
+   "code_ref": "jiwa/life-economy.js:35",
+   "note": ""
+  },
+  {
+   "key": "jobs.manusia_silver.wage",
+   "value": 12500,
+   "unit": "Rp / sesi",
+   "source": "baru",
+   "code_value": 1600,
+   "code_ref": "jiwa/life-economy.js:35",
+   "note": ""
+  },
+  {
+   "key": "jobs.manusia_silver.energyCost",
+   "value": 5,
+   "unit": "energi / sesi",
+   "source": "baru",
+   "code_value": 12,
+   "code_ref": "jiwa/life-economy.js:35",
+   "note": ""
+  },
+  {
+   "key": "jobs.manusia_silver.hygieneCost",
+   "value": 4,
+   "unit": "kebersihan / sesi",
+   "source": "baru",
+   "code_value": 8,
+   "code_ref": "jiwa/life-economy.js:35",
+   "note": "Cat silver bikin kotor: trade-off vs Parkir."
+  },
+  {
+   "key": "jobs.manusia_silver.exp",
+   "value": 10,
+   "unit": "EXP / sesi",
+   "source": "konsep",
+   "code_value": 7,
+   "code_ref": "jiwa/life-economy.js:35",
+   "note": "Konsep 06.A: 10."
+  },
+  {
+   "key": "jobs.kantor_premium.enabled",
+   "value": false,
+   "unit": "bool",
+   "source": "baru",
+   "code_value": true,
+   "code_ref": "jiwa/life-economy.js:38",
+   "note": "DIBEKUKAN di slice (pintu \"Belum buka\")."
+  },
+  {
+   "key": "jobs.kantor_premium.minHygiene",
+   "value": 60,
+   "unit": "0-100",
+   "source": "konsep",
+   "code_value": 70,
+   "code_ref": "jiwa/life-economy.js:38",
+   "note": "Perbaikan jebakan: syarat dicek saat MULAI sesi saja, 60 bisa dicapai dari 25 dengan 1× mandi umum (+35)."
+  },
+  {
+   "key": "jobs.kantor_premium.hygieneCost",
+   "value": 2,
+   "unit": "kebersihan / sesi",
+   "source": "kode",
+   "code_value": 2,
+   "code_ref": "jiwa/life-economy.js:38",
+   "note": ""
+  },
+  {
+   "key": "jobs.expSpeedFormula",
+   "value": "duration/(1+exp/100)",
+   "unit": "rumus",
+   "source": "kode",
+   "code_value": "sama",
+   "code_ref": "jiwa/life-economy.js case work",
+   "note": "Dipertahankan."
+  },
+  {
+   "key": "needs.passiveEnergyMinutes",
+   "value": 20,
+   "unit": "menit game per −1 energi (−3/jam)",
+   "source": "konsep",
+   "code_value": 60,
+   "code_ref": "jiwa/life-economy.js:51",
+   "note": "Konsep 04.A −3/jam."
+  },
+  {
+   "key": "needs.passiveFullnessMinutes",
+   "value": 24,
+   "unit": "menit game per −2 kenyang (−5/jam)",
+   "source": "konsep",
+   "code_value": 35,
+   "code_ref": "jiwa/life-economy.js:51",
+   "note": "Konsep 04.B −5/jam."
+  },
+  {
+   "key": "needs.passiveBladderMinutes",
+   "value": 45,
+   "unit": "menit game per +3 buang air (+4/jam)",
+   "source": "konsep",
+   "code_value": 20,
+   "code_ref": "jiwa/life-economy.js:51",
+   "note": "Kode sekarang +9/jam (terlalu cepat)."
+  },
+  {
+   "key": "needs.passiveHygieneMinutes",
+   "value": 30,
+   "unit": "menit game per −1 kebersihan (−2/jam)",
+   "source": "konsep",
+   "code_value": 90,
+   "code_ref": "jiwa/life-economy.js:51",
+   "note": ""
+  },
+  {
+   "key": "needs.fullnessZeroEnergyDrain",
+   "value": 1,
+   "unit": "energi / tick saat kenyang 0",
+   "source": "kode",
+   "code_value": 1,
+   "code_ref": "jiwa/life-economy.js:236",
+   "note": ""
+  },
+  {
+   "key": "needs.bladderAccident.hygiene",
+   "value": -20,
+   "unit": "kebersihan",
+   "source": "kode",
+   "code_value": -20,
+   "code_ref": "jiwa/life-economy.js:815",
+   "note": "Buang air 100."
+  },
+  {
+   "key": "needs.bladderAccident.moral",
+   "value": 0,
+   "unit": "moral",
+   "source": "keputusan",
+   "code_value": -5,
+   "code_ref": "jiwa/life-economy.js:815",
+   "note": "Keputusan New Bot (wakil Ichsan) 22 Nov 2026: kecelakaan buang air tanpa penalti moral (Konsep 04.A, bukan kesengajaan). Nilai tabel asli −5."
+  },
+  {
+   "key": "food.warteg.price",
+   "value": 12000,
+   "unit": "Rp",
+   "source": "kode",
+   "code_value": 12000,
+   "code_ref": "jiwa/life-economy.js:47",
+   "note": ""
+  },
+  {
+   "key": "food.warteg.fullness",
+   "value": 45,
+   "unit": "kenyang",
+   "source": "konsep",
+   "code_value": 30,
+   "code_ref": "jiwa/life-economy.js:549 (hardcoded)",
+   "note": "Konsep 04.B +40..60."
+  },
+  {
+   "key": "food.warteg.energy",
+   "value": 8,
+   "unit": "energi",
+   "source": "konsep",
+   "code_value": 12,
+   "code_ref": "jiwa/life-economy.js:549 (hardcoded)",
+   "note": ""
+  },
+  {
+   "key": "food.warteg.bladder",
+   "value": 10,
+   "unit": "buang air",
+   "source": "konsep",
+   "code_value": 12,
+   "code_ref": "jiwa/life-economy.js:549 (hardcoded)",
+   "note": ""
+  },
+  {
+   "key": "food.gorengan.price",
+   "value": 5000,
+   "unit": "Rp",
+   "source": "baru",
+   "code_value": 2500,
+   "code_ref": "jiwa/life-economy.js:47 streetFoodPrice",
+   "note": "Harga nyata 2026; konsep nasi uduk Rp8.000."
+  },
+  {
+   "key": "food.gorengan.fullness",
+   "value": 20,
+   "unit": "kenyang",
+   "source": "baru",
+   "code_value": 30,
+   "code_ref": "jiwa/life-economy.js:549 (hardcoded, sama dengan warteg)",
+   "note": "Dibedakan dari warteg supaya ada pilihan."
+  },
+  {
+   "key": "food.gorengan.energy",
+   "value": 4,
+   "unit": "energi",
+   "source": "baru",
+   "code_value": 12,
+   "code_ref": "jiwa/life-economy.js:549",
+   "note": ""
+  },
+  {
+   "key": "food.gorengan.bladder",
+   "value": 5,
+   "unit": "buang air",
+   "source": "baru",
+   "code_value": 12,
+   "code_ref": "jiwa/life-economy.js:549",
+   "note": ""
+  },
+  {
+   "key": "food.coffee.price",
+   "value": 5000,
+   "unit": "Rp",
+   "source": "kode",
+   "code_value": 5000,
+   "code_ref": "jiwa/life-economy.js:47",
+   "note": ""
+  },
+  {
+   "key": "food.coffee.energy",
+   "value": 15,
+   "unit": "energi",
+   "source": "konsep",
+   "code_value": 20,
+   "code_ref": "jiwa/life-economy.js:553 (hardcoded)",
+   "note": ""
+  },
+  {
+   "key": "food.coffee.bladder",
+   "value": 25,
+   "unit": "buang air",
+   "source": "kode",
+   "code_value": 25,
+   "code_ref": "jiwa/life-economy.js:553",
+   "note": ""
+  },
+  {
+   "source": "keputusan",
+   "code_value": "coffee (Warung Kopi)",
+   "code_ref": "",
+   "note": "Warung Kopi dikunci \"Belum buka\"; kopi dijual di Warteg (§15-D5).",
+   "key": "shop.coffeeAt",
+   "value": "warteg",
+   "unit": "site"
+  },
+  {
+   "source": "keputusan",
+   "code_value": "njh_warung_kopi READY",
+   "code_ref": "world-builder/njh-map-preview.js NJH_READY",
+   "note": "Pintu yang dikunci \"Belum buka\" di slice walau interiornya ada (Warung Kopi r6 belum lulus Kharisma).",
+   "key": "doors.sliceLocked",
+   "value": [
+    "njh_warung_kopi"
+   ],
+   "unit": "interiorTemplate[]"
+  },
+  {
+   "source": "keputusan",
+   "code_value": "kost",
+   "code_ref": "",
+   "note": "Teks UI pakai \"kos\"; nama tempat tetap \"Kost Cove\" (§15-D6).",
+   "key": "ui.spellingKos",
+   "value": "kos",
+   "unit": "teks"
+  },
+  {
+   "key": "food.fruit.fullness",
+   "value": 20,
+   "unit": "kenyang",
+   "source": "kode",
+   "code_value": 20,
+   "code_ref": "jiwa/life-economy.js eat_item buah",
+   "note": "Jaring pengaman gratis (catch_fruit)."
+  },
+  {
+   "key": "food.fruit.energy",
+   "value": 8,
+   "unit": "energi",
+   "source": "kode",
+   "code_value": 8,
+   "code_ref": "jiwa/life-economy.js eat_item buah",
+   "note": ""
+  },
+  {
+   "key": "food.fruit.pickEnergy",
+   "value": 7,
+   "unit": "energi",
+   "source": "kode",
+   "code_value": 7,
+   "code_ref": "jiwa/life-economy.js:535",
+   "note": ""
+  },
+  {
+   "key": "food.fruit.pickMinutes",
+   "value": 8,
+   "unit": "menit game",
+   "source": "kode",
+   "code_value": 8,
+   "code_ref": "jiwa/life-economy.js:535",
+   "note": ""
+  },
+  {
+   "key": "facility.publicToilet.price",
+   "value": 2000,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 0,
+   "code_ref": "jiwa/life-economy.js:578 (tidak ada biaya)",
+   "note": "Konsep v2.1 §05."
+  },
+  {
+   "key": "facility.publicToilet.hygienePenalty",
+   "value": 5,
+   "unit": "kebersihan",
+   "source": "kode",
+   "code_value": 5,
+   "code_ref": "jiwa/life-economy.js:48",
+   "note": ""
+  },
+  {
+   "key": "facility.publicToilet.minutes",
+   "value": 4,
+   "unit": "menit game",
+   "source": "kode",
+   "code_value": 4,
+   "code_ref": "jiwa/life-economy.js:579",
+   "note": ""
+  },
+  {
+   "key": "facility.publicShower.price",
+   "value": 4000,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 500,
+   "code_ref": "jiwa/life-economy.js:48 publicShowerFee",
+   "note": "Konsep v2.1 §05."
+  },
+  {
+   "key": "facility.publicShower.hygiene",
+   "value": 35,
+   "unit": "kebersihan",
+   "source": "kode",
+   "code_value": 35,
+   "code_ref": "jiwa/life-economy.js:48",
+   "note": ""
+  },
+  {
+   "key": "facility.publicShower.minutes",
+   "value": 15,
+   "unit": "menit game",
+   "source": "kode",
+   "code_value": 15,
+   "code_ref": "jiwa/life-economy.js:572",
+   "note": ""
+  },
+  {
+   "key": "facility.wallPee.moral",
+   "value": -5,
+   "unit": "moral",
+   "source": "kode",
+   "code_value": -5,
+   "code_ref": "jiwa/life-economy.js wall_pee",
+   "note": ""
+  },
+  {
+   "key": "sleep.actionMinutes",
+   "value": 60,
+   "unit": "menit game / aksi tidur",
+   "source": "kode",
+   "code_value": 60,
+   "code_ref": "jiwa/life-economy.js:562",
+   "note": ""
+  },
+  {
+   "key": "sleep.tent.energy",
+   "value": 30,
+   "unit": "energi / jam",
+   "source": "kode",
+   "code_value": 30,
+   "code_ref": "jiwa/life-economy.js:49 hoboSleepRecovery",
+   "note": "Konsep +10 berarti tidur 8 jam = 4 menit nyata diam; slice pakai nilai kode."
+  },
+  {
+   "key": "sleep.tent.hygiene",
+   "value": -2,
+   "unit": "kebersihan / jam",
+   "source": "konsep",
+   "code_value": -15,
+   "code_ref": "jiwa/life-economy.js:564 (hardcoded)",
+   "note": "Penalti −15/jam membuat grind (catatan reviewer)."
+  },
+  {
+   "key": "sleep.kosBed.energy",
+   "value": 40,
+   "unit": "energi / jam",
+   "source": "baru",
+   "code_value": 65,
+   "code_ref": "jiwa/life-economy.js:49 homeSleepRecovery",
+   "note": ""
+  },
+  {
+   "key": "sleep.kosBed.hygiene",
+   "value": -1,
+   "unit": "kebersihan / jam",
+   "source": "konsep",
+   "code_value": -8,
+   "code_ref": "jiwa/life-economy.js:564 (hardcoded)",
+   "note": ""
+  },
+  {
+   "key": "sleep.benchRest.energy",
+   "value": 3,
+   "unit": "energi / 12 menit",
+   "source": "kode",
+   "code_value": 3,
+   "code_ref": "jiwa/life-economy.js:53 seatRestEnergy",
+   "note": ""
+  },
+  {
+   "key": "faint.restMinutes",
+   "value": 240,
+   "unit": "menit game (= 2 menit nyata)",
+   "source": "konsep",
+   "code_value": 30,
+   "code_ref": "jiwa/life-economy.js:46 faintRestMinutes",
+   "note": "Konsep 02.A: 4 jam game."
+  },
+  {
+   "key": "faint.recoveryEnergy",
+   "value": 30,
+   "unit": "energi",
+   "source": "konsep",
+   "code_value": 25,
+   "code_ref": "jiwa/life-economy.js:50",
+   "note": ""
+  },
+  {
+   "key": "faint.moneyLossPct",
+   "value": 10,
+   "unit": "% dompet",
+   "source": "konsep",
+   "code_value": 0,
+   "code_ref": "jiwa/life-economy.js:820 (tidak ada kerugian)",
+   "note": "Konsep 02.A. Slice: SELALU uang (tanpa undian item) supaya mudah dites."
+  },
+  {
+   "key": "faint.moneyLossMax",
+   "value": 20000,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 0,
+   "code_ref": "",
+   "note": ""
+  },
+  {
+   "key": "faint.wakeAt",
+   "value": "tenda terdekat",
+   "unit": "lokasi",
+   "source": "konsep",
+   "code_value": null,
+   "code_ref": "",
+   "note": "Puskesmas belum ada → tenda."
+  },
+  {
+   "key": "scavenge.minutes",
+   "value": 8,
+   "unit": "menit game",
+   "source": "kode",
+   "code_value": 8,
+   "code_ref": "jiwa/life-economy.js:386",
+   "note": ""
+  },
+  {
+   "key": "scavenge.energy",
+   "value": 4,
+   "unit": "energi",
+   "source": "kode",
+   "code_value": 4,
+   "code_ref": "jiwa/life-economy.js:386",
+   "note": ""
+  },
+  {
+   "key": "scavenge.sellLoakPrice",
+   "value": 4000,
+   "unit": "Rp / barang",
+   "source": "konsep",
+   "code_value": 1000,
+   "code_ref": "jiwa/life-economy.js:395 (hardcoded)",
+   "note": "Konsep 07.A Rp2.000–8.000."
+  },
+  {
+   "key": "scavenge.spots",
+   "value": 19,
+   "unit": "titik",
+   "source": "kode",
+   "code_value": 19,
+   "code_ref": "recap §7",
+   "note": ""
+  },
+  {
+   "key": "scavenge.respawnGameMinutes",
+   "value": 180,
+   "unit": "menit game",
+   "source": "konsep",
+   "code_value": null,
+   "code_ref": "tidak ditemukan di kode",
+   "note": "Konsep 02.A. Jika belum ada di kode: catat, jangan buat fitur baru di slice."
+  },
+  {
+   "key": "fish.minutes",
+   "value": 12,
+   "unit": "menit game / lempar (6 dtk)",
+   "source": "kode",
+   "code_value": 12,
+   "code_ref": "jiwa/life-economy.js:51 fishMinutes",
+   "note": ""
+  },
+  {
+   "key": "fish.energy",
+   "value": 3,
+   "unit": "energi / lempar",
+   "source": "baru",
+   "code_value": 8,
+   "code_ref": "jiwa/life-economy.js:51 fishEnergy",
+   "note": "Konsep −2."
+  },
+  {
+   "key": "fish.weights",
+   "value": "sapu_sapu 60 / lele 20 / nila 12 / mujair 8",
+   "unit": "%",
+   "source": "kode",
+   "code_value": "sama",
+   "code_ref": "jiwa/life-economy.js:22",
+   "note": ""
+  },
+  {
+   "key": "fish.price.sapu_sapu.siomay",
+   "value": 1500,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 450,
+   "code_ref": "jiwa/life-economy.js:23",
+   "note": ""
+  },
+  {
+   "key": "fish.price.sapu_sapu.pasar",
+   "value": null,
+   "unit": "Rp (ditolak)",
+   "source": "konsep",
+   "code_value": null,
+   "code_ref": "jiwa/life-economy.js:23",
+   "note": ""
+  },
+  {
+   "key": "fish.price.lele.siomay",
+   "value": 5500,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 1600,
+   "code_ref": "jiwa/life-economy.js:24",
+   "note": ""
+  },
+  {
+   "key": "fish.price.lele.pasar",
+   "value": 7500,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 2100,
+   "code_ref": "jiwa/life-economy.js:24",
+   "note": ""
+  },
+  {
+   "key": "fish.price.nila.siomay",
+   "value": 6500,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 1900,
+   "code_ref": "jiwa/life-economy.js:25",
+   "note": ""
+  },
+  {
+   "key": "fish.price.nila.pasar",
+   "value": 9000,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 2500,
+   "code_ref": "jiwa/life-economy.js:25",
+   "note": ""
+  },
+  {
+   "key": "fish.price.mujair.siomay",
+   "value": 5000,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 1400,
+   "code_ref": "jiwa/life-economy.js:26",
+   "note": ""
+  },
+  {
+   "key": "fish.price.mujair.pasar",
+   "value": 7000,
+   "unit": "Rp",
+   "source": "konsep",
+   "code_value": 2000,
+   "code_ref": "jiwa/life-economy.js:26",
+   "note": ""
+  },
+  {
+   "key": "fish.spoilMinutes",
+   "value": 720,
+   "unit": "menit game",
+   "source": "keputusan",
+   "code_value": 180,
+   "code_ref": "jiwa/life-economy.js:23",
+   "note": "New Bot 2026-11-22: 720 game min (6 real min) so a catch survives the walk to Pasar Ikan on the one clock"
+  },
+  {
+   "key": "help.minutes",
+   "value": 15,
+   "unit": "menit game",
+   "source": "kode",
+   "code_value": 15,
+   "code_ref": "jiwa/life-economy.js help",
+   "note": ""
+  },
+  {
+   "key": "help.energy",
+   "value": -5,
+   "unit": "energi",
+   "source": "kode",
+   "code_value": -5,
+   "code_ref": "jiwa/life-economy.js help",
+   "note": ""
+  },
+  {
+   "key": "help.moral",
+   "value": 5,
+   "unit": "moral",
+   "source": "kode",
+   "code_value": 5,
+   "code_ref": "jiwa/life-economy.js help",
+   "note": ""
+  },
+  {
+   "key": "quest.q1_makan.reward",
+   "value": 10000,
+   "unit": "Rp (Isi Perut Dulu · count eat 1)",
+   "source": "baru",
+   "code_value": 5000,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 q_ogah (reward lama 5000)",
+   "note": ""
+  },
+  {
+   "key": "quest.q2_wc.reward",
+   "value": 3000,
+   "unit": "Rp (Jangan di Celana · count public_toilet 1)",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 baru (data)",
+   "note": ""
+  },
+  {
+   "key": "quest.q3_parkir.reward",
+   "value": 10000,
+   "unit": "Rp (Coba Markir · count work jobId=kang_parkir 3)",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 baru (data)",
+   "note": ""
+  },
+  {
+   "key": "quest.q4_loak.reward",
+   "value": 8000,
+   "unit": "Rp (Barang Bekas · count sell_loak 2)",
+   "source": "baru",
+   "code_value": 6000,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 q_loak (inv 2, reward 6000)",
+   "note": ""
+  },
+  {
+   "key": "quest.q5_mandi.reward",
+   "value": 8000,
+   "unit": "Rp (Biar Rapi · stat hygiene >= 60)",
+   "source": "baru",
+   "code_value": 4000,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 q_parkir (target 80, reward 4000)",
+   "note": ""
+  },
+  {
+   "key": "quest.q6_ogah.reward",
+   "value": 15000,
+   "unit": "Rp (Jaga Simpang · count work jobId=pak_ogah 5)",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 baru (data)",
+   "note": ""
+  },
+  {
+   "key": "quest.q7_ikan.reward",
+   "value": 15000,
+   "unit": "Rp (Rezeki Kali · count sell_fish 3)",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 baru (data)",
+   "note": ""
+  },
+  {
+   "key": "quest.q8_silver.reward",
+   "value": 15000,
+   "unit": "Rp (Modal Cat Silver · count work jobId=manusia_silver 3)",
+   "source": "baru",
+   "code_value": 7500,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 q_silver (earn 5000, reward 7500)",
+   "note": ""
+  },
+  {
+   "key": "quest.q9_tabungan.reward",
+   "value": 30000,
+   "unit": "Rp (Tabungan Kos · earn 450000 total dari kerja)",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 baru (data); q_warga (help) DIBEKUKAN",
+   "note": ""
+  },
+  {
+   "key": "quest.q10_kos.reward",
+   "value": 0,
+   "unit": "Rp (Punya Kos · buy_room 1)",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "world-builder/semesta-life-hooks.js:142 baru — WIN",
+   "note": ""
+  },
+  {
+   "key": "sim.walkSpeed",
+   "value": 1.4,
+   "unit": "tile / detik",
+   "source": "kode",
+   "code_value": 1.4,
+   "code_ref": "world-builder/builder.js:2528",
+   "note": "Lari 2.2."
+  },
+  {
+   "key": "sim.travelSeconds.cepat",
+   "value": 10,
+   "unit": "detik nyata / pindah titik",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": "Estimasi: lari, rute pendek."
+  },
+  {
+   "key": "sim.travelSeconds.normal",
+   "value": 20,
+   "unit": "detik nyata / pindah titik",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": "≈28 tile jalan kaki."
+  },
+  {
+   "key": "sim.travelSeconds.awam",
+   "value": 35,
+   "unit": "detik nyata / pindah titik",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": "Nyasar, cek peta."
+  },
+  {
+   "key": "sim.overheadPct.cepat",
+   "value": 5,
+   "unit": "% waktu nyata",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": "Menu/baca teks."
+  },
+  {
+   "key": "sim.overheadPct.normal",
+   "value": 15,
+   "unit": "% waktu nyata",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": ""
+  },
+  {
+   "key": "sim.overheadPct.awam",
+   "value": 30,
+   "unit": "% waktu nyata",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": ""
+  },
+  {
+   "key": "target.timeToKos.normal",
+   "value": "45-60",
+   "unit": "menit nyata",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": "Keputusan lead; menggantikan Konsep 07.A (5–14 jam main)."
+  },
+  {
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "",
+   "note": "§11: titik inti maksimal 30 tile satu sama lain (laporan saja, data map milik Ellen).",
+   "key": "map.maxCoreDistanceTiles",
+   "value": 30,
+   "unit": "tile"
+  },
+  {
+   "key": "gate.maxRequestsToPlayable",
+   "value": 150,
+   "unit": "request",
+   "source": "baru",
+   "code_value": 873,
+   "code_ref": "diukur 22 Nov live",
+   "note": ""
+  },
+  {
+   "key": "gate.maxTransferMB",
+   "value": 3,
+   "unit": "MB",
+   "source": "baru",
+   "code_value": 5.5,
+   "code_ref": "diukur 22 Nov live",
+   "note": ""
+  },
+  {
+   "key": "gate.max404",
+   "value": 0,
+   "unit": "respons",
+   "source": "baru",
+   "code_value": 62,
+   "code_ref": "diukur 22 Nov live",
+   "note": ""
+  },
+  {
+   "key": "gate.minFpsMidPhone",
+   "value": 30,
+   "unit": "fps",
+   "source": "baru",
+   "code_value": null,
+   "code_ref": "belum diukur di HP",
+   "note": ""
+  }
+ ],
+ "format": "njh-balancing-v1",
+ "contentRevision": "slice-1.0-r2",
+ "copiedFrom": {
+  "file": "/workspace/njh-slice/balancing.json (New Bot, 22 Nov 2026)",
+  "doc": "https://docs.google.com/document/d/1zAK1VDPE3AYg_iekJ_v8KC8s2-swlUMHy_jbguItn2o/edit",
+  "sheet": "https://docs.google.com/spreadsheets/d/1DPq2B22Z3XYIQVzApGQUh75kwkMPsZS0ZwYea1qeVRw/edit",
+  "changes": "r1: decisions from New Bot (Ichsan delegate) 22 Nov 2026 applied: needs.bladderAccident.moral -5 -> 0; added kos.guestRoomIncludesStove, shop.coffeeAt, doors.sliceLocked, ui.spellingKos, map.maxCoreDistanceTiles, hold.realSecondsPerGameMinute note, quests[] (targets/NPC/teks; reward tetap dari params quest.*.reward)."
+ },
+ "quests": [
+  {
+   "id": "q1_makan",
+   "npcId": "job_pak_ogah",
+   "npc": "Pak Ogah",
+   "title": "Isi Perut Dulu",
+   "text": "Ngatur jalan itu capek, Bos. Makan dulu, abis itu kita ngobrol.",
+   "goal": "Makan 1×",
+   "kind": "count",
+   "act": [
+    "eat"
+   ],
+   "target": 1
+  },
+  {
+   "id": "q2_wc",
+   "npcId": "hansip",
+   "npc": "Hansip",
+   "title": "Jangan di Celana",
+   "text": "Kebelet? Pakai WC umum. Pipis di tembok bikin moral turun.",
+   "goal": "Pakai WC umum 1×",
+   "kind": "count",
+   "act": [
+    "public_toilet",
+    "toilet"
+   ],
+   "target": 1
+  },
+  {
+   "id": "q3_parkir",
+   "npcId": "job_kang_parkir",
+   "npc": "Kang Parkir",
+   "title": "Coba Markir",
+   "text": "Bantu jaga parkir. Tahan AKSI sampai penuh, dua motor sekali jalan.",
+   "goal": "Kerja Parkir 3×",
+   "kind": "count",
+   "act": [
+    "work:kang_parkir"
+   ],
+   "target": 3
+  },
+  {
+   "id": "q4_loak",
+   "npcId": "loak",
+   "npc": "Babeh Loak",
+   "title": "Barang Bekas",
+   "text": "Babeh lagi butuh barang. Mulung dua biji, jual ke Babeh.",
+   "goal": "Jual 2 barang bekas",
+   "kind": "count",
+   "act": [
+    "sell_loak"
+   ],
+   "target": 2
+  },
+  {
+   "id": "q5_mandi",
+   "npcId": "job_kang_parkir",
+   "npc": "Kang Parkir",
+   "title": "Biar Rapi",
+   "text": "Mandi dulu lah biar orang percaya.",
+   "goal": "Kebersihan minimal 60",
+   "kind": "stat",
+   "stat": "hygiene",
+   "target": 60,
+   "hint": {
+    "text": "Belum cukup uang? Mulung dulu, jual ke Babeh Loak.",
+    "walletBelowParam": "facility.publicShower.price"
+   }
+  },
+  {
+   "id": "q6_ogah",
+   "npcId": "job_pak_ogah",
+   "npc": "Pak Ogah",
+   "title": "Jaga Simpang",
+   "text": "Simpang lagi rame. Bantu atur jalan, ritmenya beda sama parkir.",
+   "goal": "Kerja Pak Ogah 5×",
+   "kind": "count",
+   "act": [
+    "work:pak_ogah"
+   ],
+   "target": 5
+  },
+  {
+   "id": "q7_ikan",
+   "npcId": "pasar_ikan",
+   "npc": "Ibu Pasar Ikan",
+   "title": "Rezeki Kali",
+   "text": "Mancing di kali, jual ke sini atau ke Bang Siomay. Pasar bayar lebih mahal.",
+   "goal": "Jual 3 ikan",
+   "kind": "count",
+   "act": [
+    "sell_fish"
+   ],
+   "target": 3
+  },
+  {
+   "id": "q8_silver",
+   "npcId": "job_silver",
+   "npc": "Mas Silver",
+   "title": "Modal Cat Silver",
+   "text": "Coba jadi manusia silver. Bayarannya gede, tapi badan jadi kotor.",
+   "goal": "Kerja Silver 3×",
+   "kind": "count",
+   "act": [
+    "work:manusia_silver"
+   ],
+   "target": 3
+  },
+  {
+   "id": "q9_tabungan",
+   "npcId": "kost",
+   "npc": "Ibu Kost",
+   "title": "Tabungan Kos",
+   "text": "Kumpulin upah kerja dulu. Kuota tiap kerjaan buka lagi jam {clock.dayStartTime}.",
+   "goal": "Total upah kerja ≥ {target}",
+   "kind": "earn",
+   "scope": "total",
+   "target": 450000
+  },
+  {
+   "id": "q10_kos",
+   "npcId": "kost",
+   "npc": "Ibu Kost",
+   "title": "Punya Kos",
+   "text": "{kos.price} sekali bayar, kamar jadi milikmu permanen.",
+   "goal": "Bayar kos {kos.price}",
+   "kind": "count",
+   "act": [
+    "buy_room"
+   ],
+   "target": 1,
+   "win": true
+  }
+ ]
+}

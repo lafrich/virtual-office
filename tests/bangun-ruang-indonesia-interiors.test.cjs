@@ -21,10 +21,15 @@ const canvas=()=>({
   set:(target,key,value)=>{target[key]=value;return true;}
  })
 });
-test('66 Indonesian room recipes and 11 registered NJH MART additions',()=>{
- assert.equal(pack.count,66);
- assert.equal(Object.keys(pack.types).length,55);
- assert.equal(Object.keys(model.types).length,72);
+test('69 Indonesian room recipes (66 pack + 3 Ellen r1) and NJH MART additions',()=>{
+ assert.equal(pack.count,69);
+ assert.ok(pack.templates.id_tpl_rumah_biasa);
+ assert.ok(pack.templates.id_tpl_warung_makan);
+ assert.ok(pack.templates.id_tpl_wc_umum);
+ assert.equal(Object.keys(pack.types).length,59);
+ assert.equal(Object.keys(model.types).length,76);
+ assert.ok(pack.types.plastic_bench_red);
+ assert.ok(pack.types.plastic_bench_blue);
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('minimarket')));
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('mushola')));
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('puskesmas')));
@@ -51,7 +56,7 @@ test('all prescribed placements fit 8x6, are reachable, have action metadata, an
   }
   assert.ok(!occupied.has(scene.entrance.c+','+scene.entrance.r),key+' door');
  }
- assert.equal(props,384);
+ assert.equal(props,432); // 384 prior pack + 17+17+14 Ellen r1
 });
 test('smaller footprint gracefully omits furniture without corrupting existing locations',()=>{
  for(const key of Object.keys(pack.templates)){

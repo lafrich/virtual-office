@@ -38,7 +38,7 @@ Follow-ups: preview prop sizes at size/50 (dock ~22% short, Cove 6.76×7.04 vs 7
 | `messages()` | real | Persisted Nokia inbox |
 | `sites()` | real | `{id,label,x,z,placeholder,npc?,points[]}`; `x,z` is the first match, `points` lists every match (e.g. all scavenge spots) |
 | `enterables()` | real | Requires `enterable` or an interior template; scavenge props are excluded |
-| `housing()` / `relationship()` / `roomAccess()` / `saveMeta()` | real | Client-side 4P kost + pacaran. `housing().roomId` is `njh_kos_ichsan` / `njh_kos_noor`. Partner may use bed/WC; fridge/lemari/stove/kitchen_sink rejected with `Punya pacar`. Locked doors show `Terkunci`. |
+| `housing()` / `relationship()` / `roomAccess()` / `saveMeta()` | real | Client-side 4P kost + pacaran. `housing().roomId` is `njh_kos_ichsan` / `njh_kos_noor`. Partner may use bed/WC; fridge/lemari/stove/kitchen_sink rejected with `Hanya pemilik`. Locked doors show `Terkunci`. |
 | `nearbyActions()` / `runAction()` | real | SITE actions, lobby/room door enter/exit on the Action button, mapped furniture ids (`open`/`cook`/`wash`/`bathe`/`use_toilet` + tags), and `scene:<id>` stubs |
 | `spawnAt` / `clock` / `pause` / save slots | real | `spawnAt('kost', roomId)` still lands in the room (skips lobby) for Ichsan/Noor |
 | `njh98:open-map` | real | Listener forwards to the parent map window |
@@ -112,7 +112,7 @@ Behaviours are placeholder: idle, a short patrol loop, talk, give quest, stand-a
 | `coffeePrice` | Kopi | 5.000 |
 | `teaPrice` | Es Teh | 3.000 |
 | `tokenPrice` | Token listrik (5 unit) | 20.000 |
-| `roomPrice` | Sewa kost (sekali bayar) | 700.000 |
+| `roomPrice` | Bayar kos (sekali bayar, permanen) | 700.000 |
 | `fridgePrice` | Kulkas | 2.000.000 |
 | `bed` | Kasur | 1.500.000 |
 | `chair` | Kursi | 350.000 |

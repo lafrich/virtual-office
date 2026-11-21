@@ -38,7 +38,7 @@ Every instance takes one slot (no stacking, same as the existing bag rule).
 - `container`: `'bag' | 'fridge' | 'storage'` (`storage` = lemari / homeStorage).
 - Returns `{ok, container, label, slots, used, free, items:ItemRow[], locked, reason?}`.
 - `locked:true` (with `ok:false` and `reason`) when:
-  - not the owner of the room you are in (partner → `"Punya pacar"`, others → `"Terkunci"`),
+  - not the owner of the room you are in (partner → `"Hanya pemilik"`, others → `"Terkunci"`),
   - no kost (`"Perlu kost dahulu."`), no kulkas bought (`"Belum punya kulkas."`),
   - electricity token is 0 (`"Token listrik habis. Isi token dulu (Rp20.000 / 5 unit)."`) — fridge AND storage.
 - `bag` is never locked.
@@ -160,7 +160,7 @@ Entries keep the existing shape `{id, action, label, price, spotLabel, args, fur
 | `fish_start` | `fishing` (args.spotId) | near a fishing spot |
 | `topup_token` | `token` | in own kost when units ≤ 2 |
 
-Locks: in someone else's kost (partner `Punya pacar`, stranger `Terkunci`) and when the token is 0, `open_fridge` /
+Locks: in someone else's kost (partner `Hanya pemilik`, stranger `Terkunci`) and when the token is 0, `open_fridge` /
 `open_storage` / `cook_menu` still come back, with `disabled:true`, `hint` and `reason` (the lock or
 `"Token listrik habis. Isi token dulu (Rp20.000 / 5 unit)."`), and `locked:true` for owner locks.
 Ellen's furniture ids map to kinds: `stove` → `cook_menu`, `fridge` / `kulkas` → `open_fridge`, `wardrobe` / `lemari` → `open_storage`.
@@ -193,3 +193,36 @@ emits `mainkan:open-ui` `{ui, args}`; it does not change state.
 cook → `cook` / `cook_stir` (drinks `mix_drink`); minimarket pay → `hand_over`; fishing → `fishing_cast`,
 `fishing_wait` / `fishing_wait_sit`; storage → `use_storage`; eating → `eat` / `eat_sit` / `eat_snack`.
 Missing ids fall back through the existing chain (never blocks).
+
+## 20. Jual ikan (PREVIEW 22 Nov 2026)
+
+Layar must not invent a sell payload. Call these hooks on `window.SemestaLifePlay` (also forwarded on `window.SemestaPlay`).
+
+`sellableFish(buyerId?)`
+- Optional `buyerId`: `'siomay_batagor' | 'pasar_ikan'`.
+- Returns
+```
+{
+  ok: true,
+  buyerId: 'siomay_batagor' | null,
+  buyers: [{id:'siomay_batagor', label:'Bang Siomay / Batagor'}, {id:'pasar_ikan', label:'Pasar Ikan'}],
+  items: [{
+    uid: 'life:lele:12',   // instance id; may be passed to sell()
+    itemId: 'lele',        // catalog / species id
+    label: 'Ikan Lele',
+    qty: 1,                // one instance per row (bag does not stack)
+    price: 1600 | null,    // Rupiah for the selected buyer, or the default buyer if none given
+    prices: {siomay_batagor:1600, pasar_ikan:2100},
+    container: 'bag',
+    spoiled: false
+  }]
+}
+```
+- Only bag fish are listed (the live `sell_fish` economy only accepts tas). `price` is `null` when that buyer refuses the species.
+
+`sell(itemId, qty, buyerId)` also accepts a single object `{itemId|uid, qty, buyerId}`.
+- `itemId` may be an instance `uid` or a species id. `qty` sells that many matching bag instances (default 1).
+- Returns `{ok:true, sold:[{uid,itemId,price}], qty, buyerId, wallet}` or `{ok:false, reason, sold}`.
+- `reason` is Indonesian and should be shown as-is.
+
+Kopi / Es Teh / Sedekah / Ibadah actions now carry `confirm:true, ui:'confirm'`. Do not spend on the first E; show a confirm/choice menu, then call the same action id once the player confirms.

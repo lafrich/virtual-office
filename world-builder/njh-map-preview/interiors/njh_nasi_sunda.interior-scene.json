@@ -1,0 +1,404 @@
+{
+  "id": "njh_nasi_sunda",
+  "label": "NJH · Nasi Sunda",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "floor": 1,
+  "baseId": "semesta:medium",
+  "notes": "Nasi Sunda 8x6 (rumah makan, Kharisma composition). Cookline on the back wall r=0 (hawu, bak cuci, seeng, rak piring - stove + sink on one row), kulkas + sambal rack. Two-bay etalase lauk r=2 (c0-3) prasmanan, staff gap c=4 on the door aisle, kasir at the right end (c5-6, faces the door), second gap c=7. Two dining groups r=3-4: meja 1 with side chairs (rot 90/270), meja 2 with a side chair and a north chair (7,3, rot 0) - every chair visually faces its table; none use rot 180. Kitchen fronts r=1 reachable through c=4/c=7 (no sealed kitchen).",
+  "source": "njh-interiors-kharisma-r7 (revision of njh-interior-templates-r6)",
+  "scope": "PREVIEW, NOT LIVE. Baymax integrates; live needs Ichsan's own OK.",
+  "paint": {
+    "theme": "warm",
+    "themeNote": "Runtime only bakes paint for warteg (VLWartegInteriorArt) and NJH MART (bakeMartWall). These five layers + palette are the declaration for Baymax's hook; preview renders in r7/renders show the intent.",
+    "layers": [
+      {
+        "layer": "dado",
+        "z": [
+          0,
+          49
+        ],
+        "spec": "woven bamboo (bilik) wainscot",
+        "palette": [
+          "#7A5A2A",
+          "#A07A3E",
+          "#C9A15E",
+          "#E2C48A",
+          "#F4E2B8"
+        ]
+      },
+      {
+        "layer": "trim",
+        "z": [
+          50,
+          50
+        ],
+        "spec": "dark teak batten",
+        "palette": [
+          "#2A1A0E",
+          "#4A2E18",
+          "#6E4626",
+          "#94643A",
+          "#C08A58"
+        ]
+      },
+      {
+        "layer": "midDisplay",
+        "z": [
+          56,
+          70
+        ],
+        "spec": "shelf of boboko, caping and kendi; menu strip with prices",
+        "palette": [
+          "#5C3A1E",
+          "#A0703E",
+          "#D9B070",
+          "#3E7A3A",
+          "#F4E2B8"
+        ]
+      },
+      {
+        "layer": "identity",
+        "z": [
+          69,
+          116
+        ],
+        "spec": "'NASI SUNDA' carved board, 6-frame lauk photo frieze, wall clock",
+        "palette": [
+          "#3A2410",
+          "#6E4626",
+          "#F4E2B8",
+          "#2E7D32",
+          "#C62828"
+        ]
+      },
+      {
+        "layer": "ceiling",
+        "z": [
+          108,
+          120
+        ],
+        "spec": "two rattan pendant lamps + ceiling fan",
+        "palette": [
+          "#5C3A1E",
+          "#A07A3E",
+          "#FFD27A",
+          "#FFF0C0",
+          "#FFFFFF"
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "njh-sunda-stove-1",
+      "assetId": "stove",
+      "name": "Hawu / Kompor",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-sunda-kitchen_sink-1",
+      "assetId": "kitchen_sink",
+      "name": "Bak Cuci",
+      "c": 1,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-sunda-rice_cooker-1",
+      "assetId": "rice_cooker",
+      "name": "Seeng / Rice Cooker",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook",
+        "open"
+      ]
+    },
+    {
+      "id": "njh-sunda-dish_rack-1",
+      "assetId": "dish_rack",
+      "name": "Rak Piring & Boboko",
+      "c": 3,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash",
+        "store"
+      ]
+    },
+    {
+      "id": "njh-sunda-fridge-1",
+      "assetId": "fridge",
+      "name": "Kulkas Lalapan",
+      "c": 5,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    },
+    {
+      "id": "njh-sunda-shelf-1",
+      "assetId": "shelf",
+      "name": "Rak Sambal & Minuman",
+      "c": 6,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-sunda-food_vitrine-1",
+      "assetId": "food_vitrine",
+      "name": "Etalase Lauk Sunda 1",
+      "c": 0,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-sunda-food_vitrine-2",
+      "assetId": "food_vitrine",
+      "name": "Etalase Lauk Sunda 2",
+      "c": 2,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-sunda-cashier-1",
+      "assetId": "cashier",
+      "name": "Kasir",
+      "c": 5,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell"
+      ]
+    },
+    {
+      "id": "njh-sunda-chair-1",
+      "assetId": "chair",
+      "name": "Kursi Lesehan Kiri",
+      "c": 0,
+      "r": 4,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-sunda-dining_table-1",
+      "assetId": "dining_table",
+      "name": "Meja Makan 1",
+      "c": 1,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-sunda-chair-2",
+      "assetId": "chair",
+      "name": "Kursi Kanan Meja 1",
+      "c": 3,
+      "r": 4,
+      "rotation": 270,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-sunda-chair-3",
+      "assetId": "chair",
+      "name": "Kursi Meja 2",
+      "c": 5,
+      "r": 4,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-sunda-dining_table-2",
+      "assetId": "dining_table",
+      "name": "Meja Makan 2",
+      "c": 6,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-sunda-chair-4",
+      "assetId": "chair",
+      "name": "Kursi Belakang Meja 2",
+      "c": 7,
+      "r": 3,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    }
+  ]
+}

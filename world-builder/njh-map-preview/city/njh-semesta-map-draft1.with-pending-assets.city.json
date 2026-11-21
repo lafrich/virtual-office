@@ -16294,7 +16294,7 @@
           }
         },
         {
-          "id": "njh-vehicle-angkot",
+          "id": "sedan",
           "type": "vehicle",
           "x": -20.5,
           "z": 43.5,
@@ -16688,8 +16688,8 @@
           "y": 0,
           "rotation": 0,
           "scale": 1,
-          "width": 1.2374,
-          "height": 1.8371,
+          "width": 2,
+          "height": 2.737,
           "asset": "pipeline:tong_sampah",
           "collision": false,
           "replaceable": true,
@@ -17267,8 +17267,8 @@
           "y": 0,
           "rotation": 0,
           "scale": 1,
-          "width": 1.2374,
-          "height": 1.8371,
+          "width": 2,
+          "height": 2.737,
           "asset": "pipeline:tong_sampah",
           "collision": true,
           "layer": "prop",
@@ -17429,8 +17429,8 @@
         {
           "id": "njh-penanda-doa",
           "type": "sprite",
-          "asset": "object:njh_penanda_doa",
-          "name": "Penanda tempat tenang",
+          "asset": "pipeline:id_mainkan_prayer_mat",
+          "name": "Sajadah / tempat tenang",
           "x": -11.5,
           "z": 23.5,
           "y": 0,
@@ -17439,7 +17439,7 @@
           "collision": false,
           "blocking": "no",
           "layer": "prop",
-          "subtype": "njh_penanda_doa",
+          "subtype": "id_mainkan_prayer_mat",
           "tags": [
             "njh-draft1",
             "njh-preview-asset"
@@ -17452,7 +17452,9 @@
           "markerKind": "",
           "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live.",
           "w": 1,
-          "d": 1
+          "d": 1,
+          "height": 3.674,
+          "width": 2.232
         },
         {
           "id": "njh-tenda-pecel-lele",
@@ -17532,14 +17534,14 @@
           "markerKind": "",
           "blocking": "auto",
           "notes": "Function-first siomay/batagor stall. Reuses pipeline:lapak_tas (no dedicated siomay asset in the catalog). Front/interaction side is +z (south), tile (-22.5, 38.5) left free.",
-          "asset": "pipeline:lapak_tas",
+          "asset": "pipeline:id_mainkan_siomay_cart",
           "x": -22.5,
           "z": 37.5,
           "rotation": 0,
-          "width": 2.55,
-          "height": 3.593,
+          "width": 2.232,
+          "height": 3.674,
           "name": "Lapak Siomay Batagor",
-          "subtype": "lapak_tas",
+          "subtype": "id_mainkan_siomay_cart",
           "collision": true
         },
         {
@@ -17564,8 +17566,8 @@
           "x": -47.5,
           "z": 25.5,
           "rotation": 0,
-          "width": 1.2374,
-          "height": 1.8371,
+          "width": 2,
+          "height": 2.737,
           "name": "Tong Sampah Gang Utara",
           "subtype": "tong_sampah",
           "collision": false
@@ -17648,8 +17650,8 @@
           "x": -47.5,
           "z": 51.5,
           "rotation": 0,
-          "width": 1.2374,
-          "height": 1.8371,
+          "width": 2,
+          "height": 2.737,
           "name": "Tong Sampah Gang Selatan",
           "subtype": "tong_sampah",
           "collision": false
@@ -17732,8 +17734,8 @@
           "x": -47.5,
           "z": 63.5,
           "rotation": 0,
-          "width": 1.2374,
-          "height": 1.8371,
+          "width": 2,
+          "height": 2.737,
           "name": "Tong Sampah Gang Selatan 2",
           "subtype": "tong_sampah",
           "collision": false
@@ -17816,8 +17818,8 @@
           "x": -24.5,
           "z": 64.5,
           "rotation": 0,
-          "width": 1.2374,
-          "height": 1.8371,
+          "width": 2,
+          "height": 2.737,
           "name": "Tong Sampah Gang Timur",
           "subtype": "tong_sampah",
           "collision": false
@@ -17956,8 +17958,8 @@
           "x": -51.0,
           "z": 28.5,
           "rotation": 0,
-          "width": 1.2374,
-          "height": 1.8371,
+          "width": 2,
+          "height": 2.737,
           "name": "Tong Sampah tepi Kali utara",
           "subtype": "tong_sampah",
           "collision": false

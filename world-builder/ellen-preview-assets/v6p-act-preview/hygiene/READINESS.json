@@ -1,0 +1,364 @@
+{
+  "contract": "v6p-act HYGIENE SHEET h1 (separate from v2 activity sheets)",
+  "generated": "2026-11-07T14:23:30.300593+07:00",
+  "runtime_media": "media/v6p-act-h/<part>.png",
+  "output": "/workspace/v6p-act-incoming/hygiene",
+  "sheet": {
+    "w": 384,
+    "h": 2688,
+    "cols": 6,
+    "rows": 24,
+    "cell": [
+      64,
+      112
+    ],
+    "pivot": [
+      32,
+      100
+    ],
+    "dir_order": [
+      "se",
+      "sw",
+      "ne",
+      "nw"
+    ]
+  },
+  "fixture_qa": {
+    "status": "FIXTURE_QA_PENDING",
+    "standalone_centered_on_pivot": true,
+    "fixtures_drawn": false,
+    "assumptions": {
+      "ground_y": 100,
+      "toilet_seat_height_px": 16,
+      "toilet_seat_y": 84,
+      "bath_rim_height_px": 28,
+      "bath_rim_y": 72,
+      "note": "Seat ~16px and rim ~28px are GUESSES, not measured from any verified fixture art. Baymax will measure fixture offsets in code. These poses were authored standalone at pivot (32,100) so they can be offset later. Do not treat these numbers as final."
+    }
+  },
+  "rule": "A clip is READY only when status==authored AND compositor+fixture QA have passed. Transparent reserved bands (16, 20) are NOT playable. status authored_pending_compositor_fixtureQA means art is present and an offline cmap preview exists, but live compositor QA and fixture alignment have not been run.",
+  "bands": {
+    "shower": {
+      "start": 0,
+      "frames": 4,
+      "ms_per_frame": 300,
+      "type": "loop",
+      "status": "authored_pending_compositor_fixtureQA",
+      "emosi": true,
+      "note": "Front standing wash. Frames: hair rub, hair rub, arm rub, arm rub. Water FX on base/fx.png using official fx blues (not compositor K-keys). No shower-head fixture drawn. emosi:true (upright idle head).",
+      "keys": [
+        "hair_a",
+        "hair_b",
+        "arm_a",
+        "arm_b"
+      ]
+    },
+    "pee_stand": {
+      "start": 4,
+      "frames": 4,
+      "ms_per_frame": 400,
+      "type": "loop",
+      "status": "authored_pending_compositor_fixtureQA",
+      "emosi": false,
+      "note": "Standing back (NE/NW) and 3/4-side (SE/SW), hands at the waist covering the front. Featureless body only. NO anatomy and NO stream (fx empty). Subtle weight shift. emosi:false.",
+      "keys": [
+        "center",
+        "shift_L",
+        "center",
+        "shift_R"
+      ]
+    },
+    "bath_soak": {
+      "start": 8,
+      "frames": 4,
+      "ms_per_frame": 500,
+      "type": "loop",
+      "status": "authored_pending_compositor_fixtureQA",
+      "emosi": true,
+      "note": "Front seated, reclined, arms resting on a guessed rim (y\u224872, 28px above ground \u2014 UNVERIFIED). Full body drawn for future water occlusion. No shadow. Breath loop. emosi:true. No tub prop drawn.",
+      "keys": [
+        "rest",
+        "in",
+        "peak",
+        "out"
+      ]
+    },
+    "toilet_sit": {
+      "start": 12,
+      "frames": 4,
+      "ms_per_frame": 500,
+      "type": "loop",
+      "status": "authored_pending_compositor_fixtureQA",
+      "emosi": true,
+      "note": "Front seated, leaning slightly forward with elbows on knees (covers the pelvic area). Seat height guessed at 16px above ground (hip y\u224884 \u2014 UNVERIFIED). Slight side shift + breath. NO anatomy and NO waste. emosi:true. No toilet prop drawn.",
+      "keys": [
+        "center",
+        "shift_L",
+        "center",
+        "shift_R"
+      ]
+    },
+    "reserved_16": {
+      "start": 16,
+      "frames": 4,
+      "status": "reserved_transparent",
+      "note": "rows 16-19 empty; Baymax 64..95 note was a typo (sheet has 24 rows)"
+    },
+    "reserved_20": {
+      "start": 20,
+      "frames": 4,
+      "status": "reserved_transparent",
+      "note": "rows 20-23 empty"
+    }
+  },
+  "parts": {
+    "base/body.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/base/body.png",
+      "sha256": "de8c6a4efa7e43d93f915c372affad43f8e3805a1473e567e7dbb2abc204e6ce",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "base/body_f.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/base/body_f.png",
+      "sha256": "e6be68218eae5c69f957d786be537107270957af2028f59ae7ca93f3505f2392",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "face/m_blank.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/face/m_blank.png",
+      "sha256": "6f679e273c0847bf23bb7649fa5fe6057dad7439e88939346e336867d545f833",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "face/f_blank.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/face/f_blank.png",
+      "sha256": "faa809463fd6b6d09092978ac13867a942250b4b521b682fd44691c7712ed4ae",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "top/nude.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/top/nude.png",
+      "sha256": "e3a54666787b4e36a14a2ea4e7a4f9095e6739e3d6c5837d75bc70e0a24599bd",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "top/nude_f.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/top/nude_f.png",
+      "sha256": "2b2295b6a560c66db212a78624c263eee0e419d4037e9894f51c94cd02d7d2c9",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "top/nude_back.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/top/nude_back.png",
+      "sha256": "e28144e282d87dcb97d82cd86c1f8de647cc179cb1eeacc1cbf9a164425f4195",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "top/nude_back_f.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/top/nude_back_f.png",
+      "sha256": "e28144e282d87dcb97d82cd86c1f8de647cc179cb1eeacc1cbf9a164425f4195",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "hair/mid_curtain_back.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/hair/mid_curtain_back.png",
+      "sha256": "e3eaa89ed6d749b79a4fc676ebcc1a215302f7a8155d5a306d10326eaf3c275f",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "hair/mid_curtain_front.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/hair/mid_curtain_front.png",
+      "sha256": "f33e93d58412ec8b625afdcdf2c6e6ea53dd5473d14efccbb6190880c903c638",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "hair/long_back.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/hair/long_back.png",
+      "sha256": "671ffabfb9ce3df537d46a7f61a8765e1a51cac5b97c3f31a454bc9ce588af22",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "hair/long_front.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/hair/long_front.png",
+      "sha256": "9e8449788c4723cb4367a7100650a23f56e4b5d84c559f3ec45874c384db3368",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "shoes/nude.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/shoes/nude.png",
+      "sha256": "bc3e897bf1060321badb73e8afaf240dfbd7b6ecb1e720cffb10cc8b8e8d43ac",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "shoes/nude_f.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/shoes/nude_f.png",
+      "sha256": "cee0b2e868696e6dfa445a455c15c667a353991514bad1df2e6b6d4299d59311",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "base/shadow.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/base/shadow.png",
+      "sha256": "2e989a0f4b31d2390d037c8856124cb26955a165112c30e3a26c13e540e78914",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent",
+      "note": "Standing/sitting shadows on shower, pee_stand, toilet_sit; empty on bath_soak"
+    },
+    "pants/nude.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/pants/nude.png",
+      "sha256": "32a4e3c005cc77286a20e828752693eb8e77aeee1689c90bf53b5ad28e01acca",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "pants/nude_f.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/pants/nude_f.png",
+      "sha256": "4027c32e6b6a6f325e4cb2bfa5ca55d33f85537a7891d4d9ce672a2b4d21f665",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent"
+    },
+    "base/fx.png": {
+      "path": "/workspace/v6p-act-incoming/hygiene/base/fx.png",
+      "sha256": "378c3e27d1a84cc9dd64ac5d82edbefdc2c9876c94e46b47423b898b89fb24b7",
+      "size": [
+        384,
+        2688
+      ],
+      "shower": "authored_pending_compositor_fixtureQA",
+      "pee_stand": "authored_pending_compositor_fixtureQA",
+      "bath_soak": "authored_pending_compositor_fixtureQA",
+      "toilet_sit": "authored_pending_compositor_fixtureQA",
+      "other_bands": "transparent",
+      "note": "Water drips on shower only; empty for pee/bath/toilet"
+    }
+  },
+  "skipped": {
+    "base/body_front.png": "v6p 1x1 placeholder \u2014 skipped",
+    "base/body_front_f.png": "v6p 1x1 placeholder \u2014 skipped"
+  },
+  "content_policy": {
+    "featureless_nonsexual": true,
+    "no_autostrip": true,
+    "no_anatomy": true,
+    "no_stream": true,
+    "no_waste": true,
+    "private_areas_covered": true
+  }
+}

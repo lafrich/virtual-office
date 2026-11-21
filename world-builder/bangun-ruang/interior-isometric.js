@@ -237,7 +237,7 @@ function nativeFurniture(ctx,geo,item,fw,fd){
 function furniture(ctx,geo,item,selected=false,warteg=false){
  const c=Number(item.c),r=Number(item.r),type=TYPES[item.assetId]?.visualAs||item.assetId;
  const [fw,fd]=itemFootprint(item);
- const {w,d}=TYPES[item.assetId]; // unrotated local dimensions for art geometry
+ const {w,d}=TYPES[item.assetId]||{w:fw,d:fd}; // unrotated local dimensions for art geometry
  if(!Number.isFinite(c)||!Number.isFinite(r))return null;
  const inset=.08;
  // Physical shadow is pixel geometry projected at ground level.
@@ -501,7 +501,7 @@ function draw(canvas,scene,opts={}){
     [en.c+1,r+1,2],[en.c,r+1,2]]),'#22894A');
  }
  const hits=[];
- const items=(Array.isArray(scene?.items)?scene.items:[]).filter(x=>TYPES[x.assetId])
+ const items=(Array.isArray(scene?.items)?scene.items:[]).filter(x=>TYPES[x.assetId]||g.VLNjhInteriorArtPreview?.owns?.(x.assetId))
   .slice(0,250).sort((a,b)=>(a.c+a.r)-(b.c+b.r)||a.id.localeCompare(b.id));
  for(const item of items){
   const info=furniture(ctx,geo,item,item.id===opts.selectedId,scene?.theme==='warteg');

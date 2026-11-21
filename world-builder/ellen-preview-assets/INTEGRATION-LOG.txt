@@ -1,0 +1,11 @@
+vehicles: copied 60 PNGs for 15 ids
+vehicles catalog 15 entries
+C1 proposal bench/table copied 8 PNGs (lamp/trash left in pack, not requested)
+SKIP selokan_grill (no selokan map/art data change)
+street props r1: overlaid 14 revised PNGs (selokan_grill skipped)
+WC V4: 12 sprites + new catalog id id200_publik_wc_umum_kumuh (did not overwrite kampung toilet)
+env r1: copied 46 canal/ripple files; skipped drain_* tiles and did not touch selokan map data
+loak v2: added 170 PNGs for 85 new types; did not replace the 37 original IDs
+LGR phase 1: copied tee_v4/trousers_v4 (+ _under) into v6p, mh-wear, and VO preview (36 writes)
+Mahluk act/hygiene: copied 40 layer files (status authored_pending_compositorQA; not marked play-ready)
+shots: 21 files in /workspace/njh-sync-shots/ellen-assets

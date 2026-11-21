@@ -1,10 +1,18 @@
 /* Semesta · Harvest Moon-inspired 24-hour clock and solar lighting model.
  * Pure data logic; no dependencies on DOM, timers or Three.js.
- * At 1×, 1 real second = 1 in-game minute (24 real minutes/day).
+ * Rate: ONE clock for world and body. realSecondsPerGameMinute comes from
+ * content/balancing.json (window.NJHBalancing, slice: 0.5 s = 1 game minute,
+ * 12 real minutes/day). Without the table the old rate stays: 1 s = 1 minute.
  */
 (function(g){
 'use strict';
-const MINUTES=1440,DEFAULT_MINUTE=7*60,DAY_REAL_SECONDS=24*60;
+const MINUTES=1440,DEFAULT_MINUTE=7*60;
+function realSecondsPerGameMinute(){
+ try{const r=Number(g.NJHBalancing&&g.NJHBalancing.clock&&g.NJHBalancing.clock()?.realSecondsPerGameMinute);if(Number.isFinite(r)&&r>0)return r;}catch(_e){}
+ return 1;
+}
+const SECONDS_PER_MINUTE=realSecondsPerGameMinute();
+const DAY_REAL_SECONDS=MINUTES*SECONDS_PER_MINUTE;
 const WEEK=['SEN','SEL','RAB','KAM','JUM','SAB','MIN'];
 const stops=[
  {t:0,night:.78,glow:1,cast:.025,contact:.22,rgb:[11,27,56],sky:'#71869b'},
@@ -35,7 +43,7 @@ function format(minute){
 function advance(state,seconds){
  const input=normalize(state),dt=clamp(Number(seconds)||0,0,60);
  if(input.paused||dt<=0)return input;
- const total=input.minute+dt*input.speed;
+ const total=input.minute+dt*input.speed/SECONDS_PER_MINUTE;
  input.minute=total%MINUTES;
  input.day=Math.min(999999,input.day+Math.floor(total/MINUTES));
  return input;
@@ -79,6 +87,6 @@ function makeClock(initial){
  };
 }
 g.VLSemestaDayNight=Object.freeze({
- MINUTES,DEFAULT_MINUTE,DAY_REAL_SECONDS,WEEK,normalize,advance,model,format,makeClock
+ MINUTES,DEFAULT_MINUTE,DAY_REAL_SECONDS,SECONDS_PER_MINUTE,WEEK,normalize,advance,model,format,makeClock
 });
 })(window);

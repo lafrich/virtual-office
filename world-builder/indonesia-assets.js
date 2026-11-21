@@ -4,12 +4,20 @@
  */
 (function(g){
 'use strict';
-const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/';
-const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json','indonesia_custom_catalog.json','mainkan_gameplay_catalog.json'];
+const PREVIEW_REF='main';
+const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/'+PREVIEW_REF+'/';
+const LOCAL_BASE='./ellen-preview-assets/';
+const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json','indonesia_custom_catalog.json','mainkan_gameplay_catalog.json','ellen_vehicles_15_catalog.json','ellen_wc_v4_catalog.json'];
 let cached=null;
-// Retired Indonesia 200 vehicle sprites must never re-enter live catalogs,
-// including through stale browser caches or previously published manifests.
-const retired=s=>/^id200_transport_/.test(String(s?.id||''))||/^pipeline:id200_transport_/.test(String(s?.file||''));
+// B3 motors and any other legacy id200_transport_* stay retired. Ellen's
+// finished B1/B2/B4-R2 15-vehicle redesign is allowlisted for this preview only.
+const ALLOWED_TRANSPORT=new Set(["id200_transport_angkot_kota", "id200_transport_ambulans_puskesmas", "id200_transport_bus_kota_kecil", "id200_transport_elf_travel_antarkota", "id200_transport_mobil_angkut_sampah", "id200_transport_pikap_galon_isi_ulang", "id200_transport_pikap_sayur_keliling", "id200_transport_truk_material_bangunan", "id200_transport_truk_pasir_proyek", "id200_transport_bajaj_oranye", "id200_transport_becak_kampung", "id200_transport_bentor_roda_tiga", "id200_transport_delman_andong", "id200_transport_sepeda_ontel_tua", "id200_transport_sepeda_tukang_roti"]);
+const retired=s=>{
+ const id=String(s?.id||'').replace(/^pipeline:/,'');
+ const file=String(s?.file||'').replace(/^pipeline:/,'');
+ if(ALLOWED_TRANSPORT.has(id)||ALLOWED_TRANSPORT.has(file))return false;
+ return /^id200_transport_/.test(id)||/^id200_transport_/.test(file);
+};
 const IMAGE_REV='indonesia200-wheel-horizontal-v8-20261106';
 function cacheBust(spec,url){
  if(!url)return url;
@@ -33,11 +41,20 @@ function valid(s){
  );
 }
 async function fetchPack(name){
- const res=await fetch(base+'assets/street_buildings/'+name,{cache:'no-store'});
- if(!res.ok)throw Error(name+' not yet published: '+res.status);
- const j=await res.json();
- if(j?.projection!=='isometric-2:1'||!Array.isArray(j.assets))throw Error('Invalid '+name);
- return j.assets.filter(valid);
+ const urls=[];
+ if(/^ellen_/.test(name))urls.push(LOCAL_BASE+'street_buildings/'+name);
+ urls.push(base+'assets/street_buildings/'+name);
+ let last=Error(name+' not yet published');
+ for(const url of urls){
+  try{
+   const res=await fetch(url,{cache:'no-store'});
+   if(!res.ok){last=Error(name+' not yet published: '+res.status);continue;}
+   const j=await res.json();
+   if(j?.projection!=='isometric-2:1'||!Array.isArray(j.assets)){last=Error('Invalid '+name);continue;}
+   return j.assets.filter(valid);
+  }catch(err){last=err;}
+ }
+ throw last;
 }
 async function load(){
  if(cached)return cached;
@@ -72,11 +89,14 @@ async function load(){
    ...previous,
    prefabs:Object.freeze([...(previous.prefabs||[]).filter(s=>!retired(s)),...unique]),
    building(id,dir='sw'){
-    if(/^(?:pipeline:)?id200_transport_/.test(String(id||'')))return null;
+    if(retired({id,file:String(id||'')}))return null;
     const item=index.get(id);
     if(item){
      const v=item.variants[dir]||item.variants.sw||item.variants.se;
-     return v?cacheBust(item,base+'assets/street_buildings/'+v.file):null;
+     if(!v)return null;
+     if(/^ellen-/.test(item.pack||''))
+      return LOCAL_BASE+'street_buildings/'+v.file+'?v=njh-newbot-fix-20261122';
+     return cacheBust(item,base+'assets/street_buildings/'+v.file);
     }
     return legacy(id,dir);
    }
@@ -86,5 +106,5 @@ async function load(){
   packs:responses.filter(x=>x.status==='fulfilled').length};
  return cached;
 }
-g.VLIndonesiaAssets=Object.freeze({load,base,valid,PACKS,cacheBust,IMAGE_REV});
+g.VLIndonesiaAssets=Object.freeze({load,base,valid,PACKS,cacheBust,IMAGE_REV,PREVIEW_REF,LOCAL_BASE,ALLOWED_TRANSPORT,retired});
 })(typeof window!=='undefined'?window:globalThis);

@@ -1,0 +1,84 @@
+{
+ "id_tpl_wc_umum": {
+  "label": "Publik \u00b7 WC Umum Bilik",
+  "category": "Publik",
+  "theme": "aqua",
+  "min": [
+   8,
+   6
+  ],
+  "items": [
+   [
+    "squat_toilet",
+    0.0,
+    0.0
+   ],
+   [
+    "water_tub",
+    0.125,
+    0.0
+   ],
+   [
+    "squat_toilet",
+    0.25,
+    0.0
+   ],
+   [
+    "water_tub",
+    0.375,
+    0.0
+   ],
+   [
+    "squat_toilet",
+    0.5,
+    0.0
+   ],
+   [
+    "water_tub",
+    0.625,
+    0.0
+   ],
+   [
+    "wc",
+    0.75,
+    0.0
+   ],
+   [
+    "sink",
+    0.875,
+    0.0
+   ],
+   [
+    "sink",
+    0.0,
+    0.6667
+   ],
+   [
+    "sink",
+    0.125,
+    0.6667
+   ],
+   [
+    "trash_bin",
+    0.25,
+    0.6667
+   ],
+   [
+    "cashier",
+    0.75,
+    0.6667
+   ],
+   [
+    "chair",
+    0.875,
+    0.8333
+   ],
+   [
+    "waiting_bench",
+    0.0,
+    0.8333
+   ]
+  ],
+  "source": "bangun-interior-templates-r1"
+ }
+}

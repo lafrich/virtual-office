@@ -49,9 +49,9 @@ const BUILTIN_DIMENSIONS=Object.freeze({
  "furniture-cashier":"101,83,50,54|101,83,50,54|101,87,50,58|101,90,50,61",
  "furniture-shelf":"101,102,50,73|101,103,50,74|101,103,50,74|101,102,50,73",
  "furniture-counter":"101,85,50,56|101,83,50,54|101,83,50,54|101,85,50,56",
- "park-bench":"104,74,52,70",
+ "park-bench":"104,89,52,70",
  "park-lamp":"34,139,17,135",
- "park-table":"108,47,54,43",
+ "park-table":"108,68,54,43",
  "trash-bin":"50,53,25,49",
  "potted-plant":"64,79,32,75",
  "small-tree":"71,119,34,115|68,119,34,115|71,119,34,115|68,119,34,115"
@@ -152,12 +152,17 @@ function drawFixture(row,dir){
  const pivot=iso.point(geo,2+fw/2,2+fd/2,0);
  return cut(cv,pivot);
 }
+const C1_PREVIEW=new Set(['park-bench','park-table']);
+const C1_ART='./ellen-preview-assets/street_buildings/props/';
 function imageForBuiltin(id,dir){
  const key=id+'|'+dir;
  if(!cache.has(key)){
   const row=builtins.find(b=>b.id===id);
   if(!row)return null;
-  cache.set(key,row.kind==='grok-native'?{url:row.grok.views[dir]?.url||null}:
+  if(C1_PREVIEW.has(id)){
+   const dim=dimensions(id,dir);
+   cache.set(key,{url:C1_ART+id+'_'+dir+'.png?v=njh-newbot-fix-20261122',size:dim.size,pivot:dim.pivot});
+  }else cache.set(key,row.kind==='grok-native'?{url:row.grok.views[dir]?.url||null}:
    row.kind==='fixture'?drawFixture(row,dir):drawOutdoor(row,dir));
  }
  return cache.get(key)||null;

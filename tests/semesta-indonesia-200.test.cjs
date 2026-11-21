@@ -36,18 +36,18 @@ test('180 retained Indonesian sprites load from secondary published manifest',as
  const {g,calls}=mock([],all);
  const out=await g.VLIndonesiaAssets.load();
  assert.equal(out.loaded,true);assert.equal(out.count,180);
- assert.equal(out.packs,2);
+ assert.equal(out.packs,4);
  assert.equal(g.VLAssetCatalog.length,180);
  assert.equal(g.VLPipelineAssets.prefabs.length,180);
  assert.equal(new Set(g.VLAssetCatalog.map(x=>x.file)).size,180);
  assert.equal(g.VLPipelineAssets.building(all[0].id,'ne'),
-  'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/'+all[0].variants.ne.file+'?v='+g.VLIndonesiaAssets.IMAGE_REV);
+  'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/'+g.VLIndonesiaAssets.PREVIEW_REF+'/assets/street_buildings/'+all[0].variants.ne.file+'?v='+g.VLIndonesiaAssets.IMAGE_REV);
  assert.equal(g.VLPipelineAssets.building('ruko_a'),'old-url');
  assert.equal(g.VLIndonesiaAssets.cacheBust(all[0],'https://example.com/png.png'),
   'https://example.com/png.png?v='+g.VLIndonesiaAssets.IMAGE_REV);
  assert.equal(g.VLIndonesiaAssets.cacheBust({pack:'indonesia-v1'},'https://example.com/old.png'),
   'https://example.com/old.png');
- assert.equal(calls.length,4);
+ assert.equal(calls.length,6);
  assert.ok(calls.some(x=>x.endsWith('mainkan_gameplay_catalog.json')));
  assert.ok(calls.some(x=>x.endsWith('indonesia_200_catalog.json')));
  assert.equal((await g.VLIndonesiaAssets.load()).count,180);
@@ -85,7 +85,7 @@ test('Semesta gallery and quick Assets panel expose Indonesia 200 without breaki
 
 test('retired Indonesia 200 vehicles never reload, even from stale manifests',async()=>{
  const valid=item();
- const retired={...item('id200_transport_angkot_kota','Angkot','transport'),
+ const retired={...item('id200_transport_motor_matik_keluarga','Motor Matik','transport'),
   group:'prop',objectCategory:'vehicle'};
  const {g}=mock([],[retired,valid]);
  const result=await g.VLIndonesiaAssets.load();

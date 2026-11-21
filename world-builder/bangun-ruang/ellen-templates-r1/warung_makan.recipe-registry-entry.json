@@ -1,0 +1,99 @@
+{
+ "id_tpl_warung_makan": {
+  "label": "Kuliner \u00b7 Warung Makan Kampung",
+  "category": "Kuliner",
+  "theme": "warm",
+  "min": [
+   8,
+   6
+  ],
+  "items": [
+   [
+    "stove",
+    0.0,
+    0.0
+   ],
+   [
+    "noodle_pot",
+    0.125,
+    0.0
+   ],
+   [
+    "kitchen_sink",
+    0.25,
+    0.0
+   ],
+   [
+    "dish_rack",
+    0.375,
+    0.0
+   ],
+   [
+    "fridge",
+    0.625,
+    0.0
+   ],
+   [
+    "shelf",
+    0.75,
+    0.0
+   ],
+   [
+    "market_crate",
+    0.875,
+    0.1667
+   ],
+   [
+    "food_vitrine",
+    0.125,
+    0.3333
+   ],
+   [
+    "cashier",
+    0.5,
+    0.3333
+   ],
+   [
+    "water_dispenser",
+    0.75,
+    0.3333
+   ],
+   [
+    "drink_cooler",
+    0.875,
+    0.3333
+   ],
+   [
+    "dining_table",
+    0.0,
+    0.6667
+   ],
+   [
+    "wooden_bench",
+    0.0,
+    0.8333
+   ],
+   [
+    "dining_table",
+    0.625,
+    0.6667
+   ],
+   [
+    "wooden_bench",
+    0.625,
+    0.8333
+   ],
+   [
+    "trash_bin",
+    0.875,
+    0.8333
+   ],
+   [
+    "fan",
+    0.5,
+    0.6667
+   ]
+  ],
+  "source": "bangun-interior-templates-r1"
+ }
+}

@@ -47,7 +47,9 @@ const TYPES={
  cashier:{label:'Kasir',category:'Shop',glyph:'▣',w:2,d:1,actions:['buy','sell']},
  shelf:{label:'Rak Barang',category:'Shop',glyph:'▤',w:2,d:1,actions:['browse']},
  counter:{label:'Display Counter',category:'Shop',glyph:'▥',w:2,d:1,actions:['buy','sell']},
- ...INDONESIA.types
+ ...INDONESIA.types,
+ plastic_bench_red:{label:'Bangku Plastik Merah',category:'Living',glyph:'▭',w:2,d:1,actions:['sit'],visualAs:'plastic_bench_red'},
+ plastic_bench_blue:{label:'Bangku Plastik Biru',category:'Living',glyph:'▭',w:2,d:1,actions:['sit'],visualAs:'plastic_bench_blue'}
 };
 const TEMPLATES=Object.freeze({
  empty:{label:'Empty / Kosong',theme:'cream',items:[]},

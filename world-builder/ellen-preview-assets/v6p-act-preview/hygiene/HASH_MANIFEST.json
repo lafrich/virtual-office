@@ -1,0 +1,689 @@
+{
+  "generated": "2026-11-07T14:23:30.300593+07:00",
+  "original_refs_sha256": {
+    "base/body.png": "223a687041e8d5d01d04a077333a927c56be21fa865635a88c9fe25a2f273ef2",
+    "base/body_f.png": "53cc5021779bced1a39858faed0001aca5ed0639d0f7d23276e318d1907ef8cf",
+    "face/m_blank.png": "39fd65766c37da9f02b2bad4b736611e7d44d63cc84183900e832884e55154fb",
+    "face/f_blank.png": "c90d04b521a3a8a50f6dea528fa5e92682e1c62dd47db1c285b4c98ff548094b",
+    "top/nude.png": "41ceaea8112e7de470af4bc1d554274a48848c6b12bca140417906c436ce635d",
+    "top/nude_f.png": "80addd04e954baf828da4b109ebc124651a8ee81f38e5c228c21add8691f8a1a",
+    "top/nude_back.png": "3dec94a64c9af274704709161fea55edecf9916a072f2c205efa45f1c0c4b5b7",
+    "top/nude_back_f.png": "8ab7159de64380503816c09d7934dfd9ec73ee0df46d23d399ce7d07823cf243",
+    "hair/mid_curtain_back.png": "0b0557aaf1ff9bbe921546a365b420cb0bf0891c73408ea785995f71bef5ca42",
+    "hair/mid_curtain_front.png": "c1d66b09afc30e92332cf3db52eb277a1017ecf40ad1da2716c3f89fd6ec086e",
+    "hair/long_back.png": "f89910a72e55f7c7cd3b24f53da0ab4d93d77f53eddb00409a55237700f2ae9f",
+    "hair/long_front.png": "6d44d02191fb55a4a1fe480d8e2b392f9e06915538414719834c92a0fa42398b",
+    "shoes/nude.png": "a59a6f03413555b2a54a3285ec5e85b3089ad96f1dd0983d44f7ac9114b083a9",
+    "shoes/nude_f.png": "8f96b5f1f2427ff170b606e6d528bc5b07becaba8b7c0f44aa0a33c4da2f4984",
+    "base/shadow.png": "25d0f921e524bfa36fb43742b20c94f62312ba9b99a842f7a5df9ed18c250590",
+    "pants/nude.png": "8e3514a87eff43d7475cc8187aef7bc4328bc0a4f4485442e5e8f9b67428da2f",
+    "pants/nude_f.png": "600816baba0e59808e9317e93461faf127fb0c23792c55d385d0cd3e483dd9a3",
+    "base/fx.png": "9a2283aef1ed26d0cad6e53042eb240cf2a9191e197d7b229e4df1e3ce88f155",
+    "base/body_front.png": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+    "base/body_front_f.png": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+  },
+  "original_refs_unchanged": true,
+  "v2_sheets_unchanged": true,
+  "outputs": {
+    "base/body.png": {
+      "sha256": "de8c6a4efa7e43d93f915c372affad43f8e3805a1473e567e7dbb2abc204e6ce",
+      "bytes": 8907,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 2024,
+        "pee_stand": 2024,
+        "bath_soak": 2024,
+        "toilet_sit": 2024,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          50,
+          229,
+          255
+        ],
+        [
+          255,
+          56,
+          226,
+          255
+        ],
+        [
+          255,
+          62,
+          223,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ],
+        [
+          255,
+          74,
+          217,
+          255
+        ]
+      ]
+    },
+    "base/body_f.png": {
+      "sha256": "e6be68218eae5c69f957d786be537107270957af2028f59ae7ca93f3505f2392",
+      "bytes": 8873,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 2008,
+        "pee_stand": 2008,
+        "bath_soak": 2008,
+        "toilet_sit": 2008,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          50,
+          229,
+          255
+        ],
+        [
+          255,
+          56,
+          226,
+          255
+        ],
+        [
+          255,
+          62,
+          223,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "face/m_blank.png": {
+      "sha256": "6f679e273c0847bf23bb7649fa5fe6057dad7439e88939346e336867d545f833",
+      "bytes": 6066,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 480,
+        "pee_stand": 480,
+        "bath_soak": 480,
+        "toilet_sit": 480,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          50,
+          229,
+          255
+        ],
+        [
+          255,
+          56,
+          226,
+          255
+        ],
+        [
+          255,
+          74,
+          217,
+          255
+        ]
+      ]
+    },
+    "face/f_blank.png": {
+      "sha256": "faa809463fd6b6d09092978ac13867a942250b4b521b682fd44691c7712ed4ae",
+      "bytes": 6168,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 512,
+        "pee_stand": 512,
+        "bath_soak": 512,
+        "toilet_sit": 512,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          50,
+          229,
+          255
+        ],
+        [
+          255,
+          56,
+          226,
+          255
+        ],
+        [
+          255,
+          62,
+          223,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "top/nude.png": {
+      "sha256": "e3a54666787b4e36a14a2ea4e7a4f9095e6739e3d6c5837d75bc70e0a24599bd",
+      "bytes": 11974,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 6186,
+        "pee_stand": 7180,
+        "bath_soak": 7066,
+        "toilet_sit": 6980,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "top/nude_f.png": {
+      "sha256": "2b2295b6a560c66db212a78624c263eee0e419d4037e9894f51c94cd02d7d2c9",
+      "bytes": 12311,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 5282,
+        "pee_stand": 6504,
+        "bath_soak": 6352,
+        "toilet_sit": 6276,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "top/nude_back.png": {
+      "sha256": "e28144e282d87dcb97d82cd86c1f8de647cc179cb1eeacc1cbf9a164425f4195",
+      "bytes": 9260,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 1972,
+        "pee_stand": 2704,
+        "bath_soak": 1338,
+        "toilet_sit": 2212,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "top/nude_back_f.png": {
+      "sha256": "e28144e282d87dcb97d82cd86c1f8de647cc179cb1eeacc1cbf9a164425f4195",
+      "bytes": 9260,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 1972,
+        "pee_stand": 2704,
+        "bath_soak": 1338,
+        "toilet_sit": 2212,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "hair/mid_curtain_back.png": {
+      "sha256": "e3eaa89ed6d749b79a4fc676ebcc1a215302f7a8155d5a306d10326eaf3c275f",
+      "bytes": 6990,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 4784,
+        "pee_stand": 4784,
+        "bath_soak": 4784,
+        "toilet_sit": 4784,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          8,
+          250,
+          255
+        ],
+        [
+          255,
+          14,
+          247,
+          255
+        ],
+        [
+          255,
+          26,
+          241,
+          255
+        ]
+      ]
+    },
+    "hair/mid_curtain_front.png": {
+      "sha256": "f33e93d58412ec8b625afdcdf2c6e6ea53dd5473d14efccbb6190880c903c638",
+      "bytes": 14747,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 6536,
+        "pee_stand": 6536,
+        "bath_soak": 6536,
+        "toilet_sit": 6536,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          8,
+          250,
+          255
+        ],
+        [
+          255,
+          14,
+          247,
+          255
+        ],
+        [
+          255,
+          26,
+          241,
+          255
+        ],
+        [
+          255,
+          32,
+          238,
+          255
+        ]
+      ]
+    },
+    "hair/long_back.png": {
+      "sha256": "671ffabfb9ce3df537d46a7f61a8765e1a51cac5b97c3f31a454bc9ce588af22",
+      "bytes": 8425,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 8272,
+        "pee_stand": 8272,
+        "bath_soak": 8272,
+        "toilet_sit": 8272,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          8,
+          250,
+          255
+        ],
+        [
+          255,
+          14,
+          247,
+          255
+        ],
+        [
+          255,
+          26,
+          241,
+          255
+        ]
+      ]
+    },
+    "hair/long_front.png": {
+      "sha256": "9e8449788c4723cb4367a7100650a23f56e4b5d84c559f3ec45874c384db3368",
+      "bytes": 14825,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 9120,
+        "pee_stand": 9120,
+        "bath_soak": 9120,
+        "toilet_sit": 9120,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          8,
+          250,
+          255
+        ],
+        [
+          255,
+          14,
+          247,
+          255
+        ],
+        [
+          255,
+          26,
+          241,
+          255
+        ],
+        [
+          255,
+          32,
+          238,
+          255
+        ]
+      ]
+    },
+    "shoes/nude.png": {
+      "sha256": "bc3e897bf1060321badb73e8afaf240dfbd7b6ecb1e720cffb10cc8b8e8d43ac",
+      "bytes": 6099,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 1104,
+        "pee_stand": 1104,
+        "bath_soak": 1152,
+        "toilet_sit": 1072,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "shoes/nude_f.png": {
+      "sha256": "cee0b2e868696e6dfa445a455c15c667a353991514bad1df2e6b6d4299d59311",
+      "bytes": 6046,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 976,
+        "pee_stand": 976,
+        "bath_soak": 888,
+        "toilet_sit": 864,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "base/shadow.png": {
+      "sha256": "2e989a0f4b31d2390d037c8856124cb26955a165112c30e3a26c13e540e78914",
+      "bytes": 4945,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 1376,
+        "pee_stand": 1376,
+        "bath_soak": 0,
+        "toilet_sit": 1936,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          0,
+          0,
+          0,
+          46
+        ],
+        [
+          0,
+          0,
+          0,
+          56
+        ]
+      ]
+    },
+    "pants/nude.png": {
+      "sha256": "32a4e3c005cc77286a20e828752693eb8e77aeee1689c90bf53b5ad28e01acca",
+      "bytes": 7935,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 5488,
+        "pee_stand": 5488,
+        "bath_soak": 3648,
+        "toilet_sit": 3976,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "pants/nude_f.png": {
+      "sha256": "4027c32e6b6a6f325e4cb2bfa5ca55d33f85537a7891d4d9ce672a2b4d21f665",
+      "bytes": 8309,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 5648,
+        "pee_stand": 5648,
+        "bath_soak": 4208,
+        "toilet_sit": 4688,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ]
+    },
+    "base/fx.png": {
+      "sha256": "378c3e27d1a84cc9dd64ac5d82edbefdc2c9876c94e46b47423b898b89fb24b7",
+      "bytes": 6307,
+      "size": [
+        384,
+        2688
+      ],
+      "opaque_by_band": {
+        "shower": 832,
+        "pee_stand": 0,
+        "bath_soak": 0,
+        "toilet_sit": 0,
+        "reserved": 0
+      },
+      "unique_opaque_colors": [
+        [
+          176,
+          226,
+          240,
+          220
+        ],
+        [
+          236,
+          240,
+          246,
+          255
+        ]
+      ]
+    }
+  },
+  "verify": {
+    "sheet_dims_ok": true,
+    "key_colors_ok": true,
+    "reserved_16_23_transparent": true,
+    "fourframe_unused_cols_transparent": true,
+    "face_ne_nw_empty": true,
+    "original_refs_unchanged": true,
+    "v2_sheets_unchanged": true,
+    "clipping_pixels": 0,
+    "issues": [],
+    "clip_log": {
+      "shower": 0,
+      "pee_stand": 0,
+      "bath_soak": 0,
+      "toilet_sit": 0
+    }
+  },
+  "fixture_qa": {
+    "status": "FIXTURE_QA_PENDING",
+    "standalone_centered_on_pivot": true,
+    "fixtures_drawn": false,
+    "assumptions": {
+      "ground_y": 100,
+      "toilet_seat_height_px": 16,
+      "toilet_seat_y": 84,
+      "bath_rim_height_px": 28,
+      "bath_rim_y": 72,
+      "note": "Seat ~16px and rim ~28px are GUESSES, not measured from any verified fixture art. Baymax will measure fixture offsets in code. These poses were authored standalone at pivot (32,100) so they can be offset later. Do not treat these numbers as final."
+    }
+  }
+}

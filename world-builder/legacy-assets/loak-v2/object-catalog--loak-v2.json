@@ -1,0 +1,3400 @@
+{
+  "format": "loak-object-art-review-v2",
+  "game": "Namanya Juga Hidup the Game",
+  "installed": false,
+  "runtime_category": null,
+  "notes": [
+    "No object/item category in current Drive Semesta catalog; review_group is metadata only, not runtime schema.",
+    "No new prices, rarity, loot weights or economy. Original historical economy is archived separately, not active.",
+    "Each model uses one fixed, baked native isometric orientation. No fake directional rotations.",
+    "Proposed footprints/pickup anchors require app adapter validation.",
+    "Native palette and alpha 0/56/255; originals kept byte-identical."
+  ],
+  "items": [
+    {
+      "id": "botol_plastik",
+      "nama": "Botol plastik bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "botol_plastik_bening",
+          "icon": "icons/botol_plastik_bening.png",
+          "ground": "ground/botol_plastik_bening.png",
+          "size": [
+            34,
+            19
+          ],
+          "pivot": [
+            15,
+            14
+          ]
+        },
+        {
+          "sprite_id": "botol_plastik_hijau",
+          "icon": "icons/botol_plastik_hijau.png",
+          "ground": "ground/botol_plastik_hijau.png",
+          "size": [
+            34,
+            19
+          ],
+          "pivot": [
+            15,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kaleng_minuman",
+      "nama": "Kaleng minuman bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "kaleng_minuman_merah",
+          "icon": "icons/kaleng_minuman_merah.png",
+          "ground": "ground/kaleng_minuman_merah.png",
+          "size": [
+            24,
+            16
+          ],
+          "pivot": [
+            10,
+            11
+          ]
+        },
+        {
+          "sprite_id": "kaleng_minuman_hijau",
+          "icon": "icons/kaleng_minuman_hijau.png",
+          "ground": "ground/kaleng_minuman_hijau.png",
+          "size": [
+            24,
+            16
+          ],
+          "pivot": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kardus_lipat",
+      "nama": "Kardus bekas dilipat",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "kardus_lipat",
+          "icon": "icons/kardus_lipat.png",
+          "ground": "ground/kardus_lipat.png",
+          "size": [
+            40,
+            23
+          ],
+          "pivot": [
+            20,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "koran_bekas",
+      "nama": "Koran bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "koran_bekas",
+          "icon": "icons/koran_bekas.png",
+          "ground": "ground/koran_bekas.png",
+          "size": [
+            36,
+            21
+          ],
+          "pivot": [
+            18,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sandal_jepit",
+      "nama": "Sandal jepit putus",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "sandal_jepit_biru",
+          "icon": "icons/sandal_jepit_biru.png",
+          "ground": "ground/sandal_jepit_biru.png",
+          "size": [
+            32,
+            19
+          ],
+          "pivot": [
+            14,
+            10
+          ]
+        },
+        {
+          "sprite_id": "sandal_jepit_merah",
+          "icon": "icons/sandal_jepit_merah.png",
+          "ground": "ground/sandal_jepit_merah.png",
+          "size": [
+            32,
+            19
+          ],
+          "pivot": [
+            14,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kabel_bekas",
+      "nama": "Gulungan kabel bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "kabel_bekas",
+          "icon": "icons/kabel_bekas.png",
+          "ground": "ground/kabel_bekas.png",
+          "size": [
+            30,
+            21
+          ],
+          "pivot": [
+            13,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "charger_rusak",
+      "nama": "Charger HP rusak",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "charger_rusak",
+          "icon": "icons/charger_rusak.png",
+          "ground": "ground/charger_rusak.png",
+          "size": [
+            22,
+            18
+          ],
+          "pivot": [
+            8,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kaset_pita",
+      "nama": "Kaset pita lama",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "kaset_pita",
+          "icon": "icons/kaset_pita.png",
+          "ground": "ground/kaset_pita.png",
+          "size": [
+            28,
+            18
+          ],
+          "pivot": [
+            14,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "buku_bekas",
+      "nama": "Buku bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "buku_bekas_merah",
+          "icon": "icons/buku_bekas_merah.png",
+          "ground": "ground/buku_bekas_merah.png",
+          "size": [
+            36,
+            22
+          ],
+          "pivot": [
+            18,
+            13
+          ]
+        },
+        {
+          "sprite_id": "buku_bekas_biru",
+          "icon": "icons/buku_bekas_biru.png",
+          "ground": "ground/buku_bekas_biru.png",
+          "size": [
+            36,
+            22
+          ],
+          "pivot": [
+            18,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "payung_rusak",
+      "nama": "Payung rusak",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "payung_rusak_ungu",
+          "icon": "icons/payung_rusak_ungu.png",
+          "ground": "ground/payung_rusak_ungu.png",
+          "size": [
+            42,
+            20
+          ],
+          "pivot": [
+            20,
+            15
+          ]
+        },
+        {
+          "sprite_id": "payung_rusak_hitam",
+          "icon": "icons/payung_rusak_hitam.png",
+          "ground": "ground/payung_rusak_hitam.png",
+          "size": [
+            42,
+            20
+          ],
+          "pivot": [
+            20,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sepatu_bekas",
+      "nama": "Sepatu bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "sepatu_bekas_putih",
+          "icon": "icons/sepatu_bekas_putih.png",
+          "ground": "ground/sepatu_bekas_putih.png",
+          "size": [
+            36,
+            28
+          ],
+          "pivot": [
+            16,
+            20
+          ]
+        },
+        {
+          "sprite_id": "sepatu_bekas_hitam",
+          "icon": "icons/sepatu_bekas_hitam.png",
+          "ground": "ground/sepatu_bekas_hitam.png",
+          "size": [
+            36,
+            28
+          ],
+          "pivot": [
+            16,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dompet_kosong",
+      "nama": "Dompet kosong",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "dompet_kosong",
+          "icon": "icons/dompet_kosong.png",
+          "ground": "ground/dompet_kosong.png",
+          "size": [
+            28,
+            20
+          ],
+          "pivot": [
+            14,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gelas_plastik",
+      "nama": "Gelas plastik es teh",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "gelas_plastik",
+          "icon": "icons/gelas_plastik.png",
+          "ground": "ground/gelas_plastik.png",
+          "size": [
+            18,
+            24
+          ],
+          "pivot": [
+            6,
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ember_bocor",
+      "nama": "Ember bocor",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "ember_bocor",
+          "icon": "icons/ember_bocor.png",
+          "ground": "ground/ember_bocor.png",
+          "size": [
+            28,
+            32
+          ],
+          "pivot": [
+            12,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hp_jadul",
+      "nama": "HP jadul rusak",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "hp_jadul_biru",
+          "icon": "icons/hp_jadul_biru.png",
+          "ground": "ground/hp_jadul_biru.png",
+          "size": [
+            24,
+            19
+          ],
+          "pivot": [
+            12,
+            9
+          ]
+        },
+        {
+          "sprite_id": "hp_jadul_abu",
+          "icon": "icons/hp_jadul_abu.png",
+          "ground": "ground/hp_jadul_abu.png",
+          "size": [
+            24,
+            19
+          ],
+          "pivot": [
+            12,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jam_tangan_rusak",
+      "nama": "Jam tangan rusak",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "jam_tangan_rusak",
+          "icon": "icons/jam_tangan_rusak.png",
+          "ground": "ground/jam_tangan_rusak.png",
+          "size": [
+            24,
+            19
+          ],
+          "pivot": [
+            12,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kacamata",
+      "nama": "Kacamata bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "kacamata",
+          "icon": "icons/kacamata.png",
+          "ground": "ground/kacamata.png",
+          "size": [
+            30,
+            16
+          ],
+          "pivot": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kunci_lama",
+      "nama": "Kunci lama",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "kunci_lama",
+          "icon": "icons/kunci_lama.png",
+          "ground": "ground/kunci_lama.png",
+          "size": [
+            24,
+            12
+          ],
+          "pivot": [
+            10,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "besi_tua",
+      "nama": "Besi tua",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "besi_tua",
+          "icon": "icons/besi_tua.png",
+          "ground": "ground/besi_tua.png",
+          "size": [
+            40,
+            22
+          ],
+          "pivot": [
+            19,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "helm_bekas",
+      "nama": "Helm bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "helm_bekas_merah",
+          "icon": "icons/helm_bekas_merah.png",
+          "ground": "ground/helm_bekas_merah.png",
+          "size": [
+            34,
+            26
+          ],
+          "pivot": [
+            16,
+            17
+          ]
+        },
+        {
+          "sprite_id": "helm_bekas_putih",
+          "icon": "icons/helm_bekas_putih.png",
+          "ground": "ground/helm_bekas_putih.png",
+          "size": [
+            34,
+            26
+          ],
+          "pivot": [
+            16,
+            17
+          ]
+        },
+        {
+          "sprite_id": "helm_bekas_hitam",
+          "icon": "icons/helm_bekas_hitam.png",
+          "ground": "ground/helm_bekas_hitam.png",
+          "size": [
+            34,
+            26
+          ],
+          "pivot": [
+            16,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tas_bekas",
+      "nama": "Tas bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "tas_bekas_coklat",
+          "icon": "icons/tas_bekas_coklat.png",
+          "ground": "ground/tas_bekas_coklat.png",
+          "size": [
+            32,
+            35
+          ],
+          "pivot": [
+            14,
+            26
+          ]
+        },
+        {
+          "sprite_id": "tas_bekas_hitam",
+          "icon": "icons/tas_bekas_hitam.png",
+          "ground": "ground/tas_bekas_hitam.png",
+          "size": [
+            32,
+            35
+          ],
+          "pivot": [
+            14,
+            26
+          ]
+        }
+      ]
+    },
+    {
+      "id": "boneka_kain",
+      "nama": "Boneka beruang kumal",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "boneka_kain",
+          "icon": "icons/boneka_kain.png",
+          "ground": "ground/boneka_kain.png",
+          "size": [
+            28,
+            30
+          ],
+          "pivot": [
+            13,
+            23
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mainan_mobil",
+      "nama": "Mobil-mobilan rusak",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "mainan_mobil_merah",
+          "icon": "icons/mainan_mobil_merah.png",
+          "ground": "ground/mainan_mobil_merah.png",
+          "size": [
+            34,
+            25
+          ],
+          "pivot": [
+            16,
+            16
+          ]
+        },
+        {
+          "sprite_id": "mainan_mobil_kuning",
+          "icon": "icons/mainan_mobil_kuning.png",
+          "ground": "ground/mainan_mobil_kuning.png",
+          "size": [
+            34,
+            25
+          ],
+          "pivot": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kipas_angin",
+      "nama": "Kipas angin meja rusak",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "kipas_angin",
+          "icon": "icons/kipas_angin.png",
+          "ground": "ground/kipas_angin.png",
+          "size": [
+            32,
+            44
+          ],
+          "pivot": [
+            13,
+            35
+          ]
+        }
+      ]
+    },
+    {
+      "id": "setrika_lama",
+      "nama": "Setrika lama",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "setrika_lama",
+          "icon": "icons/setrika_lama.png",
+          "ground": "ground/setrika_lama.png",
+          "size": [
+            36,
+            27
+          ],
+          "pivot": [
+            17,
+            18
+          ]
+        }
+      ]
+    },
+    {
+      "id": "radio_tua",
+      "nama": "Radio tua",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "radio_tua",
+          "icon": "icons/radio_tua.png",
+          "ground": "ground/radio_tua.png",
+          "size": [
+            34,
+            38
+          ],
+          "pivot": [
+            14,
+            29
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jam_dinding",
+      "nama": "Jam dinding mati",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "jam_dinding",
+          "icon": "icons/jam_dinding.png",
+          "ground": "ground/jam_dinding.png",
+          "size": [
+            30,
+            19
+          ],
+          "pivot": [
+            14,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gembok_tua",
+      "nama": "Gembok tua",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "gembok_tua",
+          "icon": "icons/gembok_tua.png",
+          "ground": "ground/gembok_tua.png",
+          "size": [
+            18,
+            20
+          ],
+          "pivot": [
+            6,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "id": "senter_rusak",
+      "nama": "Senter rusak",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "senter_rusak",
+          "icon": "icons/senter_rusak.png",
+          "ground": "ground/senter_rusak.png",
+          "size": [
+            32,
+            18
+          ],
+          "pivot": [
+            14,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "koin_kuno",
+      "nama": "Koin kuno",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "koin_kuno",
+          "icon": "icons/koin_kuno.png",
+          "ground": "ground/koin_kuno.png",
+          "size": [
+            22,
+            11
+          ],
+          "pivot": [
+            8,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tembaga_gulungan",
+      "nama": "Gulungan kawat tembaga",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "tembaga_gulungan",
+          "icon": "icons/tembaga_gulungan.png",
+          "ground": "ground/tembaga_gulungan.png",
+          "size": [
+            30,
+            21
+          ],
+          "pivot": [
+            13,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aki_bekas",
+      "nama": "Aki bekas",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "aki_bekas",
+          "icon": "icons/aki_bekas.png",
+          "ground": "ground/aki_bekas.png",
+          "size": [
+            36,
+            32
+          ],
+          "pivot": [
+            16,
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kamera_analog",
+      "nama": "Kamera analog",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "kamera_analog",
+          "icon": "icons/kamera_analog.png",
+          "ground": "ground/kamera_analog.png",
+          "size": [
+            30,
+            27
+          ],
+          "pivot": [
+            13,
+            18
+          ]
+        }
+      ]
+    },
+    {
+      "id": "walkman",
+      "nama": "Walkman kaset",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "walkman",
+          "icon": "icons/walkman.png",
+          "ground": "ground/walkman.png",
+          "size": [
+            28,
+            23
+          ],
+          "pivot": [
+            14,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "piringan_hitam",
+      "nama": "Piringan hitam",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "piringan_hitam",
+          "icon": "icons/piringan_hitam.png",
+          "ground": "ground/piringan_hitam.png",
+          "size": [
+            48,
+            26
+          ],
+          "pivot": [
+            24,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arloji_saku",
+      "nama": "Arloji saku antik",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "arloji_saku",
+          "icon": "icons/arloji_saku.png",
+          "ground": "ground/arloji_saku.png",
+          "size": [
+            26,
+            15
+          ],
+          "pivot": [
+            12,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lampu_petromaks",
+      "nama": "Lampu petromaks",
+      "status": "preserved_original",
+      "review_group": "koleksi_asli",
+      "sprites": [
+        {
+          "sprite_id": "lampu_petromaks",
+          "icon": "icons/lampu_petromaks.png",
+          "ground": "ground/lampu_petromaks.png",
+          "size": [
+            22,
+            37
+          ],
+          "pivot": [
+            8,
+            30
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pipa_besi",
+      "nama": "Pipa besi berkarat",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.67,
+        0.42
+      ],
+      "proposed_pickup_anchor": [
+        21,
+        18
+      ],
+      "sprites": [
+        {
+          "sprite_id": "pipa_besi",
+          "icon": "icons/pipa_besi.png",
+          "ground": "ground/pipa_besi.png",
+          "size": [
+            43,
+            27
+          ],
+          "pivot": [
+            21,
+            18
+          ]
+        }
+      ]
+    },
+    {
+      "id": "siku_pipa",
+      "nama": "Siku pipa besi",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.52,
+        0.39
+      ],
+      "proposed_pickup_anchor": [
+        17,
+        16
+      ],
+      "sprites": [
+        {
+          "sprite_id": "siku_pipa",
+          "icon": "icons/siku_pipa.png",
+          "ground": "ground/siku_pipa.png",
+          "size": [
+            33,
+            25
+          ],
+          "pivot": [
+            17,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "engsel_pintu",
+      "nama": "Engsel pintu lepas",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.56,
+        0.31
+      ],
+      "proposed_pickup_anchor": [
+        18,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "engsel_pintu",
+          "icon": "icons/engsel_pintu.png",
+          "ground": "ground/engsel_pintu.png",
+          "size": [
+            36,
+            20
+          ],
+          "pivot": [
+            18,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "braket_rak",
+      "nama": "Braket rak besi",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.53,
+        0.53
+      ],
+      "proposed_pickup_anchor": [
+        16,
+        26
+      ],
+      "sprites": [
+        {
+          "sprite_id": "braket_rak",
+          "icon": "icons/braket_rak.png",
+          "ground": "ground/braket_rak.png",
+          "size": [
+            34,
+            34
+          ],
+          "pivot": [
+            16,
+            26
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rantai_sepeda",
+      "nama": "Rantai sepeda putus",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.55,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        16,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "rantai_sepeda",
+          "icon": "icons/rantai_sepeda.png",
+          "ground": "ground/rantai_sepeda.png",
+          "size": [
+            35,
+            18
+          ],
+          "pivot": [
+            16,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gir_sepeda",
+      "nama": "Gir sepeda bekas",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.47,
+        0.25
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "gir_sepeda",
+          "icon": "icons/gir_sepeda.png",
+          "ground": "ground/gir_sepeda.png",
+          "size": [
+            30,
+            16
+          ],
+          "pivot": [
+            14,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pegas_besi",
+      "nama": "Per pegas lepas",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.52,
+        0.25
+      ],
+      "proposed_pickup_anchor": [
+        15,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "pegas_besi",
+          "icon": "icons/pegas_besi.png",
+          "ground": "ground/pegas_besi.png",
+          "size": [
+            33,
+            16
+          ],
+          "pivot": [
+            15,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "baut_mur",
+      "nama": "Sekantong baut mur",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.47,
+        0.31
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "baut_mur",
+          "icon": "icons/baut_mur.png",
+          "ground": "ground/baut_mur.png",
+          "size": [
+            30,
+            20
+          ],
+          "pivot": [
+            14,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kran_air",
+      "nama": "Kran air rusak",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.33,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        7,
+        15
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kran_air",
+          "icon": "icons/kran_air.png",
+          "ground": "ground/kran_air.png",
+          "size": [
+            21,
+            22
+          ],
+          "pivot": [
+            7,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gagang_pintu",
+      "nama": "Gagang pintu bekas",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.41,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        10,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "gagang_pintu",
+          "icon": "icons/gagang_pintu.png",
+          "ground": "ground/gagang_pintu.png",
+          "size": [
+            26,
+            17
+          ],
+          "pivot": [
+            10,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kawat_kasa",
+      "nama": "Kawat kasa sobek",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.64,
+        0.36
+      ],
+      "proposed_pickup_anchor": [
+        21,
+        13
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kawat_kasa",
+          "icon": "icons/kawat_kasa.png",
+          "ground": "ground/kawat_kasa.png",
+          "size": [
+            41,
+            23
+          ],
+          "pivot": [
+            21,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "potongan_seng",
+      "nama": "Potongan seng bergelombang",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.84,
+        0.48
+      ],
+      "proposed_pickup_anchor": [
+        27,
+        17
+      ],
+      "sprites": [
+        {
+          "sprite_id": "potongan_seng",
+          "icon": "icons/potongan_seng.png",
+          "ground": "ground/potongan_seng.png",
+          "size": [
+            54,
+            31
+          ],
+          "pivot": [
+            27,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tutup_kaleng",
+      "nama": "Tutup kaleng cat",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.45,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        13,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "tutup_kaleng",
+          "icon": "icons/tutup_kaleng.png",
+          "ground": "ground/tutup_kaleng.png",
+          "size": [
+            29,
+            17
+          ],
+          "pivot": [
+            13,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rangka_sadel",
+      "nama": "Rangka sadel sepeda",
+      "status": "new_review_only",
+      "review_group": "logam",
+      "proposed_footprint_tiles": [
+        0.39,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "rangka_sadel",
+          "icon": "icons/rangka_sadel.png",
+          "ground": "ground/rangka_sadel.png",
+          "size": [
+            25,
+            19
+          ],
+          "pivot": [
+            9,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jeriken_minyak",
+      "nama": "Jeriken minyak kosong",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.47,
+        0.5
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        23
+      ],
+      "sprites": [
+        {
+          "sprite_id": "jeriken_minyak",
+          "icon": "icons/jeriken_minyak.png",
+          "ground": "ground/jeriken_minyak.png",
+          "size": [
+            30,
+            32
+          ],
+          "pivot": [
+            14,
+            23
+          ]
+        }
+      ]
+    },
+    {
+      "id": "botol_sampo",
+      "nama": "Botol sampo kosong",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.33,
+        0.47
+      ],
+      "proposed_pickup_anchor": [
+        8,
+        23
+      ],
+      "sprites": [
+        {
+          "sprite_id": "botol_sampo",
+          "icon": "icons/botol_sampo.png",
+          "ground": "ground/botol_sampo.png",
+          "size": [
+            21,
+            30
+          ],
+          "pivot": [
+            8,
+            23
+          ]
+        }
+      ]
+    },
+    {
+      "id": "botol_deterjen",
+      "nama": "Botol deterjen kosong",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.38,
+        0.44
+      ],
+      "proposed_pickup_anchor": [
+        10,
+        21
+      ],
+      "sprites": [
+        {
+          "sprite_id": "botol_deterjen",
+          "icon": "icons/botol_deterjen.png",
+          "ground": "ground/botol_deterjen.png",
+          "size": [
+            24,
+            28
+          ],
+          "pivot": [
+            10,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "id": "baskom_retak",
+      "nama": "Baskom retak",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.53,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        15,
+        13
+      ],
+      "sprites": [
+        {
+          "sprite_id": "baskom_retak",
+          "icon": "icons/baskom_retak.png",
+          "ground": "ground/baskom_retak.png",
+          "size": [
+            34,
+            22
+          ],
+          "pivot": [
+            15,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "saringan_plastik",
+      "nama": "Saringan plastik patah",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.48,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        12,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "saringan_plastik",
+          "icon": "icons/saringan_plastik.png",
+          "ground": "ground/saringan_plastik.png",
+          "size": [
+            31,
+            18
+          ],
+          "pivot": [
+            12,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kotak_makan",
+      "nama": "Kotak makan tanpa tutup",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.5,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        13
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kotak_makan",
+          "icon": "icons/kotak_makan.png",
+          "ground": "ground/kotak_makan.png",
+          "size": [
+            32,
+            22
+          ],
+          "pivot": [
+            14,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tutup_botol",
+      "nama": "Tutup botol campur",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.39,
+        0.25
+      ],
+      "proposed_pickup_anchor": [
+        11,
+        8
+      ],
+      "sprites": [
+        {
+          "sprite_id": "tutup_botol",
+          "icon": "icons/tutup_botol.png",
+          "ground": "ground/tutup_botol.png",
+          "size": [
+            25,
+            15
+          ],
+          "pivot": [
+            11,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hanger_patah",
+      "nama": "Gantungan baju patah",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.56,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        17,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "hanger_patah",
+          "icon": "icons/hanger_patah.png",
+          "ground": "ground/hanger_patah.png",
+          "size": [
+            36,
+            18
+          ],
+          "pivot": [
+            17,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pot_plastik",
+      "nama": "Pot tanaman kosong retak",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.41,
+        0.38
+      ],
+      "proposed_pickup_anchor": [
+        12,
+        17
+      ],
+      "sprites": [
+        {
+          "sprite_id": "pot_plastik",
+          "icon": "icons/pot_plastik.png",
+          "ground": "ground/pot_plastik.png",
+          "size": [
+            26,
+            24
+          ],
+          "pivot": [
+            12,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "id": "keranjang_pecah",
+      "nama": "Keranjang belanja pecah",
+      "status": "new_review_only",
+      "review_group": "plastik",
+      "proposed_footprint_tiles": [
+        0.59,
+        0.45
+      ],
+      "proposed_pickup_anchor": [
+        18,
+        19
+      ],
+      "sprites": [
+        {
+          "sprite_id": "keranjang_pecah",
+          "icon": "icons/keranjang_pecah.png",
+          "ground": "ground/keranjang_pecah.png",
+          "size": [
+            38,
+            29
+          ],
+          "pivot": [
+            18,
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tabung_karton",
+      "nama": "Tabung karton bekas",
+      "status": "new_review_only",
+      "review_group": "kertas",
+      "proposed_footprint_tiles": [
+        0.59,
+        0.39
+      ],
+      "proposed_pickup_anchor": [
+        18,
+        17
+      ],
+      "sprites": [
+        {
+          "sprite_id": "tabung_karton",
+          "icon": "icons/tabung_karton.png",
+          "ground": "ground/tabung_karton.png",
+          "size": [
+            38,
+            25
+          ],
+          "pivot": [
+            18,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kantong_kertas",
+      "nama": "Kantong kertas kusut",
+      "status": "new_review_only",
+      "review_group": "kertas",
+      "proposed_footprint_tiles": [
+        0.38,
+        0.39
+      ],
+      "proposed_pickup_anchor": [
+        10,
+        18
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kantong_kertas",
+          "icon": "icons/kantong_kertas.png",
+          "ground": "ground/kantong_kertas.png",
+          "size": [
+            24,
+            25
+          ],
+          "pivot": [
+            10,
+            18
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tray_telur",
+      "nama": "Tray telur karton",
+      "status": "new_review_only",
+      "review_group": "kertas",
+      "proposed_footprint_tiles": [
+        0.58,
+        0.33
+      ],
+      "proposed_pickup_anchor": [
+        18,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "tray_telur",
+          "icon": "icons/tray_telur.png",
+          "ground": "ground/tray_telur.png",
+          "size": [
+            37,
+            21
+          ],
+          "pivot": [
+            18,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "majalah_bekas",
+      "nama": "Majalah bekas",
+      "status": "new_review_only",
+      "review_group": "kertas",
+      "proposed_footprint_tiles": [
+        0.53,
+        0.31
+      ],
+      "proposed_pickup_anchor": [
+        16,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "majalah_bekas",
+          "icon": "icons/majalah_bekas.png",
+          "ground": "ground/majalah_bekas.png",
+          "size": [
+            34,
+            20
+          ],
+          "pivot": [
+            16,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "amplop_coklat",
+      "nama": "Amplop coklat kosong",
+      "status": "new_review_only",
+      "review_group": "kertas",
+      "proposed_footprint_tiles": [
+        0.53,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        16,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "amplop_coklat",
+          "icon": "icons/amplop_coklat.png",
+          "ground": "ground/amplop_coklat.png",
+          "size": [
+            34,
+            19
+          ],
+          "pivot": [
+            16,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poster_gulung",
+      "nama": "Gulungan poster lama",
+      "status": "new_review_only",
+      "review_group": "kertas",
+      "proposed_footprint_tiles": [
+        0.56,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        17,
+        14
+      ],
+      "sprites": [
+        {
+          "sprite_id": "poster_gulung",
+          "icon": "icons/poster_gulung.png",
+          "ground": "ground/poster_gulung.png",
+          "size": [
+            36,
+            22
+          ],
+          "pivot": [
+            17,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kantong_semen",
+      "nama": "Kantong semen kosong",
+      "status": "new_review_only",
+      "review_group": "kertas",
+      "proposed_footprint_tiles": [
+        0.62,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        20,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kantong_semen",
+          "icon": "icons/kantong_semen.png",
+          "ground": "ground/kantong_semen.png",
+          "size": [
+            40,
+            22
+          ],
+          "pivot": [
+            20,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inti_lakban",
+      "nama": "Inti lakban karton",
+      "status": "new_review_only",
+      "review_group": "kertas",
+      "proposed_footprint_tiles": [
+        0.34,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "inti_lakban",
+          "icon": "icons/inti_lakban.png",
+          "ground": "ground/inti_lakban.png",
+          "size": [
+            22,
+            17
+          ],
+          "pivot": [
+            9,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "botol_kecap",
+      "nama": "Botol kecap kosong",
+      "status": "new_review_only",
+      "review_group": "kaca",
+      "proposed_footprint_tiles": [
+        0.33,
+        0.45
+      ],
+      "proposed_pickup_anchor": [
+        8,
+        22
+      ],
+      "sprites": [
+        {
+          "sprite_id": "botol_kecap",
+          "icon": "icons/botol_kecap.png",
+          "ground": "ground/botol_kecap.png",
+          "size": [
+            21,
+            29
+          ],
+          "pivot": [
+            8,
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stoples_kaca",
+      "nama": "Stoples kaca tanpa tutup",
+      "status": "new_review_only",
+      "review_group": "kaca",
+      "proposed_footprint_tiles": [
+        0.36,
+        0.36
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        16
+      ],
+      "sprites": [
+        {
+          "sprite_id": "stoples_kaca",
+          "icon": "icons/stoples_kaca.png",
+          "ground": "ground/stoples_kaca.png",
+          "size": [
+            23,
+            23
+          ],
+          "pivot": [
+            9,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gelas_belimbing",
+      "nama": "Gelas belimbing retak",
+      "status": "new_review_only",
+      "review_group": "kaca",
+      "proposed_footprint_tiles": [
+        0.31,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        7,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "gelas_belimbing",
+          "icon": "icons/gelas_belimbing.png",
+          "ground": "ground/gelas_belimbing.png",
+          "size": [
+            20,
+            19
+          ],
+          "pivot": [
+            7,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mangkuk_kaca",
+      "nama": "Mangkuk kaca sumbing",
+      "status": "new_review_only",
+      "review_group": "kaca",
+      "proposed_footprint_tiles": [
+        0.38,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        10,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "mangkuk_kaca",
+          "icon": "icons/mangkuk_kaca.png",
+          "ground": "ground/mangkuk_kaca.png",
+          "size": [
+            24,
+            18
+          ],
+          "pivot": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cermin_tangan",
+      "nama": "Cermin tangan retak",
+      "status": "new_review_only",
+      "review_group": "kaca",
+      "proposed_footprint_tiles": [
+        0.47,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        12,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "cermin_tangan",
+          "icon": "icons/cermin_tangan.png",
+          "ground": "ground/cermin_tangan.png",
+          "size": [
+            30,
+            18
+          ],
+          "pivot": [
+            12,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "keyboard_bekas",
+      "nama": "Keyboard bekas",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.75,
+        0.42
+      ],
+      "proposed_pickup_anchor": [
+        24,
+        15
+      ],
+      "sprites": [
+        {
+          "sprite_id": "keyboard_bekas",
+          "icon": "icons/keyboard_bekas.png",
+          "ground": "ground/keyboard_bekas.png",
+          "size": [
+            48,
+            27
+          ],
+          "pivot": [
+            24,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mouse_rusak",
+      "nama": "Mouse komputer rusak",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.33,
+        0.25
+      ],
+      "proposed_pickup_anchor": [
+        8,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "mouse_rusak",
+          "icon": "icons/mouse_rusak.png",
+          "ground": "ground/mouse_rusak.png",
+          "size": [
+            21,
+            16
+          ],
+          "pivot": [
+            8,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "remote_tv",
+      "nama": "Remote televisi rusak",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.47,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "remote_tv",
+          "icon": "icons/remote_tv.png",
+          "ground": "ground/remote_tv.png",
+          "size": [
+            30,
+            17
+          ],
+          "pivot": [
+            14,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "papan_sirkuit",
+      "nama": "Papan sirkuit bekas",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.58,
+        0.31
+      ],
+      "proposed_pickup_anchor": [
+        18,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "papan_sirkuit",
+          "icon": "icons/papan_sirkuit.png",
+          "ground": "ground/papan_sirkuit.png",
+          "size": [
+            37,
+            20
+          ],
+          "pivot": [
+            18,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "steker_listrik",
+      "nama": "Kepala colokan listrik",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.38,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        11,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "steker_listrik",
+          "icon": "icons/steker_listrik.png",
+          "ground": "ground/steker_listrik.png",
+          "size": [
+            24,
+            17
+          ],
+          "pivot": [
+            11,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stopkontak_bekas",
+      "nama": "Stopkontak tiga lubang",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.64,
+        0.33
+      ],
+      "proposed_pickup_anchor": [
+        21,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "stopkontak_bekas",
+          "icon": "icons/stopkontak_bekas.png",
+          "ground": "ground/stopkontak_bekas.png",
+          "size": [
+            41,
+            21
+          ],
+          "pivot": [
+            21,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kabel_usb",
+      "nama": "Kabel USB putus",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.48,
+        0.31
+      ],
+      "proposed_pickup_anchor": [
+        12,
+        13
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kabel_usb",
+          "icon": "icons/kabel_usb.png",
+          "ground": "ground/kabel_usb.png",
+          "size": [
+            31,
+            20
+          ],
+          "pivot": [
+            12,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "speaker_kecil",
+      "nama": "Speaker kecil rusak",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.41,
+        0.45
+      ],
+      "proposed_pickup_anchor": [
+        10,
+        20
+      ],
+      "sprites": [
+        {
+          "sprite_id": "speaker_kecil",
+          "icon": "icons/speaker_kecil.png",
+          "ground": "ground/speaker_kecil.png",
+          "size": [
+            26,
+            29
+          ],
+          "pivot": [
+            10,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adaptor_laptop",
+      "nama": "Adaptor laptop rusak",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.55,
+        0.33
+      ],
+      "proposed_pickup_anchor": [
+        17,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "adaptor_laptop",
+          "icon": "icons/adaptor_laptop.png",
+          "ground": "ground/adaptor_laptop.png",
+          "size": [
+            35,
+            21
+          ],
+          "pivot": [
+            17,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "router_wifi",
+      "nama": "Router WiFi mati",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.52,
+        0.52
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        24
+      ],
+      "sprites": [
+        {
+          "sprite_id": "router_wifi",
+          "icon": "icons/router_wifi.png",
+          "ground": "ground/router_wifi.png",
+          "size": [
+            33,
+            33
+          ],
+          "pivot": [
+            14,
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "id": "baling_kipas",
+      "nama": "Baling kipas lepas",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.64,
+        0.33
+      ],
+      "proposed_pickup_anchor": [
+        21,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "baling_kipas",
+          "icon": "icons/baling_kipas.png",
+          "ground": "ground/baling_kipas.png",
+          "size": [
+            41,
+            21
+          ],
+          "pivot": [
+            21,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dinamo_kecil",
+      "nama": "Dinamo kecil bekas",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.52,
+        0.31
+      ],
+      "proposed_pickup_anchor": [
+        17,
+        13
+      ],
+      "sprites": [
+        {
+          "sprite_id": "dinamo_kecil",
+          "icon": "icons/dinamo_kecil.png",
+          "ground": "ground/dinamo_kecil.png",
+          "size": [
+            33,
+            20
+          ],
+          "pivot": [
+            17,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kalkulator_mati",
+      "nama": "Kalkulator mati",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.47,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kalkulator_mati",
+          "icon": "icons/kalkulator_mati.png",
+          "ground": "ground/kalkulator_mati.png",
+          "size": [
+            30,
+            19
+          ],
+          "pivot": [
+            14,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "headphone_patah",
+      "nama": "Headphone patah",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.52,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        15,
+        13
+      ],
+      "sprites": [
+        {
+          "sprite_id": "headphone_patah",
+          "icon": "icons/headphone_patah.png",
+          "ground": "ground/headphone_patah.png",
+          "size": [
+            33,
+            22
+          ],
+          "pivot": [
+            15,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dvd_bekas",
+      "nama": "DVD bekas",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.39,
+        0.25
+      ],
+      "proposed_pickup_anchor": [
+        11,
+        7
+      ],
+      "sprites": [
+        {
+          "sprite_id": "dvd_bekas",
+          "icon": "icons/dvd_bekas.png",
+          "ground": "ground/dvd_bekas.png",
+          "size": [
+            25,
+            14
+          ],
+          "pivot": [
+            11,
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fiting_lampu",
+      "nama": "Fiting lampu lepas",
+      "status": "new_review_only",
+      "review_group": "elektronik",
+      "proposed_footprint_tiles": [
+        0.34,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "fiting_lampu",
+          "icon": "icons/fiting_lampu.png",
+          "ground": "ground/fiting_lampu.png",
+          "size": [
+            22,
+            19
+          ],
+          "pivot": [
+            9,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "panci_penyok",
+      "nama": "Panci aluminium penyok",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.55,
+        0.38
+      ],
+      "proposed_pickup_anchor": [
+        16,
+        14
+      ],
+      "sprites": [
+        {
+          "sprite_id": "panci_penyok",
+          "icon": "icons/panci_penyok.png",
+          "ground": "ground/panci_penyok.png",
+          "size": [
+            35,
+            24
+          ],
+          "pivot": [
+            16,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wajan_tua",
+      "nama": "Wajan tua",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.58,
+        0.31
+      ],
+      "proposed_pickup_anchor": [
+        15,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "wajan_tua",
+          "icon": "icons/wajan_tua.png",
+          "ground": "ground/wajan_tua.png",
+          "size": [
+            37,
+            20
+          ],
+          "pivot": [
+            15,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tutup_panci",
+      "nama": "Tutup panci lepas",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.5,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        8
+      ],
+      "sprites": [
+        {
+          "sprite_id": "tutup_panci",
+          "icon": "icons/tutup_panci.png",
+          "ground": "ground/tutup_panci.png",
+          "size": [
+            32,
+            17
+          ],
+          "pivot": [
+            14,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sendok_garpu",
+      "nama": "Sendok garpu bekas",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.5,
+        0.33
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "sendok_garpu",
+          "icon": "icons/sendok_garpu.png",
+          "ground": "ground/sendok_garpu.png",
+          "size": [
+            32,
+            21
+          ],
+          "pivot": [
+            14,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "parutan_dapur",
+      "nama": "Parutan dapur tumpul",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.56,
+        0.33
+      ],
+      "proposed_pickup_anchor": [
+        18,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "parutan_dapur",
+          "icon": "icons/parutan_dapur.png",
+          "ground": "ground/parutan_dapur.png",
+          "size": [
+            36,
+            21
+          ],
+          "pivot": [
+            18,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sodet_patah",
+      "nama": "Sodet patah",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.55,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        16,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "sodet_patah",
+          "icon": "icons/sodet_patah.png",
+          "ground": "ground/sodet_patah.png",
+          "size": [
+            35,
+            18
+          ],
+          "pivot": [
+            16,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cangkir_enamel",
+      "nama": "Cangkir enamel sumbing",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.34,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        8,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "cangkir_enamel",
+          "icon": "icons/cangkir_enamel.png",
+          "ground": "ground/cangkir_enamel.png",
+          "size": [
+            22,
+            19
+          ],
+          "pivot": [
+            8,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "talenan_kayu",
+      "nama": "Talenan kayu usang",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.59,
+        0.33
+      ],
+      "proposed_pickup_anchor": [
+        18,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "talenan_kayu",
+          "icon": "icons/talenan_kayu.png",
+          "ground": "ground/talenan_kayu.png",
+          "size": [
+            38,
+            21
+          ],
+          "pivot": [
+            18,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "termos_rusak",
+      "nama": "Termos rusak",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.33,
+        0.48
+      ],
+      "proposed_pickup_anchor": [
+        7,
+        24
+      ],
+      "sprites": [
+        {
+          "sprite_id": "termos_rusak",
+          "icon": "icons/termos_rusak.png",
+          "ground": "ground/termos_rusak.png",
+          "size": [
+            21,
+            31
+          ],
+          "pivot": [
+            7,
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sapu_lidi",
+      "nama": "Sapu lidi pendek",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.66,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        17,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "sapu_lidi",
+          "icon": "icons/sapu_lidi.png",
+          "ground": "ground/sapu_lidi.png",
+          "size": [
+            42,
+            22
+          ],
+          "pivot": [
+            17,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sikat_pakaian",
+      "nama": "Sikat pakaian usang",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.41,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        12,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "sikat_pakaian",
+          "icon": "icons/sikat_pakaian.png",
+          "ground": "ground/sikat_pakaian.png",
+          "size": [
+            26,
+            18
+          ],
+          "pivot": [
+            12,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rak_sabun",
+      "nama": "Rak kawat sabun",
+      "status": "new_review_only",
+      "review_group": "rumah_tangga",
+      "proposed_footprint_tiles": [
+        0.47,
+        0.33
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "rak_sabun",
+          "icon": "icons/rak_sabun.png",
+          "ground": "ground/rak_sabun.png",
+          "size": [
+            30,
+            21
+          ],
+          "pivot": [
+            14,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "palu_bekas",
+      "nama": "Palu bekas",
+      "status": "new_review_only",
+      "review_group": "perkakas",
+      "proposed_footprint_tiles": [
+        0.59,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        18,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "palu_bekas",
+          "icon": "icons/palu_bekas.png",
+          "ground": "ground/palu_bekas.png",
+          "size": [
+            38,
+            18
+          ],
+          "pivot": [
+            18,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tang_karat",
+      "nama": "Tang berkarat",
+      "status": "new_review_only",
+      "review_group": "perkakas",
+      "proposed_footprint_tiles": [
+        0.59,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        20,
+        13
+      ],
+      "sprites": [
+        {
+          "sprite_id": "tang_karat",
+          "icon": "icons/tang_karat.png",
+          "ground": "ground/tang_karat.png",
+          "size": [
+            38,
+            22
+          ],
+          "pivot": [
+            20,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "obeng_minus",
+      "nama": "Obeng minus bekas",
+      "status": "new_review_only",
+      "review_group": "perkakas",
+      "proposed_footprint_tiles": [
+        0.56,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        16,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "obeng_minus",
+          "icon": "icons/obeng_minus.png",
+          "ground": "ground/obeng_minus.png",
+          "size": [
+            36,
+            19
+          ],
+          "pivot": [
+            16,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kunci_pas",
+      "nama": "Kunci pas bekas",
+      "status": "new_review_only",
+      "review_group": "perkakas",
+      "proposed_footprint_tiles": [
+        0.53,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        15,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kunci_pas",
+          "icon": "icons/kunci_pas.png",
+          "ground": "ground/kunci_pas.png",
+          "size": [
+            34,
+            18
+          ],
+          "pivot": [
+            15,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "meteran_macet",
+      "nama": "Meteran gulung macet",
+      "status": "new_review_only",
+      "review_group": "perkakas",
+      "proposed_footprint_tiles": [
+        0.44,
+        0.36
+      ],
+      "proposed_pickup_anchor": [
+        10,
+        14
+      ],
+      "sprites": [
+        {
+          "sprite_id": "meteran_macet",
+          "icon": "icons/meteran_macet.png",
+          "ground": "ground/meteran_macet.png",
+          "size": [
+            28,
+            23
+          ],
+          "pivot": [
+            10,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kuas_cat",
+      "nama": "Kuas cat kering",
+      "status": "new_review_only",
+      "review_group": "perkakas",
+      "proposed_footprint_tiles": [
+        0.52,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kuas_cat",
+          "icon": "icons/kuas_cat.png",
+          "ground": "ground/kuas_cat.png",
+          "size": [
+            33,
+            19
+          ],
+          "pivot": [
+            14,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gergaji_tumpul",
+      "nama": "Gergaji tangan tumpul",
+      "status": "new_review_only",
+      "review_group": "perkakas",
+      "proposed_footprint_tiles": [
+        0.69,
+        0.38
+      ],
+      "proposed_pickup_anchor": [
+        22,
+        14
+      ],
+      "sprites": [
+        {
+          "sprite_id": "gergaji_tumpul",
+          "icon": "icons/gergaji_tumpul.png",
+          "ground": "ground/gergaji_tumpul.png",
+          "size": [
+            44,
+            24
+          ],
+          "pivot": [
+            22,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gunting_patah",
+      "nama": "Gunting patah",
+      "status": "new_review_only",
+      "review_group": "perkakas",
+      "proposed_footprint_tiles": [
+        0.55,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        17,
+        9
+      ],
+      "sprites": [
+        {
+          "sprite_id": "gunting_patah",
+          "icon": "icons/gunting_patah.png",
+          "ground": "ground/gunting_patah.png",
+          "size": [
+            35,
+            18
+          ],
+          "pivot": [
+            17,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gasing_kayu",
+      "nama": "Gasing kayu usang",
+      "status": "new_review_only",
+      "review_group": "mainan",
+      "proposed_footprint_tiles": [
+        0.34,
+        0.28
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        11
+      ],
+      "sprites": [
+        {
+          "sprite_id": "gasing_kayu",
+          "icon": "icons/gasing_kayu.png",
+          "ground": "ground/gasing_kayu.png",
+          "size": [
+            22,
+            18
+          ],
+          "pivot": [
+            9,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bola_kempis",
+      "nama": "Bola karet kempis",
+      "status": "new_review_only",
+      "review_group": "mainan",
+      "proposed_footprint_tiles": [
+        0.39,
+        0.25
+      ],
+      "proposed_pickup_anchor": [
+        11,
+        7
+      ],
+      "sprites": [
+        {
+          "sprite_id": "bola_kempis",
+          "icon": "icons/bola_kempis.png",
+          "ground": "ground/bola_kempis.png",
+          "size": [
+            25,
+            14
+          ],
+          "pivot": [
+            11,
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yoyo_tanpa_tali",
+      "nama": "Yoyo tanpa tali",
+      "status": "new_review_only",
+      "review_group": "mainan",
+      "proposed_footprint_tiles": [
+        0.34,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "yoyo_tanpa_tali",
+          "icon": "icons/yoyo_tanpa_tali.png",
+          "ground": "ground/yoyo_tanpa_tali.png",
+          "size": [
+            22,
+            17
+          ],
+          "pivot": [
+            9,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "robot_mainan",
+      "nama": "Robot mainan satu lengan",
+      "status": "new_review_only",
+      "review_group": "mainan",
+      "proposed_footprint_tiles": [
+        0.41,
+        0.45
+      ],
+      "proposed_pickup_anchor": [
+        10,
+        22
+      ],
+      "sprites": [
+        {
+          "sprite_id": "robot_mainan",
+          "icon": "icons/robot_mainan.png",
+          "ground": "ground/robot_mainan.png",
+          "size": [
+            26,
+            29
+          ],
+          "pivot": [
+            10,
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "id": "balok_kayu",
+      "nama": "Balok alfabet kayu",
+      "status": "new_review_only",
+      "review_group": "mainan",
+      "proposed_footprint_tiles": [
+        0.34,
+        0.31
+      ],
+      "proposed_pickup_anchor": [
+        8,
+        13
+      ],
+      "sprites": [
+        {
+          "sprite_id": "balok_kayu",
+          "icon": "icons/balok_kayu.png",
+          "ground": "ground/balok_kayu.png",
+          "size": [
+            22,
+            20
+          ],
+          "pivot": [
+            8,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "id": "peluit_mainan",
+      "nama": "Peluit mainan rusak",
+      "status": "new_review_only",
+      "review_group": "mainan",
+      "proposed_footprint_tiles": [
+        0.34,
+        0.25
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        8
+      ],
+      "sprites": [
+        {
+          "sprite_id": "peluit_mainan",
+          "icon": "icons/peluit_mainan.png",
+          "ground": "ground/peluit_mainan.png",
+          "size": [
+            22,
+            15
+          ],
+          "pivot": [
+            9,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kelereng_kantong",
+      "nama": "Kelereng dalam kantong jala",
+      "status": "new_review_only",
+      "review_group": "mainan",
+      "proposed_footprint_tiles": [
+        0.39,
+        0.3
+      ],
+      "proposed_pickup_anchor": [
+        11,
+        12
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kelereng_kantong",
+          "icon": "icons/kelereng_kantong.png",
+          "ground": "ground/kelereng_kantong.png",
+          "size": [
+            25,
+            19
+          ],
+          "pivot": [
+            11,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lensa_kamera",
+      "nama": "Lensa kamera lepas",
+      "status": "new_review_only",
+      "review_group": "salvage_khusus",
+      "proposed_footprint_tiles": [
+        0.36,
+        0.34
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        15
+      ],
+      "sprites": [
+        {
+          "sprite_id": "lensa_kamera",
+          "icon": "icons/lensa_kamera.png",
+          "ground": "ground/lensa_kamera.png",
+          "size": [
+            23,
+            22
+          ],
+          "pivot": [
+            9,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kompas_saku",
+      "nama": "Kompas saku rusak",
+      "status": "new_review_only",
+      "review_group": "salvage_khusus",
+      "proposed_footprint_tiles": [
+        0.39,
+        0.25
+      ],
+      "proposed_pickup_anchor": [
+        11,
+        8
+      ],
+      "sprites": [
+        {
+          "sprite_id": "kompas_saku",
+          "icon": "icons/kompas_saku.png",
+          "ground": "ground/kompas_saku.png",
+          "size": [
+            25,
+            15
+          ],
+          "pivot": [
+            11,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "teropong_kecil",
+      "nama": "Teropong kecil rusak",
+      "status": "new_review_only",
+      "review_group": "salvage_khusus",
+      "proposed_footprint_tiles": [
+        0.55,
+        0.38
+      ],
+      "proposed_pickup_anchor": [
+        16,
+        15
+      ],
+      "sprites": [
+        {
+          "sprite_id": "teropong_kecil",
+          "icon": "icons/teropong_kecil.png",
+          "ground": "ground/teropong_kecil.png",
+          "size": [
+            35,
+            24
+          ],
+          "pivot": [
+            16,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "id": "medali_kuningan",
+      "nama": "Medali kuningan bekas",
+      "status": "new_review_only",
+      "review_group": "salvage_khusus",
+      "proposed_footprint_tiles": [
+        0.36,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        9,
+        8
+      ],
+      "sprites": [
+        {
+          "sprite_id": "medali_kuningan",
+          "icon": "icons/medali_kuningan.png",
+          "ground": "ground/medali_kuningan.png",
+          "size": [
+            23,
+            17
+          ],
+          "pivot": [
+            9,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "harmonika_tua",
+      "nama": "Harmonika tua",
+      "status": "new_review_only",
+      "review_group": "salvage_khusus",
+      "proposed_footprint_tiles": [
+        0.5,
+        0.27
+      ],
+      "proposed_pickup_anchor": [
+        14,
+        10
+      ],
+      "sprites": [
+        {
+          "sprite_id": "harmonika_tua",
+          "icon": "icons/harmonika_tua.png",
+          "ground": "ground/harmonika_tua.png",
+          "size": [
+            32,
+            17
+          ],
+          "pivot": [
+            14,
+            10
+          ]
+        }
+      ]
+    }
+  ]
+}
