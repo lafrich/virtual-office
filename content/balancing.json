@@ -325,21 +325,23 @@
   },
   {
    "key": "needs.passiveEnergyMinutes",
-   "value": 20,
+   "value": 30,
    "unit": "menit game per −1 energi (−3/jam)",
-   "source": "konsep",
+   "source": "keputusan",
    "code_value": 60,
    "code_ref": "jiwa/life-economy.js:51",
-   "note": "Konsep 04.A −3/jam."
+   "note": "New Bot r3 lever (2026-11-22) L2: energy -2/h",
+   "prev_value": 20
   },
   {
    "key": "needs.passiveFullnessMinutes",
-   "value": 24,
+   "value": 30,
    "unit": "menit game per −2 kenyang (−5/jam)",
-   "source": "konsep",
+   "source": "keputusan",
    "code_value": 35,
    "code_ref": "jiwa/life-economy.js:51",
-   "note": "Konsep 04.B −5/jam."
+   "note": "New Bot r3 lever (2026-11-22) L2: hunger -4/h (-2 every 30 min)",
+   "prev_value": 24
   },
   {
    "key": "needs.passiveBladderMinutes",
@@ -352,12 +354,13 @@
   },
   {
    "key": "needs.passiveHygieneMinutes",
-   "value": 30,
+   "value": 40,
    "unit": "menit game per −1 kebersihan (−2/jam)",
-   "source": "konsep",
+   "source": "keputusan",
    "code_value": 90,
    "code_ref": "jiwa/life-economy.js:51",
-   "note": ""
+   "note": "New Bot r3 lever (2026-11-22) L2: hygiene -1.5/h",
+   "prev_value": 30
   },
   {
    "key": "needs.fullnessZeroEnergyDrain",
@@ -1098,10 +1101,37 @@
    "code_value": null,
    "code_ref": "belum diukur di HP",
    "note": ""
+  },
+  {
+   "key": "sleep.untilMorningSpeed",
+   "value": 8,
+   "unit": "x real-time speed of each hour in \"Tidur sampai pagi\"",
+   "source": "keputusan",
+   "code_value": 1,
+   "code_ref": "world-builder/semesta-life-play.js startSleep",
+   "note": "New Bot r3 lever (2026-11-22) L1: 8 game hours ~30 s real; manual 1-hour sleep stays 30 s; drain still applied per hour"
+  },
+  {
+   "key": "movement.walkEnergyTilesPerUnit",
+   "value": 16,
+   "unit": "tiles walked per 1 energy",
+   "source": "keputusan",
+   "code_value": 8,
+   "code_ref": "world-builder/semesta-life-play.js actorMoved",
+   "note": "New Bot r3 lever (2026-11-22) L2: walking energy halved"
+  },
+  {
+   "key": "movement.walkSpeedMultiplier",
+   "value": 1,
+   "unit": "x walk/run speed (life speedFactor)",
+   "source": "keputusan",
+   "code_value": 1,
+   "code_ref": "world-builder/semesta-life-play.js speedFactor",
+   "note": "New Bot r3 lever (2026-11-22) L3 available but NOT chosen (L1+L2 already meets the targets); set 1.25 to enable +25%"
   }
  ],
  "format": "njh-balancing-v1",
- "contentRevision": "slice-1.0-r2",
+ "contentRevision": "slice-1.0-r3",
  "copiedFrom": {
   "file": "/workspace/njh-slice/balancing.json (New Bot, 22 Nov 2026)",
   "doc": "https://docs.google.com/document/d/1zAK1VDPE3AYg_iekJ_v8KC8s2-swlUMHy_jbguItn2o/edit",
