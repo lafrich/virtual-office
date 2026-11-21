@@ -50,6 +50,9 @@ function closedDoorsNear(objects,x,z,radius){
  }
  return out.sort((a,b)=>a.distance-b.distance);
 }
+function sliceLockedTemplates(){
+ try{const B=g.NJHBalancing;return B&&B.ok&&B.ok()?B.lockedTemplates():[];}catch(_e){return [];}
+}
 function resolveTemplate(raw){
  const id=TEMPLATE_ALIASES[raw]||raw||null;
  return NJH_TEMPLATES.includes(id)?id:null;
@@ -349,7 +352,9 @@ async function loadMeta(){
 async function loadInteriors(){
  if(interiorCache)return interiorCache;
  const out={};
- await Promise.all(NJH_READY.map(async id=>{
+ // Never request scenes for slice-locked doors (no 404s; "Belum buka" needs no JSON).
+ const locked=new Set(sliceLockedTemplates());
+ await Promise.all(NJH_READY.filter(id=>!locked.has(id)).map(async id=>{
   try{
    const url=baseUrl()+'interiors/'+id+'.interior-scene.json';
    const r=await fetch(url,{cache:'no-store'});
@@ -386,7 +391,9 @@ function wireDoors(document,meta,interiors){
    report.noInterior.push({doorId:door.doorId,label:door.label,template:door.interiorTemplate||null});
    continue;
   }
-  const scene=scenes[template];
+  // Slice lock (content/balancing.json doors.sliceLocked): door stays "Belum buka" and never loads its interior.
+  const sliceLocked=sliceLockedTemplates().includes(template);
+  const scene=sliceLocked?null:scenes[template];
   const usePoint=Array.isArray(door.usePoint)?{x:door.usePoint[0],z:door.usePoint[1]}:null;
   const doorPoint=Array.isArray(door.doorPoint)?{x:door.doorPoint[0],z:door.doorPoint[1]}:null;
   if(!Array.isArray(obj.njhDoors))obj.njhDoors=[];
@@ -535,7 +542,7 @@ if(enabled()){hookKebonTiles();}
  doorCandidates,nearestEnterable,doorAnchor,enterRadius:ENTER_RADIUS,
  worldBoundsOf,applyBounds,spawnPool,homeFor,resolveSpawn,imageUrl,
  wireDoors,resolveTemplate,readyTemplates:NJH_READY,pendingTemplates:NJH_PENDING,
- BELUM_BUKA,isClosedDoor,closedDoorsNear,VEHICLE_ID_ALIASES,resolveVehicleId,
+ BELUM_BUKA,isClosedDoor,closedDoorsNear,sliceLockedTemplates,VEHICLE_ID_ALIASES,resolveVehicleId,
  visualTerrainType,previewTile,dermagaOverhang,applyDermagaOverhang,dermagaOverhangTiles:DERMAGA_OVERHANG,
  report:()=>cityCache?cityCache.doorReport:null,
  status(){

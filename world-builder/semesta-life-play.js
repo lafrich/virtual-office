@@ -66,6 +66,24 @@ let bagOpen=false,justWorkedAt=0,lastFaintCount=0;
 let navSelect=null,workHoldStart=0,workAnimation=0;
 let cachedMapOverview={bounds:{minX:-20,maxX:20,minZ:-20,maxZ:20},terrain:[]};
 function defaults(){return RULES?RULES.defaults():null;}
+// Slice balancing (content/balancing.json) wins over code defaults and local Jiwa rules.
+function BAL(){return root.NJHBalancing&&root.NJHBalancing.ok&&root.NJHBalancing.ok()?root.NJHBalancing:null;}
+function withBalancing(raw){const B=BAL();return B?B.applyToLifeConfig(raw):raw;}
+function coffeeAtWarteg(){return BAL()?.coffeeAt?.()==='warteg';}
+// One clock: an action that jumps the life clock (eat 10 min, sleep 60 min...) moves the
+// HUD clock by the same game minutes. Work is not synced: the HUD already ran during the hold.
+const NO_VISUAL_SYNC=new Set(['advance_time','work','walk','fish_catch']);
+function syncVisualClock(prior,next,action){
+ if(!BAL()||NO_VISUAL_SYNC.has(action))return;
+ const m=Math.round((Number(next?.elapsedMinutes)||0)-(Number(prior?.elapsedMinutes)||0));
+ if(!(m>0))return;
+ try{
+  const c=bridge?.getClock?.(),snap=c&&(typeof c.snapshot==='function'?c.snapshot():c.get?.());
+  if(!snap||typeof c.restore!=='function'||!Number.isFinite(Number(snap.minute)))return;
+  const total=Number(snap.minute)+m;
+  c.restore({...snap,minute:total%1440,day:(Number(snap.day)||1)+Math.floor(total/1440)});
+ }catch{}
+}
 function getWorld(){return bridge&&bridge.getWorld?bridge.getWorld():{objects:[],map:{}};}
 function getPos(){const p=bridge&&bridge.getPosition?bridge.getPosition():null;return p||{x:0,z:0};}
 function getScene(){return bridge&&bridge.getScene?bridge.getScene():null;}
@@ -124,8 +142,10 @@ function restore(){
  if(!RULES)return;
  let saved=null;
  try{const raw=JSON.parse(localStorage.getItem(dataKey())||'null');if(raw?.cityId===projectId)saved=raw.state;}catch{}
- state=RULES.stateFrom(saved||{wallet:6000,energy:80,hygiene:75,bladder:20,moral:50,experience:0},config);
+ // New saves take their start stats from config (balancing start.* when loaded).
+ state=RULES.stateFrom(saved||{},config);
  if(saved&&saved.testSeed)state.testSeed=saved.testSeed;
+ if(!saved)freshClock();
  if(state.visualClock){
   try{bridge?.getClock?.()?.restore?.(state.visualClock);}catch{}
  }
@@ -140,8 +160,15 @@ function restore(){
     paintPanel();message('🧪 Start tes '+id+' diterapkan: uang, kost, dan bahan masak.');
    }});
 }
+// A brand-new save starts at Day 1, clock.newGameStartTime (slice 06:30), not at the map clock.
+function freshClock(){
+ const B=BAL(),c=B?.clock?.();
+ if(!c||!Number.isFinite(c.newGameStartMinute))return;
+ try{bridge?.getClock?.()?.restore?.({day:1,minute:c.newGameStartMinute,speed:1,paused:false});}catch{}
+ if(state)state.visualClock={day:1,minute:c.newGameStartMinute,speed:1,paused:false};
+}
 function resetSave(){
- const id=playerId();state=RULES.stateFrom({wallet:6000},config);
+ const id=playerId();state=RULES.stateFrom({},config);freshClock();
  if(id&&startFor(id))applyStart(state,id,true);
  persist();
 }
@@ -173,8 +200,8 @@ async function reloadRules(revision){
   if(!active||revision!==sessionRevision)return;
   const catalog=root.JiwaActivities?.readLocal?.(localStorage);
   publishedCatalog=!!catalog?.updatedAt;
-  config=RULES.normalize({...globalRules?.lifeEconomy,activities:catalog?.activities||[],worldEntities:catalog?.worldEntities||[]});
-  configSource=(globalRules?.lifeEconomy?(city?.lifeEconomy?'JIWA CITY':'JIWA GLOBAL'):'DEFAULT V1')+
+  config=RULES.normalize(withBalancing({...globalRules?.lifeEconomy,activities:catalog?.activities||[],worldEntities:catalog?.worldEntities||[]}));
+  configSource=(BAL()?'BALANCING '+(BAL().info().revision||'')+' / ':'')+(globalRules?.lifeEconomy?(city?.lifeEconomy?'JIWA CITY':'JIWA GLOBAL'):'DEFAULT V1')+
    (publishedCatalog?' / AUTHORING':' / DEMO');
   if(state){const previous=state;state=RULES.stateFrom(previous,config);}
   buildSites();
@@ -189,6 +216,7 @@ function hookCtx(){
   loadState:next=>{state=RULES&&next?RULES.stateFrom(next,config):next;paintPanel();notifyHud();},
   getSites:()=>sites,getWorld:getWorld,getPos:getPos,
   getConfig:()=>config,getWorldEntities:()=>config?.worldEntities||[],
+  questTable:BAL()?.quests?.()||null,coffeeAtWarteg:coffeeAtWarteg(),
   playerId,cityId,dataKey,projectId,
   storage:typeof localStorage!=='undefined'?localStorage:null,
   persist,teleport:(x,z)=>{try{return !!(bridge&&bridge.teleport&&bridge.teleport(x,z));}catch{return false;}},
@@ -207,7 +235,7 @@ function hookCtx(){
   currentPose:()=>{try{return bridge?.currentPose?.()||null;}catch{return null;}},
   afterEconomy:(action,r)=>{persist();if(r?.changes?.length)message('✅ '+r.changes.join(' · '));notifyHud();paintPanel();},
   runEconomy:(action,args)=>{if(!RULES||!state)return {ok:false,reason:'Tidak ada state'};
-   const r=RULES.run(config,state,action,args||{});if(r.ok)state=r.state;return r;},
+   const r=RULES.run(config,state,action,args||{});if(r.ok){syncVisualClock(state,r.state,action);state=r.state;}return r;},
   enterInterior:id=>{
    const raw=String(id||'').replace(/^d:/,'');
    try{
@@ -286,7 +314,8 @@ function buildSites(){
    p=findLanding(x,z);
   }
   return {...d,sourceId:found?.id||'',placeholder:!found,x:p.x,z:p.z,points};
- }).filter(s=>!s.placeholder); // Never offer imaginary locations as working pins/actions.
+ }).filter(s=>!s.placeholder) // Never offer imaginary locations as working pins/actions.
+  .filter(s=>!(s.id==='coffee'&&coffeeAtWarteg())); // slice: Warung Kopi "Belum buka", coffee is sold at the Warteg
  const tent=sites.find(n=>n.id==='tent');
  const last=window.__semestaLastSpawn;
  if(tent&&last?.kind==='hobo'&&last?.point){tent.x=last.point.x;tent.z=last.point.z;tent.placeholder=false;}
@@ -544,7 +573,7 @@ function nodeButtons(n){
  if(id==='loak')entries=['<select id="slpItem">'+itemOptions('loak')+'</select>',button('sell_loak','💰 Jual Barang')];
  if(id==='scavenge')entries=[button('scavenge','📦 Mulung')];
  if(id==='tree')entries=[button('catch_fruit','🌳 Ambil Buah')];
- if(id==='warung')entries=[button('eat','🍚 Makan')];
+ if(id==='warung')entries=[button('eat','🍚 Makan'),...(coffeeAtWarteg()?[button('coffee','☕ Ngopi')]:[])];
  if(id==='coffee')entries=[button('coffee','☕ Ngopi')];
  if(id==='public_wc')entries=[button('public_toilet','🚾 WC Umum',{facilityId:n.sourceId||id})];
  if(id==='public_bath')entries=[button('public_shower','🚿 Mandi Umum',{facilityId:n.sourceId||id})];
@@ -664,13 +693,18 @@ function workDown(ev){
  if(!['slpWork','ptActionBtn'].includes(ev.target.id)||!active||progress)return;
  const n=nearest();
  if(!n||!n.jobId)return;
- if(state.detained||state.restMinutes>0||state.energy<10){message('Tidak bisa bekerja: perlu energi 10 dan bebas dari hukuman.');return;}
  const job=config.jobs?.find(j=>j.id===n.jobId);
+ const blocked=RULES.workBlock?RULES.workBlock(config,state,n.jobId):null;
+ if(blocked){message('⛔ '+blocked);return;}
+ if(!RULES.workBlock&&(state.detained||state.restMinutes>0||state.energy<10)){message('Tidak bisa bekerja: perlu energi 10 dan bebas dari hukuman.');return;}
  if(job&&state.hygiene<job.minHygiene){message('Pekerjaan '+job.label+' butuh kebersihan '+job.minHygiene+'.');return;}
  ev.preventDefault();
  workHoldStart=performance.now();
  const jobMinutes=job?.minutes||30;
- progress={started:workHoldStart,needed:Math.max(850,jobMinutes*90/(1+(state?.experience||0)/100))};
+ // Hold time = the session's game minutes on the one clock (slice: Parkir 8 s, Ogah 12 s, Silver 20 s at EXP 0).
+ const sessionMinutes=RULES.workMinutes?RULES.workMinutes(jobMinutes,state?.experience||0):jobMinutes;
+ const holdMs=BAL()?.holdMs?.(sessionMinutes);
+ progress={started:workHoldStart,needed:Number.isFinite(holdMs)&&holdMs>0?holdMs:Math.max(850,jobMinutes*90/(1+(state?.experience||0)/100))};
  const button=ev.target;try{button.setPointerCapture(ev.pointerId);}catch{}
  const animate=()=>{
   if(!progress||!active)return;
@@ -867,13 +901,13 @@ function runAction(action,args={}){
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
-  eat:'warung',coffee:'coffee',public_toilet:'public_wc',public_shower:'public_bath',
+  eat:'warung',coffee:coffeeAtWarteg()?'warung':'coffee',public_toilet:'public_wc',public_shower:'public_bath',
   buy_room:'kost',home_toilet:'kost',home_shower:'kost',sleep:ownsRoom()?'kost':'tent',
   cook:'kost',cook_recipe:'kost',store_fridge:'kost',take_fridge:'kost',store_home:'kost',take_home:'kost',rest:'bench',help:'help',charity:'charity',
   worship:node?.id?.startsWith('prayer_')?node.id:'prayer'
  }[action];
  const inWarteg=(bridge?.interiorKind?.()||root.VLNjhPlayInteriors?.kind?.())==='warteg';
- if(required&&node?.id!==required&&!(action==='eat'&&inWarteg)){
+ if(required&&node?.id!==required&&!((action==='eat'||(action==='coffee'&&coffeeAtWarteg()))&&inWarteg)){
   message('Dekati '+(sites.find(s=>s.id===required)?.label||required)+' dahulu.');return {ok:false,reason:'Lokasi aksi tidak sesuai'};
  }
  if(action==='buy_room'){
@@ -883,6 +917,7 @@ function runAction(action,args={}){
  const prior=state;
  const result=action==='cook_recipe'?cookRecipe(args):RULES.run(config,state,action,args);
  if(result.ok){
+  syncVisualClock(prior,result.state,action);
   state=result.state;
   if(['fish','work','scavenge','catch_fruit'].includes(action)&&!state.detained){
    const luck=RULES.run(config,state,'luck_find',{roll:Math.random()});
@@ -1021,8 +1056,10 @@ function tick(dt){
  const seconds=Math.max(0,Math.min(.2,Number(dt)||0));
  tickLifeNpcs(seconds);
  actorMoved(seconds);
- timeAccumulator+=seconds;
- const period=Math.max(1,config.settings.realSecondsPerGameMinute||8);
+ // While AKSI is held the work action itself advances the session minutes; do not count them twice.
+ timeAccumulator=progress?0:timeAccumulator+seconds;
+ // Same rate as the visual clock (VLSemestaDayNight), both from clock.realSecondsPerGameMinute.
+ const period=Math.max(.05,Number(config.settings.realSecondsPerGameMinute)||8);
  if(timeAccumulator>=period){
   const minutes=Math.min(15,Math.floor(timeAccumulator/period));
   timeAccumulator-=minutes*period;
@@ -1093,8 +1130,8 @@ function start(){
  bindHooks();
  const gameCatalog=root.JiwaActivities?.readLocal?.(localStorage);
  publishedCatalog=!!gameCatalog?.updatedAt;
- config=RULES.normalize({...defaults(),activities:gameCatalog?.activities||[],
-  worldEntities:gameCatalog?.worldEntities||[]});
+ config=RULES.normalize(withBalancing({...defaults(),activities:gameCatalog?.activities||[],
+  worldEntities:gameCatalog?.worldEntities||[]}));
  configSource=publishedCatalog?'JIWA AUTHORING':'SANDBOX DEMO';restore();buildSites();makeRoot();attachNokia();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);

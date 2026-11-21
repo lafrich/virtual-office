@@ -834,8 +834,13 @@ function create(opts){
    const eatSpots=session.furniture.filter(f=>(View?.eatSpot?.(f.assetId)||['dining_table','food_vitrine','cashier','table','counter'].includes(f.assetId))
     &&Math.hypot(p.x-f.x,p.z-f.z)<=2.2);
    const spot=through||eatSpots[0];
+   // Prices come from content/balancing.json when loaded (slice: food.warteg.price, food.coffee.price).
+   const B=root.NJHBalancing&&root.NJHBalancing.ok&&root.NJHBalancing.ok()?root.NJHBalancing:null;
+   const meal=B&&Number.isFinite(B.num('food.warteg.price'))?B.num('food.warteg.price'):MEAL_PRICE;
    if(spot)
-    push('eat','Makan Warteg',MEAL_PRICE,{price:MEAL_PRICE,buyerId:'warteg',place:'warteg'},spot.furnitureId||spot.assetId,spot.label||'Ibu Warteg');
+    push('eat','Makan Warteg',meal,{price:meal,buyerId:'warteg',place:'warteg'},spot.furnitureId||spot.assetId,spot.label||'Ibu Warteg');
+   if(spot&&B&&B.coffeeAt()==='warteg'&&Number.isFinite(B.num('food.coffee.price')))
+    push('coffee','Ngopi',B.num('food.coffee.price'),{place:'warteg'},spot.furnitureId||spot.assetId,spot.label||'Ibu Warteg');
   }
   if(session.kind==='kost'){
    const toilet=session.furniture.find(f=>f.assetId==='squat_toilet'&&Math.hypot(p.x-f.x,p.z-f.z)<=2.2);

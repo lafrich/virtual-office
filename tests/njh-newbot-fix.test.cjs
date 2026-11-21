@@ -177,7 +177,9 @@ test('LGR script cache-bust is no longer bare pakaian-v2',()=>{
 
 test('this fix is sw v43 with a unique ?v and hub build',()=>{
  const sw=fs.readFileSync(path.join(R,'sw.js'),'utf8');
- assert.match(sw,/^\/\* sw v43 /);
+ // Later preview packages (balancing = v44) bump the SW; this fix's v42 stays in the history.
+ assert.ok(Number((/^\/\* sw v(\d+) /.exec(sw)||[])[1])>=42,'sw >= v42');
+ assert.match(sw,/sw v42 2026-11-22/);
  assert.doesNotMatch(sw,/^\/\* sw v39 /);
  const html=fs.readFileSync(path.join(R,'mainkan/index.html'),'utf8');
  assert.match(html,/\?v=njh-step1-live-20261122/);

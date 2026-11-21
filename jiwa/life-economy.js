@@ -50,7 +50,19 @@ function defaults(){return {
  passiveFullnessMinutes:35,faintRecoveryEnergy:25,tokenDurationMinutes:60,
  // Step 2: kost base electricity load, game minutes per token unit (240 = 0.25 unit/hour, perkiraan).
  tokenBaseDrainMinutes:240,
- realSecondsPerGameMinute:8,seatRestEnergy:3},
+ realSecondsPerGameMinute:8,seatRestEnergy:3,
+ // Slice balancing hooks (content/balancing.json via shared/njh-balancing.js).
+ // Defaults below equal the pre-slice code values, so a config without the
+ // balancing table behaves exactly as before.
+ startWallet:6000,startEnergy:80,startFullness:70,startHygiene:75,startBladder:20,startMoral:50,
+ wartegFullness:30,wartegEnergy:12,wartegBladder:12,streetFoodFullness:30,streetFoodEnergy:12,streetFoodBladder:12,
+ coffeeEnergy:20,coffeeBladder:25,fruitFullness:20,fruitEnergy:8,fruitPickEnergy:7,fruitPickMinutes:8,
+ publicToiletPrice:0,toiletMinutes:4,showerMinutes:15,wallPeeMoral:5,
+ sleepMinutes:60,hoboSleepHygieneCost:15,homeSleepHygieneCost:8,
+ faintMoneyLossPct:0,faintMoneyLossMax:0,scavengeMinutes:8,scavengeEnergy:4,loakPrice:1000,
+ bladderAccidentHygiene:20,bladderAccidentMoral:5,fullnessZeroEnergyDrain:1,
+ helpMinutes:15,helpEnergy:5,helpMoral:5,
+ dailyWageCap:0,dailyWageCapGlobal:0,dayStartMinute:360,newGameStartMinute:420,roomIncludesStove:0},
  fish:copy(FISH),jobs:copy(JOBS),activities:[],worldEntities:[],
  cooking:cookingDefaults()
 };}
@@ -75,12 +87,29 @@ function normalizeCooking(src){
 }
 function normalize(raw){
  const base=defaults(),source=raw&&typeof raw==='object'?raw:{},s=source.settings||{};
- const PRICE_KEYS={coffeePrice:1,teaPrice:1,streetFoodPrice:1,wartegMealPrice:1,roomPrice:1,fridgePrice:1,tokenPrice:1,publicShowerFee:1};
+ const PRICE_KEYS={coffeePrice:1,teaPrice:1,streetFoodPrice:1,wartegMealPrice:1,roomPrice:1,fridgePrice:1,tokenPrice:1,publicShowerFee:1,
+  startWallet:1,dailyWageCap:1,publicToiletPrice:1,loakPrice:1,faintMoneyLossMax:1};
+ // Keys that may legitimately be 0 (free, no penalty, no cap, off).
+ const ZERO_OK={publicToiletPrice:1,faintMoneyLossPct:1,faintMoneyLossMax:1,bladderAccidentHygiene:1,bladderAccidentMoral:1,
+  hoboSleepHygieneCost:1,homeSleepHygieneCost:1,dailyWageCap:1,dailyWageCapGlobal:1,dayStartMinute:1,newGameStartMinute:1,
+  roomIncludesStove:1,wallPeeMoral:1,fullnessZeroEnergyDrain:1,helpEnergy:1,helpMoral:1,startWallet:1,startEnergy:1,
+  startFullness:1,startHygiene:1,startBladder:1,startMoral:1,wartegFullness:1,wartegEnergy:1,wartegBladder:1,
+  streetFoodFullness:1,streetFoodEnergy:1,streetFoodBladder:1,coffeeEnergy:1,coffeeBladder:1,fruitFullness:1,fruitEnergy:1,
+  fruitPickEnergy:1,scavengeEnergy:1,loakPrice:1};
  for(const key of Object.keys(base.settings)){
    if(key==='bagSlots'||key==='homeStorageSlots')continue;
+   if(key==='realSecondsPerGameMinute'){
+    // One clock: fractional seconds are allowed (slice: 0.5 s per game minute).
+    const n=Number(s[key]);
+    base.settings[key]=Number.isFinite(n)&&n>0?Math.max(.05,Math.min(600,Math.round(n*100)/100)):base.settings[key];
+    continue;
+   }
    const cap=PRICE_KEYS[key]?1e9:100000;
-   base.settings[key]=number(s[key],key==='arrestMoralThreshold'?0:1,cap,base.settings[key]);
+   base.settings[key]=number(s[key],key==='arrestMoralThreshold'||ZERO_OK[key]?0:1,cap,base.settings[key]);
  }
+ base.settings.dayStartMinute=Math.min(1439,base.settings.dayStartMinute);
+ base.settings.newGameStartMinute=Math.min(1439,base.settings.newGameStartMinute);
+ if(Number.isFinite(Number(s.bagSlots)))base.settings.bagSlots=number(s.bagSlots,1,48,base.settings.bagSlots);
  base.settings.arrestMoralThreshold=number(s.arrestMoralThreshold,0,50,15);
  const identity=source.identity||{};
  if(RELIGIONS.includes(identity.religion)&&identity.religion!=='satanis')base.identity.religion=identity.religion;
@@ -105,7 +134,8 @@ function normalize(raw){
    energyCost:number(next.energyCost,0,100,d.energyCost),
    hygieneCost:number(next.hygieneCost,0,100,d.hygieneCost),
    minutes:number(next.minutes,1,100000,d.minutes),exp:number(next.exp,0,100,d.exp),
-   minHygiene:number(next.minHygiene,0,100,d.minHygiene)};
+   minHygiene:number(next.minHygiene,0,100,d.minHygiene),
+   enabled:next.enabled===false?false:true};
  });
  // Editable activity catalog is global and stored separately from legacy
  // wages/jobs. Only published enabled activities can be executed by Semesta.
@@ -155,9 +185,15 @@ function stateFrom(existing,config){
  s.luckCooldownUntil=number(s.luckCooldownUntil,0,1e9,0);
  s.restMinutes=number(s.restMinutes,0,1e9,0);
  s.detentionMinutes=number(s.detentionMinutes,0,1e9,0);
- for(const [k,def] of Object.entries({wallet:6000,energy:80,hygiene:75,bladder:20,fullness:70,moral:50,experience:0})){
+ const st=c.settings;
+ for(const [k,def] of Object.entries({wallet:st.startWallet,energy:st.startEnergy,hygiene:st.startHygiene,
+  bladder:st.startBladder,fullness:st.startFullness,moral:st.startMoral,experience:0})){
   s[k]=number(s[k],0,k==='wallet'?1e9:100,def);
  }
+ // Clock origin: game minute-of-day at elapsedMinutes 0 (new game = slice 06:30).
+ s.clockOrigin=number(s.clockOrigin,0,1439,st.newGameStartMinute);
+ s.wageLedger=s.wageLedger&&typeof s.wageLedger==='object'&&s.wageLedger.byJob&&typeof s.wageLedger.byJob==='object'?
+  {day:number(s.wageLedger.day,-1,1e9,-1),total:number(s.wageLedger.total,0,1e9,0),byJob:{...s.wageLedger.byJob}}:{day:-1,total:0,byJob:{}};
  s.actionCounts=s.actionCounts&&typeof s.actionCounts==='object'?s.actionCounts:{};
  s.quests=s.quests&&typeof s.quests==='object'?s.quests:{};
  s.messages=Array.isArray(s.messages)?s.messages.slice(0,40):[];
@@ -193,6 +229,35 @@ function activeItem(config,s,id){
 }
 function speedFactor(s){
  return s.detained||s.restMinutes>0||s.detentionMinutes>0||s.energy<=0?0:(s.energy>=30?1:.28+.72*s.energy/30);
+}
+// Session length in game minutes (EXP formula kept: duration/(1+exp/100), min 5).
+function workMinutes(duration,experience){return Math.max(5,Math.round(Number(duration)/(1+(Number(experience)||0)/100)));}
+// Daily wage quota (slice: Rp150.000 per job per game day, reset at dayStartMinute).
+function wageDay(setting,s){return Math.floor((s.elapsedMinutes+s.clockOrigin-setting.dayStartMinute)/1440);}
+function wageQuota(setting,s,jobId,label){
+ const cap=setting.dailyWageCap;
+ if(!(cap>0))return {blocked:false,remaining:null};
+ const day=wageDay(setting,s),scope=setting.dailyWageCapGlobal?'global':'per_job';
+ const L=s.wageLedger||{day:-1,total:0,byJob:{}};
+ if(L.day!==day){L.day=day;L.total=0;L.byJob={};s.wageLedger=L;}
+ const earned=scope==='global'?L.total:(L.byJob[jobId||'_']||0);
+ const remaining=Math.max(0,cap-earned);
+ const hh=String(Math.floor(setting.dayStartMinute/60)).padStart(2,'0')+':'+String(setting.dayStartMinute%60).padStart(2,'0');
+ if(remaining<=0)return {blocked:true,day,scope,remaining:0,
+  reason:'Kuota '+(scope==='global'?'kerja':label)+' hari ini habis. Buka lagi besok '+hh+'.'};
+ return {blocked:false,day,scope,remaining};
+}
+// Pre-check used by the hold-to-work UI so a player never holds for a session that will be refused.
+function workBlock(config,previous,jobId){
+ const c=config&&config.settings&&Array.isArray(config.jobs)?config:normalize(config),s=stateFrom(previous,c);
+ const job=c.jobs.find(j=>j.id===String(jobId||''));
+ if(!job)return null;
+ if(job.enabled===false)return 'Belum buka';
+ if(s.restMinutes>0||s.detentionMinutes>0||s.detained)return 'Masih bed rest / menjalani hukuman.';
+ if(s.energy<job.energyCost)return 'Energi tidak cukup untuk bekerja.';
+ if(s.hygiene<job.minHygiene)return 'Pekerjaan ini membutuhkan kebersihan '+job.minHygiene+'.';
+ const q=wageQuota(c.settings,s,job.id,job.label);
+ return q.blocked?q.reason:null;
 }
 function doAction(config,previous,action,args={}){
  const c=normalize(config),s=stateFrom(previous,c),setting=c.settings,changes=[];
@@ -233,7 +298,7 @@ function doAction(config,previous,action,args={}){
   if(hygieneUse)s.hygiene=Math.max(0,s.hygiene-hygieneUse);
   if(bladderGain)s.bladder=Math.min(100,s.bladder+bladderGain*3);
   if(fullnessUse)s.fullness=Math.max(0,s.fullness-fullnessUse*2);
-  if(s.fullness===0&&!wasFaint)s.energy=Math.max(0,s.energy-1);
+  if(s.fullness===0&&!wasFaint)s.energy=Math.max(0,s.energy-setting.fullnessZeroEnergyDrain);
   if(wasFaint&&s.restMinutes===0){
    s.energy=Math.max(s.energy,setting.faintRecoveryEnergy);
    changes.push('BED REST SELESAI · energi pulih '+s.energy);
@@ -382,8 +447,8 @@ function doAction(config,previous,action,args={}){
  }
  case 'scavenge': {
   if(s.inventory.length>=setting.bagSlots)return reject('Tas penuh.');
-  if(s.energy<4)return reject('Energi tidak cukup untuk mulung.');
-  clock(8);stat('energy',-4);
+  if(s.energy<setting.scavengeEnergy)return reject('Energi tidak cukup untuk mulung.');
+  clock(setting.scavengeMinutes);if(setting.scavengeEnergy)stat('energy',-setting.scavengeEnergy);
   add('barang_bekas','Barang bekas',999999);break;
  }
  case 'sell_loak':{
@@ -392,7 +457,7 @@ function doAction(config,previous,action,args={}){
   const meta=s.itemMeta[id];
   if(!meta||meta.species!=='barang_bekas')return reject('Toko Loak hanya menerima barang bekas pada tes ini.');
   s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];
-  s.wallet+=1000;changes.push('jual barang bekas +Rp1000');break;
+  s.wallet+=setting.loakPrice;changes.push('jual barang bekas +Rp'+setting.loakPrice);break;
  }
  case 'buy_furniture':{
   if(!s.housing.room)return reject('Beli akses kost sebelum membeli furnitur.');
@@ -506,7 +571,7 @@ function doAction(config,previous,action,args={}){
    changes.push('makan '+info.meta.label);break;
   }
   s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];
-  clock(5);stat('energy',8);stat('fullness',20);stat('bladder',5);
+  clock(5);if(setting.fruitEnergy)stat('energy',setting.fruitEnergy);if(setting.fruitFullness)stat('fullness',setting.fruitFullness);stat('bladder',5);
   changes.push('makan buah dari tas');break;
  }
  case 'discard_item':{
@@ -532,8 +597,8 @@ function doAction(config,previous,action,args={}){
  }
  case 'catch_fruit': {
   if(s.inventory.length>=setting.bagSlots)return reject('Tas penuh.');
-  if(s.energy<7)return reject('Energi kurang untuk memanjat.');
-  clock(8);stat('energy',-7);add('buah','Buah pohon',120);break;
+  if(s.energy<setting.fruitPickEnergy)return reject('Energi kurang untuk memanjat.');
+  clock(setting.fruitPickMinutes);if(setting.fruitPickEnergy)stat('energy',-setting.fruitPickEnergy);add('buah','Buah pohon',120);break;
  }
  case 'advance_time':clock(args.minutes??30);break;
  case 'rest':{
@@ -546,11 +611,13 @@ function doAction(config,previous,action,args={}){
   const fallback=warteg?setting.wartegMealPrice:setting.streetFoodPrice;
   const mealPrice=Number.isFinite(Number(args.price))?Math.max(0,Math.round(Number(args.price))):fallback;
   if(!spend(mealPrice))return reject('Uang tidak cukup.');
-  clock(10);stat('energy',12);stat('fullness',30);stat('bladder',12);break;
+  clock(10);
+  const fx=warteg?[setting.wartegEnergy,setting.wartegFullness,setting.wartegBladder]:[setting.streetFoodEnergy,setting.streetFoodFullness,setting.streetFoodBladder];
+  if(fx[0])stat('energy',fx[0]);if(fx[1])stat('fullness',fx[1]);if(fx[2])stat('bladder',fx[2]);break;
  }
  case 'coffee': {
   if(!spend(setting.coffeePrice))return reject('Uang tidak cukup.');
-  clock(5);stat('energy',20);stat('bladder',25);break;
+  clock(5);if(setting.coffeeEnergy)stat('energy',setting.coffeeEnergy);if(setting.coffeeBladder)stat('bladder',setting.coffeeBladder);break;
  }
  case 'tea': {
   if(!spend(setting.teaPrice))return reject('Uang tidak cukup.');
@@ -559,9 +626,9 @@ function doAction(config,previous,action,args={}){
  case 'sleep':{
   if(s.restMinutes>0)return reject('Sedang bed rest akibat pingsan. Lanjutkan waktu istirahat.');
   const beforeSleepEnergy=s.energy;
-  clock(60);s.energy=beforeSleepEnergy;
+  clock(setting.sleepMinutes);s.energy=beforeSleepEnergy;
   stat('energy',s.housing.room?setting.homeSleepRecovery:setting.hoboSleepRecovery);
-  stat('hygiene',s.housing.room?-8:-15);
+  stat('hygiene',-(s.housing.room?setting.homeSleepHygieneCost:setting.hoboSleepHygieneCost));
   changes.push(s.housing.room?'tidur di kost':'tidur di tenda pinggiran kota');break;
  }
  case 'shower':case 'public_shower':case 'home_shower':{
@@ -569,21 +636,22 @@ function doAction(config,previous,action,args={}){
    if(home&&!s.housing.room)return reject('Mandi di kost hanya untuk pemilik akses kamar.');
    if(!home&&!args.facilityId)return reject('Cari lokasi mandi umum di kota.');
    if(!home&&!spend(setting.publicShowerFee))return reject('Uang tidak cukup untuk mandi umum.');
-   clock(15);stat('hygiene',home?setting.homeShowerRecovery:setting.publicShowerRecovery);
+   clock(setting.showerMinutes);stat('hygiene',home?setting.homeShowerRecovery:setting.publicShowerRecovery);
    changes.push(home?'mandi di kost':'mandi di WC umum');break;
  }
  case 'toilet':case 'public_toilet':case 'home_toilet':{
    const home=action==='home_toilet'||(action==='toilet'&&s.housing.room);
    if(home&&!s.housing.room)return reject('WC kost hanya untuk pemilik akses kamar.');
    if(!home&&!args.facilityId)return reject('Cari WC umum dahulu.');
-   clock(4);stat('bladder',-100);
+   if(!home&&setting.publicToiletPrice>0&&!spend(setting.publicToiletPrice))return reject('Uang tidak cukup untuk WC umum.');
+   clock(setting.toiletMinutes);stat('bladder',-100);
    if(!home)stat('hygiene',-setting.publicToiletPenalty);
    changes.push(home?'WC kost pribadi':'WC umum');break;
  }
  case 'wall_pee':{
   // Aligned to jiwa/interaction-rules.js wall_pee: moral -5, bladder -70, hygiene -5, 3 menit.
-  clock(3);stat('bladder',-70);stat('hygiene',-5);stat('moral',-5);
-  changes.push('pipis di tembok (moral -5)');break;
+  clock(3);stat('bladder',-70);stat('hygiene',-5);if(setting.wallPeeMoral)stat('moral',-setting.wallPeeMoral);
+  changes.push('pipis di tembok (moral -'+setting.wallPeeMoral+')');break;
  }
  case 'pee_outside':
   return reject('Pipis sembarangan dihapus. Dekati tembok untuk pipis (wall_pee).');
@@ -603,16 +671,25 @@ function doAction(config,previous,action,args={}){
   const jobId=String(args.jobId||'');
   const job=jobId?c.jobs.find(j=>j.id===jobId):null;
   if(jobId&&!job)return reject('Jenis pekerjaan tidak dikenal di Jiwa.');
+  if(job&&job.enabled===false)return reject('Belum buka');
   const required=job?.minHygiene??(args.premium?70:0),energy=job?.energyCost??10;
   const wage=job?.wage??(args.premium?4500:2500);
   const duration=job?.minutes??30,exp=job?.exp??7;
   if(s.energy<energy)return reject('Energi tidak cukup untuk bekerja.');
   if(s.hygiene<required)return reject('Pekerjaan ini membutuhkan kebersihan '+required+'.');
-  clock(Math.max(5,Math.round(duration/(1+s.experience/100))));
+  const quota=wageQuota(setting,s,job?.id||'',job?.label||'Kerja');
+  if(quota.blocked)return reject(quota.reason);
+  clock(workMinutes(duration,s.experience));
   stat('energy',-energy);
   if(job?.hygieneCost)stat('hygiene',-job.hygieneCost);
-  s.wallet+=wage;s.experience=Math.min(100,s.experience+exp);
-  changes.push('kerja '+(job?.label||(args.premium?'Premium':'Reguler'))+' · upah +Rp'+wage+' · EXP +'+exp);
+  const paid=quota.remaining==null?wage:Math.min(wage,quota.remaining);
+  s.wallet+=paid;s.experience=Math.min(100,s.experience+exp);
+  if(quota.remaining!=null){
+   const L=s.wageLedger;L.day=quota.day;L.total+=paid;const k=job?.id||'_';L.byJob[k]=(L.byJob[k]||0)+paid;
+   out.wageQuota={day:quota.day,earned:quota.scope==='global'?L.total:L.byJob[k],cap:setting.dailyWageCap,scope:quota.scope};
+  }
+  if(job?.id){s.actionCounts=s.actionCounts&&typeof s.actionCounts==='object'?s.actionCounts:{};s.actionCounts['work:'+job.id]=(s.actionCounts['work:'+job.id]||0)+1;}
+  changes.push('kerja '+(job?.label||(args.premium?'Premium':'Reguler'))+' · upah +Rp'+paid+' · EXP +'+exp);
   break;
  }
  case 'course':clock(25);s.experience=Math.min(100,s.experience+12);changes.push('EXP +12');break;
@@ -620,7 +697,7 @@ function doAction(config,previous,action,args={}){
   if(!spend(1000))return reject('Uang tidak cukup untuk sedekah.');
   stat('moral',5);break;
  }
- case 'help':clock(15);stat('energy',-5);stat('moral',5);break;
+ case 'help':clock(setting.helpMinutes);if(setting.helpEnergy)stat('energy',-setting.helpEnergy);if(setting.helpMoral)stat('moral',setting.helpMoral);break;
  case 'worship': {
   if(['ateis','agnostik'].includes(s.identity.religion))return reject('Karakter tidak memilih ibadah agama; moral bisa dinaikkan lewat perbuatan baik.');
   if(!args.placeReligion)return reject('Ibadah harus dilakukan di tempat ibadah yang sesuai.');
@@ -631,6 +708,7 @@ function doAction(config,previous,action,args={}){
   if(s.housing.room)return reject('Kost sudah dimiliki / diakses.');
   if(!spend(setting.roomPrice))return reject('Uang tidak cukup.');
   s.housing.room=true;s.homeAccess=true;
+  if(setting.roomIncludesStove&&!s.furniture.includes('stove')){s.furniture.push('stove');changes.push('kamar sudah termasuk kompor');}
   const room=args.roomSpawn;
   if(room&&Number.isFinite(Number(room.x))&&Number.isFinite(Number(room.z)))
    s.housing.roomPosition={x:Number(room.x),z:Number(room.z),id:String(room.id||'sandbox_kost').slice(0,90),placeholder:room.placeholder===true};
@@ -813,12 +891,17 @@ function doAction(config,previous,action,args={}){
  default:return reject('Aksi belum didukung: '+String(action));
  }
  if(s.bladder>=100&&action!=='toilet'&&action!=='public_toilet'&&action!=='home_toilet'){
-  s.bladder=0;s.hygiene=Math.max(0,s.hygiene-20);s.moral=Math.max(0,s.moral-5);
-  changes.push('KENCING DI CELANA · hygiene -20 · moral -5');
+  s.bladder=0;s.hygiene=Math.max(0,s.hygiene-setting.bladderAccidentHygiene);s.moral=Math.max(0,s.moral-setting.bladderAccidentMoral);
+  changes.push('KENCING DI CELANA · hygiene -'+setting.bladderAccidentHygiene+(setting.bladderAccidentMoral?' · moral -'+setting.bladderAccidentMoral:''));
  }
+ let faintLoss=0;
  if(s.energy<=0&&s.restMinutes===0&&!['rest','respawn'].includes(action)){
   s.restMinutes=setting.faintRestMinutes;s.faintCount++;
   changes.push('PINGSAN · bed rest '+s.restMinutes+'m');
+  if(setting.faintMoneyLossPct>0){
+   const pct=Math.floor(s.wallet*setting.faintMoneyLossPct/100);
+   faintLoss=Math.max(0,setting.faintMoneyLossMax>0?Math.min(setting.faintMoneyLossMax,pct):pct);
+  }
  }
  const delta=s.wallet-beforeWallet;
  s.actionCounts=s.actionCounts&&typeof s.actionCounts==='object'?s.actionCounts:{};
@@ -840,7 +923,16 @@ function doAction(config,previous,action,args={}){
    action,label,delta,balance:s.wallet,minute:s.elapsedMinutes,day});
   s.transactions=s.transactions.slice(-40);
  }
+ if(faintLoss>0){
+  // Separate ledger row so a wage paid in the same action is not netted against the loss.
+  s.wallet-=faintLoss;s.lastFaintLoss=faintLoss;out.faintLoss=faintLoss;
+  changes.push('PINGSAN · dompet -Rp'+faintLoss);
+  const day=Math.floor(Math.max(0,s.elapsedMinutes)/1440)+1;
+  s.transactions.push({id:'txn:'+s.elapsedMinutes+':faint:'+s.faintCount,action:'faint',label:'Pingsan (dompet)',
+   delta:-faintLoss,balance:s.wallet,minute:s.elapsedMinutes,day});
+  s.transactions=s.transactions.slice(-40);
+ }
  return Object.assign({ok:true,state:s,changes,action},out);
 }
-return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,FURNITURE,COOKING,allFish,itemDef,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,run:doAction});
+return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,FURNITURE,COOKING,allFish,itemDef,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,workMinutes,wageDay,workBlock,run:doAction});
 });
