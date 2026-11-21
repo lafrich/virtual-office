@@ -660,6 +660,71 @@
    }
   },
   {
+   "file": "pipeline:id200_gerobak_gerobak_es_cendol",
+   "id": "id200_gerobak_gerobak_es_cendol",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    3,
+    1.8
+   ],
+   "width": 3.36,
+   "height": 3.96,
+   "pivot": [
+    74,
+    158
+   ],
+   "size": [
+    168,
+    198
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      168,
+      198
+     ],
+     "pivot": [
+      74,
+      158
+     ]
+    },
+    "se": {
+     "size": [
+      168,
+      196
+     ],
+     "pivot": [
+      75,
+      157
+     ]
+    },
+    "ne": {
+     "size": [
+      168,
+      198
+     ],
+     "pivot": [
+      74,
+      158
+     ]
+    },
+    "nw": {
+     "size": [
+      168,
+      196
+     ],
+     "pivot": [
+      75,
+      157
+     ]
+    }
+   }
+  },
+  {
    "file": "pipeline:id200_jalan_tiang_kabel_listrik",
    "id": "id200_jalan_tiang_kabel_listrik",
    "source": "pipeline-street",
@@ -1455,6 +1520,96 @@
    }
   },
   {
+   "file": "pipeline:id200_tanaman_daun_pandan_wangi",
+   "id": "id200_tanaman_daun_pandan_wangi",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "plant",
+   "footprint": [
+    1.7,
+    1.7
+   ],
+   "width": 2.44,
+   "height": 1.88,
+   "pivot": [
+    52,
+    66
+   ],
+   "size": [
+    122,
+    94
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      122,
+      94
+     ],
+     "pivot": [
+      52,
+      66
+     ]
+    },
+    "se": {
+     "size": [
+      122,
+      94
+     ],
+     "pivot": [
+      52,
+      66
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_tanaman_lidah_mertua_pot",
+   "id": "id200_tanaman_lidah_mertua_pot",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "plant",
+   "footprint": [
+    1.35,
+    1.35
+   ],
+   "width": 2.0,
+   "height": 2.64,
+   "pivot": [
+    41,
+    111
+   ],
+   "size": [
+    100,
+    132
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      100,
+      132
+     ],
+     "pivot": [
+      41,
+      111
+     ]
+    },
+    "se": {
+     "size": [
+      100,
+      134
+     ],
+     "pivot": [
+      41,
+      112
+     ]
+    }
+   }
+  },
+  {
    "file": "pipeline:id200_warung_warung_nasi_sunda",
    "id": "id200_warung_warung_nasi_sunda",
    "source": "pipeline-street",
@@ -1735,6 +1890,70 @@
      "pivot": [
       56,
       152
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:motor_parkir_hitam",
+   "id": "motor_parkir_hitam",
+   "source": "pipeline-street",
+   "group": "prop",
+   "footprint": [
+    2,
+    1
+   ],
+   "width": 2.19,
+   "height": 2.433,
+   "pivot": [
+    23,
+    52
+   ],
+   "size": [
+    54,
+    60
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      54,
+      60
+     ],
+     "pivot": [
+      23,
+      52
+     ]
+    },
+    "se": {
+     "size": [
+      56,
+      50
+     ],
+     "pivot": [
+      24,
+      43
+     ]
+    },
+    "ne": {
+     "size": [
+      56,
+      60
+     ],
+     "pivot": [
+      24,
+      52
+     ]
+    },
+    "nw": {
+     "size": [
+      54,
+      50
+     ],
+     "pivot": [
+      23,
+      43
      ]
     }
    }
@@ -2048,6 +2267,94 @@
    }
   },
   {
+   "file": "pipeline:rumput_kota_hampar",
+   "id": "rumput_kota_hampar",
+   "source": "pipeline-street",
+   "group": "taman",
+   "footprint": [
+    1.4,
+    1.2
+   ],
+   "width": 1.812,
+   "height": 1.0717,
+   "pivot": [
+    41,
+    21
+   ],
+   "size": [
+    82,
+    42
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      82,
+      42
+     ],
+     "pivot": [
+      41,
+      21
+     ]
+    },
+    "se": {
+     "size": [
+      82,
+      42
+     ],
+     "pivot": [
+      41,
+      21
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:rumput_kota_rumpun",
+   "id": "rumput_kota_rumpun",
+   "source": "pipeline-street",
+   "group": "taman",
+   "footprint": [
+    0.8,
+    0.8
+   ],
+   "width": 0.7071,
+   "height": 0.7655,
+   "pivot": [
+    13,
+    23
+   ],
+   "size": [
+    32,
+    30
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      32,
+      30
+     ],
+     "pivot": [
+      13,
+      23
+     ]
+    },
+    "se": {
+     "size": [
+      32,
+      30
+     ],
+     "pivot": [
+      13,
+      23
+     ]
+    }
+   }
+  },
+  {
    "file": "pipeline:selokan_belok",
    "id": "selokan_belok",
    "source": "pipeline-street",
@@ -2175,6 +2482,94 @@
      "pivot": [
       32,
       21
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:semak_kota_pendek",
+   "id": "semak_kota_pendek",
+   "source": "pipeline-street",
+   "group": "taman",
+   "footprint": [
+    1,
+    0.75
+   ],
+   "width": 1.0165,
+   "height": 1.0206,
+   "pivot": [
+    18,
+    30
+   ],
+   "size": [
+    46,
+    40
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      46,
+      40
+     ],
+     "pivot": [
+      18,
+      30
+     ]
+    },
+    "se": {
+     "size": [
+      52,
+      42
+     ],
+     "pivot": [
+      26,
+      33
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:semak_kota_rimbun",
+   "id": "semak_kota_rimbun",
+   "source": "pipeline-street",
+   "group": "taman",
+   "footprint": [
+    1.35,
+    1.1
+   ],
+   "width": 1.2374,
+   "height": 1.3268,
+   "pivot": [
+    25,
+    41
+   ],
+   "size": [
+    56,
+    52
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      56,
+      52
+     ],
+     "pivot": [
+      25,
+      41
+     ]
+    },
+    "se": {
+     "size": [
+      56,
+      52
+     ],
+     "pivot": [
+      25,
+      41
      ]
     }
    }
