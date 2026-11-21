@@ -584,3 +584,14 @@ Revert cleanup first, then the hub, so each revert applies cleanly. If later com
 
 - Visitors who already installed `sw.js` v6 will pick up a restored worker on the next navigation (`skipWaiting` + `clients.claim`).
 - Shared play-hud files (`shared/vl-hud/phone_ellen.js`, `nokia-play.js`, `shell.css`, `y2k.css`, `y2k_art.json`) and `world-builder/legacy-assets/` belong to the hub commit; reverting only cleanup leaves them in place.
+
+## Preview: NJH balancing slice-1.0 (sw v44, `?v=njh-balancing-20261122`)
+
+Branch `preview/njh-balancing-20261122` only — not merged to `main`, Worker not deployed. To roll back the preview, stop serving the branch, or revert its commit on that branch (no force-push):
+
+```bash
+git revert --no-edit <balancing commit sha>
+git push origin preview/njh-balancing-20261122
+```
+
+Without `shared/njh-balancing.js` / `content/balancing.json`, `jiwa/life-economy.js` keeps its previous defaults (life 8 s/min, visual 1 s/min, no wage quota), so removing just the `<script>` tag from `world-builder/index.html` also restores the old numbers.
