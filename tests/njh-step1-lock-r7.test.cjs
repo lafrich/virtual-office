@@ -19,8 +19,9 @@ function loadPreview(){
 }
 
 test('STEP 1 tags stay sw v42 with a unique cache/hub; LGR ?v is kept',()=>{
- assert.match(read('sw.js'),/^\/\* sw v42 /);
- assert.match(read('sw.js'),/STEP 1/);
+ // Balancing (sw v44) sits on top of STEP 1; v42 STEP 1 stays in the SW history.
+ assert.ok(Number((/^\/\* sw v(\d+) /.exec(read('sw.js'))||[])[1])>=42,'sw >= v42');
+ assert.match(read('sw.js'),/sw v42 2026-11-22: Preview STEP 1/);
  assert.match(read('mainkan/index.html'),/\?v=njh-step1-lock-r7-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
  assert.equal(hub.build,'hub-20261122-step1-lock-r7');

@@ -43,14 +43,15 @@ function once(seed){
  const work=job=>{const j=cfg.jobs.find(x=>x.id===job);const m=Life.workMinutes(j.minutes,st.experience);
   if(Life.workBlock(cfg,st,job))return false;real+=m*RSPM;const r=Life.run(cfg,st,'work',{jobId:job});if(r.ok){st=r.state;sessions++;}return r.ok;};
  const siteOf={pak_ogah:'job_pak_ogah',kang_parkir:'job_kang_parkir',manusia_silver:'job_silver'};
- // Sleep like the game: "Tidur sampai pagi" (hourly, sleep.untilMorningSpeed x faster) stops at full energy or 06:00.
- // Quota used up: after it stops at full energy the player still has to reach 06:00 -> manual 1-hour sleeps (30 s each).
- const isMorning=()=>{const hhmm=(st.elapsedMinutes+st.clockOrigin)%1440;return hhmm>=S.dayStartMinute&&hhmm<S.dayStartMinute+60;};
- const sleepHour=fast=>{const r=Life.run(cfg,st,'sleep',{});if(!r.ok)return false;st=r.state;sleeps++;
-  if(SLEEP==='realtime')real+=S.sleepMinutes*RSPM/(fast?FAST:1);else tick(ANIM_S);return true;};
- const sleepUntil=(energy,toMorning)=>{go('tent');let guard=0;
-  do{if(!sleepHour(true))break;}while(guard++<24&&st.energy<100&&!isMorning());
-  if(toMorning){guard=0;while(guard++<24&&!isMorning())if(!sleepHour(false))break;}
+ // Sleep like the game: "Tidur sampai pagi" (hourly, sleep.untilMorningSpeed x faster) always runs to 06:00.
+ // Tired during the day: the player uses it and presses Bangun once energy is full. Quota used up: sleep to 06:00.
+ const toMorning=()=>{const hhmm=(st.elapsedMinutes+st.clockOrigin)%1440;return (S.dayStartMinute-hhmm+1440)%1440;};
+ const sleepHour=fast=>{const left=toMorning();const m=left>0&&left<S.sleepMinutes?left:S.sleepMinutes;
+  const r=Life.run(cfg,st,'sleep',m<S.sleepMinutes?{minutes:m}:{});if(!r.ok)return false;st=r.state;sleeps++;
+  if(SLEEP==='realtime')real+=m*RSPM/(fast?FAST:1);else tick(ANIM_S);return true;};
+ const sleepUntil=(energy,toMorningMode)=>{go('tent');let guard=0;
+  if(toMorningMode&&toMorning()===0)return;
+  do{if(!sleepHour(true))break;}while(guard++<26&&toMorning()!==0&&(toMorningMode||st.energy<100));
  };
  const needs=()=>{
   if(st.restMinutes>0){while(st.restMinutes>0)tick(15);go('tent');}
