@@ -3,13 +3,17 @@
 Written 2026-11-22 (Asia/Jakarta). UI/CSS/copy, window-fit/e2e/unit tes, dan catatan rollback. Tidak ada perubahan Worker, sandi, atau secret.
 
 - Previous live `origin/main`: `024bb502dc6c53368ce9390e57136d8af01c2fb8` (delta 15 Nov, sw v31)
-- This commit: *(SHA diisi setelah push; cari "landscape-gate-20261122" / sw v32)*
+- Landscape-gate commit: `c3287cb36e76a049d2bcd41c86143565d828e9da` (sw v32, `?v=landscape-gate-20261122`)
 - Isi: gerbang "Putar HP" blocking di HP potret (`alertdialog`, tanpa Lanjut/Tutup); `lockLandscape` tetap; dua tes tombol E usang di-update (`!e.repeat`); CHECKPOINT-STEP2 ditandai disupersede; pelajaran 20.
-- Gate sebelum push: unit suite hijau, no-clip, kursi, window-fit 4 ukuran (potret = gerbang, bukan crop UI), tes ukuran peta, smoke 4-ID di Worker lokal, scan secret.
+- Gate sebelum push: unit suite 569 lulus / 0 gagal / 2 dilewati (571 total); no-clip + kursi + ukuran peta ikut suite (61/61); window-fit 4 ukuran 69 cek, 0 terpotong (potret 390x844 = gerbang utuh, bukan crop UI); smoke 4-ID di Worker lokal throwaway (`/tmp/step1-worker` :8787, proxy localhost:8912): Ichsan/Noor/Guest1/Guest2 desktop + HP landscape login+spawn lulus; gerbang potret blocking terlihat (judul Putar HP, tanpa Lanjut); scan secret bersih di patch c3287cb3 (0 value hit, 0 name=value). Hit sisa di tree live hanya substring token pendek 3–4 karakter yang sudah ada di 024bb502, bukan hash/TOKEN_KEY/kredensial panjang.
+- Items 2–4 (loading sampai semua aset siap, urutan depth objek vs karakter, lubang frame jalan LGR) TIDAK ikut commit ini. Mereka hanya di branch preview.
+
+Cara rollback tanpa force-push (kembalikan tree 024bb502 dalam satu commit baru):
 
 ```bash
 git fetch origin && git checkout main && git pull --ff-only origin main
-git revert --no-edit <sha-commit-ini>
+git checkout 024bb502dc6c53368ce9390e57136d8af01c2fb8 -- .
+git commit -m "rollback: landscape-gate (restore 024bb502 tree)"
 # bump sw.js ke v33 supaya HP melepas v32, lalu push --ff-only
 ```
 
