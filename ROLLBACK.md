@@ -1,3 +1,30 @@
+# Rollback — Package 3 A+B live (22 Nov 2026)
+
+Written 2026-11-22 05:40 WIB (Asia/Jakarta). Client UI/CSS/JS, loading bar, walk raster hook, tests, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Kendaraan dan clock rate tidak diubah. Pipeline main tidak di-release.
+
+- Previous live `origin/main`: `0484b22a920e4e000bdcd20769f4c02196d673ee` (docs tip, sw v33, `?v=force-landscape-20261122`)
+- Combined linear FF of New Bot–approved package 3 A+B, built on 0484b22a (Ellen sync branch was not the base; this package goes to main first):
+  - `e6587e9f3adee0ef626bd8a2a592340ad398ae31` wait for all assets + iso foot-depth
+  - `e445261d5dbb9201bb4477606350efbb158b9685` loading percent and x/y aset
+  - `5cfc2c29da3c0b01de227861c0269ccbd17eab08` walk holes v2 (setJointMode v2, no 4px JOINT_FILL)
+  - `9ac2d81f31736c8cbd69330f0a50460f2251319b` joystick grey-hole compositor fix + `?fresh=1`
+  - `13ca716a3ce77d94085f0431db4d56151d203780` sw v41 + one cache-bust `?v=pkg3-live-20261122`
+  - `237a1c80e05ec6c40bde210bafa5f930d24a376f` bust world-builder genesis-player cache so the v2 hook is not stuck on `pakaian-v2`
+- Isi: lubang abu-abu Y-flip di bawah joystick ditutup (`filter:opacity(1)` + outline transparan pada HUD); `?fresh=1` isolated guest (namespace `njh-fresh-v1:`, tanpa login/server writes, spawn tenda/hobo); loading bar `pct% · x/y aset` dan input dikunci sampai aset siap (timeout 60000); walk v2 portable ke official-9. sw v41 (di atas semua preview; v36–v37 tetap reserved Ellen).
+- Gate sebelum push: unit 575 tes, 573 lulus, 0 gagal, 2 dilewati; window-fit 4 ukuran 85 cek, 0 terpotong, 0 start error; secret-scan package diff 0/0/0 (password_assign / token_assign / bearer); smoke 4-ID 8/8 (Ichsan/Noor/Guest1/Guest2 × desktop + phone landscape) di worker throwaway `localhost:8841` + static `localhost:8921` (bukan :8787, bukan `srv/.dev.vars`); Playwright `?fresh=1` landscape: banner, tanpa login, Pemain Baru, spawn (−14.5, 0, 30.5), loading `99% · 5/5 aset`, joystick tanpa lubang magenta (0), force-landscape di potret, walk enclosed-pinhole 0 pada v2 (legacy n4=56 / crotch-n3≈142; v2 n4=0).
+- Backlog, tidak memblokir: gerakan knob HP belum diverifikasi mandiri di luar probe; patch terang di bawah joystick potret (dunia/trotoar, bukan kotak abu compositor); “skirt” crotch celana walk SW; bukti oklusi foot-depth masih lemah.
+
+Cara rollback tanpa force-push (kembalikan tree 0484b22a dalam satu commit baru):
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git checkout 0484b22a920e4e000bdcd20769f4c02196d673ee -- .
+git commit -m "rollback: package 3 A+B (restore 0484b22a tree)"
+# bump sw.js ke v42 supaya HP melepas v41, lalu push origin HEAD:refs/heads/main
+```
+
+---
+
 # Rollback — HP potret menampilkan game landscape (22 Nov 2026)
 
 Written 2026-11-22 (Asia/Jakarta). UI/CSS/JS, window-fit/e2e/unit tes, dan catatan rollback. Tidak ada perubahan Worker, sandi, atau secret.
