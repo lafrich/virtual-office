@@ -197,7 +197,12 @@ function info(){
  return {loaded:ok(),version:doc&&doc.version||null,revision:doc&&doc.contentRevision||null,
   source:sourceUrl,error:loadError?String(loadError.message||loadError):null,params:params().size};
 }
-return Object.freeze({FILE,SETTINGS_MAP,info,ok,has,value,num,params:()=>new Map(params()),
+// r3 levers (table keys with the old behaviour as default when a key is missing).
+function numOr(key,fallback){const n=num(key);return n===undefined?fallback:n;}
+function sleepTuning(){return {untilMorningSpeed:Math.max(1,numOr('sleep.untilMorningSpeed',1))};}
+function movement(){return {walkEnergyTilesPerUnit:Math.max(1,numOr('movement.walkEnergyTilesPerUnit',8)),
+ walkSpeedMultiplier:Math.max(.1,numOr('movement.walkSpeedMultiplier',1))};}
+return Object.freeze({FILE,SETTINGS_MAP,info,ok,has,value,num,numOr,sleepTuning,movement,params:()=>new Map(params()),
  lifeSettings,jobs,fish,lifeEconomy,applyToLifeConfig,quests,clock,holdMs,lockedTemplates,coffeeAt,rp,
  _reset:()=>{doc=null;loadError=null;paramMap=null;sourceUrl=null;}});
 });

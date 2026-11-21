@@ -73,19 +73,19 @@ test('"Tidur sampai pagi" repeats hourly until 06:00 or full energy',()=>{
  h.P.runAction('wake');
 });
 
-test('fish rot is 720 game minutes and hunger is -5 per hour (-2 every 24 min), both from the table',()=>{
+test('fish rot is 720 game minutes and hunger drain (-2 every needs.passiveFullnessMinutes) both come from the table',()=>{
  assert.equal(P['fish.spoilMinutes'],720);
  const c=cfg();
  assert.ok(c.fish.every(f=>f.spoilMinutes===720));
  let s=Life.stateFrom({},c);
  s=Life.run(c,s,'fish',{spotId:'dock',roll:.9}).state;
  assert.equal(s.itemMeta[s.inventory[0]].expiresAt-s.elapsedMinutes,720-0);
- assert.equal(P['needs.passiveFullnessMinutes'],24);
+ // r2 set -2 every 24 min (-5/h); r3 (New Bot lever L2) moved it to -2 every 30 min (-4/h). Always from the table.
+ const every=P['needs.passiveFullnessMinutes'];
+ assert.equal(c.settings.passiveFullnessMinutes,every);
  const f0=Life.stateFrom({},c);
- const f1=Life.run(c,f0,'advance_time',{minutes:60}).state;
- assert.equal(f0.fullness-f1.fullness,Math.floor(60/24)*2); // 4 in the first hour, 5/h on average
  const f2=Life.run(c,f0,'advance_time',{minutes:120}).state;
- assert.equal(f0.fullness-f2.fullness,10);
+ assert.equal(f0.fullness-f2.fullness,Math.floor(120/every)*2);
 });
 
 test('fishing minigame: one time source (live clock), fish_catch only adds the minutes still owed',()=>{

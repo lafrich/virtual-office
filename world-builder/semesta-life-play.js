@@ -105,7 +105,9 @@ function startSleep(args,untilMorning){
  if(untilMorning&&(state.energy>=100||morningNow())){const why='Sudah pagi atau energi penuh.';message('⛔ '+why);return {ok:false,reason:why};}
  progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
  const a={...args};delete a.untilMorning;delete a.__timed;delete a.minutes;
- sleepSession={args:a,untilMorning:!!untilMorning,elapsedMs:0,neededMs:sleepNeededMs(),hours:0};
+ // r3 (L1): "Tidur sampai pagi" runs sleep.untilMorningSpeed x faster in real time; each hour still runs the sleep rule.
+ const speed=untilMorning?(BAL()?.sleepTuning?.().untilMorningSpeed||1):1;
+ sleepSession={args:a,untilMorning:!!untilMorning,elapsedMs:0,neededMs:sleepNeededMs()/speed,hours:0};
  try{bridge?.playPose?.('sleep',Math.ceil(sleepSession.neededMs/1000));}catch{}
  message('💤 '+(untilMorning?'Tidur sampai pagi':'Tidur')+' · 1 jam game = '+Math.round(sleepSession.neededMs/1000)+' detik. Bangun kapan saja (tombol Bangun / bergerak).');
  notifyHud();paintPanel();
@@ -1096,8 +1098,9 @@ function actorMoved(dt){
  if(sleepSession&&delta>.05){wake('Bangun (bergerak)');}
  if(delta>0&&delta<3){
   walkerDistance+=delta;
-  if(walkerDistance>=8){
-   walkerDistance-=8;
+  const tilesPerUnit=BAL()?.movement?.().walkEnergyTilesPerUnit||8; // r3 (L2): table movement.walkEnergyTilesPerUnit
+  if(walkerDistance>=tilesPerUnit){
+   walkerDistance-=tilesPerUnit;
    const result=RULES.run(config,state,'walk',{units:1});
    if(result.ok){const prior=state;state=result.state;persist();afterLifeTransition(prior);}
   }
@@ -1147,7 +1150,8 @@ function tick(dt){
 }
 function moneyBalance(){return active&&state?state.wallet:null;}
 function bagLabels(){return active&&state?(state.inventory||[]).map(id=>state.itemMeta?.[id]?.label||id):null;}
-function speedFactor(){return active&&state?RULES.speedFactor(state):1;}
+// r3 (L3): movement.walkSpeedMultiplier from the table scales walk/run speed (builder multiplies by this factor).
+function speedFactor(){return (active&&state?RULES.speedFactor(state):1)*(BAL()?.movement?.().walkSpeedMultiplier||1);}
 const NOKIA_ICONS={
  fish:'fish',siomay_batagor:'stall',pasar_ikan:'market',job_silver:'office',job_pak_ogah:'office',
  job_kang_parkir:'office',premium_job:'office',loak:'market',scavenge:'scav',tree:'tree',
