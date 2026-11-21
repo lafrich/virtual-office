@@ -338,3 +338,39 @@ test('Ibu Warteg stands behind the etalase and offers Makan Warteg via nearby/ex
  assert.equal(eat.furnitureId,'npc_ibu_warteg');
  assert.match(String(eat.spotLabel||''),/Ibu Warteg/i);
 });
+
+test('Warteg door stays on njh_warteg_kharisma with Ibu Warteg even when the city template is njh_warung_makan',()=>{
+ const prev=globalThis.VLNjhMapPreview;
+ globalThis.VLNjhMapPreview={readyTemplates:['njh_kos','njh_warung_makan','njh_minimarket']};
+ try{
+  const ids=Interiors.readyTemplateIds();
+  assert.ok(ids.includes('njh_warteg_kharisma'),'official Kharisma template stays in the load set: '+ids.join(','));
+  assert.ok(ids.includes('njh_warung_makan'));
+ }finally{
+  if(prev===undefined)delete globalThis.VLNjhMapPreview;else globalThis.VLNjhMapPreview=prev;
+ }
+ const use={x:31.8,z:27.4};
+ const objects=[{
+  id:'jakarta-v3-18446',type:'sprite',asset:'pipeline:id_warteg_sederhana',
+  name:'Warteg (warung makan)',x:31.8,z:25,d:3,
+  njhInteriorTemplate:'njh_warung_makan',
+  njhDoors:[{doorId:'njh_door_warung_makan',template:'njh_warung_makan',pending:false,
+   interior:Interiors.wrapInterior(warteg),use,usePoint:[use.x,use.z]}]
+ }];
+ const h=kit({objects,scenes:{njh_kos:kos,njh_warteg_kharisma:kharisma,njh_warung_makan:warteg}});
+ assert.equal(h.api.buildings().warteg.template,'njh_warteg_kharisma');
+ h.pos={x:use.x,z:use.z};
+ const opened=h.api.enterNearby();
+ assert.equal(opened.ok,true,opened.reason||'enter Warteg door');
+ assert.equal(h.api.active().template,'njh_warteg_kharisma');
+ assert.equal(h.api.active().roomId,'njh_warteg_kharisma');
+ const ibu=h.api.active().furniture.find(f=>f.assetId==='npc_ibu_warteg'||f.id==='npc_ibu_warteg');
+ assert.ok(ibu,'Ibu Warteg NPC must be present in the Kharisma room');
+ assert.match(String(ibu.label||ibu.name||''),/Ibu Warteg/i);
+ const viaId=h.api.enterInterior?null:null;
+ h.api.exit();
+ const forced=h.api.enterInterior('njh_warung_makan');
+ assert.equal(forced.ok,true,forced.reason||'remap enterInterior');
+ assert.equal(h.api.active().roomId,'njh_warteg_kharisma');
+ assert.ok(h.api.active().furniture.some(f=>f.assetId==='npc_ibu_warteg'));
+});

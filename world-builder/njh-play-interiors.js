@@ -44,8 +44,12 @@ function mapPreviewInteriorsBase(){
  return './njh-map-preview/interiors/';
 }
 function readyTemplateIds(){
- try{const t=root.VLNjhMapPreview?.readyTemplates;if(Array.isArray(t)&&t.length)return t;}catch(_e){}
- return [...Object.values(TEMPLATES),...Object.values(FALLBACK),...ROOM_SCENES,...PUBLIC_SCENES];
+ // Official play templates (Kharisma Warteg, etc.) always stay in the load
+ // set. Template-first READY lists must not drop them in favour of
+ // njh_warung_makan (live Warteg door regression).
+ const official=[...Object.values(TEMPLATES),...Object.values(FALLBACK),...ROOM_SCENES,...PUBLIC_SCENES];
+ try{const t=root.VLNjhMapPreview?.readyTemplates;if(Array.isArray(t)&&t.length)return [...new Set([...official,...t])];}catch(_e){}
+ return official;
 }
 function hasReadyInterior(obj){
  if(!obj)return false;
@@ -119,6 +123,15 @@ function create(opts){
  const THREE=opts.THREE,scene=opts.scene;
  let catalog=opts.catalog||null,scenes=opts.scenes||{},images=new Map();
  let group=null,session=null,hidden=[],outdoorHidden=false,billboards=[],buildings={};
+ function wartegRoomId(id){
+  const raw=String(id||'');
+  if(kindOfRoom(raw)==='warteg'&&scenes[TEMPLATES.warteg])return TEMPLATES.warteg;
+  return raw;
+ }
+ function wartegKindTemplate(kind,template){
+  if(kind==='warteg'&&scenes[TEMPLATES.warteg])return TEMPLATES.warteg;
+  return template;
+ }
  const storage=opts.storage||(typeof localStorage!=='undefined'?localStorage:null);
 
  async function loadAssets(){
@@ -531,7 +544,7 @@ function create(opts){
 
  function enterInterior(roomId,reason){
   const A=AccessApi();
-  const resolved=A?.resolveId?.(roomId)||roomId;
+  const resolved=wartegRoomId(A?.resolveId?.(roomId)||roomId);
   const sc=sceneOf(resolved);
   if(!sc)return {ok:false,reason:'Belum buka',closed:true};
   const gate=canEnterRoom(resolved);if(!gate.ok)return gate;
@@ -559,7 +572,7 @@ function create(opts){
  function openInteriorById(id){
   const A=AccessApi();
   const raw=String(id||'');
-  const resolved=A?.resolveId?.(raw)||raw;
+  const resolved=wartegRoomId(A?.resolveId?.(raw)||raw);
   if(raw==='njh-kos-noor'||resolved===LOBBY_ID||A?.isLobby?.(raw))
    return enterInterior(LOBBY_ID);
   if(sceneOf(resolved))return enterInterior(resolved);
@@ -576,9 +589,11 @@ function create(opts){
   if(!rec)return {ok:false,reason:'Belum buka',closed:true};
   const gate=canEnter(kind);if(!gate.ok)return gate;
   const pos=opts.getPos?.()||{x:0,z:0};
-  const built=buildRoom(kind,rec.scene,rec.template);if(!built)return {ok:false,reason:'Gagal membangun interior'};
+  const tpl=wartegKindTemplate(kind,rec.template);
+  const sc=scenes[tpl]||rec.scene;
+  const built=buildRoom(kind,sc,tpl);if(!built)return {ok:false,reason:'Gagal membangun interior'};
   hideOutdoor(true);
-  session={kind,template:rec.template,roomId:rec.template,buildingId:rec.object.id,
+  session={kind,template:tpl,roomId:tpl,buildingId:rec.object.id,
    exit:session?.exit||{x:pos.x,z:pos.z},...built};
   const landing=spawnInside();
   opts.teleport?.(landing.x,landing.z,8,{keepView:true});
@@ -610,7 +625,7 @@ function create(opts){
   function consider(obj,kind,template,pt,closed){
    if(!pt||!Number.isFinite(pt.x)||!Number.isFinite(pt.z))return;
    const distance=Math.hypot(p.x-pt.x,p.z-pt.z);
-   if(distance<limit){best={inside:false,kind,door:pt,distance,objectId:obj&&obj.id,template:template||null,closed:!!closed};limit=distance;}
+   if(distance<limit){best={inside:false,kind,door:pt,distance,objectId:obj&&obj.id,template:wartegKindTemplate(kind,template)||null,closed:!!closed};limit=distance;}
   }
   function pointOf(d,obj){
    const u=d&&(d.use||d.usePoint);
@@ -902,6 +917,6 @@ function create(opts){
 
 return Object.freeze({
  PIXEL_WORLD,VERTICAL_COMP,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,MINIMARKET_PATTERN,
- wrapInterior,tilePos,dirFor,doorWorld,doorUseWorld,sceneDoors,create,baseUrl
+ wrapInterior,tilePos,dirFor,doorWorld,doorUseWorld,sceneDoors,create,baseUrl,readyTemplateIds
 });
 });

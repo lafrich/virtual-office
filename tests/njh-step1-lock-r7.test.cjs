@@ -18,10 +18,10 @@ function loadPreview(){
  return window.VLNjhMapPreview;
 }
 
-test('STEP 1 tags stay sw v42 with a unique cache/hub; LGR ?v is kept',()=>{
- assert.match(read('sw.js'),/^\/\* sw v42 /);
+test('STEP 1 tags stay sw v43 with a unique cache/hub; LGR ?v is kept',()=>{
+ assert.match(read('sw.js'),/^\/\* sw v43 /);
  assert.match(read('sw.js'),/STEP 1/);
- assert.match(read('mainkan/index.html'),/\?v=njh-step1-lock-r7-20261122/);
+ assert.match(read('mainkan/index.html'),/\?v=njh-step1-live-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
  assert.equal(hub.build,'hub-20261122-step1-lock-r7');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);
@@ -68,7 +68,7 @@ test('locked official doors are closed in isClosedDoor and enterables (tooltip B
 
 test('guest / creator default is a tee, including reset and normalizeProfile',()=>{
  const html=read('mainkan/index.html');
- assert.match(html,/classic-creator\.js\?v=njh-step1-lock-r7-20261122/);
+ assert.match(html,/classic-creator\.js\?v=njh-step1-live-20261122/);
  assert.match(html,/<option value="tee" selected>T-shirt/);
  assert.match(html,/<option value="trousers" selected>Trousers/);
  assert.doesNotMatch(html,/<select id="topStyle"><option value="nude" selected>/);
