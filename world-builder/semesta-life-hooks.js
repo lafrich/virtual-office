@@ -328,6 +328,12 @@ function create(ctx){
    return {site:s,dist:d};
   }).filter(x=>x.dist<=range).sort((a,b)=>a.dist-b.dist);
  }
+ // r4: "Tidur sampai pagi" is offered disabled outside the night window (sleep.untilMorningWindow* in the table).
+ function untilMorningOpen(){try{return typeof ctx.untilMorningOpen==='function'?ctx.untilMorningOpen()!==false:true;}catch(_e){return true;}}
+ function pushUntilMorning(push){
+  if(untilMorningOpen())push('sleep_until_morning','Tidur sampai pagi');
+  else push('sleep_until_morning','Tidur sampai pagi (malam saja)',{},{disabled:true,hint:'Hanya malam. Pakai Tidur 1 jam.'});
+ }
  function actionsForSite(site,state){
   const id=site.id,out=[];
   const push=(action,label,args,extra)=>{
@@ -363,12 +369,12 @@ function create(ctx){
     push('home_toilet','WC Kost');
     push('home_shower','Mandi Kost');
     if(ctx.sleeping&&ctx.sleeping())push('wake','Bangun');
-    else{push('sleep','Tidur Kost');if(ctx.timedSleep)push('sleep_until_morning','Tidur sampai pagi');}
+    else{push('sleep','Tidur Kost');if(ctx.timedSleep)pushUntilMorning(push);}
     push('cook','Masak Ikan');
     push('cook_recipe','Masak Resep');
    }else push('buy_room','Bayar kos (sekali bayar, permanen)');
   }
-  else if(id==='tent'){if(ctx.sleeping&&ctx.sleeping())push('wake','Bangun');else{push('sleep','Tidur Tenda');if(ctx.timedSleep)push('sleep_until_morning','Tidur sampai pagi');}}
+  else if(id==='tent'){if(ctx.sleeping&&ctx.sleeping())push('wake','Bangun');else{push('sleep','Tidur Tenda');if(ctx.timedSleep)pushUntilMorning(push);}}
   else if(site.religion)push('worship','Ibadah '+site.religion,{placeReligion:site.religion},{confirm:true,ui:'confirm'});
   else if(id==='course')push('course','Kursus Online');
   else if(id==='help')push('help','Bantu warga');
@@ -739,7 +745,7 @@ function create(ctx){
     const owned=id==='shower'||id==='sink'||id==='squat_toilet'||id==='toilet'||!!(state.furniture||[]).includes(id)||(id==='fridge'&&state.housing?.fridge);
     const acts=[];
     const kind=kindOf(it,gates)||id;
-    if(kind==='bed'||id==='bed'){acts.push({act:'sleep',label:'Tidur'});if(ctx.timedSleep)acts.push({act:'sleep_until_morning',label:'Tidur sampai pagi'});}
+    if(kind==='bed'||id==='bed'){acts.push({act:'sleep',label:'Tidur'});if(ctx.timedSleep)acts.push(untilMorningOpen()?{act:'sleep_until_morning',label:'Tidur sampai pagi'}:{act:'sleep_until_morning',label:'Tidur sampai pagi (malam saja)',disabled:true});}
     if(kind==='stove'||id==='stove')acts.push({act:'cook',label:'Masak Ikan'},{act:'cook_recipe',label:'Masak Resep'});
     if(id==='fridge'||kind==='fridge')acts.push({act:'open_fridge',label:'Buka Kulkas'});
     if(kind==='bathroom'||/shower|mandi/.test(id))acts.push({act:'home_shower',label:'Mandi'});

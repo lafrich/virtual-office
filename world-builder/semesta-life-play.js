@@ -105,6 +105,7 @@ function runTimedSleep(args){timedAction=true;try{return runAction('sleep',{...a
 function startSleep(args,untilMorning){
  if(sleepSession)return {ok:false,reason:'Sedang tidur.'};
  if(state.restMinutes>0){const why='Sedang bed rest akibat pingsan. Lanjutkan waktu istirahat.';message('⛔ '+why);return {ok:false,reason:why};}
+ if(untilMorning&&!untilMorningOpen()){const why=untilMorningClosedReason();message('⛔ '+why);return {ok:false,reason:why,closed:true};}
  if(untilMorning&&minutesToMorning()===0){const why='Sudah pagi.';message('⛔ '+why);return {ok:false,reason:why};}
  progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
  const a={...args};delete a.untilMorning;delete a.__timed;delete a.minutes;
@@ -118,6 +119,11 @@ function startSleep(args,untilMorning){
  return {ok:true,sleeping:true,untilMorning:!!untilMorning,neededMs:sleepSession.neededMs};
 }
 // One chunk = a full sleep hour, or the minutes left until 06:00 for "Tidur sampai pagi".
+// r4: "Tidur sampai pagi" only inside sleep.untilMorningWindowStart..End (table); manual sleep always works.
+function minuteOfDay(){return state?(((Number(state.elapsedMinutes)||0)+(Number(state.clockOrigin)||0))%1440+1440)%1440:0;}
+function untilMorningOpen(){const B=BAL();return !B||!B.untilMorningAllowed?true:B.untilMorningAllowed(minuteOfDay());}
+function untilMorningClosedReason(){const t=BAL()?.sleepTuning?.()||{};const f=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+ return 'Tidur sampai pagi hanya malam'+(t.windowStart!=null?' ('+f(t.windowStart)+'–'+f(t.windowEnd)+')':'')+'. Pakai Tidur 1 jam.';}
 function nextSleepChunk(s){
  const hour=sleepMinutesSetting();
  s.chunk=s.untilMorning?Math.max(1,Math.min(hour,minutesToMorning()||hour)):hour;
@@ -284,7 +290,7 @@ function hookCtx(){
   getSites:()=>sites,getWorld:getWorld,getPos:getPos,
   getConfig:()=>config,getWorldEntities:()=>config?.worldEntities||[],
   questTable:BAL()?.quests?.()||null,coffeeAtWarteg:coffeeAtWarteg(),
-  timedSleep:!!BAL(),sleeping:()=>!!sleepSession,
+  timedSleep:!!BAL(),sleeping:()=>!!sleepSession,untilMorningOpen:()=>untilMorningOpen(),
   playerId,cityId,dataKey,projectId,
   storage:typeof localStorage!=='undefined'?localStorage:null,
   persist,teleport:(x,z)=>{try{return !!(bridge&&bridge.teleport&&bridge.teleport(x,z));}catch{return false;}},
@@ -614,7 +620,8 @@ function drawStats(){
 function nodeButtons(n){
  if(!n)return '<small>Berjalan ke pin di kota untuk berinteraksi (WASD / panah). Tombol Action di HUD dipakai untuk aksi terdekat.</small>';
  const id=n.id;let entries=[];
- const button=(action,label,args={})=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(args))+'">'+label+'</button>';
+ const button=(action,label,args={},disabled)=>'<button data-life-action="'+action+'" data-args="'+esc(JSON.stringify(args))+'"'+(disabled?' disabled':'')+'>'+label+'</button>';
+ const untilMorningButton=()=>untilMorningOpen()?button('sleep_until_morning','🌙 Tidur sampai pagi'):button('sleep_until_morning','🌙 Tidur sampai pagi (malam saja)',{},true);
  const siblings=authoredAt(n);
  if(siblings.length>1){
   const actions=siblings.map(s=>{
@@ -649,7 +656,7 @@ function nodeButtons(n){
  if(id==='kost')entries=ownsRoom()?
   [button('home_toilet','🚽 WC Kost'),
    ...(furnOk('home_shower')?[button('home_shower','🚿 Mandi Kost')]:[]),
-   ...(furnOk('sleep')?[button('sleep','💤 Tidur Kost'),...(BAL()?[button('sleep_until_morning','🌙 Tidur sampai pagi')]:[])]:[]),
+   ...(furnOk('sleep')?[button('sleep','💤 Tidur Kost'),...(BAL()?[untilMorningButton()]:[])]:[]),
    '<select id="slpItem">'+itemOptions('any')+'</select>',
    ...(furnOk('cook')?[button('cook','🍳 Masak Ikan')]:[]),
    ...(furnOk('cook_recipe')&&kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
@@ -659,7 +666,7 @@ function nodeButtons(n){
    '<select id="slpFridgeItem">'+(state.fridge||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
    button('take_fridge','📦 Ambil dari Kulkas')]:
    [button('buy_room','🏠 Bayar kos (sekali bayar, permanen)')];
- if(id==='tent')entries=[button('sleep','💤 Tidur Tenda'),...(BAL()?[button('sleep_until_morning','🌙 Tidur sampai pagi')]:[])];
+ if(id==='tent')entries=[button('sleep','💤 Tidur Tenda'),...(BAL()?[untilMorningButton()]:[])];
  if(sleepSession&&(id==='tent'||id==='kost'))entries=[sleepBarHtml(),button('wake','☀ Bangun')];
  if(n.religion)entries=[button('worship','🤲 Ibadah '+n.religion,{placeReligion:n.religion})];
  if(id==='course')entries=[button('course','📱 Kursus Online')];
@@ -689,7 +696,7 @@ function hookActionButtons(){
   if(!list.length)return {html:'',spot:''};
   const html=list.map(a=>{
    const price=Number(a.price)>0?(' Rp'+Number(a.price).toLocaleString('id-ID')):'';
-   return '<button data-life-action="'+esc(a.id)+'" data-args="'+esc(JSON.stringify(a.args||{}))+'">'+esc(a.label||a.id)+price+'</button>';
+   return '<button data-life-action="'+esc(a.id)+'" data-args="'+esc(JSON.stringify(a.args||{}))+'"'+(a.disabled?' disabled title="'+esc(a.hint||'')+'"':'')+'>'+esc(a.label||a.id)+price+'</button>';
   }).join('');
   const spot=list.spot||list[0]?.spotLabel||'';
   return {html,spot,list};

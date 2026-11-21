@@ -1128,10 +1128,28 @@
    "code_value": 1,
    "code_ref": "world-builder/semesta-life-play.js speedFactor",
    "note": "New Bot r3 lever (2026-11-22) L3 available but NOT chosen (L1+L2 already meets the targets); set 1.25 to enable +25%"
+  },
+  {
+   "key": "sleep.untilMorningWindowStart",
+   "value": "18:00",
+   "unit": "HH:MM game clock",
+   "source": "keputusan",
+   "code_value": null,
+   "code_ref": "world-builder/semesta-life-play.js startSleep / semesta-life-hooks.js",
+   "note": "New Bot r4 (2026-11-22): \"Tidur sampai pagi\" only at night, window start; outside it the button is disabled \"Tidur sampai pagi (malam saja)\" and only the manual 1-hour sleep works"
+  },
+  {
+   "key": "sleep.untilMorningWindowEnd",
+   "value": "05:00",
+   "unit": "HH:MM game clock",
+   "source": "keputusan",
+   "code_value": null,
+   "code_ref": "world-builder/semesta-life-play.js startSleep / semesta-life-hooks.js",
+   "note": "New Bot r4 (2026-11-22): \"Tidur sampai pagi\" only at night, window end (exclusive: 05:00 is outside); outside it the button is disabled \"Tidur sampai pagi (malam saja)\" and only the manual 1-hour sleep works"
   }
  ],
  "format": "njh-balancing-v1",
- "contentRevision": "slice-1.0-r3",
+ "contentRevision": "slice-1.0-r4",
  "copiedFrom": {
   "file": "/workspace/njh-slice/balancing.json (New Bot, 22 Nov 2026)",
   "doc": "https://docs.google.com/document/d/1zAK1VDPE3AYg_iekJ_v8KC8s2-swlUMHy_jbguItn2o/edit",

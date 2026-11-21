@@ -199,10 +199,15 @@ function info(){
 }
 // r3 levers (table keys with the old behaviour as default when a key is missing).
 function numOr(key,fallback){const n=num(key);return n===undefined?fallback:n;}
-function sleepTuning(){return {untilMorningSpeed:Math.max(1,numOr('sleep.untilMorningSpeed',1))};}
+function sleepTuning(){return {untilMorningSpeed:Math.max(1,numOr('sleep.untilMorningSpeed',1)),
+ // r4: night window for "Tidur sampai pagi" (null = always allowed, the old behaviour)
+ windowStart:hhmm('sleep.untilMorningWindowStart')??null,windowEnd:hhmm('sleep.untilMorningWindowEnd')??null};}
+function untilMorningAllowed(minuteOfDay){const t=sleepTuning();if(t.windowStart===null||t.windowEnd===null)return true;
+ const m=((Number(minuteOfDay)||0)%1440+1440)%1440;
+ return t.windowStart<=t.windowEnd?(m>=t.windowStart&&m<t.windowEnd):(m>=t.windowStart||m<t.windowEnd);}
 function movement(){return {walkEnergyTilesPerUnit:Math.max(1,numOr('movement.walkEnergyTilesPerUnit',8)),
  walkSpeedMultiplier:Math.max(.1,numOr('movement.walkSpeedMultiplier',1))};}
-return Object.freeze({FILE,SETTINGS_MAP,info,ok,has,value,num,numOr,sleepTuning,movement,params:()=>new Map(params()),
+return Object.freeze({FILE,SETTINGS_MAP,info,ok,has,value,num,numOr,sleepTuning,untilMorningAllowed,movement,params:()=>new Map(params()),
  lifeSettings,jobs,fish,lifeEconomy,applyToLifeConfig,quests,clock,holdMs,lockedTemplates,coffeeAt,rp,
  _reset:()=>{doc=null;loadError=null;paramMap=null;sourceUrl=null;}});
 });
