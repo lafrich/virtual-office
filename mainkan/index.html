@@ -105,6 +105,8 @@ body.mainkan-playing #viewport{
 #worldLoading .world-loader-card p{margin:13px 0;line-height:1.4}
 #worldLoading .world-loader-card small{display:block;margin-top:9px;line-height:1.4;color:#4c4c4c}
 #worldLoading .progress{height:19px}
+#worldLoadingPct,#enterLoadingPct{margin-top:6px;font:700 13px Tahoma,sans-serif;color:#1c2441;letter-spacing:.02em}
+#enterLoadingPct{text-align:left;max-width:430px}
 #retryWorld{display:block;margin-top:15px;width:100%;min-height:42px}
 #retryWorld[hidden]{display:none!important}
 
@@ -161,7 +163,7 @@ body.mainkan-playing #viewport{
 <script src="./flow-model.js?v=mainkan-flow-v1" defer></script>
 <script src="./config.js?v=mainkan-20261108" defer></script>
 <script src="./local-character.js?v=test-login-save-2" defer></script>
-<script src="./app.js?v=loading-all-20261122" defer></script>
+<script src="./app.js?v=loading-bar-20261122" defer></script>
 <script src="../shared/hud-layout.js?v=mainkan-hud-20261108" defer></script>
  <script src="./game-hud.js?v=mainkan-hud-edit-20261108" defer></script>
 <script src="./classic-creator.js?v=pakaian-v2" defer></script>
@@ -286,7 +288,7 @@ body.mainkan-playing #viewport{
 <fieldset class="njh-group"><legend>Data karakter</legend><div id="confirmList"></div></fieldset><p id="confirmMessage" class="status"></p><div class="njh-wizard-actions"><button type="button" class="btn" id="confirmBack">&lt; Ubah Karakter</button><span class="spacer"></span><button type="button" class="btn primary" id="confirmGo">Lanjut &gt;</button></div>
 </section>
 <section id="loadingScreen" class="screen" hidden aria-label="Enter World">
-<h1>Masuk ke kota…</h1><p class="muted" id="loadingCopy">Menyiapkan kehidupanmu di Semesta.</p><div class="progress"><div id="enterProgress"></div></div>
+<h1>Masuk ke kota…</h1><p class="muted" id="loadingCopy">Menyiapkan kehidupanmu di Semesta.</p><div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="enterProgress"></div></div><div id="enterLoadingPct">Menunggu aset…</div>
 </section>
 <section id="tutorialScreen" class="screen" hidden aria-label="Cara Main">
 <div class="njh-howto" id="njhHowtoScreen"></div>
@@ -310,7 +312,10 @@ body.mainkan-playing #viewport{
       <div class="world-loader-card">
        <strong>NAMANYA JUGA HIDUP · MEMUAT KOTA</strong>
        <p id="worldLoadingText">Menyiapkan dunia dan karakter Genesis...</p>
-       <div class="progress"><div id="worldProgress"></div></div>
+       <div class="progress" id="worldProgressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="worldLoadingPct">
+        <div id="worldProgress"></div>
+       </div>
+       <div id="worldLoadingPct">0% · 0 aset</div>
        <small id="worldLoadingDetail">Karakter akan muncul setelah semua sprite siap.</small>
         <button type="button" class="btn primary" id="retryWorld" hidden>Coba Muat Ulang Dunia</button>
       </div>

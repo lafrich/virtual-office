@@ -39,7 +39,10 @@ test('Mainkan waits until all needed assets are loaded before play input',()=>{
  assert.match(app,/Input dikunci sampai semua layer sprite siap/);
  assert.match(app,/,60000\)/);
  assert.match(htmlWorld,/loading-all-20261122/);
- assert.match(html,/loading-all-20261122/);
+ assert.match(html,/loading-bar-20261122/);
+ assert.match(html,/id="worldLoadingPct"/);
+ assert.match(app,/player-loading/);
+ assert.match(app,/loaded\+'\/'\+total\+' aset'/);
  assert.match(html,/id="njhStage"/);
  assert.doesNotMatch(html,/njhRotate|Putar HP/);
 });

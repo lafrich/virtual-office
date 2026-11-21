@@ -357,12 +357,15 @@ window.addEventListener('message',e=>{
  }
  if(e.data.type==='mainkan:player-loading'){
   const loaded=Number(e.data.loaded)||0,total=Math.max(1,Number(e.data.total)||1);
-  const pct=Math.max(5,Math.round(100*loaded/total));
+  const pct=Math.max(0,Math.min(99,Math.round(100*loaded/total)));
   $('worldProgress').style.width=pct+'%';
+  const bar=$('worldProgressBar');if(bar)bar.setAttribute('aria-valuenow',String(pct));
+  if($('worldLoadingPct'))$('worldLoadingPct').textContent=pct+'% · '+loaded+'/'+total+' aset';
   $('worldLoading').hidden=false;
   $('worldLoadingText').textContent=e.data.detail||'Menyiapkan semua aset dulu...';
-  $('worldLoadingDetail').textContent=(e.data.stage?('Tahap '+e.data.stage+' · '):'')+loaded+'/'+total+' layer sprite LGR siap.';
-  $('statusText').textContent='SEMESTA • MEMUAT '+String(e.data.stage||'aset').toUpperCase();
+  const lgr=(Number(e.data.lgrTotal)>0)?(' · LGR '+Number(e.data.lgrLoaded||0)+'/'+Number(e.data.lgrTotal)):'';
+  $('worldLoadingDetail').textContent=(e.data.stage?('Tahap '+e.data.stage+' · '):'')+loaded+'/'+total+' aset'+lgr+'.';
+  $('statusText').textContent='SEMESTA • MEMUAT '+pct+'% ('+loaded+'/'+total+')';
  }else if(e.data.type==='mainkan:semesta-ready'){
   if(e.data.characterPending){
    $('worldLoading').hidden=false;
@@ -373,6 +376,8 @@ window.addEventListener('message',e=>{
   }
   worldReady=true;
   $('worldProgress').style.width='100%';
+  const barReady=$('worldProgressBar');if(barReady)barReady.setAttribute('aria-valuenow','100');
+  if($('worldLoadingPct'))$('worldLoadingPct').textContent='100% · siap';
   $('worldLoading').hidden=true;
   $('retryWorld').hidden=true;
   $('cityName').textContent=e.data.city||'SEMESTA • Native World';

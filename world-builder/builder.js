@@ -4896,9 +4896,23 @@ if(playerMode){
    }
    if(performance.now()-reportedAt>350){
     reportedAt=performance.now();
+    const gate=assetGate(rig);
+    const mapCount=(documentMap.objects||[]).filter(o=>o.id!=='__semesta_life_temporary_player__').length;
+    const gameplayActive=window.SemestaLifePlay?.active?.()===true;
+    let loaded=0,total=0;
+    total+=1; if(playerFirstFrameRendered&&gameplayActive) loaded+=1; // engine
+    total+=1; if(mapCount>=1) loaded+=1; // map
+    const interiorsPending=!!njhInteriorsReady&&njhHomeSpawnSettled===false;
+    const room=window.SemestaLifePlay?.state?.()?.housing?.roomId;
+    const who=String(mainkanPlayerId||'').toLowerCase();
+    const needsRoom=['t_ichsan','t_noor','ichsan','noor'].includes(who)&&!!room;
+    const roomReady=!needsRoom||!!window.__njhPlayInteriors?.active?.()?.roomId||!!window.__njhPlayInteriors?.active?.();
+    total+=1; if(!interiorsPending&&(!needsRoom||roomReady)) loaded+=1; // interior / outdoor settle
+    const lgrTotal=Math.max(1,Number(status.total)||0), lgrLoaded=Number(status.loaded)||0;
+    total+=lgrTotal; loaded+=lgrLoaded;
     if(window.parent!==window)window.parent.postMessage({
-     type:'mainkan:player-loading',loaded:status.loaded,total:status.total,
-     stage:assetGate(rig).stage,detail:assetGate(rig).detail
+     type:'mainkan:player-loading',loaded,total,lgrLoaded,lgrTotal,
+     stage:gate.stage,detail:gate.detail
     },location.origin);
    }
    setTimeout(reportPlayerReady,130);

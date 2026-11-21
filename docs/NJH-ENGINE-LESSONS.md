@@ -167,4 +167,6 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Penyebab:** Billboard vertikal menulis depth WebGL di bidang tengah/atas sprite. Daun atau atap yang lebih dekat ke kamera menutupi karakter di depan batang, meski kaki objek lebih jauh.
 - **Aturan:** Urutkan sprite dan aktor menurut `isoFootDepth(x,z,direction)` (sumbu lantai kamera). `isoRenderOrder` di kaki; karakter dapat bias +2 di petak yang sama. Billboard biasa mematikan `depthWrite` (kecuali `studioGroundComposite` / `keepDepthWrite`) supaya `renderOrder` yang menang antarsprite. Tes otomatis di peta outdoor + semua interior.
 - **Cek:** `node --test tests/njh-iso-depth-order.test.cjs`. Screenshot before/after di `/workspace/njh-1122-shots/occlusion/`.
+- **Loading bar (t818u, preview):** layar `#worldLoading` menampilkan persen dan `x/y aset` dari hitungan nyata (engine + peta + interior + layer LGR), bukan animasi palsu ke 100%.
+
 
