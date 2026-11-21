@@ -30,7 +30,9 @@
     bathe: ['home_shower'],
     home_shower: ['home_shower'],
     use_toilet: ['home_toilet'],
-    home_toilet: ['home_toilet']
+    home_toilet: ['home_toilet'],
+    sit: ['rest'],
+    rest: ['rest']
   };
 
   const DEFAULTS = {
@@ -287,7 +289,7 @@
         }
       });
       if (!out.length && act) {
-        const fallback = { open: null, cook: 'cook', wash: 'wash', bathe: 'home_shower', use_toilet: 'home_toilet', sleep: 'sleep' };
+        const fallback = { open: null, cook: 'cook', wash: 'wash', bathe: 'home_shower', use_toilet: 'home_toilet', sleep: 'sleep', sit: 'rest', rest: 'rest' };
         if (fallback[act]) out.push(fallback[act]);
       }
       return out;
@@ -407,6 +409,9 @@
         if (allow.has(actionId)) return null;
         return REASON_PARTNER;
       }
+      // Public interiors (warung, laundry, mushola...) have no housing record.
+      // Guests may use public furniture actions such as sitting on a bench.
+      if (!isRoom(roomId) && acc.canEnter) return null;
       if (!acc.canEnter) return REASON_LOCKED;
       return REASON_LOCKED;
     }

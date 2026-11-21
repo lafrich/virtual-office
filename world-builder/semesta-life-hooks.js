@@ -54,7 +54,13 @@ const FURNITURE_GATES=Object.freeze([
  {id:'bed',kind:'bed',actions:Object.freeze(['sleep']),
   furnitureIds:Object.freeze(['bed']),
   patterns:/kasur|bed|divan|dipan/i,inRoom:true,label:'Kasur',
-  exemptSiteIds:Object.freeze(['tent'])}
+  exemptSiteIds:Object.freeze(['tent'])},
+ {id:'plastic_bench',kind:'plastic_bench',actions:Object.freeze(['rest','sit']),
+  furnitureIds:Object.freeze(['plastic_bench_red','plastic_bench_blue','plastic_bench']),
+  patterns:/plastic_bench|bangku.?plastik/i,inRoom:true,label:'Bangku Plastik'},
+ {id:'waiting_bench',kind:'waiting_bench',actions:Object.freeze(['rest','sit']),
+  furnitureIds:Object.freeze(['waiting_bench']),
+  patterns:/waiting_bench|bangku.?tunggu/i,inRoom:true,label:'Bangku Tunggu'}
 ]);
 const ACTION_LABELS={
  fish:'Mancing',sell_fish:'Jual Ikan',work:'Kerja',scavenge:'Mulung',sell_loak:'Jual Barang',

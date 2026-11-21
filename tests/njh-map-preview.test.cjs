@@ -87,7 +87,7 @@ test('city file uses real keys and is bounded; core + r7 interiors exist',()=>{
  assert.ok(assets.includes('object:njh_kost_cove'));
  assert.equal(doc.map.unbounded,false);
  assert.deepEqual(doc.map.worldBounds,{minX:-57,maxX:-5,minZ:14,maxZ:77});
- const scenes=['njh_kos','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_pecel_lele_tenda','njh_sate_madura_tenda'];
+ const scenes=['njh_kos','njh_warteg_kharisma','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_pecel_lele_tenda','njh_sate_madura_tenda'];
  for(const id of scenes){
   const scene=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/interiors',id+'.interior-scene.json'),'utf8'));
   assert.equal(scene.id,id);
@@ -97,7 +97,7 @@ test('city file uses real keys and is bounded; core + r7 interiors exist',()=>{
  assert.ok(wc.items.some(i=>i.assetId==='sekat_wc'));
 });
 
-test('wires core READY interiors; r7 doors and Warung Kopi stay pending / Belum buka',()=>{
+test('wires core + 7 r7 READY interiors; only Warung Kopi stays pending / Belum buka',()=>{
  const {api}=loadPreview('?njhMap=1');
  const city=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
  const meta=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/njh-map-meta.json'),'utf8'));
@@ -112,23 +112,23 @@ test('wires core READY interiors; r7 doors and Warung Kopi stay pending / Belum 
  const wired=Object.fromEntries(report.wired.map(r=>[r.doorId,r.template]));
  assert.deepEqual(wired,{
   njh_door_laundry:'njh_laundry',
-  njh_door_warung_makan:'njh_warung_makan',
+  njh_door_warung_makan:'njh_warteg_kharisma',
   njh_door_kos_cove_lobby:'njh_kos_cove_lobby',
   njh_door_rumah_biasa:'njh_rumah_biasa',
   njh_door_bengkel:'njh_bengkel',
   njh_door_wc_umum:'njh_wc_mandi_umum',
-  njh_door_minimarket:'njh_minimarket'
- });
- const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
- assert.deepEqual(pending,{
-  njh_door_warung_kopi:'njh_warung_kopi',
-  njh_door_tenda_pecel_lele:'njh_pecel_lele_tenda',
-  njh_door_tenda_sate_madura:'njh_sate_madura_tenda',
+  njh_door_minimarket:'njh_minimarket',
   njh_door_mushola:'njh_mushola',
   njh_door_koperasi:'njh_koperasi',
   njh_door_loak:'njh_toko_loak',
   njh_door_warung_madura:'njh_warung_madura',
-  njh_door_nasi_sunda:'njh_nasi_sunda'
+  njh_door_nasi_sunda:'njh_nasi_sunda',
+  njh_door_tenda_pecel_lele:'njh_pecel_lele_tenda',
+  njh_door_tenda_sate_madura:'njh_sate_madura_tenda'
+ });
+ const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
+ assert.deepEqual(pending,{
+  njh_door_warung_kopi:'njh_warung_kopi'
  });
  for(const id of Object.keys(pending)){
   const door=meta.doors.find(d=>d.doorId===id);
@@ -163,9 +163,9 @@ test('wires core READY interiors; r7 doors and Warung Kopi stay pending / Belum 
  assert.equal(api.resolveTemplate('njh_kos'),'njh_kos_noor');
  const tent=api.nearestEnterable(document.objects,-25.0,38.5,1.25);
  assert.equal(tent.o.id,'njh-tenda-pecel-lele');
- assert.equal(tent.o.njhInteriorPending,true);
+ assert.equal(tent.o.njhInteriorPending,false);
  assert.equal(tent.o.njhInteriorTemplate,'njh_pecel_lele_tenda');
- assert.equal(api.isClosedDoor(tent.o),true);
+ assert.equal(api.isClosedDoor(tent.o),false);
  const far=api.nearestEnterable(document.objects,-26.25,71.5-3,1.25);
  assert.equal(far,null);
  const kos=document.objects.find(o=>o.id==='njh-kos-noor');

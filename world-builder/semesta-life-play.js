@@ -708,7 +708,8 @@ const ACTION_POSE={cook:'cook',eat:'eat',eat_item:'eat',coffee:'drink_coffee',fi
  public_toilet:'wc_squat',home_toilet:'wc_squat',public_shower:'mandi',home_shower:'mandi',wall_pee:'pee_wall',fart:'idle',talk:'talk',
  worship:'pray_generic',charity:'give_sedekah',help:'hand_over',sell_fish:'hand_over',sell_loak:'hand_over',
  store_fridge:'use_storage',take_fridge:'use_storage',store_home:'use_storage',take_home:'use_storage',catch_fruit:'pick_up',
- move_item:'use_storage',shop_buy:'hand_over',buy_token:'hand_over',topup_token:'hand_over',fish_catch:'pick_up'};
+ move_item:'use_storage',shop_buy:'hand_over',buy_token:'hand_over',topup_token:'hand_over',fish_catch:'pick_up',
+ rest:'sit',sit:'sit'};
 const JOB_POSE={manusia_silver:'silver_pose',pak_ogah:'ogah_flag',kang_parkir:'parkir_whistle'};
 function actionPose(action,args){
  if(action==='work')return JOB_POSE[args.jobId]||'talk';
@@ -863,7 +864,8 @@ function runAction(action,args={}){
   const expected='act:'+String(args.activityId||'');
   if(node?.id!==expected||node.placeholder)return {ok:false,reason:'Datangi bangunan aktivitas yang sesuai di Semesta.'};
  }
- if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity','wash','enter_room','enter_closed','exit_interior'].includes(action)&&!node)
+ const seating=action==='rest'&&args&&args.seatId;
+ if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity','wash','enter_room','enter_closed','exit_interior'].includes(action)&&!node&&!seating)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
@@ -873,7 +875,7 @@ function runAction(action,args={}){
   worship:node?.id?.startsWith('prayer_')?node.id:'prayer'
  }[action];
  const inWarteg=(bridge?.interiorKind?.()||root.VLNjhPlayInteriors?.kind?.())==='warteg';
- if(required&&node?.id!==required&&!(action==='eat'&&inWarteg)){
+ if(required&&node?.id!==required&&!(action==='eat'&&inWarteg)&&!seating){
   message('Dekati '+(sites.find(s=>s.id===required)?.label||required)+' dahulu.');return {ok:false,reason:'Lokasi aksi tidak sesuai'};
  }
  if(action==='buy_room'){
