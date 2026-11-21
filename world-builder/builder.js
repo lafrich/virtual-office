@@ -18,7 +18,7 @@ if(playerMode){
   for(const src of [
    '/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/emosi-source.js?v=genesis-player-20261108',
-   '../shared/genesis-player.js?v=pakaian-v2'
+   '../shared/genesis-player.js?v=pakaian-v2-njh-newbot-fix-20261122'
   ]){
    await new Promise((resolve,reject)=>{
     const script=document.createElement('script');script.src=src;script.onload=resolve;
@@ -3320,7 +3320,7 @@ window.SemestaPlay=Object.freeze({
  // Read-only full Semesta directory for Jiwa binding checks and editor previews.
  worldDirectory:()=>documentMap.objects.map(o=>({id:o.id,name:o.name||o.label||'',label:o.label||'',
   type:o.type||'',layer:o.layer||'',subtype:o.subtype||'',asset:o.asset||'',assetId:o.assetId||'',
-  x:Number(o.x)||0,z:Number(o.z)||0,enterable:o.enterable===true})),
+  x:Number(o.x)||0,z:Number(o.z)||0,enterable:o.enterable===true,interactions:Array.isArray(o.interactions)?o.interactions.slice():[],njhInteriorPending:!!o.njhInteriorPending,njhInteriorTemplate:o.njhInteriorTemplate||null,interior:o.interior?{floors:o.interior.floors||[]}:null,njhDoors:o.njhDoors||[],pending:!!o.pending})),
  spawnRespawn:spawnRespawnApi(),
  devicePref:readDevicePref,
  setDevice:(mode,preset)=>{writeDevicePref({mode,preset});applyDevicePreview();return readDevicePref();},

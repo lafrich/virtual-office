@@ -881,7 +881,11 @@ function doorList(){
  try{if(world()?.__njhPlayInteriors?.active?.())return [];}catch{}
  if(typeof S?.enterables==='function'){try{return (S.enterables()||[]).map(d=>({id:'d:'+d.id,x:+d.x,z:+d.z,name:d.name||'Bangunan',sample:false,closed:!!d.closed}));}catch{return [];}}
  let dir=[];try{dir=S?.worldDirectory?.()||[];}catch{}
- const real=dir.filter(o=>o.enterable).map(o=>({id:'d:'+o.id,x:o.x,z:o.z,name:o.name||o.label||'Bangunan',sample:false}));
+ const real=dir.filter(o=>o.enterable||o.njhInteriorTemplate||o.njhInteriorPending||(Array.isArray(o.interactions)&&o.interactions.includes('enter'))).map(o=>{
+   const ready=!!(o.interior&&o.njhInteriorPending!==true)||(Array.isArray(o.njhDoors)&&o.njhDoors.some(d=>d&&d.interior&&!d.pending));
+   const closed=!!(o.closed||o.njhInteriorPending||o.pending||!ready);
+   return {id:'d:'+o.id,x:o.x,z:o.z,name:o.name||o.label||'Bangunan',sample:false,closed};
+  });
  if(real.length||!demo)return real;
  let sites=[];try{sites=life()?.sites?.()||[];}catch{}
  return sites.filter(s=>s&&(!s.placeholder||s.id==='kost')&&SAMPLE_DOORS.test(s.id)&&Number.isFinite(s.x)).map(s=>({id:'d:'+s.id,x:s.x,z:s.z,name:s.label,sample:true}));

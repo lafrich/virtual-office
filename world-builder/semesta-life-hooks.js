@@ -59,7 +59,7 @@ const FURNITURE_GATES=Object.freeze([
 const ACTION_LABELS={
  fish:'Mancing',sell_fish:'Jual Ikan',work:'Kerja',scavenge:'Mulung',sell_loak:'Jual Barang',
  catch_fruit:'Ambil Buah',eat:'Makan',coffee:'Ngopi',tea:'Beli Es Teh',talk:'Ngobrol',arrest:'Tegur Hansip',wall_pee:'Pipis di Tembok',fart:'Kentut',public_toilet:'WC Umum',public_shower:'Mandi Umum',
- buy_room:'Beli Akses Kost',home_toilet:'WC Kost',home_shower:'Mandi Kost',sleep:'Tidur',
+ buy_room:'Bayar kos (sekali bayar, permanen)',home_toilet:'WC Kost',home_shower:'Mandi Kost',sleep:'Tidur',
  cook:'Masak Ikan',cook_recipe:'Masak Resep',store_fridge:'Simpan Kulkas',take_fridge:'Ambil dari Kulkas',
  store_home:'Simpan di Kost',take_home:'Ambil dari Kost',wash:'Cuci',bathe:'Mandi Kost',use_toilet:'WC Kost',
  enter_room:'Masuk',enter_closed:'Belum buka',exit_interior:'Keluar',rest:'Duduk sebentar',help:'Bantu warga',
@@ -160,7 +160,7 @@ function seedMessages(state,config){
  const room=num(config?.settings?.roomPrice,700000);
  state.messages=[
   {from:'Lafrich',text:'Selamat datang di kota! Cari kerja, hemat, kumpulin buat kost.',t:1},
-  {from:'Mak Kost',text:'Kamar kost masih ada, '+rpMoney(room)+' sekali bayar. Kabarin ya.',t:1}
+  {from:'Mak Kost',text:'Kamar kost masih ada, Bayar kos (sekali bayar, permanen) '+rpMoney(room)+'. Kabarin ya.',t:1}
  ];
 }
 function pushMessage(state,from,text){
@@ -347,7 +347,7 @@ function create(ctx){
     push('sleep','Tidur Kost');
     push('cook','Masak Ikan');
     push('cook_recipe','Masak Resep');
-   }else push('buy_room','Beli Akses Kost');
+   }else push('buy_room','Bayar kos (sekali bayar, permanen)');
   }
   else if(id==='tent')push('sleep','Tidur Tenda');
   else if(site.religion)push('worship','Ibadah '+site.religion,{placeReligion:site.religion},{confirm:true,ui:'confirm'});
@@ -640,7 +640,7 @@ function create(ctx){
   const targets=cur==='tenda'?[
    {label:'Level 3',done:lv>=3,info:'Lv '+lv},
    {label:'Tabungan '+rpMoney(room),done:num(state.wallet,0)>=room,info:rpMoney(state.wallet)},
-   {label:'Sewa kamar di Kost',done:!!state.housing?.room,info:'datangi Kost'}
+   {label:'Bayar kos (sekali bayar, permanen)',done:!!state.housing?.room,info:'datangi Kost'}
   ]:[
    {label:'Level 8',done:lv>=8,info:'Lv '+lv},
    {label:'Tabungan Rp150.000.000',done:num(state.wallet,0)>=150000000,info:rpMoney(state.wallet)},
@@ -804,7 +804,8 @@ function create(ctx){
    const id=String(o.id||'');if(!id||seen.has(id))return;seen.add(id);
    let x=num(o.x,0),z=num(o.z,0);
    if(door){try{const p=door(o);if(p&&Number.isFinite(Number(p.x))){x=Number(p.x);z=Number(p.z);}}catch(_e){}}
-   const closed=!!(o.closed||o.njhInteriorPending||o.pending);
+   const ready=!!(o.interior&&o.njhInteriorPending!==true)||(Array.isArray(o.njhDoors)&&o.njhDoors.some(d=>d&&d.interior&&!d.pending));
+   const closed=!!(o.closed||o.njhInteriorPending||o.pending||(o.enterable===true&&!ready));
    out.push({id,name:o.name||o.label||o.asset||o.id||'Bangunan',x,z,
     closed,label:closed?'Belum buka':(o.name||o.label||'Bangunan'),reason:closed?'Belum buka':null});
   };
@@ -814,9 +815,10 @@ function create(ctx){
   const text=o=>[o.id,o.name,o.label,o.asset,o.assetId,o.subtype,o.type,o.njhInteriorTemplate].filter(Boolean).join(' ');
   for(const o of objects){
    if(scavengePat.test(text(o))&&o.enterable!==true&&!o.njhInteriorTemplate&&!o.interior)continue;
-   const hasInterior=!!(o.enterable===true||o.interior?.floors?.length||o.njhInteriorTemplate);
+   const wantsEnter=o.enterable===true||o.njhInteriorTemplate||!!o.interior?.floors?.length||
+    (Array.isArray(o.interactions)&&o.interactions.includes('enter'));
    const playDoor=(o.enterable===true||o.njhInteriorTemplate||o.interior)&& (kostPat.test(text(o))||wartegPat.test(text(o)));
-   if(hasInterior||playDoor)push(o);
+   if(wantsEnter||playDoor)push(o);
   }
   if(typeof ctx.playEnterables==='function'){
    try{for(const o of ctx.playEnterables()||[])if(o)push(o);}catch(_e){}

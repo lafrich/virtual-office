@@ -36,7 +36,7 @@ const DEFAULT_RENDERER="lgr";
 // An explicit ?renderer=v6p remains a developer-only rollback for debugging.
 const RENDERER=(()=>{try{return new URLSearchParams(root.location.search).get("renderer")==="v6p"&&V?"v6p":"lgr"}catch{return DEFAULT_RENDERER}})();
 const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-raster.js","lgr1-motion.js","lgr-skin.js","lgr-wear.js","lgr-actor.js","lgr-db.js","lgr-game.js"]
- .map(f=>"/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2");
+ .map(f=>"/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2-njh-newbot-fix-20261122");
 const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};
 function loadLGR(){
  if(!lgr.wanted)return null;
