@@ -28,7 +28,7 @@ const CDN="/virtual-life-asset-pipeline/media/v6p/";
 const assets=new Map(),pixels=new Map();
 // ── LGR-1 character runtime (default) ───────────────────────────────────────
 // Official LGR-1 base + baked outfits + hair + keyframe motions + Emosi face,
-// rasterised by the pipeline's LGR runtime (joint fill on). Instant rollback to
+// rasterised by the pipeline's LGR runtime (preview: joint mode v2, no 4px fill). Instant rollback to
 // the old V6P sheets: open any page with ?renderer=v6p (remembered on this
 // device; ?renderer=lgr switches back), or set DEFAULT_RENDERER below.
 const DEFAULT_RENDERER="lgr";
@@ -36,7 +36,12 @@ const DEFAULT_RENDERER="lgr";
 // An explicit ?renderer=v6p remains a developer-only rollback for debugging.
 const RENDERER=(()=>{try{return new URLSearchParams(root.location.search).get("renderer")==="v6p"&&V?"v6p":"lgr"}catch{return DEFAULT_RENDERER}})();
 const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-raster.js","lgr1-motion.js","lgr-skin.js","lgr-wear.js","lgr-actor.js","lgr-db.js","lgr-game.js"]
- .map(f=>"/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2");
+ .map(f=>{
+  // Preview: vendored v2 raster (setJointMode('v2'), no JOINT_FILL, no setW4).
+  // Official-9 remains the artist base loaded by lgr-game. Portable to official-9.
+  if(f==="lgr1-raster.js")return "/virtual-office/shared/lgr1-raster-v2.js?v=walk-holes-v2-20261122";
+  return "/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2";
+ });
 const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};
 function loadLGR(){
  if(!lgr.wanted)return null;
@@ -48,7 +53,9 @@ function loadLGR(){
    await new Promise((resolve,reject)=>{const el=root.document.createElement("script");el.src=src;el.onload=resolve;
     el.onerror=()=>reject(Error("LGR runtime "+name+" missing"));root.document.head.appendChild(el)});
   }
-  await root.LGRGame.load();lgr.ready=true;try{root.dispatchEvent(new CustomEvent("lgr-game-ready"))}catch{}
+  await root.LGRGame.load();
+  try{root.LGR1Raster?.setJointMode?.("v2");}catch{}
+  lgr.ready=true;try{root.dispatchEvent(new CustomEvent("lgr-game-ready"))}catch{}
  })().catch(e=>{lgr.error=e;console.warn("LGR runtime failed; using V6P sheets",e);});
  return lgr.promise;
 }
