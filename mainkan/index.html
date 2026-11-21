@@ -154,7 +154,8 @@ body.mainkan-playing #viewport{
 </style>
 <link rel="stylesheet" href="./classic-creator.css?v=desktop-paint-preview-20261108">
 <!-- Windows 98 / Y2K skin + fullscreen play HUD (UI only). -->
-<link rel="stylesheet" href="./njh98.css?v=force-landscape-20261122">
+<script src="./fresh-mode.js?v=joystick-fix-fresh-20261122"></script>
+<link rel="stylesheet" href="./njh98.css?v=joystick-fix-fresh-20261122">
 <script src="../world-builder/pipeline-catalog.js?v=mainkan-20261108" defer></script>
 <script src="../shared/spawn-respawn.js?v=mainkan-20261108" defer></script>
 <script src="/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108" defer></script>
@@ -302,6 +303,7 @@ body.mainkan-playing #viewport{
 <h1 id="customTitle">Screen</h1><p class="muted" id="customDescription"></p><div class="njh-wizard-actions"><span class="spacer"></span><button type="button" class="btn primary" id="customContinue">Lanjut &gt;</button></div>
 </section>
 <section id="gameScreen" class="screen" hidden aria-label="Semesta gameplay">
+  <div id="njhFreshBanner" class="njh-fresh-banner" hidden>PREVIEW · ?fresh=1 · isolated save · no login</div>
   <div class="game-top"><div><strong id="cityName">SEMESTA • Original World</strong>
   <div class="micro" id="worldLabel">Menggunakan renderer dan mekanik Semesta asli</div></div>
   <div class="actions"><button type="button" class="btn compact" id="pauseButton">Ⅱ Menu</button><button type="button" class="btn compact" id="reloadWorld">↻ Reload</button>
