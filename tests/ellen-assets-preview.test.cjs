@@ -101,11 +101,11 @@ test('LGR phase 1 tee_v4 / trousers_v4 strips are registered; phase 2 outfits ar
 
 test('preview cache-bust and service worker are unique for this asset checkpoint',()=>{
  const sw=fs.readFileSync(path.join(VO,'sw.js'),'utf8');
- assert.match(sw,/^\/\* sw v45 /);
+ assert.match(sw,/^\/\* sw v46 /);
  const html=fs.readFileSync(path.join(VO,'mainkan/index.html'),'utf8');
- assert.match(html,/\?v=njh-step2-r7-20261122/);
+ assert.match(html,/\?v=njh-cp3-logic-20261122/);
  const wb=fs.readFileSync(path.join(VO,'world-builder/index.html'),'utf8');
- assert.match(wb,/indonesia-assets\.js\?v=njh-step2-r7-20261122/);
+ assert.match(wb,/indonesia-assets\.js\?v=njh-cp3-logic-20261122/);
  const hub=JSON.parse(fs.readFileSync(path.join(VO,'shared/hub-version.json'),'utf8'));
- assert.equal(hub.build,'hub-20261122-step2-r7');
+ assert.equal(hub.build,'hub-20261122-cp3-logic');
 });

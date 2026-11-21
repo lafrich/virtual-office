@@ -65,11 +65,17 @@ function model(minute){
 }
 function makeClock(initial){
  let clock=normalize(initial);
+ let playerHold=false;
  return {
   get(){return {...clock};},
   snapshot(){return {...clock};},
   tick(realSeconds){clock=advance(clock,realSeconds);return {...clock};},
-  restore(obj){clock=normalize(obj);return {...clock};},
+  restore(obj,src){
+   if(src!=='player'&&playerHold)return {...clock};
+   clock=normalize(obj);
+   playerHold=src==='player';
+   return {...clock};
+  },
   setMinute(value){const n=Number(value);if(Number.isFinite(n))clock.minute=((n%MINUTES)+MINUTES)%MINUTES;return {...clock};},
   setSpeed(value){const n=Number(value);if([1,2,4].includes(n))clock.speed=n;return {...clock};},
   setPaused(value){clock.paused=!!value;return {...clock};},

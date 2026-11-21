@@ -1,7 +1,7 @@
 {
   "schema": "virtual-life-hub-v1",
   "schemaVersion": 1,
-  "build": "hub-20261122-step2-r7",
+  "build": "hub-20261122-cp3-logic",
   "project": {
     "name": "Namanya Juga Hidup: The Game",
     "spokenName": "Namanya Juga Hidup the Game"

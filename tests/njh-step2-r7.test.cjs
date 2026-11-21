@@ -11,11 +11,11 @@ function loadPlay(){
 }
 
 test('STEP 2 tags are unique; LGR pack ?v is unchanged',()=>{
- assert.match(read('sw.js'),/^\/\* sw v45 /);
- assert.match(read('mainkan/index.html'),/\?v=njh-step2-r7-20261122/);
- assert.match(read('mainkan/index.html'),/fresh-mode\.js\?v=njh-step2-r7-20261122/);
+ assert.match(read('sw.js'),/^\/\* sw v46 /);
+ assert.match(read('mainkan/index.html'),/\?v=njh-cp3-logic-20261122/);
+ assert.match(read('mainkan/index.html'),/fresh-mode\.js\?v=njh-cp3-logic-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
- assert.equal(hub.build,'hub-20261122-step2-r7');
+ assert.equal(hub.build,'hub-20261122-cp3-logic');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);
 });
 
