@@ -4,7 +4,7 @@
  */
 (function(g){
 'use strict';
-const PREVIEW_REF='preview/njh-sync-decisions-20261122';
+const PREVIEW_REF='main';
 const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/'+PREVIEW_REF+'/';
 const LOCAL_BASE='./ellen-preview-assets/';
 const PACKS=['indonesia_catalog.json','indonesia_200_catalog.json','indonesia_custom_catalog.json','mainkan_gameplay_catalog.json','ellen_vehicles_15_catalog.json','ellen_wc_v4_catalog.json'];
@@ -95,7 +95,7 @@ async function load(){
      const v=item.variants[dir]||item.variants.sw||item.variants.se;
      if(!v)return null;
      if(/^ellen-/.test(item.pack||''))
-      return LOCAL_BASE+'street_buildings/'+v.file+'?v=njh-ellen-r7-20261122';
+      return LOCAL_BASE+'street_buildings/'+v.file+'?v=njh-newbot-fix-20261122';
      return cacheBust(item,base+'assets/street_buildings/'+v.file);
     }
     return legacy(id,dir);

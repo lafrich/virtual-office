@@ -22,7 +22,7 @@ test('Ellen 15 catalog vehicles are allowlisted with 4-dir PNGs and stay out of 
  const g={};
  vm.runInNewContext(src,{window:g,fetch:async()=>({ok:false,status:404,json:async()=>({})}),console:{warn(){}}});
  const api=g.VLIndonesiaAssets;
- assert.equal(api.PREVIEW_REF,'preview/njh-sync-decisions-20261122');
+ assert.equal(api.PREVIEW_REF,'main');
  assert.equal(api.ALLOWED_TRANSPORT.size,15);
  for(const id of FIFTEEN){
   assert.equal(api.retired({id,file:'pipeline:'+id}),false,id+' should be allowed');
@@ -72,7 +72,9 @@ test('C1 park-bench and park-table use proposal canvas sizes and preview PNGs',(
 
 test('selokan map data and selokan_grill art are not part of this integration',()=>{
  const preview=fs.readFileSync(path.join(VO,'world-builder/njh-map-preview.js'),'utf8');
- assert.match(preview,/Does not edit drain\/selokan cell data/);
+ assert.match(preview,/Drain\/selokan cell data is not edited/);
+ assert.doesNotMatch(preview,/RIPPLE/);
+ assert.doesNotMatch(preview,/sheet_8x1\.png/);
  assert.equal(fs.existsSync(path.join(VO,'world-builder/ellen-preview-assets/street_buildings/props/selokan_grill_sw.png')),false);
  const log=fs.readFileSync(path.join(VO,'world-builder/ellen-preview-assets/INTEGRATION-LOG.txt'),'utf8');
  assert.match(log,/SKIP selokan_grill/);
@@ -99,11 +101,11 @@ test('LGR phase 1 tee_v4 / trousers_v4 strips are registered; phase 2 outfits ar
 
 test('preview cache-bust and service worker are unique for this asset checkpoint',()=>{
  const sw=fs.readFileSync(path.join(VO,'sw.js'),'utf8');
- assert.match(sw,/^\/\* sw v37 /);
+ assert.match(sw,/^\/\* sw v42 /);
  const html=fs.readFileSync(path.join(VO,'mainkan/index.html'),'utf8');
- assert.match(html,/\?v=njh-ellen-r7-20261122/);
+ assert.match(html,/\?v=njh-newbot-fix-20261122/);
  const wb=fs.readFileSync(path.join(VO,'world-builder/index.html'),'utf8');
- assert.match(wb,/indonesia-assets\.js\?v=njh-ellen-r7-20261122/);
+ assert.match(wb,/indonesia-assets\.js\?v=njh-newbot-fix-20261122/);
  const hub=JSON.parse(fs.readFileSync(path.join(VO,'shared/hub-version.json'),'utf8'));
- assert.equal(hub.build,'hub-20261122-ellen-r7');
+ assert.equal(hub.build,'hub-20261122-newbot-fix');
 });

@@ -15,11 +15,19 @@ const TEMPLATE_ALIASES=Object.freeze({
  'njh_kos':'njh_kos_noor'
 });
 const BELUM_BUKA='Belum buka';
+function hasReadyInterior(entry){
+ if(!entry)return false;
+ if(entry.interior&&entry.njhInteriorPending!==true)return true;
+ return Array.isArray(entry.njhDoors)&&entry.njhDoors.some(d=>d&&d.interior&&!d.pending);
+}
 function isClosedDoor(entry){
  if(!entry)return false;
  if(entry.pending===true||entry.njhInteriorPending===true)return true;
  if(Array.isArray(entry.njhDoors)&&entry.njhDoors.length)
   return entry.njhDoors.every(d=>d.pending||!d.interior);
+ const wantsEnter=entry.enterable===true||entry.njhInteriorTemplate||
+  (Array.isArray(entry.interactions)&&entry.interactions.includes('enter'));
+ if(wantsEnter&&!hasReadyInterior(entry))return true;
  return false;
 }
 function usePointOf(entry,obj){
@@ -279,15 +287,10 @@ function hookKebonTiles(){
  if(!api||api.__njhMapPreviewHooked)return;
  const tiles=api.TILES||{};
  const origTile=api.tile?.bind(api);
- const RIPPLE=Object.freeze({
-  sheet:'./ellen-preview-assets/environment/ellen-env-r1/animations/water_sw/sheet_8x1.png',
-  frames:8,frameSize:[64,32],frameDurationMs:120,loopDurationMs:960,
-  applyTo:Object.freeze(['water','river']),
-  note:'Preview-only Kali ripple. Does not edit drain/selokan cell data.'
- });
+ // Do not hook the 8-frame Kali ripple sheet as a tile texture — a 512×32
+ // strip rendered as a repeating terrain tile becomes black/teal boxes.
+ // Drain/selokan cell data is not edited here.
  function tileUrl(name){
-  if((RIPPLE.applyTo||[]).includes(name))
-   return RIPPLE.sheet+'?v=njh-ellen-r7-20261122';
   const file=tiles[name];
   if(!file)return null;
   const leaf=String(file).split('/').pop();
@@ -300,7 +303,7 @@ function hookKebonTiles(){
  }
  try{
   g.VLKebonSirihStyle=Object.freeze({
-   VERSION:api.VERSION,TILES:api.TILES,ROOT:api.ROOT,RIPPLE,
+   VERSION:api.VERSION,TILES:api.TILES,ROOT:api.ROOT,
    tileUrl,tile,category:api.category,eligible:api.eligible,
    pick:api.pick,upgrade:api.upgrade,__njhMapPreviewHooked:true
   });

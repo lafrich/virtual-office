@@ -561,7 +561,7 @@ function nodeButtons(n){
    button('take_home','🎒 Ambil dari Kost'),
    '<select id="slpFridgeItem">'+(state.fridge||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
    button('take_fridge','📦 Ambil dari Kulkas')]:
-   [button('buy_room','🏠 Beli Akses Kost (1×)')];
+   [button('buy_room','🏠 Bayar kos (sekali bayar, permanen)')];
  if(id==='tent')entries=[button('sleep','💤 Tidur Tenda')];
  if(n.religion)entries=[button('worship','🤲 Ibadah '+n.religion,{placeReligion:n.religion})];
  if(id==='course')entries=[button('course','📱 Kursus Online')];

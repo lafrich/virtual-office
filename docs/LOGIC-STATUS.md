@@ -112,7 +112,7 @@ Behaviours are placeholder: idle, a short patrol loop, talk, give quest, stand-a
 | `coffeePrice` | Kopi | 5.000 |
 | `teaPrice` | Es Teh | 3.000 |
 | `tokenPrice` | Token listrik (5 unit) | 20.000 |
-| `roomPrice` | Bayar kos (sekali bayar, permanen) (sekali bayar) | 700.000 |
+| `roomPrice` | Bayar kos (sekali bayar, permanen) | 700.000 |
 | `fridgePrice` | Kulkas | 2.000.000 |
 | `bed` | Kasur | 1.500.000 |
 | `chair` | Kursi | 350.000 |

@@ -37,10 +37,10 @@ const DEFAULT_RENDERER="lgr";
 const RENDERER=(()=>{try{return new URLSearchParams(root.location.search).get("renderer")==="v6p"&&V?"v6p":"lgr"}catch{return DEFAULT_RENDERER}})();
 const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-raster.js","lgr1-motion.js","lgr-skin.js","lgr-wear.js","lgr-actor.js","lgr-db.js","lgr-game.js"]
  .map(f=>{
-  // Preview: vendored v2 raster (setJointMode('v2'), no JOINT_FILL, no setW4).
+  // Package 3 live: vendored v2 raster (setJointMode('v2'), no JOINT_FILL, no setW4).
   // Official-9 remains the artist base loaded by lgr-game. Portable to official-9.
   if(f==="lgr1-raster.js")return "/virtual-office/shared/lgr1-raster-v2.js?v=pkg3-live-20261122";
-  return "/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2";
+  return "/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2-njh-newbot-fix-20261122";
  });
 const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};
 function loadLGR(){

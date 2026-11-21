@@ -168,7 +168,7 @@ function housing(s){
  const targets=cur==='tenda'?[
    {label:'Level '+3,done:lv>=3,info:'Lv '+lv},
    {label:'Tabungan '+rp(room),done:(s.wallet||0)>=room,info:rp(s.wallet)},
-   {label:'Sewa kamar di Kost',done:!!s.housing?.room,info:'datangi Kost'}]:[
+   {label:'Bayar kos (sekali bayar, permanen)',done:!!s.housing?.room,info:'datangi Kost'}]:[
    {label:'Level 8',done:lv>=8,info:'Lv '+lv},
    {label:'Tabungan Rp150.000.000',done:(s.wallet||0)>=150000000,info:rp(s.wallet)},
    {label:'Furnitur: Kasur, Kursi, Kompor, Lemari',done:['bed','chair','stove','wardrobe'].every(x=>furn.includes(x)),info:furn.length+'/4'},
@@ -244,7 +244,7 @@ $('njhMarks')?.addEventListener('click',e=>{const m=e.target.closest('.njh-qmark
 
 /* ================= Nokia extras: Pesan / Lowongan / Tips ================= */
 const inbox={real(){const f=hook('messages');if(!f)return null;try{const v=f();return Array.isArray(v)?v:null;}catch{return null;}},
- list(){const r=this.real();if(r){const extra=ls.get(pk('inbox'),null)||[];return extra.filter(m=>m.sim).concat(r);}fired('messages');return ls.get(pk('inbox'),null)||[{from:'Lafrich',text:'Selamat datang di kota! Cari kerja, hemat, kumpulin buat kost.',t:Date.now()},{from:'Mak Kost',text:'Kamar kost masih ada, '+rp(price('roomPrice'))+' sekali bayar. Kabarin ya.',t:Date.now()}];},
+ list(){const r=this.real();if(r){const extra=ls.get(pk('inbox'),null)||[];return extra.filter(m=>m.sim).concat(r);}fired('messages');return ls.get(pk('inbox'),null)||[{from:'Lafrich',text:'Selamat datang di kota! Cari kerja, hemat, kumpulin buat kost.',t:Date.now()},{from:'Mak Kost',text:'Kamar kost masih ada, Bayar kos (sekali bayar, permanen) '+rp(price('roomPrice'))+'. Kabarin ya.',t:Date.now()}];},
  // UI-only notes (e.g. a SIMULASI job application) are kept beside the real inbox and tagged
  push(from,text){const real=!!this.real();const l=real?(ls.get(pk('inbox'),null)||[]).filter(m=>m.sim):this.list();l.unshift({from,text,t:Date.now(),unread:true,sim:real});ls.set(pk('inbox'),l.slice(0,30));}};
 const JOB_NAMES={pak_ogah:'Bantu Lalu Lintas (Pak Ogah)',manusia_silver:'Manusia Silver',kang_parkir:'Jaga Parkir (Kang Parkir)',kantor_premium:'Kerja Kantor Premium'};
@@ -387,7 +387,7 @@ function indoorOff(){if(indoor){indoor=null;document.body.classList.remove('njh-
 function openKost(d){
  const s=st();
  if(!s.housing?.room){
-  const w=win('njhKost','Kost.exe','<div class="njh-shophead"><b>Kost</b>'+PH+'</div><p>Kamu belum punya kamar. Sewa sekali bayar <b>'+rp(price('roomPrice'))+'</b> (aksi game asli).</p><div class="w98-well micro" id="njhKostMsg">Dompet '+rp(s.wallet)+'</div><div class="njh-row"><button class="btn" data-close type="button">Nanti</button><button class="btn primary" type="button" id="njhKostRent">Sewa Kamar</button></div>',{layer:'hud',cls:'njh-small'});
+  const w=win('njhKost','Kost.exe','<div class="njh-shophead"><b>Kost</b>'+PH+'</div><p>Kamu belum punya kamar. Bayar kos (sekali bayar, permanen) <b>'+rp(price('roomPrice'))+'</b> (aksi game asli).</p><div class="w98-well micro" id="njhKostMsg">Dompet '+rp(s.wallet)+'</div><div class="njh-row"><button class="btn" data-close type="button">Nanti</button><button class="btn primary" type="button" id="njhKostRent">Bayar kos (sekali bayar, permanen)</button></div>',{layer:'hud',cls:'njh-small'});
   w.querySelector('#njhKostRent').onclick=()=>{const r=runReal('buy_room',{});$('njhKostMsg').textContent=resultText(r);if(r.ok)setTimeout(()=>openKost(d),700);};
   return;
  }
