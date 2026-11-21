@@ -59,7 +59,7 @@ const FURNITURE_GATES=Object.freeze([
 const ACTION_LABELS={
  fish:'Mancing',sell_fish:'Jual Ikan',work:'Kerja',scavenge:'Mulung',sell_loak:'Jual Barang',
  catch_fruit:'Ambil Buah',eat:'Makan',coffee:'Ngopi',tea:'Beli Es Teh',talk:'Ngobrol',arrest:'Tegur Hansip',wall_pee:'Pipis di Tembok',fart:'Kentut',public_toilet:'WC Umum',public_shower:'Mandi Umum',
- buy_room:'Bayar kos (sekali bayar, permanen)',home_toilet:'WC Kost',home_shower:'Mandi Kost',sleep:'Tidur',
+ buy_room:'Bayar kos (sekali bayar, permanen)',home_toilet:'WC Kost',home_shower:'Mandi Kost',sleep:'Tidur',sleep_until_morning:'Tidur sampai pagi',wake:'Bangun',
  cook:'Masak Ikan',cook_recipe:'Masak Resep',store_fridge:'Simpan Kulkas',take_fridge:'Ambil dari Kulkas',
  store_home:'Simpan di Kost',take_home:'Ambil dari Kost',wash:'Cuci',bathe:'Mandi Kost',use_toilet:'WC Kost',
  enter_room:'Masuk',enter_closed:'Belum buka',exit_interior:'Keluar',rest:'Duduk sebentar',help:'Bantu warga',
@@ -205,7 +205,9 @@ function questRow(q,state,table){
   if(i>0&&table.slice(0,i).some(p=>((state?.quests||{})[p.id]||{}).state!=='done'))st='locked';
  }
  return {npcId:q.npcId,id:q.id,title:q.title,goal:q.goal,text:q.text,target:q.target,
-  progress:Math.max(0,progress),reward:q.reward,state:st,win:q.win===true||undefined};
+  progress:Math.max(0,progress),reward:q.reward,state:st,win:q.win===true||undefined,
+  // Data hint (content/balancing.json quests[].hint): shown while money is below the threshold (no softlock).
+  hint:q.hint&&(st==='active'||st==='available')&&Number.isFinite(Number(q.hint.walletBelow))&&num(state?.wallet,0)<Number(q.hint.walletBelow)?String(q.hint.text||''):undefined};
 }
 function defaultEmit(ctx,type,detail){
  const payload=Object.assign({type},detail||{});
@@ -360,12 +362,13 @@ function create(ctx){
    if(state?.housing?.room){
     push('home_toilet','WC Kost');
     push('home_shower','Mandi Kost');
-    push('sleep','Tidur Kost');
+    if(ctx.sleeping&&ctx.sleeping())push('wake','Bangun');
+    else{push('sleep','Tidur Kost');if(ctx.timedSleep)push('sleep_until_morning','Tidur sampai pagi');}
     push('cook','Masak Ikan');
     push('cook_recipe','Masak Resep');
    }else push('buy_room','Bayar kos (sekali bayar, permanen)');
   }
-  else if(id==='tent')push('sleep','Tidur Tenda');
+  else if(id==='tent'){if(ctx.sleeping&&ctx.sleeping())push('wake','Bangun');else{push('sleep','Tidur Tenda');if(ctx.timedSleep)push('sleep_until_morning','Tidur sampai pagi');}}
   else if(site.religion)push('worship','Ibadah '+site.religion,{placeReligion:site.religion},{confirm:true,ui:'confirm'});
   else if(id==='course')push('course','Kursus Online');
   else if(id==='help')push('help','Bantu warga');
@@ -736,7 +739,7 @@ function create(ctx){
     const owned=id==='shower'||id==='sink'||id==='squat_toilet'||id==='toilet'||!!(state.furniture||[]).includes(id)||(id==='fridge'&&state.housing?.fridge);
     const acts=[];
     const kind=kindOf(it,gates)||id;
-    if(kind==='bed'||id==='bed')acts.push({act:'sleep',label:'Tidur'});
+    if(kind==='bed'||id==='bed'){acts.push({act:'sleep',label:'Tidur'});if(ctx.timedSleep)acts.push({act:'sleep_until_morning',label:'Tidur sampai pagi'});}
     if(kind==='stove'||id==='stove')acts.push({act:'cook',label:'Masak Ikan'},{act:'cook_recipe',label:'Masak Resep'});
     if(id==='fridge'||kind==='fridge')acts.push({act:'open_fridge',label:'Buka Kulkas'});
     if(kind==='bathroom'||/shower|mandi/.test(id))acts.push({act:'home_shower',label:'Mandi'});
@@ -1127,14 +1130,17 @@ function create(ctx){
   if(!spot||(spot.source!=="temporary"&&Math.hypot(spot.x-pos.x,spot.z-pos.z)>range))return {ok:false,reason:'Dekati dermaga / tempat mancing dahulu.'};
   if((st.inventory||[]).length>=set.bagSlots)return {ok:false,reason:'Tas penuh ('+set.bagSlots+' slot).'};
   if(num(st.energy,0)<set.fishEnergy)return {ok:false,reason:'Energi tidak cukup untuk mancing.'};
-  fishSession={id:'fish-'+(++fishSeq),spotId:spot.id,spotLabel:spot.label,phase:'cast',waits:0,fish:null,progress:0,tension:0.5,miss:0};
+  fishSession={id:'fish-'+(++fishSeq),spotId:spot.id,spotLabel:spot.label,phase:'cast',waits:0,fish:null,progress:0,tension:0.5,miss:0,startElapsed:num(st.elapsedMinutes,0)};
   play('fishing_cast');
   return {ok:true,sessionId:fishSession.id,spotId:spot.id,energyCost:set.fishEnergy,phase:'cast'};
  }
  function finishFish(gotAway,reason){
   const ses=fishSession;fishSession=null;
   if(!ses)return {ok:false,done:true,reason:'Sesi mancing tidak ada.'};
-  const r=econ('fish_catch',gotAway?{gotAway:true,spotId:ses.spotId,spotLabel:ses.spotLabel}:{fishId:ses.fish.id,spotId:ses.spotId,spotLabel:ses.spotLabel});
+  // One time source: the live clock kept running during the minigame; only the rest of fishMinutes is still owed.
+  const fishMinutes=num(cfgN()?.settings?.fishMinutes,12);
+  const minutes=Math.max(0,fishMinutes-Math.max(0,num(getState()?.elapsedMinutes,0)-num(ses.startElapsed,0)));
+  const r=econ('fish_catch',gotAway?{gotAway:true,spotId:ses.spotId,spotLabel:ses.spotLabel,minutes}:{fishId:ses.fish.id,spotId:ses.spotId,spotLabel:ses.spotLabel,minutes});
   const res=r.ok?{ok:true,done:true,sessionId:ses.id,spotId:ses.spotId,gotAway:!!gotAway,
    fishId:gotAway?null:r.fishId,label:gotAway?null:r.label,rarity:gotAway?null:r.rarity,rarityTier:gotAway?null:r.rarityTier,uid:gotAway?null:r.uid}
    :{ok:false,done:true,sessionId:ses.id,gotAway:true,reason:r.reason};
