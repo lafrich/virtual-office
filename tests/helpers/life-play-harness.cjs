@@ -9,7 +9,7 @@ module.exports=function harness(opts={}){
   querySelector:()=>el(),querySelectorAll:()=>[],addEventListener(){},appendChild(c){return c;},setAttribute(){},remove(){},append(){},blur(){}};return e;};
  const document={createElement:el,getElementById:()=>null,querySelector:()=>null,querySelectorAll:()=>[],body:el(),head:el(),addEventListener(){}};
  const win={console,localStorage:ls,document,JiwaLifeEconomy:Life,NJHBalancing:B,location:{href:'http://x/world-builder/index.html'},
-  requestAnimationFrame:()=>0,cancelAnimationFrame(){},performance:{now:()=>Date.now()},addEventListener(){},dispatchEvent(){},CustomEvent:function(t,d){this.type=t;this.detail=d&&d.detail;},
+  requestAnimationFrame:()=>0,cancelAnimationFrame(){},performance:{now:()=>opts.now?opts.now():Date.now()},addEventListener(){},dispatchEvent(){},CustomEvent:function(t,d){this.type=t;this.detail=d&&d.detail;},
   fetch:()=>Promise.reject(new Error('offline')),setTimeout,clearTimeout,URL};
  win.window=win;win.globalThis=win;win.self=win;
  const ctx=vm.createContext(win);

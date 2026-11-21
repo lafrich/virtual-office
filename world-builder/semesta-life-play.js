@@ -59,7 +59,7 @@ const name=o=>[o.name,o.label,o.asset,o.subtype,o.questId,...(Array.isArray(o.ta
 const buildingName=o=>[o.name,o.label,o.type,o.id].filter(Boolean).join(' ');
 let bridge=null,active=false,projectId='',config=RULES?RULES.defaults():null;
 let state=null,sites=[],outer=null,markerGroup=null,nearId='',statusText='',progress=null;
-let walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
+let lastTickAt=0,walkerDistance=0,frameAccumulator=0,timeAccumulator=0,sessionRevision=0,configSource='default',saveQueued=0;
 let publishedCatalog=false; // Separate unconfigured sandbox demo from Jiwa-authored rules
 let hooks=null;
 let bagOpen=false,justWorkedAt=0,lastFaintCount=0;
@@ -1130,14 +1130,19 @@ function checkHansip(){
 }
 function tick(dt){
  if(!active||!state)return;
- if(getHooks()?.isPaused?.())return;
+ if(getHooks()?.isPaused?.()){lastTickAt=0;return;}
  const seconds=Math.max(0,Math.min(.2,Number(dt)||0));
+ // One clock on slow devices: the builder caps dt at 0.05 s per frame but the HUD clock gets the real
+ // frame time (cap 0.5 s). Game time uses the same real frame time so the two never drift apart.
+ const nowMs=(root.performance&&root.performance.now)?root.performance.now():Date.now();
+ const measured=lastTickAt?Math.max(0,(nowMs-lastTickAt)/1000):0;lastTickAt=nowMs;
+ const clockSeconds=Math.min(.5,Math.max(seconds,measured));
  tickLifeNpcs(seconds);
  actorMoved(seconds);
  // While AKSI is held the work action itself advances the session minutes; do not count them twice.
  // A timed sleep carries its own minutes (the sleep rule), so the passive tick pauses too.
- timeAccumulator=(progress||sleepSession)?0:timeAccumulator+seconds;
- if(sleepSession)sleepStep(seconds);
+ timeAccumulator=(progress||sleepSession)?0:timeAccumulator+clockSeconds;
+ if(sleepSession)sleepStep(clockSeconds);
  // Same rate as the visual clock (VLSemestaDayNight), both from clock.realSecondsPerGameMinute.
  const period=Math.max(.05,Number(config.settings.realSecondsPerGameMinute)||8);
  if(timeAccumulator>=period){

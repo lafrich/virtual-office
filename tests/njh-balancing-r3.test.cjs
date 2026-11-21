@@ -71,3 +71,12 @@ test('L3: movement.walkSpeedMultiplier scales the player speed factor the builde
  assert.equal(h.P.speedFactor(),Life.speedFactor(h.P.state())*P['movement.walkSpeedMultiplier']);
  assert.match(read('world-builder/builder.js'),/life\.speedFactor\(\)/);
 });
+
+test('one clock on slow devices: game time follows the real frame time (builder dt is capped at 0.05 s)',()=>{
+ let now=1000;const h=harness({now:()=>now});h.P.start();
+ const t0=h.P.state().elapsedMinutes;
+ // 4 fps for 10 real seconds: each frame the builder passes dt=0.05 but 250 ms really passed
+ for(let i=0;i<40;i++){now+=250;h.P.tick(0.05);}
+ // first frame has no previous timestamp (uses dt), then 39 x 250 ms; the old dt-only clock gave 40 x 0.05 s = 4 min
+ assert.equal(h.P.state().elapsedMinutes-t0,Math.floor((0.05+39*0.25)/SPM));
+});
