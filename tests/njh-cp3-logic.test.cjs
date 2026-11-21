@@ -11,9 +11,9 @@ function identityLabel(spec){
 test('sw v46 and unique CP3 cache / hub tags',()=>{
  const sw=read('sw.js');
  assert.match(sw,/^\/\* sw v46 /);
- assert.match(read('mainkan/index.html'),/\?v=njh-cp3-logic-20261122/);
+ assert.match(read('mainkan/index.html'),/\?v=njh-cp3-confirm-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
- assert.equal(hub.build,'hub-20261122-cp3-logic');
+ assert.equal(hub.build,'hub-20261122-cp3-confirm');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);
 });
 
@@ -80,10 +80,50 @@ test('E at a door does not override other contextual actions; locked door menu i
  assert.match(js,/label:cleanLabel\(doorNearObj\.closed\?'Belum buka':'Masuk'\)/);
 });
 
-test('paid actions go through confirmPaid',()=>{
+test('confirmPaid only asks at >= Rp20.000 or irreversible; small pay toasts −RpX',()=>{
+ const hooks=require(path.join(root,'world-builder/semesta-life-hooks.js'));
+ assert.equal(hooks.CONFIRM_PAID_MIN_FALLBACK,20000);
+ assert.equal(hooks.confirmPaidMin({}),20000);
+ assert.equal(hooks.actionPrice('buy_room',{settings:{roomPrice:750000}},{}),750000);
+
+ const small=hooks.paymentPolicy('eat',2000);
+ assert.equal(small.confirm,false);
+ assert.equal(small.toast,'\u2212Rp2.000');
+ assert.equal(small.min,20000);
+
+ const kos=hooks.paymentPolicy('buy_room',750000);
+ assert.equal(kos.confirm,true);
+ assert.equal(kos.toast,null);
+ assert.equal(kos.irreversible,true);
+
+ const irr=hooks.paymentPolicy('buy_furniture',0);
+ assert.equal(irr.confirm,true);
+ assert.equal(irr.irreversible,true);
+ const irrCheap=hooks.paymentPolicy('buy_fridge',1000,{min:20000});
+ assert.equal(irrCheap.confirm,true);
+
+ const raised=hooks.paymentPolicy('coffee',5000,{min:3000});
+ assert.equal(raised.confirm,true);
+ assert.equal(raised.toast,null);
+ const lowered=hooks.paymentPolicy('buy_token',20000,{min:50000});
+ assert.equal(lowered.confirm,false);
+ assert.equal(lowered.toast,'\u2212Rp20.000');
+ assert.equal(hooks.confirmPaidMin({NJHBalancing:{num:k=>k==='ui.confirmPaidMin'?10000:undefined}}),10000);
+ assert.equal(hooks.confirmPaidMin({NJH_BALANCING:{get:k=>k==='ui.confirmPaidMin'?50000:undefined}}),50000);
+ assert.equal(hooks.confirmPaidMin({NJH_BALANCING:{ui:{confirmPaidMin:15000}}}),15000);
+
  const play=read('world-builder/semesta-life-play.js');
  assert.match(play,/function confirmPaid\(action,args\)/);
+ assert.match(play,/function spendToast\(action,args\)/);
+ assert.match(play,/H\.paymentPolicy\(action,pay,\{root\}\)/);
+ assert.match(play,/if\(!policy\.confirm\)return true;/);
+ assert.match(play,/const spend=spendToast\(action,args\);/);
  assert.match(play,/if\(!confirmPaid\(action,args\)\)return \{ok:false,reason:'Dibatalkan'\}/);
+ assert.equal(fs.existsSync(path.join(root,'content/balancing.json')),false);
+ assert.equal(fs.existsSync(path.join(root,'shared/njh-balancing.js')),false);
+ const guide=read('docs/NJH-CP3-LOGIC-PREVIEW-TEST-GUIDE.md');
+ assert.match(guide,/ui\.confirmPaidMin: 20000/);
+ assert.match(guide,/content\/balancing\.json/);
 });
 
 test('dermaga mancing wins the menu over Pos Hansip when both are in range',()=>{

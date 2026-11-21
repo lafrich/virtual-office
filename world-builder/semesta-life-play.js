@@ -777,18 +777,32 @@ function afterLifeTransition(previous){
  notifyHud();paintPanel();
 }
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
+// New Bot CP3: confirm only for pay >= ui.confirmPaidMin (balancing, fallback 20000)
+// or irreversible actions. Small purchases go straight through with a "−RpX" toast.
+function spendToast(action,args){
+ const H=root.SemestaLifeHooks;
+ const price=(H&&typeof H.actionPrice==='function')?Number(H.actionPrice(action,config,args)||0):0;
+ const tokenPay=['buy_token','topup_token'].includes(action)?Number(config?.settings?.tokenPrice||0):0;
+ const pay=price||tokenPay;
+ if(!(H&&typeof H.paymentPolicy==='function'))return (pay>0&&pay<20000)?'\u2212Rp'+Number(pay).toLocaleString('id-ID'):null;
+ return H.paymentPolicy(action,pay,{root}).toast||null;
+}
 function confirmPaid(action,args){
  if(args&&args.confirmed)return true;
  if(root.__NJH_SKIP_CONFIRM)return true;
- const fn=(typeof root.confirm==='function')?root.confirm:(typeof confirm==='function'?confirm:null);
- if(typeof fn!=='function')return true;
- const price=(root.SemestaLifeHooks&&typeof root.SemestaLifeHooks.actionPrice==='function')
-  ?Number(root.SemestaLifeHooks.actionPrice(action,config,args)||0):0;
+ const H=root.SemestaLifeHooks;
+ const price=(H&&typeof H.actionPrice==='function')?Number(H.actionPrice(action,config,args)||0):0;
  const tokenPay=['buy_token','topup_token'].includes(action)?Number(config?.settings?.tokenPrice||0):0;
  const pay=price||tokenPay;
- if(!(pay>0))return true;
- const label={eat:'makan',coffee:'ngopi',tea:'es teh',public_shower:'mandi umum',charity:'sedekah',buy_room:'bayar kos',buy_fridge:'beli kulkas',buy_token:'isi token',topup_token:'isi token'}[action]||'aksi ini';
- try{return !!fn('Bayar Rp'+Number(pay).toLocaleString('id-ID')+' untuk '+label+'?');}catch{return true;}
+ const policy=(H&&typeof H.paymentPolicy==='function')
+  ?H.paymentPolicy(action,pay,{root})
+  :{confirm:pay>=20000||['buy_room','buy_fridge','buy_furniture'].includes(action),toast:pay>0&&pay<20000?'\u2212Rp'+Number(pay).toLocaleString('id-ID'):null,pay};
+ if(!policy.confirm)return true;
+ const fn=(typeof root.confirm==='function')?root.confirm:(typeof confirm==='function'?confirm:null);
+ if(typeof fn!=='function')return true;
+ const label={eat:'makan',coffee:'ngopi',tea:'es teh',public_shower:'mandi umum',public_toilet:'WC umum',charity:'sedekah',buy_room:'bayar kos',buy_fridge:'beli kulkas',buy_furniture:'beli perabot',buy_token:'isi token',topup_token:'isi token'}[action]||'aksi ini';
+ const msg=pay>0?'Bayar Rp'+Number(pay).toLocaleString('id-ID')+' untuk '+label+'?':'Lanjutkan '+label+'? Tidak bisa dibatalkan.';
+ try{return !!fn(msg);}catch{return true;}
 }
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
@@ -836,7 +850,7 @@ function runAction(action,args={}){
  try{const ui=getHooks()?.openUi?.(action,args);if(ui){paintPanel();return ui;}}catch{}
  if(['store_home','take_home','store_fridge','take_fridge'].includes(action)&&state?.housing?.room&&(state.powerTokens||0)<=0){
   const why='Token listrik habis. Isi token dulu (Rp20.000 / 5 unit).';message('⛔ '+why);return {ok:false,reason:why};}
- if(action==='buy_token'||action==='topup_token'){if(!confirmPaid(action,args))return {ok:false,reason:'Dibatalkan'};const r=getHooks()?.topupToken?.(args.units||5)||{ok:false,reason:'hooks missing'};if(!r.ok)message('⛔ '+r.reason);return r;}
+ if(action==='buy_token'||action==='topup_token'){if(!confirmPaid(action,args))return {ok:false,reason:'Dibatalkan'};const r=getHooks()?.topupToken?.(args.units||5)||{ok:false,reason:'hooks missing'};if(!r.ok)message('⛔ '+r.reason);else{const t=spendToast(action,args);if(t)message(t);}return r;}
  try{if(getHooks())args=getHooks().argsFor(action,args);}catch{}
  try{
   const Access=root.SemestaRoomAccess;
@@ -933,7 +947,9 @@ function runAction(action,args={}){
    if(luck.ok&&luck.changes.some(x=>x.includes('+Rp')||x.includes('NASIB BURUK')))result.changes.push(...luck.changes);
   }
   persist();
-  if(action==='buy_room')message('🏠 Kost dibeli! Respawn berikutnya pindah ke kamar. WC dan mandi pribadi aktif.');
+  const spend=spendToast(action,args);
+  if(spend)message(spend);
+  else if(action==='buy_room')message('🏠 Kost dibeli! Respawn berikutnya pindah ke kamar. WC dan mandi pribadi aktif.');
   else message('✅ '+result.changes.join(' · '));
  }else message('⛔ '+result.reason);
  if(result.ok){const pose=actionPose(action,args);if(pose&&action!=='sleep')try{bridge?.playPose?.(pose,4);}catch{}}

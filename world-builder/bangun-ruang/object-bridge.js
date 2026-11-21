@@ -161,7 +161,7 @@ function imageForBuiltin(id,dir){
   if(!row)return null;
   if(C1_PREVIEW.has(id)){
    const dim=dimensions(id,dir);
-   cache.set(key,{url:C1_ART+id+'_'+dir+'.png?v=njh-cp3-logic-20261122',size:dim.size,pivot:dim.pivot});
+   cache.set(key,{url:C1_ART+id+'_'+dir+'.png?v=njh-cp3-confirm-20261122',size:dim.size,pivot:dim.pivot});
   }else cache.set(key,row.kind==='grok-native'?{url:row.grok.views[dir]?.url||null}:
    row.kind==='fixture'?drawFixture(row,dir):drawOutdoor(row,dir));
  }

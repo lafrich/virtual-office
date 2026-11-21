@@ -145,6 +145,42 @@ function actionPrice(action,config,args){
  }
  return 0;
 }
+// Payment confirm policy (New Bot CP3 decision). Only payments >= ui.confirmPaidMin
+// (balancing.json, fallback 20000) or irreversible actions ask first. Small
+// purchases go straight through with a "−RpX" toast. No tuning numbers here
+// except the documented fallback; the real value lives in content/balancing.json.
+const CONFIRM_PAID_MIN_FALLBACK=20000;
+const IRREVERSIBLE_PAID=Object.freeze(['buy_room','buy_fridge','buy_furniture']);
+function confirmPaidMin(src){
+ const tryNum=v=>{const n=Number(v);return v!==null&&v!==undefined&&v!==''&&Number.isFinite(n)&&n>=0?n:undefined;};
+ const g=src||(typeof globalThis!=='undefined'?globalThis:null)||{};
+ try{
+  const B=g.NJHBalancing;
+  if(B){
+   const n=typeof B.num==='function'?tryNum(B.num('ui.confirmPaidMin')):undefined;
+   if(n!==undefined)return n;
+   const v=typeof B.get==='function'?tryNum(B.get('ui.confirmPaidMin')):(typeof B.value==='function'?tryNum(B.value('ui.confirmPaidMin')):undefined);
+   if(v!==undefined)return v;
+  }
+  const doc=g.NJH_BALANCING;
+  if(doc){
+   const direct=tryNum(doc.ui&&doc.ui.confirmPaidMin);if(direct!==undefined)return direct;
+   const flat=tryNum(doc['ui.confirmPaidMin']);if(flat!==undefined)return flat;
+   if(Array.isArray(doc.params)){const p=doc.params.find(x=>x&&x.key==='ui.confirmPaidMin');const n=tryNum(p&&p.value);if(n!==undefined)return n;}
+   if(typeof doc.get==='function'){const n=tryNum(doc.get('ui.confirmPaidMin'));if(n!==undefined)return n;}
+  }
+ }catch(_e){}
+ return CONFIRM_PAID_MIN_FALLBACK;
+}
+function paymentPolicy(action,price,opts){
+ const pay=Math.max(0,Number(price)||0);
+ const min=opts&&Number.isFinite(Number(opts.min))?Number(opts.min):confirmPaidMin(opts&&opts.root);
+ const irreversible=IRREVERSIBLE_PAID.includes(String(action))||!!(opts&&opts.irreversible);
+ if(!(pay>0)&&!irreversible)return {confirm:false,toast:null,pay:0,min,irreversible:false};
+ const confirm=irreversible||pay>=min;
+ const toast=confirm||!(pay>0)?null:'\u2212Rp'+Number(pay).toLocaleString('id-ID');
+ return {confirm,toast,pay,min,irreversible};
+}
 const QUEST_TABLE=Object.freeze([
  {id:'q_silver',npcId:'job_silver',title:'Modal Cat Silver',text:'Mas, cat silver mahal. Bantu cari modal dulu ya, kerja apa aja.',goal:'Dapatkan Rp5.000 dari kerja',kind:'earn',target:5000,reward:7500},
  {id:'q_ogah',npcId:'job_pak_ogah',title:'Isi Perut Dulu',text:'Ngatur jalan itu capek, Bos. Makan dulu di warteg, abis itu kita ngobrol.',goal:'Makan di warteg 1×',kind:'count',act:'eat',target:1,reward:5000},
@@ -1287,6 +1323,6 @@ function create(ctx){
 
 return Object.freeze({
  RANGE,AUTO_KEY,SLOT_KEY,FURNITURE_GATES,ACTION_LABELS,
- furnitureFromInteriorItems,kindOf,actionPrice,dayFromElapsed,clockFromElapsed,QUEST_TABLE,WALL_PEE,FART,isWallObject,wallPeeFacingRequired,create
+ furnitureFromInteriorItems,kindOf,actionPrice,paymentPolicy,confirmPaidMin,CONFIRM_PAID_MIN_FALLBACK,IRREVERSIBLE_PAID,dayFromElapsed,clockFromElapsed,QUEST_TABLE,WALL_PEE,FART,isWallObject,wallPeeFacingRequired,create
 });
 });

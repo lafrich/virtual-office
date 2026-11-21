@@ -27,7 +27,7 @@ test('window-fit portrait force-renders landscape (no blocking Putar HP gate)',(
  assert.match(css,/njh-force-landscape/);
  assert.match(css,/\.njh-joy\{[^}]*background:transparent/);
  assert.match(css,/filter:opacity\(1\)/);
- assert.match(html,/fresh-mode\.js\?v=njh-cp3-logic-20261122/);
+ assert.match(html,/fresh-mode\.js\?v=njh-cp3-confirm-20261122/);
  assert.match(html,/id="njhFreshBanner"/);
 
  assert.match(css,/rotate\(90deg\) translateY\(-100%\)/);
