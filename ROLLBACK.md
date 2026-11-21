@@ -1,3 +1,38 @@
+# Rollback — STEP 1 live (22 Nov 2026)
+
+Written 2026-11-22 06:26 WIB (Asia/Jakarta). Client UI/JS, Warteg door mapping, unit test, sw/?v bump, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Clock rate tidak diubah.
+
+- Previous live VO `origin/main`: `7ed8f23fe919b3185b049803dd0beaafa259ddf0` (Package 3 A+B, sw v41, `?v=pkg3-live-20261122`)
+- Previous live pipeline `origin/main`: `290828592e6efbc4a1ef334c49157c3c4e744bb1`
+- New Bot approved `preview/njh-sync-decisions-20261122` @ `e418b3d9298ca9cbd3e039e3019d082885b9c6b4` for LIVE, with one condition: restore the Warteg door to `njh_warteg_kharisma` + Ibu Warteg (e418b3d opened `njh_warung_makan` and dropped the NPC).
+- Fix commit on top of e418b3d: `f9f9f52050184562d97937d63416007cdcf60480` — keep official play templates in the load set, remap warteg kind/room to `njh_warteg_kharisma` when that scene is present, lock with a unit test, sw v43, `?v=njh-step1-live-20261122`.
+- Preview branch: `preview/njh-step1-live-20261122` @ the same SHA.
+- Pipeline shipped together (FF only): `c9dc88fab2e5d82a1193a456760418b6e4dc115c` (raised-door PNG/manifest drop-ins + Ellen asset checkpoint).
+- Isi STEP 1: lock 8 pintu r7 + Warung Kopi (`Belum buka`), default tee tamu, Warung Kopi tooltip, plus the Warteg restore above.
+- Gate sebelum push: unit 603 tes, 601 lulus, 0 gagal, 2 dilewati; window-fit 85 cek, 0 terpotong, 0 start error; secret-scan commit diff 0/0/0 (password_assign / token_assign / bearer); tree scan counts only: password_assign 0, token_assign 3, bearer 0, private_key 0; smoke 4-ID 8/8 (Ichsan/Noor/Guest1/Guest2 × desktop + phone landscape) di worker throwaway `localhost:8843` + static `localhost:8923` (bukan :8787, bukan `srv/.dev.vars`); Playwright `?fresh=1`: Warteg E → `njh_warteg_kharisma` + Ibu Warteg terlihat, 8/8 pintu terkunci `Belum buka`, tamu pakai tee. Pages verify: sw v43, `?v=njh-step1-live-20261122`, Warteg + Ibu Warteg, 8 locked doors, 0 raw preview requests, 0 HTTP 4xx.
+
+Cara rollback VO tanpa force-push (kembalikan tree 7ed8f23 dalam satu commit baru). Pipeline, kalau perlu, FF-balik tidak bisa; restore 2908285 juga lewat commit baru atau biarkan (cek dulu):
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git checkout 7ed8f23fe919b3185b049803dd0beaafa259ddf0 -- .
+git commit -m "rollback: STEP 1 live (restore 7ed8f23 tree)"
+# bump sw.js ke v44 supaya HP melepas v43, lalu:
+git push origin HEAD:refs/heads/main
+```
+
+Pipeline rollback (bukan force-push):
+
+```bash
+cd virtual-life-asset-pipeline
+git fetch origin && git checkout main && git pull --ff-only origin main
+git checkout 290828592e6efbc4a1ef334c49157c3c4e744bb1 -- .
+git commit -m "rollback: STEP 1 pipeline (restore 2908285 tree)"
+git push origin HEAD:refs/heads/main
+```
+
+---
+
 # Rollback — Package 3 A+B live (22 Nov 2026)
 
 Written 2026-11-22 05:40 WIB (Asia/Jakarta). Client UI/CSS/JS, loading bar, walk raster hook, tests, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Kendaraan dan clock rate tidak diubah. Pipeline main tidak di-release.
