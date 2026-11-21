@@ -805,7 +805,9 @@ function create(ctx){
    let x=num(o.x,0),z=num(o.z,0);
    if(door){try{const p=door(o);if(p&&Number.isFinite(Number(p.x))){x=Number(p.x);z=Number(p.z);}}catch(_e){}}
    const ready=!!(o.interior&&o.njhInteriorPending!==true)||(Array.isArray(o.njhDoors)&&o.njhDoors.some(d=>d&&d.interior&&!d.pending));
-   const closed=!!(o.closed||o.njhInteriorPending||o.pending||(o.enterable===true&&!ready));
+   const wantsEnter=o.enterable===true||o.njhInteriorTemplate||!!o.interior?.floors?.length||
+    (Array.isArray(o.interactions)&&o.interactions.includes('enter'));
+   const closed=!!(o.closed||o.njhInteriorPending||o.pending||(wantsEnter&&!ready));
    out.push({id,name:o.name||o.label||o.asset||o.id||'Bangunan',x,z,
     closed,label:closed?'Belum buka':(o.name||o.label||'Bangunan'),reason:closed?'Belum buka':null});
   };

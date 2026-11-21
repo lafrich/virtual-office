@@ -39,11 +39,11 @@ test('Mainkan waits until all needed assets are loaded before play input',()=>{
  assert.match(app,/Input dikunci sampai semua layer sprite siap/);
  assert.match(app,/,60000\)/);
  assert.match(htmlWorld,/pkg3-live-20261122/);
- assert.match(html,/pkg3-live-20261122/);
+ assert.match(html,/fresh-mode\.js\?v=njh-step1-lock-r7-20261122/);
  assert.match(html,/id="worldLoadingPct"/);
  assert.match(app,/player-loading/);
  assert.match(app,/loaded\+'\/'\+total\+' aset'/);
- assert.match(html,/pkg3-live-20261122/);
+ assert.match(html,/\?v=njh-step1-lock-r7-20261122/);
  assert.match(html,/id="njhStage"/);
  assert.doesNotMatch(html,/njhRotate|Putar HP/);
 });
@@ -68,7 +68,7 @@ test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entr
  assert.doesNotMatch(shell,/NJH98Mock\?\.enterDoor\(doorNearObj\)/);
  assert.match(shell,/if\(!demo\)return \[\]/);
  assert.match(html,/fresh-mode\.js/);
- assert.match(html,/\?v=njh-newbot-fix-20261122/);
+ assert.match(html,/\?v=njh-step1-lock-r7-20261122/);
  assert.match(shell,/njh-force-landscape/);
 });
 
@@ -150,11 +150,12 @@ test('Genesis is the only player body; all player faces are Emosi.exe sources',(
  assert.match(gen,/if\(!status\.ready\)return false/);
  assert.match(gen,/ctx\.clearRect\(0,0,64,112\);ctx\.drawImage\(work,0,0\)/);
  assert.match(gen,/\["short","swept"\]\.includes/);
- for(const [id,label] of [['topStyle','Tanpa atasan'],['pantsStyle','Tanpa celana']])
-  assert.match(html,new RegExp('<select id="'+id+'"><option value="nude" selected>'+label));
+ assert.match(html,/<select id="topStyle"><option value="nude">Tanpa atasan<\/option><option value="tee" selected>T-shirt/);
+ assert.match(html,/<select id="pantsStyle"><option value="nude">Tanpa celana<\/option><option value="trousers" selected>Trousers/);
  assert.match(html,/<select id="shoesStyle"><option value="nude" selected>Tanpa sepatu<\/option><option value="shoes">Mahluk Shoes/);
- assert.match(gen,/topStyle:"nude",topColor/);
- assert.match(gen,/pantsStyle:"nude",pantsColor/);
+ assert.match(gen,/topStyle:"tee",topColor/);
+ assert.match(gen,/pantsStyle:"trousers",pantsColor/);
+ assert.match(gen,/pantsStyle:"trousers",pantsColor/);
  assert.match(gen,/shoesStyle:"nude",shoesColor/);
  assert.match(gen,/const shoeLast=a\.pantsStyle==="custom"&&a\.shoesStyle!=="custom"/);
  assert.match(gen,/if\(cells\.some\(cell=>!cell\)\)return false/);

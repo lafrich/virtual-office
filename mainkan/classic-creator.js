@@ -197,8 +197,8 @@
   paintOptions();paintSwatches();paintSummary();status('Random look applied');
  }
  function resetLook(){
-  const defaults={hairStyle:'mid_curtain',hairColor:'navy',skinTone:'light',topStyle:'nude',topColor:'white',
-   pantsStyle:'nude',pantsColor:'slate',shoesStyle:'nude',shoesColor:'black',glasses:'none',facialHair:'none'};
+  const defaults={hairStyle:'mid_curtain',hairColor:'navy',skinTone:'light',topStyle:'tee',topColor:'white',
+   pantsStyle:'trousers',pantsColor:'slate',shoesStyle:'nude',shoesColor:'black',glasses:'none',facialHair:'none'};
   for(const [field,val] of Object.entries(defaults))setInput(field,val);
   setBody('genesis_male_nude');paintOptions();paintSwatches();paintSummary();status('Appearance reset');
  }

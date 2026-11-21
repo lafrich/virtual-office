@@ -320,7 +320,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": false,
+   "interiorPending": true,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -527,7 +527,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": false,
+   "interiorPending": true,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -558,7 +558,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": false,
+   "interiorPending": true,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -589,7 +589,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": false,
+   "interiorPending": true,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -620,7 +620,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": false,
+   "interiorPending": true,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -652,7 +652,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": false,
+   "interiorPending": true,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -684,7 +684,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": false,
+   "interiorPending": true,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {

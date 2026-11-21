@@ -103,9 +103,9 @@ test('preview cache-bust and service worker are unique for this asset checkpoint
  const sw=fs.readFileSync(path.join(VO,'sw.js'),'utf8');
  assert.match(sw,/^\/\* sw v42 /);
  const html=fs.readFileSync(path.join(VO,'mainkan/index.html'),'utf8');
- assert.match(html,/\?v=njh-newbot-fix-20261122/);
+ assert.match(html,/\?v=njh-step1-lock-r7-20261122/);
  const wb=fs.readFileSync(path.join(VO,'world-builder/index.html'),'utf8');
- assert.match(wb,/indonesia-assets\.js\?v=njh-newbot-fix-20261122/);
+ assert.match(wb,/indonesia-assets\.js\?v=njh-step1-lock-r7-20261122/);
  const hub=JSON.parse(fs.readFileSync(path.join(VO,'shared/hub-version.json'),'utf8'));
- assert.equal(hub.build,'hub-20261122-newbot-fix');
+ assert.equal(hub.build,'hub-20261122-step1-lock-r7');
 });

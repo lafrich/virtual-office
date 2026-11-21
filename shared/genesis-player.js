@@ -39,7 +39,7 @@ const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-r
  .map(f=>{
   // Package 3 live: vendored v2 raster (setJointMode('v2'), no JOINT_FILL, no setW4).
   // Official-9 remains the artist base loaded by lgr-game. Portable to official-9.
-  if(f==="lgr1-raster.js")return "/virtual-office/shared/lgr1-raster-v2.js?v=pkg3-live-20261122";
+  if(f==="lgr1-raster.js")return "/virtual-office/shared/lgr1-raster-v2.js?v=njh-step1-lock-r7-20261122";
   return "/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2-njh-newbot-fix-20261122";
  });
 const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};
@@ -72,8 +72,8 @@ function normalizeProfile(input){
  // clothes over its custom sheets.
  const sourceLook=SOURCE.bases[input.base].appearance||{};
  const defaults={hairStyle:sourceLook.hair||"none",hairColor:sourceLook.hairColor||"black",
-  skinTone:sourceLook.skin||"light",topStyle:"nude",topColor:sourceLook.topColor||"white",
-  pantsStyle:"nude",pantsColor:sourceLook.pantsColor||"slate",
+  skinTone:sourceLook.skin||"light",topStyle:"tee",topColor:sourceLook.topColor||"white",
+  pantsStyle:"trousers",pantsColor:sourceLook.pantsColor||"slate",
   // Genesis Nude must open with its own immutable Custom Wear barefoot sheet.
   // Native Mahluk black shoes remain opt-in, not silently worn over a nude base.
   shoesStyle:"nude",shoesColor:sourceLook.shoesColor||"black",

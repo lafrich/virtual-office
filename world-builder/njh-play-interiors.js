@@ -17,7 +17,7 @@ const DIR=['sw','se','ne','nw'];
 const TEMPLATES={kost:'njh_kos',warteg:'njh_warteg_kharisma',minimarket:'njh_minimarket'};
 const FALLBACK={warteg:'njh_warung_makan'};
 const ROOM_SCENES=['njh_kos_cove_lobby','njh_kos_ichsan','njh_kos_noor'];
-const PUBLIC_SCENES=['njh_laundry','njh_bengkel','njh_wc_mandi_umum','njh_rumah_biasa','njh_warung_kopi','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_pecel_lele_tenda','njh_sate_madura_tenda'];
+const PUBLIC_SCENES=['njh_laundry','njh_bengkel','njh_wc_mandi_umum','njh_rumah_biasa'];
 const LOBBY_ID='njh_kos_cove_lobby';
 const ACTION_LABELS={sleep:'Tidur',store_fridge:'Simpan Kulkas',take_fridge:'Ambil dari Kulkas',
  store_home:'Simpan di Kost',take_home:'Ambil dari Kost',cook:'Masak Ikan',cook_recipe:'Masak Resep',

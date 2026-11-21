@@ -97,7 +97,7 @@ test('city file uses real keys and is bounded; core + r7 interiors exist',()=>{
  assert.ok(wc.items.some(i=>i.assetId==='sekat_wc'));
 });
 
-test('wires ready interiors including r7 Kharisma doors; no pending r7 templates',()=>{
+test('wires core READY interiors; r7 doors and Warung Kopi stay pending / Belum buka',()=>{
  const {api}=loadPreview('?njhMap=1');
  const city=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
  const meta=JSON.parse(fs.readFileSync(path.join(root,'njh-map-preview/njh-map-meta.json'),'utf8'));
@@ -117,8 +117,11 @@ test('wires ready interiors including r7 Kharisma doors; no pending r7 templates
   njh_door_rumah_biasa:'njh_rumah_biasa',
   njh_door_bengkel:'njh_bengkel',
   njh_door_wc_umum:'njh_wc_mandi_umum',
+  njh_door_minimarket:'njh_minimarket'
+ });
+ const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
+ assert.deepEqual(pending,{
   njh_door_warung_kopi:'njh_warung_kopi',
-  njh_door_minimarket:'njh_minimarket',
   njh_door_tenda_pecel_lele:'njh_pecel_lele_tenda',
   njh_door_tenda_sate_madura:'njh_sate_madura_tenda',
   njh_door_mushola:'njh_mushola',
@@ -127,8 +130,12 @@ test('wires ready interiors including r7 Kharisma doors; no pending r7 templates
   njh_door_warung_madura:'njh_warung_madura',
   njh_door_nasi_sunda:'njh_nasi_sunda'
  });
- const pending=Object.fromEntries(report.pending.map(r=>[r.doorId,r.template]));
- assert.deepEqual(pending,{});
+ for(const id of Object.keys(pending)){
+  const door=meta.doors.find(d=>d.doorId===id);
+  assert.equal(door.interiorPending,true,id+' meta must be pending');
+  assert.ok(api.pendingTemplates.includes(door.interiorTemplate),id+' template is pending');
+  assert.ok(!api.readyTemplates.includes(door.interiorTemplate),id+' template is not ready');
+ }
  for(const row of report.wired){
   const obj=document.objects.find(o=>o.id===row.objectId);
   assert.equal(obj.enterable,true);
@@ -136,6 +143,13 @@ test('wires ready interiors including r7 Kharisma doors; no pending r7 templates
   assert.ok(obj.interior);
   assert.equal(obj.njhInteriorTemplate,row.template);
   assert.deepEqual([obj.njhUsePoint.x,obj.njhUsePoint.z],row.usePoint);
+ }
+ for(const row of report.pending){
+  const obj=document.objects.find(o=>o.id===row.objectId);
+  assert.equal(obj.enterable,true);
+  assert.equal(obj.njhInteriorPending,true);
+  assert.equal(obj.interior,null);
+  assert.equal(api.isClosedDoor(obj),true);
  }
  // Aliases still resolve if a kit string sneaks back in.
  assert.equal(api.resolveTemplate('bangun-ruang kit in br-warung-pecel-lele.json'),'njh_pecel_lele_tenda');
@@ -149,8 +163,9 @@ test('wires ready interiors including r7 Kharisma doors; no pending r7 templates
  assert.equal(api.resolveTemplate('njh_kos'),'njh_kos_noor');
  const tent=api.nearestEnterable(document.objects,-25.0,38.5,1.25);
  assert.equal(tent.o.id,'njh-tenda-pecel-lele');
- assert.equal(tent.o.njhInteriorPending,false);
+ assert.equal(tent.o.njhInteriorPending,true);
  assert.equal(tent.o.njhInteriorTemplate,'njh_pecel_lele_tenda');
+ assert.equal(api.isClosedDoor(tent.o),true);
  const far=api.nearestEnterable(document.objects,-26.25,71.5-3,1.25);
  assert.equal(far,null);
  const kos=document.objects.find(o=>o.id==='njh-kos-noor');
