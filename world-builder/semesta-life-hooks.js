@@ -145,7 +145,7 @@ function actionPrice(action,config,args){
  if(action==='charity')return 1000;
  if(action==='buy_room')return num(s.roomPrice,700000);
  if(action==='buy_fridge')return num(s.fridgePrice,2000000);
- if(action==='buy_token')return num(s.tokenPrice,20000);
+ if(action==='buy_token'||action==='topup_token')return num(s.tokenPrice,20000);
  if(action==='course')return 0;
  if(action==='work'){
   const job=(config?.jobs||[]).find(j=>j.id===args?.jobId);
@@ -513,6 +513,14 @@ function create(ctx){
   try{
    const extra2=step2Actions();
    if(extra2.some(a=>a.id==='fish_start')){for(let i=list.length-1;i>=0;i--)if(list[i].id==='fish')list.splice(i,1);}
+   const fishing=extra2.some(a=>a.id==='fish_start')||list.some(a=>a.id==='fish'||a.id==='fish_start');
+   if(fishing){
+    for(let i=list.length-1;i>=0;i--){
+     const row=list[i],id=String(row.id||row.action||'');
+     const hansip=id==='arrest'||id==='hansip'||/hansip/i.test(row.spotLabel||row.label||'');
+     if(hansip)list.splice(i,1);
+    }
+   }
    for(const a of extra2)if(!list.some(x=>x.id===a.id))list.push(a);
   }catch(_e){}
   const spot=near[0]?.site?.label||near[0]?.site?.id||'';
@@ -1337,7 +1345,7 @@ function create(ctx){
   questMarkers,enterables,worldToScreen,playerPosition,
   hasSave,saveMeta,saveSlot,loadSlot,listSlots,resetSave,
   housing,relationship,roomAccess,
-  inventory,moveItem,eatItem,recipes,cook,shopList,buy,checkoutCart:buy,fishSpots,fishStart,fishInput,sellableFish,sell,token,topupToken,
+  inventory,moveItem,eatItem,recipes,cook,shopList,buy,checkoutCart:buy,fishSpots,fishStart,fishInput,sellableFish,sellList:sellableFish,fishSellList:sellableFish,sell,token,topupToken,
   step2Actions,openUi,tokenWatch,STEP2_UI:['open_fridge','open_storage','cook_menu','shop_minimarket','fish_start','topup_token'],
   RANGE:range,FURNITURE_GATES:gates
  };

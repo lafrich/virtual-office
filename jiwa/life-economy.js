@@ -804,7 +804,7 @@ function doAction(config,previous,action,args={}){
   const fishIds=new Set(allFish(c).map(f=>f.id));
   const fits=(need,sp)=>need.id?need.id===sp:(need.category==='fish'?fishIds.has(sp):itemDef(c,sp)?.category===need.category);
   const needs=r=>(r.ingredients||[]).map(n=>typeof n==='string'?{id:n,qty:1}:{id:n.id,category:n.category,qty:number(n.qty,1,12,1)});
-  // Assign concrete bag items to every need; exact=true means no item may be left over.
+  // Assign concrete items from tas, kulkas, or lemari; exact=true means no leftover in the picked pool.
   const assign=(r,pool,exact)=>{
    const left=pool.slice().sort((a,b)=>(s.itemMeta[a].expiresAt||0)-(s.itemMeta[b].expiresAt||0)),used=[];
    const ordered=needs(r).sort((a,b)=>(a.id?0:1)-(b.id?0:1)); // exact ids before wildcards
@@ -815,21 +815,21 @@ function doAction(config,previous,action,args={}){
    if(exact&&left.length)return null;
    return used;
   };
-  const bag=s.inventory.filter(id=>s.itemMeta[id]);
+  const pantry=[...s.inventory,...(s.fridge||[]),...(s.homeStorage||[])].filter(id=>s.itemMeta[id]);
   let recipe=null,used=null;
   if(args.recipeId){
    recipe=recipes.find(r=>r.id===String(args.recipeId));
    if(!recipe)return reject('Resep tidak ada.');
    if(!known.has(recipe.id))return reject('Resep belum dikenal. Coba eksperimen bahan.');
-   used=assign(recipe,bag,false);
-   if(!used)return reject('Bahan kurang di Tas.');
+   used=assign(recipe,pantry,false);
+   if(!used)return reject('Bahan kurang di Tas, kulkas, atau lemari.');
   }else{
    const picked=(Array.isArray(args.ingredients)?args.ingredients:[]).map(String);
-   if(!picked.length)return reject('Pilih bahan dari Tas.');
+   if(!picked.length)return reject('Pilih bahan dari Tas, kulkas, atau lemari.');
    const pool=[];
    for(const p of picked){
-    const id=bag.includes(p)&&!pool.includes(p)?p:bag.find(x=>s.itemMeta[x].species===p&&!pool.includes(x));
-    if(!id)return reject('Bahan tidak ada di Tas.');pool.push(id);
+    const id=pantry.includes(p)&&!pool.includes(p)?p:pantry.find(x=>s.itemMeta[x].species===p&&!pool.includes(x));
+    if(!id)return reject('Bahan tidak ada di Tas, kulkas, atau lemari.');pool.push(id);
    }
    for(const r of recipes){const u=assign(r,pool,true);if(u){recipe=r;used=u;break;}}
    if(!recipe){out.failed=true;return Object.assign(reject('Kombinasi bahan belum jadi masakan.'),{failed:true});}
@@ -842,8 +842,14 @@ function doAction(config,previous,action,args={}){
   const minExp=number(recipe.minExp,0,100,0);
   const quality=s.experience>=minExp+30&&fresh?'sempurna':s.experience>=minExp+10?'bagus':'biasa';
   const learned=!known.has(recipe.id);
-  if(s.inventory.length-used.length>=setting.bagSlots)return reject('Tas penuh.');
-  for(const id of used){s.inventory.splice(s.inventory.indexOf(id),1);delete s.itemMeta[id];}
+  if(s.inventory.filter(id=>!used.includes(id)).length>=setting.bagSlots)return reject('Tas penuh.');
+  const takeFrom=(arr,id)=>{const i=arr.indexOf(id);if(i>=0)arr.splice(i,1);};
+  for(const id of used){
+   takeFrom(s.inventory,id);
+   if(s.fridge)takeFrom(s.fridge,id);
+   if(s.homeStorage)takeFrom(s.homeStorage,id);
+   delete s.itemMeta[id];
+  }
   clock(number(recipe.durationMinutes,1,600,20));s.powerTokens=Math.max(0,s.powerTokens-1);
   for(const [k,v] of Object.entries(recipe.statEffectsCook||{}))if(['energy','fullness','hygiene','bladder','moral','experience'].includes(k)&&v)stat(k,number(v,-100,100,0));
   const outDef=itemDef(c,recipe.outputItem);

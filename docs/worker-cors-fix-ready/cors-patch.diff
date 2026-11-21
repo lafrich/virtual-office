@@ -1,0 +1,37 @@
+--- a/worker.js
++++ b/worker.js
+@@ -8,16 +8,32 @@
+ import { DurableObject } from "cloudflare:workers";
+ import { mainkanLoginResult } from "./mainkan_test_auth.js";
+ 
+-const ORIGIN = "https://lafrich.github.io";
++// Production allowlist only. Do not add localhost here (lesson 16).
++const ALLOWED_ORIGINS = Object.freeze(["https://lafrich.github.io"]);
++const ORIGIN = ALLOWED_ORIGINS[0];
+ const SEEDS = { ichsan: { nick: "Ichsan", char: { preset: "reference_man" } }, noorz: { nick: "Noor", char: { preset: "noor" } } };
+ const USERS = Object.keys(SEEDS);
+ const TOKEN_TTL = 14 * 24 * 3600;
+ const MAX_MSG = 600, MAX_RATE = 25, ITER = 100000;
+ const enc = new TextEncoder();
+ 
+-const cors = (o) => ({
+-  "Access-Control-Allow-Origin": ORIGIN, "Vary": "Origin",
+-  "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type",
+-  "Access-Control-Max-Age": "86400", ...(o || {}),
++function allowedOrigin(origin) {
++  return ALLOWED_ORIGINS.includes(origin) ? origin : null;
++}
++const cors = (o, reqOrigin) => {
++  const echo = allowedOrigin(reqOrigin);
++  const headers = {
++    "Vary": "Origin",
++    "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
++    "Access-Control-Allow-Headers": "Content-Type",
++    "Access-Control-Max-Age": "86400",
++    ...(o || {}),
++  };
++  if (echo) headers["Access-Control-Allow-Origin"] = echo;
++  return headers;
++};
++const corsFor = (req, extra) => cors(extra, req && req.headers && req.headers.get("Origin"));
++

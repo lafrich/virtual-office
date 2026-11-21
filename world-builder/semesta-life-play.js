@@ -222,7 +222,11 @@ function applyStart(s,id,force){
  base.fridge=make(st.fridge).slice(0,24);base.fridge.forEach(iid=>{base.itemMeta[iid].inFridge=true});
  base.identity=s.identity||base.identity;base.identityChosen=s.identityChosen;
  base.testSeed={id,version:f.profile.version,appliedAt:new Date().toISOString()};
+ const keepClock=(!force&&s.visualClock)?s.visualClock:null;
+ const keepElapsed=(!force&&Number.isFinite(Number(s.elapsedMinutes)))?Number(s.elapsedMinutes):null;
  Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,RULES.stateFrom(base,config));s.testSeed=base.testSeed;
+ if(keepClock)s.visualClock=keepClock;
+ if(keepElapsed!=null)s.elapsedMinutes=keepElapsed;
  return true;
 }
 function persist(){
@@ -236,6 +240,15 @@ function persist(){
   localStorage.setItem(dataKey(),JSON.stringify({schema:1,cityId:projectId,state}));
  }catch{}
 }
+function applyVisualClock(){
+ if(!state||!state.visualClock)return false;
+ try{
+  const c=bridge?.getClock?.();
+  if(!c||typeof c.restore!=='function')return false;
+  c.restore(state.visualClock,'player');
+  return true;
+ }catch{return false;}
+}
 function restore(){
  if(!RULES)return;
  let saved=null;
@@ -243,13 +256,13 @@ function restore(){
  // New saves take their start stats from config (balancing start.* when loaded).
  state=RULES.stateFrom(saved||{},config);
  if(saved&&saved.testSeed)state.testSeed=saved.testSeed;
+ if(saved&&saved.visualClock)state.visualClock=saved.visualClock;
  if(!saved)freshClock();
- if(state.visualClock){
-  try{bridge?.getClock?.()?.restore?.(state.visualClock);}catch{}
- }
+ applyVisualClock();
  const id=playerId(),rev=sessionRevision;
  if(id)startProfilesReady.then(()=>{if(!active||rev!==sessionRevision)return;
   if(applyStart(state,id,false)){
+    applyVisualClock();
     persist();
     try{
      if(state.housing?.roomId&&bridge?.spawnAtOwnRoom)bridge.spawnAtOwnRoom();
@@ -262,7 +275,7 @@ function restore(){
 function freshClock(){
  const B=BAL(),c=B?.clock?.();
  if(!c||!Number.isFinite(c.newGameStartMinute))return;
- try{bridge?.getClock?.()?.restore?.({day:1,minute:c.newGameStartMinute,speed:1,paused:false});}catch{}
+ try{bridge?.getClock?.()?.restore?.({day:1,minute:c.newGameStartMinute,speed:1,paused:false},'player');}catch{}
  if(state)state.visualClock={day:1,minute:c.newGameStartMinute,speed:1,paused:false};
 }
 function resetSave(){
@@ -570,13 +583,16 @@ function placeMarkers(){
  disposeMarkers();
 }
 function nearest(){
- const p=getPos();let found=null,dist=2.5;
+ const p=getPos();let found=null,dist=2.5,fish=null,fishD=2.5;
  for(const s of sites){
   const d=Math.hypot(p.x-s.x,p.z-s.z);
   // Same-object actions share one physical spot; prefer an authored
   // activity as the default Action, with every sibling available in panel.
   if(d<dist-(s.activityId?-.04:0)){found=s;dist=d;}
+  if((s.id==='fish'||s.action==='fish'||s.kind==='fish')&&d<=2.5&&d<fishD){fish=s;fishD=d;}
  }
+ // Dermaga mancing sits inside Hansip's radius; a real fishing spot wins the menu.
+ if(fish&&found&&found.id==='hansip')return fish;
  return found;
 }
 // Several Jiwa activities and world rules can legitimately use one real
@@ -685,11 +701,9 @@ function nodeButtons(n){
    '<select id="slpItem">'+itemOptions('any')+'</select>',
    ...(furnOk('cook')?[button('cook','🍳 Masak Ikan')]:[]),
    ...(furnOk('cook_recipe')&&kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
-    button('cook_recipe','🍳 Masak Resep')]:[]),button('store_fridge','🧊 Simpan Kulkas'),button('store_home','📦 Simpan di Kost'),
-   '<select id="slpHomeItem">'+(state.homeStorage||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
-   button('take_home','🎒 Ambil dari Kost'),
-   '<select id="slpFridgeItem">'+(state.fridge||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
-   button('take_fridge','📦 Ambil dari Kulkas')]:
+    button('cook_recipe','🍳 Masak Resep')]:[]),
+   ...(furnOk('open_fridge')||true?[button('open_fridge','🧊 Buka Kulkas')]:[]),
+   ...(furnOk('open_storage')||true?[button('open_storage','📦 Buka Lemari')]:[])]:
    [button('buy_room','🏠 Bayar kos (sekali bayar, permanen)')];
  if(id==='tent')entries=[button('sleep','💤 Tidur Tenda'),...(BAL()?[untilMorningButton()]:[])];
  if(sleepSession&&(id==='tent'||id==='kost'))entries=[sleepBarHtml(),button('wake','☀ Bangun')];
@@ -813,6 +827,9 @@ function stepWorkHold(){
  if(!progress||!active)return;
  const pct=Math.max(0,Math.min(1,(performance.now()-progress.started)/progress.needed));
  const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width=(pct*100)+'%';
+ const job=config?.jobs?.find(j=>j.id===(progress.jobId||nearest()?.jobId));
+ const jobLabel=job?.label||'Kerja';
+ try{root.dispatchEvent?.(new CustomEvent('mainkan:work-progress',{detail:{progress:pct,label:jobLabel,done:pct>=1}}));}catch{}
  if(pct>=1)finishWorkHold();
 }
 function startWorkHold(ev){
@@ -844,6 +861,9 @@ function startWorkHold(ev){
 function workDown(ev){return startWorkHold(ev);}
 function workUp(ev){
  if(!progress)return;
+ const job=config.jobs?.find(j=>j.id===nearest()?.jobId);
+ const pct=clamp((performance.now()-progress.started)/progress.needed,0,1);
+ try{root.dispatchEvent?.(new CustomEvent('mainkan:work-progress',{detail:{progress:pct,label:job?.label||'Kerja',done:false}}));}catch{}
  progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
  const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width='0%';
 }
@@ -890,7 +910,12 @@ function kitchenRecipes(){
 function cookRecipe(args){
  const nodeHere=nearest();
  if(nodeHere?.id!=='kost')return {ok:false,reason:'Dekati kost dahulu.'};
- if(!ownsRoom()||!state.furniture.includes('stove'))return {ok:false,reason:'Masak membutuhkan kost dan kompor.'};
+ const stoveHere=()=>{
+  if((state.furniture||[]).includes('stove'))return true;
+  try{if((bridge?.interiorFurniture?.()||[]).some(f=>f.kind==='stove'||f.id==='stove'||f.furnitureId==='stove'||f.assetId==='stove'))return true;}catch{}
+  return false;
+ };
+ if(!ownsRoom()||!stoveHere())return {ok:false,reason:'Masak membutuhkan kost dan kompor.'};
  if((state.powerTokens||0)<1)return {ok:false,reason:'Token listrik habis.'};
  const a=kitchenRecipes().find(x=>x.id===String(args.activityId||''));
  if(!a)return {ok:false,reason:'Resep belum ada di katalog Jiwa.'};
@@ -933,6 +958,19 @@ function snapToSeat(args){
   try{bridge?.teleport?.(x,z);}catch{}
  }
  try{bridge?.playPose?.('sit',8);}catch{}
+}
+function confirmPaid(action,args){
+ if(args&&args.confirmed)return true;
+ if(root.__NJH_SKIP_CONFIRM)return true;
+ const fn=(typeof root.confirm==='function')?root.confirm:(typeof confirm==='function'?confirm:null);
+ if(typeof fn!=='function')return true;
+ const price=(root.SemestaLifeHooks&&typeof root.SemestaLifeHooks.actionPrice==='function')
+  ?Number(root.SemestaLifeHooks.actionPrice(action,config,args)||0):0;
+ const tokenPay=['buy_token','topup_token'].includes(action)?Number(config?.settings?.tokenPrice||0):0;
+ const pay=price||tokenPay;
+ if(!(pay>0))return true;
+ const label={eat:'makan',coffee:'ngopi',tea:'es teh',public_shower:'mandi umum',charity:'sedekah',buy_room:'bayar kos',buy_fridge:'beli kulkas',buy_token:'isi token',topup_token:'isi token'}[action]||'aksi ini';
+ try{return !!fn('Bayar Rp'+Number(pay).toLocaleString('id-ID')+' untuk '+label+'?');}catch{return true;}
 }
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
@@ -996,7 +1034,7 @@ function runAction(action,args={}){
  try{const ui=getHooks()?.openUi?.(action,args);if(ui){paintPanel();return ui;}}catch{}
  if(['store_home','take_home','store_fridge','take_fridge'].includes(action)&&state?.housing?.room&&(state.powerTokens||0)<=0){
   const why='Token listrik habis. Isi token dulu (Rp20.000 / 5 unit).';message('⛔ '+why);return {ok:false,reason:why};}
- if(action==='buy_token'||action==='topup_token'){const r=getHooks()?.topupToken?.(args.units||5)||{ok:false,reason:'hooks missing'};if(!r.ok)message('⛔ '+r.reason);return r;}
+ if(action==='buy_token'||action==='topup_token'){if(!confirmPaid(action,args))return {ok:false,reason:'Dibatalkan'};const r=getHooks()?.topupToken?.(args.units||5)||{ok:false,reason:'hooks missing'};if(!r.ok)message('⛔ '+r.reason);return r;}
  try{if(getHooks())args=getHooks().argsFor(action,args);}catch{}
  try{
   const Access=root.SemestaRoomAccess;
@@ -1088,6 +1126,7 @@ function runAction(action,args={}){
  if(action==='worship'&&node){args={...args,placeReligion:node.religion};}
  if(action==='sleep'&&BAL()&&!args.__timed)return startSleep(args,!!args.untilMorning);
  if(action==='sleep'){args={...args};delete args.__timed;delete args.untilMorning;}
+ if(!confirmPaid(action,args))return {ok:false,reason:'Dibatalkan'};
  const prior=state;
  const result=action==='cook_recipe'?cookRecipe(args):RULES.run(config,state,action,args);
  if(result.ok){
@@ -1241,6 +1280,11 @@ function checkHansip(){
  if(publishedCatalog)return;
  if(!active||!state||state.detained||state.arrestGraceMinutes>0||state.moral>=config.settings.arrestMoralThreshold)return;
  const p=getPos();
+ try{
+  const hooks=getHooks();
+  const spots=(typeof hooks?.fishSpots==='function'?hooks.fishSpots():[])||[];
+  if(spots.some(s=>s&&s.source!=='temporary'&&Math.hypot((Number(s.x)||0)-p.x,(Number(s.z)||0)-p.z)<=(hooks.RANGE||2.5)))return;
+ }catch(_e){}
  const witness=(getWorld().objects||[]).find(o=>/hansip|satpam|security.guard/i.test(name(o))&&
   Math.hypot((Number(o.x)||0)-p.x,(Number(o.z)||0)-p.z)<4)||
   sites.find(n=>n.id==='hansip'&&Math.hypot(n.x-p.x,n.z-p.z)<4);
@@ -1339,7 +1383,7 @@ function start(){
  publishedCatalog=!!gameCatalog?.updatedAt;
  config=RULES.normalize(withBalancing({...defaults(),activities:gameCatalog?.activities||[],
   worldEntities:gameCatalog?.worldEntities||[]}));
- configSource=publishedCatalog?'JIWA AUTHORING':'SANDBOX DEMO';restore();buildSites();makeRoot();attachNokia();
+ configSource=publishedCatalog?'JIWA AUTHORING':'SANDBOX DEMO';restore();applyVisualClock();buildSites();makeRoot();attachNokia();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
  message('🎮 Play Mode aktif. '+(ownsRoom()?'Respawn di kost':'Mulai sebagai hobo; respawn dari tenda pinggiran kota')+'.');
@@ -1460,6 +1504,8 @@ const api=Object.freeze({attach,start,stop,active:visible,persist,state:()=>stat
  fishStart:hookApi('fishStart',{ok:false,reason:'hooks missing'}),
  fishInput:hookApi('fishInput',{ok:false,reason:'hooks missing'}),
  sellableFish:hookApi('sellableFish',{ok:false,reason:'hooks missing',items:[]}),
+ sellList:hookApi('sellableFish',{ok:false,reason:'hooks missing',items:[]}),
+ fishSellList:hookApi('sellableFish',{ok:false,reason:'hooks missing',items:[]}),
  sell:hookApi('sell',{ok:false,reason:'hooks missing'}),
  token:hookApi('token',null),
  topupToken:hookApi('topupToken',{ok:false,reason:'hooks missing'}),
