@@ -3,7 +3,9 @@
 /* NJH slice-1.0 time-to-kos estimate. Drives the REAL engine (jiwa/life-economy.js +
  * world-builder/semesta-life-hooks.js quests) with the numbers from content/balancing.json.
  * Real time = travel + hold-to-work + action animations + menu overhead (all from the table's sim.* rows).
- * Usage: node tools/njh-slice-sim.cjs [--profile normal|cepat|awam] [--runs 200] [--sleep instant|realtime] [--json]
+ * Sleep (New Bot r2): one sleep = sleep.actionMinutes game min on the normal clock (30 s real); the player uses
+ * "Tidur sampai pagi" when every job quota is used up. --sleep instant is kept only for comparison.
+ * Usage: node tools/njh-slice-sim.cjs [--profile normal|cepat|awam] [--runs 200] [--sleep realtime|instant] [--json]
  */
 const path=require('path');
 const R=path.join(__dirname,'..');
@@ -11,12 +13,15 @@ const B=require(path.join(R,'shared/njh-balancing.js'));
 const Life=require(path.join(R,'jiwa/life-economy.js'));
 const Hooks=require(path.join(R,'world-builder/semesta-life-hooks.js'));
 const arg=(k,d)=>{const i=process.argv.indexOf(k);return i>0?process.argv[i+1]:d;};
-const PROFILE=arg('--profile','normal'),RUNS=Number(arg('--runs',200)),SLEEP=arg('--sleep','instant');
+const PROFILE=arg('--profile','normal'),RUNS=Number(arg('--runs',200)),SLEEP=arg('--sleep','realtime');
 const RSPM=B.num('clock.realSecondsPerGameMinute');
 const TRAVEL=B.num('sim.travelSeconds.'+PROFILE),OVER=B.num('sim.overheadPct.'+PROFILE)/100,WALK=B.num('sim.walkSpeed');
+// Energy a trip costs (walk units + passive drain) -> a sensible player keeps two trips in reserve.
 const ANIM_S=4; // pose/animation seconds for a non-hold action (njh98 progress window ~4 s)
 const cfg=Life.normalize(B.applyToLifeConfig(Life.defaults()));
 const S=cfg.settings;
+const PER_MOVE=Math.floor(WALK*TRAVEL*1.3/8)+Math.ceil(TRAVEL*1.3/RSPM/S.passiveEnergyMinutes);
+const LOW_E=Math.max(20,10+2*PER_MOVE);
 function mulberry(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function once(seed){
  const rnd=mulberry(seed);
@@ -32,27 +37,30 @@ function once(seed){
   if(Life.workBlock(cfg,st,job))return false;real+=m*RSPM;const r=Life.run(cfg,st,'work',{jobId:job});if(r.ok){st=r.state;sessions++;}return r.ok;};
  const siteOf={pak_ogah:'job_pak_ogah',kang_parkir:'job_kang_parkir',manusia_silver:'job_silver'};
  const sleepUntil=(energy,toMorning)=>{go('tent');let guard=0;
-  while(guard++<30){
+  while(guard++<24){
    const hhmm=(st.elapsedMinutes+st.clockOrigin)%1440;
    const morning=toMorning&&!(hhmm>=S.dayStartMinute&&hhmm<S.dayStartMinute+60);
    if(st.energy>=energy&&!morning)break;
    const r=Life.run(cfg,st,'sleep',{});if(!r.ok)break;st=r.state;sleeps++;
-   tick(SLEEP==='realtime'?S.sleepMinutes*RSPM:ANIM_S);
+   if(SLEEP==='realtime')real+=S.sleepMinutes*RSPM;else tick(ANIM_S);
   }};
  const needs=()=>{
   if(st.restMinutes>0){while(st.restMinutes>0)tick(15);go('tent');}
   if(st.bladder>=75){go('wc');if(!act('public_toilet',{facilityId:'wc'}).ok)act('wall_pee',{});}
   if(st.fullness<=25&&st.wallet>=S.wartegMealPrice){go('warung');act('eat',{place:'warteg'});}
-  if(st.energy<=20){if(st.wallet>=S.coffeePrice+40000&&st.bladder<60&&rnd()<.3){go('warung');act('coffee',{});}else sleepUntil(85,false);}
+  if(st.energy<=LOW_E){if(st.wallet>=S.coffeePrice+40000&&st.bladder<60&&rnd()<.3){go('warung');act('coffee',{});}else sleepUntil(85,false);}
  };
  const quest=()=>{const rows=H.quests();return rows.find(r=>r.state!=='done');};
+ const mulungLoak=()=>{const id=st.inventory.find(i=>st.itemMeta[i]?.species==='barang_bekas');
+  if(id){go('loak');return act('sell_loak',{itemId:id}).ok;}
+  go('scavenge');return act('scavenge',{}).ok;};
  const npcSite={job_pak_ogah:'job_pak_ogah',hansip:'hansip',job_kang_parkir:'job_kang_parkir',loak:'loak',pasar_ikan:'pasar_ikan',job_silver:'job_silver',kost:'kost'};
  let guard=0;
  while(!st.housing.room&&guard++<4000){
-  needs();
+  needs();if(process.env.SIMDEBUG&&guard%200===0)console.error("it",guard,real.toFixed(0),st.wallet,st.energy,st.fullness,st.restMinutes,quest()?.id,JSON.stringify(st.actionCounts),st.faintCount);
   const q=quest();
   if(q&&q.state==='available'){go(npcSite[q.npcId]);H.acceptQuest(q.npcId,q.id);tick(ANIM_S);continue;}
-  if(q&&q.state==='ready'){go(npcSite[q.npcId]);const t=H.turnInQuest(q.npcId,q.id);tick(ANIM_S);log.push([+(real*(1+OVER)/60).toFixed(1),q.id,st.wallet]);continue;}
+  if(q&&q.state==='ready'){go(npcSite[q.npcId]);const t=H.turnInQuest(q.npcId,q.id);tick(ANIM_S);if(t&&t.ok)log.push([+(real*(1+OVER)/60).toFixed(1),q.id,st.wallet]);continue;}
   if(q&&q.state==='active'){
    const id=q.id;
    if(id==='q1_makan'){go('warung');if(act('eat',{place:'warteg'}).ok)continue;}
@@ -60,13 +68,15 @@ function once(seed){
    if(id==='q3_parkir'){go('job_kang_parkir');work('kang_parkir');continue;}
    if(id==='q4_loak'){const n=st.inventory.filter(i=>st.itemMeta[i]?.species==='barang_bekas').length;
     if(n<1){go('scavenge');act('scavenge',{});continue;}go('loak');act('sell_loak',{itemId:st.inventory.find(i=>st.itemMeta[i]?.species==='barang_bekas')});continue;}
-   if(id==='q5_mandi'){go('bath');if(act('public_shower',{facilityId:'bath'}).ok)continue;}
+   if(id==='q5_mandi'){if(st.wallet<S.publicShowerFee){if(mulungLoak())continue;}else{go('bath');if(act('public_shower',{facilityId:'bath'}).ok)continue;}}
    if(id==='q6_ogah'){go('job_pak_ogah');work('pak_ogah');continue;}
    if(id==='q7_ikan'){const fish=st.inventory.filter(i=>['lele','nila','mujair'].includes(st.itemMeta[i]?.species));
     const junk=st.inventory.filter(i=>st.itemMeta[i]?.species==='sapu_sapu');
     // fish.spoilMinutes 180 = 90 real s on the one clock: a normal player sells each catch right away.
     for(const i of st.inventory.slice()){const info=Life.activeItem(cfg,st,i);if(info.ok&&info.fish&&info.spoiled)st=Life.run(cfg,st,'discard_item',{itemId:i}).state;}
-    if(fish.length+junk.length<1){go('dock');act('fish',{spotId:'dock',roll:rnd()});continue;}
+    const need=Math.max(1,(q.target||3)-(q.progress||0));
+    if(fish.length+junk.length<Math.min(need,3)&&st.energy>S.fishEnergy+5){go('dock');if(act('fish',{spotId:'dock',roll:rnd()}).ok)continue;}
+    if(!fish.length&&!junk.length){go('dock');act('fish',{spotId:'dock',roll:rnd()});continue;}
     const sellable=fish[0]||junk[0];go(fish[0]?'pasar_ikan':'siomay');act('sell_fish',{itemId:sellable,buyerId:fish[0]?'pasar_ikan':'siomay_batagor'});continue;}
    if(id==='q8_silver'){if(st.hygiene<10){go('bath');act('public_shower',{facilityId:'bath'});continue;}go('job_silver');work('manusia_silver');continue;}
    if(id==='q10_kos'&&st.wallet>=S.roomPrice){go('kost');act('buy_room',{});continue;}
@@ -74,7 +84,8 @@ function once(seed){
   // grind: best job with quota left (Ogah, then Parkir, then Silver when clean enough)
   const order=st.hygiene>=30?['pak_ogah','kang_parkir','manusia_silver']:['pak_ogah','kang_parkir'];
   const job=order.find(j=>!Life.workBlock(cfg,st,j));
-  if(job){go(siteOf[job]);let n=0;while(n++<40&&st.energy>20&&st.bladder<75&&(st.fullness>25||(st.wallet<S.wartegMealPrice&&st.fullness>3))&&work(job)){} if(st.hygiene<25){go('bath');act('public_shower',{facilityId:'bath'});}continue;}
+  if(!job&&st.wallet<S.wartegMealPrice&&st.energy>S.scavengeEnergy+2&&mulungLoak())continue;
+  if(job){go(siteOf[job]);let n=0;while(n++<40&&st.energy>LOW_E&&st.bladder<75&&(st.fullness>25||st.wallet<S.wartegMealPrice)&&work(job)){} if(st.hygiene<25){go('bath');act('public_shower',{facilityId:'bath'});}continue;}
   const blocked=order.map(j=>Life.workBlock(cfg,st,j));
   if(blocked.every(b=>/Kuota/.test(b||'')))sleepUntil(60,true);else sleepUntil(85,false);
  }

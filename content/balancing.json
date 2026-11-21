@@ -858,12 +858,12 @@
   },
   {
    "key": "fish.spoilMinutes",
-   "value": 180,
+   "value": 720,
    "unit": "menit game",
-   "source": "kode",
+   "source": "keputusan",
    "code_value": 180,
    "code_ref": "jiwa/life-economy.js:23",
-   "note": ""
+   "note": "New Bot 2026-11-22: 720 game min (6 real min) so a catch survives the walk to Pasar Ikan on the one clock"
   },
   {
    "key": "help.minutes",
@@ -1101,7 +1101,7 @@
   }
  ],
  "format": "njh-balancing-v1",
- "contentRevision": "slice-1.0-r1",
+ "contentRevision": "slice-1.0-r2",
  "copiedFrom": {
   "file": "/workspace/njh-slice/balancing.json (New Bot, 22 Nov 2026)",
   "doc": "https://docs.google.com/document/d/1zAK1VDPE3AYg_iekJ_v8KC8s2-swlUMHy_jbguItn2o/edit",
@@ -1171,7 +1171,11 @@
    "goal": "Kebersihan minimal 60",
    "kind": "stat",
    "stat": "hygiene",
-   "target": 60
+   "target": 60,
+   "hint": {
+    "text": "Belum cukup uang? Mulung dulu, jual ke Babeh Loak.",
+    "walletBelowParam": "facility.publicShower.price"
+   }
   },
   {
    "id": "q6_ogah",

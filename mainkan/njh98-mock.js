@@ -217,7 +217,7 @@ function openQuest(qm){
  const o=qm.npc||{};const me=N.playerPos();
  if(me&&Math.hypot((o.x||0)-me.x,(o.z||0)-me.z)>6){N.toast('Dekati '+(o.name||'NPC')+' dulu.');return;}
  // real quest data for this NPC wins: quests() → [{npcId,id,title,goal,target,progress,reward,state:'available'|'active'|'ready'|'done'}]
- let hq=null;const hookQ=hook('quests');if(hookQ){try{const ids=new Set([String(o.id),String(qm.npcId||'')]);hq=(hookQ()||[]).find(x=>ids.has(String(x.npcId)))||null;}catch{}}
+ let hq=null;const hookQ=hook('quests');if(hookQ){try{const ids=new Set([String(o.id),String(qm.npcId||'')]);const rows=(hookQ()||[]).filter(x=>ids.has(String(x.npcId)));hq=rows.find(x=>['active','ready','available'].includes(x.state))||rows.filter(x=>x.state==='done').pop()||rows[0]||null;}catch{}}
  if(!hq)fired('quests');
  const q=hq?{...questFor(o),...hq,text:hq.text||questFor(o).text,kind:'count'}:questFor(o);const all=ls.get(pk('quests'),{});const s=st();
  const rec=hq?(hq.state==='available'?null:{state:hq.state}):all[o.id];
@@ -226,7 +226,7 @@ function openQuest(qm){
  let html='<div class="njh-quest"><b class="njh-qicon'+(ready?' ready':'')+'">'+(ready?'?':'!')+'</b><div><p><b>'+esc(o.name||'NPC')+':</b> “'+esc(q.text)+'”</p>'+
   '<fieldset class="njh-group"><legend>'+esc(q.title)+(hq?'':' '+SIM)+'</legend><p>Tujuan: '+esc(q.goal)+'</p>'+
   (rec&&rec.state!=='done'?'<div class="njh-bar njh-bar-lg"><i style="width:'+pct+'%"></i></div><p class="micro">'+(q.kind==='earn'?rp(Math.max(0,prog))+' / '+rp(q.target):Math.max(0,Math.round(prog))+' / '+q.target)+'</p>':'')+
-  '<p class="micro">Hadiah: '+rp(q.reward)+' ke dompet simulasi · reputasi warga +15</p></fieldset></div></div><div class="njh-row">';
+  (hq&&hq.hint&&hq.state!=='done'?'<p class="micro njh-qhint">💡 '+esc(hq.hint)+'</p>':'')+'<p class="micro">Hadiah: '+rp(q.reward)+' ke dompet simulasi · reputasi warga +15</p></fieldset></div></div><div class="njh-row">';
  if(!rec)html+='<button class="btn" type="button" data-close>Nanti</button><button class="btn primary" type="button" id="njhQAccept">Terima</button>';
  else if(rec.state==='done')html+='<span class="micro">Quest sudah selesai. Makasih!</span><button class="btn primary" type="button" data-close>OK</button>';
  else html+='<button class="btn" type="button" data-close>Tutup</button><button class="btn primary" type="button" id="njhQTurnIn"'+(ready?'':' disabled')+'>? Serahkan</button>';
