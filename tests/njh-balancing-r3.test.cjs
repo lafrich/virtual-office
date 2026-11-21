@@ -19,7 +19,7 @@ function loaderWith(mutate){
 }
 
 test('r3 table revision and lever keys are read from the file (old defaults when missing)',()=>{
- assert.match(FILE.contentRevision,/^slice-1\.0-r3$/);
+ assert.match(FILE.contentRevision,/^slice-1\.0-r[3-9]$/);
  for(const k of ['sleep.untilMorningSpeed','movement.walkEnergyTilesPerUnit','movement.walkSpeedMultiplier'])assert.ok(k in P,k);
  assert.equal(B.sleepTuning().untilMorningSpeed,P['sleep.untilMorningSpeed']);
  assert.equal(B.movement().walkEnergyTilesPerUnit,P['movement.walkEnergyTilesPerUnit']);

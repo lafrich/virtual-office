@@ -46,12 +46,14 @@ function once(seed){
  // Sleep like the game: "Tidur sampai pagi" (hourly, sleep.untilMorningSpeed x faster) always runs to 06:00.
  // Tired during the day: the player uses it and presses Bangun once energy is full. Quota used up: sleep to 06:00.
  const toMorning=()=>{const hhmm=(st.elapsedMinutes+st.clockOrigin)%1440;return (S.dayStartMinute-hhmm+1440)%1440;};
- const sleepHour=fast=>{const left=toMorning();const m=left>0&&left<S.sleepMinutes?left:S.sleepMinutes;
+ // r4: the fast mode is only available inside the night window (sleep.untilMorningWindow*); outside it, manual 1-hour sleeps (30 s).
+ const fastOpen=()=>B.untilMorningAllowed((st.elapsedMinutes+st.clockOrigin)%1440);
+ const sleepHour=()=>{const fast=fastOpen();const left=toMorning();const m=fast&&left>0&&left<S.sleepMinutes?left:S.sleepMinutes;
   const r=Life.run(cfg,st,'sleep',m<S.sleepMinutes?{minutes:m}:{});if(!r.ok)return false;st=r.state;sleeps++;
   if(SLEEP==='realtime')real+=m*RSPM/(fast?FAST:1);else tick(ANIM_S);return true;};
  const sleepUntil=(energy,toMorningMode)=>{go('tent');let guard=0;
   if(toMorningMode&&toMorning()===0)return;
-  do{if(!sleepHour(true))break;}while(guard++<26&&toMorning()!==0&&(toMorningMode||st.energy<100));
+  do{if(!sleepHour())break;}while(guard++<26&&toMorning()!==0&&(toMorningMode||st.energy<100));
  };
  const needs=()=>{
   if(st.restMinutes>0){while(st.restMinutes>0)tick(15);go('tent');}

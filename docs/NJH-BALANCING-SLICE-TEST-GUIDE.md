@@ -1,7 +1,7 @@
 # NJH balancing slice-1.0 — test guide (New Bot)
 
-Preview branch `preview/njh-balancing-20261122`, sw v44, assets `?v=njh-balancing-r3-20261122`.
-All numbers come from `content/balancing.json` (contentRevision `slice-1.0-r3`). Edit that file + reload to retune; nothing is hardcoded.
+Preview branch `preview/njh-balancing-20261122`, sw v44, assets `?v=njh-balancing-r4-20261122`.
+All numbers come from `content/balancing.json` (contentRevision `slice-1.0-r4`). Edit that file + reload to retune; nothing is hardcoded.
 
 ## Start from zero
 1. Open the preview with `?fresh=1` (if the fresh-start stream is on your build). If not: use an incognito window / Guest, or clear site data — an empty save starts the same way (Day 1, 06:30, Rp15.000, energy 80, fullness 50, hygiene 50, moral 50, no kos — values from `start.*` in the table).
@@ -14,7 +14,7 @@ All numbers come from `content/balancing.json` (contentRevision `slice-1.0-r3`).
 - **Kantor (premium):** shows “Belum buka” (frozen for this slice).
 - **Warung Kopi door:** “Belum buka”. Coffee is bought at the Warteg (button in the warteg panel / interior).
 - **Prices:** Warteg Rp12.000, Loak buys Rp4.000, fish per v2.1 (Pasar Ikan pays more than Bang Siomay). Fish rot after 720 game min (= 6 real min). Fishing minigame time runs on the live clock and is not counted twice.
-- **Sleep (r2):** one *Tidur* = 60 game minutes on the normal clock (30 real s) with a progress bar; *Bangun* (or walking) wakes you anytime, counting only the minutes slept. *Tidur sampai pagi* always continues hour by hour to 06:00 (energy just caps at 100; stop anytime with *Bangun* or walking), 8× faster (each hour ≈ 3.75 s, 8 hours ≈ 30 s; `sleep.untilMorningSpeed`), still applying energy/hygiene/hunger per hour. Tent: energy +30, hygiene −2 per hour. **Faint** (energy 0): 2 real minutes bed rest, wallet −10% (max Rp20.000).
+- **Sleep (r2):** one *Tidur* = 60 game minutes on the normal clock (30 real s) with a progress bar; *Bangun* (or walking) wakes you anytime, counting only the minutes slept. *Tidur sampai pagi* works only at night, 18:00–05:00 (`sleep.untilMorningWindowStart/End`; outside it the button shows disabled “Tidur sampai pagi (malam saja)” and only the manual 1-hour *Tidur* works). Inside the window it always continues hour by hour to 06:00 (energy just caps at 100; stop anytime with *Bangun* or walking), 8× faster (each hour ≈ 3.75 s, 8 hours ≈ 30 s; `sleep.untilMorningSpeed`), still applying energy/hygiene/hunger per hour. Tent: energy +30, hygiene −2 per hour. **Faint** (energy 0): 2 real minutes bed rest, wallet −10% (max Rp20.000).
 - **No softlock:** with Rp0, Mulung → Babeh Loak (Rp4.000/item) always works; quest 5 shows “Belum cukup uang? Mulung dulu, jual ke Babeh Loak.” while you can't pay the shower. After a faint at Rp0 you can still mulung.
 - **Drain (r3):** energy −2/hour, hunger −4/hour (−2 every 30 min), hygiene −1.5/hour; walking costs 1 energy per 16 tiles (`movement.walkEnergyTilesPerUnit`). Walk speed unchanged (`movement.walkSpeedMultiplier` = 1).
 - **Toilet accident:** hygiene penalty only, no moral loss.
