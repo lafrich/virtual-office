@@ -26,20 +26,24 @@ test('mainkan onboarding and native Semesta iframe exist',()=>{
  assert.doesNotMatch(app,/world\.json/);
  assert.doesNotMatch(app,/drawTerrain|drawObject|function blocked\(/);
 });
-test('Mainkan enters playable landscape world before slow Genesis art completes',()=>{
+test('Mainkan waits until all needed assets are loaded before play input',()=>{
  const htmlWorld=read('world-builder/index.html');
  assert.match(semesta,/playerFirstFrameRendered=true/);
- assert.match(semesta,/gameplayActive&&playerFirstFrameRendered/);
- assert.match(semesta,/characterPending:!rig\.state\?\.loaded/);
+ assert.match(semesta,/function assetGate\(/);
+ assert.match(semesta,/__njhPlayInputLocked=true/);
+ assert.match(semesta,/characterPending:false/);
+ assert.match(semesta,/Memuat interior, furnitur, dan NPC kamar/);
  assert.match(semesta,/mainkan:player-character-ready/);
  assert.match(app,/e\.data\.characterPending/);
  assert.match(app,/mainkan:player-character-error/);
- assert.match(app,/\},18000\)/);
- assert.match(htmlWorld,/mainkan-startup-20261115/);
- assert.match(html,/landscape-startup-unblock-20261115/);
+ assert.match(app,/Input dikunci sampai semua layer sprite siap/);
+ assert.match(app,/,60000\)/);
+ assert.match(htmlWorld,/loading-all-20261122/);
+ assert.match(html,/loading-all-20261122/);
  assert.match(html,/id="njhStage"/);
  assert.doesNotMatch(html,/njhRotate|Putar HP/);
 });
+
 
 test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entry',()=>{
  const interiors=read('world-builder/njh-play-interiors.js');

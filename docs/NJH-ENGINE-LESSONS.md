@@ -153,3 +153,18 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Perbaikan:** Di HP (`pointer:coarse`) + potret, bungkus shell di `#njhStage`, tukar ukuran menjadi (tinggi viewport × lebar viewport), lalu `rotate(90deg) translateY(-100%)`. Tidak ada overlay/alertdialog. Joystick, `fitWin`, dan marker memakai `clientToStage` / `localRect` supaya koordinat pointer ikut terpetakan. Landscape asli dan desktop tidak diputar. `screen.orientation.lock('landscape')` tetap dicoba setelah gestur fullscreen, gagal dengan tenang.
 - **Aturan:** Jangan kembalikan gerbang blocking atau bypass "Lanjut bermain". Window-fit 390×844 harus menampilkan game landscape yang diputar, tanpa crop.
 - **Cek:** `node --test tests/njh98-window-fit.test.cjs`; `node mainkan/tools/njh98-window-fit.mjs` (390×844 = stage ter-rotate, semua jendela tanpa crop); e2e `tests/mainkan-native-semesta.e2e.cjs` menuntut force-landscape di potret dan tanpa transform di landscape.
+
+## 21. Layar loading harus menunggu SEMUA aset sebelum input
+
+- **Error:** Dunia bisa dimainkan (loader hilang, input hidup) begitu frame WebGL pertama dan hook Jiwa siap, meski sheet LGR/Genesis, interior/furnitur, atau spawn kamar masih pending (`characterPending`). Ichsan t814u minta loading sampai semua termuat. Smoke 4-ID Ichsan/Noor sempat memotret kamar hitam hanya karena dialog spawn di atas canvas yang belum selesai.
+- **Penyebab:** `reportPlayerReady` mengirim `mainkan:semesta-ready` dengan `characterPending:!rig.state?.loaded`, dan `app.js` menyembunyikan `#worldLoading` saat itu. `scheduleNjhHomeSpawn` async setelah `loadAssets()`; loader tidak menunggu.
+- **Aturan:** Jangan buka input / jangan sembunyikan loader sebelum gerbang aset lolos: frame pertama, hook Jiwa aktif, peta punya objek, `njhHomeSpawnSettled` (interior+furnitur+NPC kamar kalau pemilik kost), dan `rig.state.loaded` (semua layer LGR). `characterPending` pada `semesta-ready` selalu `false`. Input dikunci lewat `__njhPlayInputLocked`. Kalau gagal: tombol Coba Muat Ulang (timeout 60 dtk), jangan hang tanpa ujung. Gaya jendela tetap njh98 Win98/Y2K.
+- **Cek:** `tests/mainkan-smoke.test.cjs` (tes "waits until all needed assets"). Di preview, pemain kost tidak masuk dunia hitam; progress menyebut tahap engine/map/interior/lgr.
+
+## 22. Urutan gambar iso memakai kaki objek, bukan tengah sprite
+
+- **Error:** Pohon, tenda, fasad, dan furnitur interior sering tergambar di depan karakter yang berdiri di depan tapak objek itu (Ichsan t814u, "problem kaya biasa").
+- **Penyebab:** Billboard vertikal menulis depth WebGL di bidang tengah/atas sprite. Daun atau atap yang lebih dekat ke kamera menutupi karakter di depan batang, meski kaki objek lebih jauh.
+- **Aturan:** Urutkan sprite dan aktor menurut `isoFootDepth(x,z,direction)` (sumbu lantai kamera). `isoRenderOrder` di kaki; karakter dapat bias +2 di petak yang sama. Billboard biasa mematikan `depthWrite` (kecuali `studioGroundComposite` / `keepDepthWrite`) supaya `renderOrder` yang menang antarsprite. Tes otomatis di peta outdoor + semua interior.
+- **Cek:** `node --test tests/njh-iso-depth-order.test.cjs`. Screenshot before/after di `/workspace/njh-1122-shots/occlusion/`.
+

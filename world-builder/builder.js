@@ -3,6 +3,7 @@
  * Official characters and buildings come from the asset pipeline; GPT props remain optional.
  * Intentionally separate from production: no auth, economy or NPC side effects.
  */
+import { isoFootDepth, isoRenderOrder } from './njh-iso-depth.js';
 const $=id=>document.getElementById(id);
 // mainkan.exe reuses the native Semesta renderer, assets, physics and Jiwa play runtime.
 // Player entry is read-only and cannot enter authoring modes.
@@ -1623,6 +1624,42 @@ function registerBigOccluder(root,o){
  if(!materials.size)return;
  bigOccluders.set(o.id,{root,box:new THREE.Box3(),materials,alpha:1});
  refreshBigOccluder(o.id);
+}
+function applyIsoFootDepth(){
+ const dir=direction||{x:1,z:1};
+ const skip=node=>node?.userData?.studioGroundComposite||node?.userData?.keepDepthWrite;
+ function applyMat(node,order){
+  if(!node?.isMesh)return;
+  node.renderOrder=order;
+  const mats=Array.isArray(node.material)?node.material:[node.material];
+  for(const mat of mats){
+   if(!mat||skip(node))continue;
+   if(mat.userData._isoDepth==null)mat.userData._isoDepth=mat.depthWrite!==false;
+   if(mat.depthWrite){mat.depthWrite=false;mat.needsUpdate=true;}
+  }
+ }
+ for(const entry of billboardSprites){
+  const root=entry.root,plane=entry.plane;
+  if(!root||!plane)continue;
+  applyMat(plane,isoRenderOrder(root.position.x,root.position.z,dir,0));
+ }
+ try{
+  const furn=window.__njhPlayInteriors?.furniture?.()||[];
+  for(const f of furn){
+   const root=f.root||f.mesh||f.object;
+   if(!root)continue;
+   const x=Number(f.x??root.position?.x)||0,z=Number(f.z??root.position?.z)||0;
+   const order=isoRenderOrder(x,z,dir,0);
+   if(root.traverse)root.traverse(n=>applyMat(n,order));
+   else applyMat(root,order);
+  }
+ }catch{}
+ const id=cameraFollowId||walkActorId||LIFE_TEST_ACTOR_ID;
+ const holder=rigs.get(id);
+ if(holder?.root){
+  const order=isoRenderOrder(holder.root.position.x,holder.root.position.z,dir,2);
+  holder.root.traverse(n=>applyMat(n,order));
+ }
 }
 function updateLargeOcclusion(dt){
  const id=cameraFollowId||(mode==='walk'?walkActorId:null)||
@@ -3523,10 +3560,12 @@ if(playerMode){
  window.addEventListener('mainkan:resume',onLifePause);
 }
 
-let njhInteriorsReady=null,njhHomeSpawnTicket=0;
+let njhInteriorsReady=null,njhHomeSpawnTicket=0,njhHomeSpawnSettled=false;
+function markHomeSpawnSettled(){njhHomeSpawnSettled=true;}
 function scheduleNjhHomeSpawn(){
- if(!playerMode||!njhInteriorsReady)return false;
+ if(!playerMode||!njhInteriorsReady){markHomeSpawnSettled();return false;}
  const ticket=++njhHomeSpawnTicket;
+ njhHomeSpawnSettled=false;
  Promise.all([njhInteriorsReady,window.SemestaLifePlay?.startProfiles?.()||Promise.resolve()])
  .then(([I])=>{
   if(ticket!==njhHomeSpawnTicket||mode!=='walk'||!I)return;
@@ -3545,7 +3584,8 @@ function scheduleNjhHomeSpawn(){
   window.__semestaLastSpawn={ok:true,kind:'home',roomId:room,playExitTent:false,
    point:{x:holder?.root?.position.x||0,z:holder?.root?.position.z||0},reason:'owned-room'};
   window.SemestaLifePlay?.onSpawn?.(window.__semestaLastSpawn);
- }).catch(err=>console.warn('NJH room spawn',err));
+ }).catch(err=>console.warn('NJH room spawn',err))
+ .finally(()=>{if(ticket===njhHomeSpawnTicket)markHomeSpawnSettled();});
  return true;
 }
 function bootNjhPlayInteriors(){
@@ -4704,7 +4744,7 @@ window.addEventListener('keydown',e=>{
   e.target instanceof HTMLTextAreaElement||e.target?.isContentEditable)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();restoreStack(undoStack,redoStack);}
   else if(playerMode&&e.key.toLowerCase()==='e'&&mode==='walk'&&!e.repeat){
-   e.preventDefault();if(!window.SemestaLifePlay?.handleAction?.())tell('Tidak ada interaksi di dekatmu.');
+   e.preventDefault();if(window.__njhPlayInputLocked)return;if(!window.SemestaLifePlay?.handleAction?.())tell('Tidak ada interaksi di dekatmu.');
   }
  else if(e.key.toLowerCase()==='h'){toggleGrid();}
  else if(e.key==='Delete'&&item())remove();
@@ -4803,18 +4843,35 @@ if(playerMode){
   // The Genesis PNG/LGR layers are downloaded asynchronously; never freeze
   // the entire game just because a character atlas is slow on a phone.
   let done=false,reportedAt=0,worldAnnounced=false;
+  window.__njhPlayInputLocked=true;
+  function assetGate(rig){
+   const gameplayActive=window.SemestaLifePlay?.active?.()===true;
+   const mapCount=(documentMap.objects||[]).filter(o=>o.id!=='__semesta_life_temporary_player__').length;
+   const interiorsPending=!!njhInteriorsReady&&njhHomeSpawnSettled===false;
+   const room=window.SemestaLifePlay?.state?.()?.housing?.roomId;
+   const who=String(mainkanPlayerId||'').toLowerCase();
+   const needsRoom=['t_ichsan','t_noor','ichsan','noor'].includes(who)&&!!room;
+   const roomReady=!needsRoom||!!window.__njhPlayInteriors?.active?.()?.roomId||!!window.__njhPlayInteriors?.active?.();
+   if(!playerFirstFrameRendered||!gameplayActive||!rig)return {ok:false,stage:'engine',detail:'Menyiapkan engine Semesta, peta, dan fisika...'};
+   if(mapCount<1)return {ok:false,stage:'map',detail:'Memuat peta NJH dan objek kota...'};
+   if(interiorsPending||(needsRoom&&!roomReady))return {ok:false,stage:'interior',detail:'Memuat interior, furnitur, dan NPC kamar...'};
+   if(!rig.state?.loaded)return {ok:false,stage:'lgr',detail:'Memuat sheet LGR / Genesis (semua arah)...'};
+   return {ok:true,stage:'ready',detail:'Semua aset siap.',count:mapCount};
+  }
   function reportPlayerReady(){
    if(done)return;
    const rig=rigs.get(LIFE_TEST_ACTOR_ID)?.rig;
-   const gameplayActive=window.SemestaLifePlay?.active?.()===true;
-   if(!worldAnnounced&&rig&&gameplayActive&&playerFirstFrameRendered){
+   const gate=assetGate(rig);
+   if(!worldAnnounced&&gate.ok){
     worldAnnounced=true;
+    window.__njhPlayInputLocked=false;
     document.documentElement.dataset.mainkanReady='true';
     if(window.parent!==window)window.parent.postMessage({
      type:'mainkan:semesta-ready',city:documentMap.map?.name||'Semesta',
      profile:mainkanPlayerProfile.base,faceSource:'emosi.exe',
-     characterPending:!rig.state?.loaded,
-     count:documentMap.objects.filter(o=>o.id!=='__semesta_life_temporary_player__').length
+     characterPending:false,
+     stage:gate.stage,
+     count:gate.count
     },location.origin);
    }
    if(worldAnnounced&&rig?.state?.loaded){
@@ -4840,7 +4897,8 @@ if(playerMode){
    if(performance.now()-reportedAt>350){
     reportedAt=performance.now();
     if(window.parent!==window)window.parent.postMessage({
-     type:'mainkan:player-loading',loaded:status.loaded,total:status.total
+     type:'mainkan:player-loading',loaded:status.loaded,total:status.total,
+     stage:assetGate(rig).stage,detail:assetGate(rig).detail
     },location.origin);
    }
    setTimeout(reportPlayerReady,130);
@@ -4877,7 +4935,7 @@ function frame(now){
  if(playerMode&&mainkanPlayerProfile&&rigs.has(LIFE_TEST_ACTOR_ID)){
   rigs.get(LIFE_TEST_ACTOR_ID).rig.applyContext?.(window.SemestaLifePlay?.state?.());
  }
- if(mode==='walk'&&walkActorId&&rigs.has(walkActorId)&&!(window.VLSpawnHobo&&window.VLSpawnHobo.busy())){
+ if(mode==='walk'&&walkActorId&&rigs.has(walkActorId)&&!(window.VLSpawnHobo&&window.VLSpawnHobo.busy())&&!window.__njhPlayInputLocked){
    const holder=rigs.get(walkActorId);
    let dx=Number(walkInput.right)-Number(walkInput.left);
    let dz=Number(walkInput.down)-Number(walkInput.up);
@@ -5031,6 +5089,7 @@ function frame(now){
  try{window.VLSpawnHobo&&window.VLSpawnHobo.tick(dt,camera);}catch{}
  try{window.SemestaLifePlay?.tick?.(dt);}catch(err){console.warn('life play tick',err);}
  worldEffects.update(elapsedReal,dayClock.solar());
+ applyIsoFootDepth();
  renderer.render(scene,camera);
  if(playerMode)playerFirstFrameRendered=true;
 }

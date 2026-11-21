@@ -326,12 +326,12 @@ function startWorld(force=false){
  // if native art or WebGL stalls on a slower connection.
  setTimeout(()=>{
   if(!worldReady&&stage==='gameScreen'&&frame.getAttribute('src')===url.href){
-   $('worldLoadingText').textContent='Engine Semesta belum merespons. Koneksi atau modul mungkin gagal dimuat.';
-   $('worldLoadingDetail').textContent='Tekan Coba Muat Ulang Dunia. Data karakter dan kota tidak dihapus.';
+   $('worldLoadingText').textContent='Beberapa aset belum selesai dimuat. Tekan Coba Muat Ulang Dunia.';
+   $('worldLoadingDetail').textContent='Data karakter dan kota tidak dihapus. Memuat ulang mencoba lagi semua aset (peta, interior, LGR, NPC).';
    $('statusText').textContent='SEMESTA • STARTUP TIMEOUT';
    $('retryWorld').hidden=false;
   }
- },18000);
+ },60000);
 }
 window.addEventListener('message',e=>{
  if(e.origin!==location.origin||!e.data)return;
@@ -357,18 +357,27 @@ window.addEventListener('message',e=>{
  }
  if(e.data.type==='mainkan:player-loading'){
   const loaded=Number(e.data.loaded)||0,total=Math.max(1,Number(e.data.total)||1);
-  $('worldProgress').style.width=Math.round(100*loaded/total)+'%';
-  $('worldLoadingText').textContent='Menyiapkan Genesis + Emosi.exe...';
-  $('worldLoadingDetail').textContent=loaded+'/'+total+' layer sprite siap.';
-  if(worldReady)$('statusText').textContent='SEMESTA • GAME RUNNING · GENESIS '+loaded+'/'+total;
+  const pct=Math.max(5,Math.round(100*loaded/total));
+  $('worldProgress').style.width=pct+'%';
+  $('worldLoading').hidden=false;
+  $('worldLoadingText').textContent=e.data.detail||'Menyiapkan semua aset dulu...';
+  $('worldLoadingDetail').textContent=(e.data.stage?('Tahap '+e.data.stage+' · '):'')+loaded+'/'+total+' layer sprite LGR siap.';
+  $('statusText').textContent='SEMESTA • MEMUAT '+String(e.data.stage||'aset').toUpperCase();
  }else if(e.data.type==='mainkan:semesta-ready'){
+  if(e.data.characterPending){
+   $('worldLoading').hidden=false;
+   $('worldLoadingText').textContent='Karakter Genesis / LGR masih dimuat. Tunggu sampai selesai sebelum main.';
+   $('worldLoadingDetail').textContent='Input dikunci sampai semua layer sprite siap.';
+   $('statusText').textContent='SEMESTA • MENUNGGU GENESIS';
+   return;
+  }
   worldReady=true;
   $('worldProgress').style.width='100%';
   $('worldLoading').hidden=true;
   $('retryWorld').hidden=true;
   $('cityName').textContent=e.data.city||'SEMESTA • Native World';
-  $('worldLabel').textContent='Semesta WebGL · '+Number(e.data.count||0)+' objek · '+(guest?'Guest':'Player')+(e.data.characterPending?' · Genesis dimuat':'');
-  $('statusText').textContent=e.data.characterPending?'SEMESTA • GAME RUNNING · GENESIS LOADING':'SEMESTA • PLAYER READY';
+  $('worldLabel').textContent='Semesta WebGL · '+Number(e.data.count||0)+' objek · '+(guest?'Guest':'Player');
+  $('statusText').textContent='SEMESTA • PLAYER READY';
   if(pauseRequested)frame.contentWindow?.postMessage({type:'mainkan:pause'},location.origin);
   else try{frame.focus();}catch{}
  }else if(e.data.type==='mainkan:player-character-ready'){
