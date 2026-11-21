@@ -39,7 +39,7 @@ const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-r
  .map(f=>{
   // Preview: vendored v2 raster (setJointMode('v2'), no JOINT_FILL, no setW4).
   // Official-9 remains the artist base loaded by lgr-game. Portable to official-9.
-  if(f==="lgr1-raster.js")return "/virtual-office/shared/lgr1-raster-v2.js?v=walk-holes-v2-20261122";
+  if(f==="lgr1-raster.js")return "/virtual-office/shared/lgr1-raster-v2.js?v=pkg3-live-20261122";
   return "/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2";
  });
 const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};

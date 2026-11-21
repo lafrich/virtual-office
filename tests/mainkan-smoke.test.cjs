@@ -38,12 +38,12 @@ test('Mainkan waits until all needed assets are loaded before play input',()=>{
  assert.match(app,/mainkan:player-character-error/);
  assert.match(app,/Input dikunci sampai semua layer sprite siap/);
  assert.match(app,/,60000\)/);
- assert.match(htmlWorld,/loading-all-20261122/);
- assert.match(html,/loading-bar-20261122/);
+ assert.match(htmlWorld,/pkg3-live-20261122/);
+ assert.match(html,/pkg3-live-20261122/);
  assert.match(html,/id="worldLoadingPct"/);
  assert.match(app,/player-loading/);
  assert.match(app,/loaded\+'\/'\+total\+' aset'/);
- assert.match(html,/joystick-fix-fresh-20261122/);
+ assert.match(html,/pkg3-live-20261122/);
  assert.match(html,/id="njhStage"/);
  assert.doesNotMatch(html,/njhRotate|Putar HP/);
 });
@@ -67,7 +67,7 @@ test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entr
  assert.doesNotMatch(life,/const door=inside\?\(bridge\?\.exitInterior/);
  assert.doesNotMatch(shell,/NJH98Mock\?\.enterDoor\(doorNearObj\)/);
  assert.match(shell,/if\(!demo\)return \[\]/);
- assert.match(html,/joystick-fix-fresh-20261122/);
+ assert.match(html,/pkg3-live-20261122/);
 });
 
 test('login requires real server; browser never stores Mainkan passwords',()=>{
