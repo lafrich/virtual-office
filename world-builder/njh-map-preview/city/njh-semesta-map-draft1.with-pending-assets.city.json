@@ -16041,14 +16041,14 @@
           "rotation": 0,
           "scale": 1,
           "questId": "manusia_silver",
-          "profile": "ichsan",
+          "profile": "legacy_manusia_silver",
           "motion": {
             "mode": "idle",
             "direction": "auto",
             "speed": 1.5,
             "enabled": true,
             "count": 5,
-            "idleAction": "statue"
+            "idleAction": "idle"
           },
           "facing": "sw",
           "jobId": "street_performer",
@@ -16080,7 +16080,7 @@
           "rotation": 0,
           "scale": 1,
           "questId": "kang_parkir",
-          "profile": "ichsan",
+          "profile": "legacy_kang_parkir",
           "motion": {
             "mode": "idle",
             "direction": "auto",
