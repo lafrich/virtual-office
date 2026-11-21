@@ -21,6 +21,7 @@ function loadPreview(){
 test('STEP 1 history stays in sw; balancing cache/hub; LGR ?v is kept',()=>{
  // Balancing (sw v44) sits on live STEP 1 (v43); v42 STEP 1 preview stays in the SW history.
  assert.ok(Number((/^\/\* sw v(\d+) /.exec(read('sw.js'))||[])[1])>=43,'sw >= v43');
+ assert.match(read('sw.js'),/sw v43 2026-11-22: STEP 1 live/);
  assert.match(read('sw.js'),/sw v42 2026-11-22: Preview STEP 1/);
  assert.match(read('mainkan/index.html'),/\?v=njh-balancing-r\d+-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
