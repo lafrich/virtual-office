@@ -46,16 +46,34 @@ const OPENERS = [
 ];
 
 function measure() {
-  const VW = innerWidth, VH = innerHeight, T = 1.5, out = [];
+  // Forced portrait rotates #njhStage 90deg: screen AABBs swap axes, so a
+  // vertically-scrollable overflow looks like a horizontal crop. Measure in
+  // the logical landscape box instead (same as a real 844x390 phone).
+  const stage = document.getElementById('njhStage');
+  const forced = document.documentElement.classList.contains('njh-force-landscape') && stage;
+  const VW = forced ? (stage.offsetWidth || innerHeight) : innerWidth;
+  const VH = forced ? (stage.offsetHeight || innerWidth) : innerHeight;
+  const sr = forced ? stage.getBoundingClientRect() : null;
+  const H = forced ? stage.offsetHeight : 0;
+  const box = el => {
+    const r = el.getBoundingClientRect();
+    if (!forced) return r;
+    const corners = [[r.left,r.top],[r.right,r.top],[r.left,r.bottom],[r.right,r.bottom]];
+    const pts = corners.map(([cx,cy]) => ({x: cy - sr.top, y: H - (cx - sr.left)}));
+    const left = Math.min(...pts.map(p => p.x)), top = Math.min(...pts.map(p => p.y));
+    const right = Math.max(...pts.map(p => p.x)), bottom = Math.max(...pts.map(p => p.y));
+    return {left, top, right, bottom, width: right - left, height: bottom - top};
+  };
+  const T = 1.5, out = [];
   const name = el => { let s = el.tagName.toLowerCase(); if (el.id) s += '#' + el.id; const c = (typeof el.className === 'string' ? el.className : '').trim().split(/\s+/).filter(Boolean).slice(0, 2); if (c.length) s += '.' + c.join('.'); const t = (el.textContent || el.value || '').replace(/\s+/g, ' ').trim().slice(0, 24); return s + (t ? ' "' + t + '"' : ''); };
   const vis = el => el.checkVisibility ? el.checkVisibility({ visibilityProperty: true }) : el.getClientRects().length > 0;
   const wins = [...document.querySelectorAll('.njh-win,.njh-hud>.w98,#njhNotice,#pauseScreen .njh-pause,#njhActBar,#loginScreen,#characterScreen,.njh-rotate .w98')].filter(w => !w.hidden && vis(w) && w.getBoundingClientRect().width > 1);
   for (const w of wins) {
-    const wr = w.getBoundingClientRect(), wn = name(w).split(' "')[0];
+    const wr = box(w), wn = name(w).split(' "')[0];
     if (wr.left < -T || wr.top < -T || wr.right > VW + T || wr.bottom > VH + T) out.push({ win: wn, el: wn, why: `window outside viewport ${Math.round(wr.left)},${Math.round(wr.top)},${Math.round(wr.right)},${Math.round(wr.bottom)} vs ${VW}x${VH}` });
     const els = [...w.querySelectorAll('button,[role=tab],input,select,textarea,.njh-tabs,.w98-title,.njh-row,.btn')].filter(vis);
     for (const el of els) {
-      const r = el.getBoundingClientRect(); if (r.width < 1 || r.height < 1) continue;
+      const r = box(el); if (r.width < 1 || r.height < 1) continue;
       if (r.left < -T || r.right > VW + T || r.top < -T || r.bottom > VH + T) {
         // vertically scrolled out of a scroll box is fine; horizontally never.
         let scrolledY = false; for (let a = el.parentElement; a && a !== w.parentElement; a = a.parentElement) { const cs = getComputedStyle(a); if (/auto|scroll/.test(cs.overflowY) && a.scrollHeight > a.clientHeight + 1) { scrolledY = true; break; } }
@@ -63,7 +81,7 @@ function measure() {
       }
       for (let a = el.parentElement; a && a !== w.parentElement; a = a.parentElement) {
         const cs = getComputedStyle(a); if (cs.overflowX === 'visible' && cs.overflowY === 'visible') continue;
-        const ar = a.getBoundingClientRect();
+        const ar = box(a);
         const hScroll = /auto|scroll/.test(cs.overflowX), vScroll = /auto|scroll/.test(cs.overflowY);
         const outX = r.left < ar.left - T || r.right > ar.right + T, outY = r.top < ar.top - T || r.bottom > ar.bottom + T;
         if (outX && !(hScroll && a.matches('.njh-tabs'))) { out.push({ win: wn, el: name(el), why: 'cropped horizontally by ' + name(a).split(' "')[0] }); break; }
@@ -77,7 +95,7 @@ function measure() {
     }
     // footer: a close/OK row must be on screen without scrolling
     const foot = [...w.querySelectorAll('[data-close]')].filter(vis).pop();
-    if (foot) { const r = foot.getBoundingClientRect(); if (r.bottom > Math.min(VH, wr.bottom) + T || r.right > Math.min(VW, wr.right) + T || r.top < wr.top - T) out.push({ win: wn, el: name(foot), why: 'footer/close button not fully visible' }); }
+    if (foot) { const r = box(foot); if (r.bottom > Math.min(VH, wr.bottom) + T || r.right > Math.min(VW, wr.right) + T || r.top < wr.top - T) out.push({ win: wn, el: name(foot), why: 'footer/close button not fully visible' }); }
   }
   return { open: wins.map(w => name(w).split(' "')[0]), flags: out };
 }
@@ -86,64 +104,58 @@ let failures = 0, startErr = 0; const report = [];
 for (const sz of SIZES) {
   const ctx = await browser.newContext({ viewport: { width: sz.width, height: sz.height }, isMobile: !!sz.mobile, hasTouch: !!sz.mobile });
   const p = await ctx.newPage();
+  // Rotated portrait stage is on-screen, but Playwright actionability uses the
+  // untransformed box and can treat 844-wide layout as outside a 390-wide viewport.
+  const tap = (sel) => p.evaluate(s => { const el = document.querySelector(s); if (el) el.click(); }, sel);
+  const type = (sel, val) => p.evaluate(({s,v}) => { const el = document.querySelector(s); if (!el) return; el.focus(); el.value = v; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); }, {s:sel,v:val});
   try {
     await p.goto(BASE + (BASE.includes('?') ? '&' : '?') + 'cb=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 60000 });
-    for (let i = 0; i < 40; i++) { if (await p.locator('#welcomeGuest').isVisible().catch(() => false)) break; const s = p.locator('#skipSplash'); if (await s.isVisible().catch(() => false)) await s.click().catch(() => {}); await p.waitForTimeout(400); }
+    for (let i = 0; i < 40; i++) { if (await p.locator('#welcomeGuest').count() && await p.evaluate(()=>!!document.getElementById('welcomeGuest')&&!document.getElementById('welcomeGuest').hidden)) break; await tap('#skipSplash'); await p.waitForTimeout(400); }
     // login screen (welcomeContinue), then back and use Main Tanpa Akun
-    if (await p.locator('#welcomeContinue').isVisible().catch(() => false)) {
-      await p.locator('#welcomeContinue').click();
-      await p.locator('#loginScreen').waitFor({ state: 'visible', timeout: 15000 });
+    if (await p.evaluate(()=>!!document.getElementById('welcomeContinue')&&!document.getElementById('welcomeContinue').hidden&&document.getElementById('welcomeContinue').offsetParent!==null).catch(() => false)) {
+      await tap('#welcomeContinue');
+      await p.waitForFunction(()=>!document.getElementById('loginScreen')?.hidden, { timeout: 15000 });
       const loginM = await p.evaluate(measure);
       for (const f of loginM.flags) { failures++; console.log(`FAIL [${sz.tag}] login: ${f.el} — ${f.why}`); }
       report.push({ size: sz.tag, window: 'login', open: loginM.open, flags: loginM.flags.length });
       if (SHOTS) await p.screenshot({ path: `${SHOTS}/${sz.tag}-login.png` });
-      const back = p.locator('#njhLoginBack');
-      if (await back.isVisible().catch(() => false)) await back.click();
-      else await p.locator('#welcomeGuest').click().catch(() => {});
+      if (await p.evaluate(()=>!!document.getElementById('njhLoginBack')&&document.getElementById('njhLoginBack').offsetParent!==null).catch(() => false)) await tap('#njhLoginBack');
+      else await tap('#welcomeGuest');
       await p.waitForTimeout(300);
     }
-    await p.locator('#welcomeGuest').click();
-    await p.locator('#characterScreen').waitFor({ state: 'visible', timeout: 20000 });
+    await tap('#welcomeGuest');
+    await p.waitForFunction(()=>!document.getElementById('characterScreen')?.hidden, { timeout: 20000 });
     const charM = await p.evaluate(measure);
     for (const f of charM.flags) { failures++; console.log(`FAIL [${sz.tag}] character: ${f.el} — ${f.why}`); }
     report.push({ size: sz.tag, window: 'character', open: charM.open, flags: charM.flags.length });
     if (SHOTS) await p.screenshot({ path: `${SHOTS}/${sz.tag}-character.png` });
-    await p.locator('#playerName').fill('FitTes'); await p.locator('#ccDay').fill('15'); await p.locator('#ccMonth').fill('01'); await p.locator('#ccYear').fill('1990');
-    await p.locator('#ccCreate').click(); await p.locator('#confirmScreen').waitFor({ state: 'visible', timeout: 20000 }); await p.locator('#confirmGo').click();
-    for (let i = 0; i < 20; i++) { for (const s of ['#tutorialSkip', '#tutorialDone', '#njhHowtoWinSkip']) { const l = p.locator(s); if (await l.isVisible().catch(() => false)) await l.click().catch(() => {}); } if (await p.locator('#gameScreen').isVisible().catch(() => false)) break; await p.waitForTimeout(400); }
+    await type('#playerName','FitTes'); await type('#ccDay','15'); await type('#ccMonth','01'); await type('#ccYear','1990');
+    await tap('#ccCreate'); await p.waitForFunction(()=>!document.getElementById('confirmScreen')?.hidden, { timeout: 20000 }); await tap('#confirmGo');
+    for (let i = 0; i < 20; i++) { for (const s of ['#tutorialSkip', '#tutorialDone', '#njhHowtoWinSkip']) { if (await p.evaluate(sel=>{const el=document.querySelector(sel);return!!el&&el.offsetParent!==null;}, s).catch(() => false)) await tap(s); } if (await p.evaluate(()=>!document.getElementById('gameScreen')?.hidden).catch(() => false)) break; await p.waitForTimeout(400); }
     await p.waitForFunction(() => { try { const w = document.getElementById('semestaFrame')?.contentWindow; return !!(w && w.SemestaLifePlay && w.SemestaLifePlay.state?.()); } catch { return false; } }, { timeout: 90000 });
     await p.waitForTimeout(2500);
   } catch (e) { console.log(`[${sz.tag}] could not start the game: ${String(e).slice(0, 160)}`); startErr++; await ctx.close(); continue; }
-  // Portrait phones must show a blocking "Putar HP" gate. Check that window
-  // only — do not open play UI behind it and flag those as cropped.
+  // Portrait phones force-render the landscape game (rotated #njhStage). Check
+  // the rotation, then run the same window openers — nothing may be cropped.
   if (sz.tag === 'phone-390x844') {
-    const gate = await p.evaluate(() => {
-      const el = document.getElementById('njhRotate');
-      const w = el?.querySelector('.w98');
-      const r = w?.getBoundingClientRect();
-      const cs = el ? getComputedStyle(el) : {};
+    const fl = await p.evaluate(() => {
+      const stage = document.getElementById('njhStage');
+      const info = window.NJH98ForceLandscape || {};
       return {
-        display: cs.display, role: el?.getAttribute('role') || '',
+        on: document.documentElement.classList.contains('njh-force-landscape'),
         play: document.body.classList.contains('njh-play'),
-        hasContinue: !!document.getElementById('njhRotateContinue'),
-        title: (document.getElementById('njhRotateTitle')?.textContent || '').trim(),
-        left: r ? r.left : null, top: r ? r.top : null, right: r ? r.right : null, bottom: r ? r.bottom : null,
-        vw: innerWidth, vh: innerHeight
+        rotateEl: !!document.getElementById('njhRotate'),
+        transform: (stage && stage.style.transform) || '',
+        stageW: stage?.offsetWidth || 0, stageH: stage?.offsetHeight || 0,
+        logical: info.logical || null, vw: innerWidth, vh: innerHeight
       };
     });
-    const okDisplay = gate.display === 'grid' || gate.display === 'flex' || gate.display === 'block';
-    if (!gate.play || !okDisplay || gate.role !== 'alertdialog' || gate.hasContinue || gate.title !== 'Putar HP') {
-      failures++; console.log(`FAIL [${sz.tag}] rotate-gate: expected blocking Putar HP alertdialog, got ${JSON.stringify(gate)}`);
-    } else {
-      const T = 1.5;
-      if (gate.left < -T || gate.top < -T || gate.right > gate.vw + T || gate.bottom > gate.vh + T) {
-        failures++; console.log(`FAIL [${sz.tag}] rotate-gate: window outside viewport ${gate.left},${gate.top},${gate.right},${gate.bottom} vs ${gate.vw}x${gate.vh}`);
-      }
+    const rotated = typeof fl.transform === 'string' && fl.transform.includes('rotate(90deg)');
+    if (!fl.on || fl.rotateEl || !rotated || fl.stageW < 800 || fl.stageH < 360) {
+      failures++; console.log(`FAIL [${sz.tag}] force-landscape: expected rotated landscape stage, got ${JSON.stringify(fl)}`);
     }
-    report.push({ size: sz.tag, window: 'rotate-gate', open: ['div.njh-rotate'], flags: 0 });
-    if (SHOTS) await p.screenshot({ path: `${SHOTS}/${sz.tag}-rotate-gate.png` });
-    await ctx.close();
-    continue;
+    report.push({ size: sz.tag, window: 'force-landscape', open: ['#njhStage'], flags: 0 });
+    if (SHOTS) await p.screenshot({ path: `${SHOTS}/${sz.tag}-force-landscape.png` });
   }
   for (const [id, js] of OPENERS) {
     await p.evaluate(() => { try { NJH98.closeWindows(); document.querySelectorAll('.njh-win').forEach(w => w.hidden = true); } catch {} });

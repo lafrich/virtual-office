@@ -136,7 +136,7 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Cek (gate sebelum push):**
   - `node mainkan/tools/njh98-window-fit.mjs [baseUrl] [--shots dir]` harus exit 0 ("0 cropped element(s)"). Pengecek membuka semua jendela Step 1 + Step 2 di keempat ukuran, lewat Main Tanpa Akun. baseUrl default: `http://localhost:8901/virtual-office/mainkan/index.html`.
   - `node --test tests/njh98-window-fit.test.cjs` (bagian statis, ikut suite unit).
-  - Catatan (22 Nov 2026, t814u): di potret 390x844 pada HP (`pointer:coarse`) pengecek hanya mensyaratkan gerbang "Putar HP" terlihat utuh dan tidak terpotong. Jendela play di belakang gerbang tidak dibuka dan tidak dihitung crop. Landscape 844x390 dan desktop tetap membuka semua jendela.
+  - Catatan (22 Nov 2026, t818u): di potret 390x844 pada HP (`pointer:coarse`) shell diputar 90° menjadi landscape (tanpa gerbang "Putar HP"). Pengecek menuntut `#njhStage` ter-rotate dan semua jendela play muat tanpa crop. Landscape 844x390 dan desktop tidak diputar.
   - `node --test tests/njh98-window-fit.test.cjs` juga menjaga CSS/HTML gerbang (alertdialog, tanpa tombol Lanjut).
 
 ## 19. Ukuran sprite NJH: kunci iso `size*PX/PY`, bukan `size/50`
@@ -147,9 +147,9 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Cek:** `node --test tests/njh-map-preview.test.cjs`. Tes "preview props and the Kost Cove use the iso lock" memastikan 6 id = `size*PX/PY`, tidak pernah `size/50`, dan width/height yang tertanam di dokumen kota sama dengan spec. Smoke 4-ID (`/tmp/smoke125.mjs`): mancing di kedua dermaga (`fishStart` jangkauan 2,5) dan masuk lobby Cove.
 - **Ikut push yang sama (bukan lesson terpisah):** profil tes Ichsan/Noor v4. Tas berisi 3/8 (telur, minyak, kopi), kulkas berisi nasi, lele, susu, dan gula masuk ke penyimpanan rumah. Tujuannya supaya beli 2 barang muat. Seed ini data klien (`mainkan/test-start-profiles.json` → `applyStart`), jadi tidak perlu deploy Worker. Tamu tidak berubah.
 
-## 20. HP wajib landscape — gerbang "Putar HP" tidak boleh dilewati
+## 20. HP potret menampilkan game landscape (tanpa gerbang "Putar HP")
 
-- **Error:** Sejak PR #44 (15 Nov, `fae45cbe`) "Putar HP" jadi saran yang bisa ditutup (tombol Lanjut, auto-dismiss 6 detik), jadi HP portrait bisa dimainkan. Ini bentrok dengan aturan Ichsan: main di HP = landscape + joystick bulat.
-- **Penyebab:** Gerbang fullscreen diganti hint non-blocking supaya pengguna dengan kunci rotasi tidak terjebak. Aturan produk tetap landscape-only (t814u, 22 Nov: "Iya push landscape aja").
-- **Aturan:** Di HP (`pointer:coarse`) + potret, tampilkan gerbang pemblokir "Putar HP" (`role=alertdialog`, tanpa tombol Lanjut/Tutup, tanpa auto-dismiss). `screen.orientation.lock('landscape')` tetap dicoba setelah gestur fullscreen, gagal dengan tenang. Di landscape, gerbang hilang dan joystick bulat jalan seperti biasa. Jangan kembalikan bypass "Lanjut bermain".
-- **Cek:** `node --test tests/njh98-window-fit.test.cjs`; `node mainkan/tools/njh98-window-fit.mjs` di 390x844 harus lulus pada gerbang (bukan crop UI di belakangnya); e2e `tests/mainkan-native-semesta.e2e.cjs` menuntut alertdialog blocking di potret dan `display:none` di landscape.
+- **Error:** Gerbang pemblokir "Putar HP" (t814u / `c3287cb3`) memaksa pemain memutar HP dulu. Ichsan (t818u, 22 Nov 2026) menilai itu berlebihan: cukup tampilkan game dalam landscape; pemberitahuan tidak perlu menunggu HP diputar.
+- **Perbaikan:** Di HP (`pointer:coarse`) + potret, bungkus shell di `#njhStage`, tukar ukuran menjadi (tinggi viewport × lebar viewport), lalu `rotate(90deg) translateY(-100%)`. Tidak ada overlay/alertdialog. Joystick, `fitWin`, dan marker memakai `clientToStage` / `localRect` supaya koordinat pointer ikut terpetakan. Landscape asli dan desktop tidak diputar. `screen.orientation.lock('landscape')` tetap dicoba setelah gestur fullscreen, gagal dengan tenang.
+- **Aturan:** Jangan kembalikan gerbang blocking atau bypass "Lanjut bermain". Window-fit 390×844 harus menampilkan game landscape yang diputar, tanpa crop.
+- **Cek:** `node --test tests/njh98-window-fit.test.cjs`; `node mainkan/tools/njh98-window-fit.mjs` (390×844 = stage ter-rotate, semua jendela tanpa crop); e2e `tests/mainkan-native-semesta.e2e.cjs` menuntut force-landscape di potret dan tanpa transform di landscape.

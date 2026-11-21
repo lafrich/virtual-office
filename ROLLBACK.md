@@ -1,3 +1,24 @@
+# Rollback — HP potret menampilkan game landscape (22 Nov 2026)
+
+Written 2026-11-22 (Asia/Jakarta). UI/CSS/JS, window-fit/e2e/unit tes, dan catatan rollback. Tidak ada perubahan Worker, sandi, atau secret.
+
+- Previous live `origin/main`: `751d614893a7941b30df5d491215ff5568d8481f` (docs tip, sw v32, gerbang "Putar HP")
+- Force-landscape commit: `fe6e3e4dd0030cff2da35c1df659859d5c53893c` (sw v33, `?v=force-landscape-20261122`)
+- Isi: gerbang blocking "Putar HP" diganti; di HP (`pointer:coarse`) + potret, `#njhStage` ditukar ukurannya (tinggi viewport × lebar viewport) lalu diputar `rotate(90deg) translateY(-100%)` sehingga game landscape tampil tanpa menunggu HP diputar. Tidak ada overlay/alertdialog. Joystick, `fitWin`, dan marker memetakan koordinat lewat `clientToStage` / `localRect`. Landscape asli dan desktop tidak diputar. Pelajaran 20 direvisi (t818u).
+- Gate sebelum push: unit suite 569 lulus / 0 gagal / 2 dilewati (571 total); window-fit 4 ukuran 85 cek, 0 terpotong, 0 start error (390×844 = stage ter-rotate, semua jendela play tanpa crop); smoke potret+landscape (joystick di mode ter-rotate: knob dx=40 saat dorong kanan layout); e2e assertions force-landscape ikut di tes yang di-update. Worker throwaway :8787 sudah mati saat gate 4-ID akan diulang, jadi login 4-ID tidak dijalankan ulang di revisi ini (perubahan hanya shell CSS/JS, bukan auth). Scan secret: 0 value hit panjang di patch.
+- Items 2–4 (loading bar persen, urutan depth, lubang walk LGR) dan kendaraan TIDAK ikut commit ini. Loading bar & walk tetap di preview.
+
+Cara rollback tanpa force-push (kembalikan tree 751d6148 dalam satu commit baru):
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git checkout 751d614893a7941b30df5d491215ff5568d8481f -- .
+git commit -m "rollback: force-landscape (restore 751d6148 tree)"
+# bump sw.js ke v34 supaya HP melepas v33, lalu push origin HEAD:refs/heads/main
+```
+
+---
+
 # Rollback — HP landscape-only gate (22 Nov 2026)
 
 Written 2026-11-22 (Asia/Jakarta). UI/CSS/copy, window-fit/e2e/unit tes, dan catatan rollback. Tidak ada perubahan Worker, sandi, atau secret.

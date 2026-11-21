@@ -200,8 +200,8 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  assert.ok(!errors.some(e=>/SyntaxError|ReferenceError/i.test(e)),errors.slice(0,4).join(' | '));
  fs.mkdirSync('screenshots',{recursive:true});
  await page.screenshot({path:'screenshots/mainkan-native-semesta.png',fullPage:true});
- // Portrait + touch must show a blocking "Putar HP" alertdialog (Ichsan t814u).
- // Landscape + touch stays playable with the joystick; there is no Continue bypass.
+ // Portrait + touch force-renders the landscape game (no blocking Putar HP gate).
+ // Real landscape is unchanged. Joystick/pointer coords remap through clientToStage (t818u).
  const mobileContext=await browser.newContext({
   viewport:{width:390,height:844},deviceScaleFactor:1,hasTouch:true,isMobile:true
  });
@@ -210,30 +210,35 @@ const base=process.env.MAINKAN_TEST_URL||'http://127.0.0.1:8091/virtual-office/m
  await mobilePage.addStyleTag({content:'#gameScreen[hidden]{display:flex!important}'});
  await mobilePage.evaluate(()=>document.body.classList.add('njh-play'));
  const hint=await mobilePage.evaluate(()=>{
-  const el=document.getElementById('njhRotate');
-  const w=el?.querySelector('.w98');
-  const r=el.getBoundingClientRect(),wr=w?.getBoundingClientRect(),hit=document.elementFromPoint(innerWidth/2,innerHeight/2);
+  const stage=document.getElementById('njhStage');
+  const mid=typeof window.NJH98ClientToStage==='function'?window.NJH98ClientToStage(innerWidth/2,innerHeight/2):null;
+  const r=stage?.getBoundingClientRect();
   return {coarse:matchMedia('(pointer:coarse)').matches,
    portrait:matchMedia('(orientation:portrait)').matches,
-   display:getComputedStyle(el).display,width:r.width,height:r.height,
-   winLeft:wr?.left,winTop:wr?.top,winRight:wr?.right,winBottom:wr?.bottom,
-   middleBlocked:el.contains(hit),role:el.getAttribute('role'),
-   continueVisible:!!document.getElementById('njhRotateContinue'),
-   title:(document.getElementById('njhRotateTitle')?.textContent||'').trim()};
+   on:document.documentElement.classList.contains('njh-force-landscape'),
+   rotateEl:!!document.getElementById('njhRotate'),
+   transform:stage?.style.transform||'',
+   stageW:stage?.offsetWidth||0,stageH:stage?.offsetHeight||0,
+   aabbW:r?.width||0,aabbH:r?.height||0,
+   mid};
  });
  assert.equal(hint.coarse,true,'mobile test must actually emulate a touch pointer');
  assert.equal(hint.portrait,true,'mobile test must actually emulate portrait');
- assert.ok(['grid','flex','block'].includes(hint.display),'portrait must show the Putar HP gate');
- assert.ok(hint.width>=388&&hint.height>=842,'gate overlay should cover the 390x844 playfield');
- assert.equal(hint.middleBlocked,true,'world center must stay blocked until the phone is rotated');
- assert.equal(hint.role,'alertdialog','rotation gate is a modal alertdialog');
- assert.equal(hint.title,'Putar HP');
- assert.equal(hint.continueVisible,false,'portrait must not offer a continue bypass');
- assert.ok(hint.winLeft>=-1&&hint.winTop>=-1&&hint.winRight<=390+1&&hint.winBottom<=844+1,
-  'Putar HP window must fit in the portrait viewport');
+ assert.equal(hint.on,true,'portrait phone must force-render landscape');
+ assert.equal(hint.rotateEl,false,'no blocking Putar HP overlay');
+ assert.match(hint.transform,/rotate\(90deg\)/,'#njhStage rotates 90deg');
+ assert.ok(hint.stageW>=800&&hint.stageH>=360,'logical stage is landscape (swapped width/height)');
+ assert.ok(hint.aabbW>=388&&hint.aabbH>=842,'rotated stage AABB covers the 390x844 phone');
+ assert.ok(hint.mid&&Math.abs(hint.mid.x-422)<12&&Math.abs(hint.mid.y-195)<12,
+  'portrait mid-screen maps to landscape mid-stage, got '+JSON.stringify(hint.mid));
  await mobilePage.setViewportSize({width:844,height:390});
- assert.equal(await mobilePage.locator('#njhRotate').evaluate(el=>getComputedStyle(el).display),
-  'none','landscape must hide the gate and allow play');
+ await mobilePage.waitForTimeout(200);
+ const land=await mobilePage.evaluate(()=>({
+  on:document.documentElement.classList.contains('njh-force-landscape'),
+  transform:document.getElementById('njhStage')?.style.transform||''
+ }));
+ assert.equal(land.on,false,'real landscape must not force-rotate');
+ assert.equal(land.transform,'','real landscape leaves #njhStage untransformed');
  await mobileContext.close();
  await browser.close();
  console.log('MAINKAN_NATIVE_SEMESTA_BROWSER_PASS');

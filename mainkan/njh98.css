@@ -339,15 +339,49 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 @keyframes njhBlink{50%{visibility:hidden}}
 @media (prefers-reduced-motion:reduce){.njh-intro *{animation:none!important}}
 
-/* Mobile play is landscape-only. Portrait phones get a blocking "Putar HP"
-   gate; landscape plays normally with the round joystick. lockLandscape() is
-   still attempted after fullscreen. */
-.njh-rotate{display:none;position:absolute;inset:0;z-index:20;place-items:center;background:#008080;pointer-events:auto}
-.njh-rotate .w98{position:relative;width:min(300px,calc(100% - 24px))}
-.njh-rotate .w98-body{display:grid;gap:8px;justify-items:center;text-align:center;padding:12px}
-.njh-rotate-ico{width:64px;height:40px;background:#000;border:3px solid #808080;box-shadow:inset 0 0 0 3px #9bbc0f;animation:njhRot 2s steps(4) infinite}
-@keyframes njhRot{0%,40%{transform:rotate(90deg)}60%,100%{transform:rotate(0)}}
-@media (orientation:portrait) and (pointer:coarse){body.njh-play .njh-rotate{display:grid}}
+/* Portrait phones force-render the whole shell in landscape: #njhStage is
+   sized to (100dvh × 100dvw) and rotated 90deg. No blocking "Putar HP"
+   notice — Ichsan t818u, 22 Nov 2026. Real landscape is unchanged.
+   lockLandscape() is still attempted after fullscreen. */
+#njhStage{min-height:100dvh}
+html.njh-force-landscape,html.njh-force-landscape body{
+  overflow:hidden;width:100vw;height:100dvh;margin:0;position:fixed;inset:0
+}
+html.njh-force-landscape #njhStage{
+  position:fixed;top:0;left:0;
+  width:100dvh!important;height:100dvw!important;min-height:0!important;min-width:0!important;
+  transform-origin:0 0;transform:rotate(90deg) translateY(-100%);
+  overflow:hidden;z-index:5;box-sizing:border-box
+}
+html.njh-force-landscape #desktop{width:100%;height:100%;min-height:0;padding:0;box-sizing:border-box}
+html.njh-force-landscape body.njh-play #desktop,
+html.njh-force-landscape body.mainkan-playing #desktop{padding:0!important;height:100%!important;width:100%!important}
+/* njh-play / mainkan-playing live on body, not html. Beat body.mainkan-playing.njh-play
+   .window { width:100vw!important;height:100dvh!important } so the window fills the
+   logical 844x390 stage instead of the 390px portrait viewport. */
+html.njh-force-landscape body .window,
+html.njh-force-landscape body.njh-play .window,
+html.njh-force-landscape body.mainkan-playing .window,
+html.njh-force-landscape body.mainkan-playing.njh-play:not(.njh-paused) .window,
+html.njh-force-landscape body.njh-play:not(.njh-paused) .window{
+  position:absolute!important;inset:0!important;left:0!important;top:0!important;
+  width:100%!important;height:100%!important;
+  max-width:none!important;max-height:none!important;transform:none
+}
+html.njh-force-landscape body.njh-play #gameScreen,
+html.njh-force-landscape body.mainkan-playing #gameScreen{width:100%!important;height:100%!important}
+html.njh-force-landscape #gameFrame,html.njh-force-landscape #viewport{width:100%;height:100%}
+html.njh-force-landscape{
+  --njh-win-max-w:calc((var(--njh-logical-w,100dvh) - var(--njh-win-pad-x) - var(--sal) - var(--sar)) / var(--njh-ui,1));
+  --njh-win-max-h:calc((var(--njh-logical-h,100dvw) - var(--njh-win-pad-y) - var(--sat) - var(--sab)) / var(--njh-ui,1));
+}
+html.njh-force-landscape body.njh-paused .window{
+  position:absolute!important;left:50%!important;top:50%!important;
+  width:min(380px,calc(100% - 24px))!important;height:auto!important;
+  max-width:none!important;max-height:calc(100% - 24px)!important;
+  transform:translate(-50%,-50%)
+}
+html.njh-force-landscape #pauseScreen .njh-pause{max-width:min(360px,calc(100% - 24px));max-height:calc(100% - 24px)}
 
 /* virtual joystick (touch only), drives WASD */
 .njh-joy{display:none;position:absolute;left:0;bottom:0;width:40%;height:62%;pointer-events:auto;touch-action:none;z-index:2}
@@ -697,7 +731,7 @@ html:not(.njh-devmode) .njh-dev{display:none!important}
 body.njh-play{--njh-win-pad-y:72px}
 @media (pointer:coarse) and (max-height:500px){body.njh-play{--njh-win-pad-y:80px;--njh-win-pad-x:12px}}
 @media (max-height:600px){body.njh-play{--njh-win-pad-y:64px}}
-.njh-win,.njh-nokiaplus,.njh-progress,.njh-spawn-note,.njh-rotate>.w98,#pauseScreen .njh-pause,.njh-profile{
+.njh-win,.njh-nokiaplus,.njh-progress,.njh-spawn-note,#pauseScreen .njh-pause,.njh-profile{
  box-sizing:border-box;min-width:0;
  max-width:min(var(--njh-win-max-w),calc((100% - 16px) / var(--njh-ui,1)))!important;
  max-height:min(var(--njh-win-max-h),calc((100% - 16px) / var(--njh-ui,1)))!important;
@@ -742,10 +776,36 @@ body:has(#characterScreen:not([hidden])) .window{max-width:calc(100vw - 16px);ma
 @media (max-width:760px), (max-height:530px){
  #classicCreator.cc-paint{min-height:0!important;height:100%!important}
 }
-/* pause menu and rotate dialog stay in the viewport */
+/* pause menu stays in the (logical) viewport */
 #pauseScreen{overflow:auto}
 #pauseScreen .njh-pause{box-sizing:border-box;max-width:min(360px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;margin:0 auto}
 #pauseScreen .njh-menu{max-width:100%}
-.njh-rotate{place-items:center;overflow:auto}
-.njh-rotate>.w98{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto}
+html.njh-force-landscape #pauseScreen .njh-pause{max-width:min(360px,calc(100% - 24px));max-height:calc(100% - 24px)}
 
+/* Forced portrait landscape: logical size is --njh-logical-w × --njh-logical-h
+   (~844×390). Viewport units and max-width/max-height media queries still see
+   the 390×844 portrait phone, so restore the short-landscape / wide-layout rules. */
+html.njh-force-landscape{
+  --njh-win-max-w:calc((var(--njh-logical-w,100dvh) - var(--njh-win-pad-x) - var(--sal) - var(--sar)) / var(--njh-ui,1));
+  --njh-win-max-h:calc((var(--njh-logical-h,100dvw) - var(--njh-win-pad-y) - var(--sat) - var(--sab)) / var(--njh-ui,1));
+}
+html.njh-force-landscape body.njh-play{--njh-win-pad-y:80px;--njh-win-pad-x:12px}
+html.njh-force-landscape .njh-win>.w98-body{
+  max-height:calc((var(--njh-logical-h,100dvw) - 44px) / var(--njh-ui,1));
+}
+html.njh-force-landscape .window,
+html.njh-force-landscape body:has(#characterScreen:not([hidden])) .window{
+  max-width:none!important;
+  max-height:none!important;
+}
+html.njh-force-landscape #pauseScreen .njh-pause{
+  max-width:min(360px,calc(var(--njh-logical-w) - 24px));
+  max-height:calc(var(--njh-logical-h) - 24px);
+}
+html.njh-force-landscape .njh-s2-row{
+  grid-template-columns:minmax(0,1fr) auto auto;
+  grid-template-rows:auto;
+}
+html.njh-force-landscape .njh-s2-row .njh-qty{grid-column:2;grid-row:1}
+html.njh-force-landscape .njh-s2-row .btn{grid-column:3;grid-row:1;min-height:36px}
+html.njh-force-landscape .njh-s2-cols{grid-template-columns:1fr;max-height:calc(var(--njh-logical-h) * .46);overflow:auto}

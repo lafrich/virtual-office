@@ -189,9 +189,74 @@ $('njhPauseHowto')?.addEventListener('click',()=>{pendingHowto=true;$('resumeGam
 /* ---------- login back (re-uses the existing return-to-menu path) ---------- */
 $('njhLoginBack')?.addEventListener('click',()=>$('homeButton')?.click());
 
-/* Portrait phones are blocked by the "Putar HP" gate (CSS). Keep trying to
-   lock landscape after a fullscreen gesture; failure is quiet. There is no
-   dismiss/continue path — Ichsan t814u, 22 Nov 2026. */
+/* Portrait phones force-render the shell in landscape (rotate #njhStage 90deg,
+   swap width/height). No blocking "Putar HP" notice — Ichsan t818u, 22 Nov 2026.
+   Real landscape is unchanged. lockLandscape() is still tried after fullscreen. */
+
+function forceLandscapeOn(){return document.documentElement.classList.contains('njh-force-landscape');}
+function stageEl(){return document.getElementById('njhStage')||document.getElementById('desktop')||document.body;}
+function viewportSize(){
+ const vv=window.visualViewport;
+ return {w:Math.round(vv?.width||window.innerWidth),h:Math.round(vv?.height||window.innerHeight)};
+}
+let _forceApplied=null;
+function applyForceLandscape(){
+ const phone=window.matchMedia('(pointer:coarse)').matches;
+ const {w,h}=viewportSize();
+ const on=!!(phone&&h>w);
+ const key=on?('1:'+w+'x'+h):('0:'+w+'x'+h);
+ if(_forceApplied===key)return;
+ const was=forceLandscapeOn();
+ document.documentElement.classList.toggle('njh-force-landscape',on);
+ document.body.classList.toggle('njh-force-landscape',on);
+ const stage=stageEl();
+ if(on){
+  stage.style.position='fixed';stage.style.top='0';stage.style.left='0';
+  stage.style.width=h+'px';stage.style.height=w+'px';
+  stage.style.minWidth='0';stage.style.minHeight='0';
+  stage.style.maxWidth=h+'px';stage.style.maxHeight=w+'px';
+  stage.style.transformOrigin='0 0';
+  stage.style.transform='rotate(90deg) translateY(-100%)';
+  document.documentElement.style.setProperty('--njh-logical-w',h+'px');
+  document.documentElement.style.setProperty('--njh-logical-h',w+'px');
+ }else{
+  stage.style.position='';stage.style.top='';stage.style.left='';
+  stage.style.width='';stage.style.height='';
+  stage.style.minWidth='';stage.style.minHeight='';
+  stage.style.maxWidth='';stage.style.maxHeight='';
+  stage.style.transformOrigin='';stage.style.transform='';
+  document.documentElement.style.removeProperty('--njh-logical-w');
+  document.documentElement.style.removeProperty('--njh-logical-h');
+ }
+ _forceApplied=key;
+ try{window.NJH98ForceLandscape={on,logical:{w:on?h:w,h:on?w:h},viewport:{w,h}};}catch{}
+ if(was!==on)requestAnimationFrame(()=>{try{window.dispatchEvent(new Event('resize'));}catch{}});
+}
+/* Inverse of rotate(90deg) translateY(-100%) at origin 0 0: x=clientY, y=H-clientX. */
+function clientToStage(clientX,clientY){
+ const stage=stageEl();
+ const r=stage.getBoundingClientRect();
+ if(!forceLandscapeOn())return {x:clientX-r.left,y:clientY-r.top};
+ const H=stage.offsetHeight;
+ return {x:clientY-r.top,y:H-(clientX-r.left)};
+}
+function localRect(el){
+ if(!el)return {left:0,top:0,width:0,height:0,right:0,bottom:0};
+ const stage=stageEl();
+ if(!forceLandscapeOn()){
+  const r=el.getBoundingClientRect(),s=stage.getBoundingClientRect();
+  return {left:r.left-s.left,top:r.top-s.top,width:r.width,height:r.height,right:r.right-s.left,bottom:r.bottom-s.top};
+ }
+ let x=0,y=0,n=el;
+ while(n&&n!==stage){x+=n.offsetLeft||0;y+=n.offsetTop||0;n=n.offsetParent;}
+ const width=el.offsetWidth,height=el.offsetHeight;
+ return {left:x,top:y,width,height,right:x+width,bottom:y+height};
+}
+applyForceLandscape();
+window.addEventListener('resize',applyForceLandscape);
+window.addEventListener('orientationchange',()=>{_forceApplied=null;applyForceLandscape();});
+try{window.visualViewport?.addEventListener('resize',applyForceLandscape);}catch{}
+try{window.NJH98ClientToStage=clientToStage;}catch{}
 
 /* ---------- fullscreen (optional, user gesture) + landscape lock ---------- */
 const docEl=document.documentElement;
@@ -260,11 +325,13 @@ function fitWin(el){
  const apply=()=>{
   if(el.hidden)return;
   const z=Number(getComputedStyle(el).zoom)||Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--njh-ui'))||1;
-  const r=el.getBoundingClientRect();
-  const pad=8,vw=innerWidth,vh=innerHeight;
-  const host=el.closest('#njhHud,#gameScreen,#desktop')||document.body;
-  const hr=host.getBoundingClientRect();
-  const dock=$('njhDock');const d=dock&&!dock.hidden?dock.getBoundingClientRect():null;
+  const forced=forceLandscapeOn();
+  const r=forced?localRect(el):el.getBoundingClientRect();
+  const stage=stageEl();
+  const pad=8,vw=forced?stage.offsetWidth:innerWidth,vh=forced?stage.offsetHeight:innerHeight;
+  const host=el.closest('#njhHud,#gameScreen,#desktop,#njhStage')||document.body;
+  const hr=forced?localRect(host):host.getBoundingClientRect();
+  const dock=$('njhDock');const d=dock&&!dock.hidden?(forced?localRect(dock):dock.getBoundingClientRect()):null;
   const minL=Math.max(pad,hr.left+pad),minT=Math.max(pad,hr.top+pad);
   const maxR=Math.min(vw-pad,hr.right-pad),maxB=Math.min(vh-pad,(d&&d.height>2?d.top-6:hr.bottom-pad),hr.bottom-pad);
   let left=r.left,top=r.top;
@@ -459,12 +526,13 @@ function placeActBar(){
   if(!el||el.hidden)return null;
   const cs=getComputedStyle(el);
   if(cs.display==='none'||cs.visibility==='hidden')return null;
-  const r=el.getBoundingClientRect();
+  const r=forceLandscapeOn()?localRect(el):el.getBoundingClientRect();
   return(r.width>=2&&r.height>=2)?r:null;
  };
  const hit=(a,b,p=2)=>a.left<b.right+p&&a.right>b.left-p&&a.top<b.bottom+p&&a.bottom>b.top+p;
  const runR=visRect($('gameRun')),dockR=visRect($('njhDock')),joyR=visRect($('njhJoyBase'));
- const br=btn.getBoundingClientRect(),hr=hud.getBoundingClientRect();
+ const br=forceLandscapeOn()?localRect(btn):btn.getBoundingClientRect();
+ const hr=forceLandscapeOn()?localRect(hud):hud.getBoundingClientRect();
  const GAP=6,PAD=8;
  const floor=Math.min(br.top,runR?runR.top:1e9,dockR?dockR.top:1e9)-GAP;
  const avail=Math.max(40,floor-(hr.top+PAD));
@@ -702,12 +770,14 @@ if(joy){
  const R=44;
  joy.addEventListener('pointerdown',e=>{
   if(joyId!==null)return;e.preventDefault();joyId=e.pointerId;try{joy.setPointerCapture(e.pointerId);}catch{}
-  const r=joy.getBoundingClientRect();joyOrigin={x:e.clientX,y:e.clientY};
-  base.style.left=(e.clientX-r.left)+'px';base.style.top=(e.clientY-r.top)+'px';base.classList.add('on');closeCtx();
+  const p=clientToStage(e.clientX,e.clientY),r=localRect(joy);
+  joyOrigin={x:p.x,y:p.y};
+  base.style.left=(p.x-r.left)+'px';base.style.top=(p.y-r.top)+'px';base.classList.add('on');closeCtx();
  });
  joy.addEventListener('pointermove',e=>{
   if(e.pointerId!==joyId||!joyOrigin)return;
-  let dx=e.clientX-joyOrigin.x,dy=e.clientY-joyOrigin.y;const len=Math.hypot(dx,dy);
+  const p=clientToStage(e.clientX,e.clientY);
+  let dx=p.x-joyOrigin.x,dy=p.y-joyOrigin.y;const len=Math.hypot(dx,dy);
   if(len>R){dx=dx/len*R;dy=dy/len*R;}
   knob.style.transform='translate('+dx+'px,'+dy+'px)';
   const next=new Set();
@@ -768,10 +838,18 @@ function cameraFocus(){
  camT=t;return {x:camFocus.x,z:camFocus.z,px:p.x,pz:p.z};
 }
 function canvasRect(){
+ const hud=$('njhHud');
+ if(forceLandscapeOn()){
+  const fr=localRect(frame),hr=localRect(hud);
+  let c=null;try{c=wdoc()?.querySelector('#canvas-wrap canvas')||wdoc()?.querySelector('canvas');}catch{}
+  const w=c?.clientWidth||fr.width,h=c?.clientHeight||fr.height;
+  if(!w)return null;
+  return {x:fr.left-hr.left,y:fr.top-hr.top,w,h};
+ }
  const fr=frame.getBoundingClientRect();
  let c=null;try{c=wdoc()?.querySelector('#canvas-wrap canvas')||wdoc()?.querySelector('canvas');}catch{}
  const r=c?.getBoundingClientRect();if(!r||!r.width)return null;
- const hr=$('njhHud').getBoundingClientRect();
+ const hr=hud.getBoundingClientRect();
  return {x:fr.left+r.left-hr.left,y:fr.top+r.top-hr.top,w:r.width,h:r.height};
 }
 function project(x,y,z,rect,me){

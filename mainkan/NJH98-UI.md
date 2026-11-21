@@ -47,7 +47,7 @@ Satu-satunya pengecualian bentuk bulat: joystick dan tombol AKSI/LARI di HP (kon
 
 ### HP
 - **Landscape** (acuan 844×390), susunan HUD sama dengan desktop, diperkecil.
-- Portrait saat main → jendela **"Putar HP ke landscape"**; `screen.orientation.lock('landscape')` dicoba setelah fullscreen, gagal dengan tenang.
+- Portrait saat main di HP → shell diputar 90° menjadi landscape (`#njhStage`), tanpa gerbang "Putar HP"; `screen.orientation.lock('landscape')` tetap dicoba setelah fullscreen, gagal dengan tenang. Landscape asli tidak diputar.
 - Gerak: **joystick bulat** semi-transparan kiri bawah (muncul di titik jempol), menyetir input WASD yang sudah ada. D-pad lama tetap di DOM tapi disembunyikan.
 - AKSI & LARI di kanan bawah: **ikon saja** (tangan / tokoh lari), latar semi-transparan, border pixel tipis, tanpa tulisan; `aria-label`/`title` tetap. Di HP bentuknya tetap bulat, target ≥ 44px. Joystick tidak diubah.
 - Target sentuh: dock / opsi Aksi **≥ 36px** di HP, tombol **AKSI** dan **LARI** **≥ 44px** di HP. HUD bawaan **tidak boleh menutupi > 25% layar**. Saat Nokia/popup terbuka, HUD minggir.
