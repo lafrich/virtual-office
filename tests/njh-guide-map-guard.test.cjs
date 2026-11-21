@@ -17,9 +17,9 @@ const terrain=new Map(city.map.terrain.cells.map(t=>[t.c+','+t.r,t.type]));
 const trees=city.objects.filter(o=>/^vegetation:pohon_/.test(o.asset||''));
 const allowed=new Set(['grass','plaza','soil','dirt','park']);
 
-test('NJH-only city has 7 correctly oriented north-south grill covers',()=>{
+test('NJH-only city has 14 correctly oriented north-south grill covers on c=-35 (7 original + 7 from the selokan axis pack)',()=>{
  const gr=city.objects.filter(o=>o.asset==='pipeline:selokan_grill'&&o.id.startsWith('njh-grill--35-'));
- assert.equal(gr.length,7);
+ assert.equal(gr.length,14);
  for(const o of gr)assert.equal(o.rotation,90,o.id+' must follow r axis (se)');
 });
 

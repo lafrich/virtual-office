@@ -633,22 +633,22 @@
       "pending": true,
       "facing": "sw",
       "doorPoint": [
-        -25.0,
-        38.0
+        -25.5,
+        39.0
       ],
       "useTile": [
-        -25,
-        38
+        -26,
+        39
       ],
       "usePoint": [
-        -25.0,
-        38.5
+        -25.5,
+        39.5
       ],
       "footprintRect": [
-        -25.625,
-        -24.375,
-        37.0,
-        38.0
+        -27.5,
+        -23.5,
+        36.0,
+        39.0
       ],
       "baymaxDoorId": null,
       "baymaxInteractionId": null,
@@ -665,22 +665,22 @@
       "pending": true,
       "facing": "sw",
       "doorPoint": [
-        -20.0,
-        38.0
+        -19.0,
+        39.0
       ],
       "useTile": [
-        -20,
-        38
+        -19,
+        39
       ],
       "usePoint": [
-        -20.0,
-        38.5
+        -19.0,
+        39.5
       ],
       "footprintRect": [
-        -20.625,
-        -19.375,
-        37.0,
-        38.0
+        -21.0,
+        -17.0,
+        36.0,
+        39.0
       ],
       "baymaxDoorId": null,
       "baymaxInteractionId": null,
@@ -1010,7 +1010,7 @@
       "side": "any",
       "usePoint": [
         -12.5,
-        40.5
+        41.5
       ],
       "questId": "manusia_silver",
       "baymaxInteractionId": null
@@ -1022,7 +1022,7 @@
       "side": "any",
       "usePoint": [
         -15.5,
-        40.5
+        41.5
       ],
       "questId": "kang_parkir",
       "baymaxInteractionId": null
@@ -1071,8 +1071,8 @@
       "kind": "sleep",
       "side": "front",
       "usePoint": [
-        -51.5,
-        64.5
+        -50.5,
+        65.5
       ],
       "asset": "pipeline:id200_pasar_tenda_biru_pasar"
     },
@@ -1115,8 +1115,8 @@
       "kind": "scavenge",
       "side": "any",
       "usePoint": [
-        -41.5,
-        26.25
+        -40.5,
+        26.75
       ],
       "asset": "loak-v2/ground/botol_plastik_bening.png"
     },
@@ -1127,7 +1127,7 @@
       "side": "any",
       "usePoint": [
         -37.5,
-        26.25
+        26.75
       ],
       "asset": "loak-v2/ground/kardus_lipat.png"
     },
@@ -1149,7 +1149,7 @@
       "side": "any",
       "usePoint": [
         -41.5,
-        52.25
+        52.75
       ],
       "asset": "loak-v2/ground/botol_plastik_hijau.png"
     },
@@ -1160,7 +1160,7 @@
       "side": "any",
       "usePoint": [
         -36.5,
-        52.25
+        52.75
       ],
       "asset": "loak-v2/ground/kardus_lipat.png"
     },
@@ -1182,7 +1182,7 @@
       "side": "any",
       "usePoint": [
         -45.5,
-        64.25
+        64.75
       ],
       "asset": "loak-v2/ground/botol_plastik_bening.png"
     },
@@ -1193,7 +1193,7 @@
       "side": "any",
       "usePoint": [
         -37.5,
-        64.25
+        64.75
       ],
       "asset": "loak-v2/ground/kardus_lipat.png"
     },
@@ -1215,7 +1215,7 @@
       "side": "any",
       "usePoint": [
         -18.5,
-        65.25
+        65.75
       ],
       "asset": "loak-v2/ground/botol_plastik_hijau.png"
     },
@@ -1226,7 +1226,7 @@
       "side": "any",
       "usePoint": [
         -13.5,
-        65.25
+        65.75
       ],
       "asset": "loak-v2/ground/kardus_lipat.png"
     },
@@ -1236,8 +1236,8 @@
       "kind": "scavenge",
       "side": "any",
       "usePoint": [
-        -13.5,
-        23.25
+        -29.0,
+        28.25
       ],
       "asset": "loak-v2/ground/botol_plastik_bening.png"
     },
@@ -1247,8 +1247,8 @@
       "kind": "scavenge",
       "side": "any",
       "usePoint": [
-        -29.5,
-        37.25
+        -29.0,
+        36.75
       ],
       "asset": "loak-v2/ground/kardus_lipat.png"
     },
@@ -1258,7 +1258,7 @@
       "kind": "scavenge",
       "side": "any",
       "usePoint": [
-        -51.5,
+        -51.0,
         29.25
       ],
       "asset": "pipeline:tong_sampah"
@@ -1269,7 +1269,7 @@
       "kind": "scavenge",
       "side": "any",
       "usePoint": [
-        -51.5,
+        -51.0,
         57.25
       ],
       "asset": "loak-v2/ground/botol_plastik_hijau.png"
@@ -1838,7 +1838,7 @@
       "asset": "studio:br-warung-pecel-lele",
       "source": "/workspace/lfb-quality-guide/demo/bangunan-tenda/br-warung-pecel-lele.json",
       "minCorner": {
-        "c": -27,
+        "c": -27.5,
         "r": 36
       },
       "footprintRotated": [
@@ -1855,7 +1855,7 @@
       "asset": "studio:br-lapak-sate-madura",
       "source": "/workspace/lfb-quality-guide/demo/bangunan-tenda/br-lapak-sate-madura.json",
       "minCorner": {
-        "c": -22,
+        "c": -21.0,
         "r": 36
       },
       "footprintRotated": [

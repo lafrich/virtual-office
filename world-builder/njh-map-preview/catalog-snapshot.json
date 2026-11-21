@@ -1,0 +1,2618 @@
+{
+ "format": "njh-catalog-snapshot-v1",
+ "note": "Footprint/category metadata only, captured from the runtime VLAssetCatalog plus the published pipeline packs (indonesia*, mainkan_gameplay, jakarta_urban with aliases). Regenerate with /workspace/njh-map-densify/tools/make_snapshot.py.",
+ "assets": [
+  {
+   "file": "loak-v2/ground/botol_plastik_bening.png",
+   "id": "botol_plastik_bening",
+   "source": "loak-v2",
+   "group": "Loak Objects",
+   "objectCategory": "item",
+   "width": 0.55,
+   "height": 0.7,
+   "pivot": [
+    15,
+    14
+   ],
+   "size": [
+    34,
+    19
+   ],
+   "collision": false,
+   "variants": {}
+  },
+  {
+   "file": "loak-v2/ground/botol_plastik_hijau.png",
+   "id": "botol_plastik_hijau",
+   "source": "loak-v2",
+   "group": "Loak Objects",
+   "objectCategory": "item",
+   "width": 0.55,
+   "height": 0.7,
+   "pivot": [
+    15,
+    14
+   ],
+   "size": [
+    34,
+    19
+   ],
+   "collision": false,
+   "variants": {}
+  },
+  {
+   "file": "loak-v2/ground/kardus_lipat.png",
+   "id": "kardus_lipat",
+   "source": "loak-v2",
+   "group": "Loak Objects",
+   "objectCategory": "item",
+   "width": 0.625,
+   "height": 0.7,
+   "pivot": [
+    20,
+    13
+   ],
+   "size": [
+    40,
+    23
+   ],
+   "collision": false,
+   "variants": {}
+  },
+  {
+   "file": "object:njh_dermaga_mancing",
+   "id": "njh_dermaga_mancing",
+   "source": "njh-preview",
+   "group": "prop",
+   "footprint": [
+    2,
+    1
+   ],
+   "rotateFootprint": true,
+   "width": 2.232,
+   "height": 1.837,
+   "pivot": [
+    50,
+    62
+   ],
+   "size": [
+    101,
+    72
+   ],
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      101,
+      72
+     ],
+     "pivot": [
+      50,
+      62
+     ]
+    },
+    "se": {
+     "size": [
+      101,
+      72
+     ],
+     "pivot": [
+      50,
+      62
+     ]
+    },
+    "ne": {
+     "size": [
+      101,
+      72
+     ],
+     "pivot": [
+      50,
+      62
+     ]
+    },
+    "nw": {
+     "size": [
+      101,
+      72
+     ],
+     "pivot": [
+      50,
+      62
+     ]
+    }
+   }
+  },
+  {
+   "file": "object:njh_kost_cove",
+   "id": "njh_kost_cove",
+   "source": "njh-preview",
+   "group": "kampung",
+   "footprint": [
+    5.5,
+    4.6
+   ],
+   "width": 7.469,
+   "height": 8.981,
+   "pivot": [
+    159,
+    272
+   ],
+   "size": [
+    338,
+    352
+   ],
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      338,
+      352
+     ],
+     "pivot": [
+      159,
+      272
+     ]
+    },
+    "se": {
+     "size": [
+      338,
+      350
+     ],
+     "pivot": [
+      160,
+      270
+     ]
+    },
+    "ne": {
+     "size": [
+      338,
+      352
+     ],
+     "pivot": [
+      159,
+      272
+     ]
+    },
+    "nw": {
+     "size": [
+      338,
+      350
+     ],
+     "pivot": [
+      160,
+      270
+     ]
+    }
+   }
+  },
+  {
+   "file": "object:njh_kotak_amal",
+   "id": "njh_kotak_amal",
+   "source": "njh-preview",
+   "group": "prop",
+   "footprint": [
+    1,
+    1
+   ],
+   "rotateFootprint": false,
+   "width": 1.525,
+   "height": 1.837,
+   "pivot": [
+    34,
+    62
+   ],
+   "size": [
+    69,
+    72
+   ],
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      69,
+      72
+     ],
+     "pivot": [
+      34,
+      62
+     ]
+    },
+    "se": {
+     "size": [
+      69,
+      72
+     ],
+     "pivot": [
+      34,
+      62
+     ]
+    },
+    "ne": {
+     "size": [
+      69,
+      72
+     ],
+     "pivot": [
+      34,
+      62
+     ]
+    },
+    "nw": {
+     "size": [
+      69,
+      72
+     ],
+     "pivot": [
+      34,
+      62
+     ]
+    }
+   }
+  },
+  {
+   "file": "object:njh_lapak_silver",
+   "id": "njh_lapak_silver",
+   "source": "njh-preview",
+   "group": "prop",
+   "footprint": [
+    1,
+    1
+   ],
+   "rotateFootprint": false,
+   "width": 1.525,
+   "height": 2.143,
+   "pivot": [
+    34,
+    74
+   ],
+   "size": [
+    69,
+    84
+   ],
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      69,
+      84
+     ],
+     "pivot": [
+      34,
+      74
+     ]
+    },
+    "se": {
+     "size": [
+      69,
+      84
+     ],
+     "pivot": [
+      34,
+      74
+     ]
+    },
+    "ne": {
+     "size": [
+      69,
+      84
+     ],
+     "pivot": [
+      34,
+      74
+     ]
+    },
+    "nw": {
+     "size": [
+      69,
+      84
+     ],
+     "pivot": [
+      34,
+      74
+     ]
+    }
+   }
+  },
+  {
+   "file": "object:njh_minimarket",
+   "id": "njh_minimarket",
+   "source": "njh-preview",
+   "group": "kampung",
+   "footprint": [
+    5,
+    4
+   ],
+   "width": 6.894,
+   "height": 8.012,
+   "pivot": [
+    171,
+    300
+   ],
+   "size": [
+    312,
+    314
+   ],
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      312,
+      314
+     ],
+     "pivot": [
+      171,
+      300
+     ]
+    },
+    "se": {
+     "size": [
+      312,
+      314
+     ],
+     "pivot": [
+      139,
+      300
+     ]
+    },
+    "ne": {
+     "size": [
+      312,
+      314
+     ],
+     "pivot": [
+      171,
+      300
+     ]
+    },
+    "nw": {
+     "size": [
+      312,
+      314
+     ],
+     "pivot": [
+      139,
+      300
+     ]
+    }
+   }
+  },
+  {
+   "file": "object:njh_penanda_doa",
+   "id": "njh_penanda_doa",
+   "source": "njh-preview",
+   "group": "prop",
+   "footprint": [
+    1,
+    1
+   ],
+   "rotateFootprint": false,
+   "width": 1.525,
+   "height": 1.429,
+   "pivot": [
+    34,
+    46
+   ],
+   "size": [
+    69,
+    56
+   ],
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      69,
+      56
+     ],
+     "pivot": [
+      34,
+      46
+     ]
+    },
+    "se": {
+     "size": [
+      69,
+      56
+     ],
+     "pivot": [
+      34,
+      46
+     ]
+    },
+    "ne": {
+     "size": [
+      69,
+      56
+     ],
+     "pivot": [
+      34,
+      46
+     ]
+    },
+    "nw": {
+     "size": [
+      69,
+      56
+     ],
+     "pivot": [
+      34,
+      46
+     ]
+    }
+   }
+  },
+  {
+   "file": "object:njh_tiang_ogah",
+   "id": "njh_tiang_ogah",
+   "source": "njh-preview",
+   "group": "prop",
+   "footprint": [
+    1,
+    1
+   ],
+   "rotateFootprint": false,
+   "width": 1.525,
+   "height": 2.858,
+   "pivot": [
+    34,
+    102
+   ],
+   "size": [
+    69,
+    112
+   ],
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      69,
+      112
+     ],
+     "pivot": [
+      34,
+      102
+     ]
+    },
+    "se": {
+     "size": [
+      69,
+      112
+     ],
+     "pivot": [
+      34,
+      102
+     ]
+    },
+    "ne": {
+     "size": [
+      69,
+      112
+     ],
+     "pivot": [
+      34,
+      102
+     ]
+    },
+    "nw": {
+     "size": [
+      69,
+      112
+     ],
+     "pivot": [
+      34,
+      102
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:bangku_taman",
+   "id": "bangku_taman",
+   "source": "pipeline-street",
+   "group": "taman",
+   "footprint": [
+    2,
+    1
+   ],
+   "width": 1.591,
+   "height": 1.888,
+   "pivot": [
+    34,
+    57
+   ],
+   "size": [
+    72,
+    74
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      72,
+      74
+     ],
+     "pivot": [
+      34,
+      57
+     ]
+    },
+    "se": {
+     "size": [
+      74,
+      74
+     ],
+     "pivot": [
+      36,
+      57
+     ]
+    },
+    "ne": {
+     "size": [
+      74,
+      66
+     ],
+     "pivot": [
+      36,
+      50
+     ]
+    },
+    "nw": {
+     "size": [
+      72,
+      66
+     ],
+     "pivot": [
+      34,
+      50
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_bangunan_mushola_kampung",
+   "id": "id200_bangunan_mushola_kampung",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "objectCategory": "building",
+   "footprint": [
+    5.5,
+    4.6
+   ],
+   "width": 6.76,
+   "height": 5.84,
+   "pivot": [
+    159,
+    211
+   ],
+   "size": [
+    338,
+    292
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      338,
+      292
+     ],
+     "pivot": [
+      159,
+      211
+     ]
+    },
+    "se": {
+     "size": [
+      338,
+      328
+     ],
+     "pivot": [
+      160,
+      247
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_budaya_rak_sandal_masjid",
+   "id": "id200_budaya_rak_sandal_masjid",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    2.3,
+    1.7
+   ],
+   "width": 2.84,
+   "height": 3.24,
+   "pivot": [
+    62,
+    129
+   ],
+   "size": [
+    142,
+    162
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      142,
+      162
+     ],
+     "pivot": [
+      62,
+      129
+     ]
+    },
+    "se": {
+     "size": [
+      142,
+      160
+     ],
+     "pivot": [
+      61,
+      128
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_jalan_tiang_kabel_listrik",
+   "id": "id200_jalan_tiang_kabel_listrik",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    2.3,
+    1.7
+   ],
+   "width": 2.84,
+   "height": 3.28,
+   "pivot": [
+    62,
+    131
+   ],
+   "size": [
+    142,
+    164
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      142,
+      164
+     ],
+     "pivot": [
+      62,
+      131
+     ]
+    },
+    "se": {
+     "size": [
+      142,
+      162
+     ],
+     "pivot": [
+      61,
+      130
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_jalan_zebra_cross",
+   "id": "id200_jalan_zebra_cross",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    2.3,
+    1.7
+   ],
+   "width": 2.84,
+   "height": 1.32,
+   "pivot": [
+    62,
+    33
+   ],
+   "size": [
+    142,
+    66
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      142,
+      66
+     ],
+     "pivot": [
+      62,
+      33
+     ]
+    },
+    "se": {
+     "size": [
+      142,
+      64
+     ],
+     "pivot": [
+      61,
+      31
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_pasar_lapak_ayam_potong",
+   "id": "id200_pasar_lapak_ayam_potong",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    3,
+    1.8
+   ],
+   "width": 3.36,
+   "height": 3.8,
+   "pivot": [
+    74,
+    151
+   ],
+   "size": [
+    168,
+    190
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "se": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    },
+    "ne": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "nw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_pasar_lapak_buah_lokal",
+   "id": "id200_pasar_lapak_buah_lokal",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    3,
+    1.8
+   ],
+   "width": 3.36,
+   "height": 3.8,
+   "pivot": [
+    74,
+    151
+   ],
+   "size": [
+    168,
+    190
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "se": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    },
+    "ne": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "nw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_pasar_lapak_bumbu_dapur",
+   "id": "id200_pasar_lapak_bumbu_dapur",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    3,
+    1.8
+   ],
+   "width": 3.36,
+   "height": 3.8,
+   "pivot": [
+    74,
+    151
+   ],
+   "size": [
+    168,
+    190
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "se": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    },
+    "ne": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "nw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_pasar_lapak_ikan_basah",
+   "id": "id200_pasar_lapak_ikan_basah",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    3,
+    1.8
+   ],
+   "width": 3.36,
+   "height": 3.8,
+   "pivot": [
+    74,
+    151
+   ],
+   "size": [
+    168,
+    190
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "se": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    },
+    "ne": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "nw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_pasar_lapak_sayur_segar",
+   "id": "id200_pasar_lapak_sayur_segar",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    3,
+    1.8
+   ],
+   "width": 3.36,
+   "height": 3.8,
+   "pivot": [
+    74,
+    151
+   ],
+   "size": [
+    168,
+    190
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "se": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    },
+    "ne": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "nw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_pasar_tenda_biru_pasar",
+   "id": "id200_pasar_tenda_biru_pasar",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    3,
+    1.8
+   ],
+   "width": 3.36,
+   "height": 3.8,
+   "pivot": [
+    74,
+    151
+   ],
+   "size": [
+    168,
+    190
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "se": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    },
+    "ne": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      74,
+      151
+     ]
+    },
+    "nw": {
+     "size": [
+      168,
+      190
+     ],
+     "pivot": [
+      75,
+      151
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_publik_koperasi_simpan_pinjam",
+   "id": "id200_publik_koperasi_simpan_pinjam",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "objectCategory": "street",
+   "footprint": [
+    4,
+    3.7
+   ],
+   "width": 5.2,
+   "height": 5.24,
+   "pivot": [
+    121,
+    201
+   ],
+   "size": [
+    260,
+    262
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      260,
+      262
+     ],
+     "pivot": [
+      121,
+      201
+     ]
+    },
+    "se": {
+     "size": [
+      260,
+      262
+     ],
+     "pivot": [
+      121,
+      201
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_publik_toilet_umum_kampung",
+   "id": "id200_publik_toilet_umum_kampung",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "objectCategory": "street",
+   "footprint": [
+    4,
+    3.7
+   ],
+   "width": 5.2,
+   "height": 5.24,
+   "pivot": [
+    121,
+    201
+   ],
+   "size": [
+    260,
+    262
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      260,
+      262
+     ],
+     "pivot": [
+      121,
+      201
+     ]
+    },
+    "se": {
+     "size": [
+      260,
+      262
+     ],
+     "pivot": [
+      121,
+      201
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_rumah_jemuran_pakaian_warga",
+   "id": "id200_rumah_jemuran_pakaian_warga",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    2.3,
+    1.7
+   ],
+   "width": 2.84,
+   "height": 3.2,
+   "pivot": [
+    62,
+    128
+   ],
+   "size": [
+    142,
+    160
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      142,
+      160
+     ],
+     "pivot": [
+      62,
+      128
+     ]
+    },
+    "se": {
+     "size": [
+      142,
+      160
+     ],
+     "pivot": [
+      61,
+      127
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_rumah_kandang_ayam_pekarangan",
+   "id": "id200_rumah_kandang_ayam_pekarangan",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    2.3,
+    1.7
+   ],
+   "width": 2.84,
+   "height": 2.84,
+   "pivot": [
+    62,
+    110
+   ],
+   "size": [
+    142,
+    142
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      142,
+      142
+     ],
+     "pivot": [
+      62,
+      110
+     ]
+    },
+    "se": {
+     "size": [
+      142,
+      142
+     ],
+     "pivot": [
+      61,
+      110
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_rumah_papan_pengumuman_rt_rw",
+   "id": "id200_rumah_papan_pengumuman_rt_rw",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    2.3,
+    1.7
+   ],
+   "width": 2.84,
+   "height": 3.28,
+   "pivot": [
+    62,
+    132
+   ],
+   "size": [
+    142,
+    164
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      142,
+      164
+     ],
+     "pivot": [
+      62,
+      132
+     ]
+    },
+    "se": {
+     "size": [
+      142,
+      166
+     ],
+     "pivot": [
+      61,
+      133
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_rumah_pot_tanaman_depan_rumah",
+   "id": "id200_rumah_pot_tanaman_depan_rumah",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    2.3,
+    1.7
+   ],
+   "width": 2.84,
+   "height": 2.32,
+   "pivot": [
+    62,
+    84
+   ],
+   "size": [
+    142,
+    116
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      142,
+      116
+     ],
+     "pivot": [
+      62,
+      84
+     ]
+    },
+    "se": {
+     "size": [
+      142,
+      118
+     ],
+     "pivot": [
+      61,
+      85
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_rumah_toren_air_rumah",
+   "id": "id200_rumah_toren_air_rumah",
+   "source": "pipeline-street",
+   "group": "prop",
+   "objectCategory": "street",
+   "footprint": [
+    2.3,
+    1.7
+   ],
+   "width": 2.84,
+   "height": 3.04,
+   "pivot": [
+    62,
+    119
+   ],
+   "size": [
+    142,
+    152
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      142,
+      152
+     ],
+     "pivot": [
+      62,
+      119
+     ]
+    },
+    "se": {
+     "size": [
+      142,
+      152
+     ],
+     "pivot": [
+      61,
+      119
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id200_warung_warung_nasi_sunda",
+   "id": "id200_warung_warung_nasi_sunda",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "objectCategory": "building",
+   "footprint": [
+    3.7,
+    3.4
+   ],
+   "width": 4.84,
+   "height": 4.52,
+   "pivot": [
+    112,
+    169
+   ],
+   "size": [
+    242,
+    226
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      242,
+      226
+     ],
+     "pivot": [
+      112,
+      169
+     ]
+    },
+    "se": {
+     "size": [
+      242,
+      226
+     ],
+     "pivot": [
+      111,
+      169
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id_bengkel_motor",
+   "id": "id_bengkel_motor",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    4,
+    4
+   ],
+   "width": 5.64,
+   "height": 5.36,
+   "pivot": [
+    128,
+    203
+   ],
+   "size": [
+    282,
+    268
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      282,
+      268
+     ],
+     "pivot": [
+      128,
+      203
+     ]
+    },
+    "se": {
+     "size": [
+      256,
+      268
+     ],
+     "pivot": [
+      128,
+      203
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id_laundry_kiloan",
+   "id": "id_laundry_kiloan",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    3,
+    4
+   ],
+   "width": 4.96,
+   "height": 4.84,
+   "pivot": [
+    112,
+    185
+   ],
+   "size": [
+    248,
+    242
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      248,
+      242
+     ],
+     "pivot": [
+      112,
+      185
+     ]
+    },
+    "se": {
+     "size": [
+      224,
+      242
+     ],
+     "pivot": [
+      112,
+      185
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id_warteg_sederhana",
+   "id": "id_warteg_sederhana",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    3,
+    3
+   ],
+   "width": 4.28,
+   "height": 4.32,
+   "pivot": [
+    96,
+    168
+   ],
+   "size": [
+    214,
+    216
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      214,
+      216
+     ],
+     "pivot": [
+      96,
+      168
+     ]
+    },
+    "se": {
+     "size": [
+      192,
+      216
+     ],
+     "pivot": [
+      96,
+      168
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:lapak_barang_bekas",
+   "id": "lapak_barang_bekas",
+   "source": "pipeline-street",
+   "group": "loak",
+   "footprint": [
+    2,
+    1.5
+   ],
+   "width": 2.55,
+   "height": 3.832,
+   "pivot": [
+    56,
+    140
+   ],
+   "size": [
+    112,
+    168
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      112,
+      168
+     ],
+     "pivot": [
+      56,
+      140
+     ]
+    },
+    "se": {
+     "size": [
+      112,
+      168
+     ],
+     "pivot": [
+      56,
+      140
+     ]
+    },
+    "ne": {
+     "size": [
+      112,
+      146
+     ],
+     "pivot": [
+      56,
+      117
+     ]
+    },
+    "nw": {
+     "size": [
+      112,
+      146
+     ],
+     "pivot": [
+      56,
+      117
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:lapak_tas",
+   "id": "lapak_tas",
+   "source": "pipeline-street",
+   "group": "loak",
+   "footprint": [
+    2,
+    1.5
+   ],
+   "width": 2.55,
+   "height": 3.593,
+   "pivot": [
+    56,
+    152
+   ],
+   "size": [
+    128,
+    180
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      128,
+      180
+     ],
+     "pivot": [
+      56,
+      152
+     ]
+    },
+    "se": {
+     "size": [
+      112,
+      180
+     ],
+     "pivot": [
+      56,
+      152
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:pos_ronda",
+   "id": "pos_ronda",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    2,
+    2
+   ],
+   "width": 2.92,
+   "height": 3.833,
+   "pivot": [
+    64,
+    135
+   ],
+   "size": [
+    128,
+    168
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      128,
+      168
+     ],
+     "pivot": [
+      64,
+      135
+     ]
+    },
+    "se": {
+     "size": [
+      128,
+      168
+     ],
+     "pivot": [
+      64,
+      135
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:pot_tanaman",
+   "id": "pot_tanaman",
+   "source": "pipeline-street",
+   "group": "prop",
+   "footprint": [
+    1,
+    1
+   ],
+   "width": 0.56,
+   "height": 0.96,
+   "pivot": [
+    13,
+    43
+   ],
+   "size": [
+    28,
+    48
+   ],
+   "collision": false,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      28,
+      48
+     ],
+     "pivot": [
+      13,
+      43
+     ]
+    },
+    "se": {
+     "size": [
+      28,
+      48
+     ],
+     "pivot": [
+      13,
+      43
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:rumah_kampung_a",
+   "id": "rumah_kampung_a",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    3,
+    3.2
+   ],
+   "width": 4.53,
+   "height": 4.526,
+   "pivot": [
+    99,
+    172
+   ],
+   "size": [
+    222,
+    222
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      222,
+      222
+     ],
+     "pivot": [
+      99,
+      172
+     ]
+    },
+    "se": {
+     "size": [
+      206,
+      222
+     ],
+     "pivot": [
+      107,
+      172
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:rumah_kampung_b",
+   "id": "rumah_kampung_b",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    3,
+    3.2
+   ],
+   "width": 4.53,
+   "height": 4.526,
+   "pivot": [
+    99,
+    172
+   ],
+   "size": [
+    222,
+    222
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      222,
+      222
+     ],
+     "pivot": [
+      99,
+      172
+     ]
+    },
+    "se": {
+     "size": [
+      206,
+      222
+     ],
+     "pivot": [
+      107,
+      172
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:rumah_kampung_c",
+   "id": "rumah_kampung_c",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    3,
+    3.2
+   ],
+   "width": 4.64,
+   "height": 6.24,
+   "pivot": [
+    99,
+    262
+   ],
+   "size": [
+    232,
+    312
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      232,
+      312
+     ],
+     "pivot": [
+      99,
+      262
+     ]
+    },
+    "se": {
+     "size": [
+      212,
+      312
+     ],
+     "pivot": [
+      107,
+      262
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:rumah_kampung_d",
+   "id": "rumah_kampung_d",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    4,
+    3.2
+   ],
+   "width": 5.08,
+   "height": 4.76,
+   "pivot": [
+    115,
+    180
+   ],
+   "size": [
+    254,
+    238
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      254,
+      238
+     ],
+     "pivot": [
+      115,
+      180
+     ]
+    },
+    "se": {
+     "size": [
+      238,
+      238
+     ],
+     "pivot": [
+      123,
+      180
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:rumah_kampung_e",
+   "id": "rumah_kampung_e",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    3,
+    3.2
+   ],
+   "width": 4.44,
+   "height": 4.44,
+   "pivot": [
+    99,
+    172
+   ],
+   "size": [
+    222,
+    222
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      222,
+      222
+     ],
+     "pivot": [
+      99,
+      172
+     ]
+    },
+    "se": {
+     "size": [
+      206,
+      222
+     ],
+     "pivot": [
+      107,
+      172
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:selokan_belok",
+   "id": "selokan_belok",
+   "source": "pipeline-street",
+   "group": "lokal",
+   "footprint": [
+    1,
+    1
+   ],
+   "width": 1.4142,
+   "height": 0.9696,
+   "pivot": [
+    32,
+    21
+   ],
+   "size": [
+    64,
+    38
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      64,
+      38
+     ],
+     "pivot": [
+      32,
+      21
+     ]
+    },
+    "se": {
+     "size": [
+      64,
+      36
+     ],
+     "pivot": [
+      32,
+      19
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:selokan_grill",
+   "id": "selokan_grill",
+   "source": "pipeline-street",
+   "group": "lokal",
+   "footprint": [
+    1,
+    1
+   ],
+   "width": 1.4142,
+   "height": 0.9696,
+   "pivot": [
+    32,
+    21
+   ],
+   "size": [
+    64,
+    38
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      64,
+      38
+     ],
+     "pivot": [
+      32,
+      21
+     ]
+    },
+    "se": {
+     "size": [
+      64,
+      38
+     ],
+     "pivot": [
+      32,
+      21
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:selokan_simpang",
+   "id": "selokan_simpang",
+   "source": "pipeline-street",
+   "group": "lokal",
+   "footprint": [
+    1,
+    1
+   ],
+   "width": 1.4142,
+   "height": 0.9696,
+   "pivot": [
+    32,
+    21
+   ],
+   "size": [
+    64,
+    38
+   ],
+   "published": true,
+   "collision": false,
+   "variants": {
+    "sw": {
+     "size": [
+      64,
+      38
+     ],
+     "pivot": [
+      32,
+      21
+     ]
+    },
+    "se": {
+     "size": [
+      64,
+      38
+     ],
+     "pivot": [
+      32,
+      21
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:toko_loak",
+   "id": "toko_loak",
+   "source": "pipeline-street",
+   "group": "loak",
+   "footprint": [
+    4,
+    3.5
+   ],
+   "width": 5.47,
+   "height": 4.936,
+   "pivot": [
+    120,
+    178
+   ],
+   "size": [
+    264,
+    238
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      264,
+      238
+     ],
+     "pivot": [
+      120,
+      178
+     ]
+    },
+    "se": {
+     "size": [
+      240,
+      238
+     ],
+     "pivot": [
+      120,
+      178
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:tong_sampah",
+   "id": "tong_sampah",
+   "source": "pipeline-street",
+   "group": "taman",
+   "footprint": [
+    1.3,
+    1
+   ],
+   "width": 1.2374,
+   "height": 1.8371,
+   "pivot": [
+    27,
+    56
+   ],
+   "size": [
+    56,
+    72
+   ],
+   "published": true,
+   "collision": true,
+   "aliasOf": "tong_sampah_jakarta",
+   "variants": {
+    "sw": {
+     "size": [
+      56,
+      72
+     ],
+     "pivot": [
+      27,
+      56
+     ]
+    },
+    "se": {
+     "size": [
+      56,
+      72
+     ],
+     "pivot": [
+      27,
+      57
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:warung_madura",
+   "id": "warung_madura",
+   "source": "pipeline-street",
+   "group": "kampung",
+   "footprint": [
+    3,
+    3
+   ],
+   "width": 4.38,
+   "height": 4.012,
+   "pivot": [
+    96,
+    148
+   ],
+   "size": [
+    214,
+    196
+   ],
+   "collision": true,
+   "published": true,
+   "variants": {
+    "sw": {
+     "size": [
+      214,
+      196
+     ],
+     "pivot": [
+      96,
+      148
+     ]
+    },
+    "se": {
+     "size": [
+      192,
+      196
+     ],
+     "pivot": [
+      96,
+      148
+     ]
+    }
+   }
+  },
+  {
+   "file": "studio:br-lapak-sate-madura",
+   "id": "br-lapak-sate-madura",
+   "source": "custom-building",
+   "group": "kampung",
+   "footprint": [
+    4,
+    3
+   ],
+   "width": 5.347,
+   "height": 6.022,
+   "pivot": [
+    121,
+    164
+   ],
+   "size": [
+    242,
+    236
+   ],
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      242,
+      236
+     ],
+     "pivot": [
+      121,
+      164
+     ]
+    },
+    "se": {
+     "size": [
+      242,
+      236
+     ],
+     "pivot": [
+      121,
+      164
+     ]
+    },
+    "ne": {
+     "size": [
+      242,
+      236
+     ],
+     "pivot": [
+      121,
+      164
+     ]
+    },
+    "nw": {
+     "size": [
+      242,
+      236
+     ],
+     "pivot": [
+      121,
+      164
+     ]
+    }
+   }
+  },
+  {
+   "file": "studio:br-warung-pecel-lele",
+   "id": "br-warung-pecel-lele",
+   "source": "custom-building",
+   "group": "kampung",
+   "footprint": [
+    4,
+    3
+   ],
+   "width": 5.347,
+   "height": 6.022,
+   "pivot": [
+    121,
+    164
+   ],
+   "size": [
+    242,
+    236
+   ],
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      242,
+      236
+     ],
+     "pivot": [
+      121,
+      164
+     ]
+    },
+    "se": {
+     "size": [
+      242,
+      236
+     ],
+     "pivot": [
+      121,
+      164
+     ]
+    },
+    "ne": {
+     "size": [
+      242,
+      236
+     ],
+     "pivot": [
+      121,
+      164
+     ]
+    },
+    "nw": {
+     "size": [
+      242,
+      236
+     ],
+     "pivot": [
+      121,
+      164
+     ]
+    }
+   }
+  },
+  {
+   "file": "vegetation:pohon_angsana_M",
+   "id": "pohon_angsana_M",
+   "source": "pipeline-vegetation",
+   "group": "Vegetation \u2022 trees",
+   "footprint": [
+    1.25,
+    1.25
+   ],
+   "width": 2.254,
+   "height": 3.164,
+   "pivot": [
+    51,
+    104
+   ],
+   "size": [
+    102,
+    124
+   ],
+   "collision": true,
+   "variants": {}
+  },
+  {
+   "file": "vegetation:pohon_asam_L",
+   "id": "pohon_asam_L",
+   "source": "pipeline-vegetation",
+   "group": "Vegetation \u2022 trees",
+   "footprint": [
+    1.25,
+    1.25
+   ],
+   "width": 4.198,
+   "height": 5.256,
+   "pivot": [
+    95,
+    177
+   ],
+   "size": [
+    190,
+    206
+   ],
+   "collision": true,
+   "variants": {}
+  },
+  {
+   "file": "vegetation:pohon_asam_M",
+   "id": "pohon_asam_M",
+   "source": "pipeline-vegetation",
+   "group": "Vegetation \u2022 trees",
+   "footprint": [
+    1.25,
+    1.25
+   ],
+   "width": 3.27,
+   "height": 4.134,
+   "pivot": [
+    74,
+    139
+   ],
+   "size": [
+    148,
+    162
+   ],
+   "collision": true,
+   "variants": {}
+  },
+  {
+   "file": "vegetation:pohon_beringin",
+   "id": "pohon_beringin",
+   "source": "pipeline-vegetation",
+   "group": "Vegetation \u2022 trees",
+   "footprint": [
+    1.25,
+    1.25
+   ],
+   "width": 3.933,
+   "height": 4.771,
+   "pivot": [
+    89,
+    156
+   ],
+   "size": [
+    178,
+    187
+   ],
+   "collision": true,
+   "variants": {}
+  },
+  {
+   "file": "vegetation:pohon_ketapang_kencana",
+   "id": "pohon_ketapang_kencana",
+   "source": "pipeline-vegetation",
+   "group": "Vegetation \u2022 trees",
+   "footprint": [
+    1.25,
+    1.25
+   ],
+   "width": 2.431,
+   "height": 4.261,
+   "pivot": [
+    55,
+    149
+   ],
+   "size": [
+    110,
+    167
+   ],
+   "collision": true,
+   "variants": {}
+  },
+  {
+   "file": "vegetation:pohon_kiara_payung",
+   "id": "pohon_kiara_payung",
+   "source": "pipeline-vegetation",
+   "group": "Vegetation \u2022 trees",
+   "footprint": [
+    1.25,
+    1.25
+   ],
+   "width": 2.475,
+   "height": 3.011,
+   "pivot": [
+    56,
+    97
+   ],
+   "size": [
+    112,
+    118
+   ],
+   "collision": true,
+   "variants": {}
+  },
+  {
+   "file": "vegetation:pohon_mahoni_L",
+   "id": "pohon_mahoni_L",
+   "source": "pipeline-vegetation",
+   "group": "Vegetation \u2022 trees",
+   "footprint": [
+    1.25,
+    1.25
+   ],
+   "width": 2.342,
+   "height": 4.593,
+   "pivot": [
+    53,
+    158
+   ],
+   "size": [
+    106,
+    180
+   ],
+   "collision": true,
+   "variants": {}
+  },
+  {
+   "file": "vegetation:pohon_trembesi_M",
+   "id": "pohon_trembesi_M",
+   "source": "pipeline-vegetation",
+   "group": "Vegetation \u2022 trees",
+   "footprint": [
+    1.25,
+    1.25
+   ],
+   "width": 3.094,
+   "height": 2.628,
+   "pivot": [
+    70,
+    78
+   ],
+   "size": [
+    140,
+    103
+   ],
+   "collision": true,
+   "variants": {}
+  }
+ ]
+}
