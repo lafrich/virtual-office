@@ -14,6 +14,7 @@ const harness=require('./helpers/life-play-harness.cjs');
 const cfg=()=>Life.normalize(B.applyToLifeConfig(Life.defaults()));
 const SPM=P['clock.realSecondsPerGameMinute'];
 const ticks=(h,seconds)=>{for(let t=0;t<seconds-1e-9;t+=0.1)h.P.tick(0.1);};
+const untilHours=(h,n)=>{let t=0;while(h.P.sleepInfo()&&h.P.sleepInfo().hours<n&&t<600){h.P.tick(0.05);t+=0.05;}};
 const untilAwake=(h,cap)=>{let t=0;while(h.P.sleepInfo()&&t<cap){h.P.tick(0.1);t+=0.1;}return t;};
 const hhmm=s=>((s.elapsedMinutes+s.clockOrigin)%1440+1440)%1440;
 
@@ -50,21 +51,37 @@ test('wake anytime: minutes and recovery are pro rata; moving also wakes',()=>{
  assert.equal(h.P.sleepInfo(),null,'moving wakes the player');
 });
 
-test('"Tidur sampai pagi" repeats hourly until 06:00 or full energy',()=>{
+test('"Tidur sampai pagi" ALWAYS continues to 06:00 (energy caps at max, no early stop, no quota condition)',()=>{
  const h=harness();h.P.start();
- // 04:00, energy 10 -> stops at 06:00 (2 hours), energy 10+2*30
+ // 04:00, energy 10 -> 2 hours, ends exactly 06:00
  let s=h.P.state();s.energy=10;s.clockOrigin=4*60-s.elapsedMinutes;
  const r=h.P.runAction('sleep_until_morning',{});assert.equal(r.ok,true);assert.equal(r.untilMorning,true);
- untilAwake(h,10*30);
+ untilAwake(h,20*30);
  s=h.P.state();
  assert.equal(h.P.sleepInfo(),null);
  assert.equal(hhmm(s),6*60);
  assert.equal(s.energy,10+2*P['sleep.tent.energy']);
- // 22:00, energy 10 -> stops when energy is full (3 hours: 40, 70, 100)
+ // 22:00, energy 10: energy is full after 3 hours but sleep goes on to 06:00 (8 hours), energy capped at 100
  s.energy=10;s.clockOrigin=22*60-s.elapsedMinutes;
- h.P.runAction('sleep_until_morning',{});untilAwake(h,10*30);
+ let t0=s.elapsedMinutes;
+ h.P.runAction('sleep_until_morning',{});
+ for(let i=0;i<5;i++){untilHours(h,i+1);}
+ assert.ok(h.P.sleepInfo(),'still asleep after energy is full (5 h)');
+ assert.equal(h.P.state().energy,100);
+ untilAwake(h,20*30);
  s=h.P.state();
- assert.equal(s.energy,100);assert.equal(hhmm(s),(22*60+3*60)%1440);
+ assert.equal(hhmm(s),6*60);assert.equal(s.elapsedMinutes-t0,8*60);assert.equal(s.energy,100);
+ // full energy at the start is no reason to refuse; started at 22:30 the last chunk is 30 min and ends at 06:00
+ s.energy=100;s.clockOrigin=(22*60+30)-s.elapsedMinutes;t0=s.elapsedMinutes;
+ assert.equal(h.P.runAction('sleep_until_morning',{}).ok,true);
+ untilAwake(h,20*30);
+ s=h.P.state();
+ assert.equal(hhmm(s),6*60);assert.equal(s.elapsedMinutes-t0,7*60+30);assert.equal(s.energy,100);
+ // at exactly 06:00 there is nothing to sleep to
+ assert.equal(h.P.runAction('sleep_until_morning',{}).ok,false);
+ // Bangun stops it anytime
+ s.clockOrigin=23*60-s.elapsedMinutes;h.P.runAction('sleep_until_morning',{});untilHours(h,2);
+ assert.equal(h.P.runAction('wake').woke,true);assert.equal(h.P.sleepInfo(),null);
  // offered next to the tent sleep in the action list
  const acts=h.P.nearbyActions().map(a=>a.id);
  assert.ok(acts.includes('sleep')&&acts.includes('sleep_until_morning'),acts.join(','));

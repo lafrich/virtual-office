@@ -87,36 +87,46 @@ function syncVisualClock(prior,next,action){
  }catch{}
 }
 /* Timed sleep (slice-1.0, New Bot): one sleep = sleepMinutes (60) game minutes on the normal clock
-   (30 real s), with a progress bar; wake anytime. "Tidur sampai pagi" repeats hour by hour until
-   dayStart (06:00) or full energy. Time and drain are counted per (part) hour by the sleep rule. */
+   (30 real s), with a progress bar; wake anytime. "Tidur sampai pagi" ALWAYS continues hour by hour
+   until dayStart (06:00), as the name says (energy just caps at max; no quota condition); the last chunk
+   is shortened so it ends exactly at 06:00. Bangun / walking stops it anytime. Time and drain are
+   counted per (part) hour by the sleep rule. */
 let sleepSession=null;
 function sleepMinutesSetting(){return Math.max(1,Number(config?.settings?.sleepMinutes)||60);}
 function sleepNeededMs(){const m=sleepMinutesSetting();const h=BAL()?.holdMs?.(m);
  return Number.isFinite(h)&&h>0?h:m*1000*(Number(config?.settings?.realSecondsPerGameMinute)||.5);}
-function morningNow(){if(!state)return false;const d=Number(config?.settings?.dayStartMinute);const start=Number.isFinite(d)?d:360;
- const hhmm=(((Number(state.elapsedMinutes)||0)+(Number(state.clockOrigin)||0))%1440+1440)%1440;return hhmm>=start&&hhmm<start+60;}
+function dayStartMinute(){const d=Number(config?.settings?.dayStartMinute);return Number.isFinite(d)?d:360;}
+function minutesToMorning(){if(!state)return 0;const hhmm=(((Number(state.elapsedMinutes)||0)+(Number(state.clockOrigin)||0))%1440+1440)%1440;
+ return (dayStartMinute()-hhmm+1440)%1440;}
 function sleepInfo(){if(!sleepSession)return null;const s=sleepSession;
  return {sleeping:true,untilMorning:s.untilMorning,hours:s.hours,pct:Math.max(0,Math.min(1,s.elapsedMs/s.neededMs)),neededMs:s.neededMs,
-  minutes:Math.floor(Math.max(0,Math.min(1,s.elapsedMs/s.neededMs))*sleepMinutesSetting())};}
+  minutes:Math.floor(Math.max(0,Math.min(1,s.elapsedMs/s.neededMs))*s.chunk)};}
 function runTimedSleep(args){timedAction=true;try{return runAction('sleep',{...args,__timed:true});}finally{timedAction=false;}}
 function startSleep(args,untilMorning){
  if(sleepSession)return {ok:false,reason:'Sedang tidur.'};
  if(state.restMinutes>0){const why='Sedang bed rest akibat pingsan. Lanjutkan waktu istirahat.';message('⛔ '+why);return {ok:false,reason:why};}
- if(untilMorning&&(state.energy>=100||morningNow())){const why='Sudah pagi atau energi penuh.';message('⛔ '+why);return {ok:false,reason:why};}
+ if(untilMorning&&minutesToMorning()===0){const why='Sudah pagi.';message('⛔ '+why);return {ok:false,reason:why};}
  progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
  const a={...args};delete a.untilMorning;delete a.__timed;delete a.minutes;
  // r3 (L1): "Tidur sampai pagi" runs sleep.untilMorningSpeed x faster in real time; each hour still runs the sleep rule.
  const speed=untilMorning?(BAL()?.sleepTuning?.().untilMorningSpeed||1):1;
- sleepSession={args:a,untilMorning:!!untilMorning,elapsedMs:0,neededMs:sleepNeededMs()/speed,hours:0};
+ sleepSession={args:a,untilMorning:!!untilMorning,speed,elapsedMs:0,neededMs:0,chunk:0,hours:0};
+ nextSleepChunk(sleepSession);
  try{bridge?.playPose?.('sleep',Math.ceil(sleepSession.neededMs/1000));}catch{}
  message('💤 '+(untilMorning?'Tidur sampai pagi':'Tidur')+' · 1 jam game = '+Math.round(sleepSession.neededMs/1000)+' detik. Bangun kapan saja (tombol Bangun / bergerak).');
  notifyHud();paintPanel();
  return {ok:true,sleeping:true,untilMorning:!!untilMorning,neededMs:sleepSession.neededMs};
 }
+// One chunk = a full sleep hour, or the minutes left until 06:00 for "Tidur sampai pagi".
+function nextSleepChunk(s){
+ const hour=sleepMinutesSetting();
+ s.chunk=s.untilMorning?Math.max(1,Math.min(hour,minutesToMorning()||hour)):hour;
+ s.neededMs=sleepNeededMs()/(s.speed||1)*s.chunk/hour;s.elapsedMs=0;
+}
 function wake(reason){
  const s=sleepSession;if(!s)return {ok:false,reason:'Tidak sedang tidur.'};
  sleepSession=null;
- const minutes=Math.floor(Math.max(0,Math.min(1,s.elapsedMs/s.neededMs))*sleepMinutesSetting());
+ const minutes=Math.floor(Math.max(0,Math.min(1,s.elapsedMs/s.neededMs))*s.chunk);
  let r={ok:true,minutes:0};
  if(minutes>=1)r=runTimedSleep({...s.args,minutes});
  else{notifyHud();paintPanel();}
@@ -129,16 +139,16 @@ function sleepStep(seconds){
  s.elapsedMs+=seconds*1000;
  try{const f=outer?.querySelector('#slpSleepFill');if(f)f.style.width=Math.round(Math.min(1,s.elapsedMs/s.neededMs)*100)+'%';}catch{}
  if(s.elapsedMs<s.neededMs)return;
- const r=runTimedSleep(s.args);
+ const r=runTimedSleep(s.chunk<sleepMinutesSetting()?{...s.args,minutes:s.chunk}:s.args);
  if(sleepSession!==s)return;
  s.hours++;
- if(!r.ok||!s.untilMorning||state.energy>=100||morningNow()||state.restMinutes>0){
+ if(!r.ok||!s.untilMorning||minutesToMorning()===0||state.restMinutes>0){
   sleepSession=null;
   if(r.ok)message('☀ Bangun'+(s.untilMorning?' · tidur '+s.hours+' jam':'')+' · energi '+state.energy);
   try{bridge?.playPose?.('idle',1);}catch{}
   notifyHud();paintPanel();return;
  }
- s.elapsedMs=0;
+ nextSleepChunk(s);
  try{bridge?.playPose?.('sleep',Math.ceil(s.neededMs/1000));}catch{}
 }
 function getWorld(){return bridge&&bridge.getWorld?bridge.getWorld():{objects:[],map:{}};}
