@@ -1,0 +1,979 @@
+{
+ "format": "njh-map-distance-result-v1",
+ "branch": "preview/njh-map-distance",
+ "basedOn": "preview/njh-map-densify a804890a + merge of preview/njh-balancing-20261122 c2533a04",
+ "rule": "map.maxCoreDistanceTiles = 30, Euclidean, points per docs/NJH-MAP-DISTANCE-BRIEF.md (+ silver)",
+ "check": "node tools/njh-map-distance-check.cjs",
+ "before": {
+  "max": {
+   "a": "wc",
+   "b": "loak",
+   "euclidean": 48.23,
+   "manhattan": 61.5
+  },
+  "over": [
+   {
+    "a": "wc",
+    "b": "loak",
+    "euclidean": 48.23,
+    "manhattan": 61.5
+   },
+   {
+    "a": "loak",
+    "b": "spot_mancing",
+    "euclidean": 47.69,
+    "manhattan": 65
+   },
+   {
+    "a": "spot_mancing",
+    "b": "pasar_ikan",
+    "euclidean": 47.25,
+    "manhattan": 66.5
+   },
+   {
+    "a": "wc",
+    "b": "pasar_ikan",
+    "euclidean": 46.33,
+    "manhattan": 63
+   },
+   {
+    "a": "spot_mancing",
+    "b": "silver",
+    "euclidean": 46.04,
+    "manhattan": 64
+   },
+   {
+    "a": "tenda",
+    "b": "loak",
+    "euclidean": 45.96,
+    "manhattan": 63
+   },
+   {
+    "a": "tenda",
+    "b": "pasar_ikan",
+    "euclidean": 45.72,
+    "manhattan": 64.5
+   },
+   {
+    "a": "loak",
+    "b": "kost",
+    "euclidean": 45.51,
+    "manhattan": 46.25
+   },
+   {
+    "a": "tenda",
+    "b": "silver",
+    "euclidean": 44.94,
+    "manhattan": 62
+   },
+   {
+    "a": "parkir",
+    "b": "spot_mancing",
+    "euclidean": 43.6,
+    "manhattan": 61
+   },
+   {
+    "a": "wc",
+    "b": "silver",
+    "euclidean": 42.78,
+    "manhattan": 60.5
+   },
+   {
+    "a": "tenda",
+    "b": "parkir",
+    "euclidean": 42.44,
+    "manhattan": 59
+   },
+   {
+    "a": "pasar_ikan",
+    "b": "kost",
+    "euclidean": 40.91,
+    "manhattan": 46.25
+   },
+   {
+    "a": "wc",
+    "b": "parkir",
+    "euclidean": 40.7,
+    "manhattan": 57.5
+   },
+   {
+    "a": "spot_mancing",
+    "b": "siomay",
+    "euclidean": 40.31,
+    "manhattan": 57
+   },
+   {
+    "a": "tenda",
+    "b": "siomay",
+    "euclidean": 38.9,
+    "manhattan": 55
+   },
+   {
+    "a": "wc",
+    "b": "siomay",
+    "euclidean": 38.85,
+    "manhattan": 53.5
+   },
+   {
+    "a": "dermaga",
+    "b": "silver",
+    "euclidean": 37.96,
+    "manhattan": 40.38
+   },
+   {
+    "a": "dermaga",
+    "b": "kost",
+    "euclidean": 36.58,
+    "manhattan": 51.63
+   },
+   {
+    "a": "parkir",
+    "b": "dermaga",
+    "euclidean": 34.96,
+    "manhattan": 37.38
+   },
+   {
+    "a": "pak_ogah",
+    "b": "spot_mancing",
+    "euclidean": 34.21,
+    "manhattan": 48
+   },
+   {
+    "a": "wc",
+    "b": "pak_ogah",
+    "euclidean": 33.81,
+    "manhattan": 44.5
+   },
+   {
+    "a": "siomay",
+    "b": "kost",
+    "euclidean": 33.21,
+    "manhattan": 36.75
+   },
+   {
+    "a": "kost",
+    "b": "silver",
+    "euclidean": 33,
+    "manhattan": 43.75
+   },
+   {
+    "a": "warteg",
+    "b": "kost",
+    "euclidean": 32.8,
+    "manhattan": 43.25
+   },
+   {
+    "a": "tenda",
+    "b": "pak_ogah",
+    "euclidean": 32.65,
+    "manhattan": 46
+   },
+   {
+    "a": "dermaga",
+    "b": "pasar_ikan",
+    "euclidean": 32.58,
+    "manhattan": 42.88
+   },
+   {
+    "a": "parkir",
+    "b": "kost",
+    "euclidean": 31.87,
+    "manhattan": 40.75
+   },
+   {
+    "a": "pak_ogah",
+    "b": "kost",
+    "euclidean": 31.17,
+    "manhattan": 34.25
+   },
+   {
+    "a": "wc",
+    "b": "warteg",
+    "euclidean": 30.2,
+    "manhattan": 33.5
+   }
+  ],
+  "points": {
+   "tenda": {
+    "x": -50.5,
+    "z": 65.5
+   },
+   "wc": {
+    "x": -43,
+    "z": 71.5
+   },
+   "warteg": {
+    "x": -39.5,
+    "z": 41.5
+   },
+   "pak_ogah": {
+    "x": -29.5,
+    "z": 40.5
+   },
+   "parkir": {
+    "x": -15.5,
+    "z": 41.5
+   },
+   "loak": {
+    "x": -27,
+    "z": 26
+   },
+   "dermaga": {
+    "x": -50.375,
+    "z": 44
+   },
+   "spot_mancing": {
+    "x": -50.5,
+    "z": 67.5
+   },
+   "pasar_ikan": {
+    "x": -20.5,
+    "z": 31
+   },
+   "siomay": {
+    "x": -22.5,
+    "z": 38.5
+   },
+   "kost": {
+    "x": -26.25,
+    "z": 71.5
+   },
+   "silver": {
+    "x": -12.5,
+    "z": 41.5
+   }
+  }
+ },
+ "after": {
+  "max": {
+   "a": "spot_mancing",
+   "b": "pasar_ikan",
+   "euclidean": 29.67,
+   "manhattan": 37.8
+  },
+  "over": [],
+  "points": {
+   "tenda": {
+    "x": -50.5,
+    "z": 65.5
+   },
+   "wc": {
+    "x": -42,
+    "z": 71.5
+   },
+   "warteg": {
+    "x": -38.5,
+    "z": 57.5
+   },
+   "pak_ogah": {
+    "x": -36.5,
+    "z": 47.5
+   },
+   "parkir": {
+    "x": -23.5,
+    "z": 59.5
+   },
+   "loak": {
+    "x": -42,
+    "z": 57.5
+   },
+   "dermaga": {
+    "x": -50.375,
+    "z": 58
+   },
+   "spot_mancing": {
+    "x": -50.5,
+    "z": 67.5
+   },
+   "pasar_ikan": {
+    "x": -22.5,
+    "z": 57.7
+   },
+   "siomay": {
+    "x": -45,
+    "z": 71.5
+   },
+   "kost": {
+    "x": -26.25,
+    "z": 71.5
+   },
+   "silver": {
+    "x": -36.5,
+    "z": 50.5
+   }
+  },
+  "pairs": [
+   {
+    "a": "spot_mancing",
+    "b": "pasar_ikan",
+    "euclidean": 29.67,
+    "manhattan": 37.8
+   },
+   {
+    "a": "tenda",
+    "b": "pasar_ikan",
+    "euclidean": 29.07,
+    "manhattan": 35.8
+   },
+   {
+    "a": "parkir",
+    "b": "spot_mancing",
+    "euclidean": 28.16,
+    "manhattan": 35
+   },
+   {
+    "a": "dermaga",
+    "b": "pasar_ikan",
+    "euclidean": 27.88,
+    "manhattan": 28.17
+   },
+   {
+    "a": "tenda",
+    "b": "parkir",
+    "euclidean": 27.66,
+    "manhattan": 33
+   },
+   {
+    "a": "dermaga",
+    "b": "kost",
+    "euclidean": 27.65,
+    "manhattan": 37.63
+   },
+   {
+    "a": "parkir",
+    "b": "dermaga",
+    "euclidean": 26.92,
+    "manhattan": 28.38
+   },
+   {
+    "a": "pasar_ikan",
+    "b": "siomay",
+    "euclidean": 26.39,
+    "manhattan": 36.3
+   },
+   {
+    "a": "pak_ogah",
+    "b": "kost",
+    "euclidean": 26.1,
+    "manhattan": 34.25
+   },
+   {
+    "a": "pak_ogah",
+    "b": "siomay",
+    "euclidean": 25.46,
+    "manhattan": 32.5
+   },
+   {
+    "a": "tenda",
+    "b": "kost",
+    "euclidean": 24.98,
+    "manhattan": 30.25
+   },
+   {
+    "a": "wc",
+    "b": "pak_ogah",
+    "euclidean": 24.62,
+    "manhattan": 29.5
+   },
+   {
+    "a": "parkir",
+    "b": "siomay",
+    "euclidean": 24.62,
+    "manhattan": 33.5
+   },
+   {
+    "a": "spot_mancing",
+    "b": "kost",
+    "euclidean": 24.58,
+    "manhattan": 28.25
+   },
+   {
+    "a": "pak_ogah",
+    "b": "spot_mancing",
+    "euclidean": 24.41,
+    "manhattan": 34
+   },
+   {
+    "a": "wc",
+    "b": "pasar_ikan",
+    "euclidean": 23.89,
+    "manhattan": 33.3
+   },
+   {
+    "a": "kost",
+    "b": "silver",
+    "euclidean": 23.37,
+    "manhattan": 31.25
+   },
+   {
+    "a": "tenda",
+    "b": "pak_ogah",
+    "euclidean": 22.8,
+    "manhattan": 32
+   },
+   {
+    "a": "siomay",
+    "b": "silver",
+    "euclidean": 22.66,
+    "manhattan": 29.5
+   },
+   {
+    "a": "wc",
+    "b": "parkir",
+    "euclidean": 22.05,
+    "manhattan": 30.5
+   },
+   {
+    "a": "spot_mancing",
+    "b": "silver",
+    "euclidean": 22.02,
+    "manhattan": 31
+   },
+   {
+    "a": "wc",
+    "b": "silver",
+    "euclidean": 21.71,
+    "manhattan": 26.5
+   },
+   {
+    "a": "loak",
+    "b": "kost",
+    "euclidean": 21.07,
+    "manhattan": 29.75
+   },
+   {
+    "a": "tenda",
+    "b": "silver",
+    "euclidean": 20.52,
+    "manhattan": 29
+   },
+   {
+    "a": "loak",
+    "b": "pasar_ikan",
+    "euclidean": 19.5,
+    "manhattan": 19.7
+   },
+   {
+    "a": "siomay",
+    "b": "kost",
+    "euclidean": 18.75,
+    "manhattan": 18.75
+   },
+   {
+    "a": "parkir",
+    "b": "loak",
+    "euclidean": 18.61,
+    "manhattan": 20.5
+   },
+   {
+    "a": "warteg",
+    "b": "kost",
+    "euclidean": 18.6,
+    "manhattan": 26.25
+   },
+   {
+    "a": "pak_ogah",
+    "b": "parkir",
+    "euclidean": 17.69,
+    "manhattan": 25
+   },
+   {
+    "a": "pak_ogah",
+    "b": "dermaga",
+    "euclidean": 17.4,
+    "manhattan": 24.38
+   },
+   {
+    "a": "pak_ogah",
+    "b": "pasar_ikan",
+    "euclidean": 17.32,
+    "manhattan": 24.2
+   },
+   {
+    "a": "warteg",
+    "b": "pasar_ikan",
+    "euclidean": 16,
+    "manhattan": 16.2
+   },
+   {
+    "a": "wc",
+    "b": "dermaga",
+    "euclidean": 15.89,
+    "manhattan": 21.88
+   },
+   {
+    "a": "parkir",
+    "b": "silver",
+    "euclidean": 15.81,
+    "manhattan": 22
+   },
+   {
+    "a": "dermaga",
+    "b": "silver",
+    "euclidean": 15.77,
+    "manhattan": 21.38
+   },
+   {
+    "a": "wc",
+    "b": "kost",
+    "euclidean": 15.75,
+    "manhattan": 15.75
+   },
+   {
+    "a": "pasar_ikan",
+    "b": "silver",
+    "euclidean": 15.74,
+    "manhattan": 21.2
+   },
+   {
+    "a": "warteg",
+    "b": "spot_mancing",
+    "euclidean": 15.62,
+    "manhattan": 22
+   },
+   {
+    "a": "warteg",
+    "b": "siomay",
+    "euclidean": 15.44,
+    "manhattan": 20.5
+   },
+   {
+    "a": "warteg",
+    "b": "parkir",
+    "euclidean": 15.13,
+    "manhattan": 17
+   },
+   {
+    "a": "dermaga",
+    "b": "siomay",
+    "euclidean": 14.53,
+    "manhattan": 18.88
+   },
+   {
+    "a": "wc",
+    "b": "warteg",
+    "euclidean": 14.43,
+    "manhattan": 17.5
+   },
+   {
+    "a": "tenda",
+    "b": "warteg",
+    "euclidean": 14.42,
+    "manhattan": 20
+   },
+   {
+    "a": "loak",
+    "b": "siomay",
+    "euclidean": 14.32,
+    "manhattan": 17
+   },
+   {
+    "a": "pasar_ikan",
+    "b": "kost",
+    "euclidean": 14.3,
+    "manhattan": 17.55
+   },
+   {
+    "a": "wc",
+    "b": "loak",
+    "euclidean": 14,
+    "manhattan": 14
+   },
+   {
+    "a": "loak",
+    "b": "spot_mancing",
+    "euclidean": 13.12,
+    "manhattan": 18.5
+   },
+   {
+    "a": "parkir",
+    "b": "kost",
+    "euclidean": 12.31,
+    "manhattan": 14.75
+   },
+   {
+    "a": "warteg",
+    "b": "dermaga",
+    "euclidean": 11.89,
+    "manhattan": 12.38
+   },
+   {
+    "a": "tenda",
+    "b": "loak",
+    "euclidean": 11.67,
+    "manhattan": 16.5
+   },
+   {
+    "a": "pak_ogah",
+    "b": "loak",
+    "euclidean": 11.41,
+    "manhattan": 15.5
+   },
+   {
+    "a": "tenda",
+    "b": "wc",
+    "euclidean": 10.4,
+    "manhattan": 14.5
+   },
+   {
+    "a": "warteg",
+    "b": "pak_ogah",
+    "euclidean": 10.2,
+    "manhattan": 12
+   },
+   {
+    "a": "dermaga",
+    "b": "spot_mancing",
+    "euclidean": 9.5,
+    "manhattan": 9.63
+   },
+   {
+    "a": "wc",
+    "b": "spot_mancing",
+    "euclidean": 9.39,
+    "manhattan": 12.5
+   },
+   {
+    "a": "loak",
+    "b": "silver",
+    "euclidean": 8.9,
+    "manhattan": 12.5
+   },
+   {
+    "a": "loak",
+    "b": "dermaga",
+    "euclidean": 8.39,
+    "manhattan": 8.88
+   },
+   {
+    "a": "tenda",
+    "b": "siomay",
+    "euclidean": 8.14,
+    "manhattan": 11.5
+   },
+   {
+    "a": "tenda",
+    "b": "dermaga",
+    "euclidean": 7.5,
+    "manhattan": 7.63
+   },
+   {
+    "a": "warteg",
+    "b": "silver",
+    "euclidean": 7.28,
+    "manhattan": 9
+   },
+   {
+    "a": "spot_mancing",
+    "b": "siomay",
+    "euclidean": 6.8,
+    "manhattan": 9.5
+   },
+   {
+    "a": "warteg",
+    "b": "loak",
+    "euclidean": 3.5,
+    "manhattan": 3.5
+   },
+   {
+    "a": "wc",
+    "b": "siomay",
+    "euclidean": 3,
+    "manhattan": 3
+   },
+   {
+    "a": "pak_ogah",
+    "b": "silver",
+    "euclidean": 3,
+    "manhattan": 3
+   },
+   {
+    "a": "parkir",
+    "b": "pasar_ikan",
+    "euclidean": 2.06,
+    "manhattan": 2.8
+   },
+   {
+    "a": "tenda",
+    "b": "spot_mancing",
+    "euclidean": 2,
+    "manhattan": 2
+   }
+  ]
+ },
+ "moves": [
+  {
+   "id": "njh-toko-loak",
+   "name": "Toko Loak",
+   "from": [
+    -27,
+    23.75
+   ],
+   "to": [
+    -42,
+    55.25
+   ],
+   "why": "swap with Rumah warga 13: Loak joins the Gang Selatan cluster (was 45.5 from Kost)"
+  },
+  {
+   "id": "njh-sw2-h3",
+   "name": "Rumah warga 13",
+   "from": [
+    -42,
+    55.4
+   ],
+   "to": [
+    -27,
+    23.9
+   ],
+   "why": "swap partner of Toko Loak (house takes the old Loak lot, front on the pasar plaza edge)"
+  },
+  {
+   "id": "jakarta-v3-18446",
+   "name": "Warteg (warung makan)",
+   "from": [
+    -39.5,
+    39.5
+   ],
+   "to": [
+    -38.5,
+    55.5
+   ],
+   "why": "swap with Rumah warga 14: Warteg moves next to Loak on Gang Selatan (was 32.8 from Kost, 30.2 from WC)"
+  },
+  {
+   "id": "njh-sw2-h4",
+   "name": "Rumah warga 14",
+   "from": [
+    -38.5,
+    55.4
+   ],
+   "to": [
+    -39.5,
+    39.4
+   ],
+   "why": "swap partner of Warteg (house takes the old Warteg lot on Jl. Kebon Sirih)"
+  },
+  {
+   "id": "jakarta-v3-4942",
+   "name": "Pasar Ikan (lapak ikan basah)",
+   "from": [
+    -20.5,
+    29.9
+   ],
+   "to": [
+    -22.5,
+    56.6
+   ],
+   "why": "Pasar Ikan stall to the lapangan beside NJH Mart (was 47.2 from the fishing spot)"
+  },
+  {
+   "id": "njh-wc-umum",
+   "name": "WC Umum / Mandi Umum",
+   "from": [
+    -43,
+    69.15
+   ],
+   "to": [
+    -42,
+    69.15
+   ],
+   "why": "WC/Mandi Umum shifted 1 tile east inside its own lot to free a cart slot"
+  },
+  {
+   "id": "njh-lapak-siomay-batagor",
+   "name": "Lapak Siomay Batagor",
+   "from": [
+    -22.5,
+    37.5
+   ],
+   "to": [
+    -45,
+    70.5
+   ],
+   "why": "siomay cart between Bengkel and WC (was 40.3 from the fishing spot)"
+  },
+  {
+   "id": "njh-dermaga-mancing",
+   "name": "Dermaga mancing",
+   "from": [
+    -51.5,
+    44
+   ],
+   "to": [
+    -51.5,
+    58
+   ],
+   "why": "dock moved south along the Kali bank to the Gang Selatan mouth r=57-58, visible down the gang (was 36.6 from Kost)"
+  },
+  {
+   "id": "njh-dermaga-mancing-anchor",
+   "name": "PENDING Dermaga mancing",
+   "from": [
+    -51.5,
+    44
+   ],
+   "to": [
+    -51.5,
+    58
+   ],
+   "why": "anchor follows the dock (legacy play.js fish site)"
+  },
+  {
+   "id": "njh-scavenge-botol-kali-1",
+   "name": "Botol bekas tepi Kali selatan",
+   "from": [
+    -51.0,
+    56.5
+   ],
+   "to": [
+    -51.0,
+    55.5
+   ],
+   "why": "scavenge bottle nudged 1 tile north so the moved dock and its use tile stay clear"
+  },
+  {
+   "id": "njh-npc-pak-ogah",
+   "name": "Pak Ogah",
+   "from": [
+    -29.5,
+    41.5
+   ],
+   "to": [
+    -35.5,
+    47.5
+   ],
+   "why": "Pak Ogah keeps his simpang but works its SW corner by zebra barat (was 33.8 from WC, 34.2 from the fishing spot)"
+  },
+  {
+   "id": "njh-tiang-ogah",
+   "name": "Tiang Pak Ogah",
+   "from": [
+    -28.5,
+    40.5
+   ],
+   "to": [
+    -35.5,
+    48.5
+   ],
+   "why": "flag post follows Pak Ogah"
+  },
+  {
+   "id": "njh-tiang-ogah-anchor",
+   "name": "PENDING Tiang Pak Ogah",
+   "from": [
+    -28.5,
+    40.5
+   ],
+   "to": [
+    -35.5,
+    48.5
+   ],
+   "why": "anchor follows the post"
+  },
+  {
+   "id": "ref-ambient-9",
+   "name": "Manusia Silver",
+   "from": [
+    -13.5,
+    41.5
+   ],
+   "to": [
+    -35.5,
+    50.5
+   ],
+   "why": "Manusia Silver to the simpang SW corner sidewalk next to Pak Ogah (was 46.0 from the fishing spot)"
+  },
+  {
+   "id": "njh-lapak-silver",
+   "name": "Lapak Manusia Silver",
+   "from": [
+    -27.5,
+    39.5
+   ],
+   "to": [
+    -35.5,
+    49.5
+   ],
+   "why": "Silver stand follows Manusia Silver"
+  },
+  {
+   "id": "njh-lapak-silver-anchor",
+   "name": "PENDING Lapak Manusia Silver",
+   "from": [
+    -27.5,
+    39.5
+   ],
+   "to": [
+    -35.5,
+    49.5
+   ],
+   "why": "anchor follows the stand"
+  },
+  {
+   "id": "ref-ambient-11",
+   "name": "Kang Parkir",
+   "from": [
+    -16.5,
+    41.5
+   ],
+   "to": [
+    -24.5,
+    59.5
+   ],
+   "why": "Kang Parkir moves to the NJH Mart forecourt (was 43.6 from the fishing spot)"
+  },
+  {
+   "id": "njh-atm-16",
+   "name": "Bangku Taman",
+   "from": [
+    -22.5,
+    55.9
+   ],
+   "to": [
+    -22.5,
+    37.5
+   ],
+   "why": "Bangku Taman gave its lapangan spot to the Pasar Ikan stall; takes the old siomay slot between the pecel lele and sate tents (seating for the food row)"
+  },
+  {
+   "id": "njh-atm-15",
+   "name": "Tiang kabel listrik",
+   "from": [
+    -22,
+    58.5
+   ],
+   "to": [
+    -20.5,
+    59.5
+   ],
+   "why": "Tiang kabel listrik moved 1.5 east / 1 south onto the r=59 half of the same NJH Mart forecourt sidewalk so the Pasar Ikan use tiles stay clear"
+  },
+  {
+   "id": "njh-penanda-doa",
+   "name": "Sajadah / tempat tenang",
+   "from": [
+    -11.5,
+    23.5
+   ],
+   "to": [
+    -12.0,
+    23.5
+   ],
+   "why": "sajadah 2x1 footprint sat on the c=-11 drain after the balancing swap; shifted 0.5 west (use point unchanged)"
+  },
+  {
+   "id": "njh-penanda-doa-anchor",
+   "name": "PENDING Penanda tempat tenang",
+   "from": [
+    -11.5,
+    23.5
+   ],
+   "to": [
+    -12.0,
+    23.5
+   ],
+   "why": "anchor follows"
+  }
+ ]
+}

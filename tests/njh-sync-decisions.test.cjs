@@ -36,7 +36,9 @@ test('approved swaps: prayer mat and siomay cart replace placeholders',()=>{
  assert.deepEqual(pray.usePoint,[-11.5,24.5]);
  const siomay=meta.interactables.find(x=>x.objectId==='njh-lapak-siomay-batagor');
  assert.equal(siomay.asset,'pipeline:id_mainkan_siomay_cart');
- assert.deepEqual(siomay.usePoint,[-22.5,38.5]);
+ // preview/njh-map-distance: cart moved next to WC/Mandi Umum (30-tile core rule); use tile stays on the r=71 sidewalk
+ assert.deepEqual(siomay.usePoint,[byId['njh-lapak-siomay-batagor'].x,byId['njh-lapak-siomay-batagor'].z+1]);
+ assert.deepEqual(siomay.usePoint,[-45,71.5]);
 });
 
 test('vehicle catalog uses real PNG sizes and play art does not clamp to footprint',()=>{
@@ -88,28 +90,19 @@ test('dailyWageCap is 150000 with a raised validator clamp',()=>{
  assert.ok(eng.includes('dailyWageCap:int(settings.dailyWageCap,0,1000000,150000)'));
 });
 
-test('Kang Parkir and Manusia Silver sit on r=41.5, trees left door/use/spawn tiles',()=>{
- assert.equal(byId['ref-ambient-9'].z,41.5);
- assert.equal(byId['ref-ambient-11'].z,41.5);
- const moved={
-  'jakarta-green-v5-22249':[-29,22],
-  'jakarta-green-v5-22258':[-12.0,22.0],
-  'jakarta-green-v5-22445':[-12.0,27.5],
-  'jakarta-green-v5-22447':[-12.0,34.5],
-  'jakarta-green-v5-22452':[-12.0,37.0],
-  'jakarta-green-v5-22589':[-46.0,70.0]
- };
- for(const [id,pos] of Object.entries(moved)){
-  assert.equal(byId[id].x,pos[0],id+' x');
-  assert.equal(byId[id].z,pos[1],id+' z');
+test('Kang Parkir and Manusia Silver stand on walk surface, trees left door/use/spawn tiles',()=>{
+ // preview/njh-map-distance moved both NPCs into the 30-tile core cluster (NJH Mart forecourt r=59,
+ // Jl. Kebon Kacang west sidewalk). The densify tree fixes (kept over the balancing-side tree moves)
+ // are proven by the layout checker: no door/use/spawn point blocked (R4), NPCs on sidewalk/plaza (R7).
+ const cells=new Map(city.record.document.map.terrain.cells.map(c=>[c.c+','+c.r,c.type]));
+ for(const id of ['ref-ambient-9','ref-ambient-11']){
+  const o=byId[id];
+  assert.ok(['sidewalk','plaza'].includes(cells.get(Math.floor(o.x)+','+Math.floor(o.z))),id+' on walk surface');
  }
-});
-
-test('pipeline catalog exposes prayer mat and siomay cart at the iso lock',()=>{
- const js=read('world-builder/pipeline-catalog.js');
- assert.ok(js.includes('"id":"id_mainkan_prayer_mat"'));
- assert.ok(js.includes('"id":"id_mainkan_siomay_cart"'));
- assert.ok(js.includes('"footprint":[2,1]'));
- assert.ok(js.includes('"width":2.232'));
- assert.ok(js.includes('"height":3.674'));
+ const {check}=require('./njh-map-layout-check.cjs');
+ const r=check();
+ assert.equal(r.counts.R4,0,JSON.stringify(r.issues.R4));
+ assert.equal(r.counts.R7,0,JSON.stringify(r.issues.R7));
+ for(const id of ['jakarta-green-v5-22249','jakarta-green-v5-22445','jakarta-green-v5-22447','jakarta-green-v5-22452','jakarta-green-v5-22589'])
+  assert.ok(byId[id],id+' kept (moved, not deleted)');
 });

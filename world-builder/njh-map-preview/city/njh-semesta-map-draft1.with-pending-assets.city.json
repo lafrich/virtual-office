@@ -13685,8 +13685,8 @@
           "id": "njh-npc-pak-ogah",
           "name": "Pak Ogah",
           "type": "quest_npc",
-          "x": -29.5,
-          "z": 41.5,
+          "x": -35.5,
+          "z": 47.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -13696,7 +13696,8 @@
           "subtype": "pak_ogah",
           "tags": [
             "njh-gameplay-sites",
-            "semesta"
+            "semesta",
+            "njh-map-distance"
           ],
           "interactions": [
             "talk",
@@ -13706,7 +13707,7 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "Job NPC for Semesta Life Play (pattern /pak.?ogah/). Placed on the sidewalk south of Tiang Pak Ogah, not on the road."
+          "notes": "Job NPC for Semesta Life Play (pattern /pak.?ogah/). Placed on the sidewalk south of Tiang Pak Ogah, not on the road. Moved (-29.5,41.5)->(-35.5,47.5) for the 30-tile core-distance rule (preview/njh-map-distance)."
         },
         {
           "id": "njh-nw1-h1",
@@ -13985,8 +13986,8 @@
           "id": "jakarta-v3-18446",
           "name": "Warteg (warung makan)",
           "type": "sprite",
-          "x": -39.5,
-          "z": 39.5,
+          "x": -38.5,
+          "z": 55.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -14002,7 +14003,8 @@
             "jakarta-city",
             "kampung",
             "native",
-            "njh-door:njh_door_warung_makan"
+            "njh-door:njh_door_warung_makan",
+            "njh-map-distance"
           ],
           "interactions": [
             "enter"
@@ -14011,7 +14013,7 @@
           "entranceFacing": "sw",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "Published native pipeline sprite, individually editable"
+          "notes": "Published native pipeline sprite, individually editable Moved (-39.5,39.5)->(-38.5,55.5) for the 30-tile core-distance rule (preview/njh-map-distance)."
         },
         {
           "id": "ref-north-row-b",
@@ -14234,17 +14236,18 @@
           "replaceable": true,
           "layer": "structure",
           "tags": [
-            "njh-draft1"
+            "njh-draft1",
+            "njh-map-distance"
           ],
           "interactions": [],
           "capacity": 1,
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "",
+          "notes": "Moved (-42,55.4)->(-27,23.9) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "asset": "pipeline:rumah_kampung_d",
-          "x": -42,
-          "z": 55.4,
+          "x": -27,
+          "z": 23.9,
           "rotation": 0,
           "width": 5.08,
           "height": 4.76,
@@ -14260,17 +14263,18 @@
           "replaceable": true,
           "layer": "structure",
           "tags": [
-            "njh-draft1"
+            "njh-draft1",
+            "njh-map-distance"
           ],
           "interactions": [],
           "capacity": 1,
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "",
+          "notes": "Moved (-38.5,55.4)->(-39.5,39.4) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "asset": "pipeline:rumah_kampung_e",
-          "x": -38.5,
-          "z": 55.4,
+          "x": -39.5,
+          "z": 39.4,
           "rotation": 0,
           "width": 4.44,
           "height": 4.44,
@@ -14420,7 +14424,8 @@
           "layer": "structure",
           "tags": [
             "njh-door:njh_door_wc_umum",
-            "njh-draft1"
+            "njh-draft1",
+            "njh-map-distance"
           ],
           "interactions": [
             "enter"
@@ -14429,9 +14434,9 @@
           "entranceFacing": "sw",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "",
+          "notes": "Moved (-43,69.15)->(-42,69.15) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "asset": "pipeline:id200_publik_toilet_umum_kampung",
-          "x": -43,
+          "x": -42,
           "z": 69.15,
           "rotation": 0,
           "width": 5.2,
@@ -14921,7 +14926,8 @@
           "layer": "structure",
           "tags": [
             "njh-door:njh_door_loak",
-            "njh-draft1"
+            "njh-draft1",
+            "njh-map-distance"
           ],
           "interactions": [
             "enter"
@@ -14930,10 +14936,10 @@
           "entranceFacing": "sw",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "",
+          "notes": "Moved (-27,23.75)->(-42,55.25) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "asset": "pipeline:toko_loak",
-          "x": -27,
-          "z": 23.75,
+          "x": -42,
+          "z": 55.25,
           "rotation": 0,
           "width": 5.47,
           "height": 4.936,
@@ -15062,8 +15068,8 @@
           "id": "jakarta-v3-4942",
           "name": "Pasar Ikan (lapak ikan basah)",
           "type": "sprite",
-          "x": -20.5,
-          "z": 29.9,
+          "x": -22.5,
+          "z": 56.6,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -15078,7 +15084,8 @@
             "jakarta-city",
             "dense-v3",
             "ruko",
-            "native"
+            "native",
+            "njh-map-distance"
           ],
           "interactions": [
             "buy"
@@ -15087,7 +15094,7 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "Published native pipeline sprite, individually editable"
+          "notes": "Published native pipeline sprite, individually editable Moved (-20.5,29.9)->(-22.5,56.6) for the 30-tile core-distance rule (preview/njh-map-distance)."
         },
         {
           "id": "jakarta-v3-20101",
@@ -15933,17 +15940,18 @@
           "replaceable": true,
           "layer": "prop",
           "tags": [
-            "njh-draft1"
+            "njh-draft1",
+            "njh-map-distance"
           ],
           "interactions": [],
           "capacity": 1,
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "no",
-          "notes": "Nudged off the NJH Mart lot (preview/njh-step2-minimarket) onto sidewalk r=58, east of the door use tile.",
+          "notes": "Nudged off the NJH Mart lot (preview/njh-step2-minimarket) onto sidewalk r=58, east of the door use tile. Moved (-22,58.5)->(-20.5,59.5) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "asset": "pipeline:id200_jalan_tiang_kabel_listrik",
-          "x": -22,
-          "z": 58.5,
+          "x": -20.5,
+          "z": 59.5,
           "rotation": 0,
           "width": 2.84,
           "height": 3.28,
@@ -15959,7 +15967,8 @@
           "replaceable": true,
           "layer": "prop",
           "tags": [
-            "njh-draft1"
+            "njh-draft1",
+            "njh-map-distance"
           ],
           "interactions": [
             "sit"
@@ -15968,10 +15977,10 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "yes",
-          "notes": "Nudged east off the NJH Mart lot (preview/njh-step2-minimarket); keeps the live catalog scale/collision fix (blocking yes).",
+          "notes": "Nudged east off the NJH Mart lot (preview/njh-step2-minimarket); keeps the live catalog scale/collision fix (blocking yes). Moved (-22.5,55.9)->(-22.5,37.5) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "asset": "pipeline:bangku_taman",
           "x": -22.5,
-          "z": 55.9,
+          "z": 37.5,
           "rotation": 0,
           "width": 1.591,
           "height": 1.888,
@@ -16035,8 +16044,8 @@
           "id": "ref-ambient-9",
           "name": "Manusia Silver",
           "type": "quest_npc",
-          "x": -13.5,
-          "z": 41.5,
+          "x": -35.5,
+          "z": 50.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -16058,7 +16067,8 @@
           "tags": [
             "semesta",
             "reference-city",
-            "loop-preview"
+            "loop-preview",
+            "njh-map-distance"
           ],
           "interactions": [
             "talk",
@@ -16068,14 +16078,14 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "Automated preview only; no game AI/network behavior."
+          "notes": "Automated preview only; no game AI/network behavior. Moved (-13.5,41.5)->(-35.5,50.5) for the 30-tile core-distance rule (preview/njh-map-distance)."
         },
         {
           "id": "ref-ambient-11",
           "name": "Kang Parkir",
           "type": "quest_npc",
-          "x": -16.5,
-          "z": 41.5,
+          "x": -24.5,
+          "z": 59.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -16097,7 +16107,8 @@
           "tags": [
             "semesta",
             "reference-city",
-            "loop-preview"
+            "loop-preview",
+            "njh-map-distance"
           ],
           "interactions": [
             "talk",
@@ -16107,7 +16118,7 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "Automated preview only; no game AI/network behavior."
+          "notes": "Automated preview only; no game AI/network behavior. Moved (-16.5,41.5)->(-24.5,59.5) for the 30-tile core-distance rule (preview/njh-map-distance)."
         },
         {
           "id": "vehicle-ie7rlq",
@@ -16463,7 +16474,7 @@
           "id": "njh-dermaga-mancing-anchor",
           "type": "marker",
           "x": -51.5,
-          "z": 44,
+          "z": 58,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -16481,7 +16492,7 @@
           "entranceFacing": "",
           "markerKind": "interaction",
           "blocking": "no",
-          "notes": "Placeholder anchor for pending asset object:obj-njh-dermaga-mancing (/workspace/lfb-placeholders-v2 (njh_dermaga_mancing)). Footprint 1x2 min-corner (-52,43) rot 270.",
+          "notes": "Placeholder anchor for pending asset object:obj-njh-dermaga-mancing (/workspace/lfb-placeholders-v2 (njh_dermaga_mancing)). Footprint 1x2 min-corner (-52,57) rot 270.",
           "collision": false,
           "name": "PENDING Dermaga mancing",
           "subtype": "interaction"
@@ -16489,8 +16500,8 @@
         {
           "id": "njh-lapak-silver-anchor",
           "type": "marker",
-          "x": -27.5,
-          "z": 39.5,
+          "x": -35.5,
+          "z": 49.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -16508,7 +16519,7 @@
           "entranceFacing": "",
           "markerKind": "interaction",
           "blocking": "no",
-          "notes": "Placeholder anchor for pending asset object:obj-njh-lapak-silver (/workspace/lfb-placeholders-v2 (njh_lapak_silver)). Footprint 1x1 min-corner (-28,39) rot 0.",
+          "notes": "Placeholder anchor for pending asset object:obj-njh-lapak-silver (/workspace/lfb-placeholders-v2 (njh_lapak_silver)). Footprint 1x1 min-corner (-36,49) rot 0.",
           "collision": false,
           "name": "PENDING Lapak Manusia Silver",
           "subtype": "interaction"
@@ -16516,8 +16527,8 @@
         {
           "id": "njh-tiang-ogah-anchor",
           "type": "marker",
-          "x": -28.5,
-          "z": 40.5,
+          "x": -35.5,
+          "z": 48.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -16535,7 +16546,7 @@
           "entranceFacing": "",
           "markerKind": "interaction",
           "blocking": "no",
-          "notes": "Placeholder anchor for pending asset object:obj-njh-tiang-ogah (/workspace/lfb-placeholders-v2 (njh_tiang_ogah)). Footprint 1x1 min-corner (-29,40) rot 0.",
+          "notes": "Placeholder anchor for pending asset object:obj-njh-tiang-ogah (/workspace/lfb-placeholders-v2 (njh_tiang_ogah)). Footprint 1x1 min-corner (-36,48) rot 0.",
           "collision": false,
           "name": "PENDING Tiang Pak Ogah",
           "subtype": "interaction"
@@ -16570,7 +16581,7 @@
         {
           "id": "njh-penanda-doa-anchor",
           "type": "marker",
-          "x": -11.5,
+          "x": -12.0,
           "z": 23.5,
           "y": 0,
           "rotation": 0,
@@ -17289,7 +17300,7 @@
           "asset": "object:njh_dermaga_mancing",
           "name": "Dermaga mancing",
           "x": -51.5,
-          "z": 44,
+          "z": 58,
           "y": 0,
           "rotation": 270,
           "scale": 1,
@@ -17299,7 +17310,8 @@
           "subtype": "njh_dermaga_mancing",
           "tags": [
             "njh-draft1",
-            "njh-preview-asset"
+            "njh-preview-asset",
+            "njh-map-distance"
           ],
           "interactions": [
             "fish"
@@ -17307,7 +17319,7 @@
           "capacity": 1,
           "entranceFacing": "",
           "markerKind": "",
-          "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live.",
+          "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live. Moved (-51.5,44)->(-51.5,58) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "w": 1,
           "d": 2
         },
@@ -17347,8 +17359,8 @@
           "type": "sprite",
           "asset": "object:njh_lapak_silver",
           "name": "Lapak Manusia Silver",
-          "x": -27.5,
-          "z": 39.5,
+          "x": -35.5,
+          "z": 49.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -17358,7 +17370,8 @@
           "subtype": "njh_lapak_silver",
           "tags": [
             "njh-draft1",
-            "njh-preview-asset"
+            "njh-preview-asset",
+            "njh-map-distance"
           ],
           "interactions": [
             "silver_pose"
@@ -17366,7 +17379,7 @@
           "capacity": 1,
           "entranceFacing": "",
           "markerKind": "",
-          "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live.",
+          "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live. Moved (-27.5,39.5)->(-35.5,49.5) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "w": 1,
           "d": 1
         },
@@ -17375,8 +17388,8 @@
           "type": "sprite",
           "asset": "object:njh_tiang_ogah",
           "name": "Tiang Pak Ogah",
-          "x": -28.5,
-          "z": 40.5,
+          "x": -35.5,
+          "z": 48.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -17386,7 +17399,8 @@
           "subtype": "njh_tiang_ogah",
           "tags": [
             "njh-draft1",
-            "njh-preview-asset"
+            "njh-preview-asset",
+            "njh-map-distance"
           ],
           "interactions": [
             "ogah_flag"
@@ -17394,7 +17408,7 @@
           "capacity": 1,
           "entranceFacing": "",
           "markerKind": "",
-          "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live.",
+          "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live. Moved (-28.5,40.5)->(-35.5,48.5) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "w": 1,
           "d": 1
         },
@@ -17431,7 +17445,7 @@
           "type": "sprite",
           "asset": "pipeline:id_mainkan_prayer_mat",
           "name": "Sajadah / tempat tenang",
-          "x": -11.5,
+          "x": -12.0,
           "z": 23.5,
           "y": 0,
           "rotation": 0,
@@ -17442,7 +17456,8 @@
           "subtype": "id_mainkan_prayer_mat",
           "tags": [
             "njh-draft1",
-            "njh-preview-asset"
+            "njh-preview-asset",
+            "njh-map-distance"
           ],
           "interactions": [
             "pray_generic"
@@ -17450,7 +17465,7 @@
           "capacity": 1,
           "entranceFacing": "",
           "markerKind": "",
-          "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live.",
+          "notes": "Preview-registered from LFB placeholders v2 / Bangun tenda kit. Not live. Moved (-11.5,23.5)->(-12.0,23.5) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "w": 1,
           "d": 1,
           "height": 3.674,
@@ -17524,7 +17539,8 @@
           "replaceable": true,
           "layer": "structure",
           "tags": [
-            "njh-gameplay-sites"
+            "njh-gameplay-sites",
+            "njh-map-distance"
           ],
           "interactions": [
             "sell_fish"
@@ -17533,10 +17549,10 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "Function-first siomay/batagor stall. Reuses pipeline:lapak_tas (no dedicated siomay asset in the catalog). Front/interaction side is +z (south), tile (-22.5, 38.5) left free.",
+          "notes": "Function-first siomay/batagor stall. Reuses pipeline:lapak_tas (no dedicated siomay asset in the catalog). Front/interaction side is +z (south), tile (-22.5, 38.5) left free. Moved (-22.5,37.5)->(-45,70.5) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "asset": "pipeline:id_mainkan_siomay_cart",
-          "x": -22.5,
-          "z": 37.5,
+          "x": -45,
+          "z": 70.5,
           "rotation": 0,
           "width": 2.232,
           "height": 3.674,
@@ -17972,7 +17988,8 @@
           "replaceable": true,
           "layer": "prop",
           "tags": [
-            "njh-gameplay-sites"
+            "njh-gameplay-sites",
+            "njh-map-distance"
           ],
           "interactions": [
             "scavenge"
@@ -17981,10 +17998,10 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "no",
-          "notes": "Mulung point (kali). Function-first placement on sidewalk/plaza, paths left clear.",
+          "notes": "Mulung point (kali). Function-first placement on sidewalk/plaza, paths left clear. Moved (-51.0,56.5)->(-51.0,55.5) for the 30-tile core-distance rule (preview/njh-map-distance).",
           "asset": "loak-v2/ground/botol_plastik_hijau.png",
           "x": -51.0,
-          "z": 56.5,
+          "z": 55.5,
           "rotation": 0,
           "width": 0.55,
           "height": 0.7,

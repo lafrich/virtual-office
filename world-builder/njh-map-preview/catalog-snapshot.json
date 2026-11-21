@@ -378,70 +378,6 @@
    }
   },
   {
-   "file": "object:njh_penanda_doa",
-   "id": "njh_penanda_doa",
-   "source": "njh-preview",
-   "group": "prop",
-   "footprint": [
-    1,
-    1
-   ],
-   "rotateFootprint": false,
-   "width": 1.525,
-   "height": 1.429,
-   "pivot": [
-    34,
-    46
-   ],
-   "size": [
-    69,
-    56
-   ],
-   "collision": false,
-   "variants": {
-    "sw": {
-     "size": [
-      69,
-      56
-     ],
-     "pivot": [
-      34,
-      46
-     ]
-    },
-    "se": {
-     "size": [
-      69,
-      56
-     ],
-     "pivot": [
-      34,
-      46
-     ]
-    },
-    "ne": {
-     "size": [
-      69,
-      56
-     ],
-     "pivot": [
-      34,
-      46
-     ]
-    },
-    "nw": {
-     "size": [
-      69,
-      56
-     ],
-     "pivot": [
-      34,
-      46
-     ]
-    }
-   }
-  },
-  {
    "file": "object:njh_tiang_ogah",
    "id": "njh_tiang_ogah",
    "source": "njh-preview",
@@ -1743,6 +1679,134 @@
    }
   },
   {
+   "file": "pipeline:id_mainkan_prayer_mat",
+   "id": "id_mainkan_prayer_mat",
+   "source": "pipeline-street",
+   "group": "prop",
+   "footprint": [
+    2,
+    1
+   ],
+   "width": 2.02,
+   "height": 2.88,
+   "pivot": [
+    50,
+    130
+   ],
+   "size": [
+    101,
+    144
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      101,
+      144
+     ],
+     "pivot": [
+      50,
+      130
+     ]
+    },
+    "se": {
+     "size": [
+      101,
+      144
+     ],
+     "pivot": [
+      50,
+      130
+     ]
+    },
+    "ne": {
+     "size": [
+      101,
+      144
+     ],
+     "pivot": [
+      50,
+      130
+     ]
+    },
+    "nw": {
+     "size": [
+      101,
+      144
+     ],
+     "pivot": [
+      50,
+      130
+     ]
+    }
+   }
+  },
+  {
+   "file": "pipeline:id_mainkan_siomay_cart",
+   "id": "id_mainkan_siomay_cart",
+   "source": "pipeline-street",
+   "group": "prop",
+   "footprint": [
+    2,
+    1
+   ],
+   "width": 2.02,
+   "height": 2.88,
+   "pivot": [
+    50,
+    130
+   ],
+   "size": [
+    101,
+    144
+   ],
+   "published": true,
+   "collision": true,
+   "variants": {
+    "sw": {
+     "size": [
+      101,
+      144
+     ],
+     "pivot": [
+      50,
+      130
+     ]
+    },
+    "se": {
+     "size": [
+      101,
+      144
+     ],
+     "pivot": [
+      50,
+      130
+     ]
+    },
+    "ne": {
+     "size": [
+      101,
+      144
+     ],
+     "pivot": [
+      50,
+      130
+     ]
+    },
+    "nw": {
+     "size": [
+      101,
+      144
+     ],
+     "pivot": [
+      50,
+      130
+     ]
+    }
+   }
+  },
+  {
    "file": "pipeline:id_warteg_sederhana",
    "id": "id_warteg_sederhana",
    "source": "pipeline-street",
@@ -1846,50 +1910,6 @@
      "pivot": [
       56,
       117
-     ]
-    }
-   }
-  },
-  {
-   "file": "pipeline:lapak_tas",
-   "id": "lapak_tas",
-   "source": "pipeline-street",
-   "group": "loak",
-   "footprint": [
-    2,
-    1.5
-   ],
-   "width": 2.55,
-   "height": 3.593,
-   "pivot": [
-    56,
-    152
-   ],
-   "size": [
-    128,
-    180
-   ],
-   "collision": true,
-   "published": true,
-   "variants": {
-    "sw": {
-     "size": [
-      128,
-      180
-     ],
-     "pivot": [
-      56,
-      152
-     ]
-    },
-    "se": {
-     "size": [
-      112,
-      180
-     ],
-     "pivot": [
-      56,
-      152
      ]
     }
    }

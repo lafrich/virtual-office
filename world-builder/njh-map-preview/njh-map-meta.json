@@ -332,22 +332,22 @@
       "label": "Warteg (warung makan)",
       "facing": "sw",
       "doorPoint": [
-        -39.5,
-        41.0
+        -38.5,
+        57.0
       ],
       "useTile": [
-        -40,
-        41
+        -39,
+        57
       ],
       "usePoint": [
-        -39.5,
-        41.5
+        -38.5,
+        57.5
       ],
       "footprintRect": [
-        -41.0,
-        -38.0,
-        38.0,
-        41.0
+        -40.0,
+        -37.0,
+        54.0,
+        57.0
       ],
       "baymaxDoorId": null,
       "baymaxInteractionId": null
@@ -450,20 +450,20 @@
       "label": "WC / Mandi Umum",
       "facing": "sw",
       "doorPoint": [
-        -43.0,
+        -42.0,
         71.0
       ],
       "useTile": [
-        -43,
+        -42,
         71
       ],
       "usePoint": [
-        -43.0,
+        -42.0,
         71.5
       ],
       "footprintRect": [
-        -45.0,
-        -41.0,
+        -44.0,
+        -40.0,
         67.3,
         71.0
       ],
@@ -570,22 +570,22 @@
       "label": "Toko Loak",
       "facing": "sw",
       "doorPoint": [
-        -27.0,
-        25.5
+        -42.0,
+        57.0
       ],
       "useTile": [
-        -27,
-        26
+        -42,
+        57
       ],
       "usePoint": [
-        -27.0,
-        26.0
+        -42.0,
+        57.5
       ],
       "footprintRect": [
-        -29.0,
-        -25.0,
-        22.0,
-        25.5
+        -44.0,
+        -40.0,
+        53.5,
+        57.0
       ],
       "baymaxDoorId": null,
       "baymaxInteractionId": null,
@@ -791,8 +791,8 @@
       "kind": "buy",
       "side": "front",
       "usePoint": [
-        -20.5,
-        31.3
+        -22.5,
+        58.0
       ],
       "asset": "pipeline:id200_pasar_lapak_ikan_basah",
       "baymaxInteractionId": null,
@@ -884,7 +884,7 @@
       "pending": true,
       "usePoint": [
         -50.375,
-        44.0
+        58.0
       ],
       "asset": "object:njh_dermaga_mancing",
       "baymaxInteractionId": null,
@@ -892,11 +892,11 @@
       "waterSideTiles": [
         [
           -53,
-          43
+          57
         ],
         [
           -53,
-          44
+          58
         ]
       ],
       "legDangleClearance": "river tiles directly -c of the deck edge stay object-free",
@@ -951,11 +951,11 @@
       "id": "njh_lapak_silver",
       "objectId": "njh-lapak-silver",
       "kind": "silver_pose",
-      "side": "front",
+      "side": "west",
       "pending": true,
       "usePoint": [
-        -27.5,
-        40.5
+        -36.5,
+        49.5
       ],
       "asset": "object:njh_lapak_silver",
       "baymaxInteractionId": null,
@@ -965,11 +965,11 @@
       "id": "njh_tiang_ogah",
       "objectId": "njh-tiang-ogah",
       "kind": "ogah_flag",
-      "side": "front",
+      "side": "west",
       "pending": true,
       "usePoint": [
-        -28.5,
-        41.5
+        -36.5,
+        48.5
       ],
       "asset": "object:njh_tiang_ogah",
       "baymaxInteractionId": null,
@@ -1009,8 +1009,8 @@
       "kind": "talk",
       "side": "any",
       "usePoint": [
-        -12.5,
-        41.5
+        -36.5,
+        50.5
       ],
       "questId": "manusia_silver",
       "baymaxInteractionId": null
@@ -1021,8 +1021,8 @@
       "kind": "talk",
       "side": "any",
       "usePoint": [
-        -15.5,
-        41.5
+        -23.5,
+        59.5
       ],
       "questId": "kang_parkir",
       "baymaxInteractionId": null
@@ -1049,8 +1049,8 @@
       "kind": "sell_fish",
       "side": "front",
       "usePoint": [
-        -20.5,
-        31.0
+        -22.5,
+        57.7
       ],
       "asset": "pipeline:id200_pasar_lapak_ikan_basah"
     },
@@ -1060,8 +1060,8 @@
       "kind": "sell_fish",
       "side": "front",
       "usePoint": [
-        -22.5,
-        38.5
+        -45.0,
+        71.5
       ],
       "asset": "pipeline:id_mainkan_siomay_cart"
     },
@@ -1091,10 +1091,10 @@
       "id": "njh_pak_ogah",
       "objectId": "njh-npc-pak-ogah",
       "kind": "work",
-      "side": "north",
+      "side": "west",
       "usePoint": [
-        -29.5,
-        40.5
+        -36.5,
+        47.5
       ],
       "questId": "pak_ogah"
     },
@@ -1270,7 +1270,7 @@
       "side": "any",
       "usePoint": [
         -51.0,
-        57.25
+        56.25
       ],
       "asset": "loak-v2/ground/botol_plastik_hijau.png"
     }
@@ -1754,7 +1754,7 @@
       "source": "/workspace/lfb-placeholders-v2 (njh_dermaga_mancing)",
       "minCorner": {
         "c": -52,
-        "r": 43
+        "r": 57
       },
       "footprintRotated": [
         1,
@@ -1770,8 +1770,8 @@
       "asset": "object:njh_lapak_silver",
       "source": "/workspace/lfb-placeholders-v2 (njh_lapak_silver)",
       "minCorner": {
-        "c": -28,
-        "r": 39
+        "c": -36,
+        "r": 49
       },
       "footprintRotated": [
         1,
@@ -1787,8 +1787,8 @@
       "asset": "object:njh_tiang_ogah",
       "source": "/workspace/lfb-placeholders-v2 (njh_tiang_ogah)",
       "minCorner": {
-        "c": -29,
-        "r": 40
+        "c": -36,
+        "r": 48
       },
       "footprintRotated": [
         1,
