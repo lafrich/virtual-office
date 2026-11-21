@@ -114,6 +114,37 @@ for (const sz of SIZES) {
     await p.waitForFunction(() => { try { const w = document.getElementById('semestaFrame')?.contentWindow; return !!(w && w.SemestaLifePlay && w.SemestaLifePlay.state?.()); } catch { return false; } }, { timeout: 90000 });
     await p.waitForTimeout(2500);
   } catch (e) { console.log(`[${sz.tag}] could not start the game: ${String(e).slice(0, 160)}`); startErr++; await ctx.close(); continue; }
+  // Portrait phones must show a blocking "Putar HP" gate. Check that window
+  // only — do not open play UI behind it and flag those as cropped.
+  if (sz.tag === 'phone-390x844') {
+    const gate = await p.evaluate(() => {
+      const el = document.getElementById('njhRotate');
+      const w = el?.querySelector('.w98');
+      const r = w?.getBoundingClientRect();
+      const cs = el ? getComputedStyle(el) : {};
+      return {
+        display: cs.display, role: el?.getAttribute('role') || '',
+        play: document.body.classList.contains('njh-play'),
+        hasContinue: !!document.getElementById('njhRotateContinue'),
+        title: (document.getElementById('njhRotateTitle')?.textContent || '').trim(),
+        left: r ? r.left : null, top: r ? r.top : null, right: r ? r.right : null, bottom: r ? r.bottom : null,
+        vw: innerWidth, vh: innerHeight
+      };
+    });
+    const okDisplay = gate.display === 'grid' || gate.display === 'flex' || gate.display === 'block';
+    if (!gate.play || !okDisplay || gate.role !== 'alertdialog' || gate.hasContinue || gate.title !== 'Putar HP') {
+      failures++; console.log(`FAIL [${sz.tag}] rotate-gate: expected blocking Putar HP alertdialog, got ${JSON.stringify(gate)}`);
+    } else {
+      const T = 1.5;
+      if (gate.left < -T || gate.top < -T || gate.right > gate.vw + T || gate.bottom > gate.vh + T) {
+        failures++; console.log(`FAIL [${sz.tag}] rotate-gate: window outside viewport ${gate.left},${gate.top},${gate.right},${gate.bottom} vs ${gate.vw}x${gate.vh}`);
+      }
+    }
+    report.push({ size: sz.tag, window: 'rotate-gate', open: ['div.njh-rotate'], flags: 0 });
+    if (SHOTS) await p.screenshot({ path: `${SHOTS}/${sz.tag}-rotate-gate.png` });
+    await ctx.close();
+    continue;
+  }
   for (const [id, js] of OPENERS) {
     await p.evaluate(() => { try { NJH98.closeWindows(); document.querySelectorAll('.njh-win').forEach(w => w.hidden = true); } catch {} });
     const err = await p.evaluate(js => { try { (0, eval)(js); return null; } catch (e) { return String(e).slice(0, 120); } }, js);

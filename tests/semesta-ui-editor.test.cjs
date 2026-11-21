@@ -13,7 +13,7 @@ test('Semesta has map authoring and pure exploration, but no game HUD editor',()
  assert.match(builder,/if\(!playerMode\)return walkRunning\?6\.5:4\.1/);
  assert.match(builder,/if\(playerMode\)window\.SemestaLifePlay\?\.start\?\.\(\)/);
  assert.match(builder,/if\(playerMode\)try\{beginSpawnRespawn\(first,'playStart'\)/);
- assert.match(builder,/else if\(playerMode&&e\.key\.toLowerCase\(\)==='e'&&mode==='walk'\)/);
+ assert.match(builder,/else if\(playerMode&&e\.key\.toLowerCase\(\)==='e'&&mode==='walk'&&!e\.repeat\)/);
 });
 test('Mainkan owns game UI editor and positions real visible controls, not duplicate Semesta chrome',()=>{
  assert.match(mainkan,/href="\.\/ui-editor\.html" id="openUIEditor"/);

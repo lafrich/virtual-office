@@ -339,18 +339,15 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 @keyframes njhBlink{50%{visibility:hidden}}
 @media (prefers-reduced-motion:reduce){.njh-intro *{animation:none!important}}
 
-/* Mobile portrait is playable. Landscape is only an optional, non-blocking
-   hint. Never cover the world/joystick/AKSI with a full-screen orientation gate. */
-.njh-rotate{display:none;position:absolute;top:calc(54px + var(--sat));left:50%;right:auto;bottom:auto;
- width:min(292px,calc(100% - 24px));transform:translateX(-50%);z-index:8;
- background:transparent;pointer-events:none}
-.njh-rotate .w98{position:relative;width:100%;pointer-events:auto}
-.njh-rotate .w98-body{display:flex;flex-direction:column;gap:7px;align-items:center;text-align:center;padding:10px}
-.njh-rotate .w98-body p{margin:2px 0}
-.njh-rotate .btn{min-height:36px}
-@media (orientation:portrait) and (pointer:coarse){
- body.njh-play .njh-rotate:not(.dismissed){display:block}
-}
+/* Mobile play is landscape-only. Portrait phones get a blocking "Putar HP"
+   gate; landscape plays normally with the round joystick. lockLandscape() is
+   still attempted after fullscreen. */
+.njh-rotate{display:none;position:absolute;inset:0;z-index:20;place-items:center;background:#008080;pointer-events:auto}
+.njh-rotate .w98{position:relative;width:min(300px,calc(100% - 24px))}
+.njh-rotate .w98-body{display:grid;gap:8px;justify-items:center;text-align:center;padding:12px}
+.njh-rotate-ico{width:64px;height:40px;background:#000;border:3px solid #808080;box-shadow:inset 0 0 0 3px #9bbc0f;animation:njhRot 2s steps(4) infinite}
+@keyframes njhRot{0%,40%{transform:rotate(90deg)}60%,100%{transform:rotate(0)}}
+@media (orientation:portrait) and (pointer:coarse){body.njh-play .njh-rotate{display:grid}}
 
 /* virtual joystick (touch only), drives WASD */
 .njh-joy{display:none;position:absolute;left:0;bottom:0;width:40%;height:62%;pointer-events:auto;touch-action:none;z-index:2}

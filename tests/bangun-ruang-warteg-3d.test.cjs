@@ -84,7 +84,7 @@ test('Semesta integrates four native variant meshes, visible Enter and Walk Test
  assert.match(js,/root\.userData\.warteg3DVariants=views/);
  assert.match(js,/const display=spriteDirection\(o.rotation\)/);
  assert.match(js,/interiorPreview\.openFor\(nearest\.o\)/);
- assert.match(js,/mode==='walk'\)\{e\.preventDefault\(\);/);
- assert.match(js,/if\(!window\.SemestaLifePlay\?\.handleAction\?\.\(\)\)enterNearbyBuilding\(\)/);
+ assert.match(js,/mode==='walk'&&!e\.repeat\)\{\s*e\.preventDefault\(\);/);
+ assert.match(js,/if\(!window\.SemestaLifePlay\?\.handleAction\?\.\(\)\)tell\('Tidak ada interaksi di dekatmu\.'\)/);
  assert.match(interior,/openFor\(item\)\{[^}]*return open\(item\);\}/);
 });

@@ -15,3 +15,18 @@ test('window-fit gate: CSS keeps windows shrinkable and the checker covers every
  const win=fs.readFileSync(path.join(R,'mainkan/njh98-step2.js'),'utf8');
  for(const m of win.matchAll(/openWin\('(\w+)'/g))assert.ok(['njhCook','njhFish','njhShop2','njhStore','njhTokenWin'].includes(m[1]),'new step-2 window '+m[1]+' must be added to the checker');
 });
+test('window-fit portrait expects a blocking Putar HP gate, not play UI behind it',()=>{
+ const css=fs.readFileSync(path.join(R,'mainkan/njh98.css'),'utf8');
+ const html=fs.readFileSync(path.join(R,'mainkan/index.html'),'utf8');
+ const js=fs.readFileSync(path.join(R,'mainkan/njh98.js'),'utf8');
+ const tool=fs.readFileSync(path.join(R,'mainkan/tools/njh98-window-fit.mjs'),'utf8');
+ assert.match(css,/@media \(orientation:portrait\) and \(pointer:coarse\)\{body\.njh-play \.njh-rotate\{display:grid\}\}/);
+ assert.match(html,/Putar HP ke landscape/);
+ assert.match(html,/role="alertdialog"/);
+ assert.doesNotMatch(html,/njhRotateContinue|Lanjut bermain|Saran Tampilan HP/);
+ assert.doesNotMatch(js,/dismissRotateHint|scheduleRotateHintDismiss/);
+ assert.match(js,/function lockLandscape/);
+ assert.match(tool,/phone-390x844/);
+ assert.match(tool,/blocking "Putar HP" gate/);
+ assert.match(tool,/sz\.tag === 'phone-390x844'/);
+});

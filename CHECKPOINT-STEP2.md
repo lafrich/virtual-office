@@ -1,3 +1,5 @@
+> DISUPERSEDE 22 Nov 2026 — Baymax. Status terkini: origin/main pada audit adalah 024bb502 (delta 15 Nov). Blok ini tetap riwayat Step 2 (14 Nov). Lihat UPDATE 22 Nov di Drive recap/progress dan entri terbaru di ROLLBACK.md.
+
 # CHECKPOINT STEP 2 (14 Nov 2026) — Baymax
 
 Blok ini milik Baymax. Jangan menimpa blok Layar, Ellen, atau Gerak. Ditulis 14 Nov 2026 13:40 WIB (Asia/Jakarta), setelah Step 2 live.

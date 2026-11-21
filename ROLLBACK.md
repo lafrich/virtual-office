@@ -1,3 +1,20 @@
+# Rollback — HP landscape-only gate (22 Nov 2026)
+
+Written 2026-11-22 (Asia/Jakarta). UI/CSS/copy, window-fit/e2e/unit tes, dan catatan rollback. Tidak ada perubahan Worker, sandi, atau secret.
+
+- Previous live `origin/main`: `024bb502dc6c53368ce9390e57136d8af01c2fb8` (delta 15 Nov, sw v31)
+- This commit: *(SHA diisi setelah push; cari "landscape-gate-20261122" / sw v32)*
+- Isi: gerbang "Putar HP" blocking di HP potret (`alertdialog`, tanpa Lanjut/Tutup); `lockLandscape` tetap; dua tes tombol E usang di-update (`!e.repeat`); CHECKPOINT-STEP2 ditandai disupersede; pelajaran 20.
+- Gate sebelum push: unit suite hijau, no-clip, kursi, window-fit 4 ukuran (potret = gerbang, bukan crop UI), tes ukuran peta, smoke 4-ID di Worker lokal, scan secret.
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git revert --no-edit <sha-commit-ini>
+# bump sw.js ke v33 supaya HP melepas v32, lalu push --ff-only
+```
+
+---
+
 # Rollback — props/Cove iso scale + test-ID bags (njh-125)
 
 Written 2026-11-14 (Asia/Jakarta). Client data, sprite metadata and docs only. No Worker, storage or save-format change. `shared/genesis-player.js` is not included.
