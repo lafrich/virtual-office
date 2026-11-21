@@ -887,6 +887,18 @@ function runAction(action,args={}){
   message('Belum buka');
   return {ok:false,reason:'Belum buka',closed:true};
  }
+ // Unsupported outdoor "shop" (minimarket site) → enter the nearby official door.
+ if(action==='shop'||action==='shop_minimarket'){
+  try{
+   const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
+   if(I?.nearestDoor?.()){
+    const r=I.enterNearby?.()||{ok:false,reason:'Interior tidak tersedia'};
+    if(r.ok)message('Masuk ruangan');
+    else message('⛔ '+(r.reason||'Tidak bisa'));
+    paintPanel();return r;
+   }
+  }catch(err){return {ok:false,reason:String(err.message||err)};}
+ }
  if(action==='enter_room'){
   try{
    const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
@@ -1045,8 +1057,14 @@ function handleAction(){
  }
  // Exterior: a REAL door only wins while within reach and nearer than an
  // authored NPC/activity. This keeps E from teleporter-style Cove entry.
+ // Building-site stubs (shop/eat/coffee/buy_room) sit on the building origin,
+ // so E on the official door tile can be farther from the use-point than from
+ // the site. Those stubs must not beat enterNearby (live bug: "Aksi belum
+ // didukung: shop" at NJH Mart). Jobs / authored quests still win when closer.
  const nodeDistance=node?Math.hypot(p.x-node.x,p.z-node.z):Infinity;
- if(door&&door.distance<=nodeDistance+.15){
+ const buildingStub=node&&!node.jobId&&!node.worldRuleId&&!node.activityId
+  &&{shop:1,eat:1,coffee:1,buy_room:1}[node.action];
+ if(door&&(door.distance<=nodeDistance+.15||buildingStub)){
   const result=I.enterNearby();
   if(result?.ok)return true;
   if(result?.reason)message('⛔ '+result.reason);
