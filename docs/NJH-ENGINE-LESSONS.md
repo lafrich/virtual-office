@@ -168,5 +168,17 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Aturan:** Urutkan sprite dan aktor menurut `isoFootDepth(x,z,direction)` (sumbu lantai kamera). `isoRenderOrder` di kaki; karakter dapat bias +2 di petak yang sama. Billboard biasa mematikan `depthWrite` (kecuali `studioGroundComposite` / `keepDepthWrite`) supaya `renderOrder` yang menang antarsprite. Tes otomatis di peta outdoor + semua interior.
 - **Cek:** `node --test tests/njh-iso-depth-order.test.cjs`. Screenshot before/after di `/workspace/njh-1122-shots/occlusion/`.
 - **Loading bar (t818u, preview):** layar `#worldLoading` menampilkan persen dan `x/y aset` dari hitungan nyata (engine + peta + interior + layer LGR), bukan animasi palsu ke 100%.
+## 23. Kendaraan play: plane dari ukuran gambar, pivot manifest, tanpa fallback kanvas
 
+- **Error:** Di play, motor/mobil muncul sebagai siluet kanvas (atau menghilang/geser) meski PNG `riders_v3` dan mobil lolos QA Ellen. Sedan terlihat ~26 px terlalu tinggi.
+- **Penyebab:** `vehicleGraphic` men-clamp lebar ke `footprint*0.95`, menanam pivot di baris ban (`wheelGround.contact`) bukan pivot footprint-centre, dan saat PNG belum termuat (atau gagal sekali) memakai `vehicleCanvas`/`riderPreview`. Kandidat legacy 80×116 ikut ditawarkan ke pemuat. Library Aset juga bisa menampilkan proxy kanvas.
+- **Aturan:** Plane = `naturalWidth*PX × naturalHeight*PY` (kala × `editorArtScale`). `footprint` hanya untuk lalu lintas/tabrakan, bukan seni. Jangkar = `pivot` dari manifest/katalog v3, bukan baris ban. Sembunyikan mesh sampai tekstur asli siap; preload 4 arah × frame; gagal muat boleh di-retry, jangan menempel `missingOriginals` selamanya; jangan fallback ke kanvas di play atau pratinjau Asset Library. Jangan menuliskan ukuran v3 ke `street_vehicles/manifest.json` lama (itu milik PNG `riders/` legacy). Alias id `njh-vehicle-angkot` → `sedan`.
+- **Cek:** `node --test tests/njh-sync-decisions.test.cjs` (ukuran v3, tanpa clamp, pivot manifest, alias sedan). QA PNG Ellen: keempat kendaraan LULUS, tidak perlu redraw.
+
+## 24. Tukar sajadah & gerobak siomay: cadangkan dulu, hapus semua rujukan penanda
+
+- **Error:** `object:njh_penanda_doa` (empat PNG placeholder) dan `pipeline:lapak_tas` (bukan gerobak siomay) masih tampil di peta. Setelah swap, rujukan lama bisa menghidupkan slab jika tersisa di PROP_DEFS, pendingAssets, atau folder props.
+- **Penyebab:** Placeholder terdaftar di city, PROP_DEFS, KEY_MAP, meta pendingAssets, dan `props/njh_penanda_doa/`.
+- **Aturan:** Cadangkan PNG lama ke folder backup (`props/_backup-20261122/`) lalu hapus keempat file live. Objek kota dan interactable memakai `pipeline:id_mainkan_prayer_mat` / `pipeline:id_mainkan_siomay_cart` dengan kunci iso 2.232×3.674, footprint 2×1, jangkar dan `pray_generic` tetap. KEY_MAP lama `object:obj-njh-penanda-doa` mengarah ke prayer_mat (save lama tidak menghidupkan slab). Hapus baris PROP_DEFS dan pendingAssets. Jangan hapus PNG `lapak_tas` (aset pipeline sah). Setelah swap, petak use dan jalur jalan harus tetap kosong.
+- **Cek:** `node --test tests/njh-sync-decisions.test.cjs` dan `tests/njh-map-preview.test.cjs`. Use sajadah tetap `[−11.5, 24.5]`; siomay `[−22.5, 38.5]`.>>>>>>> 7ee7b1f (preview: Ellen asset checkpoint (templates, 15 vehicles, C1, LGR phase 1, WC V4, ripple, loak v2, street props, Mahluk))
 

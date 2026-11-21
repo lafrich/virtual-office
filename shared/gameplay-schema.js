@@ -34,7 +34,7 @@
     bag:{enabled:true,separateFromPhone:true,slots:8},
     movement:{enabled:true,controllerOnly:true,walkSpeed:1.4,runSpeed:2.2},
     energy:{enabled:false,todo:true,zeroCanMove:true,lowEnergySlowFactor:0.35,crossingCost:0},
-    jobs:{enabled:true,dailyWageCap:6000,viaProfessionNpcOnly:true},
+    jobs:{enabled:true,dailyWageCap:150000,viaProfessionNpcOnly:true},
     courses:{enabled:true,dailyXpCap:150},
     traffic:{enabled:false,todo:true,densityCycle:'shared_deterministic',busyRatio:0.6,quietRatio:0.3},
     loak:{enabled:false,todo:true,sellPercent:5},
@@ -85,7 +85,7 @@
   base.modules.energy.crossingCost=int(energy.crossingCost,0,20,0);
   const jobs=src.jobs&&typeof src.jobs==='object'?src.jobs:{};
   base.modules.jobs.enabled=jobs.enabled!==false;
-  base.modules.jobs.dailyWageCap=int(jobs.dailyWageCap,0,100000,6000);
+  base.modules.jobs.dailyWageCap=int(jobs.dailyWageCap,0,1000000,150000);
   base.modules.jobs.viaProfessionNpcOnly=jobs.viaProfessionNpcOnly!==false;
   const courses=src.courses&&typeof src.courses==='object'?src.courses:{};
   base.modules.courses.enabled=courses.enabled!==false;

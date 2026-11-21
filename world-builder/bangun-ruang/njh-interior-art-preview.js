@@ -64,6 +64,13 @@ function loadMartKit(){
     CATALOG[id]=Object.fromEntries(DIR.map(d=>[d,{...items[id][d],sourceBase:base}]));
     if(preloaded)for(const d of DIR){total++;load(base+CATALOG[id][d].file);}
    }
+   const ibu=items.npc_ibu_warteg;
+   if(ibu&&DIR.every(d=>ibu[d]?.file)){
+    for(const alias of ['npc_njh_minimarket_kasir','npc_njh_minimarket_staff','npc_ibu_warteg']){
+     CATALOG[alias]=Object.fromEntries(DIR.map(d=>[d,{...ibu[d],sourceBase:base}]));
+     if(preloaded)for(const d of DIR){total++;load(base+CATALOG[alias][d].file);}
+    }
+   }
    martKitStatus='ready';
   })
   .catch(err=>{martKitStatus='error';martKitError=String(err.message||err);console.warn('NJH Mart art preview unavailable',err);})

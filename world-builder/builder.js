@@ -568,6 +568,11 @@ function cityTexture(name){
   tex.magFilter=tex.minFilter=THREE.NearestFilter;
   tex.generateMipmaps=false;
   tex.colorSpace=THREE.SRGBColorSpace;
+  const ripple=cityStyle?.RIPPLE;
+  if(ripple&&(ripple.applyTo||[]).includes(name)&&ripple.frames){
+   tex.repeat.set(1/ripple.frames,1);
+   tex.offset.set(0,0);
+  }
   cityTextures.set(name,tex);
  }
  return cityTextures.get(name);
@@ -2487,7 +2492,7 @@ canvas.addEventListener('wheel',e=>{
   return !!(o?.interior?.floors?.length||(o?.type==='sprite'&&assetByName.get(o.asset)?.interior?.floors?.length));
  }
  function enterNearbyBuilding(){
-  try{const r=window.__njhPlayInteriors?.enterNearby?.();if(r?.ok)return true;if(r?.reason)tell(r.reason);}catch{}
+  try{const r=window.__njhPlayInteriors?.enterNearby?.();if(r?.ok)return true;if(r?.closed){tell(r.reason||'Belum buka');lastEnterReason='closed';return false;}if(r?.reason)tell(r.reason);}catch{}
   const root=owners.get(walkActorId);
   if(!root||!interiorPreview){lastEnterReason='unavailable';return false;}
   const candidates=documentMap.objects.filter(o=>
@@ -2516,7 +2521,7 @@ canvas.addEventListener('wheel',e=>{
    }):nearest.o;
   if(njhMapPreview&&!buildingHasInterior(openObj)){
    lastEnterReason='missing-interior';
-   tell('interior belum ada');
+   tell('Belum buka');
    return false;
   }
   for(const k of Object.keys(walkInput))walkInput[k]=false;
@@ -4933,6 +4938,17 @@ function frame(now){
  requestAnimationFrame(frame);
  const elapsedReal=Math.min(.5,Math.max(0,(now-priorFrame)/1000));
  const dt=Math.min(.05,elapsedReal);priorFrame=now;
+ const ripple=cityStyle?.RIPPLE;
+ if(ripple&&ripple.frames){
+  const frameIndex=Math.floor(now/(ripple.frameDurationMs||120))%ripple.frames;
+  if(cityTexture.rippleFrame!==frameIndex){
+   cityTexture.rippleFrame=frameIndex;
+   for(const name of ripple.applyTo||[]){
+    const tex=cityTextures.get(name);
+    if(tex){tex.offset.x=frameIndex/ripple.frames;tex.needsUpdate=true;}
+   }
+  }
+ }
  const prevClockDay=dayClock.get().day;
  dayClock.tick(elapsedReal);
  if(dayClock.get().day>prevClockDay){

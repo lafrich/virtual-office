@@ -27,7 +27,7 @@ The local `/virtual-life-asset-pipeline/` mount is incomplete (genesis-source.js
 | `object:obj-njh-lapak-silver` | `object:njh_lapak_silver` |
 | `object:obj-njh-tiang-ogah` | `object:njh_tiang_ogah` |
 | `object:obj-njh-kotak-amal` | `object:njh_kotak_amal` |
-| `object:obj-njh-penanda-doa` | `object:njh_penanda_doa` |
+| `object:obj-njh-penanda-doa` | `pipeline:id_mainkan_prayer_mat` |
 | `studio:br-warung-pecel-lele` | `studio:br-warung-pecel-lele` (unchanged) |
 | `studio:br-lapak-sate-madura` | `studio:br-lapak-sate-madura` (unchanged) |
 

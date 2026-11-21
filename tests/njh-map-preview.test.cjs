@@ -29,7 +29,7 @@ function loadPhysics(){
 test('NJH map module is enabled by default and inert only with njhMap=0',()=>{
  const on=loadPreview('');
  assert.equal(on.api.enabled(),true);
- assert.equal(on.api.registerCatalog().count,9);
+ assert.equal(on.api.registerCatalog().count,8);
  const off=loadPreview('?njhMap=0');
  assert.equal(off.api.enabled(),false);
  assert.equal(off.api.registerCatalog().count,0);
@@ -43,15 +43,15 @@ test('isNjhDocument accepts the official NJH city and rejects Jakarta leftovers'
  assert.equal(api.isNjhDocument({map:{name:'NJH · Kampung Kali Kebon Sirih (draft1)'},objects:[]}),true);
 });
 
-test('registers 9 corrected catalog keys when njhMap=1',()=>{
+test('registers 8 corrected catalog keys when njhMap=1',()=>{
  const {window,api}=loadPreview('?njhMap=1');
  assert.equal(api.enabled(),true);
  const result=api.registerCatalog();
- assert.equal(result.count,9);
+ assert.equal(result.count,8);
  const files=window.VLAssetCatalog.map(x=>x.file);
  for(const key of [
   'object:njh_dermaga_mancing','object:njh_lapak_silver','object:njh_tiang_ogah',
-  'object:njh_kotak_amal','object:njh_penanda_doa','object:njh_kost_cove',
+  'object:njh_kotak_amal','object:njh_kost_cove',
   'studio:br-warung-pecel-lele','studio:br-lapak-sate-madura',
   'object:njh_minimarket'
  ])assert.ok(files.includes(key),key);
@@ -606,7 +606,7 @@ test('step-2 fishing spot on the Kali bank: dock collision, water stays water, r
 test('preview props and the Kost Cove use the iso lock size*PX/PY, never size/50 (lesson 19)',()=>{
  const {window}=loadPreview('?njhMap=1');window.VLNjhMapPreview.registerCatalog();
  const PX=Math.SQRT2/64,PY=Math.SQRT2/64*2/Math.sqrt(3),r=v=>+v.toFixed(3);
- for(const id of ['njh_dermaga_mancing','njh_lapak_silver','njh_tiang_ogah','njh_kotak_amal','njh_penanda_doa','njh_kost_cove']){
+ for(const id of ['njh_dermaga_mancing','njh_lapak_silver','njh_tiang_ogah','njh_kotak_amal','njh_kost_cove']){
   const s=window.VLAssetCatalog.find(x=>x.id===id);assert.ok(s,id);
   assert.equal(s.width,r(s.size[0]*PX),id+' width');assert.equal(s.height,r(s.size[1]*PY),id+' height');
   assert.notEqual(s.width,s.size[0]/50,id+' must not be size/50');
@@ -618,7 +618,7 @@ test('preview props and the Kost Cove use the iso lock size*PX/PY, never size/50
  // A per-object width/height in the city doc overrides the spec (builder: item.width||spec.width),
  // so a baked size/50 there silently undoes the iso lock.
  const city=JSON.parse(require('fs').readFileSync(require('path').join(root,'njh-map-preview/city/njh-semesta-map-draft1.with-pending-assets.city.json'),'utf8'));
- for(const o of city.record.document.objects.filter(o=>/^object:njh_(kost_cove|dermaga_mancing|lapak_silver|tiang_ogah|kotak_amal|penanda_doa)$/.test(o.asset||''))){
+ for(const o of city.record.document.objects.filter(o=>/^object:njh_(kost_cove|dermaga_mancing|lapak_silver|tiang_ogah|kotak_amal)$/.test(o.asset||''))){
   const s=window.VLAssetCatalog.find(x=>'object:'+x.id===o.asset);
   if(o.width!=null)assert.equal(o.width,s.width,o.id+' doc width');
   if(o.height!=null)assert.equal(o.height,s.height,o.id+' doc height');

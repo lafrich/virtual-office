@@ -28,7 +28,7 @@ test('published Indonesia manifest becomes actual playable catalog, with exact u
  assert.equal(root.VLAssetCatalog.length,2);
  assert.equal(root.VLAssetCatalog[1].pack,'indonesia-v1');
  assert.equal(root.VLPipelineAssets.building('id_warteg_sederhana','se'),
- 'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main/assets/street_buildings/kampung/id_warteg_sederhana_se.png');
+ 'https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/'+root.VLIndonesiaAssets.PREVIEW_REF+'/assets/street_buildings/kampung/id_warteg_sederhana_se.png');
  assert.equal(root.VLPipelineAssets.building('ruko_a'),'old-ruko-url');
  assert.match(responses[0].url,/indonesia_catalog\.json$/);
  assert.equal(responses[0].opts.cache,'no-store');

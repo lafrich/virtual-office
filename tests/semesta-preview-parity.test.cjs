@@ -15,8 +15,8 @@ test('all vehicle previews use the exact placement renderer, not a second sprite
  assert.match(art,/nativeGalleryImages\.set\(key,task\)/);
  assert.match(art,/const EXACT_RIDERS=new Set\(Object\.keys\(RIDER_V3\)\)/);
  assert.match(art,/originalCache\.get\(originalKey\(id,side,0\)\)/);
- assert.match(art,/trimPreview\(vehicleCanvas\(id,side\)\)/);
- assert.match(art,/mat\.map=ready\|\|texture\(THREE,spec\.id,dir\)/);
+ assert.match(art,/Never show a canvas proxy/);
+ assert.match(art,/return null;/);
  assert.match(gallery,/options\.vehicleImage\?\.\(s\.id,side\)/);
  assert.match(builder,/vehicleImage:\(id,dir\)=>trafficArt\?\.vehiclePreviewAsync\?\.\(id,dir\)/);
  assert.match(thumbs,/VLSemestaArt\?\.vehiclePreviewAsync\?\.\(id,'se'\)/);
@@ -46,10 +46,8 @@ test('TransJakarta and other vehicles have a renderable single-object thumbnail'
  const sandbox={window:g,location:g.location,URL,document:{createElement:canvasFactory}};
  vm.runInNewContext(read('semesta-traffic-art.js'),sandbox);
  for(const id of ['bus_transjakarta','sedan_red','gojek']){
-  const art=g.VLSemestaArt.vehiclePreview(id,'se');
-  assert.match(art,/^data:image\/png;base64,/);
-  assert.equal(g.VLSemestaArt.vehiclePreview(id,'se'),art);
-  assert.match(g.VLSemestaArt.vehiclePreview(id,'nw'),/^data:image\/png;base64,/);
+  // Sync preview never returns a canvas proxy; wait for the real PNG.
+  assert.equal(g.VLSemestaArt.vehiclePreview(id,'se'),null);
  }
  assert.match(g.VLSemestaArt.questPreview('pak_ogah'),/^data:image\/png;base64,/);
 });

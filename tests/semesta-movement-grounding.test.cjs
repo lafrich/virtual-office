@@ -50,9 +50,9 @@ for(const o of movers){
  }
 }
 const renderer=read('semesta-traffic-art.js'),builder=read('builder.js');
-assert.match(renderer,/wheelGround\?\.contact\(image,fallback\)/);
-assert.match(renderer,/height=w\*\(imageHeight\/imageWidth\)\*VCOMP/);
-assert.match(renderer,/mesh\.position\.y=wheelGround\?\.pivotHeight\(height,contact\.ratio\)/);
+assert.match(renderer,/manifest-pivot/);
+assert.match(renderer,/imageWidth\*PX/);
+assert.match(renderer,/mesh\.position\.y=height\*\(pivotRatio-\.5\)/);
 assert.match(builder,/gfx\.setGroundPivot\?\.\('fitted'\)/);
 assert.match(builder,/const side=\.14\+\(isCrowd\?\(i%3\)\*\.035:0\)/);
 assert.match(builder,/const shifted=\{x:p\.x-p\.dz\*side,z:p\.z\+p\.dx\*side\}/);

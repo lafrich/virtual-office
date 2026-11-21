@@ -1,0 +1,402 @@
+{
+  "contract": "v6p-act ACTIVITY SHEET CONTRACT v2",
+  "generated": "2026-11-07T14:29:53.775885+07:00",
+  "sheet": {
+    "w": 384,
+    "h": 2688,
+    "cols": 6,
+    "rows": 24,
+    "cell": [
+      64,
+      112
+    ],
+    "pivot": [
+      32,
+      100
+    ],
+    "dir_order": [
+      "se",
+      "sw",
+      "ne",
+      "nw"
+    ]
+  },
+  "rule": "A clip is READY only when status==authored AND every required part listed below has that clip authored. Fully transparent reserved bands must NOT be treated as ready / playable.",
+  "bands": {
+    "squat": {
+      "start": 0,
+      "frames": 6,
+      "ms_per_frame": 140,
+      "type": "loop",
+      "status": "draft_inactive",
+      "emosi": true,
+      "note": "Draft from the earlier upright-squat pilot. Pixels remain in band 0 so the work is not lost, but this clip is NOT the active consume target. Do not treat draft_inactive as ready.",
+      "keys": [
+        "standing",
+        "descending1",
+        "descending2",
+        "bottom_hold",
+        "ascending1",
+        "ascending2"
+      ]
+    },
+    "pushup": {
+      "start": 4,
+      "frames": 4,
+      "ms_per_frame": 160,
+      "type": "loop",
+      "status": "authored_pending_compositorQA",
+      "emosi": false,
+      "note": "Polished + plank-corrected (2026-11-07 Asia/Jakarta). 4f 160ms emosi:false. Straight shoulder-hip-ankle plank at high AND low (no bent-knee pike). Hands and toes planted; elbows travel for a readable pushup L. Head/face/hair = translated lie stamps.",
+      "keys": [
+        "plank_high",
+        "descending",
+        "bottom",
+        "ascending"
+      ],
+      "polish": {
+        "authorized_by": "pt378u",
+        "backup": "/workspace/v6p-act-art/backups/incoming-pre-pushup-polish-20261107-135029",
+        "changes": [
+          "separately outlined near/far legs (thigh taper + calf + feet) so they no longer merge into one slab",
+          "arms use consistent-length elbow solve with visible hands and a high-plank bend (not a pillar)",
+          "torso overlaps the lie-head neck to remove the rectangular seam",
+          "ground contacts planted across all 4 frames; SE/SW max y=100",
+          "modest ~5-6px body drop so the loop reads as a pushup"
+        ]
+      }
+    },
+    "yoga_sphinx_idle": {
+      "start": 8,
+      "frames": 4,
+      "ms_per_frame": 500,
+      "status": "authored_pending_compositorQA",
+      "emosi": true,
+      "note": "POSE-CORRECTED 2026-11-07 Asia/Jakarta (band 8 only). True sphinx: elbows under shoulders (~95deg L), forearms and hands on the floor, chest lowered onto that short vertical upper arm, belly/pelvis/legs on the floor in SE and NE (not a straight-arm cobra). 4f 500ms breath. emosi:true. Head/face/hair = translated idle stamps. Native K keys, 64x112, pivot 32,100."
+    },
+    "yoga_puppy_idle": {
+      "start": 12,
+      "frames": 4,
+      "ms_per_frame": 500,
+      "status": "authored_pending_compositorQA",
+      "emosi": false,
+      "note": "Knees down, hips raised, chest and forehead toward the floor, arms reaching forward. 4f 500ms slight breath. emosi:false (face down, no painted face)."
+    },
+    "hip_shake": {
+      "start": 16,
+      "frames": 6,
+      "ms_per_frame": 120,
+      "status": "authored_pending_compositorQA",
+      "emosi": true,
+      "note": "Upright standing hip sway. 6f 120ms: center, L, L-peak, center, R, R-peak. Head/torso/hair/face/shoes from idle stamps; pants newly drawn from shifted hips to planted ankles. emosi:true."
+    },
+    "yoga_happy_baby_idle": {
+      "start": 20,
+      "frames": 4,
+      "ms_per_frame": 450,
+      "status": "authored_pending_compositorQA",
+      "emosi": false,
+      "note": "POSE-CORRECTED 2026-11-07 Asia/Jakarta (band 20 only). Supine happy baby: back and head on the floor, thighs toward the torso, knees bent wide (near/far separated), shins UP, each hand holding its own foot. Not a straight-leg pointed V or jackknife. 4f 450ms. emosi:false. Head from lie stamps. Native K keys, 64x112, pivot 32,100."
+    }
+  },
+  "parts": {
+    "base/body.png": {
+      "path": "/workspace/v6p-act-incoming/base/body.png",
+      "sha256": "402b44b13fc68fc8e0d3765e0951fb4294feaa7bc36641a564f41d065b3e7a1e",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "base/body_f.png": {
+      "path": "/workspace/v6p-act-incoming/base/body_f.png",
+      "sha256": "58043a2ef30eaec1c6071d5ab0e30ee932a9cd388f57413fdf48fc211c65cbae",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "face/m_blank.png": {
+      "path": "/workspace/v6p-act-incoming/face/m_blank.png",
+      "sha256": "f1f90c33826921bba1bfa93d4e4df0da9905d0aef982cb32ea1740b101994f0a",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "dirs_painted": [
+        "se",
+        "sw"
+      ],
+      "dirs_intentional_empty": [
+        "ne",
+        "nw"
+      ],
+      "note": "Squat (draft): blank face follows the translated upright head for Emosi. Pushup (live): emosi false; painted blank face only, taken from the lie horizontal head and translated to the plank head (SE/SW). NE/NW empty.",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "face/f_blank.png": {
+      "path": "/workspace/v6p-act-incoming/face/f_blank.png",
+      "sha256": "d729a95533c8bb2531026afe1a179c8d94bd5aedab7e1aae546eb9249562f158",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "dirs_painted": [
+        "se",
+        "sw"
+      ],
+      "dirs_intentional_empty": [
+        "ne",
+        "nw"
+      ],
+      "note": "Squat (draft): blank face follows the translated upright head for Emosi. Pushup (live): emosi false; painted blank face only, taken from the lie horizontal head and translated to the plank head (SE/SW). NE/NW empty.",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "top/nude.png": {
+      "path": "/workspace/v6p-act-incoming/top/nude.png",
+      "sha256": "0189e21f95eded46f5d4bc0de4dc2e19fb1cfe561ce01e1e976f460a12577d9a",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "top/nude_f.png": {
+      "path": "/workspace/v6p-act-incoming/top/nude_f.png",
+      "sha256": "a4717bc6b70a7f9928ed7a2495f808b37937ff5f4bce0f780ba72a6191dab0ff",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "top/nude_back.png": {
+      "path": "/workspace/v6p-act-incoming/top/nude_back.png",
+      "sha256": "95b251c1087d8f319f42dc6b8e6cfd81912c133fe092370df0160af5569d15a3",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "top/nude_back_f.png": {
+      "path": "/workspace/v6p-act-incoming/top/nude_back_f.png",
+      "sha256": "b3eb4e2a55fe755bcfa2daf81e0e74f0f5f31b3609c61d85793db61f74a4dc6e",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "hair/mid_curtain_back.png": {
+      "path": "/workspace/v6p-act-incoming/hair/mid_curtain_back.png",
+      "sha256": "793a30e525a85ea18dc6b537a40b5e6671fea0a3940e7eb149b2e50a7fe58788",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "hair/mid_curtain_front.png": {
+      "path": "/workspace/v6p-act-incoming/hair/mid_curtain_front.png",
+      "sha256": "bd151eac282f32abcd2eeb51b45fce97bf2b9bf6f681df12ac9edf275e458da7",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "hair/long_back.png": {
+      "path": "/workspace/v6p-act-incoming/hair/long_back.png",
+      "sha256": "be3f4a02753c73967b5ca216a581d27b8f65bf9a726ba032b5b5a85429330ffd",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "hair/long_front.png": {
+      "path": "/workspace/v6p-act-incoming/hair/long_front.png",
+      "sha256": "b1e56204a723b7a5a5353470175fd8966c086fe9189a2b7e9057b59b835ad4cd",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "shoes/nude.png": {
+      "path": "/workspace/v6p-act-incoming/shoes/nude.png",
+      "sha256": "e7a8404034dd59306e39af6275839407811a5075f314ceb25a8270ebb976081d",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "shoes/nude_f.png": {
+      "path": "/workspace/v6p-act-incoming/shoes/nude_f.png",
+      "sha256": "0e67bd23000812178cfd7fc40d02c241e988577b05aaaa22ce6d63250330dcb7",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "base/shadow.png": {
+      "path": "/workspace/v6p-act-incoming/base/shadow.png",
+      "sha256": "27fb2af91b2b211d2e8f948ef7766d0dea30af102361c48ecd23788098cb5f9d",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "pants/nude.png": {
+      "path": "/workspace/v6p-act-incoming/pants/nude.png",
+      "sha256": "dd826325fe3405cd10c232ae2574fecc406c7bd2af59eeb3ca25fe8a06dc0a62",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "pants/nude_f.png": {
+      "path": "/workspace/v6p-act-incoming/pants/nude_f.png",
+      "sha256": "fbbeefa32bf57ba90e3aed179e2f145ca6650d0702bc7065e59272aeb61f35c8",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "draft_inactive",
+      "pushup": "authored_pending_compositorQA",
+      "other_bands": "transparent",
+      "yoga_sphinx_idle": "authored_pending_compositorQA",
+      "yoga_puppy_idle": "authored_pending_compositorQA",
+      "hip_shake": "authored_pending_compositorQA",
+      "yoga_happy_baby_idle": "authored_pending_compositorQA"
+    },
+    "base/fx.png": {
+      "path": "/workspace/v6p-act-incoming/base/fx.png",
+      "sha256": "d23c585f1429c5d4d71a7504af321d396f1fba6228c1cb1bdcfac1b6d72e4ff3",
+      "size": [
+        384,
+        2688
+      ],
+      "squat": "intentional_empty",
+      "pushup": "intentional_empty",
+      "other_bands": "transparent",
+      "reason": "optional FX layer; squat/pushup have no painted FX (lie/sleep Z's do not apply). Sheet is present and fully transparent so it is not mistaken for a body duplicate.",
+      "yoga_sphinx_idle": "intentional_empty",
+      "yoga_puppy_idle": "intentional_empty",
+      "hip_shake": "intentional_empty",
+      "yoga_happy_baby_idle": "intentional_empty"
+    }
+  },
+  "skipped": {
+    "base/body_front.png": "v6p 1x1 placeholder \u2014 skipped",
+    "base/body_front_f.png": "v6p 1x1 placeholder \u2014 skipped"
+  },
+  "not_in_pilot": [
+    "glasses/*",
+    "facial/*",
+    "other tops/pants/shoes/hairs"
+  ]
+}

@@ -379,7 +379,7 @@ function runAction(){
  if(s.inventory.length+adds.length>maxBag||adds.some(id=>s.inventory.includes(id)))
   return logTest('BLOCKED · Bag full or duplicate inventory item');
  const wage=r.trigger==='job_complete'?effects.filter(x=>x.kind==='wallet_delta'&&Number(x.value)>0).reduce((n,x)=>n+Number(x.value),0):0;
- if(wage>0&&(s.dailyWages||0)+wage>(state.project.foundation?.settings?.dailyWageCap||6000))
+ if(wage>0&&(s.dailyWages||0)+wage>(state.project.foundation?.settings?.dailyWageCap||150000))
   return logTest('BLOCKED · Daily wage quota reached');
  for(const effect of effects){
   const n=Number(effect.value);

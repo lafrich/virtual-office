@@ -1,0 +1,844 @@
+{
+  "generated": "2026-11-07T14:29:53.775885+07:00",
+  "original_refs_sha256": {
+    "base/body.png": "223a687041e8d5d01d04a077333a927c56be21fa865635a88c9fe25a2f273ef2",
+    "base/body_f.png": "53cc5021779bced1a39858faed0001aca5ed0639d0f7d23276e318d1907ef8cf",
+    "face/m_blank.png": "39fd65766c37da9f02b2bad4b736611e7d44d63cc84183900e832884e55154fb",
+    "face/f_blank.png": "c90d04b521a3a8a50f6dea528fa5e92682e1c62dd47db1c285b4c98ff548094b",
+    "top/nude.png": "41ceaea8112e7de470af4bc1d554274a48848c6b12bca140417906c436ce635d",
+    "top/nude_f.png": "80addd04e954baf828da4b109ebc124651a8ee81f38e5c228c21add8691f8a1a",
+    "top/nude_back.png": "3dec94a64c9af274704709161fea55edecf9916a072f2c205efa45f1c0c4b5b7",
+    "top/nude_back_f.png": "8ab7159de64380503816c09d7934dfd9ec73ee0df46d23d399ce7d07823cf243",
+    "hair/mid_curtain_back.png": "0b0557aaf1ff9bbe921546a365b420cb0bf0891c73408ea785995f71bef5ca42",
+    "hair/mid_curtain_front.png": "c1d66b09afc30e92332cf3db52eb277a1017ecf40ad1da2716c3f89fd6ec086e",
+    "hair/long_back.png": "f89910a72e55f7c7cd3b24f53da0ab4d93d77f53eddb00409a55237700f2ae9f",
+    "hair/long_front.png": "6d44d02191fb55a4a1fe480d8e2b392f9e06915538414719834c92a0fa42398b",
+    "shoes/nude.png": "a59a6f03413555b2a54a3285ec5e85b3089ad96f1dd0983d44f7ac9114b083a9",
+    "shoes/nude_f.png": "8f96b5f1f2427ff170b606e6d528bc5b07becaba8b7c0f44aa0a33c4da2f4984",
+    "base/shadow.png": "25d0f921e524bfa36fb43742b20c94f62312ba9b99a842f7a5df9ed18c250590",
+    "pants/nude.png": "8e3514a87eff43d7475cc8187aef7bc4328bc0a4f4485442e5e8f9b67428da2f",
+    "pants/nude_f.png": "600816baba0e59808e9317e93461faf127fb0c23792c55d385d0cd3e483dd9a3",
+    "base/fx.png": "9a2283aef1ed26d0cad6e53042eb240cf2a9191e197d7b229e4df1e3ce88f155",
+    "base/body_front.png": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+    "base/body_front_f.png": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+  },
+  "original_refs_unchanged": true,
+  "outputs": {
+    "base/body.png": {
+      "sha256": "402b44b13fc68fc8e0d3765e0951fb4294feaa7bc36641a564f41d065b3e7a1e",
+      "bytes": 14050,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 3036,
+        "pushup": 2024,
+        "sphinx": 2024,
+        "puppy": 2024,
+        "hip_shake": 3036,
+        "happy_baby": 2024
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          50,
+          229,
+          255
+        ],
+        [
+          255,
+          56,
+          226,
+          255
+        ],
+        [
+          255,
+          62,
+          223,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ],
+        [
+          255,
+          74,
+          217,
+          255
+        ]
+      ],
+      "squat_band_sha256": "3edba771d3740da609a2c4db4c7162ee097a990ea8325e09d16d9240b300322d",
+      "pose_fix_band_sha256": {
+        "sphinx": "e2b81783064d84720cf6aca04bcb35fe19d346c845c427f3f18305b3e0cd407a",
+        "happy_baby": "8e30e32f1f968882c2e525bc97750b793bc8faf2cffb3897b9bc0f69f947cd18"
+      }
+    },
+    "base/body_f.png": {
+      "sha256": "58043a2ef30eaec1c6071d5ab0e30ee932a9cd388f57413fdf48fc211c65cbae",
+      "bytes": 13933,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 3012,
+        "pushup": 2008,
+        "sphinx": 2008,
+        "puppy": 2008,
+        "hip_shake": 3012,
+        "happy_baby": 2008
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          50,
+          229,
+          255
+        ],
+        [
+          255,
+          56,
+          226,
+          255
+        ],
+        [
+          255,
+          62,
+          223,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "8aea7381eaf16eac95e5dc9e065e9c0871addaf29471082687aeb6530095a005",
+      "pose_fix_band_sha256": {
+        "sphinx": "6d467245fac286d240448f569a54bb9479a53fe89563a72833aaf4500776ee23",
+        "happy_baby": "82f5886976c60c1d1be056963a4fc57db0927c47fa9dcf0510501cff2c821346"
+      }
+    },
+    "face/m_blank.png": {
+      "sha256": "f1f90c33826921bba1bfa93d4e4df0da9905d0aef982cb32ea1740b101994f0a",
+      "bytes": 6800,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 720,
+        "pushup": 192,
+        "sphinx": 480,
+        "puppy": 0,
+        "hip_shake": 720,
+        "happy_baby": 192
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          50,
+          229,
+          255
+        ],
+        [
+          255,
+          56,
+          226,
+          255
+        ],
+        [
+          255,
+          74,
+          217,
+          255
+        ]
+      ],
+      "squat_band_sha256": "64319ff4a9a3575a344eb24e22ac9a802ab8b70f4bb01ed5469c540176aac143",
+      "pose_fix_band_sha256": {
+        "sphinx": "9a8efc695ec5c48ec2ad3470413278d24fce10218ab9d8beb26c2b794670fd54",
+        "happy_baby": "173cdd348f50268534c6cccbe3529b9c52fed7cb5f9308c4d172ca2d8fdc4073"
+      }
+    },
+    "face/f_blank.png": {
+      "sha256": "d729a95533c8bb2531026afe1a179c8d94bd5aedab7e1aae546eb9249562f158",
+      "bytes": 6819,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 768,
+        "pushup": 200,
+        "sphinx": 512,
+        "puppy": 0,
+        "hip_shake": 768,
+        "happy_baby": 200
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          50,
+          229,
+          255
+        ],
+        [
+          255,
+          56,
+          226,
+          255
+        ],
+        [
+          255,
+          62,
+          223,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "5d23e1f3eeeea90c6b84b87a14df0d5acc8d21cf557b00bbbb9aae659eedc505",
+      "pose_fix_band_sha256": {
+        "sphinx": "592baef57b7b7e3876d35f6d46fb36e941350440284421d0896bd4d79734a3d1",
+        "happy_baby": "7a05521f206e2184c1290c35df55e0beeb236aac5a7d7f016d04ca1e7b2c2e63"
+      }
+    },
+    "top/nude.png": {
+      "sha256": "0189e21f95eded46f5d4bc0de4dc2e19fb1cfe561ce01e1e976f460a12577d9a",
+      "bytes": 16459,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 8040,
+        "pushup": 5454,
+        "sphinx": 6298,
+        "puppy": 5602,
+        "hip_shake": 8040,
+        "happy_baby": 8608
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "3b3c45acccdb4b8fd7ca04c7c5284f6abbeb771af807d4864b84c24c23d05f5c",
+      "pose_fix_band_sha256": {
+        "sphinx": "8b1399f7157f5115b86e620ca8ed7b6aaacd3961526fa0644d69073bca6ee647",
+        "happy_baby": "baefa6683c507d22921efd309416463a767144b3ab26dd1f89a787f0f9f789e0"
+      }
+    },
+    "top/nude_f.png": {
+      "sha256": "a4717bc6b70a7f9928ed7a2495f808b37937ff5f4bce0f780ba72a6191dab0ff",
+      "bytes": 17214,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 6612,
+        "pushup": 4952,
+        "sphinx": 5716,
+        "puppy": 5004,
+        "hip_shake": 6612,
+        "happy_baby": 7972
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "29145be4a8db411e8f082898d50f314a056e38c5e2a621c855aaa2c62f7deff7",
+      "pose_fix_band_sha256": {
+        "sphinx": "57c7570809915497d4a5c4997b5d86f03511c06d3a99fac1b9845e00641567c6",
+        "happy_baby": "70669e32cb81f5775e4c57ec85a0d149966cffa422411ef924606a7dc5332928"
+      }
+    },
+    "top/nude_back.png": {
+      "sha256": "95b251c1087d8f319f42dc6b8e6cfd81912c133fe092370df0160af5569d15a3",
+      "bytes": 10819,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 912,
+        "pushup": 2012,
+        "sphinx": 2832,
+        "puppy": 1210,
+        "hip_shake": 912,
+        "happy_baby": 3704
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "3127f227ccb0165a67d92a9de0774a457c9524447dbb64862ed1a64f9623bea3",
+      "pose_fix_band_sha256": {
+        "sphinx": "a5b44901ce47d0d1e5b5483ab78446f114c64075846e24a0887733f0882f02d3",
+        "happy_baby": "ad504a775f9c51aa2b73ed530e8b7ece49ab2a190914650fcb4260038dc57b9e"
+      }
+    },
+    "top/nude_back_f.png": {
+      "sha256": "b3eb4e2a55fe755bcfa2daf81e0e74f0f5f31b3609c61d85793db61f74a4dc6e",
+      "bytes": 10792,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 840,
+        "pushup": 2012,
+        "sphinx": 2832,
+        "puppy": 1210,
+        "hip_shake": 840,
+        "happy_baby": 3704
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "d57f689c06639da8d6f8836a997e1ec3221f42665ab1b13cb699cdb5854eb393",
+      "pose_fix_band_sha256": {
+        "sphinx": "a5b44901ce47d0d1e5b5483ab78446f114c64075846e24a0887733f0882f02d3",
+        "happy_baby": "ad504a775f9c51aa2b73ed530e8b7ece49ab2a190914650fcb4260038dc57b9e"
+      }
+    },
+    "hair/mid_curtain_back.png": {
+      "sha256": "793a30e525a85ea18dc6b537a40b5e6671fea0a3940e7eb149b2e50a7fe58788",
+      "bytes": 14006,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 7176,
+        "pushup": 4784,
+        "sphinx": 4784,
+        "puppy": 4784,
+        "hip_shake": 7176,
+        "happy_baby": 4784
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          8,
+          250,
+          255
+        ],
+        [
+          255,
+          14,
+          247,
+          255
+        ],
+        [
+          255,
+          26,
+          241,
+          255
+        ]
+      ],
+      "squat_band_sha256": "d786fd96da6d7741d63ace8f61274aa3cd7081340d0cbb9444f017a95dd3e2cb",
+      "pose_fix_band_sha256": {
+        "sphinx": "1ef2284dc014c5063d8b58bfcc362ff52834eb4acf3f101b9025a6bd144642de",
+        "happy_baby": "87cf880f1d3b9028dc4b0d8ccda1ebbf94ec8ec71a376301c675d85b93a3510f"
+      }
+    },
+    "hair/mid_curtain_front.png": {
+      "sha256": "bd151eac282f32abcd2eeb51b45fce97bf2b9bf6f681df12ac9edf275e458da7",
+      "bytes": 24822,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 9804,
+        "pushup": 6536,
+        "sphinx": 6536,
+        "puppy": 6536,
+        "hip_shake": 9804,
+        "happy_baby": 6536
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          8,
+          250,
+          255
+        ],
+        [
+          255,
+          14,
+          247,
+          255
+        ],
+        [
+          255,
+          26,
+          241,
+          255
+        ],
+        [
+          255,
+          32,
+          238,
+          255
+        ]
+      ],
+      "squat_band_sha256": "ce76c0fe8bb7fb2add96292cb5724e8daa7d669babdd7f8ba9d70d115b5a7dc0",
+      "pose_fix_band_sha256": {
+        "sphinx": "f042b889c031fc06ad6c9ef0003092ace9f5f07f4d3868758f979b807f360e73",
+        "happy_baby": "fee719c0552bb87c99507f9d6d702dc30836117c31726257f40455edc9431c7a"
+      }
+    },
+    "hair/long_back.png": {
+      "sha256": "be3f4a02753c73967b5ca216a581d27b8f65bf9a726ba032b5b5a85429330ffd",
+      "bytes": 16188,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 12408,
+        "pushup": 7360,
+        "sphinx": 8272,
+        "puppy": 7360,
+        "hip_shake": 12408,
+        "happy_baby": 7360
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          8,
+          250,
+          255
+        ],
+        [
+          255,
+          14,
+          247,
+          255
+        ],
+        [
+          255,
+          26,
+          241,
+          255
+        ]
+      ],
+      "squat_band_sha256": "497f456ad9274668f592cc59d83ddbf3a38e81c9df69ab653b6359401d9a798e",
+      "pose_fix_band_sha256": {
+        "sphinx": "7f78eb2d5c91fa7fcf3cc5be5f93a051872e9bed43c4ece7c87e043e2df00e16",
+        "happy_baby": "19af658a5436951a6540598702380fe27b4847bce56b33f2b043cdff00e82adc"
+      }
+    },
+    "hair/long_front.png": {
+      "sha256": "b1e56204a723b7a5a5353470175fd8966c086fe9189a2b7e9057b59b835ad4cd",
+      "bytes": 25265,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 13680,
+        "pushup": 8488,
+        "sphinx": 9120,
+        "puppy": 8488,
+        "hip_shake": 13680,
+        "happy_baby": 8488
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          8,
+          250,
+          255
+        ],
+        [
+          255,
+          14,
+          247,
+          255
+        ],
+        [
+          255,
+          26,
+          241,
+          255
+        ],
+        [
+          255,
+          32,
+          238,
+          255
+        ]
+      ],
+      "squat_band_sha256": "f2d5598e44eaab82c53facbcedd8df9e259d2a22ff4ba256e30f665005e37a55",
+      "pose_fix_band_sha256": {
+        "sphinx": "84e354a3f74b035bb6ac187ce711a4f8e18b347d99f8edb91d5e2c60a25f2205",
+        "happy_baby": "cfe221f64b9dfffdfb553fdb2dc924294969775c3acea4003a7cf16db04777cd"
+      }
+    },
+    "shoes/nude.png": {
+      "sha256": "e7a8404034dd59306e39af6275839407811a5075f314ceb25a8270ebb976081d",
+      "bytes": 8353,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 1656,
+        "pushup": 1528,
+        "sphinx": 1088,
+        "puppy": 1208,
+        "hip_shake": 1656,
+        "happy_baby": 1272
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "7972aefab8b031a3def402273d8eca502f19dd49bcf443e5d3ab8c1107d31a4f",
+      "pose_fix_band_sha256": {
+        "sphinx": "9a76794f4639cfca3530e26acaece2e2d57bf67a181c39eae616d6de35748b69",
+        "happy_baby": "ce8203c74805f7f21eca314e6c02f1e99c829a1a6132a458204caefa376e131a"
+      }
+    },
+    "shoes/nude_f.png": {
+      "sha256": "0e67bd23000812178cfd7fc40d02c241e988577b05aaaa22ce6d63250330dcb7",
+      "bytes": 8057,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 1464,
+        "pushup": 1256,
+        "sphinx": 896,
+        "puppy": 976,
+        "hip_shake": 1464,
+        "happy_baby": 944
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "01073f195077fa833ad91616c5e8ccedbf610e5b0143be2369270374c8c29a41",
+      "pose_fix_band_sha256": {
+        "sphinx": "d922b80ee7449c193f772f30449ebdd3f816031a3579166803004fc8645c9aaa",
+        "happy_baby": "88ab0a03ef988f74074efa31b1864b824984d5516012ea420f48c44055905c87"
+      }
+    },
+    "base/shadow.png": {
+      "sha256": "27fb2af91b2b211d2e8f948ef7766d0dea30af102361c48ecd23788098cb5f9d",
+      "bytes": 8273,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 2064,
+        "pushup": 3968,
+        "sphinx": 4896,
+        "puppy": 5448,
+        "hip_shake": 2064,
+        "happy_baby": 3920
+      },
+      "unique_opaque_colors": [
+        [
+          0,
+          0,
+          0,
+          46
+        ],
+        [
+          0,
+          0,
+          0,
+          56
+        ]
+      ],
+      "squat_band_sha256": "fc453d73b58e8aee1f3919dbe1359ccbe5772675e3acb8dc31e57549c2688f0e",
+      "pose_fix_band_sha256": {
+        "sphinx": "5cb904c79dedd772ad13fcfae464a7732832ecd92b1fafee6de20c7595c2b37e",
+        "happy_baby": "981a8d6a5d9858475d7418f2ba2a59e2ca474557d21e4eee1895be706dc8b895"
+      }
+    },
+    "pants/nude.png": {
+      "sha256": "dd826325fe3405cd10c232ae2574fecc406c7bd2af59eeb3ca25fe8a06dc0a62",
+      "bytes": 16929,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 10208,
+        "pushup": 3720,
+        "sphinx": 2420,
+        "puppy": 4224,
+        "hip_shake": 8124,
+        "happy_baby": 8304
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "4c6c92220d5eac20942d363b7bd47a30396c5ded05fbac0315026e9b1bcf2925",
+      "pose_fix_band_sha256": {
+        "sphinx": "0ca79ddb87d88e24ed53e87e0c32494da9dad0cc5aaa64ececae62a1bdf4cae8",
+        "happy_baby": "ba47827484614487120f40417867e0d030b0206d469aebb9a269d24e1ff931cf"
+      }
+    },
+    "pants/nude_f.png": {
+      "sha256": "fbbeefa32bf57ba90e3aed179e2f145ca6650d0702bc7065e59272aeb61f35c8",
+      "bytes": 17054,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 11032,
+        "pushup": 4252,
+        "sphinx": 2916,
+        "puppy": 4826,
+        "hip_shake": 9988,
+        "happy_baby": 9726
+      },
+      "unique_opaque_colors": [
+        [
+          255,
+          44,
+          232,
+          255
+        ],
+        [
+          255,
+          68,
+          220,
+          255
+        ]
+      ],
+      "squat_band_sha256": "494d2b450e20f94e27e23931de37cd853ff4f9c6aaa405cfd394cea9cf7942b7",
+      "pose_fix_band_sha256": {
+        "sphinx": "36165d1ba6dae7727f01af5c6072c8f15187d066ea8d005167aa5dceda3e011f",
+        "happy_baby": "aa53493cebbd72152ceef309d57550ebd7ba0c5d8041ec26611efabae0b8054e"
+      }
+    },
+    "base/fx.png": {
+      "sha256": "d23c585f1429c5d4d71a7504af321d396f1fba6228c1cb1bdcfac1b6d72e4ff3",
+      "bytes": 4083,
+      "size": [
+        384,
+        2688
+      ],
+      "mode": "RGBA",
+      "opaque_by_band": {
+        "squat": 0,
+        "pushup": 0,
+        "sphinx": 0,
+        "puppy": 0,
+        "hip_shake": 0,
+        "happy_baby": 0
+      },
+      "unique_opaque_colors": [],
+      "squat_band_sha256": "9c70d3e95c0dee0ff40606c7d8ca738d30e3825c688f217376a55f45cfd1191b",
+      "pose_fix_band_sha256": {
+        "sphinx": "9c70d3e95c0dee0ff40606c7d8ca738d30e3825c688f217376a55f45cfd1191b",
+        "happy_baby": "9c70d3e95c0dee0ff40606c7d8ca738d30e3825c688f217376a55f45cfd1191b"
+      }
+    }
+  },
+  "verify": {
+    "sheet_dims_ok": true,
+    "key_colors_ok": true,
+    "squat_band_byte_unchanged": true,
+    "face_ne_nw_empty": true,
+    "pushup_unused_cols_transparent": true,
+    "fourframe_unused_cols_transparent": true,
+    "original_refs_unchanged": true,
+    "clipping_pixels": 0,
+    "ground_contact_ok": true,
+    "issues": [],
+    "clip_log": {
+      "yoga_sphinx_idle": 0,
+      "yoga_happy_baby_idle": 0
+    },
+    "pose_fix_unexpected": [],
+    "preserved_other_bands": {
+      "squat": true,
+      "pushup": true,
+      "puppy": true,
+      "hip_shake": true
+    },
+    "hygiene_untouched": true
+  },
+  "authoring": {
+    "squat_draft": {
+      "method": "Frame 0 is a byte-identical blit of idle col0. Frames 1-5 translate head/face/hair/torso/top_back by (fwd, drop) with no rotation. Shoes and shadow stay planted on pivot y=100. Pants are newly drawn as boxy two-segment limbs. Status is draft_inactive.",
+      "max_drop_px": 14,
+      "max_forward_px": 2,
+      "frame_t": [
+        0.0,
+        0.35,
+        0.7,
+        1.0,
+        0.7,
+        0.35
+      ]
+    },
+    "clips": {
+      "pushup": {
+        "status": "authored_pending_compositorQA",
+        "note": "Polished + plank-corrected (2026-11-07 Asia/Jakarta). 4f 160ms emosi:false. Straight shoulder-hip-ankle plank at high AND low (no bent-knee pike). Hands and toes planted; elbows travel for a readable pushup L. Head/face/hair = translated lie stamps."
+      },
+      "yoga_sphinx_idle": {
+        "status": "authored_pending_compositorQA",
+        "note": "POSE-CORRECTED 2026-11-07 Asia/Jakarta (band 8 only). True sphinx: elbows under shoulders (~95deg L), forearms and hands on the floor, chest lowered onto that short vertical upper arm, belly/pelvis/legs on the floor in SE and NE (not a straight-arm cobra). 4f 500ms breath. emosi:true. Head/face/hair = translated idle stamps. Native K keys, 64x112, pivot 32,100.",
+        "pose_fix": "2026-11-07-sphinx-forearm-90"
+      },
+      "yoga_puppy_idle": {
+        "status": "authored_pending_compositorQA",
+        "note": "Knees down, hips raised, chest and forehead toward the floor, arms reaching forward. 4f 500ms slight breath. emosi:false (face down, no painted face)."
+      },
+      "hip_shake": {
+        "status": "authored_pending_compositorQA",
+        "note": "Upright standing hip sway. 6f 120ms: center, L, L-peak, center, R, R-peak. Head/torso/hair/face/shoes from idle stamps; pants newly drawn from shifted hips to planted ankles. emosi:true."
+      },
+      "yoga_happy_baby_idle": {
+        "status": "authored_pending_compositorQA",
+        "note": "POSE-CORRECTED 2026-11-07 Asia/Jakarta (band 20 only). Supine happy baby: back and head on the floor, thighs toward the torso, knees bent wide (near/far separated), shins UP, each hand holding its own foot. Not a straight-leg pointed V or jackknife. 4f 450ms. emosi:false. Head from lie stamps. Native K keys, 64x112, pivot 32,100.",
+        "pose_fix": "2026-11-07-happybaby-bent-wide"
+      }
+    }
+  },
+  "band_integrity": {
+    "squat_band_byte_unchanged": true,
+    "pushup_band_byte_unchanged": true,
+    "puppy_band_byte_unchanged": true,
+    "hip_shake_band_byte_unchanged": true,
+    "sphinx_band_changed": true,
+    "happy_baby_band_changed": true,
+    "hygiene_untouched": true,
+    "hygiene_clips": "not allocated on this v2 sheet"
+  }
+}

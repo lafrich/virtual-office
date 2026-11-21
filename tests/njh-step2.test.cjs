@@ -68,8 +68,8 @@ test('containers: inventory rows, moveItem storeIn rules, owner_only, token gate
  assert.equal(k.h.inventory('fridge').items[0].itemId,'telur');
  assert.ok(k.poses.includes('use_storage'));
  const noor=harness({playerId:'t_noor',state:k.state});
- assert.equal(noor.h.inventory('fridge').reason,'Punya pacar');
- assert.equal(noor.h.moveItem('fridge','bag','telur').ok,false);
+ assert.equal(noor.h.inventory('fridge').ok,true);
+ assert.equal(noor.h.moveItem('fridge','bag','telur').ok,true);
  k.state=Object.assign({},k.state,{powerTokens:0});
  const locked=k.h.inventory('storage');assert.equal(locked.locked,true);assert.match(locked.reason,/Token listrik habis/);
  assert.equal(k.h.moveItem('storage','bag','beras').ok,false);
@@ -99,7 +99,8 @@ test('cooking: known recipe, experiment learns, raw fish must be cooked, token u
  // gates
  const nostove=harness({state:k.state,furniture:[]});assert.equal(nostove.h.cook('telur_dadar').reason,'Dekati kompor dahulu.');
  const dark=harness({state:Object.assign({},k.state,{powerTokens:0})});assert.equal(dark.h.cook('telur_dadar').reason,'Token listrik habis.');
- const partner=harness({playerId:'t_noor',state:k.state});assert.equal(partner.h.cook('telur_dadar').ok,false);
+ const partner=harness({playerId:'t_noor',state:k.state});const pr=partner.h.cook('telur_dadar');
+ assert.notEqual(pr.reason,'Punya pacar');assert.notEqual(pr.reason,'Terkunci');
 });
 
 test('fishing: data-driven spot, cast/wait/strike/reel catch to bag, fish-result event, got-away path',()=>{
@@ -189,7 +190,7 @@ test('token_listrik: minimarket item tops up powerTokens (no bag slot), kost res
 test('AKSI locks: partner / stranger and empty token give disabled step-2 entries with a reason',()=>{
  const p=harness({playerId:'t_noor',state:{housing:{room:true,roomId:'njh_kos_noor',ownerId:'t_noor',kind:'kost'}}});
  const pa=p.h.nearbyActions().filter(a=>['open_fridge','open_storage','cook_menu'].includes(a.id));
- assert.equal(pa.length,3);for(const a of pa){assert.equal(a.disabled,true);assert.ok(a.hint);}
+ assert.equal(pa.length,3);for(const a of pa){assert.ok(!a.disabled,a.id+' should be allowed for pacaran partner');}
  assert.ok(!p.h.nearbyActions().some(a=>a.id==='topup_token'),'no topup in someone else\'s room');
  const e=harness({state:{powerTokens:0}});
  const ea=e.h.nearbyActions();

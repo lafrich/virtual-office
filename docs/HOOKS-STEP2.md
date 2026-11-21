@@ -193,3 +193,36 @@ emits `mainkan:open-ui` `{ui, args}`; it does not change state.
 cook → `cook` / `cook_stir` (drinks `mix_drink`); minimarket pay → `hand_over`; fishing → `fishing_cast`,
 `fishing_wait` / `fishing_wait_sit`; storage → `use_storage`; eating → `eat` / `eat_sit` / `eat_snack`.
 Missing ids fall back through the existing chain (never blocks).
+
+## 20. Jual ikan (PREVIEW 22 Nov 2026)
+
+Layar must not invent a sell payload. Call these hooks on `window.SemestaLifePlay` (also forwarded on `window.SemestaPlay`).
+
+`sellableFish(buyerId?)`
+- Optional `buyerId`: `'siomay_batagor' | 'pasar_ikan'`.
+- Returns
+```
+{
+  ok: true,
+  buyerId: 'siomay_batagor' | null,
+  buyers: [{id:'siomay_batagor', label:'Bang Siomay / Batagor'}, {id:'pasar_ikan', label:'Pasar Ikan'}],
+  items: [{
+    uid: 'life:lele:12',   // instance id; may be passed to sell()
+    itemId: 'lele',        // catalog / species id
+    label: 'Ikan Lele',
+    qty: 1,                // one instance per row (bag does not stack)
+    price: 1600 | null,    // Rupiah for the selected buyer, or the default buyer if none given
+    prices: {siomay_batagor:1600, pasar_ikan:2100},
+    container: 'bag',
+    spoiled: false
+  }]
+}
+```
+- Only bag fish are listed (the live `sell_fish` economy only accepts tas). `price` is `null` when that buyer refuses the species.
+
+`sell(itemId, qty, buyerId)` also accepts a single object `{itemId|uid, qty, buyerId}`.
+- `itemId` may be an instance `uid` or a species id. `qty` sells that many matching bag instances (default 1).
+- Returns `{ok:true, sold:[{uid,itemId,price}], qty, buyerId, wallet}` or `{ok:false, reason, sold}`.
+- `reason` is Indonesian and should be shown as-is.
+
+Kopi / Es Teh / Sedekah / Ibadah actions now carry `confirm:true, ui:'confirm'`. Do not spend on the first E; show a confirm/choice menu, then call the same action id once the player confirms.

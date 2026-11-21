@@ -994,12 +994,12 @@
       "objectId": "njh-penanda-doa",
       "kind": "pray_generic",
       "side": "front",
-      "pending": true,
+      "pending": false,
       "usePoint": [
         -11.5,
         24.5
       ],
-      "asset": "object:njh_penanda_doa",
+      "asset": "pipeline:id_mainkan_prayer_mat",
       "baymaxInteractionId": null,
       "baymaxAnchorId": null
     },
@@ -1063,7 +1063,7 @@
         -22.5,
         38.5
       ],
-      "asset": "pipeline:lapak_tas"
+      "asset": "pipeline:id_mainkan_siomay_cart"
     },
     {
       "id": "njh_tenda_hobo",
@@ -1817,23 +1817,6 @@
       "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
     },
     {
-      "id": "njh-penanda-doa",
-      "asset": "object:njh_penanda_doa",
-      "source": "/workspace/lfb-placeholders-v2 (njh_penanda_doa)",
-      "minCorner": {
-        "c": -12,
-        "r": 23
-      },
-      "footprintRotated": [
-        1,
-        1
-      ],
-      "rotation": 0,
-      "collision": false,
-      "anchorMarkerId": "njh-penanda-doa-anchor",
-      "note": "Register in the runtime catalog, then use njh-semesta-map-draft1.with-pending-assets.city.json"
-    },
-    {
       "id": "njh-tenda-pecel-lele",
       "asset": "studio:br-warung-pecel-lele",
       "source": "/workspace/lfb-quality-guide/demo/bangunan-tenda/br-warung-pecel-lele.json",
@@ -1941,7 +1924,7 @@
     "object:obj-njh-lapak-silver": "object:njh_lapak_silver",
     "object:obj-njh-tiang-ogah": "object:njh_tiang_ogah",
     "object:obj-njh-kotak-amal": "object:njh_kotak_amal",
-    "object:obj-njh-penanda-doa": "object:njh_penanda_doa",
+    "object:obj-njh-penanda-doa": "pipeline:id_mainkan_prayer_mat",
     "studio:br-warung-pecel-lele": "studio:br-warung-pecel-lele",
     "studio:br-lapak-sate-madura": "studio:br-lapak-sate-madura"
   },

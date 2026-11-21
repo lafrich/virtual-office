@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "projection": "isometric-2:1",
+  "tile": [
+    64,
+    32
+  ],
+  "palette": "v6b",
+  "count": 1,
+  "pack": "ellen-wc-v4-preview",
+  "assets": [
+    {
+      "id": "id200_publik_wc_umum_kumuh",
+      "file": "pipeline:id200_publik_wc_umum_kumuh",
+      "label": "WC Umum Kumuh (V4)",
+      "group": "kampung",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-wc-v4-preview",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        4,
+        5
+      ],
+      "category": "building",
+      "note": "Ellen WC V4 kumuh exterior. Different canvas from id200_publik_toilet_umum_kampung (296x254 vs 260x262); new id, map still uses the kampung facade until explicitly remapped.",
+      "variants": {
+        "se": {
+          "file": "kampung/id200_publik_wc_umum_kumuh_se.png",
+          "size": [
+            296,
+            254
+          ],
+          "pivot": [
+            148,
+            182
+          ]
+        },
+        "sw": {
+          "file": "kampung/id200_publik_wc_umum_kumuh_sw.png",
+          "size": [
+            296,
+            254
+          ],
+          "pivot": [
+            148,
+            182
+          ]
+        },
+        "ne": {
+          "file": "kampung/id200_publik_wc_umum_kumuh_ne.png",
+          "size": [
+            296,
+            254
+          ],
+          "pivot": [
+            148,
+            182
+          ]
+        },
+        "nw": {
+          "file": "kampung/id200_publik_wc_umum_kumuh_nw.png",
+          "size": [
+            296,
+            254
+          ],
+          "pivot": [
+            148,
+            182
+          ]
+        }
+      },
+      "size": [
+        296,
+        254
+      ],
+      "pivot": [
+        148,
+        182
+      ],
+      "width": 6.541,
+      "height": 6.481
+    }
+  ]
+}

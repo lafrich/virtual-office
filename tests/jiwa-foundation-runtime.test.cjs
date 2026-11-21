@@ -17,7 +17,7 @@ test('presets include every core life-system without changing 8-slot bag',()=>{
   'help_npc','charity','worship','theft','referral'])
   assert.ok(f.contexts.find(c=>c.id===id),id);
  assert.equal(f.settings.bagSlots,8);
- assert.equal(f.settings.dailyWageCap,6000);
+ assert.equal(f.settings.dailyWageCap,150000);
  assert.equal(f.settings.dailyCourseXpCap,150);
  assert.equal(f.settings.socialEnabled,false);
 });
@@ -47,7 +47,11 @@ test('job requires verified progress and unique job instance, capped per day',()
  assert.equal(fire(f,'basic_job',r.state,{eventId:'again',jobInstanceId:'job_a'}).ok,false);
  r=fire(f,'basic_job',r.state,{eventId:'next_job',jobInstanceId:'job_b'});
  assert.equal(r.ok,true);assert.equal(r.state.dailyWages,6000);
- assert.equal(fire(f,'basic_job',r.state,{eventId:'third_job',jobInstanceId:'job_c'}).ok,false);
+ // cap is 150000; a third unique job still fits. Quota blocks only at the cap.
+ r=fire(f,'basic_job',r.state,{eventId:'third_job',jobInstanceId:'job_c'});
+ assert.equal(r.ok,true);assert.equal(r.state.dailyWages,9000);
+ const atCap=Object.assign({},r.state,{dailyWages:147001});
+ assert.equal(fire(f,'basic_job',atCap,{eventId:'over_cap',jobInstanceId:'job_d'}).ok,false);
  const tomorrow=F.nextDay(r.state);
  assert.equal(tomorrow.dailyWages,0);assert.equal(tomorrow.wallet,r.state.wallet);
  assert.equal(tomorrow.gameDay,2);

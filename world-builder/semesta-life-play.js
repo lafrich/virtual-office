@@ -111,7 +111,14 @@ function applyStart(s,id,force){
 }
 function persist(){
  if(!state||!active)return;
- try{localStorage.setItem(dataKey(),JSON.stringify({schema:1,cityId:projectId,state}));}catch{}
+ try{
+  const clock=bridge?.getClock?.();
+  if(clock){
+   const snap=typeof clock.snapshot==='function'?clock.snapshot():(typeof clock.get==='function'?clock.get():null);
+   if(snap&&Number.isFinite(Number(snap.day)))state.visualClock={minute:Number(snap.minute),day:Number(snap.day),speed:Number(snap.speed)||1,paused:!!snap.paused};
+  }
+  localStorage.setItem(dataKey(),JSON.stringify({schema:1,cityId:projectId,state}));
+ }catch{}
 }
 function restore(){
  if(!RULES)return;
@@ -119,6 +126,9 @@ function restore(){
  try{const raw=JSON.parse(localStorage.getItem(dataKey())||'null');if(raw?.cityId===projectId)saved=raw.state;}catch{}
  state=RULES.stateFrom(saved||{wallet:6000,energy:80,hygiene:75,bladder:20,moral:50,experience:0},config);
  if(saved&&saved.testSeed)state.testSeed=saved.testSeed;
+ if(state.visualClock){
+  try{bridge?.getClock?.()?.restore?.(state.visualClock);}catch{}
+ }
  const id=playerId(),rev=sessionRevision;
  if(id)startProfilesReady.then(()=>{if(!active||rev!==sessionRevision)return;
   if(applyStart(state,id,false)){
@@ -758,6 +768,10 @@ function runAction(action,args={}){
    paintPanel();return r;
   }catch(err){return {ok:false,reason:String(err.message||err)};}
  }
+ if(action==='enter_closed'){
+  message('Belum buka');
+  return {ok:false,reason:'Belum buka',closed:true};
+ }
  if(action==='enter_room'){
   try{
    const I=bridge?.playInteriors||root.VLNjhPlayInteriors;
@@ -849,7 +863,7 @@ function runAction(action,args={}){
   const expected='act:'+String(args.activityId||'');
   if(node?.id!==expected||node.placeholder)return {ok:false,reason:'Datangi bangunan aktivitas yang sesuai di Semesta.'};
  }
- if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity','wash','enter_room','exit_interior'].includes(action)&&!node)
+ if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity','wash','enter_room','enter_closed','exit_interior'].includes(action)&&!node)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
@@ -1200,6 +1214,8 @@ const api=Object.freeze({attach,start,stop,active:visible,persist,state:()=>stat
  fishSpots:hookApi('fishSpots',[]),
  fishStart:hookApi('fishStart',{ok:false,reason:'hooks missing'}),
  fishInput:hookApi('fishInput',{ok:false,reason:'hooks missing'}),
+ sellableFish:hookApi('sellableFish',{ok:false,reason:'hooks missing',items:[]}),
+ sell:hookApi('sell',{ok:false,reason:'hooks missing'}),
  token:hookApi('token',null),
  topupToken:hookApi('topupToken',{ok:false,reason:'hooks missing'}),
  housing:hookApi('housing',null),

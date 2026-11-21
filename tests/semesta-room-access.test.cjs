@@ -54,8 +54,9 @@ test('roomAccess: owner full, partner limited, stranger locked; lobby open to gu
   assert.ok(partner.allowedActs.includes('sleep'));
   assert.ok(partner.allowedActs.includes('home_shower'));
   assert.ok(partner.allowedActs.includes('bathe'));
-  assert.ok(!partner.allowedActs.includes('store_fridge'));
-  assert.ok(!partner.allowedActs.includes('cook'));
+  assert.ok(partner.allowedActs.includes('store_fridge'));
+  assert.ok(partner.allowedActs.includes('cook'));
+  assert.ok(partner.allowedActs.includes('open_fridge'));
   assert.ok(!partner.allowedActs.includes('buy_furniture'));
 
   const stranger = A.roomAccess('t_guest_1', 'njh_kos_ichsan');
@@ -72,8 +73,8 @@ test('roomAccess: owner full, partner limited, stranger locked; lobby open to gu
 
 test('rejectAction: partner denied owner_only with Punya pacar, including kitchen_sink wash', () => {
   const A = loaded();
-  assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'store_fridge'), 'Punya pacar');
-  assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'cook'), 'Punya pacar');
+  assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'store_fridge'), null);
+  assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'cook'), null);
   assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'buy_furniture'), 'Punya pacar');
   assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'wash', { assetId: 'kitchen_sink', access: 'owner_only' }), 'Punya pacar');
   assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'sleep'), null);

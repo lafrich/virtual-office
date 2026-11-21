@@ -67,7 +67,9 @@ test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entr
  assert.doesNotMatch(life,/const door=inside\?\(bridge\?\.exitInterior/);
  assert.doesNotMatch(shell,/NJH98Mock\?\.enterDoor\(doorNearObj\)/);
  assert.match(shell,/if\(!demo\)return \[\]/);
- assert.match(html,/pkg3-live-20261122/);
+ assert.match(html,/fresh-mode\.js/);
+ assert.match(html,/\?v=njh-ellen-assets-20261122/);
+ assert.match(shell,/njh-force-landscape/);
 });
 
 test('login requires real server; browser never stores Mainkan passwords',()=>{

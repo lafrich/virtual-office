@@ -489,7 +489,7 @@ function create(opts){
   const A=AccessApi();
   const resolved=A?.resolveId?.(roomId)||roomId;
   const sc=sceneOf(resolved);
-  if(!sc)return {ok:false,reason:'Interior belum siap'};
+  if(!sc)return {ok:false,reason:'Belum buka',closed:true};
   const gate=canEnterRoom(resolved);if(!gate.ok)return gate;
   const kind=kindOfRoom(resolved);
   const pos=opts.getPos?.()||{x:0,z:0};
@@ -522,14 +522,14 @@ function create(opts){
   if(raw==='kost'||raw==='warteg'||raw==='minimarket')return enter(raw);
   const k=kindOfBuilding({id:raw,name:raw})||kindOfRoom(resolved);
   if(k==='warteg'||k==='kost'||k==='minimarket')return enter(k);
-  return {ok:false,reason:'Interior tidak dikenal'};
+  return {ok:false,reason:'Belum buka',closed:true};
  }
 
  function enter(kind,reason){
   if(kind==='kost'&&buildings.kost?.template===LOBBY_ID)
    return enterInterior(LOBBY_ID,reason);
   const rec=buildings[kind];
-  if(!rec)return {ok:false,reason:'Interior belum siap'};
+  if(!rec)return {ok:false,reason:'Belum buka',closed:true};
   const gate=canEnter(kind);if(!gate.ok)return gate;
   const pos=opts.getPos?.()||{x:0,z:0};
   const built=buildRoom(kind,rec.scene,rec.template);if(!built)return {ok:false,reason:'Gagal membangun interior'};
@@ -578,7 +578,18 @@ function create(opts){
   return best;
  }
 
+ function closedStreetDoor(){
+  if(session)return null;
+  const P=typeof window!=='undefined'?window.VLNjhMapPreview:null;
+  if(!P?.closedDoorsNear)return null;
+  const world=opts.getWorld?.()||{};
+  const p=opts.getPos?.()||{x:0,z:0};
+  const radius=P.enterRadius||ENTER_RADIUS||1.25;
+  return P.closedDoorsNear(world.objects||[],p.x,p.z,radius)[0]||null;
+ }
  function enterNearby(){
+  const closed=closedStreetDoor();
+  if(closed)return {ok:false,reason:closed.reason||'Belum buka',closed:true,doorId:closed.doorId,objectId:closed.object&&closed.object.id};
   const target=nearestDoor();
   if(!target)return {ok:false,reason:session?'Dekati pintu untuk berinteraksi':'Tidak ada pintu dalam jangkauan'};
   if(target.inside){
@@ -690,7 +701,12 @@ function create(opts){
  }
 
  function extraActions(){
-  if(!session)return [];
+  if(!session){
+   const closed=closedStreetDoor();
+   if(!closed)return [];
+   return [{id:'enter_closed',action:'enter_closed',label:'Belum buka',disabled:true,closed:true,
+    price:0,spotLabel:closed.label,args:{doorId:closed.doorId,objectId:closed.object&&closed.object.id,reason:'Belum buka'}}];
+  }
   const p=opts.getPos?.()||{x:0,z:0};
   const out=[];
   const push=(id,label,price,args,furnitureId,spotLabel)=>{

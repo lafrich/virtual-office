@@ -42,7 +42,14 @@ test('all 18 interior props and 6 street props appear in Semesta catalog',()=>{
   assert.equal(spec.source,'bangun-object');
   assert.equal(spec.published,true);
   assert.equal(Object.keys(spec.variants).length,4);
-  for(const d of DIR)assert.ok(w.VLBangunObjects.image(id,d).startsWith('data:image/png;base64,'));
+  for(const d of DIR){
+   const url=w.VLBangunObjects.image(id,d);
+   if(id==='park-bench'||id==='park-table'){
+    assert.ok(/ellen-preview-assets\/street_buildings\/props\/park-(bench|table)_/.test(url),'C1 proposal PNG for '+id);
+   }else{
+    assert.ok(url.startsWith('data:image/png;base64,'));
+   }
+  }
  }
 });
 test('custom object persists with all 4 views and keeps its ID for live reload',()=>{

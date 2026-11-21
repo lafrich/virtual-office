@@ -18,7 +18,7 @@ const car=t.makeRoute(map,3.5,1.5,'vehicle');
 const walker=t.makeRoute(map,3.5,5.5,'pedestrian');
 assert.equal(g.VLSemestaCatalog.vehicles.length,12);
 assert.equal(g.VLSemestaCatalog.questNPCs.length,6);
-assert.equal(g.VLSemestaCatalog.vehicle('bus_transjakarta').published,false);
+assert.equal(g.VLSemestaCatalog.vehicle('bus_transjakarta').published,true);
 assert.ok(car&&car.wrap&&car.length===19,'cars travel straight to road end and respawn at the starting end');
 assert.ok(walker&&walker.continuous,'sidewalk NPC walks back through actual connected tiles without disappearing');
 assert.ok(car.points.every(p=>p.z===1.5),'vehicle stays on one road lane with no U-turn');
