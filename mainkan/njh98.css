@@ -384,7 +384,7 @@ html.njh-force-landscape body.njh-paused .window{
 html.njh-force-landscape #pauseScreen .njh-pause{max-width:min(360px,calc(100% - 24px));max-height:calc(100% - 24px)}
 
 /* virtual joystick (touch only), drives WASD */
-.njh-joy{display:none;position:absolute;left:0;bottom:0;width:40%;height:62%;pointer-events:auto;touch-action:none;z-index:2}
+.njh-joy{display:none;position:absolute;left:0;bottom:0;width:40%;height:62%;pointer-events:auto;touch-action:none;z-index:2;background:transparent!important;background-color:transparent!important;box-shadow:none;border:0}
 .njh-joy-base{position:absolute;left:calc(70px + var(--sal));top:calc(100% - 70px - var(--sab));width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%!important;
  background:rgba(192,192,192,.28);border:1px solid rgba(0,0,0,.45);box-shadow:inset 1px 1px rgba(255,255,255,.5);opacity:.75}
 .njh-joy-base.on{opacity:1}
@@ -809,3 +809,38 @@ html.njh-force-landscape .njh-s2-row{
 html.njh-force-landscape .njh-s2-row .njh-qty{grid-column:2;grid-row:1}
 html.njh-force-landscape .njh-s2-row .btn{grid-column:3;grid-row:1;min-height:36px}
 html.njh-force-landscape .njh-s2-cols{grid-template-columns:1fr;max-height:calc(var(--njh-logical-h) * .46);overflow:auto}
+
+/* Joystick hit-zone is a large 40%×62% box — keep it invisible (ring/knob only). */
+html.njh-force-landscape .njh-joy,
+html.njh-force-landscape .njh-hud,
+html.njh-force-landscape .njh-marks,
+html.njh-force-landscape #gameScreen,
+html.njh-force-landscape #viewport,
+html.njh-force-landscape #semestaFrame{
+  background:transparent!important;background-color:transparent!important;
+}
+
+/* Chrome compositing bug: an opaque HUD window (the 214×127 profile at 6,6)
+   overlapping the Semesta WebGL iframe punches a Y-flipped hole of the same
+   size through the canvas. That hole sits under the joystick and shows the
+   editor #canvas-wrap grey (#bec6c0). Forcing a no-op filter (and a
+   transparent 1px outline) on HUD chrome puts those windows on a clean
+   compositor layer so the world stays visible. Native landscape and
+   force-landscape both need this. */
+.njh-hud>.w98,
+.njh-hud>.njh-dock,
+.njh-hud>.njh-actbar,
+.njh-hud>.njh-near{
+  outline:1px solid transparent;
+  filter:opacity(1);
+}
+
+.njh-fresh-banner{
+  position:absolute;right:calc(8px + var(--sar));top:calc(6px + var(--sat));
+  z-index:8;pointer-events:none;
+  font:bold 10px/1.2 var(--w-font,#111);
+  color:#000;background:#ffef8a;
+  border:1px solid #000;padding:3px 6px;
+  box-shadow:1px 1px 0 #000;
+}
+html.njh-force-landscape .njh-fresh-banner{right:calc(8px + var(--sat));}

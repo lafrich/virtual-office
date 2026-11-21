@@ -13,6 +13,7 @@ const allowed=['genesis_male_nude','genesis_female_nude'];
 const frame=$('semestaFrame');
 const unavailable='Login tes belum terhubung. Gunakan Main Tanpa Akun.';
 const previewMode=new URLSearchParams(location.search).get('flowPreview')==='1';
+const freshMode=window.NJH_FRESH_MODE===true||new URLSearchParams(location.search).get('fresh')==='1';
 let graph=F.preset('default'),currentNode=null,stage='splashScreen',loginMode='login';
 let testPlayerId='';
 let guest=true,session=null,selected='genesis_male_nude',profile=null,characterDraft=null,worldCounter=0;
@@ -184,6 +185,7 @@ $('registerTab').hidden=true;
 function saveLocalCharacter(c){return !!window.MainkanLocalCharacter?.save(testPlayerId,c);}
 function loadLocalCharacter(){const c=window.MainkanLocalCharacter?.load(testPlayerId);return c&&allowed.includes(c.base)?c:null;}
 async function request(path,options){
+ if(freshMode)throw Error('Preview fresh=1: no server writes.');
  if(!apiReady)throw Error(unavailable);
  const response=await fetch(base+path,{credentials:'omit',headers:{'Content-Type':'application/json'},...options});
  let data={};try{data=await response.json();}catch{}
@@ -192,6 +194,7 @@ async function request(path,options){
 }
 $('authForm').addEventListener('submit',async e=>{
  e.preventDefault();
+ if(freshMode){message('authMessage','Preview fresh=1 memakai isolated guest, tanpa login.',true);return;}
  if(!apiReady){message('authMessage',unavailable,true);return;}
  const button=$('authSubmit');button.disabled=true;
  try{
@@ -321,6 +324,7 @@ function startWorld(force=false){
  url.searchParams.set('player','1');
  url.searchParams.set('njhMap','1');
  url.searchParams.set('v',String(++worldCounter));
+ if(freshMode)url.searchParams.set('fresh','1');
  frame.src=url.href;
  // Never mark an unfinished world as ready. Offer a non-destructive retry
  // if native art or WebGL stalls on a slower connection.
@@ -397,9 +401,25 @@ $('importFlowFile').addEventListener('change',async e=>{
   showNode(graph.start);
  }catch(err){$('statusText').textContent='IMPORT ERROR: '+String(err.message).slice(0,80);}
 });
+function defaultFreshCharacter(){
+ return window.VLGenesisPlayer?.normalizeProfile({
+  name:'Pemain Baru',zodiac:'Capricorn',birthday:'1990-01-15',
+  base:'genesis_male_nude',appearance:{}
+ })||{name:'Pemain Baru',zodiac:'Capricorn',birthday:'1990-01-15',base:'genesis_male_nude'};
+}
 function startup(){
  if(booted)return;
- booted=true;showNode(graph.start);setLoginMode('login');
+ booted=true;setLoginMode('login');
+ if(freshMode){
+  guest=true;session=null;testPlayerId='';firstTime=true;
+  characterDraft=defaultFreshCharacter();
+  profile={character:characterDraft};
+  document.body.classList.add('njh-fresh-mode');
+  const banner=$('njhFreshBanner');if(banner)banner.hidden=false;
+  startWorld();
+  return;
+ }
+ showNode(graph.start);
 }
 if(previewMode){
  if(window.parent!==window)window.parent.postMessage({type:'mainkan:flow-request'},location.origin);

@@ -36,7 +36,7 @@ test('Mainkan enters playable landscape world before slow Genesis art completes'
  assert.match(app,/mainkan:player-character-error/);
  assert.match(app,/\},18000\)/);
  assert.match(htmlWorld,/mainkan-startup-20261115/);
- assert.match(html,/landscape-startup-unblock-20261115/);
+ assert.match(html,/joystick-fix-fresh-20261122/);
  assert.match(html,/id="njhStage"/);
  assert.doesNotMatch(html,/njhRotate|Putar HP/);
 });
@@ -59,7 +59,7 @@ test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entr
  assert.doesNotMatch(life,/const door=inside\?\(bridge\?\.exitInterior/);
  assert.doesNotMatch(shell,/NJH98Mock\?\.enterDoor\(doorNearObj\)/);
  assert.match(shell,/if\(!demo\)return \[\]/);
- assert.match(html,/force-landscape-20261122/);
+ assert.match(html,/joystick-fix-fresh-20261122/);
 });
 
 test('login requires real server; browser never stores Mainkan passwords',()=>{

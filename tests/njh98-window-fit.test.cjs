@@ -25,6 +25,11 @@ test('window-fit portrait force-renders landscape (no blocking Putar HP gate)',(
  assert.doesNotMatch(html,/njhRotateContinue|Lanjut bermain|Saran Tampilan HP/);
  assert.doesNotMatch(css,/njh-rotate/);
  assert.match(css,/njh-force-landscape/);
+ assert.match(css,/\.njh-joy\{[^}]*background:transparent/);
+ assert.match(css,/filter:opacity\(1\)/);
+ assert.match(html,/fresh-mode\.js\?v=joystick-fix-fresh-20261122/);
+ assert.match(html,/id="njhFreshBanner"/);
+
  assert.match(css,/rotate\(90deg\) translateY\(-100%\)/);
  assert.match(js,/function applyForceLandscape/);
  assert.match(js,/function clientToStage/);
