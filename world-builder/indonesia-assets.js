@@ -95,7 +95,7 @@ async function load(){
      const v=item.variants[dir]||item.variants.sw||item.variants.se;
      if(!v)return null;
      if(/^ellen-/.test(item.pack||''))
-      return LOCAL_BASE+'street_buildings/'+v.file+'?v=njh-step1-live-20261122';
+      return LOCAL_BASE+'street_buildings/'+v.file+'?v=njh-step2-live-20261122';
      return cacheBust(item,base+'assets/street_buildings/'+v.file);
     }
     return legacy(id,dir);

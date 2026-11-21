@@ -320,14 +320,14 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": true,
+   "interiorPending": false,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
    "doorId": "njh_door_warung_makan",
    "objectId": "jakarta-v3-18446",
    "role": "warung_makan",
-   "interiorTemplate": "njh_warung_makan",
+   "interiorTemplate": "njh_warteg_kharisma",
    "owner": null,
    "label": "Warteg (warung makan)",
    "facing": "sw",
@@ -527,7 +527,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": true,
+   "interiorPending": false,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -558,7 +558,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": true,
+   "interiorPending": false,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -589,7 +589,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": true,
+   "interiorPending": false,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -620,7 +620,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": true,
+   "interiorPending": false,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -630,7 +630,7 @@
    "interiorTemplate": "njh_pecel_lele_tenda",
    "owner": null,
    "label": "Warung Pecel Lele (tenda)",
-   "pending": true,
+   "pending": false,
    "facing": "sw",
    "doorPoint": [
     -25.0,
@@ -652,7 +652,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": true,
+   "interiorPending": false,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {
@@ -662,7 +662,7 @@
    "interiorTemplate": "njh_sate_madura_tenda",
    "owner": null,
    "label": "Lapak Sate Madura (tenda)",
-   "pending": true,
+   "pending": false,
    "facing": "sw",
    "doorPoint": [
     -20.0,
@@ -684,7 +684,7 @@
    ],
    "baymaxDoorId": null,
    "baymaxInteractionId": null,
-   "interiorPending": true,
+   "interiorPending": false,
    "interiorNote": "Scene arrives in Ellen r6; enter falls back to a toast until then."
   },
   {

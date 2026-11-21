@@ -39,11 +39,11 @@ test('Mainkan waits until all needed assets are loaded before play input',()=>{
  assert.match(app,/Input dikunci sampai semua layer sprite siap/);
  assert.match(app,/,60000\)/);
  assert.match(htmlWorld,/pkg3-live-20261122/);
- assert.match(html,/fresh-mode\.js\?v=njh-step1-live-20261122/);
+ assert.match(html,/fresh-mode\.js\?v=njh-step2-live-20261122/);
  assert.match(html,/id="worldLoadingPct"/);
  assert.match(app,/player-loading/);
  assert.match(app,/loaded\+'\/'\+total\+' aset'/);
- assert.match(html,/\?v=njh-step1-live-20261122/);
+ assert.match(html,/\?v=njh-step2-live-20261122/);
  assert.match(html,/id="njhStage"/);
  assert.doesNotMatch(html,/njhRotate|Putar HP/);
 });
@@ -68,7 +68,7 @@ test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entr
  assert.doesNotMatch(shell,/NJH98Mock\?\.enterDoor\(doorNearObj\)/);
  assert.match(shell,/if\(!demo\)return \[\]/);
  assert.match(html,/fresh-mode\.js/);
- assert.match(html,/\?v=njh-step1-live-20261122/);
+ assert.match(html,/\?v=njh-step2-live-20261122/);
  assert.match(shell,/njh-force-landscape/);
 });
 

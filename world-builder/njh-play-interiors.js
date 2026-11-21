@@ -17,7 +17,7 @@ const DIR=['sw','se','ne','nw'];
 const TEMPLATES={kost:'njh_kos',warteg:'njh_warteg_kharisma',minimarket:'njh_minimarket'};
 const FALLBACK={warteg:'njh_warung_makan'};
 const ROOM_SCENES=['njh_kos_cove_lobby','njh_kos_ichsan','njh_kos_noor'];
-const PUBLIC_SCENES=['njh_laundry','njh_bengkel','njh_wc_mandi_umum','njh_rumah_biasa'];
+const PUBLIC_SCENES=['njh_laundry','njh_bengkel','njh_wc_mandi_umum','njh_rumah_biasa','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_pecel_lele_tenda','njh_sate_madura_tenda'];
 const LOBBY_ID='njh_kos_cove_lobby';
 const ACTION_LABELS={sleep:'Tidur',store_fridge:'Simpan Kulkas',take_fridge:'Ambil dari Kulkas',
  store_home:'Simpan di Kost',take_home:'Ambil dari Kost',cook:'Masak Ikan',cook_recipe:'Masak Resep',
@@ -245,9 +245,21 @@ function create(opts){
 
  function kindOfBuilding(obj){
   if(!obj)return null;
-  if(obj.njhInteriorTemplate===TEMPLATES.minimarket||MINIMARKET_PATTERN.test(textOf(obj)))return 'minimarket';
-  if(obj.njhInteriorTemplate===TEMPLATES.kost||obj.id===PLAY_KOST_ID||KOST_PATTERN.test(textOf(obj)))return 'kost';
-  if(obj.njhInteriorTemplate===TEMPLATES.warteg||obj.njhInteriorTemplate===FALLBACK.warteg||WARTEG_PATTERN.test(textOf(obj)))return 'warteg';
+  // Template-first: an official njhInteriorTemplate wins over name regex.
+  // Otherwise Warung Madura / Nasi Sunda / Pecel Lele / Warung Kopi match
+  // WARTEG_PATTERN and open the warteg room (New Bot K1).
+  const tpl=obj.njhInteriorTemplate;
+  if(tpl){
+   if(tpl===TEMPLATES.minimarket||tpl==='njh_minimarket')return 'minimarket';
+   if(tpl===TEMPLATES.kost||tpl===PLAY_KOST_ID||tpl==='njh_kos'||tpl==='njh_kos_ichsan'||tpl==='njh_kos_noor')return 'kost';
+   if(tpl===LOBBY_ID)return 'lobby';
+   if(tpl===TEMPLATES.warteg||tpl===FALLBACK.warteg||tpl==='njh_warung_makan')return 'warteg';
+   return kindOfRoom(tpl);
+  }
+  if(obj.id===PLAY_KOST_ID)return 'kost';
+  if(MINIMARKET_PATTERN.test(textOf(obj)))return 'minimarket';
+  if(KOST_PATTERN.test(textOf(obj)))return 'kost';
+  if(WARTEG_PATTERN.test(textOf(obj)))return 'warteg';
   return null;
  }
 
@@ -279,16 +291,26 @@ function create(opts){
   return tex;
  }
 
+ function resolvePlayTemplate(id){
+  if(!id)return id;
+  const raw=id;
+  const A=AccessApi();
+  const resolved=A?.resolveId?.(raw)||raw;
+  // Official Warteg play room is Kharisma + Ibu Warteg. The door / NJH_READY
+  // list may still name Ellen's njh_warung_makan fallback; upgrade when the
+  // Kharisma scene is loaded so template-first does not reopen the old room.
+  if(resolved==='warteg'||resolved===TEMPLATES.warteg||resolved===FALLBACK.warteg||resolved==='njh_warung_makan'||raw==='warteg')
+   return scenes[TEMPLATES.warteg]?TEMPLATES.warteg:(scenes[FALLBACK.warteg]?FALLBACK.warteg:TEMPLATES.warteg);
+  return resolved;
+ }
  function sceneOf(id){
   if(!id)return null;
+  const resolved=resolvePlayTemplate(id);
+  if(scenes[resolved])return scenes[resolved];
   if(scenes[id])return scenes[id];
-  const A=AccessApi();
-  const resolved=A?.resolveId?.(id);
-  if(resolved&&scenes[resolved])return scenes[resolved];
-  if(id==='kost')return scenes[TEMPLATES.kost]||buildings.kost?.scene||null;
-  if(id==='warteg')return scenes[TEMPLATES.warteg]||scenes[FALLBACK.warteg]||buildings.warteg?.scene||null;
-  if(id==='minimarket')return scenes[TEMPLATES.minimarket]||buildings.minimarket?.scene||null;
-  return buildings[id]?.scene||null;
+  if(resolved==='kost'||id==='kost')return scenes[TEMPLATES.kost]||buildings.kost?.scene||null;
+  if(resolved==='minimarket'||id==='minimarket')return scenes[TEMPLATES.minimarket]||buildings.minimarket?.scene||null;
+  return buildings[resolved]?.scene||buildings[id]?.scene||null;
  }
  function kindOfRoom(id){
   if(id==='warteg'||id===TEMPLATES.warteg||id===FALLBACK.warteg||id==='njh_warung_makan')return 'warteg';
@@ -380,9 +402,85 @@ function create(opts){
    }
    return c;
   }
+  function layerOf(name){return (sc.paint?.layers||[]).find(x=>x&&x.layer===name)||null;}
+  function layerPalette(layer){return (layer&&Array.isArray(layer.palette)&&layer.palette.length)?layer.palette:null;}
+  function identityLabel(spec){
+   const m=String(spec||'').match(/'([^']+)'|"([^"]+)"/);
+   return String((m&&(m[1]||m[2]))||'').trim();
+  }
+  // Generic declared-paint baker: uses each layer's z-range, palette, and quoted
+  // identity text. Must not reuse NJH MART branding on mushola / r7 rooms.
+  function bakeDeclaredPaint(side){
+   const layers=sc.paint&&Array.isArray(sc.paint.layers)?sc.paint.layers:[];
+   if(!layers.length)return null;
+   const unit=64,ww=side==='back'?w:d;
+   const c=document.createElement('canvas');c.width=Math.max(64,Math.round(ww*unit));c.height=128;
+   const ctx=c.getContext('2d',{alpha:false});ctx.imageSmoothingEnabled=false;
+   const W=c.width,H=c.height,fromFloor=z=>H-z;
+   ctx.fillStyle='#E8DBC7';ctx.fillRect(0,0,W,H);
+   const dado=layerOf('dado'),trim=layerOf('trim'),mid=layerOf('midDisplay'),ident=layerOf('identity'),ceil=layerOf('ceiling');
+   if(dado){
+    const pal=layerPalette(dado)||['#8A8A8A','#B0B0B0','#D0D0D0','#EEEEEE','#FFFFFF'];
+    const z0=Number(dado.z?.[0]??0),z1=Number(dado.z?.[1]??49);
+    const top=fromFloor(Math.max(z0,z1)),h=Math.max(1,Math.abs(z1-z0)||1);
+    ctx.fillStyle=pal[0];ctx.fillRect(0,top,W,h);
+    ctx.fillStyle=pal[Math.min(2,pal.length-1)];
+    for(let x=0;x<W;x+=16)ctx.fillRect(x,top,1,h);
+    for(let y=top;y<top+h;y+=12)ctx.fillRect(0,y,W,1);
+    if(pal.length>3){ctx.fillStyle=pal[3];ctx.fillRect(0,fromFloor(Math.max(z0,z1)-3),W,4);}
+   }
+   if(trim){
+    const pal=layerPalette(trim)||['#444','#888'];
+    const z=Number(trim.z?.[0]??50);
+    ctx.fillStyle=pal[Math.min(2,pal.length-1)];ctx.fillRect(0,fromFloor(z+2),W,3);
+    ctx.fillStyle=pal[0];ctx.fillRect(0,fromFloor(z),W,1);
+   }
+   if(mid){
+    const pal=layerPalette(mid)||['#333','#666','#999'];
+    const z0=Number(mid.z?.[0]??56),z1=Number(mid.z?.[1]??70);
+    const top=fromFloor(Math.max(z0,z1)),h=Math.max(2,Math.abs(z1-z0)||2);
+    ctx.fillStyle=pal[0];ctx.fillRect(0,top+h-3,W,2);
+    const quote=identityLabel(mid.spec);
+    ctx.fillStyle=pal[Math.min(3,pal.length-1)]||'#fff';
+    ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText(quote||'',Math.round(W/2),fromFloor(z0+6));
+    ctx.textAlign='left';
+   }
+   if(ident){
+    const pal=layerPalette(ident)||['#123','#fff','#000'];
+    const label=identityLabel(ident.spec);
+    const z0=Number(ident.z?.[0]??69),z1=Number(ident.z?.[1]??116);
+    if(side==='back'&&label){
+     const sw=Math.min(W-18,Math.max(120,label.length*14+24)),sx=Math.round((W-sw)/2);
+     ctx.fillStyle=pal[0];ctx.fillRect(sx,fromFloor(z1-8),sw,Math.min(36,z1-z0-8));
+     ctx.fillStyle=pal[Math.min(3,pal.length-1)]||'#fff';ctx.fillRect(sx+3,fromFloor(z1-11),sw-6,Math.min(28,z1-z0-12));
+     ctx.fillStyle=pal[Math.min(2,pal.length-1)]||'#111';
+     ctx.font='bold 16px monospace';ctx.textAlign='center';
+     ctx.fillText(label,Math.round(W/2),fromFloor(z1-28));
+     ctx.textAlign='left';
+    }else if(label){
+     ctx.fillStyle=pal[0];ctx.fillRect(8,fromFloor(106),W-16,22);
+     ctx.fillStyle=pal[Math.min(3,pal.length-1)]||'#fff';
+     ctx.font='bold 11px monospace';ctx.textAlign='center';
+     ctx.fillText(label,Math.round(W/2),fromFloor(92));
+     ctx.textAlign='left';
+    }
+   }
+   if(ceil){
+    const pal=layerPalette(ceil)||['#333','#666','#FFD27A'];
+    for(const u of [0.28,0.72]){
+     const cx=Math.round(u*W),lx=Math.max(4,Math.min(W-28,cx-12));
+     ctx.fillStyle=pal[0];ctx.fillRect(lx,fromFloor(120),24,6);
+     ctx.fillStyle=pal[Math.min(3,pal.length-1)]||'#ffe';ctx.fillRect(lx+3,fromFloor(118),18,3);
+    }
+   }
+   return c;
+  }
+
   const wallMaterial=(side,fallback)=>{
    if(themeKind==='minimarket')fallback=MART_WALL[side]||fallback;
-   const can=(sc.paint&&Array.isArray(sc.paint.layers)&&sc.paint.layers.length)?bakeMartWall(side):bake(side);
+   const mart=themeKind==='minimarket'||sc.id==='njh_minimarket'||roomKind==='minimarket';
+   const can=mart?bakeMartWall(side):(sc.paint&&Array.isArray(sc.paint.layers)&&sc.paint.layers.length?bakeDeclaredPaint(side):bake(side));
    if(can&&THREE){
     const tex=new THREE.CanvasTexture(can);
     tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
@@ -544,7 +642,7 @@ function create(opts){
 
  function enterInterior(roomId,reason){
   const A=AccessApi();
-  const resolved=wartegRoomId(A?.resolveId?.(roomId)||roomId);
+  const resolved=resolvePlayTemplate(A?.resolveId?.(roomId)||roomId);
   const sc=sceneOf(resolved);
   if(!sc)return {ok:false,reason:'Belum buka',closed:true};
   const gate=canEnterRoom(resolved);if(!gate.ok)return gate;
@@ -572,11 +670,12 @@ function create(opts){
  function openInteriorById(id){
   const A=AccessApi();
   const raw=String(id||'');
-  const resolved=wartegRoomId(A?.resolveId?.(raw)||raw);
+  const resolved=resolvePlayTemplate(A?.resolveId?.(raw)||raw);
   if(raw==='njh-kos-noor'||resolved===LOBBY_ID||A?.isLobby?.(raw))
    return enterInterior(LOBBY_ID);
   if(sceneOf(resolved))return enterInterior(resolved);
-  if(raw==='kost'||raw==='warteg'||raw==='minimarket')return enter(raw);
+  if(raw==='kost'||raw==='warteg'||raw==='minimarket'||resolved==='warteg'||resolved===TEMPLATES.warteg||resolved===FALLBACK.warteg)
+   return enter(raw==='kost'||raw==='minimarket'?raw:'warteg');
   const k=kindOfBuilding({id:raw,name:raw})||kindOfRoom(resolved);
   if(k==='warteg'||k==='kost'||k==='minimarket')return enter(k);
   return {ok:false,reason:'Belum buka',closed:true};
@@ -915,7 +1014,7 @@ function create(opts){
  }
 
  return {
-  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,canEnter,canEnterRoom,enter,enterInterior,openInteriorById,nearestDoor,enterNearby,closedStreetDoor,exit,fitRoomCamera,cameraLocked,moveInside,freeInside,spawnInside,
+  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,resolvePlayTemplate,canEnter,canEnterRoom,enter,enterInterior,openInteriorById,nearestDoor,enterNearby,closedStreetDoor,exit,fitRoomCamera,cameraLocked,moveInside,freeInside,spawnInside,
   restoreIfNeeded,furniture,extraActions,obstacles,constrain,update,candidates,
   doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,MINIMARKET_PATTERN,
   place:(x,z,size)=>{if(!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return {ok:false};opts.teleport?.(Number(x),Number(z),size||12,{keepView:!!session});return {ok:true,x:Number(x),z:Number(z)};},

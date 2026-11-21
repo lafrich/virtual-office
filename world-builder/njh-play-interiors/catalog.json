@@ -3202,6 +3202,1566 @@
     "batch": "ellen-r6-new-plastic-bench",
     "sourceFolder": "njh-interior-templates-r6/new/plastic_bench_blue"
    }
+  },
+  "arcade": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-arcade_se.png",
+    "sha256": "3a9d226144a212b695d45948b43220d069f598930b5d085239eb16688a6674c6",
+    "size": [
+     69,
+     101
+    ],
+    "pivot": [
+     34,
+     80
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-arcade_sw.png",
+    "sha256": "c285fc65ad99ca138417548b8c1c8406bd60fe82b77f4b3d4ae06e7cabd873c3",
+    "size": [
+     69,
+     101
+    ],
+    "pivot": [
+     34,
+     80
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-arcade_ne.png",
+    "sha256": "2725030e50ce73242bd244fa8676c60de89d167a34492b253533a72e5061b6e6",
+    "size": [
+     69,
+     101
+    ],
+    "pivot": [
+     34,
+     80
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-arcade_nw.png",
+    "sha256": "7e8964fea1937531ea9f608101ad66733d105d7358cfd756daea0ffc9e058d6c",
+    "size": [
+     69,
+     101
+    ],
+    "pivot": [
+     34,
+     80
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "atm": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-atm_se.png",
+    "sha256": "77e7774c08e4663ba8c9140abcb94c58a5e77c856be48a89c65472da756dbe6f",
+    "size": [
+     69,
+     99
+    ],
+    "pivot": [
+     34,
+     78
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-atm_sw.png",
+    "sha256": "d22b9eec4dec74335564fa793fcf5a25a3eeea89281cf12a51f2defda2a2f14b",
+    "size": [
+     69,
+     99
+    ],
+    "pivot": [
+     34,
+     78
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-atm_ne.png",
+    "sha256": "6af3af55258d90ff9d20c04959acb5a167f9a3ab1706a1527bcf6fec77eb0629",
+    "size": [
+     69,
+     99
+    ],
+    "pivot": [
+     34,
+     78
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-atm_nw.png",
+    "sha256": "ad42f4eec8ca39f40a865ea18be65fd3f6e23ffbdf9374858c83e973bc00dd68",
+    "size": [
+     69,
+     99
+    ],
+    "pivot": [
+     34,
+     78
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "bookshelf": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-bookshelf_se.png",
+    "sha256": "2e2af6ab47b32aade793f76eb57feb9d5b50990edf1a1279ac40790411aed7af",
+    "size": [
+     101,
+     103
+    ],
+    "pivot": [
+     50,
+     74
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-bookshelf_sw.png",
+    "sha256": "b24e290edc8dd77e8dc665b2bd67a820baf03b6d90646d57364bb76473348d5c",
+    "size": [
+     101,
+     102
+    ],
+    "pivot": [
+     50,
+     73
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-bookshelf_ne.png",
+    "sha256": "e05149b89ccdf4cc1063d50eb08219cb3258f2d8d4e5f645f057449aec01957d",
+    "size": [
+     101,
+     103
+    ],
+    "pivot": [
+     50,
+     74
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-bookshelf_nw.png",
+    "sha256": "57f7dad73a7a70549dc7ebc64b685237c44cda97ea97f74c15bd95d3cbb0ca69",
+    "size": [
+     101,
+     102
+    ],
+    "pivot": [
+     50,
+     73
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "checkout": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-checkout_se.png",
+    "sha256": "c7cb8168e9ebbc780f882365509582faa9945648feb9730616df7ead9e19ea90",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-checkout_sw.png",
+    "sha256": "e028753091f513250353735efc98b3f642cde1acc1aa361ad3f00a947dac0dc6",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-checkout_ne.png",
+    "sha256": "eff75aac3f07c2e248236fa3c7918215082ebda2a5ae757de71b9bd068bda6f0",
+    "size": [
+     101,
+     87
+    ],
+    "pivot": [
+     50,
+     58
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-checkout_nw.png",
+    "sha256": "d8ee4f0d67a99b4c220b212317068f0f5693cd731c0be2306d13a5edb3a27b74",
+    "size": [
+     101,
+     90
+    ],
+    "pivot": [
+     50,
+     61
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "counter": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-counter_se.png",
+    "sha256": "09eeeefac37c016bccae43f68fce5fbcb9cde035fdba52c86d14c23fc2b475e1",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I2",
+    "sourceFolder": "out_i2",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-counter_sw.png",
+    "sha256": "3d44ddf8245af3414f95371e02b5c2052751aa7aed4617c79cb532cac3c4d091",
+    "size": [
+     101,
+     85
+    ],
+    "pivot": [
+     50,
+     56
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I2",
+    "sourceFolder": "out_i2",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-counter_ne.png",
+    "sha256": "b096f21b0eac8ee60e4106ad34af99fbae92befdc62cb89e3e555408cc571204",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I2",
+    "sourceFolder": "out_i2",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-counter_nw.png",
+    "sha256": "cfcef03a0bef2f91c4c66c34cf90c6e211179f3726e14082b89ac1f4a01319de",
+    "size": [
+     101,
+     85
+    ],
+    "pivot": [
+     50,
+     56
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I2",
+    "sourceFolder": "out_i2",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "display_freezer": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-display_freezer_se.png",
+    "sha256": "1f21fd04d7399801b936b88f5509544fb97fb9134ef85bce13b807e8a5feeadb",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-display_freezer_sw.png",
+    "sha256": "d053e35344644c8a0d074df707aef94d2c6c686c5066bb7dc717b43e92a32e4a",
+    "size": [
+     101,
+     85
+    ],
+    "pivot": [
+     50,
+     56
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-display_freezer_ne.png",
+    "sha256": "7272e3e744177954d9b38eaddc273af21240e4b3e85d4d352246f7e1b0ea5385",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-display_freezer_nw.png",
+    "sha256": "00032f7e3f482382b740e6a3f06fc2e32eaa02bb5979f350d649e5bee501ddb1",
+    "size": [
+     101,
+     85
+    ],
+    "pivot": [
+     50,
+     56
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "drink_cooler": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-drink_cooler_se.png",
+    "sha256": "300b8fbc09977841987ba983f61a3dcb97f3dfa24e15e056d5141198055b4f11",
+    "size": [
+     69,
+     93
+    ],
+    "pivot": [
+     34,
+     72
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-drink_cooler_sw.png",
+    "sha256": "5c11cf15c1b2099c1e98b75afd540c22ce552f8ba71bad30b9d4c47dcb2b988d",
+    "size": [
+     69,
+     93
+    ],
+    "pivot": [
+     34,
+     72
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-drink_cooler_ne.png",
+    "sha256": "905dfb773f9878a6b2e0f48afd5eb0c58aeb5c7086b3d8c33aad94439fa4e663",
+    "size": [
+     69,
+     93
+    ],
+    "pivot": [
+     34,
+     72
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-drink_cooler_nw.png",
+    "sha256": "ccb9d1ceddcf36be6be92a9141f5f65136afe3c9fd8e3b08a44b3ba1c49fc5b7",
+    "size": [
+     69,
+     93
+    ],
+    "pivot": [
+     34,
+     72
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "food_cart": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-food_cart_se.png",
+    "sha256": "476c6567f3dea8cb3cf60fb902d99fda910962c1474c877bf539c9b32103d6ba",
+    "size": [
+     101,
+     104
+    ],
+    "pivot": [
+     50,
+     75
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-food_cart_sw.png",
+    "sha256": "c8d2369e50bc36a32aa3990c03ad17ad506475140e0360b4dfc3faa7ba741a46",
+    "size": [
+     101,
+     116
+    ],
+    "pivot": [
+     50,
+     87
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-food_cart_ne.png",
+    "sha256": "8a018ced660002a36a88cb357db3563dbd9da800470acf28f13b6974e03516d0",
+    "size": [
+     101,
+     104
+    ],
+    "pivot": [
+     50,
+     75
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-food_cart_nw.png",
+    "sha256": "ecd56879adc964888efd63366a49b63669e442e49e51bbc2e353ab29c51b51f9",
+    "size": [
+     101,
+     116
+    ],
+    "pivot": [
+     50,
+     87
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "market_crate": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-market_crate_se.png",
+    "sha256": "a4f92bb552330ab7df13b196a24251bbf8392ed62ce9378cbd45457748fa54b0",
+    "size": [
+     69,
+     62
+    ],
+    "pivot": [
+     34,
+     41
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-market_crate_sw.png",
+    "sha256": "a3b5512fb07fd2dec34b0b5e8222d9908ecfef84eae9a56e729e5c0688abd47f",
+    "size": [
+     69,
+     61
+    ],
+    "pivot": [
+     34,
+     40
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-market_crate_ne.png",
+    "sha256": "bfe804c25971cc4b4af595d1b43c76d6047d6849a80ac9feaa35c0bfeec8bba0",
+    "size": [
+     69,
+     62
+    ],
+    "pivot": [
+     34,
+     41
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-market_crate_nw.png",
+    "sha256": "1e4d81adf476abb37f398e94b9978879d06370d43b28ef0bc53b6a75195b8bf2",
+    "size": [
+     69,
+     61
+    ],
+    "pivot": [
+     34,
+     40
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I5",
+    "sourceFolder": "out_i5",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "prayer_mat": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-prayer_mat_se.png",
+    "sha256": "623aa77a394ea6d273228c09d070b1b50c82064d1a6507336a48e9f5d02238d1",
+    "size": [
+     101,
+     56
+    ],
+    "pivot": [
+     50,
+     27
+    ],
+    "footprint": [
+     1,
+     2
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-prayer_mat_sw.png",
+    "sha256": "9dfb54c92db50b147760824094d866f989bb8f644a32c852114bfd0f9df940fb",
+    "size": [
+     101,
+     56
+    ],
+    "pivot": [
+     50,
+     27
+    ],
+    "footprint": [
+     1,
+     2
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-prayer_mat_ne.png",
+    "sha256": "748132791f1c086856269f4b9456cbdcb2c1c4deda7458801fbe0ee1b4f1ec77",
+    "size": [
+     101,
+     56
+    ],
+    "pivot": [
+     50,
+     27
+    ],
+    "footprint": [
+     1,
+     2
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-prayer_mat_nw.png",
+    "sha256": "9c5549a4b7ebda3b5e6ce51476b21109d2f0ad76dca57a10649768833a918a2e",
+    "size": [
+     101,
+     56
+    ],
+    "pivot": [
+     50,
+     27
+    ],
+    "footprint": [
+     1,
+     2
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "rice_cooker": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-rice_cooker_se.png",
+    "sha256": "7d617327023f2fa01c5c57dc68cdc414403ac3e2fc15d23438177b6f20ff9b05",
+    "size": [
+     69,
+     75
+    ],
+    "pivot": [
+     34,
+     54
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-rice_cooker_sw.png",
+    "sha256": "462152df97e214edc446f28d53ff2bf307c3adc702bdf0b8a190105fa88e4d0c",
+    "size": [
+     69,
+     75
+    ],
+    "pivot": [
+     34,
+     54
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-rice_cooker_ne.png",
+    "sha256": "287c0df05c196eb3b387699201ac4b20e4810d7f14543c457cba4ad869d8ce3f",
+    "size": [
+     69,
+     75
+    ],
+    "pivot": [
+     34,
+     54
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-rice_cooker_nw.png",
+    "sha256": "537e6eb40fcb8256784b91d6c86f6a3c607a4063a4c548c575ce90071804cf2e",
+    "size": [
+     69,
+     75
+    ],
+    "pivot": [
+     34,
+     54
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "shelf": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-shelf_se.png",
+    "sha256": "f5b35de7fef063ce67999c93a9c2dba6734095b0582593dd812060b0bc773a5f",
+    "size": [
+     101,
+     103
+    ],
+    "pivot": [
+     50,
+     74
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I1",
+    "sourceFolder": "out",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-shelf_sw.png",
+    "sha256": "458debc751364ba8761e6eba3af5d9612b5a834c19d748774990c6a2f92cbf77",
+    "size": [
+     101,
+     102
+    ],
+    "pivot": [
+     50,
+     73
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I1",
+    "sourceFolder": "out",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-shelf_ne.png",
+    "sha256": "d770d76a89f2429aac3485d9425b0e4741dd8faa40268c27a8dcbbc133b1f9df",
+    "size": [
+     101,
+     103
+    ],
+    "pivot": [
+     50,
+     74
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I1",
+    "sourceFolder": "out",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-shelf_nw.png",
+    "sha256": "81edd9381fbae06db7bdf50a006914406896aa6d9964c798e73b60a3cce2e5b8",
+    "size": [
+     101,
+     102
+    ],
+    "pivot": [
+     50,
+     73
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I1",
+    "sourceFolder": "out",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "washing_machine": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-washing_machine_se.png",
+    "sha256": "08bab343e575d4498219296985851a6298d60a3992f1924c543a719aee644c23",
+    "size": [
+     69,
+     78
+    ],
+    "pivot": [
+     34,
+     57
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-washing_machine_sw.png",
+    "sha256": "4679bcc9fd0c55b3f69bc104790866383dbee482c2c5f5f1bc89658bb3c8b846",
+    "size": [
+     69,
+     78
+    ],
+    "pivot": [
+     34,
+     57
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-washing_machine_ne.png",
+    "sha256": "c5469d66d4343f845ac6be78c1640659fb11cc77f59a6a7721caecb3d173eb81",
+    "size": [
+     69,
+     78
+    ],
+    "pivot": [
+     34,
+     57
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-washing_machine_nw.png",
+    "sha256": "87ac292969291445830ed2b1ce159bc346c36f683da1db0fdec28a483f2c80b7",
+    "size": [
+     69,
+     78
+    ],
+    "pivot": [
+     34,
+     57
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "workbench": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-workbench_se.png",
+    "sha256": "fa172c53be09fbed720bd84ef9eaadd6c3279982e099298cbd79006fa97104ab",
+    "size": [
+     101,
+     88
+    ],
+    "pivot": [
+     50,
+     59
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-workbench_sw.png",
+    "sha256": "c86bec30f2632eed93e871dd7d646ee59597f3d75ea4b3ca894dcdb77d1357be",
+    "size": [
+     101,
+     94
+    ],
+    "pivot": [
+     50,
+     65
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-workbench_ne.png",
+    "sha256": "8deb5aa4ee7904da998ea4b92e5be842dc8ea1e82b6d974bc8ed56dbe6748620",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-workbench_nw.png",
+    "sha256": "f51ed458bd7752fbfcd18aad3bb6476ee8e52a39a288a392a6ac02460a556248",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "wudhu_tap": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-wudhu_tap_se.png",
+    "sha256": "9a147d39b52b972ee0b5c03b6d49b3a1b3ba59c0307b1febc7c2401a03490a29",
+    "size": [
+     69,
+     64
+    ],
+    "pivot": [
+     34,
+     43
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-wudhu_tap_sw.png",
+    "sha256": "9224de2addb954eba18ba3311ffed604997bfa3a51d427e7d045650222330fdb",
+    "size": [
+     69,
+     69
+    ],
+    "pivot": [
+     34,
+     48
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-wudhu_tap_ne.png",
+    "sha256": "0c8cd13fe93b73ccddb75f763ff55ff3fdf69f0ea235f7ce78c0964707153bcd",
+    "size": [
+     69,
+     64
+    ],
+    "pivot": [
+     34,
+     43
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-wudhu_tap_nw.png",
+    "sha256": "fd6ee16d1e1d16cbacf974932cd1d3f154a267de8618a951a95c6ee0d0d1330c",
+    "size": [
+     69,
+     68
+    ],
+    "pivot": [
+     34,
+     47
+    ],
+    "footprint": [
+     1,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "laundry_counter": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-laundry_counter_se.png",
+    "sha256": "bd4d6382cc126dd9656838908a7d94bcd9660dc1a54ffd8dbe8e0c2ee5d64b49",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-laundry_counter_sw.png",
+    "sha256": "2c159baac63244713bb19777522aee3825bb0ab4c59a1ba523025623d28f5f2a",
+    "size": [
+     101,
+     85
+    ],
+    "pivot": [
+     50,
+     56
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-laundry_counter_ne.png",
+    "sha256": "be0635f2880e08c6041a13a92733d545144e463e0d3c3ac3fec01b1f4e682092",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-laundry_counter_nw.png",
+    "sha256": "9cc2706f3eb1d994e1799b6cba60a124a170d67a4b3215ca219a60effc0c67d2",
+    "size": [
+     101,
+     85
+    ],
+    "pivot": [
+     50,
+     56
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "locker": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-locker_se.png",
+    "sha256": "4ba96f3ce4e634962e7b368f70da1abfbace9eb889dc92627c91f210b4f5f640",
+    "size": [
+     101,
+     107
+    ],
+    "pivot": [
+     50,
+     78
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-locker_sw.png",
+    "sha256": "c6250e922c3e6ca4468fa16073410825542e9c8da3bf4b71da77f43625c53756",
+    "size": [
+     101,
+     107
+    ],
+    "pivot": [
+     50,
+     78
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-locker_ne.png",
+    "sha256": "3d33c71fa4908450568e285943f19a8b05e3b9d331b0246109b53c7a5eb04682",
+    "size": [
+     101,
+     107
+    ],
+    "pivot": [
+     50,
+     78
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-locker_nw.png",
+    "sha256": "b2325dd63bbb87d990334dd915ba9ad8c6dfc4ed7e42f6b41cf88e215387bd3a",
+    "size": [
+     101,
+     107
+    ],
+    "pivot": [
+     50,
+     78
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I3",
+    "sourceFolder": "out_i3",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "table": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-table_se.png",
+    "sha256": "ceb8015782dc7c1bf06ecc1f24fc83348ba6a2c4e77aa201e1e379e1503dd056",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I1",
+    "sourceFolder": "out",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-table_sw.png",
+    "sha256": "5f892a27cefd8159bd0a610e7da1add309674da391bb88b5d19649a3c1699953",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I1",
+    "sourceFolder": "out",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-table_ne.png",
+    "sha256": "5f892a27cefd8159bd0a610e7da1add309674da391bb88b5d19649a3c1699953",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I1",
+    "sourceFolder": "out",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-table_nw.png",
+    "sha256": "ceb8015782dc7c1bf06ecc1f24fc83348ba6a2c4e77aa201e1e379e1503dd056",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I1",
+    "sourceFolder": "out",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "waiting_bench": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-waiting_bench_se.png",
+    "sha256": "dbf4071a97cdf7e4830704733c33df422dabc5c9592aa5753fa6d1ae06f5af59",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-waiting_bench_sw.png",
+    "sha256": "ff436fc19d870871c8d7f8c42ef90ccf85a9899c2b7ac4faade507195b89e28f",
+    "size": [
+     101,
+     93
+    ],
+    "pivot": [
+     50,
+     64
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-waiting_bench_ne.png",
+    "sha256": "0cff7fa52506f96226be5b430afa10847dc579696d3e0014e8a9979fbcfcfb1c",
+    "size": [
+     101,
+     83
+    ],
+    "pivot": [
+     50,
+     54
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-waiting_bench_nw.png",
+    "sha256": "5c4ebe2ccd29cce936cf55a2a853834b4130ca7269c7ef0ca340a419f76c1284",
+    "size": [
+     101,
+     93
+    ],
+    "pivot": [
+     50,
+     64
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I4",
+    "sourceFolder": "out_i4",
+    "source": "existing-njh-preview-asset"
+   }
+  },
+  "tool_rack": {
+   "se": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-tool_rack_se.png",
+    "sha256": "aa1f7398582c48e7a35aec3c0aa16a5d17aef50b31ce8aac90794a567448db62",
+    "size": [
+     101,
+     103
+    ],
+    "pivot": [
+     50,
+     74
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "sw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-tool_rack_sw.png",
+    "sha256": "f3547273616be95f7352b3a7cade4551483a92b06c69985faa458379e1cc6b5d",
+    "size": [
+     101,
+     102
+    ],
+    "pivot": [
+     50,
+     73
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "ne": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-tool_rack_ne.png",
+    "sha256": "e9a53668d66b57b27dc0c5a3786ae642da6b2b1034509822fa5226d34c89f0dc",
+    "size": [
+     101,
+     103
+    ],
+    "pivot": [
+     50,
+     74
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   },
+   "nw": {
+    "file": "../bangun-ruang/njh-interior-preview-art/furniture-tool_rack_nw.png",
+    "sha256": "ef8fde687530538b00928eb533d4916ec81b1fff89a9ab1168dd48b774b044b7",
+    "size": [
+     101,
+     102
+    ],
+    "pivot": [
+     50,
+     73
+    ],
+    "footprint": [
+     2,
+     1
+    ],
+    "batch": "I6",
+    "sourceFolder": "out_i6",
+    "source": "existing-njh-preview-asset"
+   }
   }
  }
 }

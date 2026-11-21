@@ -172,17 +172,17 @@ test('LGR script cache-bust is no longer bare pakaian-v2',()=>{
  assert.match(gen,/\?v=pakaian-v2-njh-newbot-fix-20261122/);
  assert.doesNotMatch(gen,/\/virtual-life-asset-pipeline\/"[^"]*\?v=pakaian-v2"/);
  const builder=fs.readFileSync(path.join(R,'world-builder/builder.js'),'utf8');
- assert.match(builder,/genesis-player\.js\?v=njh-step1-live-20261122/);
+ assert.match(builder,/genesis-player\.js\?v=njh\-step2\-live\-20261122/);
 });
 
 test('this fix is sw v43 with a unique ?v and hub build',()=>{
  const sw=fs.readFileSync(path.join(R,'sw.js'),'utf8');
- // Later preview packages (balancing = v44) bump the SW; this fix's v42 stays in the history.
- assert.ok(Number((/^\/\* sw v(\d+) /.exec(sw)||[])[1])>=42,'sw >= v42');
+ // Later preview packages (balancing = v44, step2-live = v45) bump the SW; this fix's v42 stays in the history.
+ assert.ok(Number((/^\/\* sw v(\d+) /.exec(sw)||[])[1])>=45,'sw >= v45');
  assert.match(sw,/sw v42 2026-11-22/);
  assert.doesNotMatch(sw,/^\/\* sw v39 /);
  const html=fs.readFileSync(path.join(R,'mainkan/index.html'),'utf8');
- assert.match(html,/\?v=njh-step1-live-20261122/);
+ assert.match(html,/\?v=njh\-step2\-live\-20261122/);
  const hub=JSON.parse(fs.readFileSync(path.join(R,'shared/hub-version.json'),'utf8'));
- assert.equal(hub.build,'hub-20261122-step1-lock-r7');
+ assert.equal(hub.build,'hub-20261122-step2-live');
 });

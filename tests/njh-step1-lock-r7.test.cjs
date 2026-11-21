@@ -2,7 +2,8 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const VO=path.resolve(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(VO,rel),'utf8');
-const LOCK=['njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_pecel_lele_tenda','njh_sate_madura_tenda','njh_warung_kopi'];
+const R7=['njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_pecel_lele_tenda','njh_sate_madura_tenda'];
+const LOCK=['njh_warung_kopi'];
 const STILL_READY=['njh_laundry','njh_bengkel','njh_wc_mandi_umum','njh_rumah_biasa','njh_warung_makan','njh_minimarket','njh_kos'];
 
 function loadPreview(){
@@ -18,19 +19,20 @@ function loadPreview(){
  return window.VLNjhMapPreview;
 }
 
-test('STEP 1 history stays in sw; balancing cache/hub; LGR ?v is kept',()=>{
- // Balancing (sw v44) sits on live STEP 1 (v43); v42 STEP 1 preview stays in the SW history.
- assert.ok(Number((/^\/\* sw v(\d+) /.exec(read('sw.js'))||[])[1])>=43,'sw >= v43');
+test('STEP 2 tags are sw v45 with a unique cache/hub; STEP 1 and r4b stay in history; LGR ?v is kept',()=>{
+ assert.match(read('sw.js'),/^\/\* sw v45 /);
+ assert.match(read('sw.js'),/STEP 2/);
+ assert.match(read('sw.js'),/sw v44 2026-11-22/);
  assert.match(read('sw.js'),/sw v43 2026-11-22: STEP 1 live/);
  assert.match(read('sw.js'),/sw v42 2026-11-22: Preview STEP 1/);
- assert.match(read('mainkan/index.html'),/\?v=njh-balancing-r\d+[a-z]*-20261122/);
+ assert.match(read('mainkan/index.html'),/\?v=njh\-step2\-live\-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
- assert.equal(hub.build,'hub-20261122-step1-lock-r7');
+ assert.equal(hub.build,'hub-20261122-step2-live');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);
  assert.match(read('world-builder/indonesia-assets.js'),/const PREVIEW_REF='main'/);
 });
 
-test('the 7 r7 interiors and Warung Kopi are pending, not READY',()=>{
+test('the 7 r7 interiors are READY; only Warung Kopi stays pending',()=>{
  const P=loadPreview();
  for(const id of LOCK){
   assert.ok(P.pendingTemplates.includes(id),id+' pending');
@@ -42,11 +44,18 @@ test('the 7 r7 interiors and Warung Kopi are pending, not READY',()=>{
  }
  const meta=JSON.parse(read('world-builder/njh-map-preview/njh-map-meta.json'));
  const pendingDoors=meta.doors.filter(d=>LOCK.includes(d.interiorTemplate));
- assert.equal(pendingDoors.length,8);
+ assert.equal(pendingDoors.length,1);
  for(const d of pendingDoors)assert.equal(d.interiorPending,true,d.doorId);
+ for(const id of R7){
+  assert.ok(P.readyTemplates.includes(id),id+' r7 ready');
+  assert.ok(!P.pendingTemplates.includes(id),id+' r7 not pending');
+  const door=meta.doors.find(d=>d.interiorTemplate===id);
+  assert.equal(door.interiorPending,false,door.doorId);
+ }
  const play=read('world-builder/njh-play-interiors.js');
  const pub=play.match(/const PUBLIC_SCENES=\[([^\]]*)\]/)[1];
- for(const id of LOCK)assert.ok(!pub.includes("'"+id+"'"),id+' is not fetched as a public play scene');
+ for(const id of R7)assert.ok(pub.includes("'"+id+"'"),id+' is fetched as a public play scene');
+ assert.ok(!pub.includes("'njh_warung_kopi'"),'kopi is not fetched as a public play scene');
 });
 
 test('locked official doors are closed in isClosedDoor and enterables (tooltip Belum buka)',()=>{
@@ -70,7 +79,7 @@ test('locked official doors are closed in isClosedDoor and enterables (tooltip B
 
 test('guest / creator default is a tee, including reset and normalizeProfile',()=>{
  const html=read('mainkan/index.html');
- assert.match(html,/classic-creator\.js\?v=njh-step1-live-20261122/);
+ assert.match(html,/classic-creator\.js\?v=njh\-step2\-live\-20261122/);
  assert.match(html,/<option value="tee" selected>T-shirt/);
  assert.match(html,/<option value="trousers" selected>Trousers/);
  assert.doesNotMatch(html,/<select id="topStyle"><option value="nude" selected>/);

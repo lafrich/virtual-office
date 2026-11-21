@@ -17,7 +17,9 @@ test('runtime bakes declared paint as a nearest-neighbor CanvasTexture on both w
  assert.match(runtime,/sc\.paint\?\.layers/);
  for(const name of ['dado','trim','midDisplay','identity','ceiling'])
   assert.ok(runtime.includes("'"+name+"'"),name+' must have visible pixels');
- assert.match(runtime,/\(sc\.paint&&Array\.isArray\(sc\.paint\.layers\)&&sc\.paint\.layers\.length\)\?bakeMartWall\(side\):bake\(side\)/);
+ assert.match(runtime,/function bakeDeclaredPaint\(side\)/);
+ assert.match(runtime,/const mart=themeKind==='minimarket'\|\|sc\.id==='njh_minimarket'\|\|roomKind==='minimarket'/);
+ assert.match(runtime,/const can=mart\?bakeMartWall\(side\):\(sc\.paint&&Array\.isArray\(sc\.paint\.layers\)&&sc\.paint\.layers\.length\?bakeDeclaredPaint\(side\):bake\(side\)\)/);
  assert.match(runtime,/tex\.magFilter=THREE\.NearestFilter/);
  assert.match(runtime,/ctx\.imageSmoothingEnabled=false/);
 });
