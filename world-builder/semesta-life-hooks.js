@@ -128,6 +128,7 @@ function actionPrice(action,config,args){
  if(action==='coffee')return num(s.coffeePrice,5000);
  if(action==='tea')return num(s.teaPrice,3000);
  if(action==='public_shower')return num(s.publicShowerFee,500);
+ if(action==='public_toilet')return num(s.publicToiletPrice,0);
  if(action==='charity')return 1000;
  if(action==='buy_room')return num(s.roomPrice,700000);
  if(action==='buy_fridge')return num(s.fridgePrice,2000000);
@@ -171,28 +172,40 @@ function pushMessage(state,from,text){
  state.messages=state.messages.slice(0,40);
  return row;
 }
-function questDef(id,npcId){
- if(id){const q=QUEST_TABLE.find(x=>x.id===id);if(q)return q;}
- if(npcId){const q=QUEST_TABLE.find(x=>x.npcId===String(npcId));if(q)return q;}
- return QUEST_TABLE[QUEST_TABLE.length-1];
+// Quest tables: the legacy QUEST_TABLE, or the slice chain from content/balancing.json
+// (ctx.questTable, rows with chain:true). In a chain only the first unfinished quest is open.
+function questDef(id,npcId,table,state){
+ const T=Array.isArray(table)&&table.length?table:QUEST_TABLE;
+ if(id){const q=T.find(x=>x.id===id);if(q)return q;}
+ if(npcId){
+  const mine=T.filter(x=>x.npcId===String(npcId));
+  const open=mine.find(x=>((state?.quests||{})[x.id]||{}).state!=='done');
+  if(open||mine[0])return open||mine[0];
+ }
+ return T[T.length-1];
 }
+function questActs(q){return Array.isArray(q.act)?q.act:q.act?[q.act]:[];}
 function questProgress(q,rec,state){
  const c=state?.actionCounts||{};const b=rec?.base||{};
- if(q.kind==='earn')return num(c.workEarn,0)-num(b.workEarn,0);
- if(q.kind==='count')return num(c[q.act],0)-num(b[q.act],0);
+ if(q.kind==='earn')return q.scope==='total'?num(c.workEarn,0):num(c.workEarn,0)-num(b.workEarn,0);
+ if(q.kind==='count')return questActs(q).reduce((sum,a)=>sum+num(c[a],0)-num(b[a],0),0);
  if(q.kind==='stat')return num(state?.[q.stat],0);
  if(q.kind==='inv')return (state?.inventory||[]).length;
  if(q.kind==='exp')return num(state?.experience,0)-num(b.exp,0);
  return 0;
 }
-function questRow(q,state){
- const rec=(state?.quests||{})[q.id]||(state?.quests||{})[q.npcId]||null;
+function questRow(q,state,table){
+ const rec=(state?.quests||{})[q.id]||(q.chain?null:(state?.quests||{})[q.npcId])||null;
  let st='available';
  const progress=questProgress(q,rec,state);
  if(rec?.state==='done')st='done';
  else if(rec?.state==='active'||rec?.state==='ready')st=progress>=q.target?'ready':'active';
+ else if(q.chain&&Array.isArray(table)){
+  const i=table.indexOf(q);
+  if(i>0&&table.slice(0,i).some(p=>((state?.quests||{})[p.id]||{}).state!=='done'))st='locked';
+ }
  return {npcId:q.npcId,id:q.id,title:q.title,goal:q.goal,text:q.text,target:q.target,
-  progress:Math.max(0,progress),reward:q.reward,state:st};
+  progress:Math.max(0,progress),reward:q.reward,state:st,win:q.win===true||undefined};
 }
 function defaultEmit(ctx,type,detail){
  const payload=Object.assign({type},detail||{});
@@ -336,7 +349,10 @@ function create(ctx){
   else if(id==='loak')push('sell_loak','Jual Barang');
   else if(id==='scavenge')push('scavenge','Mulung');
   else if(id==='tree')push('catch_fruit','Ambil Buah');
-  else if(id==='warung')push('eat','Makan Warteg',{place:'warteg',price:actionPrice('eat',config(),{place:'warteg'})});
+  else if(id==='warung'){
+   push('eat','Makan Warteg',{place:'warteg',price:actionPrice('eat',config(),{place:'warteg'})});
+   if(ctx.coffeeAtWarteg)push('coffee','Ngopi',{place:'warteg'},{confirm:true,ui:'confirm'});
+  }
   else if(id==='coffee'){push('coffee','Ngopi',{},{confirm:true,ui:'confirm'});push('tea','Beli Es Teh',{},{confirm:true,ui:'confirm'});}
   else if(id==='public_wc')push('public_toilet','WC Umum',{facilityId:site.sourceId||id});
   else if(id==='public_bath')push('public_shower','Mandi Umum',{facilityId:site.sourceId||id});
@@ -657,13 +673,17 @@ function create(ctx){
     where:site?site.label:undefined,siteId:site?.id};
   });
  }
+ function questTable(){return Array.isArray(ctx.questTable)&&ctx.questTable.length?ctx.questTable:QUEST_TABLE;}
  function quests(){
   seedMessages(getState(),config());
-  return QUEST_TABLE.map(q=>questRow(q,getState()));
+  const T=questTable();
+  return T.map(q=>questRow(q,getState(),T));
  }
  function acceptQuest(npcId,questId){
   const state=getState();if(!state)return {ok:false,reason:'Tidak ada state'};
-  const q=questDef(questId,npcId);
+  const T=questTable();
+  const q=questDef(questId,npcId,T,state);
+  if(questRow(q,state,T).state==='locked')return {ok:false,reason:'Selesaikan quest sebelumnya dulu.'};
   state.quests=state.quests&&typeof state.quests==='object'?state.quests:{};
   const cur=state.quests[q.id];
   if(cur?.state==='done')return {ok:false,reason:'Quest sudah selesai'};
@@ -672,15 +692,16 @@ function create(ctx){
    workEarn:num(state.actionCounts?.workEarn,0),eat:num(state.actionCounts?.eat,0),
    exp:num(state.experience,0)
   }};
-  if(q.act)state.quests[q.id].base[q.act]=num(state.actionCounts?.[q.act],0);
+  for(const a of questActs(q))state.quests[q.id].base[a]=num(state.actionCounts?.[a],0);
   pushMessage(state,q.npcId||'NPC','Quest “'+q.title+'” diterima: '+q.goal+'.');
   if(typeof ctx.persist==='function')ctx.persist();
   return {ok:true,id:q.id,state:'active'};
  }
  function turnInQuest(npcId,questId){
   const state=getState();if(!state)return {ok:false,reason:'Tidak ada state'};
-  const q=questDef(questId,npcId);
-  const row=questRow(q,state);
+  const T=questTable();
+  const q=questDef(questId,npcId,T,state);
+  const row=questRow(q,state,T);
   if(row.state==='done')return {ok:false,reason:'Quest sudah selesai'};
   if(row.state!=='ready')return {ok:false,reason:'Syarat quest belum terpenuhi'};
   if(typeof ctx.runEconomy==='function'){
@@ -774,13 +795,13 @@ function create(ctx){
   const out=[],seen=new Set();
   const push=(npcId,state)=>{
    const id=String(npcId||'');if(!id||seen.has(id))return;seen.add(id);
-   if(state==='done'||state==='active')return;
+   if(state==='done'||state==='active'||state==='locked')return;
    out.push({npcId:id,state:state==='ready'?'ready':'available'});
   };
   const sites=getSites();
   const known=id=>sites.some(s=>s.id===id||s.npcId===id||s.sourceId===id)||objects.some(o=>o.id===id||o.questId===id);
   for(const rec of quests()){
-   if(rec.state==='done'||rec.state==='active')continue;
+   if(rec.state==='done'||rec.state==='active'||rec.state==='locked')continue;
    if(known(rec.npcId))push(rec.npcId,rec.state);
   }
   for(const o of objects){
