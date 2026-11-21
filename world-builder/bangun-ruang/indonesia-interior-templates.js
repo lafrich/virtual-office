@@ -25,6 +25,8 @@ const types={
  dining_table:prop('Meja Makan','Rumah','▤',2,1,'eat,browse','table'),
  chair:prop('Kursi Makan','Rumah','▦',1,1,'sit','chair'),
  wooden_bench:prop('Bangku Panjang','Rumah','▭',2,1,'sit','wooden_bench'),
+ plastic_bench_red:prop('Bangku Plastik Merah','Rumah','▭',2,1,'sit','plastic_bench_red'),
+ plastic_bench_blue:prop('Bangku Plastik Biru','Rumah','▭',2,1,'sit','plastic_bench_blue'),
  tv:prop('TV Tabung / Layar','Rumah','▣',2,1,'watch,switch_on','tv'),
  fan:prop('Kipas Angin','Rumah','✳',1,1,'switch_on','fan'),
  shoe_rack:prop('Rak Sepatu','Rumah','▥',2,1,'open,store','shelf'),

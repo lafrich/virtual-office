@@ -11,7 +11,7 @@
   'use strict';
 
   const REASON_LOCKED = 'Terkunci';
-  const REASON_PARTNER = 'Punya pacar';
+  const REASON_PARTNER = 'Hanya pemilik';
 
   const OWNER_ONLY = ['fridge', 'kulkas', 'wardrobe', 'lemari', 'stove', 'kitchen_sink'];
   const SHARED_PARTNER = ['bed', 'bathtub', 'shower', 'water_tub', 'squat_toilet', 'sink', 'sekat_wc', 'fan', 'shoe_rack'];

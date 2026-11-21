@@ -71,12 +71,12 @@ test('roomAccess: owner full, partner limited, stranger locked; lobby open to gu
   assert.equal(A.resolveId('njh-kos-noor'), 'njh_kos_cove_lobby');
 });
 
-test('rejectAction: partner denied owner_only with Punya pacar, including kitchen_sink wash', () => {
+test('rejectAction: partner denied owner_only with Hanya pemilik, including kitchen_sink wash', () => {
   const A = loaded();
   assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'store_fridge'), null);
   assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'cook'), null);
-  assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'buy_furniture'), 'Punya pacar');
-  assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'wash', { assetId: 'kitchen_sink', access: 'owner_only' }), 'Punya pacar');
+  assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'buy_furniture'), 'Hanya pemilik');
+  assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'wash', { assetId: 'kitchen_sink', access: 'owner_only' }), 'Hanya pemilik');
   assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'sleep'), null);
   assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'home_shower'), null);
   assert.equal(A.rejectAction('t_noor', 'njh_kos_ichsan', 'bathe'), null);

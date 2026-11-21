@@ -128,7 +128,7 @@ function create(opts){
    const img=new Image();
    let tried=0;
    const srcs=file.startsWith('../')?[base+file]:
-    [file.startsWith('art/')?base+file:base+'art/'+file,base+file];
+    [file.startsWith('art/')?base+file:base+'art/'+file];
    img.onload=()=>{images.set(file,img);resolve();};
    img.onerror=()=>{if(tried<srcs.length-1){img.src=srcs[++tried];}else resolve();};
    img.src=srcs[0];
@@ -272,7 +272,7 @@ function create(opts){
   // The source is the scene's published paint declaration, not a new asset.
   // Pixel geometry is baked to a nearest-filtered CanvasTexture once per room.
   const MART_WALL={back:0xf3f5f2,left:0xe2ece8};
-  function bakeMartWall(side){
+  function bakeMartWall(side){/* also used as generic paint.layers hook for any scene */
    const declared=new Set((sc.paint?.layers||[]).map(x=>x.layer));
    if(!['dado','trim','midDisplay','identity','ceiling'].every(x=>declared.has(x)))return null;
    const unit=64,ww=side==='back'?w:d;
@@ -325,7 +325,7 @@ function create(opts){
   }
   const wallMaterial=(side,fallback)=>{
    if(themeKind==='minimarket')fallback=MART_WALL[side]||fallback;
-   const can=themeKind==='minimarket'?bakeMartWall(side):bake(side);
+   const can=(sc.paint&&Array.isArray(sc.paint.layers)&&sc.paint.layers.length)?bakeMartWall(side):bake(side);
    if(can&&THREE){
     const tex=new THREE.CanvasTexture(can);
     tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;

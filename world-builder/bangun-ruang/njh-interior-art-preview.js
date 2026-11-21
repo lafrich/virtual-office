@@ -51,6 +51,7 @@ function loadMartKit(){
  if(martKitPromise||!enabled())return martKitPromise;
  martKitStatus='loading';
  const base=martKitBase();
+ const artBase=base+'art/';
  martKitPromise=fetch(base+'catalog.json',{cache:'no-cache'})
   .then(r=>{if(!r.ok)throw Error('NJH Mart catalog HTTP '+r.status);return r.json();})
   .then(data=>{
@@ -61,14 +62,14 @@ function loadMartKit(){
      throw Error('NJH Mart missing four-view source '+id);
    }
    for(const id of MART_IDS){
-    CATALOG[id]=Object.fromEntries(DIR.map(d=>[d,{...items[id][d],sourceBase:base}]));
-    if(preloaded)for(const d of DIR){total++;load(base+CATALOG[id][d].file);}
+    CATALOG[id]=Object.fromEntries(DIR.map(d=>[d,{...items[id][d],sourceBase:artBase}]));
+    if(preloaded)for(const d of DIR){total++;load(artBase+CATALOG[id][d].file);}
    }
    const ibu=items.npc_ibu_warteg;
    if(ibu&&DIR.every(d=>ibu[d]?.file)){
     for(const alias of ['npc_njh_minimarket_kasir','npc_njh_minimarket_staff','npc_ibu_warteg']){
-     CATALOG[alias]=Object.fromEntries(DIR.map(d=>[d,{...ibu[d],sourceBase:base}]));
-     if(preloaded)for(const d of DIR){total++;load(base+CATALOG[alias][d].file);}
+     CATALOG[alias]=Object.fromEntries(DIR.map(d=>[d,{...ibu[d],sourceBase:artBase}]));
+     if(preloaded)for(const d of DIR){total++;load(artBase+CATALOG[alias][d].file);}
     }
    }
    martKitStatus='ready';

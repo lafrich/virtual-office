@@ -1,0 +1,385 @@
+{
+  "id": "njh_sate_madura_tenda",
+  "label": "NJH · Sate Madura (Tenda)",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "floor": 1,
+  "baseId": "semesta:medium",
+  "notes": "Tenda Sate Madura interior 8x6, different plan from pecel lele: seller lane on the left wall c=0 (gerobak, panggangan, ember, bumbu - stove + sink on one column), staff aisle c=1, service line on c=2 (etalase sate + meja bayar facing +c into the tent), staff gap at (2,4). Customer side c>=3: aisle c=3, meja 1 (5,1) with benches left/right, meja 2 at r=4 with a north bench; walk lane c=7 to the cooler. Cooler at (7,0) on the back wall, galon on the door wall (2,5) facing in (use tile (2,4) is also the staff gap). Plastic benches are r6 review TYPES.",
+  "source": "njh-interiors-kharisma-r7 (revision of njh-interior-templates-r6)",
+  "scope": "PREVIEW, NOT LIVE. Baymax integrates; live needs Ichsan's own OK.",
+  "paint": {
+    "theme": "warm",
+    "themeNote": "Runtime only bakes paint for warteg (VLWartegInteriorArt) and NJH MART (bakeMartWall). These five layers + palette are the declaration for Baymax's hook; preview renders in r7/renders show the intent.",
+    "layers": [
+      {
+        "layer": "dado",
+        "z": [
+          0,
+          49
+        ],
+        "spec": "red-white terpal skirt",
+        "palette": [
+          "#7A1010",
+          "#B71C1C",
+          "#E53935",
+          "#F5F5F5",
+          "#FFFFFF"
+        ]
+      },
+      {
+        "layer": "trim",
+        "z": [
+          50,
+          50
+        ],
+        "spec": "bamboo pole rail",
+        "palette": [
+          "#6B4A1A",
+          "#9A6E2E",
+          "#C79A4E",
+          "#E2C48A",
+          "#F4E2B8"
+        ]
+      },
+      {
+        "layer": "midDisplay",
+        "z": [
+          56,
+          70
+        ],
+        "spec": "menu strip SATE AYAM - SATE KAMBING - LONTONG; hanging kipas bambu and arang sack",
+        "palette": [
+          "#B71C1C",
+          "#2A2A2A",
+          "#F2C230",
+          "#FFFFFF",
+          "#6B4A1A"
+        ]
+      },
+      {
+        "layer": "identity",
+        "z": [
+          69,
+          116
+        ],
+        "spec": "spanduk 'SATE MADURA CAK' with painted sate skewers",
+        "palette": [
+          "#FFFFFF",
+          "#F4F1E6",
+          "#B71C1C",
+          "#2A2A2A",
+          "#F2C230"
+        ]
+      },
+      {
+        "layer": "ceiling",
+        "z": [
+          108,
+          120
+        ],
+        "spec": "smoke-stained terpal ridge + two bohlam",
+        "palette": [
+          "#2A2A2A",
+          "#555555",
+          "#FFD27A",
+          "#FFF0C0",
+          "#FFFFFF"
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "njh-sate-food_cart-1",
+      "assetId": "food_cart",
+      "name": "Gerobak Sate Madura",
+      "c": 0,
+      "r": 0,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell",
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-sate-stove-1",
+      "assetId": "stove",
+      "name": "Panggangan Arang",
+      "c": 0,
+      "r": 2,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "cook",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "cook"
+      ]
+    },
+    {
+      "id": "njh-sate-kitchen_sink-1",
+      "assetId": "kitchen_sink",
+      "name": "Ember Cuci",
+      "c": 0,
+      "r": 3,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "wash",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "wash"
+      ]
+    },
+    {
+      "id": "njh-sate-market_crate-1",
+      "assetId": "market_crate",
+      "name": "Kotak Tusuk & Bumbu Kacang",
+      "c": 0,
+      "r": 4,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse",
+        "collect"
+      ]
+    },
+    {
+      "id": "njh-sate-food_vitrine-1",
+      "assetId": "food_vitrine",
+      "name": "Etalase Sate & Lontong",
+      "c": 2,
+      "r": 0,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-sate-cashier-1",
+      "assetId": "cashier",
+      "name": "Meja Bayar",
+      "c": 2,
+      "r": 2,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell"
+      ]
+    },
+    {
+      "id": "njh-sate-water_dispenser-1",
+      "assetId": "water_dispenser",
+      "name": "Galon",
+      "c": 2,
+      "r": 5,
+      "rotation": 180,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "drink",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "drink"
+      ]
+    },
+    {
+      "id": "njh-sate-plastic_bench_red-1",
+      "assetId": "plastic_bench_red",
+      "name": "Bangku Merah 1",
+      "c": 4,
+      "r": 1,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-sate-dining_table-1",
+      "assetId": "dining_table",
+      "name": "Meja 1",
+      "c": 5,
+      "r": 1,
+      "rotation": 90,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-sate-plastic_bench_blue-1",
+      "assetId": "plastic_bench_blue",
+      "name": "Bangku Biru 1",
+      "c": 6,
+      "r": 1,
+      "rotation": 270,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-sate-drink_cooler-1",
+      "assetId": "drink_cooler",
+      "name": "Cooler Es Jeruk",
+      "c": 7,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "drink",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "drink",
+        "buy"
+      ]
+    },
+    {
+      "id": "njh-sate-plastic_bench_blue-2",
+      "assetId": "plastic_bench_blue",
+      "name": "Bangku Biru 2",
+      "c": 5,
+      "r": 3,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "sit",
+      "pose": "sit",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "sit"
+      ]
+    },
+    {
+      "id": "njh-sate-dining_table-2",
+      "assetId": "dining_table",
+      "name": "Meja 2",
+      "c": 5,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "eat",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "eat",
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-sate-trash_bin-1",
+      "assetId": "trash_bin",
+      "name": "Tempat Sampah Tusuk",
+      "c": 3,
+      "r": 5,
+      "rotation": 180,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    }
+  ]
+}

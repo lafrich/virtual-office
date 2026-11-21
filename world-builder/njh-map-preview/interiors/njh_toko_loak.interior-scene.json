@@ -1,0 +1,384 @@
+{
+  "id": "njh_toko_loak",
+  "label": "NJH · Toko Loak",
+  "format": "virtual-life-interior-v1",
+  "version": 2,
+  "width": 8,
+  "depth": 6,
+  "theme": "warm",
+  "tilePixels": [
+    64,
+    32
+  ],
+  "unit": "semesta-ground-tile",
+  "sourceFootprint": [
+    8,
+    6
+  ],
+  "entrance": {
+    "c": 4,
+    "r": 5
+  },
+  "floor": 1,
+  "baseId": "semesta:medium",
+  "notes": "Toko Loak 8x6 (shop). Back wall r=0: two shelves, book/magazine rack, used-clothes lemari (staff side r=1). Service line r=2: etalase HP/jam bekas + kasir (c0-3), staff gap c=4 on the door aisle, servis bench (c5-6), second gap c=7. Customer half r=3-4: crate piles, used washing machine, used fan, rongsok drum, a used dingdong at (7,3). Door (4,5), door-front (4,4) free.",
+  "source": "njh-interiors-kharisma-r7 (revision of njh-interior-templates-r6)",
+  "scope": "PREVIEW, NOT LIVE. Baymax integrates; live needs Ichsan's own OK.",
+  "paint": {
+    "theme": "warm",
+    "themeNote": "Runtime only bakes paint for warteg (VLWartegInteriorArt) and NJH MART (bakeMartWall). These five layers + palette are the declaration for Baymax's hook; preview renders in r7/renders show the intent.",
+    "layers": [
+      {
+        "layer": "dado",
+        "z": [
+          0,
+          49
+        ],
+        "spec": "dark wood plank wainscot, scuffed",
+        "palette": [
+          "#3A2414",
+          "#5C3A1E",
+          "#7E532C",
+          "#A8774A",
+          "#D2A878"
+        ]
+      },
+      {
+        "layer": "trim",
+        "z": [
+          50,
+          50
+        ],
+        "spec": "black-painted batten",
+        "palette": [
+          "#111111",
+          "#2A2A2A",
+          "#444444",
+          "#6A6A6A",
+          "#9A9A9A"
+        ]
+      },
+      {
+        "layer": "midDisplay",
+        "z": [
+          56,
+          70
+        ],
+        "spec": "pegboard with hanging old radios, kettles, kabel and a bicycle wheel",
+        "palette": [
+          "#6B5A3E",
+          "#8E7A55",
+          "#B9A27A",
+          "#4A6C7E",
+          "#C05A2E"
+        ]
+      },
+      {
+        "layer": "identity",
+        "z": [
+          69,
+          116
+        ],
+        "spec": "hand-painted 'BARANG BEKAS' board, old posters and a wall clock",
+        "palette": [
+          "#F4E3B5",
+          "#C05A2E",
+          "#2A2A2A",
+          "#E8B53A",
+          "#FFFFFF"
+        ]
+      },
+      {
+        "layer": "ceiling",
+        "z": [
+          108,
+          120
+        ],
+        "spec": "two bare bulbs on cords",
+        "palette": [
+          "#2A2A2A",
+          "#555555",
+          "#FFD27A",
+          "#FFF0C0",
+          "#FFFFFF"
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "njh-loak-shelf-1",
+      "assetId": "shelf",
+      "name": "Rak Barang Bekas 1",
+      "c": 0,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-loak-shelf-2",
+      "assetId": "shelf",
+      "name": "Rak Barang Bekas 2",
+      "c": 2,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse"
+      ]
+    },
+    {
+      "id": "njh-loak-bookshelf-1",
+      "assetId": "bookshelf",
+      "name": "Rak Buku & Majalah Bekas",
+      "c": 4,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse",
+        "read"
+      ]
+    },
+    {
+      "id": "njh-loak-wardrobe-1",
+      "assetId": "wardrobe",
+      "name": "Lemari Pakaian Bekas",
+      "c": 6,
+      "r": 0,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    },
+    {
+      "id": "njh-loak-counter-1",
+      "assetId": "counter",
+      "name": "Etalase HP & Jam Bekas",
+      "c": 0,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "buy",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "buy",
+        "sell"
+      ]
+    },
+    {
+      "id": "njh-loak-checkout-1",
+      "assetId": "checkout",
+      "name": "Meja Kasir Loak",
+      "c": 2,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "pay",
+      "pose": "talk",
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "pay",
+        "buy",
+        "sell"
+      ]
+    },
+    {
+      "id": "njh-loak-workbench-1",
+      "assetId": "workbench",
+      "name": "Meja Servis Elektronik",
+      "c": 5,
+      "r": 2,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "repair",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "repair",
+        "work"
+      ]
+    },
+    {
+      "id": "njh-loak-arcade-1",
+      "assetId": "arcade",
+      "name": "Dingdong Bekas",
+      "c": 7,
+      "r": 3,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "play",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "play"
+      ]
+    },
+    {
+      "id": "njh-loak-market_crate-1",
+      "assetId": "market_crate",
+      "name": "Tumpukan Panci & Kaleng",
+      "c": 0,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse",
+        "collect"
+      ]
+    },
+    {
+      "id": "njh-loak-market_crate-2",
+      "assetId": "market_crate",
+      "name": "Tumpukan Radio & Kabel",
+      "c": 1,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse",
+        "collect"
+      ]
+    },
+    {
+      "id": "njh-loak-washing_machine-1",
+      "assetId": "washing_machine",
+      "name": "Mesin Cuci Bekas",
+      "c": 2,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "laundry",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "laundry"
+      ]
+    },
+    {
+      "id": "njh-loak-fan-1",
+      "assetId": "fan",
+      "name": "Kipas Angin Bekas",
+      "c": 3,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "switch_on",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "switch_on"
+      ]
+    },
+    {
+      "id": "njh-loak-market_crate-3",
+      "assetId": "market_crate",
+      "name": "Tumpukan Mainan Bekas",
+      "c": 5,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "browse",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "browse",
+        "collect"
+      ]
+    },
+    {
+      "id": "njh-loak-trash_bin-1",
+      "assetId": "trash_bin",
+      "name": "Tong Rongsok",
+      "c": 6,
+      "r": 4,
+      "rotation": 0,
+      "flipX": false,
+      "flipY": false,
+      "actionId": "open",
+      "pose": null,
+      "capacity": 1,
+      "blocking": true,
+      "triggerRadius": 1.15,
+      "actionAdjustments": {},
+      "motions": [
+        "open"
+      ]
+    }
+  ]
+}

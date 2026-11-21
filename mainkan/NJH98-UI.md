@@ -101,7 +101,7 @@ Ikuti handoff Baymax: `/workspace/mainkan-ui-handoff/MAINKAN-UI-HANDOFF.md` (box
 
 ### Konten
 - Harga **Rupiah realistis Indonesia** (`Rp 6.000`, format `id-ID`), teks bahasa Indonesia santai.
-- Harga UI/mock **sama persis** dengan logic game (Baymax `jiwa/life-economy.js`); nilai setting game menang, fallback di `njh98-mock.js` (`PRICE`, `FURN_PRICE`, `MOCK_JOBS`): Gorengan 2.500 · Makan Warteg 12.000 · Kopi 5.000 · Es Teh 3.000 · Token listrik (5 unit) 20.000 · Sewa kost 700.000 · Kulkas 2.000.000 · Kasur 1.500.000 · Kursi 350.000 · Kompor 850.000 · Lemari 1.000.000 · Mandi umum 500 · Sedekah 1.000. Upah per sesi: Manusia Silver 1.600 · Pak Ogah 2.500 · Kang Parkir 2.100 · Kerja Premium 4.500.
+- Harga UI/mock **sama persis** dengan logic game (Baymax `jiwa/life-economy.js`); nilai setting game menang, fallback di `njh98-mock.js` (`PRICE`, `FURN_PRICE`, `MOCK_JOBS`): Gorengan 2.500 · Makan Warteg 12.000 · Kopi 5.000 · Es Teh 3.000 · Token listrik (5 unit) 20.000 · Bayar kos (sekali bayar, permanen) 700.000 · Kulkas 2.000.000 · Kasur 1.500.000 · Kursi 350.000 · Kompor 850.000 · Lemari 1.000.000 · Mandi umum 500 · Sedekah 1.000. Upah per sesi: Manusia Silver 1.600 · Pak Ogah 2.500 · Kang Parkir 2.100 · Kerja Premium 4.500.
 
 ### Rilis
 - **Preview dulu** di branch, dengan screenshot **desktop (1366×768) + HP landscape (844×390) + 1 portrait** pakai login test asli (ID test dari Baymax; password tidak pernah dicetak/di-log).

@@ -100,7 +100,7 @@ test('cooking: known recipe, experiment learns, raw fish must be cooked, token u
  const nostove=harness({state:k.state,furniture:[]});assert.equal(nostove.h.cook('telur_dadar').reason,'Dekati kompor dahulu.');
  const dark=harness({state:Object.assign({},k.state,{powerTokens:0})});assert.equal(dark.h.cook('telur_dadar').reason,'Token listrik habis.');
  const partner=harness({playerId:'t_noor',state:k.state});const pr=partner.h.cook('telur_dadar');
- assert.notEqual(pr.reason,'Punya pacar');assert.notEqual(pr.reason,'Terkunci');
+ assert.notEqual(pr.reason,'Hanya pemilik');assert.notEqual(pr.reason,'Terkunci');
 });
 
 test('fishing: data-driven spot, cast/wait/strike/reel catch to bag, fish-result event, got-away path',()=>{

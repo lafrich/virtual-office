@@ -202,7 +202,7 @@ Wallet transactions now include `day` (visual day when `runAction` / `advance_ti
 
 `relationship(id?)` → `[{with, type}]` (pacaran for `t_ichsan`/`t_noor`).
 
-`roomAccess(roomId)` → `{canEnter, role: 'owner'|'partner'|'guest'|'none', allowedActs, reason, kind}`. Locked reason: `'Terkunci'`. Partner denied on owner-only furniture: `'Punya pacar'`.
+`roomAccess(roomId)` → `{canEnter, role: 'owner'|'partner'|'guest'|'none', allowedActs, reason, kind}`. Locked reason: `'Terkunci'`. Partner denied on owner-only furniture: `'Hanya pemilik'`.
 
 `saveMeta()` includes `{hasCharacter, needsCharacter, ownerId, spawn:{site,roomId}}`. 4P starts go through the character creator first, then `spawnAt('kost', roomId)` into their room. Guests: creator, then hobo start.
 

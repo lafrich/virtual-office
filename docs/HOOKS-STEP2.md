@@ -38,7 +38,7 @@ Every instance takes one slot (no stacking, same as the existing bag rule).
 - `container`: `'bag' | 'fridge' | 'storage'` (`storage` = lemari / homeStorage).
 - Returns `{ok, container, label, slots, used, free, items:ItemRow[], locked, reason?}`.
 - `locked:true` (with `ok:false` and `reason`) when:
-  - not the owner of the room you are in (partner → `"Punya pacar"`, others → `"Terkunci"`),
+  - not the owner of the room you are in (partner → `"Hanya pemilik"`, others → `"Terkunci"`),
   - no kost (`"Perlu kost dahulu."`), no kulkas bought (`"Belum punya kulkas."`),
   - electricity token is 0 (`"Token listrik habis. Isi token dulu (Rp20.000 / 5 unit)."`) — fridge AND storage.
 - `bag` is never locked.
@@ -160,7 +160,7 @@ Entries keep the existing shape `{id, action, label, price, spotLabel, args, fur
 | `fish_start` | `fishing` (args.spotId) | near a fishing spot |
 | `topup_token` | `token` | in own kost when units ≤ 2 |
 
-Locks: in someone else's kost (partner `Punya pacar`, stranger `Terkunci`) and when the token is 0, `open_fridge` /
+Locks: in someone else's kost (partner `Hanya pemilik`, stranger `Terkunci`) and when the token is 0, `open_fridge` /
 `open_storage` / `cook_menu` still come back, with `disabled:true`, `hint` and `reason` (the lock or
 `"Token listrik habis. Isi token dulu (Rp20.000 / 5 unit)."`), and `locked:true` for owner locks.
 Ellen's furniture ids map to kinds: `stove` → `cook_menu`, `fridge` / `kulkas` → `open_fridge`, `wardrobe` / `lemari` → `open_storage`.
