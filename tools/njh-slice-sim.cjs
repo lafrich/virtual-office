@@ -7,8 +7,14 @@
  * "Tidur sampai pagi" when every job quota is used up. --sleep instant is kept only for comparison.
  * Usage: node tools/njh-slice-sim.cjs [--profile normal|cepat|awam] [--runs 200] [--sleep realtime|instant] [--json]
  */
-const path=require('path');
+const path=require('path'),fs=require('fs');
 const R=path.join(__dirname,'..');
+// --set key=value (repeatable): try a table change without editing content/balancing.json (lever matrix).
+{const sets=[];process.argv.forEach((a,i)=>{if(a==='--set'&&process.argv[i+1])sets.push(process.argv[i+1]);});
+ if(sets.length){const doc=JSON.parse(fs.readFileSync(path.join(R,'content/balancing.json'),'utf8'));
+  for(const kv of sets){const [k,v]=kv.split('=');const row=doc.params.find(p=>p.key===k);const val=Number.isFinite(Number(v))?Number(v):v;
+   if(row)row.value=val;else doc.params.push({key:k,value:val,source:'sim --set'});}
+  globalThis.__NJH_BALANCING_DOC__=doc;}}
 const B=require(path.join(R,'shared/njh-balancing.js'));
 const Life=require(path.join(R,'jiwa/life-economy.js'));
 const Hooks=require(path.join(R,'world-builder/semesta-life-hooks.js'));
@@ -17,10 +23,11 @@ const PROFILE=arg('--profile','normal'),RUNS=Number(arg('--runs',200)),SLEEP=arg
 const RSPM=B.num('clock.realSecondsPerGameMinute');
 const TRAVEL=B.num('sim.travelSeconds.'+PROFILE),OVER=B.num('sim.overheadPct.'+PROFILE)/100,WALK=B.num('sim.walkSpeed');
 // Energy a trip costs (walk units + passive drain) -> a sensible player keeps two trips in reserve.
-const ANIM_S=4; // pose/animation seconds for a non-hold action (njh98 progress window ~4 s)
+const ANIM_S=4;
+const FAST=B.sleepTuning().untilMorningSpeed,MOVE=B.movement(); // pose/animation seconds for a non-hold action (njh98 progress window ~4 s)
 const cfg=Life.normalize(B.applyToLifeConfig(Life.defaults()));
 const S=cfg.settings;
-const PER_MOVE=Math.floor(WALK*TRAVEL*1.3/8)+Math.ceil(TRAVEL*1.3/RSPM/S.passiveEnergyMinutes);
+const PER_MOVE=Math.floor(WALK*TRAVEL*1.3/MOVE.walkEnergyTilesPerUnit)+Math.ceil(TRAVEL*1.3/MOVE.walkSpeedMultiplier/RSPM/S.passiveEnergyMinutes);
 const LOW_E=Math.max(20,10+2*PER_MOVE);
 function mulberry(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function once(seed){
@@ -30,20 +37,21 @@ function once(seed){
  const H=Hooks.create({getState:()=>st,setState:x=>{st=x;},getSites:()=>sites,getWorld:()=>({objects:[]}),getPos:()=>({x:-999,z:0}),
   getConfig:()=>cfg,questTable:B.quests(),persist:()=>{},runEconomy:(a,args)=>{const r=Life.run(cfg,st,a,args||{});if(r.ok)st=r.state;return r;}});
  const tick=sec=>{real+=sec;const m=Math.floor(sec/RSPM);if(m>0){const r=Life.run(cfg,st,'advance_time',{minutes:m});if(r.ok)st=r.state;}};
- const go=to=>{if(loc===to)return;loc=to;moves++;const t=TRAVEL*(0.7+0.6*rnd());
-  const units=Math.floor(WALK*t/8);for(let i=0;i<units;i++){const r=Life.run(cfg,st,'walk',{units:1});if(r.ok)st=r.state;}tick(t);};
+ const go=to=>{if(loc===to)return;loc=to;moves++;const t0=TRAVEL*(0.7+0.6*rnd()),t=t0/MOVE.walkSpeedMultiplier;
+  const units=Math.floor(WALK*t0/MOVE.walkEnergyTilesPerUnit);for(let i=0;i<units;i++){const r=Life.run(cfg,st,'walk',{units:1});if(r.ok)st=r.state;}tick(t);};
  const act=(a,args)=>{const r=Life.run(cfg,st,a,args||{});if(r.ok){st=r.state;tick(ANIM_S);}else if(process.env.SIMDEBUG&&dbg++<5)console.error("FAIL",a,r.reason);return r;};let dbg=0;
  const work=job=>{const j=cfg.jobs.find(x=>x.id===job);const m=Life.workMinutes(j.minutes,st.experience);
   if(Life.workBlock(cfg,st,job))return false;real+=m*RSPM;const r=Life.run(cfg,st,'work',{jobId:job});if(r.ok){st=r.state;sessions++;}return r.ok;};
  const siteOf={pak_ogah:'job_pak_ogah',kang_parkir:'job_kang_parkir',manusia_silver:'job_silver'};
+ // Sleep like the game: "Tidur sampai pagi" (hourly, sleep.untilMorningSpeed x faster) stops at full energy or 06:00.
+ // Quota used up: after it stops at full energy the player still has to reach 06:00 -> manual 1-hour sleeps (30 s each).
+ const isMorning=()=>{const hhmm=(st.elapsedMinutes+st.clockOrigin)%1440;return hhmm>=S.dayStartMinute&&hhmm<S.dayStartMinute+60;};
+ const sleepHour=fast=>{const r=Life.run(cfg,st,'sleep',{});if(!r.ok)return false;st=r.state;sleeps++;
+  if(SLEEP==='realtime')real+=S.sleepMinutes*RSPM/(fast?FAST:1);else tick(ANIM_S);return true;};
  const sleepUntil=(energy,toMorning)=>{go('tent');let guard=0;
-  while(guard++<24){
-   const hhmm=(st.elapsedMinutes+st.clockOrigin)%1440;
-   const morning=toMorning&&!(hhmm>=S.dayStartMinute&&hhmm<S.dayStartMinute+60);
-   if(st.energy>=energy&&!morning)break;
-   const r=Life.run(cfg,st,'sleep',{});if(!r.ok)break;st=r.state;sleeps++;
-   if(SLEEP==='realtime')real+=S.sleepMinutes*RSPM;else tick(ANIM_S);
-  }};
+  do{if(!sleepHour(true))break;}while(guard++<24&&st.energy<100&&!isMorning());
+  if(toMorning){guard=0;while(guard++<24&&!isMorning())if(!sleepHour(false))break;}
+ };
  const needs=()=>{
   if(st.restMinutes>0){while(st.restMinutes>0)tick(15);go('tent');}
   if(st.bladder>=75){go('wc');if(!act('public_toilet',{facilityId:'wc'}).ok)act('wall_pee',{});}
