@@ -16,7 +16,8 @@ assert.deepEqual(Array.from(w.VLWorldStyle.footprint({
 assert.equal(w.VLSemestaTrafficFlow.lengthOf({vehicleId:'bus_transjakarta'}),2);
 assert.deepEqual(Array.from(bus.editorArtFootprint),[6.6,1.3]);
 assert.match(get('semesta-traffic-art.js'),/spec\.editorArtScale/);
-assert.match(get('semesta-traffic-art.js'),/spec\.editorArtFootprint\|\|spec\.editorFootprint/);
+assert.match(get('semesta-traffic-art.js'),/imageWidth\*PX/);
+assert.match(get('semesta-traffic-art.js'),/visualScale/);
 const engine=get('builder.js'),html=get('index.html');
 for(const id of ['markerVisibility','markerVisibilityTool','markerPicker','markerFind',
  'markerDelete','markerDeleteAll']) assert.match(html,new RegExp('id="'+id+'"'));

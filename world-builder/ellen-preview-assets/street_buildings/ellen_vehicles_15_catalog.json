@@ -1,0 +1,1109 @@
+{
+  "version": 1,
+  "projection": "isometric-2:1",
+  "tile": [
+    64,
+    32
+  ],
+  "palette": "v6b",
+  "count": 15,
+  "pack": "ellen-vehicles-15-preview",
+  "status": "PREVIEW only, branch preview/njh-sync-decisions-20261122",
+  "assets": [
+    {
+      "id": "id200_transport_angkot_kota",
+      "file": "pipeline:id200_transport_angkot_kota",
+      "label": "Angkot Kota",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        3.1,
+        1.15
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_angkot_kota_se.png",
+          "size": [
+            210,
+            216
+          ],
+          "pivot": [
+            95,
+            167
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_angkot_kota_sw.png",
+          "size": [
+            210,
+            216
+          ],
+          "pivot": [
+            96,
+            168
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_angkot_kota_ne.png",
+          "size": [
+            210,
+            208
+          ],
+          "pivot": [
+            96,
+            160
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_angkot_kota_nw.png",
+          "size": [
+            210,
+            208
+          ],
+          "pivot": [
+            95,
+            160
+          ]
+        }
+      },
+      "size": [
+        210,
+        216
+      ],
+      "pivot": [
+        95,
+        167
+      ],
+      "width": 4.64,
+      "height": 5.511
+    },
+    {
+      "id": "id200_transport_ambulans_puskesmas",
+      "file": "pipeline:id200_transport_ambulans_puskesmas",
+      "label": "Ambulans Puskesmas",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        3.1,
+        1.15
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_ambulans_puskesmas_se.png",
+          "size": [
+            210,
+            216
+          ],
+          "pivot": [
+            95,
+            168
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_ambulans_puskesmas_sw.png",
+          "size": [
+            210,
+            216
+          ],
+          "pivot": [
+            96,
+            168
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_ambulans_puskesmas_ne.png",
+          "size": [
+            210,
+            218
+          ],
+          "pivot": [
+            96,
+            169
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_ambulans_puskesmas_nw.png",
+          "size": [
+            210,
+            218
+          ],
+          "pivot": [
+            95,
+            169
+          ]
+        }
+      },
+      "size": [
+        210,
+        216
+      ],
+      "pivot": [
+        95,
+        168
+      ],
+      "width": 4.64,
+      "height": 5.511
+    },
+    {
+      "id": "id200_transport_bus_kota_kecil",
+      "file": "pipeline:id200_transport_bus_kota_kecil",
+      "label": "Bus Kota Kecil",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        4,
+        1.4
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_bus_kota_kecil_se.png",
+          "size": [
+            254,
+            240
+          ],
+          "pivot": [
+            117,
+            179
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_bus_kota_kecil_sw.png",
+          "size": [
+            254,
+            240
+          ],
+          "pivot": [
+            118,
+            179
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_bus_kota_kecil_ne.png",
+          "size": [
+            254,
+            240
+          ],
+          "pivot": [
+            118,
+            180
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_bus_kota_kecil_nw.png",
+          "size": [
+            254,
+            240
+          ],
+          "pivot": [
+            117,
+            180
+          ]
+        }
+      },
+      "size": [
+        254,
+        240
+      ],
+      "pivot": [
+        117,
+        179
+      ],
+      "width": 5.613,
+      "height": 6.124
+    },
+    {
+      "id": "id200_transport_elf_travel_antarkota",
+      "file": "pipeline:id200_transport_elf_travel_antarkota",
+      "label": "Elf Travel Antarkota",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        3.4,
+        1.2
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_elf_travel_antarkota_se.png",
+          "size": [
+            254,
+            240
+          ],
+          "pivot": [
+            117,
+            179
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_elf_travel_antarkota_sw.png",
+          "size": [
+            254,
+            240
+          ],
+          "pivot": [
+            118,
+            179
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_elf_travel_antarkota_ne.png",
+          "size": [
+            254,
+            240
+          ],
+          "pivot": [
+            118,
+            180
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_elf_travel_antarkota_nw.png",
+          "size": [
+            254,
+            240
+          ],
+          "pivot": [
+            117,
+            180
+          ]
+        }
+      },
+      "size": [
+        254,
+        240
+      ],
+      "pivot": [
+        117,
+        179
+      ],
+      "width": 5.613,
+      "height": 6.124
+    },
+    {
+      "id": "id200_transport_mobil_angkut_sampah",
+      "file": "pipeline:id200_transport_mobil_angkut_sampah",
+      "label": "Mobil Angkut Sampah",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        3.1,
+        1.2
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_mobil_angkut_sampah_se.png",
+          "size": [
+            210,
+            190
+          ],
+          "pivot": [
+            95,
+            142
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_mobil_angkut_sampah_sw.png",
+          "size": [
+            210,
+            192
+          ],
+          "pivot": [
+            96,
+            144
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_mobil_angkut_sampah_ne.png",
+          "size": [
+            210,
+            192
+          ],
+          "pivot": [
+            96,
+            144
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_mobil_angkut_sampah_nw.png",
+          "size": [
+            210,
+            192
+          ],
+          "pivot": [
+            95,
+            143
+          ]
+        }
+      },
+      "size": [
+        210,
+        190
+      ],
+      "pivot": [
+        95,
+        142
+      ],
+      "width": 4.64,
+      "height": 4.848
+    },
+    {
+      "id": "id200_transport_pikap_galon_isi_ulang",
+      "file": "pipeline:id200_transport_pikap_galon_isi_ulang",
+      "label": "Pikap Galon Isi Ulang",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        2.8,
+        1.1
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_pikap_galon_isi_ulang_se.png",
+          "size": [
+            210,
+            190
+          ],
+          "pivot": [
+            95,
+            142
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_pikap_galon_isi_ulang_sw.png",
+          "size": [
+            210,
+            178
+          ],
+          "pivot": [
+            96,
+            130
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_pikap_galon_isi_ulang_ne.png",
+          "size": [
+            210,
+            178
+          ],
+          "pivot": [
+            96,
+            130
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_pikap_galon_isi_ulang_nw.png",
+          "size": [
+            210,
+            192
+          ],
+          "pivot": [
+            95,
+            143
+          ]
+        }
+      },
+      "size": [
+        210,
+        190
+      ],
+      "pivot": [
+        95,
+        142
+      ],
+      "width": 4.64,
+      "height": 4.848
+    },
+    {
+      "id": "id200_transport_pikap_sayur_keliling",
+      "file": "pipeline:id200_transport_pikap_sayur_keliling",
+      "label": "Pikap Sayur Keliling",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        2.8,
+        1.1
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_pikap_sayur_keliling_se.png",
+          "size": [
+            210,
+            190
+          ],
+          "pivot": [
+            95,
+            142
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_pikap_sayur_keliling_sw.png",
+          "size": [
+            210,
+            174
+          ],
+          "pivot": [
+            96,
+            126
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_pikap_sayur_keliling_ne.png",
+          "size": [
+            210,
+            176
+          ],
+          "pivot": [
+            96,
+            127
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_pikap_sayur_keliling_nw.png",
+          "size": [
+            210,
+            192
+          ],
+          "pivot": [
+            95,
+            143
+          ]
+        }
+      },
+      "size": [
+        210,
+        190
+      ],
+      "pivot": [
+        95,
+        142
+      ],
+      "width": 4.64,
+      "height": 4.848
+    },
+    {
+      "id": "id200_transport_truk_material_bangunan",
+      "file": "pipeline:id200_transport_truk_material_bangunan",
+      "label": "Truk Material Bangunan",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        3.4,
+        1.2
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_truk_material_bangunan_se.png",
+          "size": [
+            210,
+            190
+          ],
+          "pivot": [
+            95,
+            142
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_truk_material_bangunan_sw.png",
+          "size": [
+            210,
+            174
+          ],
+          "pivot": [
+            96,
+            126
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_truk_material_bangunan_ne.png",
+          "size": [
+            210,
+            178
+          ],
+          "pivot": [
+            96,
+            129
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_truk_material_bangunan_nw.png",
+          "size": [
+            210,
+            192
+          ],
+          "pivot": [
+            95,
+            143
+          ]
+        }
+      },
+      "size": [
+        210,
+        190
+      ],
+      "pivot": [
+        95,
+        142
+      ],
+      "width": 4.64,
+      "height": 4.848
+    },
+    {
+      "id": "id200_transport_truk_pasir_proyek",
+      "file": "pipeline:id200_transport_truk_pasir_proyek",
+      "label": "Truk Pasir Proyek",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        3.4,
+        1.2
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_truk_pasir_proyek_se.png",
+          "size": [
+            210,
+            190
+          ],
+          "pivot": [
+            95,
+            142
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_truk_pasir_proyek_sw.png",
+          "size": [
+            210,
+            174
+          ],
+          "pivot": [
+            96,
+            126
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_truk_pasir_proyek_ne.png",
+          "size": [
+            210,
+            174
+          ],
+          "pivot": [
+            96,
+            126
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_truk_pasir_proyek_nw.png",
+          "size": [
+            210,
+            192
+          ],
+          "pivot": [
+            95,
+            143
+          ]
+        }
+      },
+      "size": [
+        210,
+        190
+      ],
+      "pivot": [
+        95,
+        142
+      ],
+      "width": 4.64,
+      "height": 4.848
+    },
+    {
+      "id": "id200_transport_bajaj_oranye",
+      "file": "pipeline:id200_transport_bajaj_oranye",
+      "label": "Bajaj Oranye",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        1.5,
+        1.0
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_bajaj_oranye_se.png",
+          "size": [
+            152,
+            162
+          ],
+          "pivot": [
+            66,
+            127
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_bajaj_oranye_sw.png",
+          "size": [
+            152,
+            162
+          ],
+          "pivot": [
+            67,
+            127
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_bajaj_oranye_ne.png",
+          "size": [
+            152,
+            162
+          ],
+          "pivot": [
+            67,
+            127
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_bajaj_oranye_nw.png",
+          "size": [
+            152,
+            162
+          ],
+          "pivot": [
+            66,
+            127
+          ]
+        }
+      },
+      "size": [
+        152,
+        162
+      ],
+      "pivot": [
+        66,
+        127
+      ],
+      "width": 3.359,
+      "height": 4.134
+    },
+    {
+      "id": "id200_transport_becak_kampung",
+      "file": "pipeline:id200_transport_becak_kampung",
+      "label": "Becak Kampung",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        1.6,
+        1.0
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_becak_kampung_se.png",
+          "size": [
+            152,
+            154
+          ],
+          "pivot": [
+            66,
+            119
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_becak_kampung_sw.png",
+          "size": [
+            152,
+            176
+          ],
+          "pivot": [
+            67,
+            140
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_becak_kampung_ne.png",
+          "size": [
+            152,
+            176
+          ],
+          "pivot": [
+            67,
+            140
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_becak_kampung_nw.png",
+          "size": [
+            152,
+            154
+          ],
+          "pivot": [
+            66,
+            119
+          ]
+        }
+      },
+      "size": [
+        152,
+        154
+      ],
+      "pivot": [
+        66,
+        119
+      ],
+      "width": 3.359,
+      "height": 3.929
+    },
+    {
+      "id": "id200_transport_bentor_roda_tiga",
+      "file": "pipeline:id200_transport_bentor_roda_tiga",
+      "label": "Bentor Roda Tiga",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        1.8,
+        1.0
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_bentor_roda_tiga_se.png",
+          "size": [
+            152,
+            154
+          ],
+          "pivot": [
+            66,
+            119
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_bentor_roda_tiga_sw.png",
+          "size": [
+            152,
+            176
+          ],
+          "pivot": [
+            67,
+            140
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_bentor_roda_tiga_ne.png",
+          "size": [
+            152,
+            176
+          ],
+          "pivot": [
+            67,
+            140
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_bentor_roda_tiga_nw.png",
+          "size": [
+            152,
+            154
+          ],
+          "pivot": [
+            66,
+            119
+          ]
+        }
+      },
+      "size": [
+        152,
+        154
+      ],
+      "pivot": [
+        66,
+        119
+      ],
+      "width": 3.359,
+      "height": 3.929
+    },
+    {
+      "id": "id200_transport_delman_andong",
+      "file": "pipeline:id200_transport_delman_andong",
+      "label": "Delman / Andong",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        2.6,
+        1.1
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_delman_andong_se.png",
+          "size": [
+            152,
+            170
+          ],
+          "pivot": [
+            66,
+            134
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_delman_andong_sw.png",
+          "size": [
+            154,
+            184
+          ],
+          "pivot": [
+            69,
+            148
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_delman_andong_ne.png",
+          "size": [
+            152,
+            184
+          ],
+          "pivot": [
+            67,
+            148
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_delman_andong_nw.png",
+          "size": [
+            154,
+            172
+          ],
+          "pivot": [
+            69,
+            137
+          ]
+        }
+      },
+      "size": [
+        152,
+        170
+      ],
+      "pivot": [
+        66,
+        134
+      ],
+      "width": 3.359,
+      "height": 4.338
+    },
+    {
+      "id": "id200_transport_sepeda_ontel_tua",
+      "file": "pipeline:id200_transport_sepeda_ontel_tua",
+      "label": "Sepeda Ontel Tua",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        1.3,
+        0.7
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_sepeda_ontel_tua_se.png",
+          "size": [
+            124,
+            116
+          ],
+          "pivot": [
+            53,
+            89
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_sepeda_ontel_tua_sw.png",
+          "size": [
+            124,
+            108
+          ],
+          "pivot": [
+            53,
+            81
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_sepeda_ontel_tua_ne.png",
+          "size": [
+            124,
+            106
+          ],
+          "pivot": [
+            53,
+            79
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_sepeda_ontel_tua_nw.png",
+          "size": [
+            124,
+            114
+          ],
+          "pivot": [
+            53,
+            87
+          ]
+        }
+      },
+      "size": [
+        124,
+        116
+      ],
+      "pivot": [
+        53,
+        89
+      ],
+      "width": 2.74,
+      "height": 2.96
+    },
+    {
+      "id": "id200_transport_sepeda_tukang_roti",
+      "file": "pipeline:id200_transport_sepeda_tukang_roti",
+      "label": "Sepeda Tukang Roti",
+      "group": "prop",
+      "source": "pipeline-street",
+      "country": "ID",
+      "pack": "ellen-vehicles-15-preview",
+      "note": "Ellen B1/B2/B4-R2 redesign, preview only. Not a replacement for the 4 NJH map traffic vehicles.",
+      "category": "transport",
+      "published": true,
+      "collision": true,
+      "footprint": [
+        1.3,
+        0.7
+      ],
+      "variants": {
+        "se": {
+          "file": "props/id200_transport_sepeda_tukang_roti_se.png",
+          "size": [
+            124,
+            116
+          ],
+          "pivot": [
+            53,
+            89
+          ]
+        },
+        "sw": {
+          "file": "props/id200_transport_sepeda_tukang_roti_sw.png",
+          "size": [
+            124,
+            130
+          ],
+          "pivot": [
+            53,
+            103
+          ]
+        },
+        "ne": {
+          "file": "props/id200_transport_sepeda_tukang_roti_ne.png",
+          "size": [
+            124,
+            132
+          ],
+          "pivot": [
+            53,
+            104
+          ]
+        },
+        "nw": {
+          "file": "props/id200_transport_sepeda_tukang_roti_nw.png",
+          "size": [
+            124,
+            114
+          ],
+          "pivot": [
+            53,
+            87
+          ]
+        }
+      },
+      "size": [
+        124,
+        116
+      ],
+      "pivot": [
+        53,
+        89
+      ],
+      "width": 2.74,
+      "height": 2.96
+    }
+  ]
+}

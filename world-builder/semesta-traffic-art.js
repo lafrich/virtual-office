@@ -1,6 +1,6 @@
-/* Semesta · authored pixel-preview renderer.
- * Upstream cars and job-NPC PNGs are not published in this repository.
- * These temporary sprites are intentionally distinct from canonical assets.
+/* Semesta · street vehicle renderer.
+ * Play mode uses real pipeline PNGs (cars/* and riders_v3/frames/*).
+ * Canvas proxy drawings exist only as a non-play helper and must not appear in-world.
  */
 (function(g){
 'use strict';
@@ -11,7 +11,7 @@ const wheelGround=g.VLSemestaWheelGround;
 // Mahluk Hidup published street sprites: real transparent PNGs are preferred
 // over Semesta previews, with a safe preview fallback while source deploys.
 const SOURCE=new URL('/virtual-life-asset-pipeline/assets/street_vehicles/',location.origin);
-const originalCache=new Map(),missingOriginals=new Set(),pendingOriginals=new Map();
+const originalCache=new Map(),missingOriginals=new Map(),pendingOriginals=new Map();
 const validPath=/^(?:cars|riders)\/[a-z0-9_-]+_(?:se|sw|ne|nw)\.png$/;
 // These are the true v3 Mahluk Hidup rider dimensions/pivots, not the
 // 80x116 legacy placeholders. Never rescale a 54x92 rider into an 80x116 box.
@@ -33,44 +33,48 @@ function sourceURL(spec,dir,variant='v3',frame=0){
 function sourcePublished(id){return originalCache.has(originalKey(id,'se'));}
 function originalCount(){return [...new Set([...originalCache.keys()].map(k=>k.split(':')[0]))].length;}
 function retrySources(){missingOriginals.clear();}
+const RETRY_MS=2000;
 function requestOriginal(THREE,spec,dir,frame=0){
  frame=RIDER_V3[spec.id]?Math.max(0,Math.min(3,frame|0)):0;
  const key=originalKey(spec.id,dir,frame),known=originalCache.get(key);
  if(known)return Promise.resolve(known);
- if(missingOriginals.has(key))return Promise.resolve(null);
+ const miss=missingOriginals.get(key);
+ if(miss&&(Date.now()-miss)<RETRY_MS)return Promise.resolve(null);
  if(pendingOriginals.has(key))return pendingOriginals.get(key);
  const v3=RIDER_V3[spec.id];
- const candidates=v3?[
-  {url:sourceURL(spec,dir,'v3',frame),size:v3.size,pivot:v3.pivot},
-  ...(frame===0?[{url:sourceURL(spec,dir,'legacy'),size:spec.size,pivot:spec.pivot}]:[])
- ]:[{url:sourceURL(spec,dir,'legacy'),size:spec.size,pivot:spec.pivot}];
+ // Play uses riders_v3 (or car PNGs). Never fall back to the legacy 80x116 riders/.
+ const source=v3?{url:sourceURL(spec,dir,'v3',frame),size:v3.size,pivot:v3.pivot}:
+  {url:sourceURL(spec,dir,'legacy'),size:spec.size,pivot:spec.pivot};
  const task=new Promise(resolve=>{
-   let index=0;
-   function next(){
-     const source=candidates[index++];
-     if(!source){missingOriginals.add(key);resolve(null);return;}
-     if(!source.url){next();return;}
+     if(!source.url){missingOriginals.set(key,Date.now());resolve(null);return;}
      const img=new Image();img.decoding='async';
      img.onload=()=>{
-       if(img.naturalWidth!==source.size[0]||img.naturalHeight!==source.size[1]){
-         next();return;
+       // Plane uses natural size; catalog/v3 size is the expected default.
+       if(!img.naturalWidth||!img.naturalHeight){
+         missingOriginals.set(key,Date.now());resolve(null);return;
        }
        const tex=new THREE.Texture(img);
-       tex.userData={pivotRatio:source.pivot[1]/source.size[1]};
+       const pivot=source.pivot||spec.pivot;
+       const size=source.size||spec.size;
+       tex.userData={pivotRatio:pivot[1]/size[1],pivot,naturalSize:[img.naturalWidth,img.naturalHeight]};
        tex.colorSpace=THREE.SRGBColorSpace;
        tex.minFilter=tex.magFilter=THREE.NearestFilter;
        tex.generateMipmaps=false;tex.needsUpdate=true;
        originalCache.set(key,tex);
+       missingOriginals.delete(key);
        if(dir==='se'&&typeof g.dispatchEvent==='function'&&typeof CustomEvent!=='undefined')
          g.dispatchEvent(new CustomEvent('semesta-vehicle-source-loaded',{detail:{id:spec.id}}));
        resolve(tex);
      };
-     img.onerror=next;
+     img.onerror=()=>{missingOriginals.set(key,Date.now());resolve(null);};
      img.src=source.url;
-   }
-   next();
  }).finally(()=>pendingOriginals.delete(key));
  pendingOriginals.set(key,task);return task;
+}
+function preloadVehicle(THREE,spec){
+ const dirs=['se','sw','ne','nw'];
+ const frames=RIDER_V3[spec?.id]?4:1;
+ return Promise.all(dirs.flatMap(dir=>Array.from({length:frames},(_,f)=>requestOriginal(THREE,spec,dir,f))));
 }
 function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 function line(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
@@ -206,12 +210,8 @@ function vehiclePreview(id,dir='se'){
  const original=originalCache.get(originalKey(id,side,0));
  const image=original?.image;
  if(image?.naturalWidth>0&&image?.naturalHeight>0&&image.src)return image.src;
- const key=id+':'+side;
- if(vehiclePreviewCache.has(key))return vehiclePreviewCache.get(key);
- let url=null;
- try{url=trimPreview(vehicleCanvas(id,side));}catch{}
- if(url)vehiclePreviewCache.set(key,url);
- return url;
+ // Never show a canvas proxy in the Asset Library. Wait for the real PNG.
+ return null;
 }
 
 /*
@@ -276,81 +276,69 @@ function texture(THREE,id,dir){
  tex.magFilter=tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;
  cache.set(key,tex);return tex;
 }
+function emptyTexture(THREE){
+ if(emptyTexture._tex)return emptyTexture._tex;
+ const c=canvas(1,1);c.getContext('2d').clearRect(0,0,1,1);
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
+ tex.magFilter=tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;
+ emptyTexture._tex=tex;return tex;
+}
 function vehicleGraphic(THREE,record){
  const spec=g.VLSemestaCatalog.vehicle(record.vehicleId)||g.VLSemestaCatalog.vehicles[0];
- const scale=record.scale||1;
  const visualScale=Number(spec.editorArtScale)||1;
- // Artwork uses the native world ratio; editorFootprint is exclusively
- // for traffic occupancy and must not shrink a bus's image to collision size.
- const artFootprint=spec.editorArtFootprint||spec.editorFootprint||spec.footprint||[2.9,1];
- const w=Math.max(.7,Math.min(spec.size[0]*PX*visualScale,artFootprint[0]*.95));
- // Alpha-56 artwork shadow must never write depth or sink into road.
- // Native tyres stay opaque and depth-test against actual 3D objects.
- const mat=new THREE.MeshBasicMaterial({map:texture(THREE,spec.id,'se'),transparent:false,
-  alphaTest:.55,depthTest:true,depthWrite:true,side:THREE.DoubleSide});
- // IMPORTANT: preview image dimensions are 160×108, while the original
- // Vehicle Pipeline images are often 146×138 or 272×256. Reusing the source
- // sheet's plane height for the preview distorted cars and planted their
- // lower pixels below asphalt. Compute the actual plane from the active art.
- const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,1),mat);
+ // Plane = loaded image naturalW*PX x naturalH*PY. footprint is traffic/collision only.
+ const allowOriginal=!record.assetPath;
+ const mat=new THREE.MeshBasicMaterial({map:emptyTexture(THREE),
+  transparent:true,alphaTest:.01,depthTest:true,depthWrite:true,side:THREE.DoubleSide});
+ const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1,1),mat);
+ mesh.visible=false;
  const sourcePivot=spec.pivot[1]/spec.size[1];
- function setGroundPivot(original=false){
+ const PY=PX*VCOMP;
+ function setGroundPivot(){
   const image=mat.map?.image;
-  const imageWidth=Number(image?.naturalWidth||image?.width)||160;
-  const imageHeight=Number(image?.naturalHeight||image?.height)||108;
-  // Frame proportions follow the ACTUAL image, not the unrelated source
-  // atlas dimensions. Footprint/traffic/route scale remain untouched.
-  let height=w*(imageHeight/imageWidth)*VCOMP;
-  if(spec.group==='motor'&&!original)height=Math.max(1.45,height);
-  // Pipeline pivot is the FLOOR FOOTPRINT CENTRE and may have visible
-  // near-side wheels beneath it. Ground the true opaque tyre silhouette,
-  // for BOTH canvas previews and loaded HTMLImageElements.
-  const fallback=original===true?(mat.map?.userData?.pivotRatio??sourcePivot):
-   (original==='fitted'?sourcePivot:.935);
-  const contact=wheelGround?.contact(image,fallback)||
-   {ratio:fallback,row:null,source:'authored-fallback'};
+  const imageWidth=Number(image?.naturalWidth||image?.width)||spec.size[0];
+  const imageHeight=Number(image?.naturalHeight||image?.height)||spec.size[1];
+  const w=imageWidth*PX*visualScale;
+  const height=imageHeight*PY*visualScale;
+  const pivotRatio=mat.map?.userData?.pivotRatio??sourcePivot;
   if(mesh.geometry)mesh.geometry.dispose();
   mesh.geometry=new THREE.PlaneGeometry(w,height);
-  mesh.position.y=wheelGround?.pivotHeight(height,contact.ratio)??height*(contact.ratio-.5)+.027;
-  mesh.userData.groundClearance=wheelGround?.GROUND_CLEARANCE??.027;
-  mesh.userData.sourcePivotUsed=original===true;
+  mesh.position.y=height*(pivotRatio-.5);
+  mesh.userData.groundClearance=0;
+  mesh.userData.sourcePivotUsed=true;
   mesh.userData.effectiveImageSize=[imageWidth,imageHeight];
-  mesh.userData.groundPivot=contact.ratio;
-  mesh.userData.groundContactSource=contact.source;
-  mesh.userData.groundContactRow=contact.row;
+  mesh.userData.planeWorld=[w,height];
+  mesh.userData.groundPivot=pivotRatio;
+  mesh.userData.groundContactSource='manifest-pivot';
  }
- setGroundPivot(false);
  mesh.userData.semestaVehicle=true;mesh.userData.assetPublished=false;
  mesh.userData.catalogId=spec.id;
+ mesh.userData.playUsesOriginal=allowOriginal;
  let direction='se',displayedFrame=0,disposed=false;
- const allowOriginal=!record.assetPath;
+ function applyTex(actual){
+  if(!actual)return;
+  mat.map=actual;mat.needsUpdate=true;mat.alphaTest=.55;mat.transparent=false;
+  mesh.userData.assetPublished=true;mesh.visible=true;
+  setGroundPivot();
+ }
  function show(dir,frame=0){
    frame=RIDER_V3[spec.id]?frame:0;
    displayedFrame=frame;
    const key=originalKey(spec.id,dir,frame);
    const baseKey=originalKey(spec.id,dir,0);
-   const base=allowOriginal&&originalCache.get(baseKey);
-   const ready=allowOriginal&&(originalCache.get(key)||base);
-   mat.map=ready||texture(THREE,spec.id,dir);mat.needsUpdate=true;
-   setGroundPivot(!!ready);
-   mesh.userData.assetPublished=!!ready;
-   if(!ready&&allowOriginal&&frame>0){
-     requestOriginal(THREE,spec,dir,0).then(actual=>{
-       if(disposed||direction!==dir||displayedFrame!==frame||!actual)return;
-       mat.map=actual;mat.needsUpdate=true;mesh.userData.assetPublished=true;
-       setGroundPivot(true);
-     });
-   }
-   if(allowOriginal && !originalCache.has(key))requestOriginal(THREE,spec,dir,frame).then(actual=>{
+   const ready=originalCache.get(key)||originalCache.get(baseKey);
+   if(ready){applyTex(ready);return;}
+   mesh.visible=false;mesh.userData.assetPublished=false;
+   mat.map=emptyTexture(THREE);mat.needsUpdate=true;
+   requestOriginal(THREE,spec,dir,frame).then(actual=>{
      if(disposed||direction!==dir||displayedFrame!==frame||!actual)return;
-     mat.map=actual;mat.needsUpdate=true;mesh.userData.assetPublished=true;
-     setGroundPivot(true);
+     applyTex(actual);
    });
  }
+ if(allowOriginal)preloadVehicle(THREE,spec);
  show('se');
  return {mesh,setGroundPivot,update(dir,camera,root){
    if(!spec.views?.[dir])dir='se';
-   // Four real Mahluk Hidup rider frames cycle every 120ms; cars stay static.
    const frame=RIDER_V3[spec.id]?Math.floor(Date.now()/120)%4:0;
    if(dir!==direction||frame!==displayedFrame){direction=dir;show(dir,frame);}
    if(camera)mesh.rotation.y=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y;
@@ -429,5 +417,5 @@ function questGraphic(THREE,record){
    mesh.rotation.y=Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y;
  },dispose(){mesh.geometry.dispose();mat.dispose();tex.dispose();}};
 }
-g.VLSemestaArt=Object.freeze({sourcePublished,originalCount,retrySources,vehicleGraphic,questGraphic,vehicleCanvas,vehiclePreview,vehiclePreviewAsync,questPreview});
+g.VLSemestaArt=Object.freeze({sourcePublished,originalCount,retrySources,preloadVehicle,vehicleGraphic,questGraphic,vehicleCanvas,vehiclePreview,vehiclePreviewAsync,questPreview});
 })(window);

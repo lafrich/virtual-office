@@ -87,7 +87,7 @@ function renderPanel(){
  },true);
  card('JOBS / COURSES',c=>{
   c.append(field('Jobs enabled',check(m.jobs.enabled,v=>patch(g=>g.modules.jobs.enabled=v))));
-  c.append(field('Daily wage cap (Rp)',number(m.jobs.dailyWageCap,0,100000,100,v=>patch(g=>g.modules.jobs.dailyWageCap=v))));
+  c.append(field('Daily wage cap (Rp)',number(m.jobs.dailyWageCap,0,1000000,100,v=>patch(g=>g.modules.jobs.dailyWageCap=v))));
   c.append(field('Courses enabled',check(m.courses.enabled,v=>patch(g=>g.modules.courses.enabled=v))));
   c.append(field('Course XP cap / day',number(m.courses.dailyXpCap,0,150,5,v=>patch(g=>g.modules.courses.dailyXpCap=v))));
  });

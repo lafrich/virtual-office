@@ -153,3 +153,18 @@ Catatan singkat biar kesalahan mekanik yang sudah ketemu tidak diulang. Entri ya
 - **Perbaikan:** Di HP (`pointer:coarse`) + potret, bungkus shell di `#njhStage`, tukar ukuran menjadi (tinggi viewport × lebar viewport), lalu `rotate(90deg) translateY(-100%)`. Tidak ada overlay/alertdialog. Joystick, `fitWin`, dan marker memakai `clientToStage` / `localRect` supaya koordinat pointer ikut terpetakan. Landscape asli dan desktop tidak diputar. `screen.orientation.lock('landscape')` tetap dicoba setelah gestur fullscreen, gagal dengan tenang.
 - **Aturan:** Jangan kembalikan gerbang blocking atau bypass "Lanjut bermain". Window-fit 390×844 harus menampilkan game landscape yang diputar, tanpa crop.
 - **Cek:** `node --test tests/njh98-window-fit.test.cjs`; `node mainkan/tools/njh98-window-fit.mjs` (390×844 = stage ter-rotate, semua jendela tanpa crop); e2e `tests/mainkan-native-semesta.e2e.cjs` menuntut force-landscape di potret dan tanpa transform di landscape.
+
+## 21. Kendaraan play: plane dari ukuran gambar, pivot manifest, tanpa fallback kanvas
+
+- **Error:** Di play, motor/mobil muncul sebagai siluet kanvas (atau menghilang/geser) meski PNG `riders_v3` dan mobil lolos QA Ellen. Sedan terlihat ~26 px terlalu tinggi.
+- **Penyebab:** `vehicleGraphic` men-clamp lebar ke `footprint*0.95`, menanam pivot di baris ban (`wheelGround.contact`) bukan pivot footprint-centre, dan saat PNG belum termuat (atau gagal sekali) memakai `vehicleCanvas`/`riderPreview`. Kandidat legacy 80×116 ikut ditawarkan ke pemuat. Library Aset juga bisa menampilkan proxy kanvas.
+- **Aturan:** Plane = `naturalWidth*PX × naturalHeight*PY` (kala × `editorArtScale`). `footprint` hanya untuk lalu lintas/tabrakan, bukan seni. Jangkar = `pivot` dari manifest/katalog v3, bukan baris ban. Sembunyikan mesh sampai tekstur asli siap; preload 4 arah × frame; gagal muat boleh di-retry, jangan menempel `missingOriginals` selamanya; jangan fallback ke kanvas di play atau pratinjau Asset Library. Jangan menuliskan ukuran v3 ke `street_vehicles/manifest.json` lama (itu milik PNG `riders/` legacy). Alias id `njh-vehicle-angkot` → `sedan`.
+- **Cek:** `node --test tests/njh-sync-decisions.test.cjs` (ukuran v3, tanpa clamp, pivot manifest, alias sedan). QA PNG Ellen: keempat kendaraan LULUS, tidak perlu redraw.
+
+## 22. Tukar sajadah & gerobak siomay: cadangkan dulu, hapus semua rujukan penanda
+
+- **Error:** `object:njh_penanda_doa` (empat PNG placeholder) dan `pipeline:lapak_tas` (bukan gerobak siomay) masih tampil di peta. Setelah swap, rujukan lama bisa menghidupkan slab jika tersisa di PROP_DEFS, pendingAssets, atau folder props.
+- **Penyebab:** Placeholder terdaftar di city, PROP_DEFS, KEY_MAP, meta pendingAssets, dan `props/njh_penanda_doa/`.
+- **Aturan:** Cadangkan PNG lama ke folder backup (`props/_backup-20261122/`) lalu hapus keempat file live. Objek kota dan interactable memakai `pipeline:id_mainkan_prayer_mat` / `pipeline:id_mainkan_siomay_cart` dengan kunci iso 2.232×3.674, footprint 2×1, jangkar dan `pray_generic` tetap. KEY_MAP lama `object:obj-njh-penanda-doa` mengarah ke prayer_mat (save lama tidak menghidupkan slab). Hapus baris PROP_DEFS dan pendingAssets. Jangan hapus PNG `lapak_tas` (aset pipeline sah). Setelah swap, petak use dan jalur jalan harus tetap kosong.
+- **Cek:** `node --test tests/njh-sync-decisions.test.cjs` dan `tests/njh-map-preview.test.cjs`. Use sajadah tetap `[−11.5, 24.5]`; siomay `[−22.5, 38.5]`.
+

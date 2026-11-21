@@ -879,7 +879,7 @@ function doorList(){
  const S=sp();
  // Real interior doors only. Never show outside glints while indoors.
  try{if(world()?.__njhPlayInteriors?.active?.())return [];}catch{}
- if(typeof S?.enterables==='function'){try{return (S.enterables()||[]).map(d=>({id:'d:'+d.id,x:+d.x,z:+d.z,name:d.name||'Bangunan',sample:false}));}catch{return [];}}
+ if(typeof S?.enterables==='function'){try{return (S.enterables()||[]).map(d=>({id:'d:'+d.id,x:+d.x,z:+d.z,name:d.name||'Bangunan',sample:false,closed:!!d.closed}));}catch{return [];}}
  let dir=[];try{dir=S?.worldDirectory?.()||[];}catch{}
  const real=dir.filter(o=>o.enterable).map(o=>({id:'d:'+o.id,x:o.x,z:o.z,name:o.name||o.label||'Bangunan',sample:false}));
  if(real.length||!demo)return real;
@@ -924,7 +924,8 @@ function paintMarks(){
   for(const r of reacts){const p=project(r.x,2.15,r.z,rect,me);if(!p)continue;const el=mark(r.id,'njh-emote','<b>~</b>');el.style.transform='translate('+Math.round(p.x)+'px,'+Math.round(p.y)+'px)';}
   if(best){
    doorNear=best.id;doorNearObj=best;const g=markPool.get(best.id);if(g)g._live=false;
-   const el=mark('tip','njh-doortip','<b>'+esc(best.name)+'</b> · Masuk ['+(coarse()?'AKSI':'E')+']'+(best.sample?'<span class="njh-soon nologic">CONTOH</span>':''));
+   const doorHint=best.closed?'Belum buka':'Masuk';
+   const el=mark('tip','njh-doortip','<b>'+esc(best.name)+'</b> · '+doorHint+' ['+(coarse()?'AKSI':'E')+']'+(best.sample?'<span class="njh-soon nologic">CONTOH</span>':''));
    // the door tooltip never covers the player's "!" cue: lift it above the bubble when they would meet
    // …nor an NPC's quest "!" (marker box spans y-26…y-4): stack the tooltip above whatever it would cover
    let ty=hp&&Math.abs(best.p.x-hp.x)<180?Math.min(best.p.y,hp.y-20):best.p.y;

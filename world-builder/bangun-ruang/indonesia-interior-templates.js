@@ -77,7 +77,9 @@ const types={
  njh_papan_promo:prop('Papan Promo NJH Mart','Toko','▣',1,1,'browse','whiteboard'),
  njh_counter_kasir:prop('Meja Kasir NJH Mart','Toko','▣',2,1,'pay,buy,sell','cashier'),
  njh_counter_kopi:prop('Counter Kopi NJH Mart','Toko','▤',3,1,'brew,pay','counter'),
- njh_mesin_kopi:prop('Mesin Kopi NJH Mart','Toko','◈',1,1,'brew','coffee_machine')
+ njh_mesin_kopi:prop('Mesin Kopi NJH Mart','Toko','◈',1,1,'brew','coffee_machine'),
+ npc_njh_minimarket_kasir:prop('Kasir NJH Mart','Toko','👤',1,1,'talk,buy,sell','npc_ibu_warteg'),
+ npc_njh_minimarket_staff:prop('Staf NJH Mart','Toko','👤',1,1,'talk','npc_ibu_warteg')
 };
 const templates={};
 const rows=[
@@ -158,6 +160,10 @@ for(const [category,label,theme,recipe] of rows){
  const items=assets.map((assetId,i)=>[assetId,...anchors[i%anchors.length]]);
  templates[key]={label:category+' · '+label,category,theme,min:category==='Rumah'?[5,4]:[8,6],items,source:'indonesia-interior-pack-v1'};
 }
+// Ellen r1 furniture-only Bangun templates (preview): authored layouts, not auto-anchored recipes.
+templates['id_tpl_rumah_biasa']={label:'Rumah · Rumah Biasa (2 kamar fungsi)',category:'Rumah',theme:'warm',min:[8, 6],items:[["bed", 0.0, 0.0], ["fan", 0.25, 0.0], ["wardrobe", 0.0, 0.3333], ["stove", 0.375, 0.0], ["kitchen_sink", 0.5, 0.0], ["fridge", 0.625, 0.0], ["rice_cooker", 0.625, 0.3333], ["water_dispenser", 0.375, 0.3333], ["water_tub", 0.75, 0.0], ["squat_toilet", 0.875, 0.0], ["sink", 0.875, 0.3333], ["tv", 0.0, 0.5], ["sofa", 0.0, 0.8333], ["shoe_rack", 0.25, 0.8333], ["dining_table", 0.75, 0.6667], ["chair", 0.875, 0.5], ["chair", 0.875, 0.8333]],source:'indonesia-interior-pack-v1',authoredFrom:'bangun-interior-templates-r1'};
+templates['id_tpl_warung_makan']={label:'Kuliner · Warung Makan Kampung',category:'Kuliner',theme:'warm',min:[8, 6],items:[["stove", 0.0, 0.0], ["noodle_pot", 0.125, 0.0], ["kitchen_sink", 0.25, 0.0], ["dish_rack", 0.375, 0.0], ["fridge", 0.625, 0.0], ["shelf", 0.75, 0.0], ["market_crate", 0.875, 0.1667], ["food_vitrine", 0.125, 0.3333], ["cashier", 0.5, 0.3333], ["water_dispenser", 0.75, 0.3333], ["drink_cooler", 0.875, 0.3333], ["dining_table", 0.0, 0.6667], ["wooden_bench", 0.0, 0.8333], ["dining_table", 0.625, 0.6667], ["wooden_bench", 0.625, 0.8333], ["trash_bin", 0.875, 0.8333], ["fan", 0.5, 0.6667]],source:'indonesia-interior-pack-v1',authoredFrom:'bangun-interior-templates-r1'};
+templates['id_tpl_wc_umum']={label:'Publik · WC Umum Bilik',category:'Publik',theme:'aqua',min:[8, 6],items:[["squat_toilet", 0.0, 0.0], ["water_tub", 0.125, 0.0], ["squat_toilet", 0.25, 0.0], ["water_tub", 0.375, 0.0], ["squat_toilet", 0.5, 0.0], ["water_tub", 0.625, 0.0], ["wc", 0.75, 0.0], ["sink", 0.875, 0.0], ["sink", 0.0, 0.6667], ["sink", 0.125, 0.6667], ["trash_bin", 0.25, 0.6667], ["cashier", 0.75, 0.6667], ["chair", 0.875, 0.8333], ["waiting_bench", 0.0, 0.8333]],source:'indonesia-interior-pack-v1',authoredFrom:'bangun-interior-templates-r1'};
 function pairTemplateChairs(){
  const CHAIR=new Set(['chair']);
  const TABLE=new Set(['table','dining_table','counter','food_vitrine','cashier','desk','study_desk','workbench','registration_desk','checkout','laundry_counter']);

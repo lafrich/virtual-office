@@ -13,9 +13,9 @@ const OPT=Object.freeze({
  hair:["none","short","swept","mid_curtain","mid","wavy","wavy_curtain","long","long_curtain"],
  hairColor:["black","navy","brown","chestnut","blonde","red","white","pink"],
  skin:["porcelain","light","tan","medium","brown","deep"],
- top:["nude","tee","tee_long","tee_graphic","shirt","shirt_tie","cardigan","cardigan_dots","custom"],
+ top:["nude","tee","tee_v4","tee_long","tee_graphic","shirt","shirt_tie","cardigan","cardigan_dots","custom"],
  topColor:["charcoal","white","navy","red","green","mustard","sky","pink"],
- pants:["nude","trousers","trousers_ripped","baggy","baggy_ripped","custom"],
+ pants:["nude","trousers","trousers_v4","trousers_ripped","baggy","baggy_ripped","custom"],
  pantsColor:["slate","night","denim","khaki","olive","grey"],
  shoes:["nude","shoes","sneakers","boots","hightops","custom"],
  shoesColor:["walnut","black","white","red","navy","tan"],
@@ -183,10 +183,12 @@ function resolvePart(part,profile){
  if(part==="top/custom_back"||part==="top/custom"||part==="pants/custom"||part==="shoes/custom")return path(part,profile);
  return CDN+part+".png";
 }
+const EMOSI_ALIASES=Object.freeze({jijik:'universal-grimace',disgust:'universal-grimace'});
 function expressionFor(name){
  if(!EMOSI)return null;
- const key=EMOSI.contexts?.[name]||EMOSI.contexts?.neutral;
- return EMOSI.emotions?.find(e=>e.id===key)||null;
+ const aliased=EMOSI_ALIASES[name]||name;
+ const key=EMOSI.contexts?.[aliased]||EMOSI.contexts?.[name]||EMOSI.contexts?.neutral;
+ return EMOSI.emotions?.find(e=>e.id===key)||EMOSI.emotions?.find(e=>e.id===aliased)||null;
 }
 function imageStatus(input,emotion="neutral",dir="se"){
  const profile=normalizeProfile(input);
@@ -341,5 +343,6 @@ function debug(profile){
  });
 }
 function renderer(){return {wanted:RENDERER,active:useLGR()?"lgr":(lgrPending()?"lgr-loading":"v6p"),error:lgr.error?String(lgr.error.message||lgr.error):null,lgr:root?.LGRGame?.status?.()||null}}
-return Object.freeze({IDs,normalizeProfile,draw,directPreview,createRig,expressionFor,imageStatus,debug,renderer,loadLGR});
+const OFFICIAL_LGR_PACKS=Object.freeze({male:'official-8',female:'official-9'});
+return Object.freeze({IDs,normalizeProfile,draw,directPreview,createRig,expressionFor,imageStatus,debug,renderer,loadLGR,OFFICIAL_LGR_PACKS,EMOSI_ALIASES});
 });

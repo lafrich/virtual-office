@@ -9,13 +9,14 @@ const g={dispatchEvent(ev){events.push(ev.type);}};
 class FakeImage {
  constructor(){this.onload=null;this.onerror=null;this.naturalWidth=0;this.naturalHeight=0;}
  set src(url){
-  requested.push(url);
-  const bus=/bus_transjakarta/.test(url),gojek=/gojek/.test(url);
+  this._src=url;requested.push(url);
+  const bus=/bus_transjakarta/.test(url),gojek=/\/gojek_/.test(url)||/gojek_se|gojek_sw|gojek_ne|gojek_nw/.test(url);
   if(bus||gojek){
-   this.naturalWidth=bus?272:80;this.naturalHeight=bus?256:116;
+   this.naturalWidth=bus?272:60;this.naturalHeight=bus?256:87;
    queueMicrotask(()=>this.onload?.());
   }else queueMicrotask(()=>this.onerror?.());
  }
+ get src(){return this._src;}
 }
 class FakeMaterial {constructor(opts){Object.assign(this,opts)}dispose(){}}
 const THREE={
@@ -25,7 +26,7 @@ const THREE={
  Mesh:class {constructor(geo,mat){this.geometry=geo;this.material=mat;
   this.position={y:0};this.rotation={y:0};this.userData={};}}
 };
-const draw={fillRect(){},beginPath(){},ellipse(){},arc(){},fill(){},moveTo(){},lineTo(){},closePath(){},drawImage(){},translate(){},scale(){}};
+const draw={fillRect(){},clearRect(){},beginPath(){},ellipse(){},arc(){},fill(){},moveTo(){},lineTo(){},closePath(){},drawImage(){},translate(){},scale(){}};
 const ctx=vm.createContext({
  window:g,location:{origin:'https://lafrich.github.io'},URL,Map,Set,Promise,
  Image:FakeImage,CustomEvent:class{constructor(type){this.type=type}},
@@ -48,11 +49,11 @@ const art=g.VLSemestaArt;
  assert.equal(art.originalCount(),2);
  assert.deepEqual(Array.from(g.VLSemestaCatalog.editorFootprint('bus_transjakarta')),[2,1]);
  assert.ok(requested.some(u=>u.endsWith('/assets/street_vehicles/cars/bus_transjakarta_se.png')));
- assert.ok(requested.some(u=>u.endsWith('/assets/street_vehicles/riders/gojek_se.png')));
+ assert.ok(requested.some(u=>/riders_v3\/frames\/gojek_se_f0\.png$/.test(u)));
  assert.ok(events.includes('semesta-vehicle-source-loaded'));
  bus.update('nw',{position:{x:5,z:6}},{position:{x:0,z:0},rotation:{y:0}});
  await new Promise(resolve=>setImmediate(resolve));
- assert.match(bus.mesh.material.map.image.src||requested.at(-1),/bus_transjakarta_nw\.png/);
+ assert.ok((bus.mesh.material.map.image.src||'').includes('bus_transjakarta_nw.png')||requested.some(u=>/bus_transjakarta_nw\.png/.test(u)));
  assert.equal(bus.mesh.material.transparent,false,'vehicle depth buffer uses alpha cutouts, not sorted transparent billboards');
  assert.equal(bus.mesh.material.depthWrite,true);
  for(const a of [bus,motor,missing])a.dispose();
@@ -61,5 +62,5 @@ const art=g.VLSemestaArt;
  assert.match(builder,/semesta-vehicle-source-loaded/);
  assert.match(builder,/trafficArt\?\.retrySources\(\)/);
  assert.match(html,/semesta-traffic-art\.js\?v=[A-Za-z0-9_-]+/);
- console.log('PASS Semesta Mahluk transport original PNG source, 4-view loading, preview fallback, 2-grid TransJakarta');
+ console.log('PASS Semesta Mahluk transport original PNG source, 4-view loading, hide-until-loaded, 2-grid TransJakarta');
 })().catch(e=>{console.error(e);process.exitCode=1});

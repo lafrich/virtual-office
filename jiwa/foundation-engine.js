@@ -35,7 +35,7 @@
  const int=(v,min,max,fallback)=>{const n=Number(v);return Number.isFinite(n)?Math.min(max,Math.max(min,Math.round(n))):fallback;};
  const txt=(v,max)=>String(v==null?'':v).slice(0,max);
  function defaultFoundation(){
-  return {version:VERSION,settings:{bagSlots:8,dailyWageCap:6000,dailyCourseXpCap:150,socialEnabled:false,baseLuck:50,needsOfflineDecay:false},
+  return {version:VERSION,settings:{bagSlots:8,dailyWageCap:150000,dailyCourseXpCap:150,socialEnabled:false,baseLuck:50,needsOfflineDecay:false},
    contexts:PRESETS.map(p=>({id:p[0],label:p[1],group:p[2],trigger:p[3],target:p[4],description:p[5],enabled:true,
     conditions:p[6].map(v=>({kind:v[0],value:String(v[1])})),effects:p[7].map(v=>({kind:v[0],value:String(v[1])})),objectId:''}))};
  }
@@ -43,7 +43,7 @@
   const base=defaultFoundation(),settings=raw&&raw.settings||{},entries=Array.isArray(raw&&raw.contexts)?raw.contexts:[];
   base.settings={
    bagSlots:8, // preserve the established 8-slot v15a bag.
-   dailyWageCap:int(settings.dailyWageCap,0,100000,6000),
+   dailyWageCap:int(settings.dailyWageCap,0,1000000,150000),
    dailyCourseXpCap:int(settings.dailyCourseXpCap,0,150,150),
    socialEnabled:settings.socialEnabled===true,
    baseLuck:int(settings.baseLuck,0,100,50),

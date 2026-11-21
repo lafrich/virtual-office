@@ -44,7 +44,7 @@
     '<div class="card"><h3>WORLD RULES / GUARDRAILS</h3>'+
       '<div class="context-grid">'+
        '<label>Max Bag Slots<input value="8 (fixed, physical bag)" readonly></label>'+
-       '<label>Daily wage cap (Rp)<input type="number" min="0" max="100000" step="500" data-setting="dailyWageCap" value="'+s.dailyWageCap+'"></label>'+
+       '<label>Daily wage cap (Rp)<input type="number" min="0" max="1000000" step="500" data-setting="dailyWageCap" value="'+s.dailyWageCap+'"></label>'+
        '<label>Course XP / day<input type="number" min="0" max="150" data-setting="dailyCourseXpCap" value="'+s.dailyCourseXpCap+'"></label>'+
        '<label>Base Luck / 100<input type="number" min="0" max="100" data-setting="baseLuck" value="'+s.baseLuck+'"></label>'+
       '</div>'+

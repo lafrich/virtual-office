@@ -84,12 +84,13 @@ test('all saved vehicles use AUTO ground by default, with Y override explicitly 
  assert(Math.abs(group.position.y-.54/1.6)<1e-10,'manual override still possible');
  v.autoGround=true;placement.apply(group,v);assert.equal(group.position.y,0);
 });
-test('vehicle art uses wheel-contact helper for preview, PNG, rider and user-linked image',()=>{
+test('vehicle art uses manifest pivot and natural-size plane, not tyre-row grounding',()=>{
  const js=read('semesta-traffic-art.js'),builder=read('builder.js'),html=read('index.html');
- assert.match(js,/wheelGround\?\.contact\(image,fallback\)/);
- assert.match(js,/wheelGround\?\.pivotHeight\(height,contact\.ratio\)/);
- assert.match(js,/alphaTest:\.55,depthTest:true,depthWrite:true/);
- assert.match(js,/setGroundPivot\(!!ready\)/);
+ assert.match(js,/manifest-pivot/);
+ assert.match(js,/imageWidth\*PX/);
+ assert.match(js,/mesh\.position\.y=height\*\(pivotRatio-\.5\)/);
+ assert.match(js,/mat\.alphaTest=\.55/);
+ assert.match(js,/function setGroundPivot\(/);
  assert.match(builder,/gfx\.setGroundPivot\?\.\('fitted'\)/);
  assert.match(html,/semesta-wheel-ground\.js\?v=wheel-contact-v1/);
  assert.match(html,/id="vehicleAutoGround"/);

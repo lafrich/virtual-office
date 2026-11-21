@@ -1,0 +1,99 @@
+{
+ "id_tpl_rumah_biasa": {
+  "label": "Rumah \u00b7 Rumah Biasa (2 kamar fungsi)",
+  "category": "Rumah",
+  "theme": "warm",
+  "min": [
+   8,
+   6
+  ],
+  "items": [
+   [
+    "bed",
+    0.0,
+    0.0
+   ],
+   [
+    "fan",
+    0.25,
+    0.0
+   ],
+   [
+    "wardrobe",
+    0.0,
+    0.3333
+   ],
+   [
+    "stove",
+    0.375,
+    0.0
+   ],
+   [
+    "kitchen_sink",
+    0.5,
+    0.0
+   ],
+   [
+    "fridge",
+    0.625,
+    0.0
+   ],
+   [
+    "rice_cooker",
+    0.625,
+    0.3333
+   ],
+   [
+    "water_dispenser",
+    0.375,
+    0.3333
+   ],
+   [
+    "water_tub",
+    0.75,
+    0.0
+   ],
+   [
+    "squat_toilet",
+    0.875,
+    0.0
+   ],
+   [
+    "sink",
+    0.875,
+    0.3333
+   ],
+   [
+    "tv",
+    0.0,
+    0.5
+   ],
+   [
+    "sofa",
+    0.0,
+    0.8333
+   ],
+   [
+    "shoe_rack",
+    0.25,
+    0.8333
+   ],
+   [
+    "dining_table",
+    0.75,
+    0.6667
+   ],
+   [
+    "chair",
+    0.875,
+    0.5
+   ],
+   [
+    "chair",
+    0.875,
+    0.8333
+   ]
+  ],
+  "source": "bangun-interior-templates-r1"
+ }
+}
