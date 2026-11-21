@@ -174,6 +174,7 @@ function quests(){
   row.act=Array.isArray(q.act)?q.act.slice():q.act?[q.act]:undefined;
   row.title=fill(q.title,row);row.text=fill(q.text,row);row.goal=fill(q.goal,row);
   row.chain=true;
+  if(q.hint&&q.hint.text){const below=q.hint.walletBelowParam?num(q.hint.walletBelowParam):Number(q.hint.walletBelow);row.hint=Object.freeze({text:String(q.hint.text),walletBelow:Number.isFinite(below)?below:undefined});}
   return Object.freeze(row);
  });
 }

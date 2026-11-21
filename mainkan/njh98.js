@@ -481,11 +481,11 @@ function setWorldClass(c,on){try{wdoc()?.documentElement?.classList.toggle(c,on)
 function cleanLabel(s){return String(s||'').replace(/^[^\wÀ-ɏ]+\s*/u,'').replace(/\s+/g,' ').trim();}
 const ACT_SHORT={wall_pee:'Pipis',pee_outside:'Pipis',fart:'Kentut',sit:'Duduk',sit_down:'Duduk',rest:'Duduk',
  eat:'Makan',eat_item:'Makan',talk:'Bicara',speak:'Bicara',enter:'Masuk',enter_interior:'Masuk',
- sleep:'Tidur',lie:'Tidur',work:'Kerja',job:'Kerja',discard_item:'Buang',
+ sleep:'Tidur',sleep_until_morning:'Sampai pagi',wake:'Bangun',lie:'Tidur',work:'Kerja',job:'Kerja',discard_item:'Buang',
  cook:'Masak',cook_recipe:'Masak',cook_menu:'Masak',open_fridge:'Kulkas',open_storage:'Lemari',fish:'Mancing',fish_start:'Mancing',shop:'Belanja',shop_minimarket:'Belanja',topup_token:'Token'};
 const ACT_IC={wall_pee:'pee',pee_outside:'pee',fart:'fart',sit:'sit',sit_down:'sit',rest:'sit',
  eat:'eat',eat_item:'eat',talk:'talk',speak:'talk',enter:'door',enter_interior:'door',
- sleep:'sleep',lie:'sleep',work:'work',job:'work',discard_item:'bag',
+ sleep:'sleep',sleep_until_morning:'sleep',wake:'sleep',lie:'sleep',work:'work',job:'work',discard_item:'bag',
  cook:'eat',cook_recipe:'eat',cook_menu:'eat',open_fridge:'bag',open_storage:'bag',fish:'work',fish_start:'work',shop:'bag',shop_minimarket:'bag',topup_token:'status'};
 function shortOf(id,label){if(ACT_SHORT[id])return ACT_SHORT[id];const t=cleanLabel(label||id);const w=t.split(/\s+/)[0]||t;return w.length<=12?w:w.slice(0,11)+'…';}
 // Hide leftover step-1 action ids when the step-2 equivalent is already in the bar (UI-only; logic files stay as-is).
@@ -655,7 +655,9 @@ function paintProgress(){
  let pct=-1,title='',text='';
  const fill=wdoc()?.getElementById('slpWorkFill');
  const w=parseFloat(fill?.style.width||'0');
- if(w>0){pct=w;title='Kerja: '+(ctxInfo()?.label||'');text='Tahan AKSI sampai penuh';}
+ let sl=null;try{sl=life()?.sleepInfo?.()||null;}catch{}
+ if(sl){pct=Math.round(sl.pct*100);title=sl.untilMorning?'Tidur sampai pagi'+(sl.hours?' · '+sl.hours+' jam':''):'Tidur';text='Bangun kapan saja: tombol Bangun atau bergerak';}
+ else if(w>0){pct=w;title='Kerja: '+(ctxInfo()?.label||'');text='Tahan AKSI sampai penuh';}
  else{
   let pose='';try{pose=String(life()?.currentPose?.()||'');}catch{}
   if(pending&&!poseRun&&pose&&!IDLE.has(pose)&&performance.now()-pending.t<1500)poseRun={label:pending.label,t:performance.now()};

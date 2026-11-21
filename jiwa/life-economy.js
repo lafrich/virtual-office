@@ -626,9 +626,13 @@ function doAction(config,previous,action,args={}){
  case 'sleep':{
   if(s.restMinutes>0)return reject('Sedang bed rest akibat pingsan. Lanjutkan waktu istirahat.');
   const beforeSleepEnergy=s.energy;
-  clock(setting.sleepMinutes);s.energy=beforeSleepEnergy;
-  stat('energy',s.housing.room?setting.homeSleepRecovery:setting.hoboSleepRecovery);
-  stat('hygiene',-(s.housing.room?setting.homeSleepHygieneCost:setting.hoboSleepHygieneCost));
+  // args.minutes: a timed sleep woken early (game layer) counts only the minutes slept; effects pro rata per hour.
+  const slept=args.minutes===undefined?setting.sleepMinutes:number(args.minutes,1,setting.sleepMinutes,setting.sleepMinutes);
+  const share=slept/setting.sleepMinutes;
+  clock(slept);s.energy=beforeSleepEnergy;
+  stat('energy',Math.floor((s.housing.room?setting.homeSleepRecovery:setting.hoboSleepRecovery)*share));
+  stat('hygiene',-Math.round((s.housing.room?setting.homeSleepHygieneCost:setting.hoboSleepHygieneCost)*share));
+  out.sleptMinutes=slept;
   changes.push(s.housing.room?'tidur di kost':'tidur di tenda pinggiran kota');break;
  }
  case 'shower':case 'public_shower':case 'home_shower':{
@@ -857,7 +861,9 @@ function doAction(config,previous,action,args={}){
   if(s.energy<setting.fishEnergy)return reject('Energi tidak cukup untuk mancing.');
   const gotAway=args.gotAway===true;
   if(!gotAway&&s.inventory.length>=setting.bagSlots)return reject('Tas penuh ('+setting.bagSlots+' slot).');
-  clock(setting.fishMinutes);stat('energy',-setting.fishEnergy);
+  // One time source: the minigame already ran on the live clock; args.minutes is only the remainder still owed.
+  const fishMinutes=args.minutes===undefined?setting.fishMinutes:number(args.minutes,0,setting.fishMinutes,setting.fishMinutes);
+  if(fishMinutes>0)clock(fishMinutes);stat('energy',-setting.fishEnergy);out.minutes=fishMinutes;
   if(gotAway){changes.push('ikan kabur');out.gotAway=true;break;}
   const f=allFish(c).find(x=>x.id===String(args.fishId||''));
   if(!f)return reject('Ikan tidak dikenal.');

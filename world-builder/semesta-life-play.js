@@ -70,11 +70,13 @@ function defaults(){return RULES?RULES.defaults():null;}
 function BAL(){return root.NJHBalancing&&root.NJHBalancing.ok&&root.NJHBalancing.ok()?root.NJHBalancing:null;}
 function withBalancing(raw){const B=BAL();return B?B.applyToLifeConfig(raw):raw;}
 function coffeeAtWarteg(){return BAL()?.coffeeAt?.()==='warteg';}
-// One clock: an action that jumps the life clock (eat 10 min, sleep 60 min...) moves the
-// HUD clock by the same game minutes. Work is not synced: the HUD already ran during the hold.
-const NO_VISUAL_SYNC=new Set(['advance_time','work','walk','fish_catch']);
+// One clock: an action that jumps the life clock (eat 10 min...) moves the HUD clock by the
+// same game minutes. Work and timed sleep are not synced: the HUD already ran during the hold/sleep.
+// fish_catch IS synced: it only carries the minutes the minigame did not already spend on the live clock.
+const NO_VISUAL_SYNC=new Set(['advance_time','work','walk']);
+let timedAction=false;
 function syncVisualClock(prior,next,action){
- if(!BAL()||NO_VISUAL_SYNC.has(action))return;
+ if(!BAL()||NO_VISUAL_SYNC.has(action)||timedAction)return;
  const m=Math.round((Number(next?.elapsedMinutes)||0)-(Number(prior?.elapsedMinutes)||0));
  if(!(m>0))return;
  try{
@@ -83,6 +85,59 @@ function syncVisualClock(prior,next,action){
   const total=Number(snap.minute)+m;
   c.restore({...snap,minute:total%1440,day:(Number(snap.day)||1)+Math.floor(total/1440)});
  }catch{}
+}
+/* Timed sleep (slice-1.0, New Bot): one sleep = sleepMinutes (60) game minutes on the normal clock
+   (30 real s), with a progress bar; wake anytime. "Tidur sampai pagi" repeats hour by hour until
+   dayStart (06:00) or full energy. Time and drain are counted per (part) hour by the sleep rule. */
+let sleepSession=null;
+function sleepMinutesSetting(){return Math.max(1,Number(config?.settings?.sleepMinutes)||60);}
+function sleepNeededMs(){const m=sleepMinutesSetting();const h=BAL()?.holdMs?.(m);
+ return Number.isFinite(h)&&h>0?h:m*1000*(Number(config?.settings?.realSecondsPerGameMinute)||.5);}
+function morningNow(){if(!state)return false;const d=Number(config?.settings?.dayStartMinute);const start=Number.isFinite(d)?d:360;
+ const hhmm=(((Number(state.elapsedMinutes)||0)+(Number(state.clockOrigin)||0))%1440+1440)%1440;return hhmm>=start&&hhmm<start+60;}
+function sleepInfo(){if(!sleepSession)return null;const s=sleepSession;
+ return {sleeping:true,untilMorning:s.untilMorning,hours:s.hours,pct:Math.max(0,Math.min(1,s.elapsedMs/s.neededMs)),neededMs:s.neededMs,
+  minutes:Math.floor(Math.max(0,Math.min(1,s.elapsedMs/s.neededMs))*sleepMinutesSetting())};}
+function runTimedSleep(args){timedAction=true;try{return runAction('sleep',{...args,__timed:true});}finally{timedAction=false;}}
+function startSleep(args,untilMorning){
+ if(sleepSession)return {ok:false,reason:'Sedang tidur.'};
+ if(state.restMinutes>0){const why='Sedang bed rest akibat pingsan. Lanjutkan waktu istirahat.';message('⛔ '+why);return {ok:false,reason:why};}
+ if(untilMorning&&(state.energy>=100||morningNow())){const why='Sudah pagi atau energi penuh.';message('⛔ '+why);return {ok:false,reason:why};}
+ progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
+ const a={...args};delete a.untilMorning;delete a.__timed;delete a.minutes;
+ sleepSession={args:a,untilMorning:!!untilMorning,elapsedMs:0,neededMs:sleepNeededMs(),hours:0};
+ try{bridge?.playPose?.('sleep',Math.ceil(sleepSession.neededMs/1000));}catch{}
+ message('💤 '+(untilMorning?'Tidur sampai pagi':'Tidur')+' · 1 jam game = '+Math.round(sleepSession.neededMs/1000)+' detik. Bangun kapan saja (tombol Bangun / bergerak).');
+ notifyHud();paintPanel();
+ return {ok:true,sleeping:true,untilMorning:!!untilMorning,neededMs:sleepSession.neededMs};
+}
+function wake(reason){
+ const s=sleepSession;if(!s)return {ok:false,reason:'Tidak sedang tidur.'};
+ sleepSession=null;
+ const minutes=Math.floor(Math.max(0,Math.min(1,s.elapsedMs/s.neededMs))*sleepMinutesSetting());
+ let r={ok:true,minutes:0};
+ if(minutes>=1)r=runTimedSleep({...s.args,minutes});
+ else{notifyHud();paintPanel();}
+ message('☀ '+(reason||'Bangun')+(minutes>=1?' · tidur '+minutes+' menit':''));
+ try{bridge?.playPose?.('idle',1);}catch{}
+ return {...r,woke:true,minutes};
+}
+function sleepStep(seconds){
+ const s=sleepSession;if(!s)return;
+ s.elapsedMs+=seconds*1000;
+ try{const f=outer?.querySelector('#slpSleepFill');if(f)f.style.width=Math.round(Math.min(1,s.elapsedMs/s.neededMs)*100)+'%';}catch{}
+ if(s.elapsedMs<s.neededMs)return;
+ const r=runTimedSleep(s.args);
+ if(sleepSession!==s)return;
+ s.hours++;
+ if(!r.ok||!s.untilMorning||state.energy>=100||morningNow()||state.restMinutes>0){
+  sleepSession=null;
+  if(r.ok)message('☀ Bangun'+(s.untilMorning?' · tidur '+s.hours+' jam':'')+' · energi '+state.energy);
+  try{bridge?.playPose?.('idle',1);}catch{}
+  notifyHud();paintPanel();return;
+ }
+ s.elapsedMs=0;
+ try{bridge?.playPose?.('sleep',Math.ceil(s.neededMs/1000));}catch{}
 }
 function getWorld(){return bridge&&bridge.getWorld?bridge.getWorld():{objects:[],map:{}};}
 function getPos(){const p=bridge&&bridge.getPosition?bridge.getPosition():null;return p||{x:0,z:0};}
@@ -217,6 +272,7 @@ function hookCtx(){
   getSites:()=>sites,getWorld:getWorld,getPos:getPos,
   getConfig:()=>config,getWorldEntities:()=>config?.worldEntities||[],
   questTable:BAL()?.quests?.()||null,coffeeAtWarteg:coffeeAtWarteg(),
+  timedSleep:!!BAL(),sleeping:()=>!!sleepSession,
   playerId,cityId,dataKey,projectId,
   storage:typeof localStorage!=='undefined'?localStorage:null,
   persist,teleport:(x,z)=>{try{return !!(bridge&&bridge.teleport&&bridge.teleport(x,z));}catch{return false;}},
@@ -581,7 +637,7 @@ function nodeButtons(n){
  if(id==='kost')entries=ownsRoom()?
   [button('home_toilet','🚽 WC Kost'),
    ...(furnOk('home_shower')?[button('home_shower','🚿 Mandi Kost')]:[]),
-   ...(furnOk('sleep')?[button('sleep','💤 Tidur Kost')]:[]),
+   ...(furnOk('sleep')?[button('sleep','💤 Tidur Kost'),...(BAL()?[button('sleep_until_morning','🌙 Tidur sampai pagi')]:[])]:[]),
    '<select id="slpItem">'+itemOptions('any')+'</select>',
    ...(furnOk('cook')?[button('cook','🍳 Masak Ikan')]:[]),
    ...(furnOk('cook_recipe')&&kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
@@ -591,7 +647,8 @@ function nodeButtons(n){
    '<select id="slpFridgeItem">'+(state.fridge||[]).map(item=>'<option value="'+esc(item)+'">'+esc(state.itemMeta?.[item]?.label||item)+'</option>').join('')+'</select>',
    button('take_fridge','📦 Ambil dari Kulkas')]:
    [button('buy_room','🏠 Bayar kos (sekali bayar, permanen)')];
- if(id==='tent')entries=[button('sleep','💤 Tidur Tenda')];
+ if(id==='tent')entries=[button('sleep','💤 Tidur Tenda'),...(BAL()?[button('sleep_until_morning','🌙 Tidur sampai pagi')]:[])];
+ if(sleepSession&&(id==='tent'||id==='kost'))entries=[sleepBarHtml(),button('wake','☀ Bangun')];
  if(n.religion)entries=[button('worship','🤲 Ibadah '+n.religion,{placeReligion:n.religion})];
  if(id==='course')entries=[button('course','📱 Kursus Online')];
  if(id==='hansip')entries=['<small>Jika moral terlalu rendah, hansip dapat menangkapmu saat mendekat.</small>'];
@@ -689,6 +746,7 @@ function click(ev){
   runAction(el.dataset.lifeAction,args);
  }
 }
+function sleepBarHtml(){const i=sleepInfo();return '<small>💤 '+(i?.untilMorning?'Tidur sampai pagi':'Tidur')+(i?.hours?' · '+i.hours+' jam':'')+'</small><div class="slp-work-progress"><span id="slpSleepFill" style="width:'+Math.round((i?.pct||0)*100)+'%"></span></div>';}
 function workDown(ev){
  if(!['slpWork','ptActionBtn'].includes(ev.target.id)||!active||progress)return;
  const n=nearest();
@@ -787,6 +845,10 @@ function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
  const ALIAS={bathe:'home_shower',use_toilet:'home_toilet'};
  if(ALIAS[action])action=ALIAS[action];
+ if(action==='wake')return wake();
+ if(action==='sleep_until_morning'){action='sleep';args={...args,untilMorning:true};}
+ if(sleepSession&&action!=='sleep')wake('Bangun');
+ if(sleepSession&&action==='sleep'&&!args.__timed)return {ok:false,reason:'Sedang tidur.'};
  if(String(action).startsWith('scene:')){
   try{
    const Scenes=root.SemestaIntScenes;
@@ -914,6 +976,8 @@ function runAction(action,args={}){
   args={...args,roomSpawn:{id:node.sourceId||'kost_placeholder',x:node.x,z:node.z,placeholder:node.placeholder}};
  }
  if(action==='worship'&&node){args={...args,placeReligion:node.religion};}
+ if(action==='sleep'&&BAL()&&!args.__timed)return startSleep(args,!!args.untilMorning);
+ if(action==='sleep'){args={...args};delete args.__timed;delete args.untilMorning;}
  const prior=state;
  const result=action==='cook_recipe'?cookRecipe(args):RULES.run(config,state,action,args);
  if(result.ok){
@@ -1029,6 +1093,7 @@ function actorMoved(dt){
  if(!actorMoved.prev){actorMoved.prev={x:p.x,z:p.z};return;}
  const delta=Math.hypot(p.x-actorMoved.prev.x,p.z-actorMoved.prev.z);
  actorMoved.prev={x:p.x,z:p.z};
+ if(sleepSession&&delta>.05){wake('Bangun (bergerak)');}
  if(delta>0&&delta<3){
   walkerDistance+=delta;
   if(walkerDistance>=8){
@@ -1057,7 +1122,9 @@ function tick(dt){
  tickLifeNpcs(seconds);
  actorMoved(seconds);
  // While AKSI is held the work action itself advances the session minutes; do not count them twice.
- timeAccumulator=progress?0:timeAccumulator+seconds;
+ // A timed sleep carries its own minutes (the sleep rule), so the passive tick pauses too.
+ timeAccumulator=(progress||sleepSession)?0:timeAccumulator+seconds;
+ if(sleepSession)sleepStep(seconds);
  // Same rate as the visual clock (VLSemestaDayNight), both from clock.realSecondsPerGameMinute.
  const period=Math.max(.05,Number(config.settings.realSecondsPerGameMinute)||8);
  if(timeAccumulator>=period){
@@ -1140,7 +1207,7 @@ function start(){
 }
 function stop(){
  if(!active)return;
- persist();detachNokia();active=false;cancelAnimationFrame(workAnimation);progress=null;
+ persist();detachNokia();active=false;cancelAnimationFrame(workAnimation);progress=null;sleepSession=null;
  disposeMarkers();disposeNpcGroup();lifeNpcs=[];if(outer)outer.hidden=true;
  actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;bagOpen=false;
 }
@@ -1236,6 +1303,7 @@ function publicSites(){
 }
 const api=Object.freeze({attach,start,stop,active:visible,persist,state:()=>state,sites:publicSites,npcs:()=>lifeNpcs.map(n=>({id:n.id,label:n.label,siteId:n.siteId,role:n.role,behavior:n.behavior,x:n.x,z:n.z,placeholder:!!n.placeholder,lgr:n.lgr||null,emote:n.emote||null})),spawnEntitlement,
  spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
+ sleepInfo,wake:()=>wake(),
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
  playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null,
  spawnAt:hookApi('spawnAt',{ok:false,reason:'hooks missing'}),
