@@ -459,7 +459,7 @@ function create(ctx){
    if(acc&&(acc.role==='partner'||acc.kind==='lobby'||acc.role==='none')){
     const next=Access.filterActions(list,acc);
     // Public step-2 entries (shop, fishing) are not room furniture; keep them.
-    // Locked kost furniture entries stay as disabled rows so the AKSI bar can say why (Punya pacar / Terkunci).
+    // Locked kost furniture entries stay as disabled rows so the AKSI bar can say why (Hanya pemilik / Terkunci).
     for(const x of list)if((x.id==='shop_minimarket'||x.id==='fish_start'||(x.disabled&&x.locked&&/^(open_fridge|open_storage|cook_menu)$/.test(x.id)))&&!next.some(y=>y.id===x.id))next.push(x);
     Object.defineProperty(next,'spot',{value:spot,enumerable:false,configurable:true});
     return next;

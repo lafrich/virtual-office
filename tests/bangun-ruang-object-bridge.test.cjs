@@ -33,10 +33,10 @@ const sample=(id='obj-my-lamp')=>({
  views:Object.fromEntries(DIR.map(d=>[d,{url:PNG,size:[48,96],pivot:[24,90]}]))
 });
 
-test('all 18 interior props and 6 street props appear in Semesta catalog',()=>{
+test('all 20 interior props and 6 street props appear in Semesta catalog',()=>{
  const w=runtime(),items=w.VLBangunObjects.builtins;
- assert.equal(items.length,24);
- for(const id of ['furniture-wc','furniture-chair','furniture-bed','furniture-office_chair','park-lamp','park-bench','potted-plant']){
+ assert.equal(items.length,26);
+ for(const id of ['furniture-wc','furniture-chair','furniture-bed','furniture-office_chair','furniture-plastic_bench_red','furniture-plastic_bench_blue','park-lamp','park-bench','potted-plant']){
   const spec=w.VLAssetCatalog.find(a=>a.file==='object:'+id);
   assert.ok(spec,'missing '+id);
   assert.equal(spec.source,'bangun-object');

@@ -68,7 +68,7 @@ test('E routes to nearby physical doors, pickups and NPCs without Cove auto-entr
  assert.doesNotMatch(shell,/NJH98Mock\?\.enterDoor\(doorNearObj\)/);
  assert.match(shell,/if\(!demo\)return \[\]/);
  assert.match(html,/fresh-mode\.js/);
- assert.match(html,/\?v=njh-ellen-assets-20261122/);
+ assert.match(html,/\?v=njh-ellen-r7-20261122/);
  assert.match(shell,/njh-force-landscape/);
 });
 

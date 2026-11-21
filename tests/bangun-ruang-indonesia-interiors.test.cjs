@@ -26,8 +26,10 @@ test('69 Indonesian room recipes (66 pack + 3 Ellen r1) and NJH MART additions',
  assert.ok(pack.templates.id_tpl_rumah_biasa);
  assert.ok(pack.templates.id_tpl_warung_makan);
  assert.ok(pack.templates.id_tpl_wc_umum);
- assert.equal(Object.keys(pack.types).length,57);
- assert.equal(Object.keys(model.types).length,74);
+ assert.equal(Object.keys(pack.types).length,59);
+ assert.equal(Object.keys(model.types).length,76);
+ assert.ok(pack.types.plastic_bench_red);
+ assert.ok(pack.types.plastic_bench_blue);
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('minimarket')));
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('mushola')));
  assert.ok(Object.keys(pack.templates).some(x=>x.includes('puskesmas')));

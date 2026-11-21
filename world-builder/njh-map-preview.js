@@ -6,8 +6,8 @@
 (function(g){
 'use strict';
 const DIR=['sw','se','ne','nw'];
-const NJH_READY=['njh_kos','njh_kos_noor','njh_kos_ichsan','njh_kos_cove_lobby','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi','njh_minimarket'];
-const NJH_PENDING=['njh_pecel_lele_tenda','njh_sate_madura_tenda','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda'];
+const NJH_READY=['njh_kos','njh_kos_noor','njh_kos_ichsan','njh_kos_cove_lobby','njh_warung_makan','njh_wc_mandi_umum','njh_rumah_biasa','njh_laundry','njh_bengkel','njh_warung_kopi','njh_minimarket','njh_mushola','njh_koperasi','njh_toko_loak','njh_warung_madura','njh_nasi_sunda','njh_pecel_lele_tenda','njh_sate_madura_tenda'];
+const NJH_PENDING=[];
 const NJH_TEMPLATES=[...NJH_READY,...NJH_PENDING];
 const TEMPLATE_ALIASES=Object.freeze({
  'bangun-ruang kit in br-warung-pecel-lele.json':'njh_pecel_lele_tenda',
@@ -287,7 +287,7 @@ function hookKebonTiles(){
  });
  function tileUrl(name){
   if((RIPPLE.applyTo||[]).includes(name))
-   return RIPPLE.sheet+'?v=njh-ellen-assets-20261122';
+   return RIPPLE.sheet+'?v=njh-ellen-r7-20261122';
   const file=tiles[name];
   if(!file)return null;
   const leaf=String(file).split('/').pop();
@@ -346,13 +346,13 @@ async function loadMeta(){
 async function loadInteriors(){
  if(interiorCache)return interiorCache;
  const out={};
- await Promise.all(NJH_TEMPLATES.map(async id=>{
+ await Promise.all(NJH_READY.map(async id=>{
   try{
    const url=baseUrl()+'interiors/'+id+'.interior-scene.json';
    const r=await fetch(url,{cache:'no-store'});
    if(!r.ok)return;
    out[id]=await r.json();
-  }catch(e){/* r6 scenes are optional until Ellen drops them in */}
+  }catch(e){/* only READY templates are fetched; locked doors must never 404 */}
  }));
  interiorCache=out;
  return out;
