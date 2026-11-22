@@ -1,3 +1,30 @@
+# Rollback — balancing r4b live (22 Nov 2026)
+
+Written 2026-11-22 07:48 WIB (Asia/Jakarta). Client UI/JS, balancing table, public interiors, door-E, HUD clock, benches, hold-to-work, tests, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Clock rate tidak diubah (tetap 0.5 s/game minute dari `content/balancing.json`). Pipeline main tidak di-release.
+
+- Previous live VO `origin/main`: `30135b6d5458d6a15552a5015692e20e67286bf5` (STEP 1 live + Warteg restore + ROLLBACK.md, sw v43, `?v=njh-step1-live-20261122`)
+- Previous live pipeline `origin/main` remains `c9dc88fab2e5d82a1193a456760418b6e4dc115c` (this deploy did not ship pipeline)
+- New Bot (Ichsan's standing approval delegate) APPROVED `preview/njh-balancing-live-20261122` @ `6ddfec25d4c3338c1abaa62a90070c2e17684a20` for LIVE
+- Live code tip: `6ddfec25d4c3338c1abaa62a90070c2e17684a20` — sw v44, `?v=njh-balancing-r4b-20261122`. This follow-up commit is ROLLBACK.md only (does not bump live `sw.js` / `?v`; served tree stays v44 / r4b)
+- Isi: slice-1.0 r4/r4b (start Rp15.000, Day 1 06:30, 10 data quests with q1_makan first, meal Rp12.000 so 15.000→3.000, kos Rp750.000, per-job daily quota Rp150.000, faint wallet -10%, coffee at Warteg, Warung Kopi slice-locked, Tidur sampai pagi only 18:00–05:00 and greyed "Tidur sampai pagi (malam saja)" outside that window); Mart/Warteg/Kost door-E enters the official interior instead of toasting "Aksi belum didukung: shop"; public interiors use a customer/public role so E/Makan/Duduk work inside (private kost rooms stay owner/partner/none); HUD clock (time + period) syncs to the life clock after Tidur sampai pagi and manual sleep; benches use label "Duduk sebentar", snap to the seat, and include the Laundry `waiting_bench` gate; hold-to-work accepts `#gameAction` and harness calls. Warteg stays `njh_warteg_kharisma` + Ibu Warteg
+- Gate sebelum push (preview, all passed): unit 649 tes, 647 lulus, 0 gagal, 2 dilewati; window-fit 85 cek, 0 terpotong, 0 start error; 4-ID 8/8 (Ichsan/Noor/Guest1/Guest2 × desktop + phone landscape) di worker throwaway `localhost:8845` + static `localhost:8925` (bukan :8787, bukan `srv/.dev.vars`); Playwright `?fresh=1`: r4 table, Rp15k, q1, tee, Kopi locked, daytime sleep grey, coffee at Warteg, E doors, Warteg Makan 15.000→3.000 + q1 ready, Mart buy Kopi sachet into the bag; sim identical to 4598bb2 (p10 46.7 · median 50.8 · p90 54.9 real min · 4.6 game days · 0 faints; md5 `bafd7aca8f7d3a0d7e3ebf53b54d2200`); secret-scan commit diff 0/0/0/0, tree password_assign 0, token_assign 0, bearer 1, private_key 0 (counts only)
+- Pages verify after FF of 6ddfec25: `pages-build-deployment` run 44968269906 success (headSha 6ddfec25, completed 07:47:05 WIB / 00:47:05 UTC); curl `https://lafrich.github.io/virtual-office/sw.js` starts `/* sw v44` and names `?v=njh-balancing-r4b-20261122` (last-modified 07:46:59 WIB / 00:46:59 UTC); live `mainkan/index.html` play scripts use that cache tag; live Playwright `?fresh=1` throwaway guest only (no production accounts, no apiBase override): pass, r4Loaded, start15k, q1, wearsTee, Kopi locked, sleepGrey, coffee at Warteg, E doors Warteg→kharisma+Ibu / Mart / Kost lobby, Makan 15.000→3.000 + q1 ready, Mart buy Kopi sachet 3.000→1.000 bag 0→1; 0 preview-ref requests, 0 HTTP 4xx
+
+Cara rollback VO tanpa force-push (kembalikan tree `30135b6d` dalam satu commit baru). Jangan force-push. Setelah restore tree, bump `sw.js` ke versi bebas berikutnya (v45 jika belum dipakai di main; kalau v45 sudah terpakai di preview yang kemudian di-merge, pakai v46+) supaya browser melepas cache v44 / r4b, lalu FF push:
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git checkout 30135b6d5458d6a15552a5015692e20e67286bf5 -- .
+git commit -m "rollback: balancing r4b live (restore 30135b6d tree)"
+# bump sw.js ke versi bebas berikutnya (v45 atau berikutnya yang belum dipakai di main)
+# dan ?v cache tag baru, lalu:
+git push origin HEAD:refs/heads/main
+```
+
+Pipeline tidak ikut deploy ini; jangan di-FF atau di-rollback kecuali brief terpisah menamai SHA.
+
+---
+
 # Rollback — STEP 1 live (22 Nov 2026)
 
 Written 2026-11-22 06:26 WIB (Asia/Jakarta). Client UI/JS, Warteg door mapping, unit test, sw/?v bump, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Clock rate tidak diubah.
