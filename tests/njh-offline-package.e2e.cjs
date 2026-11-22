@@ -66,7 +66,10 @@ const ROOT='http://127.0.0.1:8097/virtual-office/mainkan/';
   console.log('NJH_OFFLINE_PLAYER_READY_AND_CONTINUE_PASS',JSON.stringify({
     name:profile.character.name,gameTime:profile.life.visualClock,blockedExternalRequests:blocked.length
   }));
-  if(blocked.length)console.log('BLOCKED_EXTERNAL_URLS',JSON.stringify([...new Set(blocked)].slice(0,30)));
+  assert.equal(blocked.length,0,'APK must not request remote websites at any point during cold start, gameplay and resume: '+JSON.stringify([...new Set(blocked)].slice(0,50)));
+  const criticalMissing=missing.filter(u=>!u.endsWith('/virtual-life-asset-pipeline/catalog.json'));
+  assert.deepEqual(criticalMissing,[], 'All bundled game resources should resolve locally');
+  console.log('NJH_COLD_START_NO_NETWORK_REQUESTS_PASS');
  }catch(error){
   fs.mkdirSync('screenshots',{recursive:true});
   await page.screenshot({path:'screenshots/njh-offline-package-failure.png',fullPage:true}).catch(()=>{});

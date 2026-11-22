@@ -54,6 +54,16 @@ def fix_text(path: Path):
         for source in ('https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js',
                        'https://unpkg.com/three@0.181.0/build/three.module.js'):
             data = data.replace(source, '../vendor/three.module.js')
+    # indonesia-assets.js builds a raw GitHub URL dynamically from PREVIEW_REF;
+    # a fixed-string URL replacement cannot catch that construction.
+    # Load the same original catalog files from the APK instead.
+    if path.parts[-2:] == ('world-builder', 'indonesia-assets.js'):
+        data = data.replace(
+            "const base='https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/'+PREVIEW_REF+'/';",
+            "const base='/virtual-life-asset-pipeline/';"
+        )
+        if 'raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/' in data:
+            raise RuntimeError('NJH offline package still has a raw GitHub catalog URL')
     if data != original:
         path.write_text(data, encoding='utf-8')
 
@@ -111,7 +121,10 @@ def main():
     # Game player-mode never uses the Semesta authoring cloud-login UI.
     worldhtml=game / 'world-builder' / 'index.html'
     txt=worldhtml.read_text(encoding='utf-8')
-    txt=re.sub(r'<script\s+src="https://accounts\.google\.com/gsi/client"[^>]*></script>', '', txt)
+    txt=re.sub(r'<script\\s+src="https://accounts\\.google\\.com/gsi/client"[^>]*></script>', '', txt)
+    # The grok editor preview manifest is not published in the official asset
+    # pipeline. The PLAYER iframe must not request an unavailable authoring asset.
+    txt=re.sub(r'<script[^>]*src="/virtual-life-asset-pipeline/grok-assets/manifest\\.js[^"]*"[^>]*></script>', '', txt)
     worldhtml.write_text(txt, encoding='utf-8')
     must_have=[
         game/'mainkan'/'index.html',game/'mainkan'/'offline-save.js',
