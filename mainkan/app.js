@@ -13,6 +13,9 @@ const allowed=['genesis_male_nude','genesis_female_nude'];
 const frame=$('semestaFrame');
 const unavailable='Login tes belum terhubung. Gunakan Main Tanpa Akun.';
 const previewMode=new URLSearchParams(location.search).get('flowPreview')==='1';
+const offlineMode=!previewMode&&new URLSearchParams(location.search).get('onlineTest')!=='1';
+const OFF=window.NJHOfflineSave;
+const offlineId=OFF?.PLAYER_ID||'njh_offline';
 const freshMode=window.NJH_FRESH_MODE===true||new URLSearchParams(location.search).get('fresh')==='1';
 let graph=F.preset('default'),currentNode=null,stage='splashScreen',loginMode='login';
 let testPlayerId='';
@@ -38,8 +41,8 @@ function nextFrom(n,branch){
 }
 function chooseBranch(n){
  if(guest&&n.routes?.guest)return 'guest';
- if(profile?.character&&n.routes?.returning)return 'returning';
  if(firstTime&&n.routes?.first_time)return 'first_time';
+ if(profile?.character&&n.routes?.returning)return 'returning';
  return 'default';
 }
 function showNode(id){
@@ -76,8 +79,10 @@ function showNode(id){
     part();$('skipSplash').hidden=n.skippable!==true;return;
    }
    case 'welcome':
-    screen('welcomeScreen');$('welcomeCopy').textContent=n.description||'Bikin karakter, masuk kota, cari pekerjaan, dan jalani hidupmu.';return;
+    screen('welcomeScreen');$('welcomeCopy').textContent=offlineMode?'Satu dunia, satu kehidupan. Semua progres tersimpan di perangkat ini.':(n.description||'Bikin karakter, masuk kota, cari pekerjaan, dan jalani hidupmu.');
+    if(offlineMode)offlineMenu();return;
    case 'auth':
+    if(offlineMode){offlineNewGame();return;}
     screen('loginScreen');return;
    case 'character':
     screen('characterScreen');drawAvatar();return;
@@ -122,9 +127,31 @@ function switchGuest(){
  if(auth)showNode(nextFrom(auth,'guest'));
  else showType('character');
 }
+function offlineMenu(){
+ const c=OFF?.character();
+ $('welcomeContinue').disabled=!c;
+ const el=$('offlineSaveNote');if(el)el.textContent=c?'Lanjutkan kehidupan '+c.name+' di perangkat ini. Tidak perlu login.':'Belum ada save. Pilih Mulai Baru untuk membuat karakter.';
+}
+function offlineNewGame(){
+ if(!OFF){window.alert('Modul save offline tidak tersedia.');return;}
+ if(OFF.hasSave()&&!window.confirm('Mulai Baru akan menghapus karakter dan progres offline NJH pada perangkat ini. Lanjutkan?'))return;
+ try{
+  if(!OFF.clear())throw Error('Save sebelumnya gagal dihapus.');
+  try{frame.contentWindow?.SemestaLifePlay?.stop?.();}catch{}
+  frame.removeAttribute('src');worldReady=false;
+  guest=false;session=null;testPlayerId=offlineId;profile=null;characterDraft=null;firstTime=true;
+  selected='genesis_male_nude';showType('character');
+ }catch(err){window.alert(err.message);}
+}
+function offlineContinue(){
+ const c=OFF?.character();
+ if(!c){offlineNewGame();return;}
+ guest=false;session=null;testPlayerId=offlineId;profile={character:c};characterDraft=c;
+ selected=c.base;firstTime=false;showType('game');
+}
 $('skipSplash').addEventListener('click',()=>branchCurrent());
-$('welcomeContinue').addEventListener('click',()=>branchCurrent());
-$('welcomeGuest').addEventListener('click',switchGuest);
+$('welcomeContinue').addEventListener('click',()=>offlineMode?offlineContinue():branchCurrent());
+$('welcomeGuest').addEventListener('click',()=>offlineMode?offlineNewGame():switchGuest());
 $('guestButton').addEventListener('click',switchGuest);
 $('backToLogin').addEventListener('click',()=>showType('auth'));
 $('confirmBack').addEventListener('click',()=>showType('character'));
@@ -132,7 +159,10 @@ $('confirmGo').addEventListener('click',async()=>{
  if(!characterDraft){message('confirmMessage','Karakter belum lengkap.',true);return;}
  const button=$('confirmGo');button.disabled=true;
  try{
-  if(!guest){
+  if(offlineMode){
+   if(!OFF?.putCharacter(characterDraft))throw Error('Karakter tidak bisa disimpan di perangkat.');
+   profile={character:characterDraft};guest=false;testPlayerId=offlineId;
+  }else if(!guest){
    let data=null;
    try{data=await request('/players/profile',{method:'PUT',body:JSON.stringify({character:characterDraft})});}
    // No status = the browser blocked/failed the request (CORS preflight on the test Worker);
@@ -160,11 +190,17 @@ $('resumeGame').addEventListener('click',()=>{
  frame.contentWindow?.postMessage({type:'mainkan:resume'},location.origin);
  pauseRequested=false;showType('game');
 });
+function persistOffline(){
+ if(!offlineMode)return;
+ try{frame.contentWindow?.SemestaLifePlay?.persist?.();}catch(err){console.warn('Offline persist failed',err);}
+}
 function returnToMenu(){
+ persistOffline();
  if(frame.getAttribute('src'))frame.removeAttribute('src');
  worldReady=false;pauseRequested=false;
  showType('welcome');
 }
+window.addEventListener('pagehide',persistOffline);
 $('pauseExit').addEventListener('click',returnToMenu);
 $('exitGame').addEventListener('click',returnToMenu);
 $('homeButton').addEventListener('click',returnToMenu);
@@ -306,7 +342,8 @@ function drawConfirm(){
   const line=document.createElement('div'),strong=document.createElement('strong');
   strong.textContent=label+': ';line.append(strong,document.createTextNode(String(value)));el.append(line);
  }
- message('confirmMessage',guest?'Guest Preview: akun tidak disimpan online.':'Saat lanjut, karakter dikirim ke backend.');
+ message('confirmMessage',offlineMode?'Karakter dan progres disimpan di perangkat ini. Tanpa akun/server.':
+  guest?'Guest Preview: akun tidak disimpan online.':'Saat lanjut, karakter dikirim ke backend.');
 }
 function startWorld(force=false){
  screen('gameScreen');$('cityName').textContent='SEMESTA • Native Runtime';
@@ -385,7 +422,7 @@ window.addEventListener('message',e=>{
   $('worldLoading').hidden=true;
   $('retryWorld').hidden=true;
   $('cityName').textContent=e.data.city||'SEMESTA • Native World';
-  $('worldLabel').textContent='Semesta WebGL · '+Number(e.data.count||0)+' objek · '+(guest?'Guest':'Player');
+  $('worldLabel').textContent='Semesta WebGL · '+Number(e.data.count||0)+' objek · '+(offlineMode?'Offline':guest?'Guest':'Player');
   $('statusText').textContent='SEMESTA • PLAYER READY';
   if(pauseRequested)frame.contentWindow?.postMessage({type:'mainkan:pause'},location.origin);
   else try{frame.focus();}catch{}
@@ -432,6 +469,12 @@ function startup(){
   const banner=$('njhFreshBanner');if(banner)banner.hidden=false;
   startWorld();
   return;
+ }
+ if(offlineMode){
+  guest=false;session=null;testPlayerId=offlineId;
+  const c=OFF?.character();
+  if(c){profile={character:c};characterDraft=c;selected=c.base;firstTime=false;}
+  else{profile=null;characterDraft=null;firstTime=true;}
  }
  showNode(graph.start);
 }

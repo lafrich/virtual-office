@@ -164,7 +164,10 @@ body.mainkan-playing #viewport{
 <script src="./flow-model.js?v=mainkan-flow-v1" defer></script>
 <script src="./config.js?v=mainkan-20261108" defer></script>
 <script src="./local-character.js?v=test-login-save-2" defer></script>
-<script src="./app.js?v=njh-rollback-step2-v48-20261122" defer></script>
+<script src="./offline-save.js?v=njh-offline-v1" defer></script>
+<script src="./app.js?v=njh-offline-v1" defer></script>
+<script src="./offline-ui.js?v=njh-offline-v1" defer></script>
+<script src="./offline-assets.js?v=njh-offline-v1" defer></script>
 <script src="../shared/hud-layout.js?v=mainkan-hud-20261108" defer></script>
  <script src="./game-hud.js?v=mainkan-hud-edit-20261108" defer></script>
 <script src="./classic-creator.js?v=njh-rollback-step2-v48-20261122" defer></script>
@@ -194,7 +197,12 @@ body.mainkan-playing #viewport{
 <section id="welcomeScreen" class="screen" hidden aria-label="Welcome">
 <div class="split"><div class="hero"><span class="njh-byline">by Lafrich</span><strong>NAMANYA<br>JUGA HIDUP</strong><em class="njh-sub">the Game</em><small>Hidup semaumu di kota virtual Indonesia.</small></div>
 <div><h1>Menu Utama</h1><p class="muted" id="welcomeCopy">Bikin karakter, masuk ke kota, cari pekerjaan, dan jalani hidupmu.</p>
-<div class="njh-menu welcome-actions" role="menu" aria-label="Menu utama"><button type="button" class="btn primary" id="welcomeContinue" role="menuitem"><span>▶ Mulai Main</span><small>Login</small></button><button type="button" class="btn" id="welcomeGuest" role="menuitem"><span>Main Tanpa Akun</span><small>Preview</small></button><i class="njh-sep" aria-hidden="true"></i><button type="button" class="btn" data-njh-placeholder="lanjutkan" title="Placeholder jalan (data simulasi): slot simpanan &amp; lanjutkan"><span>Lanjutkan</span><span class="njh-sim">SIMULASI</span></button><button type="button" class="btn" data-njh-placeholder="mulai-baru" title="Placeholder jalan (data simulasi): hapus simpanan &amp; mulai ulang"><span>Mulai Baru</span><span class="njh-sim">SIMULASI</span></button><button type="button" class="btn" data-njh-placeholder="pengaturan" title="Placeholder jalan (data simulasi): pengaturan game"><span>Pengaturan</span><span class="njh-sim">SIMULASI</span></button><button type="button" class="btn" data-njh-placeholder="kredit" title="Placeholder jalan (data simulasi): layar kredit"><span>Kredit</span><span class="njh-sim">SIMULASI</span></button></div><p class="njh-menu-note">Pemain lama langsung masuk kota setelah login (karakter tersimpan di perangkat ini).</p></div></div></section><section id="characterScreen" class="screen" hidden aria-label="Original Paint Character Creator">
+<div class="njh-menu welcome-actions" role="menu" aria-label="Menu utama">
+<button type="button" class="btn primary" id="welcomeContinue" role="menuitem"><span>▶ Lanjutkan</span><small>Save lokal</small></button>
+<button type="button" class="btn" id="welcomeGuest" role="menuitem"><span>Mulai Baru</span><small>Single player</small></button>
+<button type="button" class="btn" id="offlineDownload" role="menuitem"><span>Siapkan Offline</span><small>Unduh file game</small></button></div>
+<p class="njh-menu-note" id="offlineSaveNote">Progres tersimpan di perangkat ini, bukan di server.</p>
+<p class="njh-menu-note" id="offlineDownloadStatus" role="status" aria-live="polite">Siapkan file game saat masih online sebelum memutus internet.</p></div></div></section><section id="characterScreen" class="screen" hidden aria-label="Original Paint Character Creator">
  <div id="classicCreator" class="cc-paint">
    <div class="cc-titlebar">
       <span class="cc-paint-icon" aria-hidden="true">▧</span>
@@ -297,7 +305,19 @@ body.mainkan-playing #viewport{
 </section>
 <section id="pauseScreen" class="screen" hidden aria-label="Pause">
 <div class="njh-pause"><h1>Menu Jeda</h1><p class="muted">Progres hidup tersimpan otomatis di perangkat ini.</p>
-<div class="njh-menu" role="menu" aria-label="Menu jeda"><button class="btn primary" id="resumeGame" role="menuitem"><span>▶ Lanjut Main</span></button><button class="btn" type="button" id="njhPauseHowto" role="menuitem"><span>Lihat Tutorial</span></button><button class="btn" type="button" id="njhPauseReload" role="menuitem"><span>Muat Ulang Kota</span><small>data aman</small></button><i class="njh-sep" aria-hidden="true"></i><button class="btn" type="button" data-njh-placeholder="simpan" title="Placeholder jalan (data simulasi): slot simpan manual"><span>Simpan</span><span class="njh-sim">SIMULASI</span></button><button class="btn" type="button" data-njh-placeholder="muat" title="Placeholder jalan (data simulasi): muat slot"><span>Muat</span><span class="njh-sim">SIMULASI</span></button><button class="btn" type="button" data-njh-placeholder="laporan-hari" title="Placeholder jalan (data simulasi): laporan pemasukan/pengeluaran harian"><span>Laporan Hari</span><span class="njh-sim">SIMULASI</span></button><button class="btn" type="button" data-njh-placeholder="pengaturan" title="Placeholder jalan (data simulasi): pengaturan"><span>Pengaturan</span><span class="njh-sim">SIMULASI</span></button><i class="njh-sep" aria-hidden="true"></i><button class="btn" id="pauseExit"><span>Keluar ke Menu Utama</span></button></div></div>
+<div class="njh-menu" role="menu" aria-label="Menu jeda">
+<button class="btn primary" id="resumeGame" role="menuitem"><span>▶ Lanjut Main</span></button>
+<button class="btn" type="button" id="njhPauseHowto" role="menuitem"><span>Lihat Tutorial</span></button>
+<button class="btn" type="button" id="njhPauseReload" role="menuitem"><span>Muat Ulang Kota</span><small>data aman</small></button>
+<i class="njh-sep" aria-hidden="true"></i>
+<button class="btn" type="button" id="offlineSave"><span>💾 Simpan · Slot 1</span></button>
+<button class="btn" type="button" id="offlineLoad"><span>📂 Muat · Slot 1</span></button>
+<button class="btn" type="button" id="offlineExport"><span>Ekspor Backup</span></button>
+<button class="btn" type="button" id="offlineImport"><span>Impor Backup</span></button>
+<input id="offlineImportFile" type="file" accept=".json,application/json" hidden>
+<p class="njh-menu-note" id="offlineActionStatus" role="status" aria-live="polite">Autosave aktif di perangkat ini.</p>
+<i class="njh-sep" aria-hidden="true"></i>
+<button class="btn" id="pauseExit"><span>Keluar ke Menu Utama</span></button></div></div>
 </section>
 <section id="messageScreen" class="screen" hidden aria-label="Custom Flow Screen">
 <h1 id="customTitle">Screen</h1><p class="muted" id="customDescription"></p><div class="njh-wizard-actions"><span class="spacer"></span><button type="button" class="btn primary" id="customContinue">Lanjut &gt;</button></div>
