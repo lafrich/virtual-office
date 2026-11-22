@@ -1,3 +1,31 @@
+# Rollback — STEP 2 live (22 Nov 2026)
+
+Written 2026-11-22 08:12 WIB (Asia/Jakarta). Client UI/JS, r7 interior reopen, template-first doors, mushola wudhu fix, catalog art, tests, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Clock rate tidak diubah (tetap 0.5 s/game minute dari `content/balancing.json`). Pipeline main tidak di-release.
+
+- Previous live VO code tree (restore target): `6ddfec25d4c3338c1abaa62a90070c2e17684a20` (balancing r4b, sw v44, `?v=njh-balancing-r4b-20261122`)
+- Previous live VO tip immediately before this ship: `7f7a45d215a28eaeb2eace783b02643876c33eb7` (r4b + ROLLBACK.md follow-up only)
+- Previous live pipeline `origin/main` remains `c9dc88fab2e5d82a1193a456760418b6e4dc115c` (this deploy did not ship pipeline)
+- New Bot (Ichsan's standing approval delegate) verified live r4b `7f7a45d` OK and APPROVED `preview/njh-step2-live-20261122` @ `d96ec1254fae6876e0503a66061562959b7af112` for LIVE
+- Live code tip: `d96ec1254fae6876e0503a66061562959b7af112` — sw v45, `?v=njh-step2-live-20261122`, hub `hub-20261122-step2-live`. This follow-up commit is ROLLBACK.md only (does not bump live `sw.js` / `?v`; served tree stays v45 / step2-live)
+- Isi: reopen 7 r7 interiors (Warung Madura, Nasi Sunda, Koperasi, Toko Loak, Mushola, Pecel Lele, Sate Madura) so official doors enter the correct rooms; template-first `kindOfBuilding` / `resolvePlayTemplate` (Warteg stays `njh_warteg_kharisma` + Ibu Warteg even if the door still names the `njh_warung_makan` fallback); mushola wudhu no longer overlaps a sajadah; bakeDeclaredPaint for non-mart rooms; r7 play catalog + art. Keeps r4b: public interiors as customer, door-E enter, HUD clock after sleep, "Duduk sebentar" + snap, hold-to-work, slice table (Rp15.000, q1_makan, coffee at Warteg). Warung Kopi stays locked (slice-1.0)
+- Gate sebelum push (preview, all passed): unit 658 tes, 656 lulus, 0 gagal, 2 dilewati; Kharisma checker 7 PASS, 0 violations, exit 0; window-fit 85 cek, 0 terpotong, 0 start error; 4-ID 8/8 di worker throwaway `localhost:8847` + static `localhost:8927` (bukan :8787, bukan `srv/.dev.vars`); Playwright `?fresh=1`: 7 r7 doors correct rooms, Warteg kharisma + Ibu, Makan 15.000→3.000 + q1 ready, Mart buy, E doors, Kopi locked; sim identical to 4598bb2 (p10 46.7 · median 50.8 · p90 54.9 real min · 4.6 game days · 0 faints; md5 `bafd7aca8f7d3a0d7e3ebf53b54d2200`); secret-scan diff 0/0/0/0, tree password_assign 0, token_assign 1, bearer 2, private_key 0 (counts only)
+- Pages verify after FF of d96ec125: `pages-build-deployment` run 44970191210 success (headSha d96ec125, completed 08:10:57 WIB / 01:10:57 UTC); curl `https://lafrich.github.io/virtual-office/sw.js` starts `/* sw v45` and names `?v=njh-step2-live-20261122` (last-modified 08:10:51 WIB / 01:10:51 UTC); live `mainkan/index.html` play scripts use that cache tag; live Playwright `?fresh=1` throwaway guest only (no production accounts, no apiBase override): pass, r4Loaded, start15k, q1, wearsTee, Kopi locked, sleepGrey, coffee at Warteg, E doors Warteg→kharisma+Ibu / Mart / Kost lobby, all 7 r7 rooms correct, Makan 15.000→3.000 + q1 ready, Mart buy Kopi sachet 3.000→1.000 bag 0→1; 0 preview-ref requests, 0 HTTP 4xx on the confirming run
+
+Cara rollback VO tanpa force-push (kembalikan tree `6ddfec25` dalam satu commit baru). Jangan force-push. Setelah restore tree, bump `sw.js` ke versi bebas berikutnya **v47 atau lebih tinggi** (jangan v46 — CP3 sudah memakai v46) supaya browser melepas cache v45 / step2-live, lalu FF push:
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git checkout 6ddfec25d4c3338c1abaa62a90070c2e17684a20 -- .
+git commit -m "rollback: STEP 2 live (restore 6ddfec25 tree)"
+# bump sw.js ke v47 atau versi bebas berikutnya (jangan v46; CP3 owns v46)
+# dan ?v cache tag baru, lalu:
+git push origin HEAD:refs/heads/main
+```
+
+Pipeline tidak ikut deploy ini; jangan di-FF atau di-rollback kecuali brief terpisah menamai SHA. Jangan sentuh `preview/njh-cp3-live-20261122` (rebase CP3 sedang dikerjakan worker lain).
+
+---
+
 # Rollback — balancing r4b live (22 Nov 2026)
 
 Written 2026-11-22 07:48 WIB (Asia/Jakarta). Client UI/JS, balancing table, public interiors, door-E, HUD clock, benches, hold-to-work, tests, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Clock rate tidak diubah (tetap 0.5 s/game minute dari `content/balancing.json`). Pipeline main tidak di-release.
