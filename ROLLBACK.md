@@ -1,3 +1,35 @@
+# LIVE — rollback CP3 → STEP 2 (sw v48, 22 Nov 2026 10:01 WIB)
+
+Written 2026-11-22 10:05 WIB (Asia/Jakarta). New Bot (Ichsan's standing approval delegate) CONFIRMED execute the rollback. FF only, no --force. Map v2 / asset-fix work stays frozen. Pipeline and Worker were not deployed. Clock rates were not changed.
+
+- Live VO `origin/main` (code + this notes follow-up sits on): `4f08d781ad76527c2439b6201f93a60141fda31e`
+- Restore tree inside that commit: `d96ec1254fae6876e0503a66061562959b7af112` (STEP 2 live)
+- SW **v48**, cache `?v=njh-rollback-step2-v48-20261122` (v47 remains reserved for map v2)
+- Previous live: code `05641d8c9d187a50e3e5b61446048a97b52a6b16` (CP3, sw v46, `?v=njh-cp3-live-20261122`), tip `dbc72cd5287adc338f0ec13001eb2a7a46f64fd7`
+- Pages run `44978639417` success. `sw.js` last-modified 2026-11-22 03:00:58 GMT = 10:00:58 WIB (Asia/Jakarta). curl: starts `/* sw v48` and contains the rollback `?v`.
+- To undo this rollback later: restore tree `05641d8c` (or tip `dbc72cd`) and bump SW to **v49+**. FF only, no --force. Do not re-ship CP3 lazy-load until the door/clock/token issues below are fixed.
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+# undo later, only after a new SW-bump commit: git push origin <sha>:refs/heads/main
+```
+
+Why CP3 was pulled (evidence; fixes not shipped):
+
+1. Doors: on CP3 `05641d8c` in player mode (`?player=1`, no `?fresh`), `SemestaLifePlay.enterables()` is **20 closed / 0 open**. Warteg, Laundry, NJH Mart, Mushola, and the 7 r7 doors all show tooltip **Belum buka**. `loadCity()` skips `loadInteriors()` so `o.interior` / `d.interior` are empty; `enterables()` and `njh-play-interiors` still treat "no interior payload" as closed even when `pending` is false and the template is officially READY. After this rollback, live census is **14 open / 6 closed**, with Warteg / Laundry / Mart / Mushola / r7 open and only Warung Kopi (plus unready rumah warga / papan) closed.
+
+2. HUD clock: CP3 `semesta-daynight.js` `restore(obj, src)` sets `playerHold` when `src==='player'`. `applyVisualClock` / `freshClock` use that hold, but `syncHudToLifeClock()` after "Tidur sampai pagi" calls `restore(next)` without `'player'`, so the HUD stays at the held night time (~04:xx Malam) instead of 06:00 Pagi (the r4b fix).
+
+3. Mobile Isi Token: `#njhTokenBuy` in Token.exe can sit outside the force-landscape logical viewport (short logical height ~390px vs 100dvh/100vw media queries). Not shipped.
+
+4. Car bottoms cut off is Ellen's art; noted only.
+
+5. This rollback tree predates the CP3 favicon silence (`<link rel="icon" href="data:,">`), so a github.io `/favicon.ico` 4xx can return. Harmless; do not bump SW just for that unless asked.
+
+JANGAN DIOBRAK-ABRIK: no main push except an explicit FF; no force; no Worker deploy; no pipeline FF; no clock-rate change; no map v2 / asset-fix work.
+
+---
+
 # Rollback prepared — CP3 → STEP 2 (sw v48, 22 Nov 2026)
 
 Written 2026-11-22 09:40 WIB (Asia/Jakarta). THIS COMMIT restores the VO tree to STEP 2 live `d96ec125` and bumps the service worker to **v48** with cache `?v=njh-rollback-step2-v48-20261122`. It sits on top of `dbc72cd` (current main tip: CP3 live notes). Do not force-push. This branch is `rollback/cp3-to-step2-v48` until an explicit main FF is approved.
