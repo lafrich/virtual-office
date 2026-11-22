@@ -19,6 +19,8 @@ import android.webkit.ValueCallback;
 import android.widget.Toast;
 import androidx.webkit.WebViewAssetLoader;
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -108,7 +110,9 @@ public final class MainActivity extends Activity {
         byte[] bytes=message.getBytes(StandardCharsets.UTF_8);
         WebResourceResponse r=new WebResourceResponse("text/plain","UTF-8",new ByteArrayInputStream(bytes));
         r.setStatusCodeAndReasonPhrase(code,code==404?"Not Found":"Forbidden");
-        r.getResponseHeaders().put("Access-Control-Allow-Origin","*");
+        Map<String,String> headers=new HashMap<>();
+        headers.put("Access-Control-Allow-Origin","*");
+        r.setResponseHeaders(headers);
         return r;
     }
     @Override protected void onPause(){
