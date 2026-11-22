@@ -136,8 +136,9 @@ function offlineNewGame(){
  if(!OFF){window.alert('Modul save offline tidak tersedia.');return;}
  if(OFF.hasSave()&&!window.confirm('Mulai Baru akan menghapus karakter dan progres offline NJH pada perangkat ini. Lanjutkan?'))return;
  try{
-  if(!OFF.clear())throw Error('Save sebelumnya gagal dihapus.');
+  // Stop the live engine BEFORE clearing keys; stop() itself runs autosave.
   try{frame.contentWindow?.SemestaLifePlay?.stop?.();}catch{}
+  if(!OFF.clear())throw Error('Save sebelumnya gagal dihapus.');
   frame.removeAttribute('src');worldReady=false;
   guest=false;session=null;testPlayerId=offlineId;profile=null;characterDraft=null;firstTime=true;
   selected='genesis_male_nude';showType('character');
