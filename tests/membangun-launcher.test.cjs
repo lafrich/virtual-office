@@ -66,7 +66,7 @@ test('JIWA reads saved Semesta city drafts and exposes city-object deep links',(
  assert.ok(bridge.includes("url.searchParams.set('object',id)"));
 });
 
-test('JIWA routes bypass the encrypted game service worker',()=>{
+test('offline worker caches only player navigations and leaves editor navigation untouched',()=>{
  const vm=require('node:vm');
  const handlers={};
  const scope='https://lafrich.github.io/virtual-office/';
@@ -79,14 +79,19 @@ test('JIWA routes bypass the encrypted game service worker',()=>{
   Uint8Array,console,Promise,setTimeout,clearTimeout
  },{filename:'sw.js'});
  assert.equal(typeof handlers.fetch,'function');
- for(const asset of ['jiwa/','jiwa/index.html','jiwa/jiwa.js','membangun/','world-builder/','emotion-studio/','emotion-studio/index.html','shared/','shared/hub-registry.js']){
+ for(const asset of ['jiwa/','jiwa/index.html','membangun/','world-builder/','emotion-studio/','emotion-studio/index.html','shared/']){
   let intercepted=false;
-  handlers.fetch({
-   request:{method:'GET',url:scope+asset,mode:'navigate'},
-   respondWith(){intercepted=true;}
-  });
-  assert.equal(intercepted,false,asset+' should not require the encrypted game key');
+  handlers.fetch({request:{method:'GET',url:scope+asset,mode:'navigate'},respondWith(){intercepted=true;}});
+  assert.equal(intercepted,false,asset+' editor navigation is not part of the offline player');
  }
+ for(const asset of ['mainkan/','mainkan/index.html','world-builder/?player=1']){
+  let intercepted=false;
+  handlers.fetch({request:{method:'GET',url:scope+asset,mode:'navigate'},respondWith(){intercepted=true;}});
+  assert.equal(intercepted,true,asset+' player navigation should be cacheable');
+ }
+ let resourceCached=false;
+ handlers.fetch({request:{method:'GET',url:scope+'shared/hub-registry.js',mode:'cors'},respondWith(){resourceCached=true;}});
+ assert.equal(resourceCached,true,'game dependency should be cacheable');
 });
 
 test('Emotion Studio uses native Male Base four-view head overlay without baking it into exports',()=>{
