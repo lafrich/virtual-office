@@ -2,7 +2,10 @@
 
 Preview branch: `preview/njh-step2-r7-20261122` (based on STEP 1 `e418b3d`). Preview only. Do not merge or push `main`. Do not deploy the Worker.
 
-Tags: sw **v45**, `?v=njh-step2-r7-20261122`, hub `hub-20261122-step2-r7`. LGR pack stays `?v=pakaian-v2-njh-newbot-fix-20261122`.
+Tags: sw **v45**, `?v=njh-step2-r7-wudhu-20261122`, hub `hub-20261122-step2-wudhu`. LGR pack stays `?v=pakaian-v2-njh-newbot-fix-20261122`.
+
+
+**QA follow-up (New Bot):** the keran wudu on the door wall no longer overlaps a sajadah. The sajadah that sat under the keran wudu was removed; shaf 2 is at c=2,3 r=3, and the wudhu stays at (6,5),(7,5). Cache `?v=njh-step2-r7-wudhu-20261122`, hub `hub-20261122-step2-wudhu`. SW stays **v45**.
 
 ## What changed
 

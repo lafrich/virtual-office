@@ -21,7 +21,7 @@
   },
   "floor": 1,
   "baseId": "semesta:medium",
-  "notes": "Mushola 8x6 (Kharisma R4 typological repeat: sajadah rows, 6 types + full wall treatment). Kiblat = back wall r=0: all sajadah rot 0 (arch toward -r). Shaf 1 r=0-1 (6 mats) with rak Al-Quran in the kiblat corner; aisle r=2; shaf 2 at c2,c3,c5 leaves the door-front (4,4) and the wudhu fronts free. Rak sandal on the door wall at (0,5)-(1,5), left of the entrance, use side (0,4)/(1,4). Wudhu area on the door wall (6,5),(7,5) rot 180, tiled dado zone; use tiles (6,4),(7,4). Galon for jamaah next to the wudhu. Typology mushola: density band not forced.",
+  "notes": "Mushola 8x6 (Kharisma R4 typological repeat: sajadah rows, 6 types + full wall treatment). Kiblat = back wall r=0: all sajadah rot 0 (arch toward -r). Shaf 1 r=0-1 (6 mats) with rak Al-Quran in the kiblat corner; aisle r=2; shaf 2 at c2,c3 r=3 (the sajadah that sat under the keran wudu at c=5 was removed so the taps no longer overlap a mat). Door-front (4,4) and wudhu fronts (6,4),(7,4) stay free. Rak sandal on the door wall at (0,5)-(1,5), left of the entrance, use side (0,4)/(1,4). Wudhu area on the door wall (6,5),(7,5) rot 180, tiled dado zone; use tiles (6,4),(7,4). Galon for jamaah next to the wudhu. Typology mushola: density band not forced.",
   "source": "njh-interiors-kharisma-r7 (revision of njh-interior-templates-r6)",
   "scope": "PREVIEW, NOT LIVE. Baymax integrates; live needs Ichsan's own OK.",
   "paint": {
@@ -283,25 +283,6 @@
       "assetId": "prayer_mat",
       "name": "Sajadah Shaf 2 · 2",
       "c": 3,
-      "r": 3,
-      "rotation": 0,
-      "flipX": false,
-      "flipY": false,
-      "actionId": "pray",
-      "pose": "pray",
-      "capacity": 1,
-      "blocking": true,
-      "triggerRadius": 1.15,
-      "actionAdjustments": {},
-      "motions": [
-        "pray"
-      ]
-    },
-    {
-      "id": "njh-mushola-prayer_mat-9",
-      "assetId": "prayer_mat",
-      "name": "Sajadah Shaf 2 · 3",
-      "c": 5,
       "r": 3,
       "rotation": 0,
       "flipX": false,
