@@ -104,9 +104,9 @@ test('preview cache-bust and service worker are unique for this asset checkpoint
  // Later preview packages on top of this checkpoint bump the SW (balancing = v44); never below v36.
  assert.ok(Number((/^\/\* sw v(\d+) /.exec(sw)||[])[1])>=36,'sw >= v36');
  const html=fs.readFileSync(path.join(VO,'mainkan/index.html'),'utf8');
- assert.match(html,/\?v=njh-step2-live-20261122/);
+ assert.match(html,/\?v=njh-cp3-live-20261122/);
  const wb=fs.readFileSync(path.join(VO,'world-builder/index.html'),'utf8');
- assert.match(wb,/indonesia-assets\.js\?v=njh-step2-live-20261122/);
+ assert.match(wb,/indonesia-assets\.js\?v=njh-cp3-live-20261122/);
  const hub=JSON.parse(fs.readFileSync(path.join(VO,'shared/hub-version.json'),'utf8'));
- assert.equal(hub.build,'hub-20261122-step2-live');
+ assert.equal(hub.build,'hub-20261122-cp3-live');
 });

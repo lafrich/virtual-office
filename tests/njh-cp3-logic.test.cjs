@@ -11,24 +11,27 @@ function identityLabel(spec){
 test('sw v46 and unique CP3 cache / hub tags',()=>{
  const sw=read('sw.js');
  assert.match(sw,/^\/\* sw v46 /);
- assert.match(read('mainkan/index.html'),/\?v=njh-cp3-qa-20261122/);
+ assert.match(read('mainkan/index.html'),/\?v=njh-cp3-live-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
- assert.equal(hub.build,'hub-20261122-cp3-qa');
+ assert.equal(hub.build,'hub-20261122-cp3-live');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);
 });
 
-test('clock restore(src=player) holds against later non-player restores; rates unchanged',()=>{
+test('clock restore(src=player) holds against later non-player restores; r4b rates kept',()=>{
  const src=read('world-builder/semesta-daynight.js');
- assert.match(src,/DAY_REAL_SECONDS=24\*60/);
+ // r4b: one clock from balancing (0.5 s / game minute), not the old 1 s visual clock.
  assert.match(src,/DEFAULT_MINUTE=7\*60/);
+ assert.match(src,/DAY_REAL_SECONDS=MINUTES\*SECONDS_PER_MINUTE/);
  assert.match(src,/if\(\[1,2,4\]\.includes\(n\)\)clock\.speed=n/);
  assert.match(src,/restore\(obj,src\)/);
  assert.match(src,/if\(src!=='player'&&playerHold\)return/);
- const window={};
+ const B=require(path.join(root,'shared/njh-balancing.js'));
+ const window={NJHBalancing:B};
  vm.runInNewContext(src,{window});
  const e=window.VLSemestaDayNight;
- assert.equal(e.DAY_REAL_SECONDS,24*60);
  assert.equal(e.DEFAULT_MINUTE,7*60);
+ assert.equal(e.SECONDS_PER_MINUTE,0.5);
+ assert.equal(e.DAY_REAL_SECONDS,1440*0.5);
  const c=e.makeClock({day:3,minute:14*60,speed:1});
  c.restore({day:3,minute:14*60,speed:1},'player');
  const held=c.restore({day:1,minute:e.DEFAULT_MINUTE,speed:1},'map');
@@ -69,7 +72,7 @@ test('cook uses pantry (tas/kulkas/lemari) and a scene stove, not a start-seed s
 
 test('hold-to-work emits mainkan:work-progress {progress,label,done}',()=>{
  const play=read('world-builder/semesta-life-play.js');
- assert.match(play,/new CustomEvent\('mainkan:work-progress',\{detail:\{progress:pct,label:jobLabel,done:!!done\}\}\)/);
+ assert.match(play,/new CustomEvent\('mainkan:work-progress',\{detail:\{progress:pct,label:jobLabel,done:pct>=1\}\}\)/);
 });
 
 test('E at a door does not override other contextual actions; locked door menu is Belum buka',()=>{
@@ -119,8 +122,10 @@ test('confirmPaid only asks at >= Rp20.000 or irreversible; small pay toasts −
  assert.match(play,/if\(!policy\.confirm\)return true;/);
  assert.match(play,/const spend=spendToast\(action,args\);/);
  assert.match(play,/if\(!confirmPaid\(action,args\)\)return \{ok:false,reason:'Dibatalkan'\}/);
- assert.equal(fs.existsSync(path.join(root,'content/balancing.json')),false);
- assert.equal(fs.existsSync(path.join(root,'shared/njh-balancing.js')),false);
+ assert.equal(fs.existsSync(path.join(root,'content/balancing.json')),true);
+ assert.equal(fs.existsSync(path.join(root,'shared/njh-balancing.js')),true);
+ const B=require(path.join(root,'shared/njh-balancing.js'));
+ assert.equal(B.num('ui.confirmPaidMin'),20000);
  const guide=read('docs/NJH-CP3-LOGIC-PREVIEW-TEST-GUIDE.md');
  assert.match(guide,/ui\.confirmPaidMin: 20000/);
  assert.match(guide,/content\/balancing\.json/);

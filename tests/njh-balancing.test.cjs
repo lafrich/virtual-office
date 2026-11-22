@@ -286,9 +286,9 @@ test('Warung Kopi locked "Belum buka" (no interior request) and coffee sold at t
 
 test('world-builder loads the balancing loader before life-economy and day/night (one ?v tag)',()=>{
  const html=read('world-builder/index.html');
- const iB=html.indexOf('../shared/njh-balancing.js?v=njh-step2-live-20261122');
+ const iB=html.indexOf('../shared/njh-balancing.js?v=njh-cp3-live-20261122');
  assert.ok(iB>0);
- assert.ok(iB<html.indexOf('../jiwa/life-economy.js?v=njh-step2-live-20261122'));
- assert.ok(iB<html.indexOf('./semesta-daynight.js?v=njh-step2-live-20261122'));
- assert.match(read('sw.js'),/^\/\* sw v45 /);
+ assert.ok(iB<html.indexOf('../jiwa/life-economy.js?v=njh-cp3-live-20261122'));
+ assert.ok(iB<html.indexOf('./semesta-daynight.js?v=njh-cp3-live-20261122'));
+ assert.match(read('sw.js'),/^\/\* sw v46 /);
 });

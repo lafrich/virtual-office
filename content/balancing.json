@@ -518,6 +518,15 @@
    "unit": "teks"
   },
   {
+   "key": "ui.confirmPaidMin",
+   "value": 20000,
+   "unit": "Rp",
+   "source": "baru",
+   "code_value": 20000,
+   "code_ref": "world-builder/semesta-life-hooks.js confirmPaidMin / paymentPolicy; world-builder/semesta-life-play.js confirmPaid",
+   "note": "New Bot CP3: tampilkan dialog konfirmasi hanya untuk pembayaran >= Rp20.000 atau aksi irreversibel (beli kos/kulkas/furnitur). Pembelian kecil langsung jalan dengan toast −RpX. Dibaca lewat shared/njh-balancing.js."
+  },
+  {
    "key": "food.fruit.fullness",
    "value": 20,
    "unit": "kenyang",

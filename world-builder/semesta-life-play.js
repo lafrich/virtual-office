@@ -1181,7 +1181,9 @@ function runAction(action,args={}){
  if(result.ok){
   syncVisualClock(prior,result.state,action);
   state=result.state;
-  if(['fish','work','scavenge','catch_fruit'].includes(action)&&!state.detained){
+  // Work payout is the balancing wage only. Do not chain luck_find (+Rp500 rezeki)
+  // after a job: that made Parkir desktop land on +5.500 whenever the roll hit.
+  if(['fish','scavenge','catch_fruit'].includes(action)&&!state.detained){
    const luck=RULES.run(config,state,'luck_find',{roll:Math.random()});
    if(luck.ok)state=luck.state;
    if(luck.ok&&luck.changes.some(x=>x.includes('+Rp')||x.includes('NASIB BURUK')))result.changes.push(...luck.changes);

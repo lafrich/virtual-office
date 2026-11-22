@@ -1,15 +1,37 @@
-# NJH Checkpoint 3 — remaining logic fixes preview test guide (22 Nov 2026, Asia/Jakarta)
+# NJH Checkpoint 3 — live rebase preview test guide (22 Nov 2026, Asia/Jakarta)
 
-Preview only: `preview/njh-cp3-logic-20261122`, based on STEP 2 `9e61a23`. Do not merge or push `main`. Do not deploy the Worker.
+Preview only: `preview/njh-cp3-live-20261122`, linear on live main tip `b4e0f04` (ROLLBACK.md docs on top of STEP 2 live `d96ec125` / sw v45; balancing r4b `7f7a45d` / `6ddfec25`). Rebase of approved CP3 VO `preview/njh-cp3-logic-20261122` @ `e71027c3`. Do not merge or push `main`. Do not deploy the Worker. SW stays v46; Cache `?v=njh-cp3-live-20261122`; hub `hub-20261122-cp3-live`. Pipeline stays live `c9dc88f` (tee_v4→tee, trousers_v4→trousers).
 
-- Service worker: **v46**. (v43 is STEP 1 live / Warteg fix on another stream; **v44** = balancing; **v45** = STEP 2.)
-- Cache tag: `?v=njh-cp3-qa-20261122`
-- Hub build: `hub-20261122-cp3-qa`
+- Service worker: **v46**. (v43 = STEP 1 live; **v44** = balancing r4b, was live; **v45** = STEP 2, going live.)
+- Cache tag: `?v=njh-cp3-live-20261122`
+- Hub build: `hub-20261122-cp3-live`
 - LGR pack stays `?v=pakaian-v2-njh-newbot-fix-20261122` (not bumped).
-- Pipeline: CP3 goes live with **`c9dc88f`** (current live pack). The companion `preview/njh-cp3-lgr-20261122` (`c5fcc7f`) is **rejected** — `spec()` there let `tee_v4` through, `previewStrip()` needed unset `window.LGR_WEAR_PHASE1_BASE`, and saved `tee_v4` profiles went nude. VO maps `tee_v4` → `tee` and `trousers_v4` → `trousers`. The v4 pack is left for a later package. `PREVIEW_REF` remains `main`.
+- Pipeline stays **`c9dc88f`** (current live pack). The rejected companion `c5fcc7f` / `preview/njh-cp3-lgr-20261122` must not be used. VO maps `tee_v4` → `tee` and `trousers_v4` → `trousers`. `PREVIEW_REF` remains `main`.
 
+This branch already sits on r4b, so **`ui.confirmPaidMin: 20000`** is a real key in `content/balancing.json` and is read through `shared/njh-balancing.js` (`num` / `value`) into `confirmPaid` / `paymentPolicy`.
 
-**Rebase onto the balancing package:** this CP3 base (STEP 2) does not yet ship `content/balancing.json` / `shared/njh-balancing.js`. When CP3 is rebased onto the balancing package (SW v44, live before STEP 2), add the key **`ui.confirmPaidMin: 20000`** to `content/balancing.json`. Do not invent the file on this branch; the runtime already falls back to 20000 and will read the loader's `get` / `num('ui.confirmPaidMin')` once that package is present.
+## Live-rebase add-ons (same branch)
+
+1. **`ui.confirmPaidMin: 20000`** in `content/balancing.json`, consumed by the balancing loader. `confirmPaid` uses `paymentPolicy` with that min (fallback 20000 only if the loader is missing).
+2. **`?fresh=1` new players spawn at the hobo tent (−51.5, 64.5)** (HUD “Tenda”, interactable `njh_tenda_hobo`). Existing / non-fresh sessions keep the plaza pool or a home spawn. Ichsan/Noor homes still win.
+3. **Laundry waiting bench is visible.** The I4 `waiting_bench` sprite is a low divider, so play now aliases `waiting_bench` → `wooden_bench` (art already in `njh-play-interiors/art/`). Sit / “Duduk sebentar” is unchanged.
+4. **Parkir payout is the balancing wage (Rp5.000).** The extra +Rp500 on desktop was `luck_find` (“rezeki tak terduga”) chained after `work`. Work no longer chains luck; desktop and mobile share the same `runAction('work')` path. `luck_find` remains a separate action.
+5. **q1 e2e (one Playwright session):** accept at Pak Ogah, eat at the Warteg (Makan), q1 ready, hand in / claim.
+6. **Lazy-load r7 interior art.** Boot no longer fetches every catalog furniture PNG / every ready scene (that ballooned the session from ~6.18 MB to ~9.84 MB). Catalog JSON loads at boot; scene JSON + that room’s art load the first time a door is opened, behind a short “Memuat interior…” overlay, then the room is built in one shot (no empty-room flicker). Playwright checks that boot interior-art bytes drop and that entering an r7 room still renders the full furniture.
+
+## Gates
+
+- `node --test tests/*.test.cjs` (unit only).
+- Kharisma checker on the 7 r7 scene files: 7 PASS, 0 violations, exit 0.
+- Window-fit.
+- 4-ID smoke (Ichsan, Noor, Guest1, Guest2) on throwaway ports other than 8787 (never shared `srv/.dev.vars`).
+- Playwright `?fresh=1` in one session: old CP3 checks (clock hold, E menu priority, precheck before confirm, small buy toast, big buy confirm, fish sell aliases, cook, dermaga) plus q1 e2e and lazy-load boot/enter.
+- Sim (`node tools/njh-slice-sim.cjs`); explain any change. Work no longer chains luck in play, but the slice sim calls `RULES.run` directly and should be unchanged.
+- Secret scan of added lines: counts only.
+
+## Rollback
+
+On this preview branch only, drop `preview/njh-cp3-live-20261122`. That restores live main tip `b4e0f04` (ROLLBACK.md notes on STEP 2 live `d96ec125`, sw v45). Leave `main`, the Worker, densify, and the rejected pipeline alone.
 
 ## What changed (remaining logic only)
 
@@ -66,6 +88,14 @@ Open Mainkan on a preview static server with `?njhMap=1&fresh=1`. Use throwaway 
 - Secret scan of added lines: counts only.
 - 404 / preview-ref / ripple / furniture-without-art: all 0.
 
-## Rollback
+## Playwright evidence (static `127.0.0.1:8962`, `serviceWorkers=block`, `?fresh=1`)
 
-On this preview branch only, revert the CP3 VO SHA (and the CP3 pipeline SHA if it was pushed). That restores STEP 2 `9e61a23` / pipeline `c9dc88f`. Leave `main`, the Worker, densify, STEP 1, and STEP 2 untouched.
+Boot (before any door): 351 requests / 6.92 MB; interior art 0 / 0 B; r7 art 0; scene JSON 0; play catalog JSON 1. (Earlier same-path boot with art preloaded: 667 req / 7.61 MB, 18 scenes, 64 r7 art files / 101 KB interior-art. New Bot’s live session weight had grown from ~6.18 MB to ~9.84 MB when r7 interiors loaded at boot.)
+
+q1 in the same session: spawn tent (−51.5, 64.5, `njh-fresh-tent`) → accept `q1_makan` at Ogah → eat at official `njh_warteg_kharisma` (wallet 15.000→3.000, quest ready) → claim done +Rp10.000 (wallet 13.000).
+
+Laundry enter after boot: room `njh_laundry`, 8 furniture items including `washing_machine`, `laundry_counter`, `waiting_bench` (wooden_bench art). Enter-path network (Warteg + Laundry): 2 scene JSONs + 16 r7 art files, room built after “Memuat interior…”.
+
+CP3 policy in the same session: `confirmPaidMin` 20000; eat toast `−Rp12.000` (no confirm); `buy_room` confirm true; poor-state precheck “Uang tidak cukup.” (no confirm). sell/cook aliases present on the play API.
+
+4-ID smoke (throwaway auth `127.0.0.1:8868`, static `localhost:8962`, not 8787, no shared `srv/.dev.vars`): Ichsan and Noor spawn `home`; Guest1 and Guest2 spawn `plaza`; all four `SEMESTA • PLAYER READY`.

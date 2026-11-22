@@ -496,12 +496,15 @@ test('places NJH Mart on a free 5x4 main-road lot with a sidewalk use tile',()=>
 
  const report=api.wireDoors(document,meta,{});
  assert.equal(report.missingObject.length,0);
- const pending=report.pending.find(r=>r.doorId==='njh_door_minimarket');
- assert.ok(pending);
- assert.equal(pending.template,'njh_minimarket');
+ // READY doors stay enterable even before the scene JSON is fetched (play-mode lazy load).
+ const wired=report.wired.find(r=>r.doorId==='njh_door_minimarket');
+ assert.ok(wired);
+ assert.equal(wired.template,'njh_minimarket');
+ assert.ok(!report.pending.find(r=>r.doorId==='njh_door_minimarket'));
  assert.equal(shop.enterable,true);
- assert.equal(shop.njhInteriorPending,true);
+ assert.equal(shop.njhInteriorPending,false);
  assert.equal(shop.interior,null);
+ assert.equal(api.isClosedDoor(shop),false);
  assert.equal(shop.njhInteriorTemplate,'njh_minimarket');
  assert.deepEqual([shop.njhUsePoint.x,shop.njhUsePoint.z],[-26.5,58.5]);
 
