@@ -823,9 +823,14 @@ function create(opts){
   for(const f of session.furniture||[]){
    if(Math.hypot(p.x-f.x,p.z-f.z)>2.2)continue;
    const ids=A?.mapActionIds?.(f)||[];
+   const kind=String(f.assetId||f.kind||f.id||'');
+   if(!ids.includes('rest')&&/waiting_bench|plastic_bench|bangku/.test(kind))ids.push('rest');
    for(const id of ids){
     if(out.some(a=>a.id===id&&a.furnitureId===f.id))continue;
-    push(id,ACTION_LABELS[id]||id,0,{itemId:f.id,access:f.access,ownerId:f.ownerId},f.id,f.label);
+    const label=id==='rest'||id==='sit'?'Duduk sebentar':(ACTION_LABELS[id]||id);
+    const args={itemId:f.id,access:f.access,ownerId:f.ownerId};
+    if(id==='rest'||id==='sit'){args.seatId=f.id;args.x=f.x;args.z=f.z;}
+    push(id,label,0,args,f.id,f.label);
    }
   }
   if(session.kind==='warteg'){

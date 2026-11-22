@@ -30,7 +30,9 @@
     bathe: ['home_shower'],
     home_shower: ['home_shower'],
     use_toilet: ['home_toilet'],
-    home_toilet: ['home_toilet']
+    home_toilet: ['home_toilet'],
+    sit: ['rest'],
+    rest: ['rest']
   };
 
   const DEFAULTS = {
@@ -287,14 +289,22 @@
         }
       });
       if (!out.length && act) {
-        const fallback = { open: null, cook: 'cook', wash: 'wash', bathe: 'home_shower', use_toilet: 'home_toilet', sleep: 'sleep' };
+        const fallback = { open: null, cook: 'cook', wash: 'wash', bathe: 'home_shower', use_toilet: 'home_toilet', sleep: 'sleep', sit: 'rest', rest: 'rest' };
         if (fallback[act]) out.push(fallback[act]);
+      }
+      if (!out.length) {
+        const kind = itemKind(item);
+        if (/waiting_bench|plastic_bench|bangku/.test(kind)) out.push('rest');
       }
       return out;
     }
 
+    const PUBLIC_ACTS = ['eat', 'coffee', 'tea', 'shop', 'shop_minimarket', 'shop_buy', 'talk', 'rest', 'sit',
+      'public_shower', 'public_toilet', 'charity', 'help', 'wash', 'exit_interior', 'enter_room', 'enter', 'exit', 'fart'];
+
     function allowedActsFor(role, roomId) {
       if (isLobby(roomId)) return ['enter_room', 'exit_interior', 'exit'];
+      if (role === 'customer' || role === 'public') return PUBLIC_ACTS.slice();
       if (role === 'owner') {
         return ['sleep', 'store_fridge', 'take_fridge', 'store_home', 'take_home', 'cook', 'cook_recipe', 'wash', 'home_shower', 'home_toilet', 'buy_furniture', 'bathe', 'use_toilet', 'open'];
       }
@@ -325,7 +335,8 @@
         if (door && (door.state === 'locked' || !door.interiorTemplate && !door.to)) {
           return { canEnter: false, role: 'none', allowedActs: [], reason: REASON_LOCKED, kind: 'room' };
         }
-        return { canEnter: true, role: 'none', allowedActs: [], reason: null, kind: null };
+        /* Public interiors (warteg, mart, laundry, …): guests are customers. */
+        return { canEnter: true, role: 'customer', allowedActs: allowedActsFor('customer', id), reason: null, kind: 'public' };
       }
       if (samePlayer(home.ownerId, playerId)) {
         return { canEnter: true, role: 'owner', allowedActs: allowedActsFor('owner', home.roomId), reason: null, kind: 'room' };
@@ -372,12 +383,14 @@
 
     function filterActions(playerId, roomId, actions, itemsById) {
       const acc = roomAccess(playerId, roomId);
-      if (isLobby(roomId)) return Array.isArray(actions) ? actions.slice() : [];
+      if (isLobby(roomId) || acc.kind === 'lobby') return Array.isArray(actions) ? actions.slice() : [];
       if (acc.role === 'owner') return Array.isArray(actions) ? actions.slice() : [];
       const allow = new Set(acc.allowedActs || []);
+      const isCustomer = acc.role === 'customer' || acc.role === 'public' || acc.kind === 'public';
       return (actions || []).filter((a) => {
         const id = typeof a === 'string' ? a : (a && a.id);
         if (!id) return false;
+        if (id === 'enter_room' || id === 'exit_interior' || id === 'exit' || id === 'enter') return true;
         if (id === 'buy_furniture') {
           return acc.role === 'owner';
         }
@@ -389,8 +402,10 @@
         if (item) {
           const kindAcc = accessOfItem(item);
           if (kindAcc === 'owner_only') return false;
-          if (kindAcc === 'shared_partner' || kindAcc === 'public') return acc.role === 'partner' || acc.role === 'owner';
+          if (kindAcc === 'shared_partner') return acc.role === 'partner' || acc.role === 'owner';
+          if (kindAcc === 'public') return acc.role === 'partner' || acc.role === 'owner' || isCustomer;
         }
+        if (isCustomer) return allow.has(id) || PUBLIC_ACTS.indexOf(id) >= 0;
         return allow.has(id);
       });
     }
@@ -406,6 +421,14 @@
         if (ownerActs.has(actionId) || (item && accessOfItem(item) === 'owner_only')) return REASON_PARTNER;
         if (allow.has(actionId)) return null;
         return REASON_PARTNER;
+      }
+      // Public interiors (warteg, mart, laundry…) have no housing record.
+      // Guests may use public actions such as eating or sitting on a bench.
+      if (acc.role === 'customer' || acc.role === 'public' || acc.kind === 'public' || (!isRoom(roomId) && acc.canEnter)) {
+        if (item && accessOfItem(item) === 'owner_only') return REASON_PARTNER;
+        const allow = new Set((acc.allowedActs && acc.allowedActs.length) ? acc.allowedActs : PUBLIC_ACTS);
+        if (!actionId || allow.has(actionId) || PUBLIC_ACTS.indexOf(actionId) >= 0) return null;
+        return REASON_LOCKED;
       }
       if (!acc.canEnter) return REASON_LOCKED;
       return REASON_LOCKED;
@@ -459,10 +482,15 @@
       if (Array.isArray(a)) {
         const list = a, acc = b || {};
         if (acc.role === 'owner' || acc.kind === 'lobby') return list.slice();
+        const isCustomer = acc.role === 'customer' || acc.role === 'public' || acc.kind === 'public';
         return list.filter((act) => {
           const id = typeof act === 'string' ? act : (act && act.id);
           if (!id) return false;
           if (id === 'enter_room' || id === 'exit_interior' || id === 'exit' || id === 'enter') return true;
+          if (isCustomer) {
+            if (['store_fridge', 'take_fridge', 'store_home', 'take_home', 'cook', 'cook_recipe', 'buy_furniture', 'open', 'sleep', 'home_toilet', 'home_shower', 'bathe', 'use_toilet'].indexOf(id) >= 0) return false;
+            return true;
+          }
           if (acc.role !== 'partner') return false;
           if (['store_fridge', 'take_fridge', 'store_home', 'take_home', 'cook', 'cook_recipe', 'buy_furniture', 'open'].indexOf(id) >= 0) return false;
           const item = act && (act.item || act.prop);

@@ -1,6 +1,6 @@
 # NJH balancing slice-1.0 — test guide (New Bot)
 
-Preview branch `preview/njh-balancing-20261122`, sw v44, assets `?v=njh-balancing-r4-20261122`.
+Preview branch `preview/njh-balancing-20261122`, sw v44, assets `?v=njh-balancing-r4b-20261122`.
 All numbers come from `content/balancing.json` (contentRevision `slice-1.0-r4`). Edit that file + reload to retune; nothing is hardcoded.
 
 ## Start from zero

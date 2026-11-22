@@ -23,7 +23,7 @@ test('STEP 1 history stays in sw; balancing cache/hub; LGR ?v is kept',()=>{
  assert.ok(Number((/^\/\* sw v(\d+) /.exec(read('sw.js'))||[])[1])>=43,'sw >= v43');
  assert.match(read('sw.js'),/sw v43 2026-11-22: STEP 1 live/);
  assert.match(read('sw.js'),/sw v42 2026-11-22: Preview STEP 1/);
- assert.match(read('mainkan/index.html'),/\?v=njh-balancing-r\d+-20261122/);
+ assert.match(read('mainkan/index.html'),/\?v=njh-balancing-r\d+[a-z]*-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
  assert.equal(hub.build,'hub-20261122-step1-lock-r7');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);

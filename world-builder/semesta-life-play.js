@@ -86,6 +86,28 @@ function syncVisualClock(prior,next,action){
   c.restore({...snap,minute:total%1440,day:(Number(snap.day)||1)+Math.floor(total/1440)});
  }catch{}
 }
+// After a timed sleep skip (manual or "Tidur sampai pagi"), set the HUD clock
+// (time + period label) to the life clock. Incremental sync is skipped while
+// timedAction is on, and "Tidur sampai pagi" runs faster than the visual clock.
+function lifeClockParts(){
+ if(!state)return null;
+ const total=(Number(state.elapsedMinutes)||0)+(Number(state.clockOrigin)||0);
+ const minute=((total%1440)+1440)%1440;
+ const day=Math.floor(total/1440)+1;
+ return {minute,day};
+}
+function syncHudToLifeClock(){
+ if(!state)return;
+ try{
+  const parts=lifeClockParts();if(!parts)return;
+  const c=bridge?.getClock?.();
+  const snap=c&&(typeof c.snapshot==='function'?c.snapshot():(typeof c.get==='function'?c.get():null));
+  const next={...(snap&&typeof snap==='object'?snap:{}),minute:parts.minute,day:parts.day,
+   speed:Number(snap?.speed)||1,paused:!!snap?.paused};
+  if(c&&typeof c.restore==='function')c.restore(next);
+  state.visualClock={minute:parts.minute,day:parts.day,speed:next.speed,paused:next.paused};
+ }catch{}
+}
 /* Timed sleep (slice-1.0, New Bot): one sleep = sleepMinutes (60) game minutes on the normal clock
    (30 real s), with a progress bar; wake anytime. "Tidur sampai pagi" ALWAYS continues hour by hour
    until dayStart (06:00), as the name says (energy just caps at max; no quota condition); the last chunk
@@ -135,7 +157,8 @@ function wake(reason){
  const minutes=Math.floor(Math.max(0,Math.min(1,s.elapsedMs/s.neededMs))*s.chunk);
  let r={ok:true,minutes:0};
  if(minutes>=1)r=runTimedSleep({...s.args,minutes});
- else{notifyHud();paintPanel();}
+ syncHudToLifeClock();
+ notifyHud();paintPanel();
  message('☀ '+(reason||'Bangun')+(minutes>=1?' · tidur '+minutes+' menit':''));
  try{bridge?.playPose?.('idle',1);}catch{}
  return {...r,woke:true,minutes};
@@ -150,10 +173,12 @@ function sleepStep(seconds){
  s.hours++;
  if(!r.ok||!s.untilMorning||minutesToMorning()===0||state.restMinutes>0){
   sleepSession=null;
+  syncHudToLifeClock();
   if(r.ok)message('☀ Bangun'+(s.untilMorning?' · tidur '+s.hours+' jam':'')+' · energi '+state.energy);
   try{bridge?.playPose?.('idle',1);}catch{}
   notifyHud();paintPanel();return;
  }
+ syncHudToLifeClock();
  nextSleepChunk(s);
  try{bridge?.playPose?.('sleep',Math.ceil(s.neededMs/1000));}catch{}
 }
@@ -298,7 +323,7 @@ function hookCtx(){
   getClock:()=>{try{return bridge?.getClock?.()||null;}catch{return null;}},
   worldToScreen:(x,y,z)=>{try{return bridge?.worldToScreen?.(x,y,z)||null;}catch{return null;}},
   doorAnchor:o=>{try{return bridge?.doorAnchor?.(o)||null;}catch{return null;}},
-  interiorFurniture:()=>{try{return bridge?.interiorFurniture?.()||[];}catch{return [];}},
+  interiorFurniture:()=>{try{return bridge?.interiorFurniture?.()||bridge?.playInteriors?.furniture?.()||[];}catch{return [];}},
   interiorKind:()=>{try{return bridge?.interiorKind?.()||bridge?.playInteriors?.kind?.()||null;}catch{return null;}},
   interiorRoomId:()=>{try{return bridge?.playInteriors?.roomId?.()||bridge?.playInteriors?.active?.()?.roomId||null;}catch{return null;}},
   extraActions:()=>{try{return bridge?.extraActions?.()||bridge?.playInteriors?.extraActions?.()||[];}catch{return [];}},
@@ -766,32 +791,57 @@ function click(ev){
  }
 }
 function sleepBarHtml(){const i=sleepInfo();return '<small>💤 '+(i?.untilMorning?'Tidur sampai pagi':'Tidur')+(i?.hours?' · '+i.hours+' jam':'')+'</small><div class="slp-work-progress"><span id="slpSleepFill" style="width:'+Math.round((i?.pct||0)*100)+'%"></span></div>';}
-function workDown(ev){
- if(!['slpWork','ptActionBtn'].includes(ev.target.id)||!active||progress)return;
+function workEventOk(ev){
+ if(!ev||!ev.target)return true;
+ const id=ev.target.id||(typeof ev.target.closest==='function'&&ev.target.closest('#gameAction,#ptActionBtn,#slpWork')?.id)||'';
+ return !id||['slpWork','ptActionBtn','gameAction'].includes(id);
+}
+function workInfo(){
+ if(!progress)return null;
+ const pct=Math.max(0,Math.min(1,(performance.now()-progress.started)/progress.needed));
+ return {working:true,pct,neededMs:progress.needed,jobId:progress.jobId||nearest()?.jobId||null};
+}
+function finishWorkHold(){
+ if(!progress)return false;
+ const jobId=progress.jobId||nearest()?.jobId;
+ progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
+ justWorkedAt=performance.now();
+ if(jobId)runAction('work',{jobId});
+ return true;
+}
+function stepWorkHold(){
+ if(!progress||!active)return;
+ const pct=Math.max(0,Math.min(1,(performance.now()-progress.started)/progress.needed));
+ const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width=(pct*100)+'%';
+ if(pct>=1)finishWorkHold();
+}
+function startWorkHold(ev){
+ if(!active||progress)return false;
+ if(ev&&!workEventOk(ev))return false;
  const n=nearest();
- if(!n||!n.jobId)return;
+ if(!n||!n.jobId)return false;
  const job=config.jobs?.find(j=>j.id===n.jobId);
  const blocked=RULES.workBlock?RULES.workBlock(config,state,n.jobId):null;
- if(blocked){message('⛔ '+blocked);return;}
- if(!RULES.workBlock&&(state.detained||state.restMinutes>0||state.energy<10)){message('Tidak bisa bekerja: perlu energi 10 dan bebas dari hukuman.');return;}
- if(job&&state.hygiene<job.minHygiene){message('Pekerjaan '+job.label+' butuh kebersihan '+job.minHygiene+'.');return;}
- ev.preventDefault();
+ if(blocked){message('⛔ '+blocked);return false;}
+ if(!RULES.workBlock&&(state.detained||state.restMinutes>0||state.energy<10)){message('Tidak bisa bekerja: perlu energi 10 dan bebas dari hukuman.');return false;}
+ if(job&&state.hygiene<job.minHygiene){message('Pekerjaan '+job.label+' butuh kebersihan '+job.minHygiene+'.');return false;}
+ try{ev?.preventDefault?.();}catch{}
  workHoldStart=performance.now();
  const jobMinutes=job?.minutes||30;
  // Hold time = the session's game minutes on the one clock (slice: Parkir 8 s, Ogah 12 s, Silver 20 s at EXP 0).
  const sessionMinutes=RULES.workMinutes?RULES.workMinutes(jobMinutes,state?.experience||0):jobMinutes;
  const holdMs=BAL()?.holdMs?.(sessionMinutes);
- progress={started:workHoldStart,needed:Number.isFinite(holdMs)&&holdMs>0?holdMs:Math.max(850,jobMinutes*90/(1+(state?.experience||0)/100))};
- const button=ev.target;try{button.setPointerCapture(ev.pointerId);}catch{}
+ progress={started:workHoldStart,needed:Number.isFinite(holdMs)&&holdMs>0?holdMs:Math.max(850,jobMinutes*90/(1+(state?.experience||0)/100)),jobId:n.jobId};
+ try{ev?.target?.setPointerCapture?.(ev.pointerId);}catch{}
  const animate=()=>{
   if(!progress||!active)return;
-  const pct=clamp((performance.now()-progress.started)/progress.needed,0,1);
-  const fill=outer?.querySelector('#slpWorkFill');if(fill)fill.style.width=(pct*100)+'%';
-  if(pct>=1){progress=null;workAnimation=0;justWorkedAt=performance.now();runAction('work',{jobId:nearest()?.jobId});return;}
-  workAnimation=requestAnimationFrame(animate);
+  stepWorkHold();
+  if(progress)workAnimation=requestAnimationFrame(animate);
  };
  workAnimation=requestAnimationFrame(animate);
+ return true;
 }
+function workDown(ev){return startWorkHold(ev);}
 function workUp(ev){
  if(!progress)return;
  progress=null;cancelAnimationFrame(workAnimation);workAnimation=0;
@@ -811,7 +861,7 @@ function openBag(){
  const content=outer.querySelector('#slpContent');if(content)content.hidden=false;
  paintPanel();return true;
 }
-function actionDown(ev){workDown(ev);}
+function actionDown(ev){return workDown(ev);}
 function actionUp(ev){workUp(ev);}
 // Successful life actions play their LGR motion on the player (Bergerak DB id,
 // built-in or stand-in via LGRGame; never blocks when a motion is missing).
@@ -819,7 +869,8 @@ const ACTION_POSE={cook:'cook',eat:'eat',eat_item:'eat',coffee:'drink_coffee',fi
  public_toilet:'wc_squat',home_toilet:'wc_squat',public_shower:'mandi',home_shower:'mandi',wall_pee:'pee_wall',fart:'idle',talk:'talk',
  worship:'pray_generic',charity:'give_sedekah',help:'hand_over',sell_fish:'hand_over',sell_loak:'hand_over',
  store_fridge:'use_storage',take_fridge:'use_storage',store_home:'use_storage',take_home:'use_storage',catch_fruit:'pick_up',
- move_item:'use_storage',shop_buy:'hand_over',buy_token:'hand_over',topup_token:'hand_over',fish_catch:'pick_up'};
+ move_item:'use_storage',shop_buy:'hand_over',buy_token:'hand_over',topup_token:'hand_over',fish_catch:'pick_up',
+ rest:'sit',sit:'sit'};
 const JOB_POSE={manusia_silver:'silver_pose',pak_ogah:'ogah_flag',kang_parkir:'parkir_whistle'};
 function actionPose(action,args){
  if(action==='work')return JOB_POSE[args.jobId]||'talk';
@@ -860,6 +911,29 @@ function afterLifeTransition(previous){
  notifyHud();paintPanel();
 }
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
+function snapToSeat(args){
+ const id=String(args?.seatId||args?.furnitureId||'');
+ let x=Number(args?.x),z=Number(args?.z);
+ if(!Number.isFinite(x)||!Number.isFinite(z)){
+  try{
+   const hooks=getHooks();
+   const list=(typeof hooks?.furniture==='function'?hooks.furniture():[])||[];
+   const more=(typeof hooks?.worldFurniture==='function'?[]:null);
+   const furn=list.concat(bridge?.playInteriors?.furniture?.()||[]);
+   const f=furn.find(it=>it&&(it.id===id||it.furnitureId===id||it.assetId===id||String(it.seatId||'')===id));
+   if(f){
+    const u=f.use||f.usePoint||f.actionPoint;
+    if(Array.isArray(u)&&u.length>=2){x=Number(u[0]);z=Number(u[1]);}
+    else if(u&&typeof u==='object'){x=Number(u.x??f.x);z=Number(u.z??f.z);}
+    else{x=Number(f.x);z=Number(f.z);}
+   }
+  }catch{}
+ }
+ if(Number.isFinite(x)&&Number.isFinite(z)){
+  try{bridge?.teleport?.(x,z);}catch{}
+ }
+ try{bridge?.playPose?.('sit',8);}catch{}
+}
 function runAction(action,args={}){
  if(!active||!RULES)return {ok:false,reason:'Play Game belum dimulai'};
  const ALIAS={bathe:'home_shower',use_toilet:'home_toilet'};
@@ -990,7 +1064,11 @@ function runAction(action,args={}){
   const expected='act:'+String(args.activityId||'');
   if(node?.id!==expected||node.placeholder)return {ok:false,reason:'Datangi bangunan aktivitas yang sesuai di Semesta.'};
  }
- if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity','wash','enter_room','enter_closed','exit_interior'].includes(action)&&!node)
+ const inside=!!(bridge?.playInteriors?.active?.()||bridge?.interiorKind?.()||root.VLNjhPlayInteriors?.kind?.());
+ const hooked=(()=>{try{return (getHooks()?.nearbyActions?.()||[]).find(a=>a.id===action||a.action===action)||null;}catch{return null;}})();
+ const seating=(action==='rest'||action==='sit')&&args&&(args.seatId||args.furnitureId);
+ const interiorAct=inside&&(hooked||seating||['eat','coffee','tea','rest','sit','shop_minimarket','shop_buy','wash'].includes(action));
+ if(!['advance_time','fine','community_service','luck_find','course','buy_fridge','buy_furniture','buy_token','pee_outside','wall_pee','fart','talk','tea','quest_reward','eat_item','discard_item','set_identity','wash','enter_room','enter_closed','exit_interior'].includes(action)&&!node&&!interiorAct&&!seating)
   return {ok:false,reason:'Dekati lokasi interaksi terlebih dahulu'};
  const required={
   fish:'fish',sell_fish:args.buyerId,work:args.jobId?(sites.find(v=>v.jobId===args.jobId)?.id||'job_silver'):'job_silver',scavenge:'scavenge',sell_loak:'loak',catch_fruit:'tree',
@@ -1000,9 +1078,10 @@ function runAction(action,args={}){
   worship:node?.id?.startsWith('prayer_')?node.id:'prayer'
  }[action];
  const inWarteg=(bridge?.interiorKind?.()||root.VLNjhPlayInteriors?.kind?.())==='warteg';
- if(required&&node?.id!==required&&!((action==='eat'||(action==='coffee'&&coffeeAtWarteg()))&&inWarteg)){
+ if(required&&node?.id!==required&&!((action==='eat'||(action==='coffee'&&coffeeAtWarteg()))&&inWarteg)&&!interiorAct&&!seating){
   message('Dekati '+(sites.find(s=>s.id===required)?.label||required)+' dahulu.');return {ok:false,reason:'Lokasi aksi tidak sesuai'};
  }
+ if(hooked?.args){for(const k of Object.keys(hooked.args))if(args[k]==null)args[k]=hooked.args[k];}
  if(action==='buy_room'){
   args={...args,roomSpawn:{id:node.sourceId||'kost_placeholder',x:node.x,z:node.z,placeholder:node.placeholder}};
  }
@@ -1023,7 +1102,8 @@ function runAction(action,args={}){
   if(action==='buy_room')message('🏠 Kost dibeli! Respawn berikutnya pindah ke kamar. WC dan mandi pribadi aktif.');
   else message('✅ '+result.changes.join(' · '));
  }else message('⛔ '+result.reason);
- if(result.ok){const pose=actionPose(action,args);if(pose&&action!=='sleep')try{bridge?.playPose?.(pose,4);}catch{}}
+ if(result.ok&&(action==='rest'||action==='sit'))snapToSeat(args);
+ if(result.ok){const pose=actionPose(action,args);if(pose&&action!=='sleep')try{bridge?.playPose?.(pose,action==='rest'||action==='sit'?8:4);}catch{}}
  if(result.ok&&action==='fart'&&(args.witnessed||args.nearNpc||args.nearby>0))reactNpcsToFart();
  if(result.ok)afterLifeTransition(prior);
  else{notifyHud();paintPanel();}
@@ -1044,11 +1124,12 @@ function handleAction(){
    if(result?.reason)message('⛔ '+result.reason);
    return !!result;
   }
-  const nearby=(I.extraActions?.()||[]).filter(a=>!['exit_interior','enter_room'].includes(a.id));
+  const nearby=(getHooks()?.nearbyActions?.()||I.extraActions?.()||[])
+   .filter(a=>a&&!['exit_interior','enter_room','enter_closed','fart','wall_pee'].includes(a.id));
   if(nearby.length){
    // Multiple fridge/wardrobe choices belong in the single contextual AKSI
    // menu. E surfaces the actual nearby object; it must not trigger Cove.
-   if(nearby.length===1&&['eat','home_toilet','home_shower','sleep','wash'].includes(nearby[0].id))
+   if(nearby.length===1&&['eat','coffee','rest','sit','home_toilet','home_shower','sleep','wash'].includes(nearby[0].id))
     return !!runAction(nearby[0].id,nearby[0].args||{}).ok;
    message('AKSI: '+(nearby[0].spotLabel||nearby[0].label)+' · pilih interaksi');
    paintPanel();return true;
@@ -1101,6 +1182,20 @@ function handleAction(){
  if(!node)return false;
  if(node.jobId){
   if(performance.now()-justWorkedAt<550)return true;
+  if(progress)return true;
+  // E / AKSI hold-to-work: start the hold here so mobile #gameAction and the
+  // E key actually begin work (workDown used to ignore #gameAction).
+  if(startWorkHold()){
+   const up=ev=>{
+    if(ev&&ev.type&&ev.type.startsWith('key')&&String(ev.key||'').toLowerCase()!=='e')return;
+    workUp(ev);
+    try{root.removeEventListener('keyup',up,true);root.removeEventListener('pointerup',up,true);root.removeEventListener('pointercancel',up,true);}catch{}
+    try{root.document?.removeEventListener?.('keyup',up,true);root.document?.removeEventListener?.('pointerup',up,true);}catch{}
+   };
+   try{root.addEventListener('keyup',up,true);root.addEventListener('pointerup',up,true);root.addEventListener('pointercancel',up,true);}catch{}
+   try{root.document?.addEventListener?.('keyup',up,true);root.document?.addEventListener?.('pointerup',up,true);}catch{}
+   return true;
+  }
   message('TAHAN tombol Action (atau tombol KERJA di panel) sampai progress penuh.');
   paintPanel();return true;
  }
@@ -1168,6 +1263,7 @@ function tick(dt){
  // A timed sleep carries its own minutes (the sleep rule), so the passive tick pauses too.
  timeAccumulator=(progress||sleepSession)?0:timeAccumulator+clockSeconds;
  if(sleepSession)sleepStep(clockSeconds);
+ if(progress)stepWorkHold();
  // Same rate as the visual clock (VLSemestaDayNight), both from clock.realSecondsPerGameMinute.
  const period=Math.max(.05,Number(config.settings.realSecondsPerGameMinute)||8);
  if(timeAccumulator>=period){
@@ -1346,7 +1442,7 @@ function publicSites(){
  return (sites||[]).map(s=>({id:s.id,label:s.label,x:s.x,z:s.z,placeholder:!!s.placeholder,npc:!!s.npc,points:s.points||[{id:s.sourceId||s.id,x:s.x,z:s.z}]}));
 }
 const api=Object.freeze({attach,start,stop,active:visible,persist,state:()=>state,sites:publicSites,npcs:()=>lifeNpcs.map(n=>({id:n.id,label:n.label,siteId:n.siteId,role:n.role,behavior:n.behavior,x:n.x,z:n.z,placeholder:!!n.placeholder,lgr:n.lgr||null,emote:n.emote||null})),spawnEntitlement,
- spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
+ spawnModule,fallbackSpawn,onSpawn,handleAction,actionDown,actionUp,startWorkHold,workInfo,openPhone,openBag,runAction,tick,refresh,money:moneyBalance,bag:bagLabels,speedFactor,
  sleepInfo,wake:()=>wake(),
  reload:()=>reloadRules(sessionRevision),reset:()=>{if(!active)return;resetSave();paintPanel();},
  playerId,startProfiles:()=>startProfilesReady,currentPose:()=>bridge?.currentPose?.()||null,

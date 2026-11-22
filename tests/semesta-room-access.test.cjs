@@ -163,3 +163,26 @@ test('locked cove rooms 1-3 and doorAccess/doorSprite; action map', () => {
   assert.deepEqual(A.mapActionIds({ actionId: 'use_toilet', tags: 'home_toilet' }), ['home_toilet']);
   assert.deepEqual(A.mapActionIds({ actionId: 'wash', tags: 'wash' }), ['wash']);
 });
+
+test('public interiors give guests a customer role; kost rooms stay owner-only', () => {
+  const A = loaded();
+  for (const room of ['njh_warteg_kharisma', 'njh_minimarket', 'njh_laundry']) {
+    const acc = A.roomAccess('t_guest_1', room);
+    assert.equal(acc.canEnter, true, room);
+    assert.equal(acc.role, 'customer', room);
+    assert.equal(acc.kind, 'public', room);
+    assert.ok(acc.allowedActs.includes('eat'), room);
+    assert.ok(acc.allowedActs.includes('rest'), room);
+    assert.equal(A.rejectAction('t_guest_1', room, 'eat'), null, room + ' eat');
+    assert.equal(A.rejectAction('t_guest_1', room, 'rest', { seatId: 'waiting_bench' }), null, room + ' rest');
+  }
+  const acts = A.filterActions([{ id: 'eat' }, { id: 'coffee' }, { id: 'rest' }, { id: 'store_fridge' }],
+    A.roomAccess('t_guest_1', 'njh_warteg_kharisma'));
+  assert.deepEqual(acts.map((a) => a.id), ['eat', 'coffee', 'rest']);
+
+  const guestHome = A.roomAccess('t_guest_1', 'njh_kos_ichsan');
+  assert.equal(guestHome.canEnter, false);
+  assert.equal(guestHome.role, 'none');
+  assert.equal(A.rejectAction('t_guest_1', 'njh_kos_ichsan', 'sleep'), 'Terkunci');
+  assert.equal(A.rejectAction('t_guest_1', 'njh_kos_ichsan', 'eat'), 'Terkunci');
+});

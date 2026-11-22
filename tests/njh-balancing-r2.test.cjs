@@ -35,7 +35,7 @@ test('sleep runs 60 game minutes on the normal clock (30 s real) with a progress
  assert.equal(s.energy,Math.min(100,e0+P['sleep.tent.energy']));
  // tent hygiene -2 plus the passive hygiene drain of that hour, counted once
  assert.equal(s.hygiene,hy0+P['sleep.tent.hygiene']-Math.floor(60/P['needs.passiveHygieneMinutes']));
- assert.equal(h.clock().minute,vis0,'HUD clock is not jumped: it already ran during the 30 s');
+ assert.equal(h.clock().minute,hhmm(s),'HUD clock matches the life clock after manual sleep');
 });
 
 test('wake anytime: minutes and recovery are pro rata; moving also wakes',()=>{
@@ -183,4 +183,29 @@ test('quest window prefers the NPC\'s current quest and shows the hint',()=>{
  assert.match(mock,/hq\.hint/);
  const q5=B.quests().find(q=>q.id==='q5_mandi');
  assert.equal(q5.hint.walletBelow,P['facility.publicShower.price']);
+});
+
+test('after Tidur sampai pagi the HUD clock (time + day) matches the life clock, including a 04:16 start',()=>{
+ const h=harness();h.P.start();
+ let s=h.P.state();
+ s.energy=20;s.clockOrigin=(4*60+16)-s.elapsedMinutes;
+ const vis=h.clock();vis.minute=4*60+16;vis.day=1;
+ const r=h.P.runAction('sleep_until_morning',{});assert.equal(r.ok,true);
+ untilAwake(h,20*30);
+ s=h.P.state();
+ assert.equal(h.P.sleepInfo(),null);
+ assert.equal(hhmm(s),6*60,'life clock is 06:00');
+ assert.equal(h.clock().minute,6*60,'HUD clock is 06:00, not stuck at 04:16');
+ assert.ok(h.clock().day>=1);
+ // manual 1-hour sleep also syncs the HUD (starts 22:00 -> 23:00)
+ s.clockOrigin=22*60-s.elapsedMinutes;
+ const t0=s.elapsedMinutes;
+ h.clock().minute=22*60;h.clock().day=1;
+ // restore via the clock API so later sync sees 22:00
+ h.P.runAction('sleep',{});
+ untilAwake(h,40);
+ s=h.P.state();
+ assert.equal(s.elapsedMinutes,t0+60);
+ assert.equal(hhmm(s),23*60);
+ assert.equal(h.clock().minute,23*60,'HUD follows manual sleep too');
 });

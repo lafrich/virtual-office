@@ -54,7 +54,13 @@ const FURNITURE_GATES=Object.freeze([
  {id:'bed',kind:'bed',actions:Object.freeze(['sleep']),
   furnitureIds:Object.freeze(['bed']),
   patterns:/kasur|bed|divan|dipan/i,inRoom:true,label:'Kasur',
-  exemptSiteIds:Object.freeze(['tent'])}
+  exemptSiteIds:Object.freeze(['tent'])},
+ {id:'plastic_bench',kind:'plastic_bench',actions:Object.freeze(['rest','sit']),
+  furnitureIds:Object.freeze(['plastic_bench_red','plastic_bench_blue','plastic_bench']),
+  patterns:/plastic_bench|bangku.?plastik/i,inRoom:true,label:'Bangku Plastik'},
+ {id:'waiting_bench',kind:'waiting_bench',actions:Object.freeze(['rest','sit']),
+  furnitureIds:Object.freeze(['waiting_bench']),
+  patterns:/waiting_bench|bangku.?tunggu/i,inRoom:true,label:'Bangku Tunggu'}
 ]);
 const ACTION_LABELS={
  fish:'Mancing',sell_fish:'Jual Ikan',work:'Kerja',scavenge:'Mulung',sell_loak:'Jual Barang',
@@ -98,6 +104,13 @@ function kindOf(item,gates){
   if(g.patterns.test(textOf(item)))return g.kind;
  }
  return '';
+}
+function furnitureUsePos(f){
+ const u=f&&(f.use||f.usePoint||f.actionPoint);
+ if(Array.isArray(u)&&u.length>=2)return {x:num(u[0],f.x),z:num(u[1],f.z)};
+ if(u&&typeof u==='object'&&(Number.isFinite(Number(u.x))||Number.isFinite(Number(u.z))))
+  return {x:num(u.x,f.x),z:num(u.z,f.z)};
+ return {x:num(f?.x,0),z:num(f?.z,0)};
 }
 function furnitureFromInteriorItems(items,origin){
  const originX=num(origin?.x,0),originZ=num(origin?.z,0);
@@ -308,18 +321,20 @@ function create(ctx){
  function furnitureAllows(action,opts){
   const state=opts?.state||getState(),pos=opts?.pos||getPos();
   const site=siteForAction(action,opts?.site||null);
-  const gate=gates.find(g=>g.actions.includes(action));
-  if(!gate)return {ok:true,furnitureId:null};
-  if(gate.exemptSiteIds&&site&&gate.exemptSiteIds.includes(site.id))return {ok:true,furnitureId:null};
-  const inHome=atHomeSite(site,state);
-  const owned=ownedKinds(state);
-  if(inHome&&owned.has(gate.kind)){
-   const fid=gate.furnitureIds.find(id=>(state.furniture||[]).includes(id))||gate.furnitureIds[0];
-   return {ok:true,furnitureId:fid,source:'owned'};
+  const matches=gates.filter(g=>g.actions.includes(action));
+  if(!matches.length)return {ok:true,furnitureId:null};
+  for(const gate of matches){
+   if(gate.exemptSiteIds&&site&&gate.exemptSiteIds.includes(site.id))return {ok:true,furnitureId:null};
+   const inHome=atHomeSite(site,state);
+   const owned=ownedKinds(state);
+   if(inHome&&owned.has(gate.kind)){
+    const fid=gate.furnitureIds.find(id=>(state.furniture||[]).includes(id))||gate.furnitureIds[0];
+    return {ok:true,furnitureId:fid,source:'owned'};
+   }
+   const near=worldFurniture().find(f=>f.kind===gate.kind&&Math.hypot((f.x??0)-pos.x,(f.z??0)-pos.z)<=range);
+   if(near)return {ok:true,furnitureId:near.furnitureId||near.id,source:near.source||'world'};
   }
-  const near=worldFurniture().find(f=>f.kind===gate.kind&&Math.hypot((f.x??0)-pos.x,(f.z??0)-pos.z)<=range);
-  if(near)return {ok:true,furnitureId:near.furnitureId||near.id,source:near.source||'world'};
-  return {ok:false,reason:'Dekati '+gate.label+' dahulu.',furnitureId:null};
+  return {ok:false,reason:'Dekati '+matches[0].label+' dahulu.',furnitureId:null};
  }
  function nearestSites(){
   const p=getPos();
@@ -436,6 +451,30 @@ function create(ctx){
    const extra=(typeof ctx.extraActions==='function'?ctx.extraActions():[])||[];
    for(const a of extra)if(a&&a.id&&!list.some(x=>x.id===a.id&&x.furnitureId===a.furnitureId))list.push(a);
   }catch(_e){}
+  // Inside any interior: offer actions for furniture the player is standing at
+  // (use-point if authored, otherwise the item origin). Public benches, warteg
+  // tables (via extraActions), and kost furniture all go through this path.
+  try{
+   if(interiorKind()||currentRoomId()){
+    const pos=getPos();
+    for(const f of worldFurniture()){
+     const at=furnitureUsePos(f);
+     if(Math.hypot(at.x-pos.x,at.z-pos.z)>range)continue;
+     const gate=gates.find(g=>g.kind===f.kind);
+     if(!gate)continue;
+     for(const act of gate.actions){
+      // Kost container/cook/sleep actions come from step2 + extraActions so
+      // empty-token / owner locks stay as disabled AKSI rows. This loop only
+      // fills public seating (and similar) that those paths miss.
+      if(!['rest','sit'].includes(act))continue;
+      if(list.some(x=>x.id===act&&(x.furnitureId===f.id||x.args?.seatId===f.id)))continue;
+      const label=(act==='rest'||act==='sit')?'Duduk sebentar':(ACTION_LABELS[act]||act);
+      list.push({id:act,action:act,label,price:0,furnitureId:f.id,spotLabel:f.label||gate.label,
+       args:{seatId:f.id,furnitureId:f.id,x:at.x,z:at.z}});
+     }
+    }
+   }
+  }catch(_e){}
   try{
    if(Scenes){
     const nearSite=near[0]?.site;
@@ -481,7 +520,7 @@ function create(ctx){
   if(list[0]&&!list[0].spotLabel)list[0].spotLabel=spot;
   if(Access&&currentRoomId()){
    const acc=roomAccess();
-   if(acc&&(acc.role==='partner'||acc.kind==='lobby'||acc.role==='none')){
+   if(acc&&(acc.role==='partner'||acc.kind==='lobby'||acc.role==='none'||acc.role==='customer'||acc.role==='public'||acc.kind==='public')){
     const next=Access.filterActions(list,acc);
     // Public step-2 entries (shop, fishing) are not room furniture; keep them.
     // Locked kost furniture entries stay as disabled rows so the AKSI bar can say why (Hanya pemilik / Terkunci).
