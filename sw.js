@@ -58,6 +58,19 @@ self.addEventListener('fetch',event=>{
  const req=event.request,url=new URL(req.url);
  if(req.method!=='GET'||!allowed(url,req))return;
  event.respondWith((async()=>{
+  // The worker is registered at the shared repository root. Keep editor,
+  // Jiwa authoring and Membangun resources network-only even though their
+  // HTML/CSS/JS may share paths with the game. Cache only player clients.
+  if(event.clientId&&self.clients?.get){
+   const client=await self.clients.get(event.clientId);
+   if(client?.url){
+    const owner=new URL(client.url);
+    const rel=owner.pathname.startsWith(BASE)?owner.pathname.slice(BASE.length):'';
+    const player=rel.startsWith('mainkan/')||
+      (rel.startsWith('world-builder/')&&owner.searchParams.get('player')==='1');
+    if(!player)return fetch(req);
+   }
+  }
   const cache=await caches.open(CACHE);
   const cached=await cache.match(req,{ignoreSearch:true});
   if(cached)return cached;
