@@ -231,7 +231,8 @@ function persist(){
   const clock=bridge?.getClock?.();
   if(clock){
    const snap=typeof clock.snapshot==='function'?clock.snapshot():(typeof clock.get==='function'?clock.get():null);
-   if(snap&&Number.isFinite(Number(snap.day)))state.visualClock={minute:Number(snap.minute),day:Number(snap.day),speed:Number(snap.speed)||1,paused:!!snap.paused};
+   // Pausing is session-only. Never restart a saved offline world with its clock frozen.
+   if(snap&&Number.isFinite(Number(snap.day)))state.visualClock={minute:Number(snap.minute),day:Number(snap.day),speed:Number(snap.speed)||1,paused:false};
   }
   localStorage.setItem(dataKey(),JSON.stringify({schema:1,cityId:projectId,state}));
  }catch{}
@@ -245,7 +246,7 @@ function restore(){
  if(saved&&saved.testSeed)state.testSeed=saved.testSeed;
  if(!saved)freshClock();
  if(state.visualClock){
-  try{bridge?.getClock?.()?.restore?.(state.visualClock);}catch{}
+  try{bridge?.getClock?.()?.restore?.({...state.visualClock,paused:false});}catch{}
  }
  const id=playerId(),rev=sessionRevision;
  if(id)startProfilesReady.then(()=>{if(!active||rev!==sessionRevision)return;
@@ -311,7 +312,9 @@ function hookCtx(){
  return {
   window:root,root,
   getState:()=>state,setState:next=>{state=next;},
-  loadState:next=>{state=RULES&&next?RULES.stateFrom(next,config):next;paintPanel();notifyHud();},
+  loadState:next=>{state=RULES&&next?RULES.stateFrom(next,config):next;
+   try{if(state?.visualClock)bridge?.getClock?.()?.restore?.({...state.visualClock,paused:!!hooks?.isPaused?.()});}catch{}
+   paintPanel();notifyHud();},
   getSites:()=>sites,getWorld:getWorld,getPos:getPos,
   getConfig:()=>config,getWorldEntities:()=>config?.worldEntities||[],
   questTable:BAL()?.quests?.()||null,coffeeAtWarteg:coffeeAtWarteg(),

@@ -1,0 +1,89 @@
+name: NJH Offline Android APK (Preview)
+on:
+  pull_request:
+    paths:
+      - 'android-njh-offline/**'
+      - 'tools/prepare_njh_offline_package.py'
+      - '.github/workflows/njh-offline-apk.yml'
+      - 'mainkan/**'
+      - 'tests/njh-offline-package.e2e.cjs'
+      - 'world-builder/**'
+      - 'shared/**'
+      - 'jiwa/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout NJH game branch
+        uses: actions/checkout@v4
+        with:
+          path: virtual-office
+      - name: Checkout published LGR + artist assets
+        uses: actions/checkout@v4
+        with:
+          repository: lafrich/virtual-life-asset-pipeline
+          path: virtual-life-asset-pipeline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Vendor offline Three.js dependency
+        run: |
+          npm install --no-save --ignore-scripts --prefix /tmp/njh-three three@0.181.0
+          test -s /tmp/njh-three/node_modules/three/build/three.module.js
+          test -s /tmp/njh-three/node_modules/three/build/three.core.js
+      - name: Build approved Genesis LGR wardrobe from artist sources
+        run: |
+          python -m pip install pillow
+          python virtual-life-asset-pipeline/tools/build_lgr_wardrobe_reference_v2.py \
+            --out virtual-life-asset-pipeline/site/media/lgr1/wardrobe-approved
+          test -s virtual-life-asset-pipeline/site/media/lgr1/wardrobe-approved/index.json
+          test -s virtual-life-asset-pipeline/site/media/lgr1/wardrobe-approved/male_top_tee.json
+      - name: Stage offline game and original pipeline assets
+        run: |
+          python virtual-office/tools/prepare_njh_offline_package.py \
+            --game virtual-office \
+            --pipeline virtual-life-asset-pipeline \
+            --three /tmp/njh-three/node_modules/three/build \
+            --out virtual-office/android-njh-offline/app/src/main/assets
+      - name: Verify offline-only Android package and critical files
+        run: |
+          test -s virtual-office/android-njh-offline/app/src/main/assets/virtual-office/mainkan/index.html
+          test -s virtual-office/android-njh-offline/app/src/main/assets/virtual-office/vendor/three.module.js
+          test -s virtual-office/android-njh-offline/app/src/main/assets/virtual-life-asset-pipeline/genesis-source.js
+          ! grep -q 'android.permission.INTERNET' virtual-office/android-njh-offline/app/src/main/AndroidManifest.xml || \
+            grep -q 'Intentionally NO android.permission.INTERNET' virtual-office/android-njh-offline/app/src/main/AndroidManifest.xml
+          ! grep -q "https://cdn.jsdelivr.net/npm/three@" virtual-office/android-njh-offline/app/src/main/assets/virtual-office/world-builder/builder.js
+      - name: Install Playwright for network-blocked offline game test
+        run: cd virtual-office && npm install --no-save --ignore-scripts playwright@1.56.1
+      - name: Serve staged APK assets locally
+        run: |
+          cd virtual-office/android-njh-offline/app/src/main/assets
+          python3 -m http.server 8097 --bind 127.0.0.1 >/tmp/njh-offline-http.log 2>&1 &
+          sleep 2
+      - name: Play existing NJH with ALL external network blocked
+        run: cd virtual-office && node tests/njh-offline-package.e2e.cjs
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build offline game APK
+        run: gradle -p virtual-office/android-njh-offline --no-daemon assembleDebug
+      - name: Collect installable game APK
+        run: |
+          cp virtual-office/android-njh-offline/app/build/outputs/apk/debug/app-debug.apk NJH-Offline-Preview.apk
+          ls -lh NJH-Offline-Preview.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NJH-Offline-Android-APK
+          path: NJH-Offline-Preview.apk
+          if-no-files-found: error
