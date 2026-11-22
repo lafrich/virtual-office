@@ -1,3 +1,31 @@
+# Rollback — CP3 live (22 Nov 2026)
+
+Written 2026-11-22 09:34 WIB (Asia/Jakarta). Client UI/JS, CP3 logic (confirmPaid, clock hold, pantry cook, Parkir wage without luck_find chain, ?fresh=1 tent spawn, lazy-load interior art, favicon silence), tests, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Clock rate tidak diubah (tetap 0.5 s/game minute dari `content/balancing.json`). Pipeline main tidak di-release. Map v2 tidak disentuh.
+
+- Previous live VO code tree (restore target): `d96ec1254fae6876e0503a66061562959b7af112` (STEP 2 live, sw v45, `?v=njh-step2-live-20261122`)
+- Previous live VO tip immediately before this ship: `b4e0f04894db803aa060ba30cea0563299a1d589` (STEP 2 live + ROLLBACK.md follow-up only)
+- Previous live pipeline `origin/main` remains `c9dc88fab2e5d82a1193a456760418b6e4dc115c` (this deploy did not ship pipeline)
+- New Bot (Ichsan's standing approval delegate) relayed that Ichsan said "push live dulu" at 09:30 WIB and APPROVED `preview/njh-cp3-live-20261122` @ `05641d8c9d187a50e3e5b61446048a97b52a6b16` for LIVE
+- Live code tip: `05641d8c9d187a50e3e5b61446048a97b52a6b16` — sw v46, `?v=njh-cp3-live-20261122`. This follow-up commit is ROLLBACK.md only (does not bump live `sw.js` / `?v`; served tree stays v46 / cp3-live)
+- Isi: confirmPaid only for pay >= `ui.confirmPaidMin` (20000) or irreversible (small buys like Makan/Ngopi/gorengan go straight through with a −RpX toast); precheck before the confirm dialog; clock restore(src=player) holds; E at a door no longer overrides cook/talk/mancing (official door-E enter from r4b still works); pantry cook from tas/kulkas/lemari; Parkir work payout is the balancing wage only (no `luck_find` +Rp500 chain after work; `luck_find` stays a separate action); `?fresh=1` tent spawn (−51.5, 64.5); Laundry `waiting_bench` uses wooden_bench art; lazy-load interior scene JSON + room art on first door open (boot no longer prefetches r7 art); `<link rel="icon" href="data:,">` so browsers stop requesting `https://lafrich.github.io/favicon.ico`. Keeps STEP 2 / r4b: Warteg `njh_warteg_kharisma` + Ibu Warteg, 7 r7 doors open, Warung Kopi locked, public interiors, door-E enter, HUD clock after sleep, "Duduk sebentar" + snap, hold-to-work, slice table
+- Gate sebelum push (preview artifacts + live verify): unit 682 tes, 680 lulus, 0 gagal, 2 dilewati; window-fit 85 cek, 0 terpotong, 0 start error; sim unchanged (p10 46.7 · median 50.8 · p90 54.9 real min · 4.6 game days · 0 faints)
+- Pages verify after FF of 05641d8c: `pages-build-deployment` run 44976515405 success (headSha 05641d8c, completed 09:32:10 WIB / 02:32:10 UTC); curl `https://lafrich.github.io/virtual-office/sw.js` starts `/* sw v46` and names `?v=njh-cp3-live-20261122` (last-modified 09:32:06 WIB / 02:32:06 UTC); live `mainkan/index.html` play scripts use that cache tag; live Playwright `?fresh=1` throwaway guest only (no production accounts, no apiBase override): pass — spawn tent (−51.5, 64.5, `njh-fresh-tent`), q1 accept / Makan at `njh_warteg_kharisma` 15.000→3.000 + q1 ready / claim done +Rp10.000 (wallet 13.000), small buy policy no confirm (toast −Rp12.000, no dialog), Laundry `waiting_bench` visible (8 furniture), all 7 r7 doors correct, boot 5,707,053 bytes (< 9.8 MB; 0 r7 art / 0 scene JSON at boot), 0 preview-ref, 0 HTTP 4xx including favicon (`<link rel="icon" href="data:,">`, no favicon request)
+
+Cara rollback VO tanpa force-push (kembalikan tree `d96ec125` dalam satu commit baru). Jangan force-push. Setelah restore tree, bump `sw.js` ke versi bebas berikutnya **v48 atau lebih tinggi** (jangan v47 — v47 reserved for map v2) supaya browser melepas cache v46 / cp3-live, lalu FF push:
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only origin main
+git checkout d96ec1254fae6876e0503a66061562959b7af112 -- .
+git commit -m "rollback: CP3 live (restore d96ec125 tree)"
+# bump sw.js ke v48 atau versi bebas berikutnya (jangan v47; map v2 owns v47)
+# dan ?v cache tag baru, lalu:
+git push origin HEAD:refs/heads/main
+```
+
+Pipeline tidak ikut deploy ini; jangan di-FF atau di-rollback kecuali brief terpisah menamai SHA. Jangan sentuh map v2 dulu.
+
+---
+
 # Rollback — STEP 2 live (22 Nov 2026)
 
 Written 2026-11-22 08:12 WIB (Asia/Jakarta). Client UI/JS, r7 interior reopen, template-first doors, mushola wudhu fix, catalog art, tests, and rollback notes only. Tidak ada perubahan Worker, sandi, atau secret. Clock rate tidak diubah (tetap 0.5 s/game minute dari `content/balancing.json`). Pipeline main tidak di-release.
