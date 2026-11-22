@@ -54,7 +54,8 @@ const ROOT='http://127.0.0.1:8097/virtual-office/mainkan/';
   assert.equal(profile.character.name,'Pemain Offline');
   assert.equal(profile.onlineReady,true);
   assert.ok(profile.life);
-  await page.locator('#pauseButton').click();
+  // The visible in-game Win98 dock owns the menu entry.
+  await page.locator('#njhDockMenu').click();
   await page.locator('#offlineSave').click();
   await page.waitForFunction(()=>document.getElementById('offlineActionStatus')?.textContent?.includes('Tersimpan'),
     null,{timeout:10000});

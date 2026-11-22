@@ -27,6 +27,10 @@ REPLACE = [
      '/virtual-life-asset-pipeline/'),
     ('https://lafrich.github.io/virtual-office/',
      '/virtual-office/'),
+    ('https://raw.githubusercontent.com/lafrich/virtual-life-asset-pipeline/main',
+     '/virtual-life-asset-pipeline'),
+    ('https://raw.githubusercontent.com/lafrich/virtual-office/main',
+     '/virtual-office'),
 ]
 
 def copy_dir(src: Path, dest: Path):
