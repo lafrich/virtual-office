@@ -6,6 +6,7 @@ on:
       - 'tools/prepare_njh_offline_package.py'
       - '.github/workflows/njh-offline-apk.yml'
       - 'mainkan/**'
+      - 'tests/njh-offline-package.e2e.cjs'
       - 'world-builder/**'
       - 'shared/**'
       - 'jiwa/**'
@@ -52,6 +53,15 @@ jobs:
           ! grep -q 'android.permission.INTERNET' virtual-office/android-njh-offline/app/src/main/AndroidManifest.xml || \
             grep -q 'Intentionally NO android.permission.INTERNET' virtual-office/android-njh-offline/app/src/main/AndroidManifest.xml
           ! grep -q "https://cdn.jsdelivr.net/npm/three@" virtual-office/android-njh-offline/app/src/main/assets/virtual-office/world-builder/builder.js
+      - name: Install Playwright for network-blocked offline game test
+        run: cd virtual-office && npm install --no-save --ignore-scripts playwright@1.56.1
+      - name: Serve staged APK assets locally
+        run: |
+          cd virtual-office/android-njh-offline/app/src/main/assets
+          python3 -m http.server 8097 --bind 127.0.0.1 >/tmp/njh-offline-http.log 2>&1 &
+          sleep 2
+      - name: Play existing NJH with ALL external network blocked
+        run: cd virtual-office && node tests/njh-offline-package.e2e.cjs
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
