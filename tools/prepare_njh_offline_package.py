@@ -126,6 +126,27 @@ def main():
     # pipeline. The PLAYER iframe must not request an unavailable authoring asset.
     txt=re.sub(r'<script[^>]*src="/virtual-life-asset-pipeline/grok-assets/manifest\\.js[^"]*"[^>]*></script>', '', txt)
     worldhtml.write_text(txt, encoding='utf-8')
+    # Strip login-only Google Identity scripts from *all* APK HTML pages, including
+    # the Bangun Ruang interior iframe. The embedded game needs no Google login.
+    # Avoid fragile regexes with double-escaped dots: these are exact published tags.
+    for htmlfile in root.rglob('*.html'):
+        page = htmlfile.read_text(encoding='utf-8')
+        page = page.replace(
+            '<script src="https://accounts.google.com/gsi/client" async defer></script>',
+            ''
+        )
+        page = page.replace(
+            '<script src="/virtual-life-asset-pipeline/grok-assets/manifest.js?v=grok-review-20261107"></script>',
+            ''
+        )
+        htmlfile.write_text(page, encoding='utf-8')
+    # Ship builds with no accidental remote Google login / absent Grok preview.
+    for htmlfile in root.rglob('*.html'):
+        page=htmlfile.read_text(encoding='utf-8')
+        if 'src="https://accounts.google.com/gsi/client"' in page:
+            raise RuntimeError('Bundled HTML still loads Google login: '+str(htmlfile))
+        if '/grok-assets/manifest.js' in page:
+            raise RuntimeError('Bundled HTML still loads nonexistent Grok manifest')
     must_have=[
         game/'mainkan'/'index.html',game/'mainkan'/'offline-save.js',
         game/'world-builder'/'builder.js',game/'jiwa'/'life-economy.js',
