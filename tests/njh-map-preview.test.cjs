@@ -277,9 +277,9 @@ test('dermaga 270 rotation swaps the 2x1 footprint; dock edge stays clear of obj
   assert.equal(hit,undefined,'water-side tile '+c+','+r+' should stay object-free');
  }
  // Footprint stays on the Kali bank (sidewalk), never grass or mid-river.
- // min-corner (-52,43) 1x2 at rot 270: cells c=-52, r=43 and r=44.
+ // min-corner (-52,65) 1x2 at rot 270: cells c=-52, r=65 and r=66 (map distance v2: dock moved south next to Tenda Hobo).
  const cells=new Map(city.record.document.map.terrain.cells.map(c=>[c.c+','+c.r,c.type]));
- for(const [c,r] of [[-52,43],[-52,44]]){
+ for(const [c,r] of [[-52,65],[-52,66]]){
   const type=cells.get(c+','+r)||'grass';
   assert.equal(type,'sidewalk','dock bank tile '+c+','+r+' should be sidewalk, got '+type);
  }
@@ -305,7 +305,7 @@ test('dermaga 270 rotation swaps the 2x1 footprint; dock edge stays clear of obj
  assert.equal(JSON.stringify(offset),JSON.stringify({x:-0.8,z:0}));
  const placed=city.record.document.objects.find(o=>o.id==='njh-dermaga-mancing');
  assert.equal(placed.x,-51.5);
- assert.equal(placed.z,44);
+ assert.equal(placed.z,66);
  assert.equal(JSON.stringify(placed.njhDrawOffset),JSON.stringify({x:-0.8,z:0}));
  // Footprint / collision stay on the bank. The draw offset is visual only.
  assert.equal(JSON.stringify(style.footprint(placed,catalog)),'[1,2]');
@@ -522,15 +522,15 @@ test('places NJH Mart on a free 5x4 main-road lot with a sidewalk use tile',()=>
  assert.equal(pathCheck.ok,true,'N–S sidewalk path stays clear, got '+pathCheck.reason+' '+pathCheck.id);
 
  const bench=document.objects.find(o=>o.id==='njh-atm-16');
- assert.equal(bench.x,-22.5);
+ assert.equal(bench.x,-16.5);
  assert.equal(bench.z,55.9);
- const sit={id:'bench-sit',type:'avatar',x:-22.5,z:56.9,scale:1,collision:true};
- assert.equal(typ(-23,56),'grass');
- const sitCheck=physics.check(sit,{x:-22.5,z:56.9},document.objects,document.map,catalog,style,new Map());
+ const sit={id:'bench-sit',type:'avatar',x:-16.5,z:56.9,scale:1,collision:true};
+ assert.equal(typ(-17,56),'grass');
+ const sitCheck=physics.check(sit,{x:-16.5,z:56.9},document.objects,document.map,catalog,style,new Map());
  assert.equal(sitCheck.ok,true,'nudged bench still has a free sit tile, got '+sitCheck.reason+' '+sitCheck.id);
  const pole=document.objects.find(o=>o.id==='njh-atm-15');
- assert.equal(pole.x,-22);
- assert.equal(pole.z,58.5);
+ assert.equal(pole.x,-20.5);
+ assert.equal(pole.z,59.5);
  const papan=document.objects.find(o=>o.id==='njh-atm-17');
  assert.equal(papan.x,-21.2);
  assert.equal(papan.z,54.5);

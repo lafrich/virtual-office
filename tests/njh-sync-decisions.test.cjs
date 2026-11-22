@@ -36,7 +36,7 @@ test('approved swaps: prayer mat and siomay cart replace placeholders',()=>{
  assert.deepEqual(pray.usePoint,[-11.5,24.5]);
  const siomay=meta.interactables.find(x=>x.objectId==='njh-lapak-siomay-batagor');
  assert.equal(siomay.asset,'pipeline:id_mainkan_siomay_cart');
- assert.deepEqual(siomay.usePoint,[-22.5,38.5]);
+ assert.deepEqual(siomay.usePoint,[-40,64.5]);
 });
 
 test('vehicle catalog uses real PNG sizes and play art does not clamp to footprint',()=>{
@@ -88,9 +88,9 @@ test('dailyWageCap is 150000 with a raised validator clamp',()=>{
  assert.ok(eng.includes('dailyWageCap:int(settings.dailyWageCap,0,1000000,150000)'));
 });
 
-test('Kang Parkir and Manusia Silver sit on r=41.5, trees left door/use/spawn tiles',()=>{
- assert.equal(byId['ref-ambient-9'].z,41.5);
- assert.equal(byId['ref-ambient-11'].z,41.5);
+test('Kang Parkir and Manusia Silver sit on sidewalk (map distance v2 spots), trees left door/use/spawn tiles',()=>{
+ assert.deepEqual([byId['ref-ambient-9'].x,byId['ref-ambient-9'].z],[-35.5,50.5]);
+ assert.deepEqual([byId['ref-ambient-11'].x,byId['ref-ambient-11'].z],[-28.5,58.5]);
  const moved={
   'jakarta-green-v5-22249':[-29,22],
   'jakarta-green-v5-22258':[-12.0,22.0],
