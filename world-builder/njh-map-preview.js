@@ -15,31 +15,16 @@ const TEMPLATE_ALIASES=Object.freeze({
  'njh_kos':'njh_kos_noor'
 });
 const BELUM_BUKA='Belum buka';
-function templateIsOpen(template){
- const t=resolveTemplate(template)||template;
- if(!t)return false;
- if(NJH_PENDING.includes(t))return false;
- try{if(sliceLockedTemplates().includes(t))return false;}catch(_e){}
- return NJH_READY.includes(t);
-}
-function doorClosed(d){
- if(!d)return true;
- if(d.pending===true)return true;
- if(templateIsOpen(d.template||d.interiorTemplate))return false;
- return !d.interior;
-}
 function hasReadyInterior(entry){
  if(!entry)return false;
- if(entry.njhInteriorPending===true)return false;
- if(entry.interior)return true;
- if(templateIsOpen(entry.njhInteriorTemplate))return true;
- return Array.isArray(entry.njhDoors)&&entry.njhDoors.some(d=>d&&!doorClosed(d));
+ if(entry.interior&&entry.njhInteriorPending!==true)return true;
+ return Array.isArray(entry.njhDoors)&&entry.njhDoors.some(d=>d&&d.interior&&!d.pending);
 }
 function isClosedDoor(entry){
  if(!entry)return false;
  if(entry.pending===true||entry.njhInteriorPending===true)return true;
  if(Array.isArray(entry.njhDoors)&&entry.njhDoors.length)
-  return entry.njhDoors.every(doorClosed);
+  return entry.njhDoors.every(d=>d.pending||!d.interior);
  const wantsEnter=entry.enterable===true||entry.njhInteriorTemplate||
   (Array.isArray(entry.interactions)&&entry.interactions.includes('enter'));
  if(wantsEnter&&!hasReadyInterior(entry))return true;
@@ -55,7 +40,7 @@ function closedDoorsNear(objects,x,z,radius){
  const r=Number(radius)||1.25,out=[];
  for(const o of objects||[]){
   if(!o||!isClosedDoor(o))continue;
-  const pending=(o.njhDoors||[]).filter(doorClosed);
+  const pending=(o.njhDoors||[]).filter(d=>d.pending||!d.interior);
   const pts=pending.length?pending.map(d=>({door:d,pt:usePointOf(d,o)})):[{door:null,pt:usePointOf(null,o)}];
   for(const row of pts){
    const dist=Math.hypot(Number(x)-row.pt.x,Number(z)-row.pt.z);
@@ -408,7 +393,6 @@ function wireDoors(document,meta,interiors){
   }
   // Slice lock (content/balancing.json doors.sliceLocked): door stays "Belum buka" and never loads its interior.
   const sliceLocked=sliceLockedTemplates().includes(template);
-  const officiallyReady=templateIsOpen(template);
   const scene=sliceLocked?null:scenes[template];
   const usePoint=Array.isArray(door.usePoint)?{x:door.usePoint[0],z:door.usePoint[1]}:null;
   const doorPoint=Array.isArray(door.doorPoint)?{x:door.doorPoint[0],z:door.doorPoint[1]}:null;
@@ -418,7 +402,7 @@ function wireDoors(document,meta,interiors){
    template,owner:door.owner||null,facing:door.facing||obj.entranceFacing||'sw',
    usePoint:door.usePoint,useTile:door.useTile,
    use:{x:usePoint?usePoint.x:Number(obj.x)||0,z:usePoint?usePoint.z:Number(obj.z)||0},
-   doorPoint,interior:scene?wrapInterior(scene):null,pending:sliceLocked||(!officiallyReady&&!scene)
+   doorPoint,interior:scene?wrapInterior(scene):null,pending:!scene
   });
   obj.enterable=true;
   obj.interactive=true;
@@ -426,7 +410,7 @@ function wireDoors(document,meta,interiors){
   else if(!obj.interactions.includes('enter'))obj.interactions=[...obj.interactions,'enter'];
   const row={doorId:door.doorId,objectId:door.objectId,label:door.label,
    template,usePoint:door.usePoint,useTile:door.useTile};
-  if(scene||officiallyReady)report.wired.push(row);
+  if(scene)report.wired.push(row);
   else report.pending.push(row);
  }
  for(const obj of objects){
@@ -438,8 +422,8 @@ function wireDoors(document,meta,interiors){
   obj.njhDoorPoint=primary.doorPoint;
   obj.entranceFacing=primary.facing||obj.entranceFacing||'sw';
   obj.njhInteriorTemplate=primary.template;
-  if(primary.pending){obj.interior=primary.interior||null;obj.njhInteriorPending=true;}
-  else {obj.interior=primary.interior||null;obj.njhInteriorPending=false;}
+  if(primary.interior){obj.interior=primary.interior;obj.njhInteriorPending=false;}
+  else {obj.interior=null;obj.njhInteriorPending=true;}
  }
  return report;
 }
@@ -447,13 +431,10 @@ async function loadCity(){
  registerCatalog();
  hookBuildingBridge();
  hookKebonTiles();
- const player=(()=>{try{return new URLSearchParams(g.location?.search||'').get('player')==='1';}catch(_e){return false;}})();
- // Play mode: do not fetch every READY interior JSON at boot (r7 art used to
- // inflate the session). Scene + furniture PNGs load when a door is opened.
  const [raw,meta,interiors]=await Promise.all([
   fetchJson('city/njh-semesta-map-draft1.with-pending-assets.city.json'),
   loadMeta(),
-  player?Promise.resolve({}):loadInteriors()
+  loadInteriors()
  ]);
  const document=unwrapCity(raw);
  (document.objects||[]).forEach(o=>{if(o&&VEHICLE_ID_ALIASES[o.id])o.id=VEHICLE_ID_ALIASES[o.id];});
@@ -535,29 +516,9 @@ function homeFor(playerId,meta){
  return {id:row.doorId||'home',x:row.homeSpawn[0],z:row.homeSpawn[1],facing:'sw',
   owner:row.player,template:row.interiorTemplate};
 }
-function isFreshStart(){
- try{
-  const g=typeof window!=='undefined'?window:(typeof globalThis!=='undefined'?globalThis:null);
-  if(g&&g.NJH_FRESH_MODE===true)return true;
-  const search=(g&&g.location&&g.location.search)||'';
-  return new URLSearchParams(search).get('fresh')==='1';
- }catch{return false;}
-}
-function tentSpawn(meta){
- const m=meta||metaCache;
- const it=(m?.interactables||[]).find(x=>x&&(x.id==='njh_tenda_hobo'||x.objectId==='njh-tenda-hobo'));
- const use=it&&it.usePoint;
- const x=Array.isArray(use)?Number(use[0]):-51.5;
- const z=Array.isArray(use)?Number(use[1]):64.5;
- return {id:'njh-tenda-hobo',x:Number.isFinite(x)?x:-51.5,z:Number.isFinite(z)?z:64.5,facing:'se'};
-}
 function resolveSpawn(playerId,meta){
  const home=homeFor(playerId,meta);
  if(home)return {ok:true,kind:'home',playExitTent:false,point:home,reason:'njh-home'};
- // ?fresh=1 new players start at the hobo tent (HUD "Tenda"), not the plaza.
- // Existing / non-fresh sessions keep the plaza pool (and any saved position).
- if(isFreshStart())
-  return {ok:true,kind:'tent',playExitTent:false,point:tentSpawn(meta),reason:'njh-fresh-tent'};
  const pool=spawnPool(meta);
  if(!pool.length)return {ok:false,reason:'no-njh-spawns',point:null};
  const assigned={t_ichsan:0,t_noor:1,guest1:2,guest2:3};
@@ -579,7 +540,7 @@ if(enabled()){hookKebonTiles();}
  enabled,isNjhDocument,baseUrl,registerCatalog,registerInto,registerSekatType,
  loadCity,loadMeta,keyMap:KEY_MAP,specs:()=>SPECS,
  doorCandidates,nearestEnterable,doorAnchor,enterRadius:ENTER_RADIUS,
- worldBoundsOf,applyBounds,spawnPool,homeFor,resolveSpawn,tentSpawn,isFreshStart,imageUrl,
+ worldBoundsOf,applyBounds,spawnPool,homeFor,resolveSpawn,imageUrl,
  wireDoors,resolveTemplate,readyTemplates:NJH_READY,pendingTemplates:NJH_PENDING,
  BELUM_BUKA,isClosedDoor,closedDoorsNear,sliceLockedTemplates,VEHICLE_ID_ALIASES,resolveVehicleId,
  visualTerrainType,previewTile,dermagaOverhang,applyDermagaOverhang,dermagaOverhangTiles:DERMAGA_OVERHANG,

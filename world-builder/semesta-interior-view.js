@@ -15,8 +15,7 @@ const WALL_HEIGHT=WALL_PX*PIXEL_WORLD*VERTICAL_COMP;
 const ISO_DIRECTION={x:1,y:Math.sqrt(2/3),z:1};
 const MIN_VIEW=8, DEFAULT_PAD=1.22;
 const ART_ALIAS=Object.freeze({
- table:'dining_table',counter:'food_vitrine',shelf:'dish_rack',
- waiting_bench:'wooden_bench'
+ table:'dining_table',counter:'food_vitrine',shelf:'dish_rack'
 });
 const EAT_SPOTS=Object.freeze(['dining_table','food_vitrine','cashier','table','counter']);
 

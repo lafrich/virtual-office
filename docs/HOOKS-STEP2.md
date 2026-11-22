@@ -198,7 +198,7 @@ Missing ids fall back through the existing chain (never blocks).
 
 Layar must not invent a sell payload. Call these hooks on `window.SemestaLifePlay` (also forwarded on `window.SemestaPlay`).
 
-`sellableFish(buyerId?)` (aliases: `sellList`, `fishSellList` — same function)
+`sellableFish(buyerId?)`
 - Optional `buyerId`: `'siomay_batagor' | 'pasar_ikan'`.
 - Returns
 ```

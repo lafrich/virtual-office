@@ -19,7 +19,7 @@ if(playerMode){
   for(const src of [
    '/virtual-life-asset-pipeline/genesis-source.js?v=genesis-player-20261108',
    '/virtual-life-asset-pipeline/emosi-source.js?v=genesis-player-20261108',
-   '../shared/genesis-player.js?v=njh-cp3-live-20261122'
+   '../shared/genesis-player.js?v=njh-rollback-step2-v48-20261122'
   ]){
    await new Promise((resolve,reject)=>{
     const script=document.createElement('script');script.src=src;script.onload=resolve;
@@ -3182,7 +3182,7 @@ function beginSpawnRespawn(actor,trigger){
   if(decision?.ok&&decision.point&&holder){
    holder.root.position.set(decision.point.x,holder.root.position.y||0,decision.point.z);
    if(decision.point.facing)holder.rig?.setDirection?.(decision.point.facing);
-   tell((decision.kind==='home'?'Spawn rumah · ':decision.kind==='tent'?'Spawn tenda · ':'Spawn plaza · ')+decision.point.x.toFixed(1)+', '+decision.point.z.toFixed(1));
+   tell((decision.kind==='home'?'Spawn rumah · ':'Spawn plaza · ')+decision.point.x.toFixed(1)+', '+decision.point.z.toFixed(1));
   }
   return decision;
  }

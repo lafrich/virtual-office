@@ -53,11 +53,8 @@ function readyTemplateIds(){
 }
 function hasReadyInterior(obj){
  if(!obj)return false;
- if(obj.njhInteriorPending===true)return false;
- if(obj.interior)return true;
- const t=obj.njhInteriorTemplate;
- if(t&&readyTemplateIds().includes(t))return true;
- return Array.isArray(obj.njhDoors)&&obj.njhDoors.some(d=>d&&!d.pending&&(d.interior||d.template||d.interiorTemplate));
+ if(obj.interior&&obj.njhInteriorPending!==true)return true;
+ return Array.isArray(obj.njhDoors)&&obj.njhDoors.some(d=>d&&d.interior&&!d.pending);
 }
 function baseUrl(){
  try{
@@ -137,20 +134,40 @@ function create(opts){
  }
  const storage=opts.storage||(typeof localStorage!=='undefined'?localStorage:null);
 
- const artReady=new Set(Object.keys(scenes||{}));
- let enterLock=null;
- async function loadCatalog(){
-  if(catalog)return catalog;
+ async function loadAssets(){
   const base=opts.baseUrl||baseUrl();
-  const r=await fetch(base+'catalog.json',{cache:'no-cache'});
-  catalog=r.ok?await r.json():{items:{}};
-  return catalog;
- }
- function loadImg(file){
-  const base=opts.baseUrl||baseUrl();
-  return new Promise(resolve=>{
-   if(!file||images.has(file))return resolve();
-   if(typeof Image==='undefined')return resolve();
+  if(!catalog){
+   const r=await fetch(base+'catalog.json',{cache:'no-cache'});
+   catalog=r.ok?await r.json():{items:{}};
+  }
+  const items=catalog.items||catalog;
+  const wanted=new Set(readyTemplateIds());
+  const mapBase=mapPreviewInteriorsBase();
+  const publicIds=new Set(PUBLIC_SCENES);
+  await Promise.all([...wanted].map(async id=>{
+   if(scenes[id])return;
+   const file=id+'.interior-scene.json';
+   // Public r7 scenes live under njh-map-preview/interiors/. Play-first
+   // scenes live under njh-play-interiors/. Pick the owning base first so
+   // the other path is not probed (that 404s every load).
+   const urls=publicIds.has(id)?[mapBase+file,base+file]:[base+file,mapBase+file];
+   for(const url of urls){
+    try{const r=await fetch(url,{cache:'no-cache'});
+     if(r.ok){scenes[id]=await r.json();break;}}catch(_e){}
+   }
+  }));
+  const files=new Set();
+  for(const typ of Object.values(items)){
+   for(const view of Object.values(typ||{}))if(view?.file)files.add(view.file);
+  }
+  for(const sc of Object.values(scenes)){
+   for(const d of sceneDoors(sc)){
+    if(d.sprite)files.add(d.sprite);
+    for(const v of Object.values(d.sprites||{}))if(typeof v==='string')files.add(v);
+   }
+  }
+  function loadImg(file){return new Promise(resolve=>{
+   if(images.has(file))return resolve();
    const img=new Image();
    let tried=0;
    const srcs=file.startsWith('../')?[base+file]:
@@ -158,122 +175,10 @@ function create(opts){
    img.onload=()=>{images.set(file,img);resolve();};
    img.onerror=()=>{if(tried<srcs.length-1){img.src=srcs[++tried];}else resolve();};
    img.src=srcs[0];
-  });
+  });}
+  await Promise.all([...files].map(loadImg));
+  return {catalog,scenes,ready:images.size};
  }
- function filesForScene(sc){
-  const items=(catalog&&(catalog.items||catalog))||{};
-  const files=new Set();
-  for(const item of sc?.items||[]){
-   const typ=items[View?.artId?.(item.assetId)||item.assetId]||items[item.assetId]||{};
-   for(const view of Object.values(typ||{}))if(view?.file)files.add(view.file);
-  }
-  for(const d of sceneDoors(sc)){
-   if(d.sprite)files.add(d.sprite);
-   for(const v of Object.values(d.sprites||{}))if(typeof v==='string')files.add(v);
-  }
-  return [...files];
- }
- const inflightScenes=new Map();
- async function loadScene(id){
-  const resolved=resolvePlayTemplate(id)||id;
-  if(scenes[resolved])return scenes[resolved];
-  if(scenes[id])return scenes[id];
-  if(inflightScenes.has(resolved))return inflightScenes.get(resolved);
-  const job=(async()=>{
-   const base=opts.baseUrl||baseUrl();
-   const mapBase=mapPreviewInteriorsBase();
-   const publicIds=new Set(PUBLIC_SCENES);
-   const want=[resolved];
-   if(resolved===TEMPLATES.warteg||resolved===FALLBACK.warteg)want.push(TEMPLATES.warteg,FALLBACK.warteg);
-   const seen=new Set();
-   for(const sid of want){
-    if(!sid||seen.has(sid))continue;seen.add(sid);
-    if(scenes[sid])return scenes[sid];
-    const file=sid+'.interior-scene.json';
-    // Public r7 scenes live under njh-map-preview/interiors/. Play-first
-    // scenes live under njh-play-interiors/. Pick the owning base first so
-    // the other path is not probed (that 404s every load).
-    const urls=publicIds.has(sid)?[mapBase+file,base+file]:[base+file,mapBase+file];
-    for(const url of urls){
-     try{const r=await fetch(url,{cache:'no-cache'});
-      if(r.ok){scenes[sid]=await r.json();return scenes[sid];}}catch(_e){}
-    }
-   }
-   return null;
-  })();
-  inflightScenes.set(resolved,job);
-  try{return await job;}finally{inflightScenes.delete(resolved);}
- }
- async function ensureRoomReady(id){
-  await loadCatalog();
-  const sc=await loadScene(id);
-  if(!sc)return {ok:false,reason:'Belum buka',closed:true,roomId:id};
-  await Promise.all(filesForScene(sc).map(loadImg));
-  artReady.add(sc.id||id);
-  const resolved=resolvePlayTemplate(id)||id;
-  artReady.add(resolved);if(id)artReady.add(id);
-  return {ok:true,scene:sc,roomId:resolved,files:filesForScene(sc).length};
- }
- function isArtReady(id){
-  const resolved=resolvePlayTemplate(id)||id;
-  if(artReady.has(resolved)||artReady.has(id))return true;
-  const sc=sceneOf(resolved)||sceneOf(id);
-  return !!(sc&&(artReady.has(sc.id)||artReady.has(resolved)));
- }
- function isKnownReady(id){
-  if(!id)return false;
-  const resolved=resolvePlayTemplate(id)||id;
-  if(sceneOf(resolved)||sceneOf(id))return true;
-  try{const list=readyTemplateIds();return list.includes(resolved)||list.includes(id);}catch(_e){return false;}
- }
- function showRoomLoading(label){
-  try{
-   const doc=root.document;
-   if(!doc||!doc.body)return;
-   let el=doc.getElementById('njhInteriorLoading');
-   if(!el){
-    el=doc.createElement('div');
-    el.id='njhInteriorLoading';
-    el.setAttribute('role','status');
-    el.style.cssText='position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);color:#fff;font:14px Tahoma,Arial,sans-serif;pointer-events:none';
-    doc.body.appendChild(el);
-   }
-   el.textContent='Memuat '+(label||'interior')+'…';
-   el.hidden=false;
-  }catch(_e){}
-  try{opts.message?.('Memuat '+(label||'interior')+'…');}catch(_e){}
- }
- function hideRoomLoading(){
-  try{const el=root.document?.getElementById('njhInteriorLoading');if(el)el.hidden=true;}catch(_e){}
- }
- function enterWhenReady(roomId,then){
-  if(enterLock===roomId)return {ok:true,loading:true,roomId};
-  if(enterLock)return {ok:true,loading:true,roomId:enterLock};
-  enterLock=roomId;
-  const label=NAME[kindOfRoom(roomId)]||'interior';
-  showRoomLoading(label);
-  const run=Promise.resolve(ensureRoomReady(roomId)).then(r=>{
-   hideRoomLoading();
-   enterLock=null;
-   if(!r.ok){opts.message?.('⛔ '+(r.reason||'Belum buka'));return r;}
-   return then();
-  },err=>{
-   hideRoomLoading();
-   enterLock=null;
-   const reason=String(err&&err.message||err||'Gagal memuat interior');
-   opts.message?.('⛔ '+reason);
-   return {ok:false,reason};
-  });
-  return {ok:true,loading:true,roomId,ready:run};
- }
- // Boot only fetches the furniture catalog JSON. Scene JSON + furniture
- // PNGs load the first time a door is opened, so r7 interior art no longer
- // inflates the Mainkan session at startup (especially on mobile).
- async function loadAssets(){
-  await loadCatalog();
-  return {catalog,scenes,ready:images.size,lazy:true};
- }
-
 
  function findBuilding(kind,world){
   const objects=world?.objects||opts.getWorld?.()?.objects||[];
@@ -323,11 +228,9 @@ function create(opts){
   buildings={};
   for(const [kind,obj] of [['kost',kost],['warteg',warteg],['minimarket',minimarket]]){
    if(!obj)continue;
-   let template=TEMPLATES[kind];
-   if(!scenes[template]&&FALLBACK[kind]&&scenes[FALLBACK[kind]])template=FALLBACK[kind];
-   if(kind==='kost'&&obj.id!==PLAY_KOST_ID&&/njh-kos-noor|cove/i.test(textOf(obj)+' '+(obj.id||''))){
-    if(scenes[LOBBY_ID]||!scenes[TEMPLATES.kost])template=LOBBY_ID;
-   }
+   let template=scenes[TEMPLATES[kind]]?TEMPLATES[kind]:(FALLBACK[kind]||TEMPLATES[kind]);
+   if(kind==='kost'&&scenes[LOBBY_ID]&&obj.id!==PLAY_KOST_ID&&/njh-kos-noor|cove/i.test(textOf(obj)+' '+(obj.id||'')))
+    template=LOBBY_ID;
    const sceneData=scenes[template];
    obj.enterable=true;obj.interactive=true;
    obj.njhInteriorTemplate=template;
@@ -740,8 +643,6 @@ function create(opts){
  function enterInterior(roomId,reason){
   const A=AccessApi();
   const resolved=resolvePlayTemplate(A?.resolveId?.(roomId)||roomId);
-  if(!isArtReady(resolved)&&isKnownReady(resolved))
-   return enterWhenReady(resolved,()=>enterInterior(resolved,reason));
   const sc=sceneOf(resolved);
   if(!sc)return {ok:false,reason:'Belum buka',closed:true};
   const gate=canEnterRoom(resolved);if(!gate.ok)return gate;
@@ -772,7 +673,7 @@ function create(opts){
   const resolved=resolvePlayTemplate(A?.resolveId?.(raw)||raw);
   if(raw==='njh-kos-noor'||resolved===LOBBY_ID||A?.isLobby?.(raw))
    return enterInterior(LOBBY_ID);
-  if(sceneOf(resolved)||isKnownReady(resolved))return enterInterior(resolved);
+  if(sceneOf(resolved))return enterInterior(resolved);
   if(raw==='kost'||raw==='warteg'||raw==='minimarket'||resolved==='warteg'||resolved===TEMPLATES.warteg||resolved===FALLBACK.warteg)
    return enter(raw==='kost'||raw==='minimarket'?raw:'warteg');
   const k=kindOfBuilding({id:raw,name:raw})||kindOfRoom(resolved);
@@ -788,8 +689,6 @@ function create(opts){
   const gate=canEnter(kind);if(!gate.ok)return gate;
   const pos=opts.getPos?.()||{x:0,z:0};
   const tpl=wartegKindTemplate(kind,rec.template);
-  if(!isArtReady(tpl))
-   return enterWhenReady(tpl,()=>enter(kind,reason));
   const sc=scenes[tpl]||rec.scene;
   const built=buildRoom(kind,sc,tpl);if(!built)return {ok:false,reason:'Gagal membangun interior'};
   hideOutdoor(true);
@@ -885,7 +784,7 @@ function create(opts){
   // Access record for the generic njh_kos template) still gates the play kost.
   if(target.kind&&buildings[target.kind]&&['kost','warteg','minimarket'].includes(target.kind))
    return enter(target.kind);
-  if(target.template&&(sceneOf(target.template)||isKnownReady(target.template)))return enterInterior(target.template,'pintu terdekat');
+  if(target.template&&sceneOf(target.template))return enterInterior(target.template,'pintu terdekat');
   if(target.kind&&buildings[target.kind])return enter(target.kind);
   return {ok:false,reason:'Belum buka',closed:true,objectId:target.objectId};
  }
@@ -963,7 +862,7 @@ function create(opts){
   if(saved.roomId&&session?.roomId===saved.roomId)return {ok:true,kind:session.kind,restored:true};
   if(session?.kind===saved.kind&&!saved.roomId)return {ok:true,kind:session.kind,restored:true};
   if(session){/* drop without street teleport */hideOutdoor(false);disposeRoom();session=null;}
-  if(saved.roomId&&(sceneOf(saved.roomId)||isKnownReady(saved.roomId))){
+  if(saved.roomId&&sceneOf(saved.roomId)){
    session={exit:saved.exit};
    return enterInterior(saved.roomId,'lanjut dari save');
   }
@@ -975,12 +874,6 @@ function create(opts){
   return enter(saved.kind,'lanjut dari save');
  }
 
- function sceneItems(){
-  if(!session)return [];
-  return (session.furniture||[]).map(f=>({
-   id:f.id||null,assetId:f.assetId||f.kind||null,x:f.x,z:f.z,c:f.c,r:f.r
-  }));
- }
  function furniture(){
   if(!session)return [];
   // Privacy panels are physical collision, never interactive furniture.
@@ -1121,8 +1014,8 @@ function create(opts){
  }
 
  return {
-  loadAssets,loadCatalog,loadScene,filesForScene,ensureRoomReady,isArtReady,isKnownReady,wireWorld,ensureKost,findBuilding,kindOfBuilding,resolvePlayTemplate,canEnter,canEnterRoom,enter,enterInterior,openInteriorById,nearestDoor,enterNearby,closedStreetDoor,exit,fitRoomCamera,cameraLocked,moveInside,freeInside,spawnInside,
-  restoreIfNeeded,furniture,sceneItems,extraActions,obstacles,constrain,update,candidates,
+  loadAssets,wireWorld,ensureKost,findBuilding,kindOfBuilding,resolvePlayTemplate,canEnter,canEnterRoom,enter,enterInterior,openInteriorById,nearestDoor,enterNearby,closedStreetDoor,exit,fitRoomCamera,cameraLocked,moveInside,freeInside,spawnInside,
+  restoreIfNeeded,furniture,extraActions,obstacles,constrain,update,candidates,
   doorWorld,wrapInterior,tilePos,dirFor,TEMPLATES,FALLBACK,ROOM_SCENES,LOBBY_ID,MEAL_PRICE,ENTER_RADIUS,ORIGIN,PLAY_KOST_ID,KOST_PATTERN,WARTEG_PATTERN,MINIMARKET_PATTERN,
   place:(x,z,size)=>{if(!Number.isFinite(Number(x))||!Number.isFinite(Number(z)))return {ok:false};opts.teleport?.(Number(x),Number(z),size||12,{keepView:!!session});return {ok:true,x:Number(x),z:Number(z)};},
   active:()=>session,kind:()=>session?.kind||null,roomId:()=>session?.roomId||null,buildings:()=>buildings,

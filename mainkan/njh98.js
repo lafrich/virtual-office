@@ -353,20 +353,10 @@ function notice(title,text){
 }
 let toastTimer=0;
 function toast(text){
- const msg=String(text||'').trim();if(!msg)return;
  let t=$('njhToast');
- if(!t){t=document.createElement('div');t.id='njhToast';t.className='njh-toast';t.setAttribute('role','status');(document.body||$('njhHud')).append(t);}
- t.textContent=msg;t.hidden=false;t.setAttribute('aria-live','polite');
- clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.hidden=true;},4500);
+ if(!t){t=document.createElement('div');t.id='njhToast';t.className='njh-toast';t.setAttribute('role','status');$('njhHud')?.append(t);}
+ t.textContent=text;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.hidden=true;},2600);
 }
-function onLifeToast(ev){
- const d=ev&&ev.data!==undefined?ev.data:ev&&ev.detail;
- const text=(d&&(d.text||d.message))||(ev&&ev.detail&&ev.detail.text)||'';
- if(d&&d.type&&d.type!=='mainkan:toast'&&d.type!=='njh:toast')return;
- if(text)toast(text);
-}
-try{window.addEventListener('message',onLifeToast);}catch{}
-try{window.addEventListener('mainkan:toast',e=>toast(e.detail&&e.detail.text||''));}catch{}
 const modalClose=document.createElement('button');modalClose.type='button';modalClose.id='njhModalClose';modalClose.className='btn njh-modal-close';modalClose.hidden=true;
 modalClose.addEventListener('click',()=>{try{world()?.document?.getElementById('ptWinClose')?.click();}catch{}setTimeout(paintModal,50);});
 $('njhHud')?.append(modalClose);
@@ -524,8 +514,6 @@ function ctxOptions(){
    add({id,label:cleanLabel(a.label||id),src:'hook',args:a.args,disabled:!!a.disabled,hint:a.hint||'',mock:false});
   });
  }catch{}
- if(typeof doorNearObj!=='undefined'&&doorNearObj&&doorNearObj.dist<=1.8)
-  add({id:'enter_interior',label:cleanLabel(doorNearObj.closed?'Belum buka':'Masuk'),src:'door',disabled:false,hint:doorNearObj.closed?'Belum buka':'Masuk',mock:false});
  for(const a of bodyActs())add({...a,src:'body',label:cleanLabel(a.label)});
  return dedupeActs(out);
 }
@@ -608,8 +596,7 @@ function paintActBar(list){
   }
   const lab=shortOf(a.id,a.label);
   const ic=ICON[ACT_IC[a.id]||'action']||ICON.action;
-  const hint=a.hint&&cleanLabel(a.hint)!==cleanLabel(a.label)?a.hint:'';
-  const tip=a.label+(hint?(' — '+hint):'')+(a.mock?' (SIMULASI)':'');
+  const tip=a.label+(a.hint?(' — '+a.hint):'')+(a.mock?' (SIMULASI)':'');
   parts.push('<button type="button" role="menuitem" class="njh-act" data-njh-act="'+esc(a.id)+'" data-src="'+esc(a.src)+'"'
    +(a.disabled?' disabled':'')+' title="'+esc(tip)+'" aria-label="'+esc(a.label+(a.mock?' (SIMULASI)':''))+'">'
    +ic+'<span>'+esc(lab)+'</span>'+(a.mock?'<b class="njh-sim">SIMULASI</b>':'')+'</button>');
@@ -627,9 +614,6 @@ function pickAct(id,src,selVal){
  }else if(src==='native'){
   const b=wdoc()?.querySelector('#slpActions button[data-life-action="'+id.replace(/"/g,'')+'"]');
   if(b){pending={label:cleanLabel(b.textContent),t:performance.now()};b.click();}
- }else if(src==='door'){
-  try{life()?.handleAction?.();}catch{}
-  pending={label:'Masuk',t:performance.now()};
  }else if(src==='hook'){
   try{life()?.runAction?.(id);}catch{}
   pending={label:id,t:performance.now()};
@@ -640,15 +624,10 @@ function pickAct(id,src,selVal){
  setTimeout(closeCtx,0);
 }
 function openCtx(){
- // A nearby door must not override other contextual actions (cook, talk, mancing).
- // Only auto-enter when E/AKSI has nothing else to show.
- const info=ctxInfo();
- const opts=ctxOptions();
- const doorOnly=!!(doorNearObj&&doorNearObj.dist<=1.8);
- const otherActs=opts.filter(a=>a.src!=='door');
- if(doorOnly&&otherActs.length===0&&!info){try{return !!life()?.handleAction?.();}catch(err){console.warn(err);}}
- if(!info||info.work)return false;
- if(!opts.length)return false;
+ // enterable door nearby → its (placeholder) interior instead of the generic menu
+ if(doorNearObj&&doorNearObj.dist<=1.8){try{return !!life()?.handleAction?.();}catch(err){console.warn(err);}}
+ const info=ctxInfo();if(!info||info.work)return false;
+ const opts=ctxOptions();if(!opts.length)return false;
  ctxOpen=true;ctxLabel=info.label;document.body.classList.add('njh-act-open');
  paintActBar(opts);
  setTimeout(()=>{$('njhActBar')?.querySelector('.njh-act:not([disabled]),select')?.focus();},0);

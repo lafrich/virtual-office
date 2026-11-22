@@ -22,22 +22,10 @@ function baseUrl(){
  }catch(e){}
  return './njh-interior-preview-art/';
 }
-function isAuthoringPreview(){
- try{
-  if(g.VL_NJH_FURNITURE_PREVIEW===true)return true;
-  const p=new URLSearchParams(g.location?.search||'');
-  return p.has('njhPreview')||p.get('njhFurniturePreview')==='1';
- }catch(e){return false;}
-}
-function isPlayerMode(){
- try{return new URLSearchParams(g.location?.search||'').get('player')==='1';}catch(e){return false;}
-}
 function enabled(){
  try{
   if(g.VL_NJH_FURNITURE_PREVIEW===true)return true;
   if(g.VL_NJH_FURNITURE_PREVIEW===false)return false;
-  // Mainkan play draws rooms through njh-play-interiors, not this pack.
-  if(isPlayerMode())return false;
   const p=new URLSearchParams(g.location?.search||'');
   return p.has('njhPreview')||p.get('njhFurniturePreview')==='1'||p.get('njhMap')==='1';
  }catch(e){return false;}
@@ -152,8 +140,6 @@ function preload(){
 }
 function ready(){
  if(!enabled())return true;
- // Do not prefetch the whole I1–I6 catalog except in Bangun Ruang authoring.
- if(!isAuthoringPreview())return true;
  if(!preloaded)preload();
  return martKitStatus!=='loading'&&loaded+failed>=total;
 }
@@ -192,9 +178,7 @@ function drawPlan(ctx,item,x,y,w,h){
 g.VLNjhInteriorArtPreview=Object.freeze({
  enabled,get,owns,dirFor,preload,ready,whenReady,status,drawPlan,DIR
 });
-// Only Bangun Ruang authoring preloads the whole I1–I6 catalog. Play mode
-// (Mainkan ?player=1 / ?njhMap=1) loads room art on the first door open.
-if(typeof document!=='undefined'&&isAuthoringPreview()){
+if(typeof document!=='undefined'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',preload);
  else preload();
 }

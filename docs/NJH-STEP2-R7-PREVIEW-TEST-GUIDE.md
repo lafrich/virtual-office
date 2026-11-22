@@ -1,11 +1,11 @@
 # STEP 2 preview test guide — reopen 7 r7 doors
 
-Preview branch: `preview/njh-step2-live-20261122` (linear rebase of `preview/njh-step2-r7-20261122` @ `5ad98ece` onto live main `7f7a45d` / balancing r4b `6ddfec25`). Preview only. Do not merge or push `main`. Do not deploy the Worker.
+Preview branch: `preview/njh-rollback-step2-v48-20261122` (linear rebase of `preview/njh-step2-r7-20261122` @ `5ad98ece` onto live main `7f7a45d` / balancing r4b `6ddfec25`). Preview only. Do not merge or push `main`. Do not deploy the Worker.
 
-Tags: sw **v45**, `?v=njh-step2-live-20261122`, hub `hub-20261122-step2-live`. LGR pack stays `?v=pakaian-v2-njh-newbot-fix-20261122`.
+Tags: sw **v45**, `?v=njh-rollback-step2-v48-20261122`, hub `hub-20261122-rollback-step2-v48`. LGR pack stays `?v=pakaian-v2-njh-newbot-fix-20261122`.
 
 
-**QA follow-up (New Bot):** the keran wudu on the door wall no longer overlaps a sajadah. The sajadah that sat under the keran wudu was removed; shaf 2 is at c=2,3 r=3, and the wudhu stays at (6,5),(7,5). Cache `?v=njh-step2-live-20261122`, hub `hub-20261122-step2-live`. SW stays **v45**.
+**QA follow-up (New Bot):** the keran wudu on the door wall no longer overlaps a sajadah. The sajadah that sat under the keran wudu was removed; shaf 2 is at c=2,3 r=3, and the wudhu stays at (6,5),(7,5). Cache `?v=njh-rollback-step2-v48-20261122`, hub `hub-20261122-rollback-step2-v48`. SW stays **v45**.
 
 ## What changed
 
