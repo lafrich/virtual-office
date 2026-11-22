@@ -4,6 +4,9 @@ Preview branch: `preview/njh-step2-live-20261122` (linear rebase of `preview/njh
 
 Tags: sw **v45**, `?v=njh-step2-live-20261122`, hub `hub-20261122-step2-live`. LGR pack stays `?v=pakaian-v2-njh-newbot-fix-20261122`.
 
+
+**QA follow-up (New Bot):** the keran wudu on the door wall no longer overlaps a sajadah. The sajadah that sat under the keran wudu was removed; shaf 2 is at c=2,3 r=3, and the wudhu stays at (6,5),(7,5). Cache `?v=njh-step2-live-20261122`, hub `hub-20261122-step2-live`. SW stays **v45**.
+
 ## What changed
 
 - `kindOfBuilding` reads `njhInteriorTemplate` **before** `WARTEG_PATTERN`, so Warung Madura, Nasi Sunda, Pecel Lele, and Warung Kopi no longer open as the warteg room.

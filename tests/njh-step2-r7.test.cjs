@@ -136,3 +136,40 @@ test('rejectAction allows rest on a public interior; kost rooms stay locked for 
  assert.equal(A.rejectAction('t_guest','njh_laundry','rest',{seatId:'waiting_bench'}),null);
  assert.equal(A.rejectAction('t_guest_1','njh_kos_ichsan','sleep'),'Terkunci');
 });
+
+test('mushola wudhu taps do not overlap a sajadah (grid or Chebyshev 1)',()=>{
+ const scene=JSON.parse(read('world-builder/njh-map-preview/interiors/njh_mushola.interior-scene.json'));
+ const catalog=JSON.parse(read('world-builder/njh-play-interiors/catalog.json'));
+ const art=catalog.art||catalog.items||catalog;
+ function footprint(assetId,rot){
+  const rec=art[assetId]||{};
+  const view=rec.sw||rec.se||rec;
+  const fp=(view&&view.footprint)||[1,1];
+  let dc=Number(fp[0])||1,dr=Number(fp[1])||1;
+  const r=((Number(rot)||0)%360+360)%360;
+  if(r===90||r===270)[dc,dr]=[dr,dc];
+  return [dc,dr];
+ }
+ function tiles(it){
+  const [dc,dr]=footprint(it.assetId,it.rotation);
+  const out=[];
+  for(let c=it.c;c<it.c+dc;c++)for(let r=it.r;r<it.r+dr;r++)out.push(c+','+r);
+  return out;
+ }
+ const mats=scene.items.filter(i=>i.assetId==='prayer_mat');
+ const taps=scene.items.filter(i=>i.assetId==='wudhu_tap');
+ assert.ok(taps.length>=1&&mats.length>=1);
+ const matTiles=new Set(mats.flatMap(tiles));
+ const tapTiles=taps.flatMap(tiles);
+ for(const t of tapTiles){
+  assert.equal(matTiles.has(t),false,'wudhu tile '+t+' overlaps a sajadah');
+  const [c,r]=t.split(',').map(Number);
+  for(let dc=-1;dc<=1;dc++)for(let dr=-1;dr<=1;dr++){
+   const n=(c+dc)+','+(r+dr);
+   assert.equal(matTiles.has(n),false,'wudhu at '+t+' is adjacent to sajadah '+n);
+  }
+ }
+ const shaf2=scene.items.filter(i=>i.assetId==='prayer_mat'&&i.r>=2);
+ assert.ok(shaf2.every(i=>i.c<=3),'no sajadah in the wudhu corner (c>=5)');
+ assert.equal(scene.items.some(i=>i.id==='njh-mushola-prayer_mat-9'),false);
+});
