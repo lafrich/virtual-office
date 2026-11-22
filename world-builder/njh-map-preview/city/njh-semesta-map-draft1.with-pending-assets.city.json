@@ -14829,15 +14829,15 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "auto",
-          "notes": "",
-          "asset": "pipeline:lapak_barang_bekas",
+          "notes": "placeholder fix 22 Nov 2026: was pipeline:lapak_barang_bekas (baked-in blocky seller figure in all 4 views); reuses DB stall pipeline:lapak_aksesori (no person). Seller art: LGR redraw listed.",
+          "asset": "pipeline:lapak_aksesori",
           "x": -23,
           "z": 24.25,
           "rotation": 0,
           "width": 2.55,
-          "height": 3.832,
+          "height": 3.593,
           "name": "Lapak Barang Bekas",
-          "subtype": "lapak_barang_bekas",
+          "subtype": "lapak_aksesori",
           "collision": true
         },
         {
@@ -16032,7 +16032,7 @@
           "name": "Bluebird Taxi",
           "type": "vehicle",
           "x": -13.5,
-          "z": 73.5,
+          "z": 74.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -16045,7 +16045,7 @@
           "autoGround": true,
           "motion": {
             "mode": "road",
-            "direction": "auto",
+            "direction": "east",
             "speed": 4,
             "enabled": true,
             "count": 5,
@@ -16065,14 +16065,14 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "no",
-          "notes": "Auto-loop on painted road cells. Non-production preview."
+          "notes": "traffic-clip fix 22 Nov 2026: lane z=74.5, direction east (see docs/NJH-TRAFFIC-CLIP-FIX.md)"
         },
         {
           "id": "vehicle-jff4pv",
           "name": "Maxim + Penumpang",
           "type": "vehicle",
           "x": -12.5,
-          "z": 74.5,
+          "z": 75.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -16085,7 +16085,7 @@
           "autoGround": true,
           "motion": {
             "mode": "road",
-            "direction": "auto",
+            "direction": "east",
             "speed": 4,
             "enabled": true,
             "count": 5,
@@ -16105,7 +16105,7 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "no",
-          "notes": "Auto-loop on painted road cells. Non-production preview."
+          "notes": "traffic-clip fix 22 Nov 2026: lane z=75.5, direction east (see docs/NJH-TRAFFIC-CLIP-FIX.md)"
         },
         {
           "id": "njh-walker-1",
@@ -16175,7 +16175,7 @@
           "id": "sedan",
           "type": "vehicle",
           "x": -20.5,
-          "z": 43.5,
+          "z": 42.5,
           "y": 0,
           "rotation": 0,
           "scale": 1,
@@ -16189,7 +16189,7 @@
           "entranceFacing": "",
           "markerKind": "",
           "blocking": "no",
-          "notes": "",
+          "notes": "traffic-clip fix 22 Nov 2026: lane z=42.5, direction east (see docs/NJH-TRAFFIC-CLIP-FIX.md)",
           "collision": false,
           "vehicleId": "sedan_red",
           "name": "Sedan Merah",
@@ -16202,7 +16202,7 @@
           "autoGround": true,
           "motion": {
             "mode": "road",
-            "direction": "auto",
+            "direction": "east",
             "speed": 4,
             "enabled": true,
             "count": 5,
