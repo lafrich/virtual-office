@@ -167,3 +167,10 @@ test('Player-mode city load does not prefetch READY interiors; doors stay open w
  assert.equal(warkop.objects[0].njhInteriorPending,true);
  assert.equal(api.isClosedDoor(warkop.objects[0]),true);
 });
+
+test('Mainkan, hub, and Membangun pages set a favicon so browsers do not 4xx /favicon.ico',()=>{
+ const link=/<link rel="icon" href="data:,">/;
+ for(const file of ['mainkan/index.html','index.html','membangun/index.html','world-builder/index.html']){
+  assert.match(read(file),link,file+' missing favicon link');
+ }
+});
