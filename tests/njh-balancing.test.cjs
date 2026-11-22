@@ -290,5 +290,5 @@ test('world-builder loads the balancing loader before life-economy and day/night
  assert.ok(iB>0);
  assert.ok(iB<html.indexOf('../jiwa/life-economy.js?v=njh-step2-live-20261122'));
  assert.ok(iB<html.indexOf('./semesta-daynight.js?v=njh-step2-live-20261122'));
- assert.match(read('sw.js'),/^\/\* sw v44 /);
+ assert.match(read('sw.js'),/^\/\* sw v45 /);
 });

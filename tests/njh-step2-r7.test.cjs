@@ -74,7 +74,7 @@ test('plastic_bench_* are in FURNITURE_GATES with rest/sit',()=>{
  assert.match(access,/sit: \['rest'\]/);
  const play=read('world-builder/semesta-life-play.js');
  assert.match(play,/rest:'sit'/);
- assert.match(play,/const seating=action==='rest'&&args&&args\.seatId/);
+ assert.match(play,/const seating=\(action==='rest'\|\|action==='sit'\)&&args&&\(args\.seatId\|\|args\.furnitureId\)/);
 });
 
 test('Warung Kopi stays locked; name regex cannot remap r7 doors to warteg',()=>{
@@ -103,7 +103,7 @@ test('Warteg door resolves to njh_warteg_kharisma with Ibu Warteg, even if the t
  const door=meta.doors.find(d=>d.doorId==='njh_door_warung_makan');
  assert.equal(door.interiorTemplate,'njh_warteg_kharisma');
  const previewSrc=read('world-builder/njh-play-interiors.js');
- assert.match(previewSrc,/new Set\(\[\.\.\.always,\.\.\.t\]\)/);
+ assert.match(previewSrc,/new Set\(\[\.\.\.(always|official),\.\.\.t\]\)/);
 });
 
 test('Laundry and Bengkel item ids resolve in the play catalog with art',()=>{
