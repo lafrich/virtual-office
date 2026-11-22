@@ -23,8 +23,9 @@ test('offline Mainkan static entry and controls are wired before gameplay',()=>{
 });
 test('offline save controls call native Semesta hooks and never mock success',()=>{
  const ui=read('mainkan/offline-ui.js'),life=read('world-builder/semesta-life-play.js');
- for(const hook of ['saveSlot','loadSlot','hasSave','persist'])
+ for(const hook of ['saveSlot','loadSlot','persist'])
   assert.match(ui,new RegExp('\\.'+hook+'\\('));
+ assert.match(ui,/\.hasSave\?\.\(/);
  assert.match(life,/paused:false/);
  assert.match(life,/loadState:next/);
  const sw=read('sw.js');

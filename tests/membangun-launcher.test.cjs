@@ -76,7 +76,8 @@ test('offline worker caches only player navigations and leaves editor navigation
   URL,
   importScripts(){},
   atob(){return ''},
-  Uint8Array,console,Promise,setTimeout,clearTimeout
+  Uint8Array,console,Promise,setTimeout,clearTimeout,
+  caches:{open:async()=>({match:async()=>({ok:true})})}
  },{filename:'sw.js'});
  assert.equal(typeof handlers.fetch,'function');
  for(const asset of ['jiwa/','jiwa/index.html','membangun/','world-builder/','emotion-studio/','emotion-studio/index.html','shared/']){
