@@ -288,7 +288,7 @@ body.njh-play #viewport #gameAction:active,body.njh-play #viewport #gameRun.on{
 .njh-progress .w98-body{display:grid;gap:4px}
 .njh-bar-lg{height:18px}
 .njh-progress small{font-size:11px}
-.njh-toast{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(80px + var(--sab));z-index:6;pointer-events:none;background:var(--w-tip);color:#000;border:1px solid #000;padding:3px 6px;font:11px var(--w-font);max-width:calc(100% - 24px)}
+.njh-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + var(--sab));z-index:80;pointer-events:none;background:var(--w-tip);color:#000;border:1px solid #000;padding:6px 10px;font:12px var(--w-font);max-width:calc(100% - 24px);box-shadow:2px 2px 0 #0003}
 .njh-toast[hidden]{display:none!important}
 /* Tas grid */
 .njh-bagwin{width:min(340px,calc(100% - 16px))}

@@ -172,7 +172,7 @@ test('LGR script cache-bust is no longer bare pakaian-v2',()=>{
  assert.match(gen,/\?v=pakaian-v2-njh-newbot-fix-20261122/);
  assert.doesNotMatch(gen,/\/virtual-life-asset-pipeline\/"[^"]*\?v=pakaian-v2"/);
  const builder=fs.readFileSync(path.join(R,'world-builder/builder.js'),'utf8');
- assert.match(builder,/genesis-player\.js\?v=njh-cp3-confirm-20261122/);
+ assert.match(builder,/genesis-player\.js\?v=njh-cp3-qa-20261122/);
 });
 
 test('this fix is sw v42 with a unique ?v and hub build',()=>{
@@ -180,7 +180,7 @@ test('this fix is sw v42 with a unique ?v and hub build',()=>{
  assert.match(sw,/^\/\* sw v46 /);
  assert.doesNotMatch(sw,/^\/\* sw v39 /);
  const html=fs.readFileSync(path.join(R,'mainkan/index.html'),'utf8');
- assert.match(html,/\?v=njh-cp3-confirm-20261122/);
+ assert.match(html,/\?v=njh-cp3-qa-20261122/);
  const hub=JSON.parse(fs.readFileSync(path.join(R,'shared/hub-version.json'),'utf8'));
- assert.equal(hub.build,'hub-20261122-cp3-confirm');
+ assert.equal(hub.build,'hub-20261122-cp3-qa');
 });

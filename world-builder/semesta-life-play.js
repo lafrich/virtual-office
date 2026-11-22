@@ -113,6 +113,22 @@ function applyStart(s,id,force){
  if(keepElapsed!=null)s.elapsedMinutes=keepElapsed;
  return true;
 }
+let clockPersistArmed=false,clockPersistTimer=0;
+function armClockPersist(){
+ if(!clockPersistArmed){
+  clockPersistArmed=true;
+  const hide=()=>{try{if(active)persist();}catch{}};
+  try{root.document?.addEventListener('visibilitychange',()=>{if(root.document.visibilityState==='hidden')hide();});}catch{}
+  try{root.addEventListener('pagehide',hide);}catch{}
+  try{root.addEventListener('beforeunload',hide);}catch{}
+ }
+ try{if(clockPersistTimer)root.clearInterval(clockPersistTimer);}catch{}
+ clockPersistTimer=(root.setInterval&&root.setInterval(()=>{try{if(active)persist();}catch{}},3000))||0;
+}
+function disarmClockPersist(){
+ try{if(clockPersistTimer)root.clearInterval(clockPersistTimer);}catch{}
+ clockPersistTimer=0;
+}
 function persist(){
  if(!state||!active)return;
  try{
@@ -481,6 +497,8 @@ function message(text){
  statusText=String(text||'').slice(0,320);
  if(bridge&&bridge.tell)bridge.tell(statusText);
  if(outer){const status=outer.querySelector('#lifePlayMessage');if(status)status.textContent=statusText;}
+ try{root.dispatchEvent(new root.CustomEvent('mainkan:toast',{detail:{text:statusText}}));}catch{}
+ try{if(root.parent&&root.parent!==root)root.parent.postMessage({type:'mainkan:toast',text:statusText},'*');}catch{}
 }
 function makeRoot(){
  if(outer||!bridge?.mountTo)return;
@@ -573,8 +591,8 @@ function nodeButtons(n){
    ...(furnOk('cook')?[button('cook','🍳 Masak Ikan')]:[]),
    ...(furnOk('cook_recipe')&&kitchenRecipes().length?['<select id="slpRecipe">'+kitchenRecipes().map(a=>'<option value="'+esc(a.id)+'">'+esc((a.outputLabel||a.label)+' ('+a.ingredients.join(', ')+')')+'</option>').join('')+'</select>',
     button('cook_recipe','🍳 Masak Resep')]:[]),
-   ...(furnOk('open_fridge')||true?[button('open_fridge','🧊 Buka Kulkas')]:[]),
-   ...(furnOk('open_storage')||true?[button('open_storage','📦 Buka Lemari')]:[])]:
+   ...(furnOk('open_fridge')?[button('open_fridge','🧊 Buka Kulkas')]:[]),
+   ...(furnOk('open_storage')?[button('open_storage','📦 Buka Lemari')]:[])]:
    [button('buy_room','🏠 Bayar kos (sekali bayar, permanen)')];
  if(id==='tent')entries=[button('sleep','💤 Tidur Tenda')];
  if(n.religion)entries=[button('worship','🤲 Ibadah '+n.religion,{placeReligion:n.religion})];
@@ -779,6 +797,22 @@ function afterLifeTransition(previous){
 function notifyHud(){try{bridge?.syncHud?.();}catch{}}
 // New Bot CP3: confirm only for pay >= ui.confirmPaidMin (balancing, fallback 20000)
 // or irreversible actions. Small purchases go straight through with a "−RpX" toast.
+function actionBlocked(action,args){
+ if(!RULES||!state)return null;
+ try{
+  const act=(action==='buy_token')?'topup_token':action;
+  if(typeof RULES.precheck!=='function')return null;
+  const r=RULES.precheck(config,state,act,args||{});
+  if(r&&r.ok===false)return r.reason||'Tidak bisa';
+ }catch(_e){}
+ return null;
+}
+function rejectBlocked(action,args){
+ const why=actionBlocked(action,args);
+ if(!why)return null;
+ message('⛔ '+why);
+ return {ok:false,reason:why};
+}
 function spendToast(action,args){
  const H=root.SemestaLifeHooks;
  const price=(H&&typeof H.actionPrice==='function')?Number(H.actionPrice(action,config,args)||0):0;
@@ -850,7 +884,7 @@ function runAction(action,args={}){
  try{const ui=getHooks()?.openUi?.(action,args);if(ui){paintPanel();return ui;}}catch{}
  if(['store_home','take_home','store_fridge','take_fridge'].includes(action)&&state?.housing?.room&&(state.powerTokens||0)<=0){
   const why='Token listrik habis. Isi token dulu (Rp20.000 / 5 unit).';message('⛔ '+why);return {ok:false,reason:why};}
- if(action==='buy_token'||action==='topup_token'){if(!confirmPaid(action,args))return {ok:false,reason:'Dibatalkan'};const r=getHooks()?.topupToken?.(args.units||5)||{ok:false,reason:'hooks missing'};if(!r.ok)message('⛔ '+r.reason);else{const t=spendToast(action,args);if(t)message(t);}return r;}
+ if(action==='buy_token'||action==='topup_token'){const blockedTok=rejectBlocked(action,args);if(blockedTok)return blockedTok;if(!confirmPaid(action,args))return {ok:false,reason:'Dibatalkan'};const r=getHooks()?.topupToken?.(args.units||5)||{ok:false,reason:'hooks missing'};if(!r.ok)message('⛔ '+r.reason);else{const t=spendToast(action,args);if(t)message(t);}return r;}
  try{if(getHooks())args=getHooks().argsFor(action,args);}catch{}
  try{
   const Access=root.SemestaRoomAccess;
@@ -936,6 +970,7 @@ function runAction(action,args={}){
   args={...args,roomSpawn:{id:node.sourceId||'kost_placeholder',x:node.x,z:node.z,placeholder:node.placeholder}};
  }
  if(action==='worship'&&node){args={...args,placeReligion:node.religion};}
+ const blockedAct=rejectBlocked(action,args);if(blockedAct)return blockedAct;
  if(!confirmPaid(action,args))return {ok:false,reason:'Dibatalkan'};
  const prior=state;
  const result=action==='cook_recipe'?cookRecipe(args):RULES.run(config,state,action,args);
@@ -1159,7 +1194,7 @@ function start(){
  publishedCatalog=!!gameCatalog?.updatedAt;
  config=RULES.normalize({...defaults(),activities:gameCatalog?.activities||[],
   worldEntities:gameCatalog?.worldEntities||[]});
- configSource=publishedCatalog?'JIWA AUTHORING':'SANDBOX DEMO';restore();applyVisualClock();buildSites();makeRoot();attachNokia();
+ configSource=publishedCatalog?'JIWA AUTHORING':'SANDBOX DEMO';restore();applyVisualClock();armClockPersist();buildSites();makeRoot();attachNokia();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
  message('🎮 Play Mode aktif. '+(ownsRoom()?'Respawn di kost':'Mulai sebagai hobo; respawn dari tenda pinggiran kota')+'.');
@@ -1167,7 +1202,7 @@ function start(){
 }
 function stop(){
  if(!active)return;
- persist();detachNokia();active=false;cancelAnimationFrame(workAnimation);progress=null;
+ persist();disarmClockPersist();detachNokia();active=false;cancelAnimationFrame(workAnimation);progress=null;
  disposeMarkers();disposeNpcGroup();lifeNpcs=[];if(outer)outer.hidden=true;
  actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;bagOpen=false;
 }

@@ -39,7 +39,7 @@ const LGR_SCRIPTS=["lafrich-puppet-core.js","lafrich-puppet-renderer.js","lgr1-r
  .map(f=>{
   // Package 3 live: vendored v2 raster (setJointMode('v2'), no JOINT_FILL, no setW4).
   // Official-9 remains the artist base loaded by lgr-game. Portable to official-9.
-  if(f==="lgr1-raster.js")return "/virtual-office/shared/lgr1-raster-v2.js?v=njh-cp3-confirm-20261122";
+  if(f==="lgr1-raster.js")return "/virtual-office/shared/lgr1-raster-v2.js?v=njh-cp3-qa-20261122";
   return "/virtual-life-asset-pipeline/"+f+"?v=pakaian-v2-njh-newbot-fix-20261122";
  });
 const lgr={wanted:RENDERER==="lgr"&&!!root?.document,ready:false,error:null,promise:null};
@@ -62,7 +62,17 @@ function loadLGR(){
 const useLGR=()=>lgr.wanted&&lgr.ready&&!lgr.error;
 const lgrPending=()=>lgr.wanted&&!lgr.ready&&!lgr.error;
 if(lgr.wanted)loadLGR();
-function lgrProfile(p){return {gender:p.gender==="female"?"female":"male",appearance:p.appearance}}
+// CP3 goes live with pipeline c9dc88f / the live pack. The tee_v4 pack is a later package.
+// Rejected pipeline c5fcc7f let tee_v4 through spec() and went nude (previewStrip needed
+// LGR_WEAR_PHASE1_BASE, which is unset). Saved tee_v4 / trousers_v4 map to live tee / trousers.
+const LIVE_WEAR_ALIAS=Object.freeze({tee_v4:"tee",trousers_v4:"trousers"});
+function liveWear(value){return LIVE_WEAR_ALIAS[value]||value;}
+function lgrProfile(p){
+ const a=Object.assign({},p.appearance||{});
+ a.topStyle=liveWear(a.topStyle);a.pantsStyle=liveWear(a.pantsStyle);
+ return {gender:p.gender==="female"?"female":"male",appearance:a};
+}
+
 function normalizeProfile(input){
  if(!input||!IDs.includes(input.base))throw Error("Genesis base harus Male atau Female");
  if(!SOURCE?.bases?.[input.base])throw Error("Genesis asset belum tersedia");
@@ -85,7 +95,7 @@ function normalizeProfile(input){
  const opt=V?.OPT||OPT;
  const appearance={};
  for(const [key,vc] of Object.entries(fields)){
-  const value=input.appearance?.[key]||defaults[key];
+  const value=liveWear(input.appearance?.[key]||defaults[key]);
   appearance[key]=(Array.isArray(opt[vc])&&opt[vc].includes(value))?value:defaults[key];
  }
  // Player appearance is never allowed to change base or install built-in facial sprites.

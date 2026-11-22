@@ -12,10 +12,10 @@ function loadPlay(){
 
 test('STEP 2 tags are unique; LGR pack ?v is unchanged',()=>{
  assert.match(read('sw.js'),/^\/\* sw v46 /);
- assert.match(read('mainkan/index.html'),/\?v=njh-cp3-confirm-20261122/);
- assert.match(read('mainkan/index.html'),/fresh-mode\.js\?v=njh-cp3-confirm-20261122/);
+ assert.match(read('mainkan/index.html'),/\?v=njh-cp3-qa-20261122/);
+ assert.match(read('mainkan/index.html'),/fresh-mode\.js\?v=njh-cp3-qa-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
- assert.equal(hub.build,'hub-20261122-cp3-confirm');
+ assert.equal(hub.build,'hub-20261122-cp3-qa');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);
 });
 

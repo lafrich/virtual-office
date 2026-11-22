@@ -22,9 +22,9 @@ function loadPreview(){
 test('STEP 2 tags are sw v46 with a unique cache/hub; LGR ?v is kept',()=>{
  assert.match(read('sw.js'),/^\/\* sw v46 /);
  assert.match(read('sw.js'),/STEP 2/);
- assert.match(read('mainkan/index.html'),/\?v=njh-cp3-confirm-20261122/);
+ assert.match(read('mainkan/index.html'),/\?v=njh-cp3-qa-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
- assert.equal(hub.build,'hub-20261122-cp3-confirm');
+ assert.equal(hub.build,'hub-20261122-cp3-qa');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);
  assert.match(read('world-builder/indonesia-assets.js'),/const PREVIEW_REF='main'/);
 });
@@ -76,7 +76,7 @@ test('locked official doors are closed in isClosedDoor and enterables (tooltip B
 
 test('guest / creator default is a tee, including reset and normalizeProfile',()=>{
  const html=read('mainkan/index.html');
- assert.match(html,/classic-creator\.js\?v=njh-cp3-confirm-20261122/);
+ assert.match(html,/classic-creator\.js\?v=njh-cp3-qa-20261122/);
  assert.match(html,/<option value="tee" selected>T-shirt/);
  assert.match(html,/<option value="trousers" selected>Trousers/);
  assert.doesNotMatch(html,/<select id="topStyle"><option value="nude" selected>/);
