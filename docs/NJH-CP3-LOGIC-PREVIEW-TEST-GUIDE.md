@@ -3,10 +3,10 @@
 Preview only: `preview/njh-cp3-logic-20261122`, based on STEP 2 `9e61a23`. Do not merge or push `main`. Do not deploy the Worker.
 
 - Service worker: **v46**. (v43 is STEP 1 live / Warteg fix on another stream; **v44** = balancing; **v45** = STEP 2.)
-- Cache tag: `?v=njh-cp3-confirm-20261122`
-- Hub build: `hub-20261122-cp3-confirm`
+- Cache tag: `?v=njh-cp3-qa-20261122`
+- Hub build: `hub-20261122-cp3-qa`
 - LGR pack stays `?v=pakaian-v2-njh-newbot-fix-20261122` (not bumped).
-- Pipeline (optional companion): `preview/njh-cp3-lgr-20261122` on top of CP2 `c9dc88f` — `tee_v4` / `trousers_v4` allowed in `spec()` and under-strip composite in `site/lgr-wear.js` / `site/lgr-game.js`. `PREVIEW_REF` remains `main`.
+- Pipeline: CP3 goes live with **`c9dc88f`** (current live pack). The companion `preview/njh-cp3-lgr-20261122` (`c5fcc7f`) is **rejected** — `spec()` there let `tee_v4` through, `previewStrip()` needed unset `window.LGR_WEAR_PHASE1_BASE`, and saved `tee_v4` profiles went nude. VO maps `tee_v4` → `tee` and `trousers_v4` → `trousers`. The v4 pack is left for a later package. `PREVIEW_REF` remains `main`.
 
 
 **Rebase onto the balancing package:** this CP3 base (STEP 2) does not yet ship `content/balancing.json` / `shared/njh-balancing.js`. When CP3 is rebased onto the balancing package (SW v44, live before STEP 2), add the key **`ui.confirmPaidMin: 20000`** to `content/balancing.json`. Do not invent the file on this branch; the runtime already falls back to 20000 and will read the loader's `get` / `num('ui.confirmPaidMin')` once that package is present.
@@ -28,6 +28,17 @@ Already covered by STEP 1 / STEP 2 and **not** re-done here: r7 door locks + War
 11. Profile-PUT **CORS pack is vendored only** at `docs/worker-cors-fix-ready/`. Not deployed.
 12. Pipeline LGR (companion preview): `tee_v4` / `trousers_v4` allowed in `spec()`, under-strip composite for those pieces. Genesis V6P under-strips are still not feasible (phase-1 strips are 256×112 4-dir stills).
 
+
+## New Bot QA notes (required before live)
+
+(a) Requirements are checked **before** `confirmPaid`. A guest with no kost who taps Isi Token gets `Perlu kost dahulu.` and no dialog; a wallet that cannot afford kos gets `Uang tidak cukup.` and no dialog.
+(b) Door / AKSI button labels no longer double: `Masuk — Masuk` is just **Masuk** (hint is omitted when it repeats the label).
+(c) **Buka Kulkas** / **Buka Lemari** only appear when `furnOk(...)` is true (`||true` removed).
+(d) The `−RpX` spend toast is posted as `mainkan:toast` to the Mainkan HUD, rendered with `position:fixed; z-index:80`, and stays 4.5s.
+(e) The visual clock is persisted every 3s and on `visibilitychange` / `pagehide` / `beforeunload`, so a reload should not jump back ~19 game minutes.
+
+The interior `nearbyActions` blocker is **not** fixed here; a balancing-live change covers it and CP3 will rebase onto that later.
+
 ## How to test (Mainkan `?fresh=1`)
 
 Open Mainkan on a preview static server with `?njhMap=1&fresh=1`. Use throwaway auth on a port other than 8787; never touch shared `.dev.vars`. If **Cara Main** covers the view, click **Lewati** (`#njhHowtoWinSkip`).
@@ -40,8 +51,10 @@ Open Mainkan on a preview static server with `?njhMap=1&fresh=1`. Use throwaway 
 - At the **dermaga mancing** (near −51.5, 44), E should offer fishing, not the Hansip arrest menu. Pos Hansip itself (−49, 40) still works when you are at the pos and not on the fishing tile.
 - In a kost with a scene stove, **Masak Resep** should accept bahan from kulkas/lemari, not only Tas. 4P Ichsan start seed still has no stove item; the room scene supplies the stove.
 - Hold a work action: a listener on `mainkan:work-progress` should see `{progress,label,done}`.
-- Small purchases (gorengan / makan warteg / kopi / WC / mandi, under Rp20.000): **no confirm dialog**; a toast `−RpX` appears after a successful spend.
-- Bayar kos (Rp750.000 / room price) or other irreversible / ≥ Rp20.000 payments (isi token at the default Rp20.000): a confirm dialog appears first (`args.confirmed` / `__NJH_SKIP_CONFIRM` for tests).
+- Small purchases (gorengan / makan warteg / kopi / WC / mandi, under Rp20.000): **no confirm dialog**; a Mainkan toast `−RpX` appears on top for 4.5s after a successful spend.
+- Bayar kos or other irreversible / ≥ Rp20.000 payments: requirements are checked first (enough uang, already punya kost, etc.). The confirm dialog appears only if the payment can succeed (`args.confirmed` / `__NJH_SKIP_CONFIRM` for tests).
+- Reload after a few minutes of play: the visual clock should continue, not jump back ~19 game minutes.
+- Guest default outfit is live **tee / trousers**. A saved profile with `tee_v4` still wears the live tee (not nude).
 - Re-login: the clock day/time should continue, not jump back to 07:00 unless the save had no clock.
 - Placeholder NPCs show **· PH** on the plate.
 

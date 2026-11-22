@@ -11,9 +11,9 @@ function identityLabel(spec){
 test('sw v46 and unique CP3 cache / hub tags',()=>{
  const sw=read('sw.js');
  assert.match(sw,/^\/\* sw v46 /);
- assert.match(read('mainkan/index.html'),/\?v=njh-cp3-confirm-20261122/);
+ assert.match(read('mainkan/index.html'),/\?v=njh-cp3-qa-20261122/);
  const hub=JSON.parse(read('shared/hub-version.json'));
- assert.equal(hub.build,'hub-20261122-cp3-confirm');
+ assert.equal(hub.build,'hub-20261122-cp3-qa');
  assert.match(read('shared/genesis-player.js'),/\?v=pakaian-v2-njh-newbot-fix-20261122/);
 });
 
@@ -172,4 +172,77 @@ test('Kali ripple stays unhooked and PREVIEW_REF stays main',()=>{
  assert.match(preview,/Do not hook the 8-frame Kali ripple/);
  const assets=read('world-builder/indonesia-assets.js');
  assert.match(assets,/const PREVIEW_REF='main'/);
+});
+
+test('confirmPaid runs only after requirements pass',()=>{
+ const E=require(path.join(root,'jiwa/life-economy.js'));
+ const cfg=E.normalize(E.defaults());
+ const poor=E.stateFrom({wallet:6000,energy:80,hygiene:75,bladder:20,moral:50,experience:0},cfg);
+ const wallet=poor.wallet;
+ const kos=E.precheck(cfg,poor,'buy_room',{});
+ assert.equal(kos.ok,false);
+ assert.match(String(kos.reason),/Uang tidak cukup/);
+ assert.equal(poor.wallet,wallet);
+ const token=E.precheck(cfg,poor,'topup_token',{units:5});
+ assert.equal(token.ok,false);
+ assert.match(String(token.reason),/Perlu kost dahulu/);
+ const play=read('world-builder/semesta-life-play.js');
+ assert.match(play,/function actionBlocked\(action,args\)/);
+ assert.match(play,/function rejectBlocked\(action,args\)/);
+ const tok=play.slice(play.indexOf("action==='buy_token'||action==='topup_token'"));
+ const tokHead=tok.slice(0,tok.indexOf('topupToken'));
+ assert.match(tokHead,/rejectBlocked\(action,args\)/);
+ assert.ok(tokHead.indexOf('rejectBlocked')<tokHead.indexOf('confirmPaid'),'token: requirements before confirm');
+ const run=play.slice(play.indexOf("placeReligion:node.religion"));
+ const runHead=run.slice(0,run.indexOf('const prior='));
+ assert.match(runHead,/rejectBlocked\(action,args\)/);
+ assert.ok(runHead.indexOf('rejectBlocked')<runHead.indexOf('confirmPaid'),'runAction: requirements before confirm');
+});
+
+test('AKSI button does not double Masuk — Masuk',()=>{
+ const js=read('mainkan/njh98.js');
+ assert.match(js,/cleanLabel\(a\.hint\)!==cleanLabel\(a\.label\)/);
+ assert.doesNotMatch(js,/const tip=a\.label\+\(a\.hint\?\(' — '\+a\.hint\):''\)/);
+});
+
+test('Kulkas/Lemari buttons are gated by furnOk only (no ||true)',()=>{
+ const play=read('world-builder/semesta-life-play.js');
+ assert.doesNotMatch(play,/furnOk\('open_fridge'\)\|\|true/);
+ assert.doesNotMatch(play,/furnOk\('open_storage'\)\|\|true/);
+ assert.match(play,/\.\.\.\(furnOk\('open_fridge'\)\?\[button\('open_fridge'/);
+ assert.match(play,/\.\.\.\(furnOk\('open_storage'\)\?\[button\('open_storage'/);
+});
+
+test('−RpX toast is posted to the Mainkan HUD, on top, and lasts 4.5s',()=>{
+ const play=read('world-builder/semesta-life-play.js');
+ assert.match(play,/CustomEvent\('mainkan:toast',\{detail:\{text:statusText\}\}\)/);
+ assert.match(play,/postMessage\(\{type:'mainkan:toast',text:statusText\},'\*'\)/);
+ const js=read('mainkan/njh98.js');
+ assert.match(js,/addEventListener\('message',onLifeToast\)/);
+ assert.match(js,/addEventListener\('mainkan:toast'/);
+ assert.match(js,/setTimeout\(\(\)=>\{t\.hidden=true;\},4500\)/);
+ const css=read('mainkan/njh98.css');
+ assert.match(css,/\.njh-toast\{[^}]*position:fixed/);
+ assert.match(css,/\.njh-toast\{[^}]*z-index:80/);
+});
+
+test('visual clock persists every 3s and on visibilitychange/pagehide',()=>{
+ const play=read('world-builder/semesta-life-play.js');
+ assert.match(play,/function armClockPersist\(/);
+ assert.match(play,/addEventListener\('visibilitychange'/);
+ assert.match(play,/addEventListener\('pagehide'/);
+ assert.match(play,/setInterval\(\(\)=>\{try\{if\(active\)persist\(\);\}catch\{\}\},3000\)/);
+ assert.match(play,/restore\(\);applyVisualClock\(\);armClockPersist\(\);/);
+ assert.match(play,/persist\(\);disarmClockPersist\(\);/);
+});
+
+test('saved tee_v4 / trousers_v4 map to the live tee / trousers (pipeline c9dc88f)',()=>{
+ const gen=read('shared/genesis-player.js');
+ assert.match(gen,/c9dc88f/);
+ assert.match(gen,/LIVE_WEAR_ALIAS=Object\.freeze\(\{tee_v4:"tee",trousers_v4:"trousers"\}\)/);
+ assert.match(gen,/function liveWear\(value\)\{return LIVE_WEAR_ALIAS\[value\]\|\|value;\}/);
+ assert.match(gen,/a\.topStyle=liveWear\(a\.topStyle\);a\.pantsStyle=liveWear\(a\.pantsStyle\);/);
+ const window={};
+ // alias table only — full normalizeProfile needs Genesis assets
+ assert.match(gen,/const value=liveWear\(input\.appearance\?\.\[key\]\|\|defaults\[key\]\)/);
 });

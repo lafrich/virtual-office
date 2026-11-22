@@ -946,5 +946,9 @@ function doAction(config,previous,action,args={}){
  }
  return Object.assign({ok:true,state:s,changes,action},out);
 }
-return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,FURNITURE,COOKING,allFish,itemDef,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,workMinutes,wageDay,workBlock,run:doAction});
+function precheck(config,state,action,args){
+ const copy=JSON.parse(JSON.stringify(state||{}));
+ return doAction(config,copy,action,args||{});
+}
+return Object.freeze({RELIGIONS,ZODIACS,BUYERS,FISH,JOBS,FURNITURE,COOKING,allFish,itemDef,defaults,normalize,stateFrom,weighted,activeItem,speedFactor,workMinutes,wageDay,workBlock,run:doAction,precheck});
 });

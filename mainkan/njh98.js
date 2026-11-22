@@ -353,10 +353,20 @@ function notice(title,text){
 }
 let toastTimer=0;
 function toast(text){
+ const msg=String(text||'').trim();if(!msg)return;
  let t=$('njhToast');
- if(!t){t=document.createElement('div');t.id='njhToast';t.className='njh-toast';t.setAttribute('role','status');$('njhHud')?.append(t);}
- t.textContent=text;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.hidden=true;},2600);
+ if(!t){t=document.createElement('div');t.id='njhToast';t.className='njh-toast';t.setAttribute('role','status');(document.body||$('njhHud')).append(t);}
+ t.textContent=msg;t.hidden=false;t.setAttribute('aria-live','polite');
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.hidden=true;},4500);
 }
+function onLifeToast(ev){
+ const d=ev&&ev.data!==undefined?ev.data:ev&&ev.detail;
+ const text=(d&&(d.text||d.message))||(ev&&ev.detail&&ev.detail.text)||'';
+ if(d&&d.type&&d.type!=='mainkan:toast'&&d.type!=='njh:toast')return;
+ if(text)toast(text);
+}
+try{window.addEventListener('message',onLifeToast);}catch{}
+try{window.addEventListener('mainkan:toast',e=>toast(e.detail&&e.detail.text||''));}catch{}
 const modalClose=document.createElement('button');modalClose.type='button';modalClose.id='njhModalClose';modalClose.className='btn njh-modal-close';modalClose.hidden=true;
 modalClose.addEventListener('click',()=>{try{world()?.document?.getElementById('ptWinClose')?.click();}catch{}setTimeout(paintModal,50);});
 $('njhHud')?.append(modalClose);
@@ -598,7 +608,8 @@ function paintActBar(list){
   }
   const lab=shortOf(a.id,a.label);
   const ic=ICON[ACT_IC[a.id]||'action']||ICON.action;
-  const tip=a.label+(a.hint?(' — '+a.hint):'')+(a.mock?' (SIMULASI)':'');
+  const hint=a.hint&&cleanLabel(a.hint)!==cleanLabel(a.label)?a.hint:'';
+  const tip=a.label+(hint?(' — '+hint):'')+(a.mock?' (SIMULASI)':'');
   parts.push('<button type="button" role="menuitem" class="njh-act" data-njh-act="'+esc(a.id)+'" data-src="'+esc(a.src)+'"'
    +(a.disabled?' disabled':'')+' title="'+esc(tip)+'" aria-label="'+esc(a.label+(a.mock?' (SIMULASI)':''))+'">'
    +ic+'<span>'+esc(lab)+'</span>'+(a.mock?'<b class="njh-sim">SIMULASI</b>':'')+'</button>');
