@@ -72,7 +72,7 @@ export async function waitWorld(p,out){
   await p.waitForFunction(()=>{try{const w=document.getElementById('semestaFrame')?.contentWindow;return !!(w&&w.SemestaLifePlay&&w.SemestaLifePlay.state?.());}catch{return false;}},{timeout:180000});
   await p.waitForFunction(()=>{const e=document.getElementById('worldLoading');return !e||e.hidden},null,{timeout:180000}).catch(()=>{if(out)out.loadingStuck=true;});
   await sleep(6000);
-  for(const s of ['#njhHowtoWinSkip','#tutorialSkip','#tutorialDone'])await tap(p,s).catch(()=>{});
+  for(const s of ['#njhHowtoWinSkip','#tutorialSkip','#tutorialDone'])await p.evaluate(sel=>{const el=document.querySelector(sel);if(el&&el.offsetParent!==null)el.click();},s).catch(()=>{});
   return frameOf(p);
 }
 // Guest path without ?fresh: splash -> Main Tanpa Akun -> creator -> confirm -> game.

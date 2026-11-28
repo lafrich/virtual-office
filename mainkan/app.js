@@ -437,10 +437,13 @@ function continueOffline(){
  if(!c){switchGuest();return;}
  guest=true;session=null;testPlayerId='';firstTime=false;
  characterDraft=c;profile={character:c};
- startWorld();
+ // through the flow graph so currentNode is the game node (pause/resume keep working)
+ if(fallbackId('game'))showType('game');else startWorld();
 }
 function setupOfflineMenu(){
  document.body.classList.add('njh-offline');
+ // no Login step in the offline build: drop it from the step strip and renumber
+ try{const steps=$('njhSteps');steps?.querySelector('[data-step="login"]')?.remove();steps?.querySelectorAll('li b').forEach((b,i)=>{b.textContent=String(i+1);});}catch{}
  const saved=loadOfflineCharacter();
  const cont=$('welcomeContinue'),neu=$('welcomeGuest');
  const label=(btn,main,small)=>{if(!btn)return;const sp=btn.querySelector('span'),sm=btn.querySelector('small');if(sp)sp.textContent=main;if(sm)sm.textContent=small;};
