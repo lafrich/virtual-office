@@ -1,0 +1,9 @@
+# Offline APK build output (rebuild with: node tools/offline/build-offline.mjs)
+/offline-www/
+/njh-android/node_modules/
+/njh-android/android/app/src/main/assets/public/
+/njh-android/android/local.properties
+/njh-android/android/.gradle/
+/njh-android/android/app/build/
+/njh-android/android/build/
+/njh-android/android/capacitor-cordova-android-plugins/build/

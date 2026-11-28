@@ -1,0 +1,1117 @@
+{
+ "generated": "2026-11-28T02:48:12.302Z",
+ "pipelineLiveRef": "c9dc88fa (lafrich/virtual-life-asset-pipeline main, Pages)",
+ "note": "Files the play path fetched from the asset pipeline Pages site, raw.githubusercontent main and the three.js CDN. build-offline.mjs bundles these from the mirror (fetch-mirror re-downloads missing ones).",
+ "files": [
+  {
+   "path": "vendor/three@0.181.0/build/three.core.js",
+   "bytes": 1405971,
+   "sha256": "03fb6e9fa08628385a9096948593251ae473239c7039496d7c280cba73d84631"
+  },
+  {
+   "path": "vendor/three@0.181.0/build/three.module.js",
+   "bytes": 626216,
+   "sha256": "99b94b6829da8e751ef48147e3a7eebae861bd4087dbcb7c3a85af03a4210933"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/action-appearance-bridge.js",
+   "bytes": 7257,
+   "sha256": "0121277f55a519d5d301eead70e86c9fcdc2f6e5fcc870c50fe5cea41d19f8c0"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/action-frame-bridge.js",
+   "bytes": 4648,
+   "sha256": "f707f4639a509ba69e3c1d81c6a078490f6008e4b5cb1ab02a152dcb6fc05f69"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/action-scene-bridge.js",
+   "bytes": 8295,
+   "sha256": "9002d7145a58710f6c6ae31304f4ba433c8cc5d3a12875e8a15738e5a222511b"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/action-template-bridge.js",
+   "bytes": 4307,
+   "sha256": "12cd53684f6fe2d6bb011155609f5c2f08982b6ac418f40e6b87617dfe714c03"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/bus_transjakarta_se.png",
+   "bytes": 7292,
+   "sha256": "cb1c7e5572b1e3bf78658b5060d4e3228f16499460c59109d45e08521b51358a"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/hatchback_orange_se.png",
+   "bytes": 3489,
+   "sha256": "2f892aa84ad0ca75b11e889a65eae5bb1637df0b6532ed276ca75fe3fe0b656e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/mpv_silver_se.png",
+   "bytes": 4024,
+   "sha256": "e0c22c46beed9ee5cd71802bcad0465e8e0c7057bec9977035b14bfe49b395e0"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/sedan_red_ne.png",
+   "bytes": 3017,
+   "sha256": "dfefdf3d408aba447fc75c63663b051970f3cbf82314d4e9b440bd602c4c6d59"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/sedan_red_nw.png",
+   "bytes": 3208,
+   "sha256": "87f3a0323f229914e77d3a00515b7370f66c4e1393f0c4c27aa0bed14fbea6ae"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/sedan_red_se.png",
+   "bytes": 3464,
+   "sha256": "58b912aa649d9868623473c0b827f76eb70eb4fe206421c66da37a62cf41b90c"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/sedan_red_sw.png",
+   "bytes": 3201,
+   "sha256": "907200ce8145de4dbdadf3e67515c873d728e2053a9e011696ebfb5ec19d29a7"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/sedan_teal_se.png",
+   "bytes": 3569,
+   "sha256": "18492e6a745a047d1b348c6445c1aa335b08348f01612d524b648f76fdef995e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/taxi_bluebird_ne.png",
+   "bytes": 3373,
+   "sha256": "d960e7e93363ebf457b35afedf7d83eeb3ac7221064bed83f26ffcc3c4eb123b"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/taxi_bluebird_nw.png",
+   "bytes": 3536,
+   "sha256": "5ad492f06933f5b8c62660ad2e807bdc746cf1f451356196e1146f5069a50419"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/taxi_bluebird_se.png",
+   "bytes": 3818,
+   "sha256": "a0550b444d237b1426d961fde1b226597c635671a9a32449f2b460e39629f9fe"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/taxi_bluebird_sw.png",
+   "bytes": 3510,
+   "sha256": "9e20d70a39d1874f8e2adb8af3fe9150873582316cd152c3ab0fba1a91bcd12f"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/cars/van_cream_se.png",
+   "bytes": 3753,
+   "sha256": "d30271f75ba4bc48aa6e35b2c018263a1802ff5a82ace4b4399673538600f9da"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_ne_f0.png",
+   "bytes": 2502,
+   "sha256": "9f9c2b6b0354d29f7f9f7cd227a30e270016f1b6faf67d7173d3ecf8aa7afe11"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_ne_f1.png",
+   "bytes": 2457,
+   "sha256": "800e89bd642a64656885156016d8cfdc32f7bc4fb91e3c2786dccfd91f25ebea"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_ne_f2.png",
+   "bytes": 2490,
+   "sha256": "1ea9d377e44cd8c4c170e0769aa4c8c17256b33424a7466a6d7000fe1586e602"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_ne_f3.png",
+   "bytes": 2474,
+   "sha256": "ce1b69f1ac03486c2a426b1db69aaf49696f87613b236885fc1dd20a0452aa60"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_nw_f0.png",
+   "bytes": 2529,
+   "sha256": "f536aa73c3c131811a56089eb730985d9cdd8a1675d432a1bf87ada2ca7e4fff"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_nw_f1.png",
+   "bytes": 2582,
+   "sha256": "c9863e519bca588e817488f1b1b22f9c13e29ab9f421c3276fc100f39ab5cf69"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_nw_f2.png",
+   "bytes": 2558,
+   "sha256": "862d58b700fe6b6f7890f954bc5145bbba04909dd254a4b6d1a998d96c4222b6"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_nw_f3.png",
+   "bytes": 2494,
+   "sha256": "85173e71f730954b76f3d1b0e1358d154aa003483c7cdf4cb68ba08db144fe97"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_pax_se_f0.png",
+   "bytes": 3460,
+   "sha256": "069afb54b6f43c01c30c7c7f9a64976c07ff0240acf187c6319327090bc976ec"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_se_f0.png",
+   "bytes": 2973,
+   "sha256": "804212931b0eb8e02c6d80cdf3415e1a6c2ce93105c8c9522ab9b39f5f5008c8"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_se_f1.png",
+   "bytes": 2974,
+   "sha256": "a2cb7c1f5d2b069a752239346b9d5ac9c63110815f1f69f92f31fb5b530be52d"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_se_f2.png",
+   "bytes": 2967,
+   "sha256": "ebe11435b6060122d1420869d2efc21371fee00223e7e6d1b30abbedf2e60770"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_se_f3.png",
+   "bytes": 2997,
+   "sha256": "2be908e6ab530dc2236143fbe140217575556a7a1f5f070a95de5cf6a3ad69b1"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_sw_f0.png",
+   "bytes": 2772,
+   "sha256": "c465377e1c1d550c1afb225d54de78c45dad90ed1adc9bf49cfcfecdf1d1d3f4"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_sw_f1.png",
+   "bytes": 2804,
+   "sha256": "0045e6f5035ec5770ea7b0b24726e0bdb20797b766c0f8c273669ebf908caa22"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_sw_f2.png",
+   "bytes": 2769,
+   "sha256": "22b79f730f276efae770ac4ca1c5adaa56dbd5d45f64a7f82414344d9265831e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/gojek_sw_f3.png",
+   "bytes": 2769,
+   "sha256": "71ff01868172e1658405b58e4fd05ce2caee28c7bd78326dc124b3bdab2fc716"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_ne_f0.png",
+   "bytes": 2856,
+   "sha256": "14d6e222c8dce08489da3c707cb78532c73d44495e7bae5f6e8730e80d6724dd"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_ne_f1.png",
+   "bytes": 2854,
+   "sha256": "934dcb34e1e4e492d5001f1374e8ac3ea6c6363d48f9750abd339b16ac9ee633"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_ne_f2.png",
+   "bytes": 2898,
+   "sha256": "d5d0c964a940e488f9500470a5bb4e4f11a73a55976893c20da9aa9e791fa7f5"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_ne_f3.png",
+   "bytes": 2851,
+   "sha256": "b2b1794cc19d46a60237b6bddb9cb95912b077c5b156da0cb57d07afeca42bf1"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_nw_f0.png",
+   "bytes": 2933,
+   "sha256": "eacbafc24ba4d8c06ad6a307121e28eb19610047dd7ac5f3521d3dccb3520626"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_nw_f1.png",
+   "bytes": 2952,
+   "sha256": "3c32886f8e20b2149289453fbdb0da82de5b03bd3141a186e7fa5d909dce9864"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_nw_f2.png",
+   "bytes": 2903,
+   "sha256": "5c3e272bc9c1522f3641e26983e316a1a5ebe1fec4cc075e07b9696538cb61ae"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_nw_f3.png",
+   "bytes": 2916,
+   "sha256": "1eb8673805bffaf42595c924fa069642f00f20aa6d5936ef105350b1708b9272"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_se_f0.png",
+   "bytes": 3543,
+   "sha256": "cefeb3518ecf0297329267c85ad02a2dc31f1064bdbc72f303232f95504b7bd1"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_se_f1.png",
+   "bytes": 3552,
+   "sha256": "80685c0dae35750a9381df577b4a9b1878595a9c00e245c86a976873cbcd040f"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_se_f2.png",
+   "bytes": 3571,
+   "sha256": "d378d8a57e3407afd5393215c017998ccf8dd82b074b2b8f64745f2e0784e6f8"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_se_f3.png",
+   "bytes": 3545,
+   "sha256": "c9afafaf106c83a66a5c521ce8939e855351f149b55c0e00e069fa1af8dc5b63"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_sw_f0.png",
+   "bytes": 3205,
+   "sha256": "8c2b245cfe167ad66ff85334fd985620223d4017fafaacb9bd4c37f8261188f7"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_sw_f1.png",
+   "bytes": 3224,
+   "sha256": "340189281457adc7e46773db54bd919a96d65e0a16cdfc82198e7734c117a5a2"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_sw_f2.png",
+   "bytes": 3180,
+   "sha256": "d34af6c393d18583526a6acaffeb7bdbcb663b4403f19115846ac07658616cc5"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_pax_sw_f3.png",
+   "bytes": 3200,
+   "sha256": "5187330f81c619033b9f88ac5f97d5b470623dddbb93a2099750da3ad397eff4"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/maxim_se_f0.png",
+   "bytes": 2883,
+   "sha256": "4174fb742d41dbacfbc806e950e298c4e40289fee421e00084e5b942a0b632ce"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/assets/street_vehicles/riders_v3/frames/sma_triple_se_f0.png",
+   "bytes": 3738,
+   "sha256": "2ef607175ee498e60d0a1e6e0055a999f94af266948ba2cfab2c676a4942a39f"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/catalog.json",
+   "bytes": 237241,
+   "sha256": "5409fbfce879913c7972e0c1ce373bf5347d2cdf4fd552a49cf5f83ae171e5fd"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/character-reference-reset.js",
+   "bytes": 607,
+   "sha256": "a20c89289d846d9fd9694fa422aa62d95e2aa0edd1bbebff9804ef4eaeb0c644"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/emosi-source.js",
+   "bytes": 135652,
+   "sha256": "9099d2d16c7fb537ba07b9b18be17759a799101cbeb3a2ccbdcb1fe097c5ff5e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/genesis-source.js",
+   "bytes": 777757,
+   "sha256": "d1ed5f371ad9021688f2fbe6703b2b702ea23cafff394b603ef105660914fb56"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/grok-assets/manifest.js",
+   "bytes": 83309,
+   "sha256": "239ee71f370f1aa69a6f793f020aec45a75ffe44aa9a1463643197db4fd51dca"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/human-gameplay-rig.js",
+   "bytes": 4483,
+   "sha256": "b5bd0044ff5317866cfdf99ed6e1667f3a7ba970e93dae6682ac6b9eee660a79"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/indonesia-interior-templates.js",
+   "bytes": 11917,
+   "sha256": "04e7a5335ebb4f95a73a9c2a6bbedf010dc40662ad232207deaa260374d6c926"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/lafrich-puppet-core.js",
+   "bytes": 20610,
+   "sha256": "549ed3305679a36386765ee86d6c95230d905f17271caffb0641272cca726950"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/lafrich-puppet-renderer.js",
+   "bytes": 9424,
+   "sha256": "8744d355c99efff0326f11f2f382b40c9d54bfb858470c9123f19e61be2e88de"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/lgr-actor.js",
+   "bytes": 8773,
+   "sha256": "a851756aaef01b73dcde6eac3a01b76ed3f642a217b27b0aa25e30090f82ca79"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/lgr-db.js",
+   "bytes": 31198,
+   "sha256": "44549689d6a664e3f177518db8fc196c97f0cabdfcf85678abfeff107803862a"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/lgr-game.js",
+   "bytes": 11176,
+   "sha256": "43182561fcb4b7e6c27ee56a41b0dbe4b5a3ad8560a9bdf9b8a24643f1864b58"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/lgr-skin.js",
+   "bytes": 4027,
+   "sha256": "c852bf6aefb784ac76ff21db801a4bb8ba2418e35b0f30289d7c4b7f63bcf5bd"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/lgr-wear.js",
+   "bytes": 11475,
+   "sha256": "305e2e229b01fb02130b7330f250e976ea8f5389eb29081ffd73d9e0ed63315a"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/lgr1-motion.js",
+   "bytes": 6616,
+   "sha256": "d7bedcba5b137d49fb4afd7343e577817ba934018595cac6ae4a58a02c1ccb12"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/aladdin_sane-sheet.png",
+   "bytes": 91818,
+   "sha256": "22ffee732c7e55b1cdd0e39a21dff55ecdc2fb228cdf5c227dbe7a0e80ab0bd9"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/astrofrich-base-sheet.png",
+   "bytes": 24007,
+   "sha256": "cde13e6964c65489460a7141f35b46830f87c733b3544918004d029fa707e126"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/human-female-base-sheet.png",
+   "bytes": 19545,
+   "sha256": "6eb87d37dc274432276b95cf98c35773f67a58fa9e276437261a967ca6ca79d3"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/human-male-base-sheet.png",
+   "bytes": 19639,
+   "sha256": "ac963f6a27457e5f24024c40f57f05b4b6e25a9279dff49462fd4ec57efe64cd"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/ichsan-sheet.png",
+   "bytes": 97469,
+   "sha256": "708e164911649136463dd840685d43d0183be0b135442cd463ebc06c2fc96535"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_babeh_jam-sheet.png",
+   "bytes": 25846,
+   "sha256": "7804b9839a20385bc8d558b0f399ccd6127d9a3318ad79fc18020107b23021ba"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_babeh_pemilik-sheet.png",
+   "bytes": 28606,
+   "sha256": "6f407ca64fd477377788c50dffb024c1f4e5a17cbfe24a92735b8fb0dee8a861"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_babeh_tas-sheet.png",
+   "bytes": 29495,
+   "sha256": "44eb9d70eaa33589e9811616bd00374b06ca17190b1566fa1b5979d88f1e605e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_barista_famima-sheet.png",
+   "bytes": 23330,
+   "sha256": "aa3dd80f0e061f773687b9e3acdbdf0352ea411d49df42fa0833dda60c3a3875"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_gfunk-sheet.png",
+   "bytes": 34333,
+   "sha256": "c6cfda150433e5b67c461bff0aad8c89fce3ca5960e33ed003fd63927896d435"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_kang_parkir-sheet.png",
+   "bytes": 25684,
+   "sha256": "d77d48d6b88d63b6ba6f7d1ab8bd69f3c828c6a8325f14696859290f1a2a53dd"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_manusia_silver-sheet.png",
+   "bytes": 25535,
+   "sha256": "5aed786088576b5da127e5c7465b91dccfb77f42420ff084bd98ad0cf06221ae"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_pak_ogah-sheet.png",
+   "bytes": 30807,
+   "sha256": "8b6ae69326b83d94646cbfbe9f28a6845eef2e11242a44a5100a316b2fbf942a"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_theodore-sheet.png",
+   "bytes": 26958,
+   "sha256": "06c49e128b083801a8f3d4e0dea8c07981c80142e7c045d8b6887f9c446f20b3"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/legacy_yerbies-sheet.png",
+   "bytes": 28836,
+   "sha256": "c9e18c3205cfba9612cc9118dd00f1aa392139da207f5b3873980c0f5e6e8a92"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/base/genesis-base-female-official-9.json",
+   "bytes": 85498,
+   "sha256": "99f4db1cf3200d3c2f4f9f6fc7af7fd120e260feb4a726956e8518970fd4fa5d"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/base/genesis-base-male-official-8.json",
+   "bytes": 85184,
+   "sha256": "c556461a4b98df4bee984c7b558de76fcfd70936daaaff118b53be21eca1ef6c"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/base/index.json",
+   "bytes": 6285,
+   "sha256": "76aa3f2288e9a4ef785a3d92a9d762b0a4238d572df35a13b40f5a7a9c5812d6"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/long_back.png",
+   "bytes": 413,
+   "sha256": "e9cc779a43d5bd69fccd5941a59fec3b8fb831f7f3092ca79154fc435bb93695"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/long_curtain_back.png",
+   "bytes": 413,
+   "sha256": "e9cc779a43d5bd69fccd5941a59fec3b8fb831f7f3092ca79154fc435bb93695"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/long_curtain_front.png",
+   "bytes": 1200,
+   "sha256": "5a14039c737b0628cb624362899a0d35e25af90a995a44b55a86801e81afa649"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/long_front.png",
+   "bytes": 1091,
+   "sha256": "a5822acd09c9ffe09aa7c46dafe69e4f874c8050df4be4bf7b542d00d85204f0"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/mid_back.png",
+   "bytes": 353,
+   "sha256": "f41cd6b9a857447fd11de09cbcd7cd7a060baa1fb0fb2f46c6f07132dde0156e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/mid_curtain_back.png",
+   "bytes": 353,
+   "sha256": "f41cd6b9a857447fd11de09cbcd7cd7a060baa1fb0fb2f46c6f07132dde0156e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/mid_curtain_front.png",
+   "bytes": 1199,
+   "sha256": "b833a55f4b685c4c179f6052252164e13f8e164d48861f9365fd431e216d3be7"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/mid_front.png",
+   "bytes": 1091,
+   "sha256": "4f700b3cb78f6a7828614fa9f91965687c6f18157728ddcfb67cfe08126fa66b"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/short_back.png",
+   "bytes": 190,
+   "sha256": "22c1e0f0d74659f4b73d299d62ba5a98fe5393126dfaad943488ed1b19e27fb7"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/short_front.png",
+   "bytes": 915,
+   "sha256": "76f68b412049b62bc23c03206c0607a1ecb30cf96a927ae1e7b9271fbca1dcc3"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/swept_back.png",
+   "bytes": 190,
+   "sha256": "22c1e0f0d74659f4b73d299d62ba5a98fe5393126dfaad943488ed1b19e27fb7"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/swept_front.png",
+   "bytes": 800,
+   "sha256": "e3486c81c72f9c4471f62a27db4b289d71b6dded0f5aa6cbc59a4222e3bce2e1"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/wavy_back.png",
+   "bytes": 563,
+   "sha256": "a0de4d7f4353b3d2553d5491d92f107f743b02c83fd0e9f1ab9e1d6c3a133b4e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/wavy_curtain_back.png",
+   "bytes": 563,
+   "sha256": "a0de4d7f4353b3d2553d5491d92f107f743b02c83fd0e9f1ab9e1d6c3a133b4e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/wavy_curtain_front.png",
+   "bytes": 1718,
+   "sha256": "a52134ee6ea24058cc1e8725d122bfd162c4998de6f33994d9376dcbacf568bc"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/mh-wear/hair/wavy_front.png",
+   "bytes": 1599,
+   "sha256": "2f55dcba7384d02e6931b86400c3ebaacd8839ff7ca5cc6c70ddd24a5923abf7"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/motions.json",
+   "bytes": 12065,
+   "sha256": "25b3473c7c1a52d2d510bdf36791206545cd4e9dfab3b6dc55707a623463da38"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/female_pants_trousers.json",
+   "bytes": 2271,
+   "sha256": "896446f63117f9ba8ceb7ba5e8a9fac65e86fc03e5fb4033b7fb248a9da127ad"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/female_shoes_shoes.json",
+   "bytes": 2252,
+   "sha256": "869536c0611e39fbb61e79f59689c6e4d96f01de5ef5374106dd8c460608eb33"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/female_top_tee.json",
+   "bytes": 5120,
+   "sha256": "0e796a7eee86b38183c5b4527f1ae23afb08e301861adcd37799622afc4db917"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/index.json",
+   "bytes": 1937,
+   "sha256": "6dbef5ae1b19c036d7266d383cf46f04f93cddde34d3bacd6a61b76505d2d668"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/male_pants_trousers.json",
+   "bytes": 2287,
+   "sha256": "91a5e0ea6d651bbe6cb94a2a47d832125165ada40fbe61498785e0f9f6f7109b"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/male_shoes_shoes.json",
+   "bytes": 2204,
+   "sha256": "6d9a385f2ec785f8560eafa33368077ab4190e584855d2950bf8010075db5930"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/lgr1/wardrobe-approved/male_top_tee.json",
+   "bytes": 3898,
+   "sha256": "6f34cd84517493b0e8ac3911f1dde7f9947dc9c7d81a8a8c472eff2e71f910bf"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/milk_mascot-sheet.png",
+   "bytes": 99682,
+   "sha256": "efec0d997b1ffa3638233fae31106b9fc40819add5d75704123be8a81f2593ae"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_bima-sheet.png",
+   "bytes": 88850,
+   "sha256": "b884391ce230b32de426a217cc962213950e11c1307b87cb391dade3c7574777"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_bu_warteg-sheet.png",
+   "bytes": 74650,
+   "sha256": "e3e4706285efd5617eb3acf6b1f108e3ee75ab1b5669adf305d6f7948c2c40c3"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_ellen-sheet.png",
+   "bytes": 78554,
+   "sha256": "407061941360a3eea85979cce598001a1d4fc471a5b8ed45085bb94a550ed158"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_fm_barista-sheet.png",
+   "bytes": 84247,
+   "sha256": "7545ba7d47c814b9050ad8bff3370804c638b046b00a55b39fe1a9075acb3fb2"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_fm_kasir-sheet.png",
+   "bytes": 74121,
+   "sha256": "edc85ad2c7d13d296709d82c3f0c676194a9fb667cc8eb9f524836f84628c8db"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_grok_bot-sheet.png",
+   "bytes": 84275,
+   "sha256": "1ef332a759045d8b757ed22d8d79ba8e136160ab2ac21966cd94d79b1c2a2fd6"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_mhs_f1-sheet.png",
+   "bytes": 72530,
+   "sha256": "0a98cb6e3b47ede0e6aaad245717c9c5a2a1ea66dfb4ffaaea076622426c92ab"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_mhs_f2-sheet.png",
+   "bytes": 74063,
+   "sha256": "09e876f5296a6fa971058fa70e950e51846e7c9dab7b832133e4458e763e0ece"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_mhs_f3-sheet.png",
+   "bytes": 73174,
+   "sha256": "a92def2bd5744921ff54534dff9a40c2efd6a54199a50919f1b985fe6686e5a2"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_mhs_m1-sheet.png",
+   "bytes": 87881,
+   "sha256": "b5d7e54ea696f93f14ab08837cdcdf315013c95d1a0310d804ea3f6ddb9c0515"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_mhs_m2-sheet.png",
+   "bytes": 89195,
+   "sha256": "3690fa0f38c03700ed9fe40347442050e5f12d179031a6d34fdcb5005af8de4e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_mhs_m3-sheet.png",
+   "bytes": 91281,
+   "sha256": "05d0b52bbbc120486622dd134a5c9ecb482920a4ede587013c074bec0bb84a1d"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_nadia-sheet.png",
+   "bytes": 85332,
+   "sha256": "a33e0ca21631fbaee6f72e4801ab10da31a956e380eb31af1611e7f707ef307e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_raka-sheet.png",
+   "bytes": 88663,
+   "sha256": "28a9266f43a6a3edcc0abc3050184593b0fe3a3a8b817e33aac340ac0a7ed987"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_war_f1-sheet.png",
+   "bytes": 71185,
+   "sha256": "b09d140a9097a90d5a6dbe8eed7658cb8f446cb3f718cb4412aa67ec16f6d7c1"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_war_m1-sheet.png",
+   "bytes": 81766,
+   "sha256": "d686600b8fc10952f76c6dfb3f5c41dd44a49672b6f2e0927d3fe9d56ea8fc39"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_war_m2-sheet.png",
+   "bytes": 74044,
+   "sha256": "f073a4dfebcd9732d8409cb62df6ac712bbfa3bdb7f2f4618d89d0b3f2cd1971"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/media/native_war_m3-sheet.png",
+   "bytes": 75840,
+   "sha256": "14cafe1d3d514b8bd995ddaf8fed4a3b3d90ad06f13d152b17049f262ebcc2e6"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/universal-body-actions.js",
+   "bytes": 11110,
+   "sha256": "a8f5c1eb15500bfe1111ed8b90740037531e402eea78a84deb08c5f706882b7e"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/universal-sleep.js",
+   "bytes": 3450,
+   "sha256": "d691f3a401c765e144154d7569a6d732b761aadb641a7513058705596aed59e7"
+  },
+  {
+   "path": "virtual-life-asset-pipeline/warteg-interior-paint.js",
+   "bytes": 7727,
+   "sha256": "48a87aa3cdd3c4a270c39dc818278c2aa93f9c32cf9696a6fa17224a01b31f36"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/ellen_vehicles_15_catalog.json",
+   "bytes": 24311,
+   "sha256": "2623acdd22d94eb60ab6eaed41a2b68dbbf966f566105ffd290bcf1b04870d34"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/ellen_wc_v4_catalog.json",
+   "bytes": 1818,
+   "sha256": "50f0337ab4bcd08fa0540c76619d258c98fcb052e6e304def9c9cad4dd636a7e"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/indonesia_200_catalog.json",
+   "bytes": 234101,
+   "sha256": "45f04dc893bf1a0f969274ad267f440fe705fb6a5d7f36c7535e079f8053cc07"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/indonesia_catalog.json",
+   "bytes": 18818,
+   "sha256": "3ee82866fcefb49c991c4fff640d682ef8bf4df7025b863271828fbed28a618a"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/indonesia_custom_catalog.json",
+   "bytes": 4672,
+   "sha256": "4b90d1d2e8288b12dd7e6997a205e14ffa6ee7e4cc006f4c438a1bd8db805b84"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/jakarta_urban_catalog.json",
+   "bytes": 16832,
+   "sha256": "c21f241c442df86893db29b880872aedb40d1094cabc0a993759786c63d9d193"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/jalan_lokal/selokan_grill_se.png",
+   "bytes": 828,
+   "sha256": "239522d3ed72d9e80620c037dbee63308b78953268ead5172dbe54d707e295d9"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/jalan_lokal/selokan_grill_se__depth.png",
+   "bytes": 1061,
+   "sha256": "947ac2415073ac67173cded0a900dee66210aeb4aef8ea295c5104b7653530a7"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id200_bangunan_mushola_kampung_sw.png",
+   "bytes": 7163,
+   "sha256": "e223679b96d151bb1424db6defabd76e1d62455382728e778e1e59949769ca28"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id200_bangunan_mushola_kampung_sw__depth.png",
+   "bytes": 14293,
+   "sha256": "fe75b7cc7e038b73375dccdf5a8425731245d45f5d371417ba9327d34e1fba63"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id200_publik_koperasi_simpan_pinjam_sw.png",
+   "bytes": 4461,
+   "sha256": "8fe110f8fa6bda0ad70d786388b13d38ef25d1966436083da758afa8661887a9"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id200_publik_koperasi_simpan_pinjam_sw__depth.png",
+   "bytes": 6174,
+   "sha256": "7b0d3d314e9e79a61f7e3dcf05a352987ab487012a651e39000a634b2ad3d5bf"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id200_publik_toilet_umum_kampung_sw.png",
+   "bytes": 4325,
+   "sha256": "f27200c58acc7ffdbc9215811f3da15a98bba87859f41d18f6555d551f10af1d"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id200_publik_toilet_umum_kampung_sw__depth.png",
+   "bytes": 6174,
+   "sha256": "7b0d3d314e9e79a61f7e3dcf05a352987ab487012a651e39000a634b2ad3d5bf"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id200_warung_warung_nasi_sunda_sw.png",
+   "bytes": 4712,
+   "sha256": "44ced47efa3dfb431c09b2822fb9a882e7b49432993fecb755d289975c51c0c1"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id200_warung_warung_nasi_sunda_sw__depth.png",
+   "bytes": 6304,
+   "sha256": "ef2bea142983294858cb7a3b9b6547397aca7f1df3e1551d43548848088147fe"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id_bengkel_motor_sw.png",
+   "bytes": 4942,
+   "sha256": "3649c2e2aa42bb0b08e85c1abfcf23776eb072c2c454beb0a51acea73f1a3f48"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id_bengkel_motor_sw__depth.png",
+   "bytes": 7336,
+   "sha256": "c0dfca33ac9f0e293c0770ce8979b56cb0d7e5be15d256125a3b56589cbf44ac"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id_laundry_kiloan_sw.png",
+   "bytes": 3524,
+   "sha256": "e166219238faaebf8c7883582a3a533cb1b45404088ca226c1f928c3dac56cce"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id_laundry_kiloan_sw__depth.png",
+   "bytes": 5632,
+   "sha256": "d1d21620931f8de722f44fa8cc507a7ff1a5409ff0eadb3dd3b442a0ee767079"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id_warteg_sederhana_sw.png",
+   "bytes": 4565,
+   "sha256": "832d38e75c465e69e8ed9d7efd1c30eabf53d39021faa7f95527a293ccdd97ca"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/id_warteg_sederhana_sw__depth.png",
+   "bytes": 5294,
+   "sha256": "4011e673e14dddd836da81c808460a140298e50836ddc7764b3cd10d64ffcadb"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/pos_ronda_sw.png",
+   "bytes": 3185,
+   "sha256": "54f42974ef1e8ed4f8282ff7657aeab26c3a730c6ea748d0fd1688cf19da532b"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/pos_ronda_sw__depth.png",
+   "bytes": 4287,
+   "sha256": "e2cce99e2d42342e14d2071e0356d1a6377b1d5749ee057d3926105363a7d792"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_a_sw.png",
+   "bytes": 6159,
+   "sha256": "e965c2dcece427a375f96a716db7a61df6d0de9f9f70a6f0b0f802cde101a6a5"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_a_sw__depth.png",
+   "bytes": 6867,
+   "sha256": "5ceda31ce12fab89eb0ca466dd71ac27add5640efa0f5fdb0a9afd3f5a74cd18"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_b_sw.png",
+   "bytes": 6631,
+   "sha256": "4ed793dbb9a35b44d9ad753c14cfeb3240ccf661b2ed8fa5fcf40d884cf06c0a"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_b_sw__depth.png",
+   "bytes": 6322,
+   "sha256": "70987450f6ffab6f534d7160716ab21f0279ba837ab4d4760e6a77bf209ccf8b"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_c_sw.png",
+   "bytes": 5780,
+   "sha256": "2e5f22c3be7ab78566e93a2fe944386f753a2f4c0b1f4efade683f88d80bbc46"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_c_sw__depth.png",
+   "bytes": 7921,
+   "sha256": "712c0c81fa798b2f49d9c8a7ba4bdffa77d9d309b298d607574e1a0b74a6f881"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_d_sw.png",
+   "bytes": 7419,
+   "sha256": "8e59c8325c1d06847bfd6354f0058156c07c978959bb7ecdde2f558ac6d47e03"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_d_sw__depth.png",
+   "bytes": 8140,
+   "sha256": "233ef84aa28b74a108a9c94284de1108ca032ce878097edcc673e21da4a4fbbf"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_e_sw.png",
+   "bytes": 7311,
+   "sha256": "2528d70a4fe11f7e36c5083dfb7b5c019b773d66f10e7d07ddfd75b46088b944"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/rumah_kampung_e_sw__depth.png",
+   "bytes": 5661,
+   "sha256": "7c173b0c9ce236635df578aa7baeed6d3325f325468d65c947103055e41a5968"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/warung_madura_sw.png",
+   "bytes": 5801,
+   "sha256": "27ef164b946a72bd7cddecfe7cb234c4a6413efef8d99d6f8de9e02b99b18a78"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/kampung/warung_madura_sw__depth.png",
+   "bytes": 5591,
+   "sha256": "1cb9ed4218d432cbb8c5998fc84a590d135a63c0c1bf4e093e8a5731f55ab08c"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/mainkan_gameplay_catalog.json",
+   "bytes": 51597,
+   "sha256": "def058513636bb545615901286c4834f3f34291984dcd80b4a565ccda5e1dc1e"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/pasar_loak/lapak_barang_bekas_sw.png",
+   "bytes": 4130,
+   "sha256": "515628a916e7e28f55642faad5f62b1571a0456a72eab4a6096109ed6b81a406"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/pasar_loak/lapak_barang_bekas_sw__depth.png",
+   "bytes": 4390,
+   "sha256": "e65b5f86d28b38fbe9a9db806c2160c7aa20fb0caccc0835b716b584c129f0d0"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/pasar_loak/toko_loak_sw.png",
+   "bytes": 10306,
+   "sha256": "180b92392d3eb4f68ba8181a136227b4030e743f7d07320e31d0f1d30d1de5cc"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/pasar_loak/toko_loak_sw__depth.png",
+   "bytes": 6457,
+   "sha256": "8fe559b3ec09cc490ef68c983935f73ddc80eb228be369985987c3bf7f0e42be"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_budaya_rak_sandal_masjid_sw.png",
+   "bytes": 3409,
+   "sha256": "6671ed127cf0b5c010240d7b8b478298194549b457544c1a3782b0ac75e41012"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_budaya_rak_sandal_masjid_sw__depth.png",
+   "bytes": 6050,
+   "sha256": "e1cb88685941ee29e17c33a813dedbef9a3ad7df86f886a80cf461d16096798f"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_jalan_tiang_kabel_listrik_sw.png",
+   "bytes": 2161,
+   "sha256": "a8d33e865eed58ecbbb4d197b3028a567c824694ab273cf0c794521b14bfdfc1"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_jalan_tiang_kabel_listrik_sw__depth.png",
+   "bytes": 2696,
+   "sha256": "2bd5224578005411b6cec8f6ec4e51682a0056b17302f0098fa02af2654c341f"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_jalan_zebra_cross_se.png",
+   "bytes": 878,
+   "sha256": "d5cfb595706340e059d7044eab72ab83e2bcc0daea733c7514ac52c8a913b5ce"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_jalan_zebra_cross_se__depth.png",
+   "bytes": 1645,
+   "sha256": "4a1c417d56c2a073ec35bca88f803e135c43a5febcb49556794dc5f03e87a1b4"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_jalan_zebra_cross_sw.png",
+   "bytes": 1092,
+   "sha256": "f1aa3488a4930026220298c0bd8866de4fde1acafbdc383d7dd79eb07d057abc"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_jalan_zebra_cross_sw__depth.png",
+   "bytes": 1707,
+   "sha256": "e16cc1ed32dd056f383436db1a0ff1d7e64db77a8a8bbecfa08ee63322c34297"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_ayam_potong_sw.png",
+   "bytes": 3932,
+   "sha256": "b623f8c58552fa2bec6d72f550e36b043d7509ff969729ba5aab0e3b138ea7b3"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_ayam_potong_sw__depth.png",
+   "bytes": 7174,
+   "sha256": "557d247b54cc6703d13e832c187b9fec5b9ba50b3af8d1a1d15fa948620ba59c"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_buah_lokal_sw.png",
+   "bytes": 4423,
+   "sha256": "47a9eb3d0dc0adae8871e718174296b71fd59ea7aa1d9cc0c61a6f31bf89ac1d"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_buah_lokal_sw__depth.png",
+   "bytes": 7446,
+   "sha256": "5e630197820fd5b84ece9fe243dd1fc1f930bca7022ff383c3e8ff5942ed838e"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_bumbu_dapur_sw.png",
+   "bytes": 4488,
+   "sha256": "be938613a4143ff1ae7ba39b004ffdd93312c5345720494ca39c518a1a43ff4f"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_bumbu_dapur_sw__depth.png",
+   "bytes": 7180,
+   "sha256": "6ba89115c3f7ab6d720869b957739f4f151b89a3a73793de183bb8c69aa5b58b"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_ikan_basah_sw.png",
+   "bytes": 3936,
+   "sha256": "c060621714cfacf13039b06d4ba923905f54acb02429570aa1bce5ed20d974c7"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_ikan_basah_sw__depth.png",
+   "bytes": 7231,
+   "sha256": "cace710c77e1b9035581ff6111856e57c87b141b3d0b5785489f180bc4904200"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_sayur_segar_sw.png",
+   "bytes": 4561,
+   "sha256": "fe7ba683186f5881da0cc459ec05746ee03772e3468a04e6b3b32ddc7d0fdb8e"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_lapak_sayur_segar_sw__depth.png",
+   "bytes": 7510,
+   "sha256": "d94b30a53c398cb2f90b1f8b4766bbb75cb2b7a3c4659c3371dae2b26f96151a"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_tenda_biru_pasar_sw.png",
+   "bytes": 3775,
+   "sha256": "1829cd1d0437d87f9465ead18fff8bfbe78f923ac7b4d650d9f6dc28c07ea77d"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_pasar_tenda_biru_pasar_sw__depth.png",
+   "bytes": 7107,
+   "sha256": "5bdf16be9dee5a39248d125e0690c0362b19733037d2d9d5b3cb00d6b18aa2ac"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_jemuran_pakaian_warga_sw.png",
+   "bytes": 2251,
+   "sha256": "44ec2d0b235d0966621e259c17ca9c5d460a814bb559ad8141d6ca6c0be07fdc"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_jemuran_pakaian_warga_sw__depth.png",
+   "bytes": 3131,
+   "sha256": "ae8291f53eca36aacf4b3e5d70ad4c774dca370b317856f8c547bdf6089fc6dd"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_kandang_ayam_pekarangan_sw.png",
+   "bytes": 2119,
+   "sha256": "46ceb1c2b2fd023e76a1c6426c06feab11bacab886dab2ba3038c9fd19438d50"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_kandang_ayam_pekarangan_sw__depth.png",
+   "bytes": 4336,
+   "sha256": "340697fe54808f17e33b78ea05f0d7c3a40f3f7e9eaa2b538c1a51bb580140ab"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_papan_pengumuman_rt_rw_sw.png",
+   "bytes": 1820,
+   "sha256": "d178da09104c56fb97234da1306e84bb4036469945857ffba6c00eede099d10d"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_papan_pengumuman_rt_rw_sw__depth.png",
+   "bytes": 2485,
+   "sha256": "76a5f5d18fb0d4fa8473d023be53be9053d3d233901eb5a84b8c327b022b1088"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_pot_tanaman_depan_rumah_sw.png",
+   "bytes": 2010,
+   "sha256": "ffd2a65b3b9c688ab426145f1770e2db0b3d33e282d837dd7ffa0e5ed906dd4a"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_pot_tanaman_depan_rumah_sw__depth.png",
+   "bytes": 3876,
+   "sha256": "27555cfe2775b12d07ecf3bae266b18a06966a6ba788d725051d652d4e75acd9"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_toren_air_rumah_sw.png",
+   "bytes": 2467,
+   "sha256": "cf3c34f992ea0021bee723e30138202fc0c0dccd68c26b1f8b5770d9b1108834"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/id200_rumah_toren_air_rumah_sw__depth.png",
+   "bytes": 4123,
+   "sha256": "9acfcb36c85485d6700a0af3e00a9dc0b059c255c418cb0226aac6afd1ef9867"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/pot_tanaman_sw.png",
+   "bytes": 864,
+   "sha256": "65a4bae3dd763206aa7fb77ee8eb4ec5bbe8d92076658348adbbea35dc655b9c"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/props/pot_tanaman_sw__depth.png",
+   "bytes": 1291,
+   "sha256": "5258805f032fa2e68b0d3d0ec3347333c10546545987306255a297dc2361e329"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/taman/bangku_taman_sw.png",
+   "bytes": 1363,
+   "sha256": "e4d60ef2efc211b92e1c5a8f89e9be424f540da3d3e60be5ffc8f59118994177"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/taman/bangku_taman_sw__depth.png",
+   "bytes": 1617,
+   "sha256": "0cefb9745303592a211db9883b2f8bc628d4bd3b93d3496141d06fe3616cf96a"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/taman/tong_sampah_jakarta_sw.png",
+   "bytes": 995,
+   "sha256": "a2f901b5a4863ad9315cf926635e83983993984311792bcf89f2f2678b23a27d"
+  },
+  {
+   "path": "vlap-raw/assets/street_buildings/taman/tong_sampah_jakarta_sw__depth.png",
+   "bytes": 1693,
+   "sha256": "9dfbbf55b2e6b6a51f8fcf09910efff9e9fb6ea57d095a61bfc71edb22b17176"
+  },
+  {
+   "path": "vlap-raw/assets/vegetation_kebonsirih/trees/pohon_angsana_M.png",
+   "bytes": 4142,
+   "sha256": "4fd0984459279f340df37267744a6076a0c3fd3e70999bee15169393057634c2"
+  },
+  {
+   "path": "vlap-raw/assets/vegetation_kebonsirih/trees/pohon_asam_L.png",
+   "bytes": 7530,
+   "sha256": "d9d062ac0e77d8f2e692022c8b88317ebbf1c63327828b84ddc624c83fce1d8e"
+  },
+  {
+   "path": "vlap-raw/assets/vegetation_kebonsirih/trees/pohon_asam_M.png",
+   "bytes": 5389,
+   "sha256": "7f801d00cdb8a3d7dad6daee4cd269f8aece29a828fdce921b22b23faea0c4fb"
+  },
+  {
+   "path": "vlap-raw/assets/vegetation_kebonsirih/trees/pohon_beringin.png",
+   "bytes": 8544,
+   "sha256": "33b8de43215193b71a726522bbea322d541bb186fb7211fc821056fbd36851e8"
+  },
+  {
+   "path": "vlap-raw/assets/vegetation_kebonsirih/trees/pohon_ketapang_kencana.png",
+   "bytes": 4766,
+   "sha256": "11d5e681646c6fb8b922e52bfccdb7190106d2dc114b6cd18adc79c1646e95eb"
+  },
+  {
+   "path": "vlap-raw/assets/vegetation_kebonsirih/trees/pohon_kiara_payung.png",
+   "bytes": 4181,
+   "sha256": "90aa38c4a8652285fac567256093d01982feb664d95e8e6ff6bb2086eceacf7f"
+  },
+  {
+   "path": "vlap-raw/assets/vegetation_kebonsirih/trees/pohon_mahoni_L.png",
+   "bytes": 4934,
+   "sha256": "1a88f7bc6859dd1ed56d3725ef20bbd2b109cca394eff4288dcd1fb55a2c0241"
+  },
+  {
+   "path": "vlap-raw/assets/vegetation_kebonsirih/trees/pohon_trembesi_M.png",
+   "bytes": 4565,
+   "sha256": "6e2c1b8cbafed87a180cd67c710a1b8ec8248e4fe1f945bbd37fc18e8b47a4eb"
+  },
+  {
+   "path": "vlap-raw/game/assets/chars/ellen_v6b_sheet.png",
+   "bytes": 78462,
+   "sha256": "fca77304f99db6999d35b376ac48e4460c4b08cd88c1836de9e44a5c94c06b6a"
+  },
+  {
+   "path": "vlap-raw/game/assets/chars/nadia_v6b_sheet.png",
+   "bytes": 84898,
+   "sha256": "6e29b6b32f01e49a29d2d37f651cf12c9f729a2e6a86702e23f4bc529ac5eec9"
+  },
+  {
+   "path": "vlap-raw/game/assets/chars/noor_v6b_sheet.png",
+   "bytes": 101295,
+   "sha256": "2b340553581420958c96ceae8dbfb16fba6388dafaacc9225cc269846eebefa2"
+  },
+  {
+   "path": "vlap-raw/game/assets/chars/raka_v6b_sheet.png",
+   "bytes": 87461,
+   "sha256": "d92cbcc3f606a629f02443fa4df9eac18c45f8cf0138dbda2d548d4984bbb9d0"
+  }
+ ]
+}

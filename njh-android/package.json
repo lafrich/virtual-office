@@ -1,0 +1,18 @@
+{
+  "name": "njh-android",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Namanya Juga Hidup offline Android wrapper (Capacitor). Web bundle comes from ../offline-www (tools/offline/build-offline.mjs).",
+  "scripts": {
+    "bundle": "node ../tools/offline/build-offline.mjs --out offline-www",
+    "sync": "npx cap sync android",
+    "apk:debug": "npm run sync && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.6.11",
+    "@capacitor/core": "^7.6.11"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.11"
+  }
+}

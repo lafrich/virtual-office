@@ -236,6 +236,26 @@ function persist(){
   localStorage.setItem(dataKey(),JSON.stringify({schema:1,cityId:projectId,state}));
  }catch{}
 }
+// Save-on-hide (restored after the CP3 rollback): flush the autosave when the tab/app is hidden,
+// the page is unloaded (Android WebView backgrounding fires visibilitychange), plus a light 5 s interval
+// so a killed app loses at most a few seconds. Existing slots (semesta-life-slots-v1:) are untouched.
+let savePersistArmed=false,savePersistTimer=0;
+function armSavePersist(){
+ if(!savePersistArmed){
+  savePersistArmed=true;
+  const flush=()=>{try{if(active)persist();}catch{}};
+  try{root.document?.addEventListener('visibilitychange',()=>{if(root.document.visibilityState==='hidden')flush();});}catch{}
+  try{root.addEventListener('pagehide',flush);}catch{}
+  try{root.addEventListener('beforeunload',flush);}catch{}
+  try{root.addEventListener('freeze',flush);}catch{}
+ }
+ try{if(savePersistTimer)root.clearInterval(savePersistTimer);}catch{}
+ savePersistTimer=(root&&root.setInterval&&root.setInterval(()=>{try{if(active)persist();}catch{}},5000))||0;
+}
+function disarmSavePersist(){
+ try{if(savePersistTimer)root.clearInterval(savePersistTimer);}catch{}
+ savePersistTimer=0;
+}
 function restore(){
  if(!RULES)return;
  let saved=null;
@@ -1339,7 +1359,7 @@ function start(){
  publishedCatalog=!!gameCatalog?.updatedAt;
  config=RULES.normalize(withBalancing({...defaults(),activities:gameCatalog?.activities||[],
   worldEntities:gameCatalog?.worldEntities||[]}));
- configSource=publishedCatalog?'JIWA AUTHORING':'SANDBOX DEMO';restore();buildSites();makeRoot();attachNokia();
+ configSource=publishedCatalog?'JIWA AUTHORING':'SANDBOX DEMO';restore();armSavePersist();buildSites();makeRoot();attachNokia();
  if(outer){outer.hidden=false;outer.querySelector('#slpContent').hidden=false;}
  placeMarkers();paintPanel();reloadRules(sessionRevision);
  message('🎮 Play Mode aktif. '+(ownsRoom()?'Respawn di kost':'Mulai sebagai hobo; respawn dari tenda pinggiran kota')+'.');
@@ -1347,7 +1367,7 @@ function start(){
 }
 function stop(){
  if(!active)return;
- persist();detachNokia();active=false;cancelAnimationFrame(workAnimation);progress=null;sleepSession=null;
+ persist();disarmSavePersist();detachNokia();active=false;cancelAnimationFrame(workAnimation);progress=null;sleepSession=null;
  disposeMarkers();disposeNpcGroup();lifeNpcs=[];if(outer)outer.hidden=true;
  actorMoved.prev=null;walkerDistance=0;nearId='';timeAccumulator=0;bagOpen=false;
 }

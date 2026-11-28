@@ -1,0 +1,14 @@
+{
+  "appId": "com.lafrich.njh",
+  "appName": "Namanya Juga Hidup",
+  "webDir": "../offline-www",
+  "loggingBehavior": "debug",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 0 }
+  }
+}

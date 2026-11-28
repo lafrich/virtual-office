@@ -142,7 +142,7 @@ $('confirmGo').addEventListener('click',async()=>{
    // Test Worker has no profile route yet: keep the character on this device per player id.
    if(!data&&!saveLocalCharacter(characterDraft))throw Error('Karakter tidak bisa disimpan di perangkat ini.');
    profile={...(profile||{}),...(data?.player||{}),character:characterDraft};
-  }else profile={character:characterDraft};
+  }else{profile={character:characterDraft};if(offlineMode)saveOfflineCharacter(characterDraft);}
   const n=currentNode;showNode(nextFrom(n));
  }catch(err){message('confirmMessage',err.message,true);}
  finally{button.disabled=false;}
@@ -415,6 +415,58 @@ $('importFlowFile').addEventListener('change',async e=>{
   showNode(graph.start);
  }catch(err){$('statusText').textContent='IMPORT ERROR: '+String(err.message).slice(0,80);}
 });
+/* Offline APK build (window.NJH_OFFLINE=true, set only by tools/offline/build-offline.mjs):
+ * no login/Worker. The guest character is kept on this device so "Lanjutkan" goes straight back
+ * into the city with the autosave (semesta-life-play-v1:<city>, guest key). Live web is unaffected. */
+const offlineMode=window.NJH_OFFLINE===true&&!freshMode;
+const OFFLINE_CHAR_ID='offline-guest';
+function saveOfflineCharacter(c){try{return !!window.MainkanLocalCharacter?.save(OFFLINE_CHAR_ID,c);}catch{return false;}}
+function loadOfflineCharacter(){try{const c=window.MainkanLocalCharacter?.load(OFFLINE_CHAR_ID);return c&&typeof c==='object'?c:null;}catch{return null;}}
+function clearOfflineProgress(){
+ try{
+  for(const k of Object.keys(localStorage)){
+   // guest autosave only (no @player); manual slots and settings stay
+   if(k.startsWith('semesta-life-play-v1:')&&!k.includes('@'))localStorage.removeItem(k);
+   if(k.startsWith('mainkan-character-v1:'+OFFLINE_CHAR_ID))localStorage.removeItem(k);
+  }
+  localStorage.removeItem('njh98:tutorial-done');
+ }catch{}
+}
+function continueOffline(){
+ const c=loadOfflineCharacter();
+ if(!c){switchGuest();return;}
+ guest=true;session=null;testPlayerId='';firstTime=false;
+ characterDraft=c;profile={character:c};
+ startWorld();
+}
+function setupOfflineMenu(){
+ document.body.classList.add('njh-offline');
+ const saved=loadOfflineCharacter();
+ const cont=$('welcomeContinue'),neu=$('welcomeGuest');
+ const label=(btn,main,small)=>{if(!btn)return;const sp=btn.querySelector('span'),sm=btn.querySelector('small');if(sp)sp.textContent=main;if(sm)sm.textContent=small;};
+ document.querySelectorAll('[data-njh-placeholder="lanjutkan"],[data-njh-placeholder="mulai-baru"]').forEach(b=>{b.hidden=true;});
+ const note=document.querySelector('.njh-menu-note');
+ if(note)note.textContent='Versi offline: tanpa internet dan tanpa login. Progres tersimpan otomatis di HP ini.';
+ if(saved){
+  label(cont,'▶ Lanjutkan',(saved.name||'Pemain')+' · simpanan HP ini');
+  label(neu,'Karakter Baru','mulai dari awal');
+  cont.hidden=false;
+ }else{
+  if(cont)cont.hidden=true;
+  label(neu,'▶ Mulai Main','buat karakter');
+  neu?.classList.add('primary');
+ }
+}
+if(offlineMode){
+ // Capture phase so the online handlers (login flow / plain guest) never run in the offline build.
+ $('welcomeContinue').addEventListener('click',e=>{e.stopImmediatePropagation();continueOffline();},true);
+ $('welcomeGuest').addEventListener('click',e=>{
+  if(!loadOfflineCharacter())return;
+  e.stopImmediatePropagation();
+  if(!window.confirm('Mulai karakter baru? Progres kota yang tersimpan otomatis akan dihapus (slot simpan manual tetap ada).'))return;
+  clearOfflineProgress();switchGuest();
+ },true);
+}
 function defaultFreshCharacter(){
  return window.VLGenesisPlayer?.normalizeProfile({
   name:'Pemain Baru',zodiac:'Capricorn',birthday:'1990-01-15',
@@ -424,6 +476,7 @@ function defaultFreshCharacter(){
 function startup(){
  if(booted)return;
  booted=true;setLoginMode('login');
+ if(offlineMode)setupOfflineMenu();
  if(freshMode){
   guest=true;session=null;testPlayerId='';firstTime=true;
   characterDraft=defaultFreshCharacter();
